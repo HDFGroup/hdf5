@@ -2534,7 +2534,7 @@ none_selection_chunk(void)
  *                  H5D_link_chunk_collective_io, processes report linked chunk I/O
  *
  *              TEST_ACTUAL_IO_CONTIGUOUS:
- *                  H5D_contig_collective_write or H5D_contig_collective_read
+ *                  H5D__contig_collective_write or H5D__contig_collective_read
  *                  each process reports contiguous collective I/O
  *
  *              TEST_ACTUAL_IO_NO_COLLECTIVE:

@@ -160,12 +160,12 @@ typedef struct H5D_copy_file_ud_t {
 /* Library Private Prototypes */
 /******************************/
 /* Internal I/O routines */
-H5_DLL herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
-                       const H5S_t *file_space, hid_t dset_xfer_plist,
-                       void *buf/*out*/);
-H5_DLL herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
+H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
                         const H5S_t *file_space, hid_t dset_xfer_plist,
-                        const void *buf);
+                        void *buf/*out*/);
+H5_DLL herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, 
+                         const H5S_t *file_space, hid_t dset_xfer_plist,
+                         const void *buf);
 
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
@@ -183,14 +183,8 @@ H5_DLL hid_t H5D_get_type(H5D_t *dset);
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
     void *buf);
 
-/* Functions that operate on contiguous storage */
-H5_DLL herr_t H5D_contig_delete(H5F_t *f, hid_t dxpl_id,
-    const H5O_storage_t *store);
-
 /* Functions that operate on chunked storage */
 H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-H5_DLL herr_t H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    H5O_storage_t *store);
 
 /* Functions that operate on indexed storage */
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,

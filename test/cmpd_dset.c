@@ -2183,7 +2183,7 @@ main (int argc, char *argv[])
 	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
 	    exit(1);
 	}
-	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T_conv_struct_opt);
+	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T__conv_struct_opt);
     }
 
     /* Create the file */

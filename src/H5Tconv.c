@@ -605,7 +605,7 @@
 {                                                                             \
     herr_t      ret_value=SUCCEED;      /* Return value         */            \
                                                                               \
-    FUNC_ENTER_NOAPI(FAIL)                                                    \
+    FUNC_ENTER_PACKAGE                                                        \
                                                                               \
 {                                                                             \
     size_t	elmtno;			/*element number		*/    \
@@ -892,7 +892,7 @@ done:                                                                         \
 /* Local Typedefs */
 /******************/
 
-/* Conversion data for H5T_conv_struct() */
+/* Conversion data for H5T__conv_struct() */
 typedef struct H5T_conv_struct_t {
     int	*src2dst;		/*mapping from src to dst member num */
     hid_t	*src_memb_id;		/*source member type ID's	     */
@@ -902,7 +902,7 @@ typedef struct H5T_conv_struct_t {
     unsigned            src_nmembs;     /*needed by free function            */
 } H5T_conv_struct_t;
 
-/* Conversion data for H5T_conv_enum() */
+/* Conversion data for H5T__conv_enum() */
 typedef struct H5T_enum_struct_t {
     int	base;			/*lowest `in' value		     */
     int	length;			/*num elements in arrays	     */
@@ -974,7 +974,7 @@ H5T_init_conv_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_noop
+ * Function:	H5T__conv_noop
  *
  * Purpose:	The no-op conversion.  The library knows about this
  *		conversion without it being registered.
@@ -987,14 +987,14 @@ H5T_init_conv_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id, H5T_cdata_t *cdata,
+H5T__conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id, H5T_cdata_t *cdata,
 	      size_t UNUSED nelmts, size_t UNUSED buf_stride,
               size_t UNUSED bkg_stride, void UNUSED *buf,
 	      void UNUSED *background, hid_t UNUSED dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1014,14 +1014,14 @@ H5T_conv_noop(hid_t UNUSED src_id, hid_t UNUSED dst_id, H5T_cdata_t *cdata,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_noop() */
+} /* end H5T__conv_noop() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_order_opt
+ * Function:	H5T__conv_order_opt
  *
  * Purpose:	Convert one type to another when byte order is the only
- *		difference. This is the optimized version of H5T_conv_order()
+ *		difference. This is the optimized version of H5T__conv_order()
  *              for a handful of different sizes.
  *
  * Note:	This is a soft conversion function.
@@ -1036,7 +1036,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                    size_t nelmts, size_t buf_stride,
                    size_t UNUSED bkg_stride, void *_buf,
                    void UNUSED *background, hid_t UNUSED dxpl_id)
@@ -1047,7 +1047,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     size_t      i;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1417,11 +1417,11 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_order_opt() */
+} /* end H5T__conv_order_opt() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_order
+ * Function:	H5T__conv_order
  *
  * Purpose:	Convert one type to another when byte order is the only
  *		difference.
@@ -1444,7 +1444,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	       size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
                void UNUSED *background, hid_t UNUSED dxpl_id)
 {
@@ -1455,7 +1455,7 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	j, md;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1517,11 +1517,11 @@ H5T_conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_order() */
+} /* end H5T__conv_order() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_b_b
+ * Function:	H5T__conv_b_b
  *
  * Purpose:	Convert from one bitfield to any other bitfield.
  *
@@ -1539,7 +1539,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	     size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
              void UNUSED *background, hid_t dxpl_id)
 {
@@ -1560,7 +1560,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination        */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -1678,7 +1678,7 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     } /* end if */
 
                     if(except_ret == H5T_CONV_UNHANDLED) {
-                        H5T_bit_copy(d, dst->shared->u.atomic.offset,
+                        H5T__bit_copy(d, dst->shared->u.atomic.offset,
                                      s, src->shared->u.atomic.offset, dst->shared->u.atomic.prec);
                     } else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
@@ -1686,10 +1686,10 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         /*Don't reverse because user handles it*/
                         reverse = FALSE;
                 } else {
-                    H5T_bit_copy(d, dst->shared->u.atomic.offset,
+                    H5T__bit_copy(d, dst->shared->u.atomic.offset,
                                  s, src->shared->u.atomic.offset,
                                  src->shared->u.atomic.prec);
-                    H5T_bit_set(d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                    H5T__bit_set(d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
                                 dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                 }
 
@@ -1698,11 +1698,11 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 switch(dst->shared->u.atomic.lsb_pad) {
                     case H5T_PAD_ZERO:
-                        H5T_bit_set(d, (size_t)0, dst->shared->u.atomic.offset, FALSE);
+                        H5T__bit_set(d, (size_t)0, dst->shared->u.atomic.offset, FALSE);
                         break;
 
                     case H5T_PAD_ONE:
-                        H5T_bit_set(d, (size_t)0, dst->shared->u.atomic.offset, TRUE);
+                        H5T__bit_set(d, (size_t)0, dst->shared->u.atomic.offset, TRUE);
                         break;
 
                     default:
@@ -1711,11 +1711,11 @@ H5T_conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 msb_pad_offset = dst->shared->u.atomic.offset + dst->shared->u.atomic.prec;
                 switch(dst->shared->u.atomic.msb_pad) {
                     case H5T_PAD_ZERO:
-                        H5T_bit_set(d, msb_pad_offset, 8 * dst->shared->size - msb_pad_offset, FALSE);
+                        H5T__bit_set(d, msb_pad_offset, 8 * dst->shared->size - msb_pad_offset, FALSE);
                         break;
 
                     case H5T_PAD_ONE:
-                        H5T_bit_set(d, msb_pad_offset, 8 * dst->shared->size - msb_pad_offset, TRUE);
+                        H5T__bit_set(d, msb_pad_offset, 8 * dst->shared->size - msb_pad_offset, TRUE);
                         break;
                     default:
                         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unsupported MSB padding")
@@ -1760,7 +1760,7 @@ done:
     if(src_rev)
         H5MM_free(src_rev);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_b_b() */
+} /* end H5T__conv_b_b() */
 
 
 /*-------------------------------------------------------------------------
@@ -1889,8 +1889,8 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
         /*
          * Insure that members are sorted.
          */
-        H5T_sort_value(src, NULL);
-        H5T_sort_value(dst, NULL);
+        H5T__sort_value(src, NULL);
+        H5T__sort_value(dst, NULL);
 
         /*
          * Build a mapping from source member number to destination member
@@ -1926,8 +1926,8 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
     else {
         /* Restore sorted conditions for the datatypes */
         /* (Required for the src2dst array to be valid) */
-        H5T_sort_value(src, NULL);
-        H5T_sort_value(dst, NULL);
+        H5T__sort_value(src, NULL);
+        H5T__sort_value(dst, NULL);
     } /* end else */
 
     /*
@@ -2001,7 +2001,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_struct_subset
+ * Function:	H5T__conv_struct_subset
  *
  * Purpose:     A quick way to return a field in a struct private in this
  *              file.  The flag SMEMBS_SUBSET indicates whether the source
@@ -2025,11 +2025,11 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_subset_info_t *
-H5T_conv_struct_subset(const H5T_cdata_t *cdata)
+H5T__conv_struct_subset(const H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t	*priv;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(cdata);
     HDassert(cdata->priv);
@@ -2037,11 +2037,11 @@ H5T_conv_struct_subset(const H5T_cdata_t *cdata)
     priv = (H5T_conv_struct_t *)(cdata->priv);
 
     FUNC_LEAVE_NOAPI((H5T_subset_info_t *) &priv->subset_info)
-} /* end H5T_conv_struct_subset() */
+} /* end H5T__conv_struct_subset() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_struct
+ * Function:	H5T__conv_struct
  *
  * Purpose:	Converts between compound datatypes.  This is a soft
  *		conversion function.  The algorithm is basically:
@@ -2081,7 +2081,7 @@ H5T_conv_struct_subset(const H5T_cdata_t *cdata)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t buf_stride, size_t bkg_stride, void *_buf, void *_bkg, hid_t dxpl_id)
 {
     uint8_t	*buf = (uint8_t *)_buf;	/*cast for pointer arithmetic	*/
@@ -2100,7 +2100,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_conv_struct_t *priv = (H5T_conv_struct_t *)(cdata->priv);
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -2143,8 +2143,8 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Insure that members are sorted.
              */
-            H5T_sort_value(src, NULL);
-            H5T_sort_value(dst, NULL);
+            H5T__sort_value(src, NULL);
+            H5T__sort_value(dst, NULL);
             src2dst = priv->src2dst;
 
             /*
@@ -2256,14 +2256,14 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_struct() */
+} /* end H5T__conv_struct() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_struct_opt
+ * Function:	H5T__conv_struct_opt
  *
  * Purpose:	Converts between compound datatypes in a manner more
- *		efficient than the general-purpose H5T_conv_struct()
+ *		efficient than the general-purpose H5T__conv_struct()
  *		function.  This function isn't applicable if the destination
  *		is larger than the source type. This is a soft conversion
  *		function.  The algorithm is basically:
@@ -2328,7 +2328,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     size_t nelmts, size_t buf_stride, size_t bkg_stride, void *_buf,
     void *_bkg, hid_t dxpl_id)
 {
@@ -2350,7 +2350,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
     int		i;			/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -2433,8 +2433,8 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
             /*
              * Insure that members are sorted.
              */
-            H5T_sort_value(src, NULL);
-            H5T_sort_value(dst, NULL);
+            H5T__sort_value(src, NULL);
+            H5T__sort_value(dst, NULL);
 
             /*
              * Calculate strides. If BUF_STRIDE is non-zero then convert one
@@ -2552,13 +2552,13 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_struct_opt() */
+} /* end H5T__conv_struct_opt() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_enum_init
  *
- * Purpose:	Initialize information for H5T_conv_enum().
+ * Purpose:	Initialize information for H5T__conv_enum().
  *
  * Return:	Success:	Non-negative
  *
@@ -2595,8 +2595,8 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
      * symbol names and build a map from source member index to destination
      * member index.
      */
-    H5T_sort_name(src, NULL);
-    H5T_sort_name(dst, NULL);
+    H5T__sort_name(src, NULL);
+    H5T__sort_name(dst, NULL);
     if(NULL == (priv->src2dst = (int *)H5MM_malloc(src->shared->u.enumer.nmembs * sizeof(int))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for(i = 0, j = 0;
@@ -2688,7 +2688,7 @@ H5T_conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     }
 
     /* Sort source type by value and adjust src2dst[] appropriately */
-    H5T_sort_value(src, priv->src2dst);
+    H5T__sort_value(src, priv->src2dst);
 
 done:
     if (ret_value<0 && priv) {
@@ -2701,7 +2701,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_enum
+ * Function:	H5T__conv_enum
  *
  * Purpose:	Converts one type of enumerated data to another.
  *
@@ -2714,7 +2714,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
               void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -2731,7 +2731,7 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	i;			/*counters			*/
     herr_t      ret_value = SUCCEED;    /* Return value                 */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -2779,9 +2779,9 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
              * sort keys are used here during conversion. See H5T_conv_enum_init(). But
              * we actually don't care about the source type's order when doing the O(1)
              * conversion algorithm, which is turned on by non-zero priv->length */
-            H5T_sort_name(dst, NULL);
+            H5T__sort_name(dst, NULL);
             if(!priv->length)
-                H5T_sort_value(src, NULL);
+                H5T__sort_value(src, NULL);
 
             /*
              * Direction of conversion.
@@ -2887,11 +2887,11 @@ H5T_conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_enum() */
+} /* end H5T__conv_enum() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_vlen
+ * Function:	H5T__conv_vlen
  *
  * Purpose:	Converts between VL datatypes in memory and on disk.
  *		This is a soft conversion function.  The algorithm is
@@ -2931,7 +2931,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t buf_stride, size_t bkg_stride, void *buf, void *bkg, hid_t dxpl_id)
 {
     H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
@@ -2961,7 +2961,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	elmtno;			/*element number counter	     */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -3234,11 +3234,11 @@ done:
         tmp_buf = H5FL_BLK_FREE(vlen_seq, tmp_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_vlen() */
+} /* end H5T__conv_vlen() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_array
+ * Function:	H5T__conv_array
  *
  * Purpose:	Converts between array datatypes in memory and on disk.
  *		This is a soft conversion function.
@@ -3253,7 +3253,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	      size_t buf_stride, size_t bkg_stride, void *_buf,
               void UNUSED *_bkg, hid_t dxpl_id)
 {
@@ -3269,7 +3269,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     void	*bkg_buf = NULL;     	/*temporary background buffer 	     */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch (cdata->command) {
         case H5T_CONV_INIT:
@@ -3380,11 +3380,11 @@ done:
         bkg_buf = H5FL_BLK_FREE(array_seq, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_array() */
+} /* end H5T__conv_array() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_i_i
+ * Function:	H5T__conv_i_i
  *
  * Purpose:	Convert one integer type to another.  This is the catch-all
  *		function for integer conversions and is probably not
@@ -3412,7 +3412,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t buf_stride, size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
     hid_t dxpl_id)
 {
@@ -3434,7 +3434,7 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination        */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -3536,7 +3536,7 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * What is the bit number for the msb bit of S which is set? The
                  * bit number is relative to the significant part of the number.
                  */
-                sfirst = H5T_bit_find (s, src->shared->u.atomic.offset, src->shared->u.atomic.prec,
+                sfirst = H5T__bit_find (s, src->shared->u.atomic.offset, src->shared->u.atomic.prec,
                                        H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
 
@@ -3549,7 +3549,7 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * The source has no bits set and must therefore be zero.
                      * Set the destination to zero.
                      */
-                    H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, FALSE);
+                    H5T__bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, FALSE);
 
                 } else if (H5T_SGN_NONE==src->shared->u.atomic.u.i.sign &&
                            H5T_SGN_NONE==dst->shared->u.atomic.u.i.sign) {
@@ -3560,9 +3560,9 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * destination will be set to the maximum possible value.
                      */
                     if (src->shared->u.atomic.prec <= dst->shared->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               src->shared->u.atomic.prec);
-                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                        H5T__bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
                              dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                     } else if (first>=dst->shared->u.atomic.prec) {
                         /*overflow*/
@@ -3573,14 +3573,14 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
+                            H5T__bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               dst->shared->u.atomic.prec);
                     }
 
@@ -3602,16 +3602,16 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, FALSE);
+                            H5T__bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else if (src->shared->u.atomic.prec < dst->shared->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               src->shared->u.atomic.prec-1);
-                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec-1,
+                        H5T__bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec-1,
                              (dst->shared->u.atomic.prec-src->shared->u.atomic.prec)+1, FALSE);
                     } else if (first>=dst->shared->u.atomic.prec) {
                         /*overflow - source is positive*/
@@ -3622,14 +3622,14 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED)
-                            H5T_bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
+                            H5T__bit_set (d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec, TRUE);
                         else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               dst->shared->u.atomic.prec);
                     }
 
@@ -3649,20 +3649,20 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, TRUE);
-                            H5T_bit_set(d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), (size_t)1, FALSE);
+                            H5T__bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, TRUE);
+                            H5T__bit_set(d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), (size_t)1, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else if (src->shared->u.atomic.prec<dst->shared->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               src->shared->u.atomic.prec);
-                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                        H5T__bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
                              dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                     } else {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               dst->shared->u.atomic.prec);
                     }
                 } else if (first+1 == src->shared->u.atomic.prec) {
@@ -3673,7 +3673,7 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                      * destination is set to a negative number with the largest
                      * possible magnitude.
                      */
-                    ssize_t sfz = H5T_bit_find (s, src->shared->u.atomic.offset,
+                    ssize_t sfz = H5T__bit_find (s, src->shared->u.atomic.offset,
                                     src->shared->u.atomic.prec-1, H5T_BIT_MSB, FALSE);
                     size_t fz = (size_t)sfz;
 
@@ -3686,18 +3686,18 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, FALSE);
-                            H5T_bit_set(d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), (size_t)1, TRUE);
+                            H5T__bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, FALSE);
+                            H5T__bit_set(d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), (size_t)1, TRUE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else if (src->shared->u.atomic.prec<dst->shared->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset, src->shared->u.atomic.prec);
-                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec, dst->shared->u.atomic.prec-src->shared->u.atomic.prec, TRUE);
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset, src->shared->u.atomic.prec);
+                        H5T__bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec, dst->shared->u.atomic.prec-src->shared->u.atomic.prec, TRUE);
                     } else {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset, dst->shared->u.atomic.prec);
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset, dst->shared->u.atomic.prec);
                     }
 
                 } else {
@@ -3716,20 +3716,20 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, TRUE);
-                            H5T_bit_set(d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), (size_t)1, FALSE);
+                            H5T__bit_set(d, dst->shared->u.atomic.offset, dst->shared->u.atomic.prec-1, TRUE);
+                            H5T__bit_set(d, (dst->shared->u.atomic.offset + dst->shared->u.atomic.prec-1), (size_t)1, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED)
                             /*Don't reverse because user handles it already*/
                             reverse = FALSE;
                     } else if (src->shared->u.atomic.prec<dst->shared->u.atomic.prec) {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               src->shared->u.atomic.prec);
-                        H5T_bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
+                        H5T__bit_set (d, dst->shared->u.atomic.offset+src->shared->u.atomic.prec,
                              dst->shared->u.atomic.prec-src->shared->u.atomic.prec, FALSE);
                     } else {
-                        H5T_bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
+                        H5T__bit_copy (d, dst->shared->u.atomic.offset, s, src->shared->u.atomic.offset,
                               dst->shared->u.atomic.prec);
                     }
                 }
@@ -3739,11 +3739,11 @@ H5T_conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (dst->shared->u.atomic.offset>0) {
                     assert(H5T_PAD_ZERO==dst->shared->u.atomic.lsb_pad || H5T_PAD_ONE==dst->shared->u.atomic.lsb_pad);
-                    H5T_bit_set(d, (size_t)0, dst->shared->u.atomic.offset, (hbool_t)(H5T_PAD_ONE==dst->shared->u.atomic.lsb_pad));
+                    H5T__bit_set(d, (size_t)0, dst->shared->u.atomic.offset, (hbool_t)(H5T_PAD_ONE==dst->shared->u.atomic.lsb_pad));
                 }
                 if (dst->shared->u.atomic.offset+dst->shared->u.atomic.prec!=8*dst->shared->size) {
                     assert (H5T_PAD_ZERO==dst->shared->u.atomic.msb_pad || H5T_PAD_ONE==dst->shared->u.atomic.msb_pad);
-                    H5T_bit_set (d, dst->shared->u.atomic.offset+dst->shared->u.atomic.prec,
+                    H5T__bit_set (d, dst->shared->u.atomic.offset+dst->shared->u.atomic.prec,
                                  8*dst->shared->size - (dst->shared->u.atomic.offset+ dst->shared->u.atomic.prec),
                                  (hbool_t)(H5T_PAD_ONE==dst->shared->u.atomic.msb_pad));
                 }
@@ -3786,11 +3786,11 @@ done:
     if(src_rev)
         H5MM_free(src_rev);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_i_i() */
+} /* end H5T__conv_i_i() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_f_f
+ * Function:	H5T__conv_f_f
  *
  * Purpose:	Convert one floating point type to another.  This is a catch
  *		all for floating point conversions and is probably not
@@ -3821,7 +3821,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t buf_stride, size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
     hid_t dxpl_id)
 {
@@ -3858,7 +3858,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination        */
     herr_t      ret_value = SUCCEED;    /*return value                 */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -3984,21 +3984,21 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /*
                  * Find the sign bit value of the source.
                  */
-                sign = H5T_bit_get_d(s, src.u.f.sign, (size_t)1);
+                sign = H5T__bit_get_d(s, src.u.f.sign, (size_t)1);
 
                 /*
                  * Check for special cases: +0, -0, +Inf, -Inf, NaN
                  */
-                if (H5T_bit_find (s, src.u.f.mpos, src.u.f.msize,
+                if (H5T__bit_find (s, src.u.f.mpos, src.u.f.msize,
                                   H5T_BIT_LSB, TRUE)<0) {
-                    if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                    if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                       H5T_BIT_LSB, TRUE)<0) {
                         /* +0 or -0 */
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
-                        H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, FALSE);
-                        H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                        H5T__bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
+                        H5T__bit_set (d, dst.u.f.epos, dst.u.f.esize, FALSE);
+                        H5T__bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         goto padding;
-                    } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                    } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                              H5T_BIT_LSB, FALSE)<0) {
                         /* +Inf or -Inf */
                         if(cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -4013,14 +4013,14 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
-                            H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
-                            H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
-                            H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                            H5T__bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
+                            H5T__bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                            H5T__bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                             /*If the destination no implied mantissa bit, we'll need to set
                              *the 1st bit of mantissa to 1.  The Intel-Linux long double is
                              *this case.*/
                             if (H5T_NORM_NONE==dst.u.f.norm)
-                                H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
+                                H5T__bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
                         } else if(except_ret == H5T_CONV_HANDLED) {
                             /*No need to reverse the order of destination because user handles it*/
                             reverse = FALSE;
@@ -4030,8 +4030,8 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                         goto padding;
                     }
-                } else if (H5T_NORM_NONE==src.u.f.norm && H5T_bit_find (s, src.u.f.mpos, src.u.f.msize-1,
-                                  H5T_BIT_LSB, TRUE)<0 && H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                } else if (H5T_NORM_NONE==src.u.f.norm && H5T__bit_find (s, src.u.f.mpos, src.u.f.msize-1,
+                                  H5T_BIT_LSB, TRUE)<0 && H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                   H5T_BIT_LSB, FALSE)<0) {
                     /*This is a special case for the source of no implied mantissa bit.
                      *If the exponent bits are all 1s and only the 1st bit of mantissa
@@ -4049,14 +4049,14 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     }
 
                     if(except_ret == H5T_CONV_UNHANDLED) {
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
-                        H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
-                        H5T_bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                        H5T__bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
+                        H5T__bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                        H5T__bit_set (d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         /*If the destination no implied mantissa bit, we'll need to set
                          *the 1st bit of mantissa to 1.  The Intel-Linux long double is
                          *this case.*/
                         if (H5T_NORM_NONE==dst.u.f.norm)
-                            H5T_bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
+                            H5T__bit_set (d, dst.u.f.mpos+dst.u.f.msize-1, (size_t)1, TRUE);
                     } else if(except_ret == H5T_CONV_HANDLED) {
                         /*No need to reverse the order of destination because user handles it*/
                         reverse = FALSE;
@@ -4068,7 +4068,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 #ifdef H5_VMS
                 } /*Temporary solution to handle VAX special values*/
 #else /*H5_VMS*/
-                } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -4081,9 +4081,9 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(except_ret == H5T_CONV_UNHANDLED) {
                         /* There are many NaN values, so we just set all bits of
                          * the significand. */
-                        H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
-                        H5T_bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
-                        H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, TRUE);
+                        H5T__bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
+                        H5T__bit_set (d, dst.u.f.epos, dst.u.f.esize, TRUE);
+                        H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, TRUE);
                     } else if(except_ret == H5T_CONV_HANDLED) {
                         /*No need to reverse the order of destination because user handles it*/
                         reverse = FALSE;
@@ -4100,7 +4100,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * the source bit field where it's located.	 Don't worry about
                  * the exponent bias yet.
                  */
-                expo = H5T_bit_get_d(s, src.u.f.epos, src.u.f.esize);
+                expo = H5T__bit_get_d(s, src.u.f.epos, src.u.f.esize);
 
                 if(expo==0)
                    denormalized=TRUE;
@@ -4113,12 +4113,12 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 mpos = src.u.f.mpos;
                 mrsh = 0;
                 if (0==expo || H5T_NORM_NONE==src.u.f.norm) {
-                    if ((bitno=H5T_bit_find(s, src.u.f.mpos, src.u.f.msize,
+                    if ((bitno=H5T__bit_find(s, src.u.f.mpos, src.u.f.msize,
                                             H5T_BIT_MSB, TRUE))>0) {
                         msize = bitno;
                     } else if (0==bitno) {
                         msize = 1;
-                        H5T_bit_set(s, src.u.f.mpos, (size_t)1, FALSE);
+                        H5T__bit_set(s, src.u.f.mpos, (size_t)1, FALSE);
                     }
                 } else if (H5T_NORM_IMPLIED==src.u.f.norm) {
                     msize = src.u.f.msize;
@@ -4131,7 +4131,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * The sign for the destination is the same as the sign for the
                  * source in all cases.
                  */
-                H5T_bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
+                H5T__bit_copy (d, dst.u.f.sign, s, src.u.f.sign, (size_t)1);
 
                 /*
                  * Calculate the true source exponent by adjusting according to
@@ -4164,7 +4164,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if (expo < -(hssize_t)(dst.u.f.msize)) {
                     /* The exponent is way too small.  Result is zero. */
                     expo = 0;
-                    H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                    H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                     msize = 0;
                 } else if (expo<=0) {
                     /*
@@ -4194,7 +4194,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                     if(except_ret == H5T_CONV_UNHANDLED) {
                         expo = expo_max;
-                        H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                        H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         msize = 0;
                     } else if(except_ret == H5T_CONV_ABORT)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
@@ -4215,17 +4215,17 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     bitno = (ssize_t)(mrsh+msize - dst.u.f.msize);
                     assert(bitno>=0 && (size_t)bitno<=msize);
                     /*If the 1st bit being cut off is set and source isn't denormalized.*/
-                    if(H5T_bit_get_d(s, (mpos + bitno) - 1, (size_t)1) && !denormalized) {
+                    if(H5T__bit_get_d(s, (mpos + bitno) - 1, (size_t)1) && !denormalized) {
                         /*Don't do rounding if exponent is 111...110 and mantissa is 111...11.
                          *To do rounding and increment exponent in this case will create an infinity value.*/
-                        if((H5T_bit_find(s, mpos+bitno, msize-bitno, H5T_BIT_LSB, FALSE)>=0 || expo<expo_max-1)) {
-                            carry = H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
+                        if((H5T__bit_find(s, mpos+bitno, msize-bitno, H5T_BIT_LSB, FALSE)>=0 || expo<expo_max-1)) {
+                            carry = H5T__bit_inc(s, mpos+bitno-1, 1+msize-bitno);
                             if (carry)
                                 implied = 2;
                         }
-                    } else if(H5T_bit_get_d(s, (mpos + bitno) - 1, (size_t)1) && denormalized)
+                    } else if(H5T__bit_get_d(s, (mpos + bitno) - 1, (size_t)1) && denormalized)
                             /*For either source or destination, denormalized value doesn't increment carry.*/
-                            H5T_bit_inc(s, mpos+bitno-1, 1+msize-bitno);
+                            H5T__bit_inc(s, mpos+bitno-1, 1+msize-bitno);
                 }
                 else
                     carry=0;
@@ -4234,28 +4234,28 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * Write the mantissa to the destination
                  */
                 if (mrsh>dst.u.f.msize+1) {
-                    H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                    H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                 } else if (mrsh==dst.u.f.msize+1) {
-                    H5T_bit_set(d, dst.u.f.mpos+1, dst.u.f.msize-1, FALSE);
-                    H5T_bit_set(d, dst.u.f.mpos, (size_t)1, TRUE);
+                    H5T__bit_set(d, dst.u.f.mpos+1, dst.u.f.msize-1, FALSE);
+                    H5T__bit_set(d, dst.u.f.mpos, (size_t)1, TRUE);
                 } else if (mrsh==dst.u.f.msize) {
-                    H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
-                    H5T_bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), (hsize_t)implied);
+                    H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                    H5T__bit_set_d(d, dst.u.f.mpos, MIN(2, dst.u.f.msize), (hsize_t)implied);
                 } else {
                     if (mrsh>0) {
-                        H5T_bit_set(d, dst.u.f.mpos+dst.u.f.msize-mrsh, mrsh,
+                        H5T__bit_set(d, dst.u.f.mpos+dst.u.f.msize-mrsh, mrsh,
                                     FALSE);
-                        H5T_bit_set_d(d, dst.u.f.mpos+dst.u.f.msize-mrsh, (size_t)2,
+                        H5T__bit_set_d(d, dst.u.f.mpos+dst.u.f.msize-mrsh, (size_t)2,
                                       (hsize_t)implied);
                     }
                     if (mrsh+msize>=dst.u.f.msize) {
-                        H5T_bit_copy(d, dst.u.f.mpos,
+                        H5T__bit_copy(d, dst.u.f.mpos,
                                      s, (mpos+msize+mrsh-dst.u.f.msize),
                                      dst.u.f.msize-mrsh);
                     } else {
-                        H5T_bit_copy(d, dst.u.f.mpos+dst.u.f.msize-(mrsh+msize),
+                        H5T__bit_copy(d, dst.u.f.mpos+dst.u.f.msize-(mrsh+msize),
                                      s, mpos, msize);
-                        H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize-(mrsh+msize),
+                        H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize-(mrsh+msize),
                                     FALSE);
                     }
                 }
@@ -4281,7 +4281,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
                             expo = expo_max;
-                            H5T_bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
+                            H5T__bit_set(d, dst.u.f.mpos, dst.u.f.msize, FALSE);
                         } else if(except_ret == H5T_CONV_ABORT)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                         else if(except_ret == H5T_CONV_HANDLED) {
@@ -4294,7 +4294,7 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 carry = 0;
 
                 H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
-                H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
+                H5T__bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
 
             padding:
 
@@ -4303,11 +4303,11 @@ H5T_conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (dst.offset>0) {
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
-                    H5T_bit_set (d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                    H5T__bit_set (d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
                 if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
-                    H5T_bit_set (d, dst.offset+dst.prec, 8*dst_p->shared->size - (dst.offset+dst.prec),
+                    H5T__bit_set (d, dst.offset+dst.prec, 8*dst_p->shared->size - (dst.offset+dst.prec),
                          (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
                 }
 
@@ -4365,11 +4365,11 @@ done:
         H5MM_free(src_rev);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_f_f() */
+} /* end H5T__conv_f_f() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_s_s
+ * Function:	H5T__conv_s_s
  *
  * Purpose:	Convert one fixed-length string type to another.
  *
@@ -4391,7 +4391,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 	      size_t buf_stride, size_t UNUSED bkg_stride, void *buf,
               void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4405,7 +4405,7 @@ H5T_conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     uint8_t	*dbuf=NULL;		/*temp buf for overlap convers.	*/
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -4598,11 +4598,11 @@ done:
     H5MM_xfree(dbuf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_s_s() */
+} /* end H5T__conv_s_s() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_uchar
+ * Function:	H5T__conv_schar_uchar
  *
  * Purpose:	Converts `signed char' to `unsigned char'
  *
@@ -4618,7 +4618,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
@@ -4628,7 +4628,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_schar
+ * Function:	H5T__conv_uchar_schar
  *
  * Purpose:	Converts `unsigned char' to `signed char'
  *
@@ -4644,7 +4644,7 @@ H5T_conv_schar_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
@@ -4654,7 +4654,7 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_short
+ * Function:	H5T__conv_schar_short
  *
  * Purpose:	Converts `signed char' to `short'
  *
@@ -4670,7 +4670,7 @@ H5T_conv_uchar_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
@@ -4680,7 +4680,7 @@ H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_ushort
+ * Function:	H5T__conv_schar_ushort
  *
  * Purpose:	Converts `signed char' to `unsigned short'
  *
@@ -4696,7 +4696,7 @@ H5T_conv_schar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -4706,7 +4706,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_short
+ * Function:	H5T__conv_uchar_short
  *
  * Purpose:	Converts `unsigned char' to `short'
  *
@@ -4722,7 +4722,7 @@ H5T_conv_schar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                      hid_t UNUSED dxpl_id)
@@ -4732,7 +4732,7 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_ushort
+ * Function:	H5T__conv_uchar_ushort
  *
  * Purpose:	Converts `unsigned char' to `unsigned short'
  *
@@ -4748,7 +4748,7 @@ H5T_conv_uchar_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -4758,7 +4758,7 @@ H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_int
+ * Function:	H5T__conv_schar_int
  *
  * Purpose:	Converts `signed char' to `int'
  *
@@ -4774,7 +4774,7 @@ H5T_conv_uchar_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4783,7 +4783,7 @@ H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_uint
+ * Function:	H5T__conv_schar_uint
  *
  * Purpose:	Converts `signed char' to `unsigned int'
  *
@@ -4799,7 +4799,7 @@ H5T_conv_schar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4808,7 +4808,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_int
+ * Function:	H5T__conv_uchar_int
  *
  * Purpose:	Converts `unsigned char' to `int'
  *
@@ -4824,7 +4824,7 @@ H5T_conv_schar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4833,7 +4833,7 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_uint
+ * Function:	H5T__conv_uchar_uint
  *
  * Purpose:	Converts `unsigned char' to `unsigned int'
  *
@@ -4849,7 +4849,7 @@ H5T_conv_uchar_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4858,7 +4858,7 @@ H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_long
+ * Function:	H5T__conv_schar_long
  *
  * Purpose:	Converts `signed char' to `long'
  *
@@ -4874,7 +4874,7 @@ H5T_conv_uchar_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4883,7 +4883,7 @@ H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_ulong
+ * Function:	H5T__conv_schar_ulong
  *
  * Purpose:	Converts `signed char' to `unsigned long'
  *
@@ -4899,7 +4899,7 @@ H5T_conv_schar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -4909,7 +4909,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_long
+ * Function:	H5T__conv_uchar_long
  *
  * Purpose:	Converts `unsigned char' to `long'
  *
@@ -4925,7 +4925,7 @@ H5T_conv_schar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -4934,7 +4934,7 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_ulong
+ * Function:	H5T__conv_uchar_ulong
  *
  * Purpose:	Converts `unsigned char' to `unsigned long'
  *
@@ -4950,7 +4950,7 @@ H5T_conv_uchar_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -4960,7 +4960,7 @@ H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_llong
+ * Function:	H5T__conv_schar_llong
  *
  * Purpose:	Converts `signed char' to `long long'
  *
@@ -4976,7 +4976,7 @@ H5T_conv_uchar_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -4986,7 +4986,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_ullong
+ * Function:	H5T__conv_schar_ullong
  *
  * Purpose:	Converts `signed char' to `unsigned long long'
  *
@@ -5002,7 +5002,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5012,7 +5012,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_llong
+ * Function:	H5T__conv_uchar_llong
  *
  * Purpose:	Converts `unsigned char' to `long long'
  *
@@ -5028,7 +5028,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5038,7 +5038,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_ullong
+ * Function:	H5T__conv_uchar_ullong
  *
  * Purpose:	Converts `unsigned char' to `unsigned long long'
  *
@@ -5054,7 +5054,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5064,7 +5064,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_schar
+ * Function:	H5T__conv_short_schar
  *
  * Purpose:	Converts `short' to `signed char'
  *
@@ -5080,7 +5080,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5090,7 +5090,7 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_uchar
+ * Function:	H5T__conv_short_uchar
  *
  * Purpose:	Converts `short' to `unsigned char'
  *
@@ -5106,7 +5106,7 @@ H5T_conv_short_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5116,7 +5116,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_schar
+ * Function:	H5T__conv_ushort_schar
  *
  * Purpose:	Converts `unsigned short' to `signed char'
  *
@@ -5132,7 +5132,7 @@ H5T_conv_short_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5142,7 +5142,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_uchar
+ * Function:	H5T__conv_ushort_uchar
  *
  * Purpose:	Converts `unsigned short' to `unsigned char'
  *
@@ -5158,7 +5158,7 @@ H5T_conv_ushort_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5168,7 +5168,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_ushort
+ * Function:	H5T__conv_short_ushort
  *
  * Purpose:	Converts `short' to `unsigned short'
  *
@@ -5184,7 +5184,7 @@ H5T_conv_ushort_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5194,7 +5194,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_short
+ * Function:	H5T__conv_ushort_short
  *
  * Purpose:	Converts `unsigned short' to `short'
  *
@@ -5210,7 +5210,7 @@ H5T_conv_short_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5220,7 +5220,7 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_int
+ * Function:	H5T__conv_short_int
  *
  * Purpose:	Converts `short' to `int'
  *
@@ -5236,7 +5236,7 @@ H5T_conv_ushort_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
@@ -5246,7 +5246,7 @@ H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_uint
+ * Function:	H5T__conv_short_uint
  *
  * Purpose:	Converts `short' to `unsigned int'
  *
@@ -5262,7 +5262,7 @@ H5T_conv_short_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5272,7 +5272,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_int
+ * Function:	H5T__conv_ushort_int
  *
  * Purpose:	Converts `unsigned short' to `int'
  *
@@ -5288,7 +5288,7 @@ H5T_conv_short_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5298,7 +5298,7 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_uint
+ * Function:	H5T__conv_ushort_uint
  *
  * Purpose:	Converts `unsigned short' to `unsigned int'
  *
@@ -5314,7 +5314,7 @@ H5T_conv_ushort_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5324,7 +5324,7 @@ H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_long
+ * Function:	H5T__conv_short_long
  *
  * Purpose:	Converts `short' to `long'
  *
@@ -5340,7 +5340,7 @@ H5T_conv_ushort_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5350,7 +5350,7 @@ H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_ulong
+ * Function:	H5T__conv_short_ulong
  *
  * Purpose:	Converts `short' to `unsigned long'
  *
@@ -5366,7 +5366,7 @@ H5T_conv_short_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5376,7 +5376,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_long
+ * Function:	H5T__conv_ushort_long
  *
  * Purpose:	Converts `unsigned short' to `long'
  *
@@ -5392,7 +5392,7 @@ H5T_conv_short_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5402,7 +5402,7 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_ulong
+ * Function:	H5T__conv_ushort_ulong
  *
  * Purpose:	Converts `unsigned short' to `unsigned long'
  *
@@ -5418,7 +5418,7 @@ H5T_conv_ushort_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5428,7 +5428,7 @@ H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_llong
+ * Function:	H5T__conv_short_llong
  *
  * Purpose:	Converts `short' to `long long'
  *
@@ -5444,7 +5444,7 @@ H5T_conv_ushort_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5454,7 +5454,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_ullong
+ * Function:	H5T__conv_short_ullong
  *
  * Purpose:	Converts `short' to `unsigned long long'
  *
@@ -5470,7 +5470,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5480,7 +5480,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_llong
+ * Function:	H5T__conv_ushort_llong
  *
  * Purpose:	Converts `unsigned short' to `long long'
  *
@@ -5496,7 +5496,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -5506,7 +5506,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_ullong
+ * Function:	H5T__conv_ushort_ullong
  *
  * Purpose:	Converts `unsigned short' to `unsigned long long'
  *
@@ -5522,7 +5522,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -5532,7 +5532,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_schar
+ * Function:	H5T__conv_int_schar
  *
  * Purpose:	Converts `int' to `signed char'
  *
@@ -5548,7 +5548,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
@@ -5558,7 +5558,7 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_uchar
+ * Function:	H5T__conv_int_uchar
  *
  * Purpose:	Converts `int' to `unsigned char'
  *
@@ -5574,7 +5574,7 @@ H5T_conv_int_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
@@ -5584,7 +5584,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_schar
+ * Function:	H5T__conv_uint_schar
  *
  * Purpose:	Converts `unsigned int' to `signed char'
  *
@@ -5600,7 +5600,7 @@ H5T_conv_int_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5610,7 +5610,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_uchar
+ * Function:	H5T__conv_uint_uchar
  *
  * Purpose:	Converts `unsigned int' to `unsigned char'
  *
@@ -5626,7 +5626,7 @@ H5T_conv_uint_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5636,7 +5636,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_short
+ * Function:	H5T__conv_int_short
  *
  * Purpose:	Converts `int' to `short'
  *
@@ -5652,7 +5652,7 @@ H5T_conv_uint_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride,
                    size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		   hid_t UNUSED dxpl_id)
@@ -5662,7 +5662,7 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_ushort
+ * Function:	H5T__conv_int_ushort
  *
  * Purpose:	Converts `int' to `unsigned short'
  *
@@ -5678,7 +5678,7 @@ H5T_conv_int_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5688,7 +5688,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_short
+ * Function:	H5T__conv_uint_short
  *
  * Purpose:	Converts `unsigned int' to `short'
  *
@@ -5704,7 +5704,7 @@ H5T_conv_int_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride,
                     size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		    hid_t UNUSED dxpl_id)
@@ -5714,7 +5714,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_ushort
+ * Function:	H5T__conv_uint_ushort
  *
  * Purpose:	Converts `unsigned int' to `unsigned short'
  *
@@ -5730,7 +5730,7 @@ H5T_conv_uint_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5740,7 +5740,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_uint
+ * Function:	H5T__conv_int_uint
  *
  * Purpose:	Converts `int' to `unsigned int'
  *
@@ -5756,7 +5756,7 @@ H5T_conv_uint_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5765,7 +5765,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_int
+ * Function:	H5T__conv_uint_int
  *
  * Purpose:	Converts `unsigned int' to `int'
  *
@@ -5781,7 +5781,7 @@ H5T_conv_int_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5790,7 +5790,7 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_long
+ * Function:	H5T__conv_int_long
  *
  * Purpose:	Converts `int' to `long'
  *
@@ -5806,7 +5806,7 @@ H5T_conv_uint_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5815,7 +5815,7 @@ H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_ulong
+ * Function:	H5T__conv_int_ulong
  *
  * Purpose:	Converts `int' to `unsigned long'
  *
@@ -5831,7 +5831,7 @@ H5T_conv_int_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5840,7 +5840,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_long
+ * Function:	H5T__conv_uint_long
  *
  * Purpose:	Converts `unsigned int' to `long'
  *
@@ -5856,7 +5856,7 @@ H5T_conv_int_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5865,7 +5865,7 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_ulong
+ * Function:	H5T__conv_uint_ulong
  *
  * Purpose:	Converts `unsigned int' to `unsigned long'
  *
@@ -5881,7 +5881,7 @@ H5T_conv_uint_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5890,7 +5890,7 @@ H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_llong
+ * Function:	H5T__conv_int_llong
  *
  * Purpose:	Converts `int' to `long long'
  *
@@ -5906,7 +5906,7 @@ H5T_conv_uint_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5915,7 +5915,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_ullong
+ * Function:	H5T__conv_int_ullong
  *
  * Purpose:	Converts `int' to `unsigned long long'
  *
@@ -5931,7 +5931,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5940,7 +5940,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_llong
+ * Function:	H5T__conv_uint_llong
  *
  * Purpose:	Converts `unsigned int' to `long long'
  *
@@ -5956,7 +5956,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -5965,7 +5965,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_ullong
+ * Function:	H5T__conv_uint_ullong
  *
  * Purpose:	Converts `unsigned int' to `unsigned long long'
  *
@@ -5981,7 +5981,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -5991,7 +5991,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_schar
+ * Function:	H5T__conv_long_schar
  *
  * Purpose:	Converts `long' to `signed char'
  *
@@ -6007,7 +6007,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6016,7 +6016,7 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_uchar
+ * Function:	H5T__conv_long_uchar
  *
  * Purpose:	Converts `long' to `unsigned char'
  *
@@ -6032,7 +6032,7 @@ H5T_conv_long_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6041,7 +6041,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_schar
+ * Function:	H5T__conv_ulong_schar
  *
  * Purpose:	Converts `unsigned long' to `signed char'
  *
@@ -6057,7 +6057,7 @@ H5T_conv_long_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6067,7 +6067,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_uchar
+ * Function:	H5T__conv_ulong_uchar
  *
  * Purpose:	Converts `unsigned long' to `unsigned char'
  *
@@ -6083,7 +6083,7 @@ H5T_conv_ulong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6093,7 +6093,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_short
+ * Function:	H5T__conv_long_short
  *
  * Purpose:	Converts `long' to `short'
  *
@@ -6109,7 +6109,7 @@ H5T_conv_ulong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6118,7 +6118,7 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_ushort
+ * Function:	H5T__conv_long_ushort
  *
  * Purpose:	Converts `long' to `unsigned short'
  *
@@ -6134,7 +6134,7 @@ H5T_conv_long_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6144,7 +6144,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_short
+ * Function:	H5T__conv_ulong_short
  *
  * Purpose:	Converts `unsigned long' to `short'
  *
@@ -6160,7 +6160,7 @@ H5T_conv_long_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                      void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6169,7 +6169,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_ushort
+ * Function:	H5T__conv_ulong_ushort
  *
  * Purpose:	Converts `unsigned long' to `unsigned short'
  *
@@ -6185,7 +6185,7 @@ H5T_conv_ulong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6195,7 +6195,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_int
+ * Function:	H5T__conv_long_int
  *
  * Purpose:	Converts `long' to `int'
  *
@@ -6211,7 +6211,7 @@ H5T_conv_ulong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		  size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                   void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6220,7 +6220,7 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_uint
+ * Function:	H5T__conv_long_uint
  *
  * Purpose:	Converts `long' to `unsigned int'
  *
@@ -6236,7 +6236,7 @@ H5T_conv_long_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6245,7 +6245,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_int
+ * Function:	H5T__conv_ulong_int
  *
  * Purpose:	Converts `unsigned long' to `int'
  *
@@ -6261,7 +6261,7 @@ H5T_conv_long_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6270,7 +6270,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_uint
+ * Function:	H5T__conv_ulong_uint
  *
  * Purpose:	Converts `unsigned long' to `unsigned int'
  *
@@ -6286,7 +6286,7 @@ H5T_conv_ulong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6295,7 +6295,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_ulong
+ * Function:	H5T__conv_long_ulong
  *
  * Purpose:	Converts `long' to `unsigned long'
  *
@@ -6311,7 +6311,7 @@ H5T_conv_ulong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6320,7 +6320,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_long
+ * Function:	H5T__conv_ulong_long
  *
  * Purpose:	Converts `unsigned long' to `long'
  *
@@ -6336,7 +6336,7 @@ H5T_conv_long_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6345,7 +6345,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_llong
+ * Function:	H5T__conv_long_llong
  *
  * Purpose:	Converts `long' to `long long'
  *
@@ -6361,7 +6361,7 @@ H5T_conv_ulong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6370,7 +6370,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_ullong
+ * Function:	H5T__conv_long_ullong
  *
  * Purpose:	Converts `long' to `unsigned long long'
  *
@@ -6386,7 +6386,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6396,7 +6396,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_llong
+ * Function:	H5T__conv_ulong_llong
  *
  * Purpose:	Converts `unsigned long' to `long long'
  *
@@ -6412,7 +6412,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6422,7 +6422,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_ullong
+ * Function:	H5T__conv_ulong_ullong
  *
  * Purpose:	Converts `unsigned long' to `unsigned long long'
  *
@@ -6438,7 +6438,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6448,7 +6448,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_schar
+ * Function:	H5T__conv_llong_schar
  *
  * Purpose:	Converts `long long' to `signed char'
  *
@@ -6464,7 +6464,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6474,7 +6474,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_uchar
+ * Function:	H5T__conv_llong_uchar
  *
  * Purpose:	Converts `long long' to `unsigned char'
  *
@@ -6490,7 +6490,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6500,7 +6500,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_schar
+ * Function:	H5T__conv_ullong_schar
  *
  * Purpose:	Converts `unsigned long long' to `signed char'
  *
@@ -6516,7 +6516,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6526,7 +6526,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_uchar
+ * Function:	H5T__conv_ullong_uchar
  *
  * Purpose:	Converts `unsigned long long' to `unsigned char'
  *
@@ -6542,7 +6542,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                       size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6552,7 +6552,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_short
+ * Function:	H5T__conv_llong_short
  *
  * Purpose:	Converts `long long' to `short'
  *
@@ -6568,7 +6568,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6578,7 +6578,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_ushort
+ * Function:	H5T__conv_llong_ushort
  *
  * Purpose:	Converts `long long' to `unsigned short'
  *
@@ -6594,7 +6594,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6604,7 +6604,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_short
+ * Function:	H5T__conv_ullong_short
  *
  * Purpose:	Converts `unsigned long long' to `short'
  *
@@ -6620,7 +6620,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6630,7 +6630,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_ushort
+ * Function:	H5T__conv_ullong_ushort
  *
  * Purpose:	Converts `unsigned long long' to `unsigned short'
  *
@@ -6646,7 +6646,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -6656,7 +6656,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_int
+ * Function:	H5T__conv_llong_int
  *
  * Purpose:	Converts `long long' to `int'
  *
@@ -6672,7 +6672,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		   size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                    void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6681,7 +6681,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_uint
+ * Function:	H5T__conv_llong_uint
  *
  * Purpose:	Converts `long long' to `unsigned int'
  *
@@ -6697,7 +6697,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6706,7 +6706,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_int
+ * Function:	H5T__conv_ullong_int
  *
  * Purpose:	Converts `unsigned long long' to `int'
  *
@@ -6722,7 +6722,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6731,7 +6731,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_uint
+ * Function:	H5T__conv_ullong_uint
  *
  * Purpose:	Converts `unsigned long long' to `unsigned int'
  *
@@ -6747,7 +6747,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6757,7 +6757,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_long
+ * Function:	H5T__conv_llong_long
  *
  * Purpose:	Converts `long long' to `long'
  *
@@ -6773,7 +6773,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		    size_t nelmts, size_t buf_stride, size_t UNUSED bkg_stride,
                     void *buf, void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
@@ -6782,7 +6782,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_ulong
+ * Function:	H5T__conv_llong_ulong
  *
  * Purpose:	Converts `long long' to `unsigned long'
  *
@@ -6798,7 +6798,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6808,7 +6808,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_long
+ * Function:	H5T__conv_ullong_long
  *
  * Purpose:	Converts `unsigned long long' to `long'
  *
@@ -6824,7 +6824,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		     size_t nelmts, size_t buf_stride,
                      size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
 		     hid_t UNUSED dxpl_id)
@@ -6834,7 +6834,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_ulong
+ * Function:	H5T__conv_ullong_ulong
  *
  * Purpose:	Converts `unsigned long long' to `unsigned long'
  *
@@ -6850,7 +6850,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6860,7 +6860,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_ullong
+ * Function:	H5T__conv_llong_ullong
  *
  * Purpose:	Converts `long long' to `unsigned long long'
  *
@@ -6876,7 +6876,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6886,7 +6886,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_llong
+ * Function:	H5T__conv_ullong_llong
  *
  * Purpose:	Converts `unsigned long long' to `long long'
  *
@@ -6902,7 +6902,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		      size_t nelmts, size_t buf_stride,
                       size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                       hid_t UNUSED dxpl_id)
@@ -6912,7 +6912,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_double
+ * Function:	H5T__conv_float_double
  *
  * Purpose:	Convert native `float' to native `double' using hardware.
  *		This is a fast special case.
@@ -6932,7 +6932,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_FP
 herr_t
-H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -6943,7 +6943,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_ldouble
+ * Function:	H5T__conv_float_ldouble
  *
  * Purpose:	Convert native `float' to native `long double' using hardware.
  *		This is a fast special case.
@@ -6959,7 +6959,7 @@ H5T_conv_float_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_LDOUBLE
 herr_t
-H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -6970,7 +6970,7 @@ H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_float
+ * Function:	H5T__conv_double_float
  *
  * Purpose:	Convert native `double' to native `float' using hardware.
  *		This is a fast special case.
@@ -6993,7 +6993,7 @@ H5T_conv_float_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_FP
 herr_t
-H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7004,7 +7004,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_ldouble
+ * Function:	H5T__conv_double_ldouble
  *
  * Purpose:	Convert native `double' to native `long double' using hardware.
  *		This is a fast special case.
@@ -7020,7 +7020,7 @@ H5T_conv_double_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_LDOUBLE
 herr_t
-H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7031,7 +7031,7 @@ H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_float
+ * Function:	H5T__conv_ldouble_float
  *
  * Purpose:	Convert native `long double' to native `float' using hardware.
  *		This is a fast special case.
@@ -7047,7 +7047,7 @@ H5T_conv_double_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_LDOUBLE
 herr_t
-H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7058,7 +7058,7 @@ H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_double
+ * Function:	H5T__conv_ldouble_double
  *
  * Purpose:	Convert native `long double' to native `double' using hardware.
  *		This is a fast special case.
@@ -7074,7 +7074,7 @@ H5T_conv_ldouble_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_LDOUBLE
 herr_t
-H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7085,7 +7085,7 @@ H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_float
+ * Function:	H5T__conv_schar_float
  *
  * Purpose:	Convert native signed char to native float using hardware.
  *		This is a fast special case.
@@ -7100,7 +7100,7 @@ H5T_conv_ldouble_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7110,7 +7110,7 @@ H5T_conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_double
+ * Function:	H5T__conv_schar_double
  *
  * Purpose:	Convert native signed char to native double using hardware.
  *		This is a fast special case.
@@ -7125,7 +7125,7 @@ H5T_conv_schar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7135,7 +7135,7 @@ H5T_conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_schar_ldouble
+ * Function:	H5T__conv_schar_ldouble
  *
  * Purpose:	Convert native signed char to native long double using
  *              hardware.  This is a fast special case.
@@ -7151,7 +7151,7 @@ H5T_conv_schar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7162,7 +7162,7 @@ H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_float
+ * Function:	H5T__conv_uchar_float
  *
  * Purpose:	Convert native unsigned char to native float using hardware.
  *		This is a fast special case.
@@ -7177,7 +7177,7 @@ H5T_conv_schar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7187,7 +7187,7 @@ H5T_conv_uchar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_double
+ * Function:	H5T__conv_uchar_double
  *
  * Purpose:	Convert native unsigned char to native double using hardware.
  *		This is a fast special case.
@@ -7202,7 +7202,7 @@ H5T_conv_uchar_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uchar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7212,7 +7212,7 @@ H5T_conv_uchar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uchar_ldouble
+ * Function:	H5T__conv_uchar_ldouble
  *
  * Purpose:	Convert native unsigned char to native long double using
  *              hardware.  This is a fast special case.
@@ -7228,7 +7228,7 @@ H5T_conv_uchar_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7239,7 +7239,7 @@ H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_float
+ * Function:	H5T__conv_short_float
  *
  * Purpose:	Convert native short to native float using hardware.
  *		This is a fast special case.
@@ -7254,7 +7254,7 @@ H5T_conv_uchar_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7264,7 +7264,7 @@ H5T_conv_short_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_double
+ * Function:	H5T__conv_short_double
  *
  * Purpose:	Convert native short to native double using hardware.
  *		This is a fast special case.
@@ -7279,7 +7279,7 @@ H5T_conv_short_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_short_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7289,7 +7289,7 @@ H5T_conv_short_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_short_ldouble
+ * Function:	H5T__conv_short_ldouble
  *
  * Purpose:	Convert native short to native long double using hardware.
  *		This is a fast special case.
@@ -7305,7 +7305,7 @@ H5T_conv_short_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7316,7 +7316,7 @@ H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_float
+ * Function:	H5T__conv_ushort_float
  *
  * Purpose:	Convert native unsigned short to native float using hardware.
  *		This is a fast special case.
@@ -7331,7 +7331,7 @@ H5T_conv_short_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7341,7 +7341,7 @@ H5T_conv_ushort_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_double
+ * Function:	H5T__conv_ushort_double
  *
  * Purpose:	Convert native unsigned short to native double using hardware.
  *		This is a fast special case.
@@ -7356,7 +7356,7 @@ H5T_conv_ushort_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_ushort_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7366,7 +7366,7 @@ H5T_conv_ushort_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ushort_ldouble
+ * Function:	H5T__conv_ushort_ldouble
  *
  * Purpose:	Convert native unsigned short to native long double using
  *              hardware.  This is a fast special case.
@@ -7382,7 +7382,7 @@ H5T_conv_ushort_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7393,7 +7393,7 @@ H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_float
+ * Function:	H5T__conv_int_float
  *
  * Purpose:	Convert native integer to native float using hardware.
  *		This is a fast special case.
@@ -7408,7 +7408,7 @@ H5T_conv_ushort_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7418,7 +7418,7 @@ H5T_conv_int_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_double
+ * Function:	H5T__conv_int_double
  *
  * Purpose:	Convert native integer to native double using hardware.
  *		This is a fast special case.
@@ -7433,7 +7433,7 @@ H5T_conv_int_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_int_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7443,7 +7443,7 @@ H5T_conv_int_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_int_ldouble
+ * Function:	H5T__conv_int_ldouble
  *
  * Purpose:	Convert native integer to native long double using hardware.
  *		This is a fast special case.
@@ -7459,7 +7459,7 @@ H5T_conv_int_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7470,7 +7470,7 @@ H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_float
+ * Function:	H5T__conv_uint_float
  *
  * Purpose:	Convert native unsigned integer to native float using
  *              hardware.  This is a fast special case.
@@ -7485,7 +7485,7 @@ H5T_conv_int_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7495,7 +7495,7 @@ H5T_conv_uint_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_double
+ * Function:	H5T__conv_uint_double
  *
  * Purpose:	Convert native unsigned integer to native double using
  *              hardware.  This is a fast special case.
@@ -7510,7 +7510,7 @@ H5T_conv_uint_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_uint_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7520,7 +7520,7 @@ H5T_conv_uint_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_uint_ldouble
+ * Function:	H5T__conv_uint_ldouble
  *
  * Purpose:	Convert native unsigned integer to native long double using
  *              hardware.  This is a fast special case.
@@ -7536,7 +7536,7 @@ H5T_conv_uint_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7547,7 +7547,7 @@ H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_float
+ * Function:	H5T__conv_long_float
  *
  * Purpose:	Convert native long to native float using hardware.
  *		This is a fast special case.
@@ -7562,7 +7562,7 @@ H5T_conv_uint_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7572,7 +7572,7 @@ H5T_conv_long_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_double
+ * Function:	H5T__conv_long_double
  *
  * Purpose:	Convert native long to native double using hardware.
  *		This is a fast special case.
@@ -7587,7 +7587,7 @@ H5T_conv_long_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7597,7 +7597,7 @@ H5T_conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_long_ldouble
+ * Function:	H5T__conv_long_ldouble
  *
  * Purpose:	Convert native long to native long double using hardware.
  *		This is a fast special case.
@@ -7613,7 +7613,7 @@ H5T_conv_long_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_INTEGER_LDOUBLE
 herr_t
-H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7624,7 +7624,7 @@ H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_float
+ * Function:	H5T__conv_ulong_float
  *
  * Purpose:	Convert native unsigned long to native float using hardware.
  *		This is a fast special case.
@@ -7640,7 +7640,7 @@ H5T_conv_long_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_ULONG_FLT
 herr_t
-H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7651,7 +7651,7 @@ H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_double
+ * Function:	H5T__conv_ulong_double
  *
  * Purpose:	Convert native unsigned long to native double using hardware.
  *		This is a fast special case.
@@ -7667,7 +7667,7 @@ H5T_conv_ulong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_ULONG_DBL
 herr_t
-H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7678,7 +7678,7 @@ H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ulong_ldouble
+ * Function:	H5T__conv_ulong_ldouble
  *
  * Purpose:	Convert native unsigned long to native long double using
  *              hardware.  This is a fast special case.
@@ -7694,7 +7694,7 @@ H5T_conv_ulong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_ULONG_LDOUBLE
 herr_t
-H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7705,7 +7705,7 @@ H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_float
+ * Function:	H5T__conv_llong_float
  *
  * Purpose:	Convert native long long to native float using hardware.
  *		This is a fast special case.
@@ -7720,7 +7720,7 @@ H5T_conv_ulong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7730,7 +7730,7 @@ H5T_conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_double
+ * Function:	H5T__conv_llong_double
  *
  * Purpose:	Convert native long long to native double using hardware.
  *		This is a fast special case.
@@ -7745,7 +7745,7 @@ H5T_conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7755,7 +7755,7 @@ H5T_conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_llong_ldouble
+ * Function:	H5T__conv_llong_ldouble
  *
  * Purpose:	Convert native long long to native long double using
  *              hardware.  This is a fast special case.
@@ -7771,7 +7771,7 @@ H5T_conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LLONG_LDOUBLE
 herr_t
-H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7782,7 +7782,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_float
+ * Function:	H5T__conv_ullong_float
  *
  * Purpose:	Convert native unsigned long long to native float using
  *              hardware.  This is a fast special case.
@@ -7798,7 +7798,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_ULLONG_FP
 herr_t
-H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7809,7 +7809,7 @@ H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_double
+ * Function:	H5T__conv_ullong_double
  *
  * Purpose:	Convert native unsigned long long to native double using
  *              hardware.  This is a fast special case.
@@ -7825,7 +7825,7 @@ H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_ULLONG_FP
 herr_t
-H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7836,7 +7836,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ullong_ldouble
+ * Function:	H5T__conv_ullong_ldouble
  *
  * Purpose:	Convert native unsigned long long to native long double using
  *              hardware.  This is a fast special case.
@@ -7852,7 +7852,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_ULLONG_LDOUBLE
 herr_t
-H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7863,7 +7863,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_schar
+ * Function:	H5T__conv_float_schar
  *
  * Purpose:	Convert native float to native signed char using
  *              hardware.  This is a fast special case.
@@ -7878,7 +7878,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7888,7 +7888,7 @@ H5T_conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_uchar
+ * Function:	H5T__conv_float_uchar
  *
  * Purpose:	Convert native float to native unsigned char using
  *              hardware.  This is a fast special case.
@@ -7903,7 +7903,7 @@ H5T_conv_float_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7913,7 +7913,7 @@ H5T_conv_float_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_schar
+ * Function:	H5T__conv_double_schar
  *
  * Purpose:	Convert native double to native signed char using
  *              hardware.  This is a fast special case.
@@ -7928,7 +7928,7 @@ H5T_conv_float_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7938,7 +7938,7 @@ H5T_conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_uchar
+ * Function:	H5T__conv_double_uchar
  *
  * Purpose:	Convert native double to native unsigned char using
  *              hardware.  This is a fast special case.
@@ -7953,7 +7953,7 @@ H5T_conv_double_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7963,7 +7963,7 @@ H5T_conv_double_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_schar
+ * Function:	H5T__conv_ldouble_schar
  *
  * Purpose:	Convert native long double to native signed char using
  *              hardware.  This is a fast special case.
@@ -7979,7 +7979,7 @@ H5T_conv_double_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -7990,7 +7990,7 @@ H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_uchar
+ * Function:	H5T__conv_ldouble_uchar
  *
  * Purpose:	Convert native long double to native unsigned char using
  *              hardware.  This is a fast special case.
@@ -8006,7 +8006,7 @@ H5T_conv_ldouble_schar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8017,7 +8017,7 @@ H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_short
+ * Function:	H5T__conv_float_short
  *
  * Purpose:	Convert native float to native short using
  *              hardware.  This is a fast special case.
@@ -8032,7 +8032,7 @@ H5T_conv_ldouble_uchar (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8042,7 +8042,7 @@ H5T_conv_float_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_ushort
+ * Function:	H5T__conv_float_ushort
  *
  * Purpose:	Convert native float to native unsigned short using
  *              hardware.  This is a fast special case.
@@ -8057,7 +8057,7 @@ H5T_conv_float_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8067,7 +8067,7 @@ H5T_conv_float_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_short
+ * Function:	H5T__conv_double_short
  *
  * Purpose:	Convert native double to native short using
  *              hardware.  This is a fast special case.
@@ -8082,7 +8082,7 @@ H5T_conv_float_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8092,7 +8092,7 @@ H5T_conv_double_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_ushort
+ * Function:	H5T__conv_double_ushort
  *
  * Purpose:	Convert native double to native unsigned short using
  *              hardware.  This is a fast special case.
@@ -8107,7 +8107,7 @@ H5T_conv_double_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8117,7 +8117,7 @@ H5T_conv_double_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_short
+ * Function:	H5T__conv_ldouble_short
  *
  * Purpose:	Convert native long double to native short using
  *              hardware.  This is a fast special case.
@@ -8133,7 +8133,7 @@ H5T_conv_double_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8144,7 +8144,7 @@ H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_ushort
+ * Function:	H5T__conv_ldouble_ushort
  *
  * Purpose:	Convert native long double to native unsigned short using
  *              hardware.  This is a fast special case.
@@ -8160,7 +8160,7 @@ H5T_conv_ldouble_short (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8171,7 +8171,7 @@ H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_int
+ * Function:	H5T__conv_float_int
  *
  * Purpose:	Convert native float to native int using
  *              hardware.  This is a fast special case.
@@ -8186,7 +8186,7 @@ H5T_conv_ldouble_ushort (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8196,7 +8196,7 @@ H5T_conv_float_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_uint
+ * Function:	H5T__conv_float_uint
  *
  * Purpose:	Convert native float to native unsigned int using
  *              hardware.  This is a fast special case.
@@ -8211,7 +8211,7 @@ H5T_conv_float_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8221,7 +8221,7 @@ H5T_conv_float_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_int
+ * Function:	H5T__conv_double_int
  *
  * Purpose:	Convert native double to native int using
  *              hardware.  This is a fast special case.
@@ -8236,7 +8236,7 @@ H5T_conv_float_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8246,7 +8246,7 @@ H5T_conv_double_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_uint
+ * Function:	H5T__conv_double_uint
  *
  * Purpose:	Convert native double to native unsigned int using
  *              hardware.  This is a fast special case.
@@ -8261,7 +8261,7 @@ H5T_conv_double_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8271,7 +8271,7 @@ H5T_conv_double_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_int
+ * Function:	H5T__conv_ldouble_int
  *
  * Purpose:	Convert native long double to native int using
  *              hardware.  This is a fast special case.
@@ -8287,7 +8287,7 @@ H5T_conv_double_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8298,7 +8298,7 @@ H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_uint
+ * Function:	H5T__conv_ldouble_uint
  *
  * Purpose:	Convert native long double to native unsigned int using
  *              hardware.  This is a fast special case.
@@ -8314,7 +8314,7 @@ H5T_conv_ldouble_int (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_UINT
 herr_t
-H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8325,7 +8325,7 @@ H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_long
+ * Function:	H5T__conv_float_long
  *
  * Purpose:	Convert native float to native long using
  *              hardware.  This is a fast special case.
@@ -8340,7 +8340,7 @@ H5T_conv_ldouble_uint (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8350,7 +8350,7 @@ H5T_conv_float_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_ulong
+ * Function:	H5T__conv_float_ulong
  *
  * Purpose:	Convert native float to native unsigned long using
  *              hardware.  This is a fast special case.
@@ -8365,7 +8365,7 @@ H5T_conv_float_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_float_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8375,7 +8375,7 @@ H5T_conv_float_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_long
+ * Function:	H5T__conv_double_long
  *
  * Purpose:	Convert native double to native long using
  *              hardware.  This is a fast special case.
@@ -8390,7 +8390,7 @@ H5T_conv_float_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8400,7 +8400,7 @@ H5T_conv_double_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_ulong
+ * Function:	H5T__conv_double_ulong
  *
  * Purpose:	Convert native double to native unsigned long using
  *              hardware.  This is a fast special case.
@@ -8415,7 +8415,7 @@ H5T_conv_double_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_double_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8425,7 +8425,7 @@ H5T_conv_double_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_long
+ * Function:	H5T__conv_ldouble_long
  *
  * Purpose:	Convert native long double to native long using
  *              hardware.  This is a fast special case.
@@ -8441,7 +8441,7 @@ H5T_conv_double_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8452,7 +8452,7 @@ H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_ulong
+ * Function:	H5T__conv_ldouble_ulong
  *
  * Purpose:	Convert native long double to native unsigned long using
  *              hardware.  This is a fast special case.
@@ -8468,7 +8468,7 @@ H5T_conv_ldouble_long (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_INTEGER
 herr_t
-H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8479,7 +8479,7 @@ H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_llong
+ * Function:	H5T__conv_float_llong
  *
  * Purpose:	Convert native float to native long long using
  *              hardware.  This is a fast special case.
@@ -8495,7 +8495,7 @@ H5T_conv_ldouble_ulong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_LLONG
 herr_t
-H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8506,7 +8506,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_float_ullong
+ * Function:	H5T__conv_float_ullong
  *
  * Purpose:	Convert native float to native unsigned long long using
  *              hardware.  This is a fast special case.
@@ -8522,7 +8522,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_ULLONG
 herr_t
-H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8533,7 +8533,7 @@ H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_llong
+ * Function:	H5T__conv_double_llong
  *
  * Purpose:	Convert native double to native long long using
  *              hardware.  This is a fast special case.
@@ -8549,7 +8549,7 @@ H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_LLONG
 herr_t
-H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8560,7 +8560,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_double_ullong
+ * Function:	H5T__conv_double_ullong
  *
  * Purpose:	Convert native double to native unsigned long long using
  *              hardware.  This is a fast special case.
@@ -8576,7 +8576,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_FP_ULLONG
 herr_t
-H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t dxpl_id)
@@ -8587,7 +8587,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_llong
+ * Function:	H5T__conv_ldouble_llong
  *
  * Purpose:	Convert native long double to native long long using
  *              hardware.  This is a fast special case.
@@ -8603,7 +8603,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_LLONG
 herr_t
-H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t UNUSED dxpl_id)
@@ -8614,7 +8614,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_ldouble_ullong
+ * Function:	H5T__conv_ldouble_ullong
  *
  * Purpose:	Convert native long double to native unsigned long long using
  *              hardware.  This is a fast special case.
@@ -8630,7 +8630,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  */
 #if H5T_CONV_INTERNAL_LDOUBLE_ULLONG
 herr_t
-H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+H5T__conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 		       size_t nelmts, size_t buf_stride,
                        size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
                        hid_t dxpl_id)
@@ -8641,7 +8641,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_f_i
+ * Function:	H5T__conv_f_i
  *
  * Purpose:	Convert one floating-point type to an integer.  This is
  *              the catch-all function for float-integer conversions and
@@ -8665,7 +8665,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t buf_stride, size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
     hid_t dxpl_id)
 {
@@ -8699,7 +8699,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     H5T_conv_ret_t      except_ret;     /*return of callback function   */
     herr_t      ret_value=SUCCEED;      /* Return value                 */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -8826,24 +8826,24 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 
                 /*zero-set all destination bits*/
-                H5T_bit_set (d, dst.offset, dst.prec, FALSE);
+                H5T__bit_set (d, dst.offset, dst.prec, FALSE);
 
                 /*
                  * Find the sign bit value of the source.
                  */
-                sign = H5T_bit_get_d(s, src.u.f.sign, (size_t)1);
+                sign = H5T__bit_get_d(s, src.u.f.sign, (size_t)1);
 
                 /*
                  * Check for special cases: +0, -0, +Inf, -Inf, NaN
                  */
-                if (H5T_bit_find (s, src.u.f.mpos, src.u.f.msize,
+                if (H5T__bit_find (s, src.u.f.mpos, src.u.f.msize,
                                   H5T_BIT_LSB, TRUE)<0) {
-                    if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                    if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                       H5T_BIT_LSB, TRUE)<0) {
                         /* +0 or -0 */
                         /* Set all bits to zero */
                         goto padding;
-                    } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                    } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                              H5T_BIT_LSB, FALSE)<0) {
                         /* +Infinity or -Infinity */
                         if(sign) { /* -Infinity */
@@ -8856,7 +8856,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) {
                                 if (H5T_SGN_2==dst.u.i.sign)
-                                    H5T_bit_set (d, dst.prec-1, (size_t)1, TRUE);
+                                    H5T__bit_set (d, dst.prec-1, (size_t)1, TRUE);
                             } else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -8873,9 +8873,9 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) {
                                 if (H5T_SGN_NONE==dst.u.i.sign)
-                                    H5T_bit_set (d, dst.offset, dst.prec, TRUE);
+                                    H5T__bit_set (d, dst.offset, dst.prec, TRUE);
                                 else if (H5T_SGN_2==dst.u.i.sign)
-                                    H5T_bit_set (d, dst.offset, dst.prec-1, TRUE);
+                                    H5T__bit_set (d, dst.offset, dst.prec-1, TRUE);
                             } else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -8885,8 +8885,8 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         }
                         goto padding;
                     }
-                } else if (H5T_NORM_NONE==src.u.f.norm && H5T_bit_find (s, src.u.f.mpos, src.u.f.msize-1,
-                                  H5T_BIT_LSB, TRUE)<0 && H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                } else if (H5T_NORM_NONE==src.u.f.norm && H5T__bit_find (s, src.u.f.mpos, src.u.f.msize-1,
+                                  H5T_BIT_LSB, TRUE)<0 && H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                   H5T_BIT_LSB, FALSE)<0) {
                     /*This is a special case for the source of no implied mantissa bit.
                      *If the exponent bits are all 1s and only the 1st bit of mantissa
@@ -8902,7 +8902,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
                             if (H5T_SGN_2==dst.u.i.sign)
-                                H5T_bit_set (d, dst.prec-1, (size_t)1, TRUE);
+                                H5T__bit_set (d, dst.prec-1, (size_t)1, TRUE);
                         } else if(except_ret == H5T_CONV_HANDLED) {
                             /*No need to reverse the order of destination because user handles it*/
                             reverse = FALSE;
@@ -8919,9 +8919,9 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                         if(except_ret == H5T_CONV_UNHANDLED) {
                             if (H5T_SGN_NONE==dst.u.i.sign)
-                                H5T_bit_set (d, dst.offset, dst.prec, TRUE);
+                                H5T__bit_set (d, dst.offset, dst.prec, TRUE);
                             else if (H5T_SGN_2==dst.u.i.sign)
-                                H5T_bit_set (d, dst.offset, dst.prec-1, TRUE);
+                                H5T__bit_set (d, dst.offset, dst.prec-1, TRUE);
                         } else if(except_ret == H5T_CONV_HANDLED) {
                             /*No need to reverse the order of destination because user handles it*/
                             reverse = FALSE;
@@ -8930,7 +8930,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                     }
                     goto padding;
-                } else if (H5T_bit_find (s, src.u.f.epos, src.u.f.esize,
+                } else if (H5T__bit_find (s, src.u.f.epos, src.u.f.esize,
                                          H5T_BIT_LSB, FALSE)<0) {
                     /* NaN */
                     if(cb_struct.func) { /*If user's exception handler is present, use it*/
@@ -8958,7 +8958,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * the source bit field where it's located.   Not expecting
                  * exponent to be greater than the maximal value of hssize_t.
                  */
-                expo = H5T_bit_get_d(s, src.u.f.epos, src.u.f.esize);
+                expo = H5T__bit_get_d(s, src.u.f.epos, src.u.f.esize);
 
                 /*
                  * Calculate the true source exponent by adjusting according to
@@ -8983,14 +8983,14 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  *      V       V       V       V
                  *    buf[0]  buf[1]  buf[2]  buf[3]
                  */
-                H5T_bit_copy(int_buf, (size_t)0, s, src.u.f.mpos, src.u.f.msize);
+                H5T__bit_copy(int_buf, (size_t)0, s, src.u.f.mpos, src.u.f.msize);
 
                 /*
                  * Restore the implicit bit for mantissa if it's implied.
                  * Equivalent to mantissa |= (hsize_t)1<<src.u.f.msize.
                  */
                 if(H5T_NORM_IMPLIED == src.u.f.norm)
-                    H5T_bit_inc(int_buf, src.u.f.msize, 8 * buf_size - src.u.f.msize);
+                    H5T__bit_inc(int_buf, src.u.f.msize, 8 * buf_size - src.u.f.msize);
 
                 /*
                  * Shift mantissa part by exponent minus mantissa size(right shift),
@@ -8998,7 +8998,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * 10...010111, expo=20, expo-msize=-3.  Right-shift the sequence, we get
                  * 00010...10.  The last three bits were dropped.
                  */
-                H5T_bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), (size_t)0, buf_size * 8);
+                H5T__bit_shift(int_buf, (ssize_t)(expo-src.u.f.msize), (size_t)0, buf_size * 8);
 
                 /*
                  * If expo is less than mantissa size, the frantional value is dropped off
@@ -9012,7 +9012,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  * which is set?  This is checked before converted to negative
                  * integer.
                  */
-                sfirst = H5T_bit_find(int_buf, (size_t)0, 8 * buf_size, H5T_BIT_MSB, TRUE);
+                sfirst = H5T__bit_find(int_buf, (size_t)0, 8 * buf_size, H5T_BIT_MSB, TRUE);
                 first = (size_t)sfirst;
 
                 if(sfirst < 0) {
@@ -9054,7 +9054,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             }
 
                             if(except_ret == H5T_CONV_UNHANDLED)
-                                H5T_bit_set (d, dst.offset, dst.prec, TRUE);
+                                H5T__bit_set (d, dst.offset, dst.prec, TRUE);
                             else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -9071,7 +9071,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED)
                                 /*copy source value into it if case is ignored by user handler*/
-                                H5T_bit_copy (d, dst.offset, int_buf, (size_t)0, first+1);
+                                H5T__bit_copy (d, dst.offset, int_buf, (size_t)0, first+1);
                             else if(except_ret == H5T_CONV_HANDLED) {
                                 /*No need to reverse the order of destination because user handles it*/
                                 reverse = FALSE;
@@ -9092,12 +9092,12 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) { /*If this case ignored by user handler*/
                                 /*Convert to integer representation.  Equivalent to ~(value - 1).*/
-                                H5T_bit_dec(int_buf, (size_t)0, 8 * buf_size);
-                                H5T_bit_neg(int_buf, (size_t)0, 8 * buf_size);
+                                H5T__bit_dec(int_buf, (size_t)0, 8 * buf_size);
+                                H5T__bit_neg(int_buf, (size_t)0, 8 * buf_size);
 
                                 /*copy source value into destination*/
-                                H5T_bit_copy(d, dst.offset, int_buf, (size_t)0, dst.prec-1);
-                                H5T_bit_set(d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
+                                H5T__bit_copy(d, dst.offset, int_buf, (size_t)0, dst.prec-1);
+                                H5T__bit_set(d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9117,7 +9117,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             }
 
                             if(except_ret == H5T_CONV_UNHANDLED)
-                                H5T_bit_set(d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
+                                H5T__bit_set(d, (dst.offset + dst.prec-1), (size_t)1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9137,7 +9137,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             }
 
                             if(except_ret == H5T_CONV_UNHANDLED)
-                                H5T_bit_set(d, dst.offset, dst.prec-1, TRUE);
+                                H5T__bit_set(d, dst.offset, dst.prec-1, TRUE);
                             else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9155,7 +9155,7 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                             if(except_ret == H5T_CONV_UNHANDLED) {
                                 /*copy source value into it if case is ignored by user handler*/
-                                H5T_bit_copy (d, dst.offset, int_buf, (size_t)0, first+1);
+                                H5T__bit_copy (d, dst.offset, int_buf, (size_t)0, first+1);
                             } else if(except_ret == H5T_CONV_ABORT)
                                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")
                             else if(except_ret == H5T_CONV_HANDLED) {
@@ -9173,11 +9173,11 @@ H5T_conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if (dst.offset>0) {
                     assert (H5T_PAD_ZERO==dst.lsb_pad || H5T_PAD_ONE==dst.lsb_pad);
-                    H5T_bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                    H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
                 if (dst.offset+dst.prec!=8*dst_p->shared->size) {
                     assert (H5T_PAD_ZERO==dst.msb_pad || H5T_PAD_ONE==dst.msb_pad);
-                    H5T_bit_set(d, dst.offset+dst.prec,
+                    H5T__bit_set(d, dst.offset+dst.prec,
                                  8*dst_p->shared->size - (dst.offset+ dst.prec),
                                  (hbool_t)(H5T_PAD_ONE==dst.msb_pad));
                 }
@@ -9226,11 +9226,11 @@ done:
         H5MM_free(src_rev);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_f_i() */
+} /* end H5T__conv_f_i() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_conv_i_f
+ * Function:	H5T__conv_i_f
  *
  * Purpose:	Convert one integer type to a floating-point type.  This is
  *              the catch-all function for integer-float conversions and
@@ -9254,7 +9254,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
+H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t buf_stride, size_t UNUSED bkg_stride, void *buf, void UNUSED *bkg,
     hid_t dxpl_id)
 {
@@ -9290,7 +9290,7 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     hbool_t             reverse;        /*if reverse the order of destination   */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     switch(cdata->command) {
         case H5T_CONV_INIT:
@@ -9409,28 +9409,28 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 }
 
                 /*zero-set all destination bits*/
-                H5T_bit_set (d, dst.offset, dst.prec, FALSE);
+                H5T__bit_set (d, dst.offset, dst.prec, FALSE);
 
                 /* Copy source into a temporary buffer */
-                H5T_bit_copy(int_buf, (size_t)0, s, src.offset, src.prec);
+                H5T__bit_copy(int_buf, (size_t)0, s, src.offset, src.prec);
 
                 /*
                  * Find the sign bit value of the source.
                  */
                 if(H5T_SGN_2 == src.u.i.sign)
-                    sign = (size_t)H5T_bit_get_d(int_buf, src.prec - 1, (size_t)1);
+                    sign = (size_t)H5T__bit_get_d(int_buf, src.prec - 1, (size_t)1);
 
                 /*
                  * What is the bit position(starting from 0 as first one) for the most significant
 		 * bit(MSB) of S which is set?
                  */
                 if(H5T_SGN_2 == src.u.i.sign) {
-                    sfirst = H5T_bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
+                    sfirst = H5T__bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
                     if(sign && sfirst < 0)
 			/* The case 0x80...00, which is negative with maximal value */
                         is_max_neg = 1;
                 } else if(H5T_SGN_NONE == src.u.i.sign)
-                    sfirst = H5T_bit_find(int_buf, (size_t)0, src.prec, H5T_BIT_MSB, TRUE);
+                    sfirst = H5T__bit_find(int_buf, (size_t)0, src.prec, H5T_BIT_MSB, TRUE);
 
                 /* Handle special cases here.  Integer is zero */
                 if(!sign && sfirst < 0)
@@ -9442,9 +9442,9 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 if(H5T_SGN_2 == src.u.i.sign && sign) {
                     if(!is_max_neg) {
                         /* Equivalent to ~(i - 1) */
-                        H5T_bit_dec(int_buf, (size_t)0, buf_size * 8);
-                        H5T_bit_neg(int_buf, (size_t)0, buf_size * 8);
-                        sfirst = H5T_bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
+                        H5T__bit_dec(int_buf, (size_t)0, buf_size * 8);
+                        H5T__bit_neg(int_buf, (size_t)0, buf_size * 8);
+                        sfirst = H5T__bit_find(int_buf, (size_t)0, src.prec - 1, H5T_BIT_MSB, TRUE);
                     } else {
 			/* If it's maximal negative number 0x80...000, treat it as if it overflowed
 			 * (create a carry) to help conversion.  i.e. a character type number 0x80
@@ -9459,10 +9459,10 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* Sign bit has been negated if bit vector isn't 0x80...00.  Set all bits in front of
                      * sign bit to 0 in the temporary buffer because they're all negated from the previous
 		     * step. */
-                    H5T_bit_set(int_buf, src.prec, (buf_size * 8) - src.prec, 0);
+                    H5T__bit_set(int_buf, src.prec, (buf_size * 8) - src.prec, 0);
 
                     /* Set sign bit in destination */
-                    H5T_bit_set_d(d, dst.u.f.sign, (size_t)1, (hsize_t)sign);
+                    H5T__bit_set_d(d, dst.u.f.sign, (size_t)1, (hsize_t)sign);
                 } /* end if */
 
                 first = (size_t)sfirst;
@@ -9482,7 +9482,7 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 /* Handle mantissa part here */
                 if (H5T_NORM_IMPLIED==dst.u.f.norm) {
                     /* Imply first bit */
-                    H5T_bit_set(int_buf, first, (size_t)1, 0);
+                    H5T__bit_set(int_buf, first, (size_t)1, 0);
        		} else if (H5T_NORM_NONE==dst.u.f.norm) {
 		    first++;
 		}
@@ -9511,28 +9511,28 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 		     */
 
                     /* Check 1st dropoff bit, see if it's set. */
-                    if(H5T_bit_get_d(int_buf, ((first - dst.u.f.msize) - 1), (size_t)1)) {
+                    if(H5T__bit_get_d(int_buf, ((first - dst.u.f.msize) - 1), (size_t)1)) {
                     	/* Check all bits after 1st dropoff bit, see if any of them is set. */
-                        if(((first - dst.u.f.msize) - 1) > 0 && H5T_bit_get_d(int_buf, (size_t)0, ((first - dst.u.f.msize) - 1)))
+                        if(((first - dst.u.f.msize) - 1) > 0 && H5T__bit_get_d(int_buf, (size_t)0, ((first - dst.u.f.msize) - 1)))
                             do_round = 1;
                         else {  /* The .50...0 case */
                             /* Check if the least significant bit is odd. */
-                            if(H5T_bit_get_d(int_buf, (first - dst.u.f.msize), (size_t)1))
+                            if(H5T__bit_get_d(int_buf, (first - dst.u.f.msize), (size_t)1))
                                do_round = 1;
                         }
 		    }
 
                     /* Right shift to drop off extra bits */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize - first), (size_t)0, buf_size * 8);
+                    H5T__bit_shift(int_buf, (ssize_t)(dst.u.f.msize - first), (size_t)0, buf_size * 8);
 
                     if(do_round) {
-                        H5T_bit_inc(int_buf, (size_t)0, buf_size * 8);
+                        H5T__bit_inc(int_buf, (size_t)0, buf_size * 8);
                         do_round = 0;
 
 			/* If integer is like 0x0ff...fff and we need to round up the
 			 * last f, we get 0x100...000.  Treat this special case here.
 			 */
-                    	if(H5T_bit_get_d(int_buf, dst.u.f.msize, (size_t)1)) {
+                    	if(H5T__bit_get_d(int_buf, dst.u.f.msize, (size_t)1)) {
                 	    if (H5T_NORM_IMPLIED==dst.u.f.norm) {
 			        /* The bit at this 1's position was impled already, so this
 			         * number should be 0x200...000.  We need to increment the
@@ -9543,7 +9543,7 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 				/* Right shift 1 bit to let the carried 1 fit in the mantissa,
 				 * and increment exponent by 1.
 				 */
-                                H5T_bit_shift(int_buf, (ssize_t)-1, (size_t)0, buf_size * 8);
+                                H5T__bit_shift(int_buf, (ssize_t)-1, (size_t)0, buf_size * 8);
 			 	expo++;
 			    }
 			}
@@ -9551,7 +9551,7 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 } else {
                     /* The bit sequence can fit mantissa part.  Left shift to fit in from high-order of
 		     * bit position. */
-                    H5T_bit_shift(int_buf, (ssize_t)(dst.u.f.msize - first), (size_t)0, dst.u.f.msize);
+                    H5T__bit_shift(int_buf, (ssize_t)(dst.u.f.msize - first), (size_t)0, dst.u.f.msize);
                 }
 
 
@@ -9580,10 +9580,10 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
                 if(except_ret == H5T_CONV_UNHANDLED) {
                     /* Set exponent in destination */
-                    H5T_bit_set_d(d, dst.u.f.epos, dst.u.f.esize, expo);
+                    H5T__bit_set_d(d, dst.u.f.epos, dst.u.f.esize, expo);
 
                     /* Copy mantissa into destination */
-                    H5T_bit_copy(d, dst.u.f.mpos, int_buf, (size_t)0, (buf_size * 8) > dst.u.f.msize ? dst.u.f.msize : buf_size * 8);
+                    H5T__bit_copy(d, dst.u.f.mpos, int_buf, (size_t)0, (buf_size * 8) > dst.u.f.msize ? dst.u.f.msize : buf_size * 8);
                 }
 
             padding:
@@ -9592,11 +9592,11 @@ H5T_conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                  */
                 if(dst.offset > 0) {
                     HDassert(H5T_PAD_ZERO == dst.lsb_pad || H5T_PAD_ONE == dst.lsb_pad);
-                    H5T_bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
+                    H5T__bit_set(d, (size_t)0, dst.offset, (hbool_t)(H5T_PAD_ONE==dst.lsb_pad));
                 }
                 if(dst.offset + dst.prec != 8 * dst_p->shared->size) {
                     HDassert(H5T_PAD_ZERO == dst.msb_pad || H5T_PAD_ONE == dst.msb_pad);
-                    H5T_bit_set(d, dst.offset + dst.prec,
+                    H5T__bit_set(d, dst.offset + dst.prec,
                                  8 * dst_p->shared->size - (dst.offset + dst.prec),
                                  (hbool_t)(H5T_PAD_ONE == dst.msb_pad));
                 }
@@ -9658,7 +9658,7 @@ done:
         H5MM_free(src_rev);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_conv_i_f() */
+} /* end H5T__conv_i_f() */
 
 
 /*-------------------------------------------------------------------------

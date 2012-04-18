@@ -2849,8 +2849,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     hsize_t          size;           /* size of external file   */
     hsize_t          storage_size;
     hsize_t       curr_pos = 0;        /* total data element position   */
-    hsize_t       elmt_counter = 0;/* counts the # elements printed.*/
-    haddr_t          ioffset;
     h5tools_str_t buffer;          /* string into which to render   */
 
     /* setup */
@@ -2860,7 +2858,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
     storage_size = H5Dget_storage_size(obj_id);
     nfilters = H5Pget_nfilters(dcpl_id);
-    ioffset = H5Dget_offset(obj_id);
     HDstrcpy(f_name,"\0");
 
     /*-------------------------------------------------------------------------
@@ -3043,6 +3040,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
         }
         else {
+            haddr_t          ioffset;
+
             ctx->indent_level++;
 
             ctx->need_prefix = TRUE;
@@ -3063,6 +3062,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
             
             h5tools_str_reset(&buffer);
+            ioffset = H5Dget_offset(obj_id);
             h5tools_str_append(&buffer,"OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
@@ -3375,7 +3375,6 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info,
     size_t        buf_size = 0;
     size_t        ncols = 80;      /* available output width        */
     h5tools_str_t buffer;          /* string into which to render   */
-    hsize_t       elmt_counter = 0;/* counts the # elements printed.*/
     hsize_t       curr_pos = ctx->sm_pos;   /* total data element position   */
                                             /* pass to the prefix in h5tools_simple_prefix the total position
                                              * instead of the current stripmine position i; this is necessary
@@ -3429,7 +3428,6 @@ h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
 {
     h5tools_str_t buffer;          /* string into which to render   */
     size_t        ncols = 80;      /* available output width        */
-    hsize_t       elmt_counter = 0;/* counts the # elements printed.*/
     hsize_t       curr_pos = ctx->sm_pos;   /* total data element position   */
                                             /* pass to the prefix in h5tools_simple_prefix the total position
                                              * instead of the current stripmine position i; this is necessary

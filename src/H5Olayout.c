@@ -445,7 +445,7 @@ H5O_layout_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg
 
     /* Compute serialized size */
     /* (including possibly compact data) */
-    ret_value = H5D_layout_meta_size(f, mesg, TRUE);
+    ret_value = H5D__layout_meta_size(f, mesg, TRUE);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_size() */
@@ -550,13 +550,13 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 
         case H5D_CONTIGUOUS:    /* Contiguous block on disk */
             /* Free the file space for the raw data */
-            if(H5D_contig_delete(f, dxpl_id, &mesg->storage) < 0)
+            if(H5D__contig_delete(f, dxpl_id, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
             /* Free the file space for the index & chunk raw data */
-            if(H5D_chunk_delete(f, dxpl_id, open_oh, &mesg->storage) < 0)
+            if(H5D__chunk_delete(f, dxpl_id, open_oh, &mesg->storage) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -615,7 +615,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_COMPACT:
 	    if(layout_src->storage.u.compact.buf) {
                 /* copy compact raw data */
-                if(H5D_compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                if(H5D__compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
                 copied = TRUE;
 	    } /* end if */
@@ -630,18 +630,18 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 layout_dst->storage.u.contig.size = H5S_extent_nelem(udata->src_space_extent) *
                                         H5T_get_size(udata->src_dtype);
 
-            if(H5D_contig_is_space_alloc(&layout_src->storage)) {
+            if(H5D__contig_is_space_alloc(&layout_src->storage)) {
                 /* copy contiguous raw data */
-                if(H5D_contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info, dxpl_id) < 0)
+                if(H5D__contig_copy(file_src, &layout_src->storage.u.contig, file_dst, &layout_dst->storage.u.contig, udata->src_dtype, cpy_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy contiguous storage")
                 copied = TRUE;
             } /* end if */
             break;
 
         case H5D_CHUNKED:
-            if(H5D_chunk_is_space_alloc(&layout_src->storage)) {
+            if(H5D__chunk_is_space_alloc(&layout_src->storage)) {
                 /* Create chunked layout */
-                if(H5D_chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info, dxpl_id) < 0)
+                if(H5D__chunk_copy(file_src, &layout_src->storage.u.chunk, &layout_src->u.chunk, file_dst, &layout_dst->storage.u.chunk, udata->src_space_extent, udata->src_dtype, udata->common.src_pline, cpy_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
                 copied = TRUE;
             } /* end if */

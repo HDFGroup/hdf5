@@ -806,7 +806,7 @@ H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t 
     /* H5Dcreate_anon */
     if (NULL == name) {
         /* build and open the new dataset */
-        if(NULL == (dset = H5D_create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
+        if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
         /* Register the new dataset to get an ID for it */
@@ -974,7 +974,7 @@ H5VL_native_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* read raw data */
-    if(H5D_read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
+    if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -1040,7 +1040,7 @@ H5VL_native_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* write raw data */
-    if(H5D_write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+    if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -1074,7 +1074,7 @@ H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Private function */
-    if(H5D_set_extent(dset, size, H5AC_dxpl_id) < 0)
+    if(H5D__set_extent(dset, size, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
 
 done:
@@ -1124,7 +1124,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments
                 H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
 
                 /* Read data space address and return */
-                if(FAIL==(ret_value=H5D_get_space_status(dset, allocation, H5AC_ind_dxpl_id)))
+                if(H5D__get_space_status(dset, allocation, H5AC_ind_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
                 break;
@@ -1165,7 +1165,8 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments
                 hsize_t *ret = va_arg (arguments, hsize_t *);
 
                 /* Set return value */
-                *ret = H5D_get_storage_size(dset, H5AC_ind_dxpl_id);
+                if(H5D__get_storage_size(dset, H5AC_ind_dxpl_id, ret) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataset's storage")
                 break;
             }
             /* H5Dget_offset */
@@ -1174,7 +1175,10 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments
                 haddr_t *ret = va_arg (arguments, haddr_t *);
 
                 /* Set return value */
-                *ret = H5D_get_offset(dset);
+                *ret = H5D__get_offset(dset);
+                if(!H5F_addr_defined(*ret))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HADDR_UNDEF, "unable to get space status")
+
                 break;
             }
         default:

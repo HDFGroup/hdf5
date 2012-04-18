@@ -124,6 +124,7 @@ static int make_hlinks(hid_t loc_id);
 static int make_early(void);
 static int make_layout(hid_t loc_id);
 static int make_layout2(hid_t loc_id);
+static int make_layout3(hid_t loc_id);
 #ifdef H5_HAVE_FILTER_SZIP
 static int make_szip(hid_t loc_id);
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -1712,6 +1713,19 @@ int make_testfiles(void)
         return -1;
 
     /*-------------------------------------------------------------------------
+    * for test layout conversions form chunk with unlimited max dims
+    *-------------------------------------------------------------------------
+    */
+    if((fid = H5Fcreate("h5repack_layout3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
+
+    if(make_layout3(fid) < 0)
+        goto out;
+
+    if(H5Fclose(fid) < 0)
+        return -1;
+
+    /*-------------------------------------------------------------------------
     * create a file for the H5D_ALLOC_TIME_EARLY test
     *-------------------------------------------------------------------------
     */
@@ -3073,6 +3087,94 @@ out:
     return(ret_value);
 
 } /* make_layout2() */
+
+/*-------------------------------------------------------------------------
+* Function: make_layout3
+*
+* Purpose: make chunked datasets with unlimited max dim and chunk dim is
+*          bigger than current dim. (HDFFV-7933)
+*          Test for converting chunk to chunk , chunk to conti and chunk
+*          to compact.  
+*          - The chunk to chunk changes layout bigger than any current dim 
+*            again. 
+*          - The chunk to compact test dataset bigger than 64K, should
+*            remain original layout.*
+*
+*-------------------------------------------------------------------------
+*/
+#define DIM1_L3 300
+#define DIM2_L3 200
+static
+int make_layout3(hid_t loc_id)
+{
+    hid_t    dcpl=-1; /* dataset creation property list */
+    hid_t    sid=-1;  /* dataspace ID */
+    hsize_t  dims[RANK]={DIM1_L3,DIM2_L3};
+    hsize_t  maxdims[RANK]={H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t  chunk_dims[RANK]={DIM1_L3*2,5};
+    int      buf[DIM1_L3][DIM2_L3];
+    int      i, j, n;
+
+    for (i=n=0; i<DIM1_L3; i++)
+    {
+        for (j=0; j<DIM2_L3; j++)
+        {
+            buf[i][j]=n++;
+        }
+    }
+
+    /*-------------------------------------------------------------------------
+    * make several dataset with several layout options
+    *-------------------------------------------------------------------------
+    */
+    /* create a space */
+    if((sid = H5Screate_simple(RANK, dims, maxdims)) < 0)
+        return -1;
+    /* create a dataset creation property list; the same DCPL is used for all dsets */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    {
+        goto out;
+    }
+
+
+    /*-------------------------------------------------------------------------
+    * H5D_CHUNKED
+    *-------------------------------------------------------------------------
+    */
+    if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
+        goto out;
+    if (make_dset(loc_id,"chunk_unlimit1",sid,dcpl,buf) < 0)
+    {
+        goto out;
+    }
+
+    if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
+        goto out;
+
+    if (make_dset(loc_id,"chunk_unlimit2",sid,dcpl,buf) < 0)
+    {
+        goto out;
+    }
+
+    /*-------------------------------------------------------------------------
+    * close space and dcpl
+    *-------------------------------------------------------------------------
+    */
+    if(H5Sclose(sid) < 0)
+        goto out;
+    if(H5Pclose(dcpl) < 0)
+        goto out;
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+}
 
 /*-------------------------------------------------------------------------
 * Function: make a file with an integer dataset with a fill value
