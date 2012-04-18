@@ -77,7 +77,7 @@ New Features
     - Add two new routines to set/get the atomicity parameter in the
       MPI library to perform atomic operations. Some file systems (for
       example PVFS2) do not support atomic updates, so those routines
-      would not be supported. See details at HDFFV-7961. (MSC - 2012/03/27)
+      would not be supported. (MSC - 2012/03/27 - HDFFV-7961)
  
     Tools
     -----
@@ -89,8 +89,7 @@ New Features
     - h5dump: Added capability for "-a" option to show attributes containing "/" 
       by using an escape character. For example, for a dataset "/dset" 
       containing attribute "speed(m/h)", use "h5dump -a "/dset/speed(\/h)" 
-      to show the content of the attribute. See details at HDFFV-7523
-      (PC -- 2012/03/12)
+      to show the content of the attribute. (PC - 2012/03/12 - HDFFV-7523)
     - h5dump: Added ability to apply command options across multiple files using a
       wildcard in the filename. Unix example; "h5dump -H -d Dataset1 tarr*.h5".
       Cross platform example; "h5dump -H -d Dataset1 tarray1.h5 tarray2.h5 tarray3.h5".
@@ -99,7 +98,7 @@ New Features
       interpret the '[' character as starting the compact form of 
       subsetting. This is useful when the "h5dump error: unable to 
       open dataset "datset_name"" message is output because a dataset
-      name contains a '[' character.(ADB - 2012/03/05 - HDFFV-7689).
+      name contains a '[' character. (ADB - 2012/03/05 - HDFFV-7689).
     - h5repack: Improved performance for big chunked datasets (size > 128MB)
       when used with the layout (-l) or compression (-f) options. 
       Before this change, repacking datasets with chunks with a large first 
@@ -109,13 +108,13 @@ New Features
       might take under an hour. After this change, processing the dataset 
       with chunk dimensions of 1024x5x1 takes about 15 minutes, and processing 
       a dataset with chunk dimensions of 1x5x1024 takes about 14 minutes.
-      HDFFV-7862 (JKM - 2012/03/01) 
+      (JKM - 2012/03/01 - HDFFV-7862) 
 
     High-Level APIs
     ---------------
     - New API: h5ltpath_valid (Fortran: h5ltpath_valid_f) checks
       if a path is correct, determines if a link resolves to a valid
-      object, and checks that the link does not dangle. (MSB- 2012/3/15)
+      object, and checks that the link does not dangle. (MSB - 2012/03/15)
 
     Fortran API
     -----------
@@ -146,55 +145,55 @@ Bug Fixes since HDF5-1.8.8
     - Added code to display the version information of XL Fortran and C++
       in the summary of configure. (AKC - 2012/02/28 - HDFFV-7793)
     - Updated all CMakeLists.txt files to indicate the minimum CMake version is
-      the current standard of 2.8.6 (ADB -2011/12/05 - HDFFV-7854)
+      the current standard of 2.8.6 (ADB - 2011/12/05 - HDFFV-7854)
 
     Library
     -------
     - Windows and STDIO correctness changes have been propagated from the SEC2
-      and old Windows drivers to the STDIO VFD.  (DER - 2012/3/30, HDFFV-7917)
+      and old Windows drivers to the STDIO VFD.  (DER - 2012/03/30 - HDFFV-7917)
     - Fixed an error that would occur when copying an object with attribute
-      creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
+      creation order tracked and indexed. (NAF - 2012/03/28 - HDFFV-7762)
     - Fixed a bug in H5Ocopy(): When copying an opened object, call the
       object's flush class action to ensure that cached data is flushed so
-      that H5Ocopy will get the correct data.  (VC - 2012/3/27 - HDFFV-7853)
+      that H5Ocopy will get the correct data.  (VC - 2012/03/27 - HDFFV-7853)
     - The istore test will now skip the sparse 50x50x50 test when the VFD does
       not support sparse files on that platform.  The most important platforms
       on which this will be skipped are Windows (NTFS sparse files are not
       supported) and Mac OS-X (HFS sparse files are not supported).  This
-      fixes CTest timeout issues on Windows.  (DER - 2012/3/27, HDFFV-7769)
+      fixes CTest timeout issues on Windows.  (DER - 2012/03/27 - HDFFV-7769)
     - Windows and POSIX correctness changes have been propagated from the SEC2
       VFD to the Core VFD.  This mainly affects file operations on the
       driver's backing store and fixes a problem on Windows where large files
-      could not be read. (DER - 2012/3/27, HDFFV-7916, HDFFV-7603)
+      could not be read. (DER - 2012/03/27 - HDFFV-7916 - HDFFV-7603)
     - When an application tries to write or read many small data chunks and
       runs out of memory, the library had a segmentation fault.  The fix is to
-      return the error stack with proper information. (SLU - 2012/3/23. 
-      HDFFV-7785)
+      return the error stack with proper information.
+      (SLU - 2012/03/23 - HDFFV-7785)
     - H5Pset_data_transform had a segmentation fault in some cases like x*-100.  
       It works correctly now and handles other cases like 100-x or 2/x.
-      (SLU - 2012/3/15.  HDFFV-7922)
+      (SLU - 2012/03/15 - HDFFV-7922)
     - Fixed rare corruption bugs that could occur when using the new object
-      header format. (NAF - 2012/3/15 - HDFFV-7879)
+      header format. (NAF - 2012/03/15 - HDFFV-7879)
     - Fixed an error that occurred when creating a contiguous dataset with a 
       zero-sized dataspace and space allocation time set to 'early'. 
-      (QAK - 2012/3/12)
+      (QAK - 2012/03/12)
     - Changed Windows thread creation to use _beginthread() instead of
       CreateThread().  Threads created by the latter can be killed in
-      low-memory situations. (DER - 2012/2/10, HDFFV-7780)
+      low-memory situations. (DER - 2012/02/10 - HDFFV-7780)
     - Creating a dataset in a read-only file caused a segmentation fault when 
       the file is closed.  It's fixed. The attempt to create a dataset will 
-      fail with an error indicating the file is read-only. (SLU -
-      2012/1/25. HDFFV-7756) 
+      fail with an error indicating the file is read-only.
+      (SLU - 2012/01/25 - HDFFV-7756) 
     - Fixed a segmentation fault that could occur when shrinking a dataset 
       with chunks larger than 1 MB. (NAF - 2011/11/30 - HDFFV-7833)
     - Fixed a bug that could cause H5Oget_info to return the wrong address
       after copying a committed (named) datatype. (NAF - 2011/11/14)
     - The library allowed the conversion of strings between ASCII and UTF8
-      (HDFFV-7582).  We have corrected it to report an error under this
-      situation. (SLU - 2011/11/8)
+      We have corrected it to report an error under this situation.
+      (SLU - 2011/11/8 - HDFFV-7582)
     - Fixed a segmentation fault when the library tried to shrink the size 
       of a compound datatype through H5Tset_size immediately after the 
-      datatype was created (HDFFV-7618). (SLU - 2011/11/4)
+      datatype was created. (SLU - 2011/11/4 - HDFFV-7618)
 
     Parallel Library
     ----------------
@@ -204,41 +203,40 @@ Bug Fixes since HDF5-1.8.8
     -----
     - h5repack: Fixed a failure that occurred when repacking the chunk size 
       of a specified chunked dataset with unlimited max dims. 
-      HDFFV-7993 (JKM 2012/04/11) 
+      (JKM - 2012/04/11 - HDFFV-7993) 
     - h5diff: Fixed a failure when comparing groups. Before the fix, if an 
       object in a group was compared with an object in another group where 
       both had the same name but the object type was different, then h5diff
       would fail. After the fix, h5diff detects such cases as non-comparable
       and displays appropriate error messages. 
-      HDFFV-7644 (JKM 2012/03/28)
+      (JKM - 2012/03/28 - HDFFV-7644)
     - h5diff: If unique objects exist only in one file and if h5diff is set to 
       exclude the unique objects with the --exclude-path option, then h5diff 
       might miss excluding some objects. This was fixed to correctly exclude 
-      objects. HDFFV-7837 (JKM 2012/03/20)
+      objects. (JKM - 2012/03/20 - HDFFV-7837)
     - h5diff: When two symbolic dangling links are compared with the 
       --follow-symlinks option, the result should be the same. This worked when 
       comparing two files, but didn't work when comparing two objects.
-      h5diff now works when comparing two objects. HDFFV-7835 (JKM 2012/03/09)
+      h5diff now works when comparing two objects.
+      (JKM - 2012/03/09 - HDFFV-7835)
     - h5dump: Added the tools library error stack to properly catch error
-      information generated within the library.
-      HDFFV-7958 (ADB 2012/03/12)
+      information generated within the library. (ADB - 2012/03/12 - HDFFV-7958)
     - h5dump: Changed the process where an open link used to fail. Now dangling 
-      links no longer throw error messages.
-      HDFFV-7839 (ADB 2012/03/12)
+      links no longer throw error messages. (ADB - 2012/03/12 - HDFFV-7839)
     - h5dump: Refactored code to remove duplicated functions. Split XML 
       functions from DDL functions. Corrected indentation and formatting
       errors. Also fixed subsetting counting overflow (HDFFV-5874). Verified
       all tools call tools_init() in main. The USER_BLOCK data now correctly
       displays within the SUPER_BLOCK info. NOTE: WHITESPACE IN THE OUTPUT
-      HAS CHANGED.
-      HDFFV-7560 (ADB 2012/02/17)
+      HAS CHANGED. (ADB - 2012/02/17 - HDFFV-7560)
     - h5diff: Fixed to prevent from displaying error stack message when 
       comparing two dangling symbolic links with the follow-symlinks option.
-      HDFFV-7836 (JKM 2012/01/13)
+      (JKM - 2012/01/13 - HDFFV-7836)
     - h5repack: Fixed a memory leak that occurred with the handling of 
-      variable length strings in attributes.  HDFFV-7840 (JKM 2012/01/10)
+      variable length strings in attributes.
+      (JKM - 2012/01/10 - HDFFV-7840)
     - h5ls: Fixed a segmentation fault that occurred when accessing region 
-      reference data in an attribute. HDFFV-7838 (JKM 2012/01/06)
+      reference data in an attribute. (JKM - 2012/01/06 - HDFFV-7838)
 
     F90 API
     -------
@@ -257,7 +255,7 @@ Bug Fixes since HDF5-1.8.8
     - h5ltget_attribute_string_f: The h5ltget_attribute_string_f used to return 
       the C NULL character in the returned character buffer. The returned 
       charactor buffer now does not return the C NULL character; the buffer 
-      is blank-padded if needed. (MSB - 2012/3/23)
+      is blank-padded if needed. (MSB - 2012/03/23)
 
 
 Platforms Tested
@@ -310,18 +308,23 @@ The following platforms and compilers have been tested for this release.
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20110731 
     (ostrich)                     GNU Fortran (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3)
 
-    SGI ProPack 7 Linux           Intel(R) C++ Version 11.1 20100806
-    2.6.32.24-0.2.1.2230.2.PTF-   Intel(R) Fortran Version 11.1 20100806
-    default #1 SMP                SGI MPT 2.01
-    SGI Altix UV
-    (NCSA ember)
-
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
     (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
                                   Sun C++ 5.9 Sun OS_sparc Patch 124863-26
                                   Sun C 5.11 SunOS_sparc
                                   Sun Fortran 95 8.5 SunOS_sparc
                                   Sun C++ 5.11 SunOS_sparc
+
+    SGI Altix UV                  Intel(R) C, Fortran Compilers
+    SGI ProPack 7 Linux               Version 11.1 20100806
+    2.6.32.24-0.2.1.2230.2.PTF-   SGI MPT 2.02
+    default #1 SMP                
+    (NCSA ember)
+
+    Dell NVIDIA Cluster           Intel(R) C, Fortran Compilers
+    Red Hat Enterprise Linux 6        Version 12.0.4 20110427
+    2.6.32-131.4.1.el6.x86_64     mvapich2 1.7rc1-intel-12.0.4
+    (NCSA forge)
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
                                   Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
@@ -380,7 +383,11 @@ The following platforms and compilers have been tested for this release.
     Ubuntu 11.10 3.0.0-16-generic #29-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
                                   GNU Fortran (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
+
+    Cray Linux Environment (CLE)  PrgEnv-pgi 2.2.74
     hopper.nersc.gov              pgcc 11.9-0 64-bit target on x86-64 Linux -tp k8e
+                                  pgf90 11.9-0 64-bit target on x86-64 Linux -tp k8e
+                                  pgCC 11.9-0 64-bit target on x86-64 Linux -tp k8e
     
 
 Tested Configuration Features Summary
@@ -406,7 +413,7 @@ Windows Vista                              n        y(4)   n        y     y     
 Windows Vista x64                          n        y(4)   n        y     y     y
 Mac OS X 10.8 Intel 32-bit                 n        y      n        y     y     n 
 Mac OS X 10.8 Intel 64-bit                 n        y      n        y     y     y
-AIX 6.1 32- and 64-bit                     y        y      y        y     y     y
+AIX 5.3 32- and 64-bit                     y        y      y        y     y     y
 FreeBSD 8.2-STABLE 32&64 bit               n        x      n        x     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y     n
@@ -415,7 +422,8 @@ CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y     
 CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
 Linux 2.6.32-220.7.1.el6.ppc64             n        y      n        y     y     y
-SGI Linux 2.6.32.19                        y        y      y        y     y     y
+SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y    y
+Red Hat Enterprise Linux 6                 y        y      y        y     y    y
 CLE hopper.nersc.gov                       y        y(3)   y        y     y     n
 
 
@@ -429,7 +437,7 @@ Windows Vista                              y       y(4)      y         y
 Windows Vista x64                          y       y(4)      y         y
 Mac OS X 10.8 Intel 32-bit                 y       n         y         n        
 Mac OS X 10.8 Intel 64-bit                 y       n         y         n        
-AIX 6.1 32- and 64-bit                     n       n         n         y        
+AIX 5.3 32- and 64-bit                     n       n         n         y        
 FreeBSD 8.2-STABLE 32&64 bit               y       x         x         y        
 CentOS 5.5 Linux 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
 CentOS 5.5 Linux 2.6.18-128 i686 Intel  W  y       y         y         n        
@@ -438,7 +446,8 @@ CentOS 5.5 Linux 2.6.16 x86_64 GNU (1)  W  y       y         y         y
 CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  y       y         y         n        
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
 Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
-SGI Linux 2.6.32.19                        y       y         y         y 
+SGI ProPack 7 Linux 2.6.32.24              y       y         y         n 
+Red Hat Enterprise Linux 6                 y       y         y         n
 CLE hopper.nersc.gov                       n       n         n         n
 
            (1) Fortran compiled with gfortran.
@@ -452,6 +461,13 @@ CLE hopper.nersc.gov                       n       n         n         n
 
 Known Problems
 ==============
+* On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
+  to aprun -np X, because the H5lib_settings.c file was not generated
+  properly. Not setting those environment variables works, because
+  configure was able to automatically detect that it's a Cray system
+  and used the proper launch commands when necessary. 
+  (MSC - 2012/04/18)
+
 * The data conversion test dt_arith.c fails in "long double" to integer
   conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
   is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
@@ -461,8 +477,24 @@ Known Problems
 
       CFLAGS=-O1 ./configure
 
-  This will overwrite the library's default optimization level. (HDFFV-7829. 
-  SLU - 2012/2/7)
+  This will overwrite the library's default optimization level.
+  (SLU - 2012/02/07 - HDFFV-7829)
+
+* The STDIO VFD does not work on some architectures, possibly due to 32/64
+  bit or large file issues.  The basic STDIO VFD test is known to fail on
+  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
+  10.7.0.  The STDIO VFD test has been disabled while we investigate and
+  a fix should appear in a future release, possibly 1.8.9.
+  (DER - 2011/10/14)
+
+* h5diff can report inconsistent results when comparing datasets of enum type
+  that contain invalid values.  This is due to how enum types are handled in
+  the library and will be addressed in a future release.
+  (DER - 2011/10/14 - HDFFV-7527)
+
+* The links test can fail under the stdio VFD due to some issues with external
+  links.  This will be investigated and fixed in a future release.
+  (DER - 2011/10/14 - HDFFV-7768)
 
 * After the shared library support was fixed for some bugs, it was discovered
   that "make prefix=XXX install" no longer works for shared libraries. It
@@ -470,7 +502,7 @@ Known Problems
   install the HDF5 shared libraries in a location such as /usr/local/hdf5,
   you need to specify the location via the --prefix option during configure 
   time. E.g, ./configure --prefix=/usr/local/hdf5 ...
-  (AKC - 2011/05/07 HDFFV-7583)
+  (AKC - 2011/05/07 - HDFFV-7583)
 
 * The parallel test, t_shapesame, in testpar/, may run for a long time and may
   be terminated by the alarm signal.  If that happens, one can increase the
@@ -479,7 +511,8 @@ Known Problems
   (60 minutes).  Note that the t_shapesame test may fail in some systems 
   (see the "While working on the 1.8.6 release..." problem below).  If 
   it does, it will waste more time if $HDF5_ALARM_SECONDS is set
-  to a larger value. (AKC - 2011/05/07)
+  to a larger value.
+  (AKC - 2011/05/07)
 
 * The C++ and FORTRAN bindings are not currently working on FreeBSD.
   (QAK - 2011/04/26)
@@ -487,15 +520,11 @@ Known Problems
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the fortran and hl/fortran
   tests fail. We are looking into the issue. HL and C++ shared libraries
-  should now be working as intended, however. (MAM - 2011/04/20)
+  should now be working as intended, however.
+  (MAM - 2011/04/20)
 
-* The --with-mpe configure option does not work with Mpich2. AKC - 2011/03/10
-
-* If parallel gmake (e.g., gmake -j 4) is used, the "gmake clean" command
-  sometimes fails in the perform directory due to the attempt to remove the
-  executable of h5perf or h5perf_serial by two "parallel" commands. This error
-  has no consequence on the functionality of the HDF5 library or install. It
-  is fixed in the next release. AKC - 2011/01/25
+* The --with-mpe configure option does not work with Mpich2.
+  (AKC - 2011/03/10)
 
 * While working on the 1.8.6 release of HDF5, a bug was discovered that can
   occur when reading from a dataset in parallel shortly after it has been
@@ -508,12 +537,13 @@ Known Problems
   They should be run across multiple nodes with a varying number of processes.
   These programs can be found at:
   http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+  (NAF - 2011/01/19)
 
 * The library's test dt_arith.c showed a compiler's rounding problem on
   Cygwin when converting from unsigned long long to long double.  The 
   library's own conversion works fine.  We defined a macro for Cygwin to
-  skip this test until we can solve the problem.  Please see bug #1813.
-  SLU - 2010/5/5 
+  skip this test until we can solve the problem.
+  (SLU - 2010/05/05 - HDFFV-1264)
 
 * All the VFL drivers aren't backward compatible.  In H5FDpublic.h, the
   structure H5FD_class_t changed in 1.8.  There is new parameter added to
@@ -523,21 +553,33 @@ Known Problems
   for 1.6 and try to plug in 1.8 library.  Because there's only one user 
   complaining about it, we (Elena, Quincey, and I) decided to leave it as 
   it is (see bug report #1279).  Quincey will make a plan for 1.10.
-  SLU - 2010/2/2
+  (SLU - 2010/02/02)
 
 * MinGW has a missing libstdc++.dll.a library file and will not successfully link
   C++ applications/tests. Do not use the enable-cxx configure option. Read all of
-  the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
+  the INSTALL_MINGW.txt file for all restrictions.
+  (ADB - 2009/11/11)
+
+* The --enable-static-exec configure flag will only statically link libraries
+  if the static version of that library is present. If only the shared version
+  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
+  for example, only have shared versions), the flag should still result in a 
+  successful compilation, but note that the installed executables will not be 
+  fully static. Thus, the only guarantee on these systems is that the 
+  executable is statically linked with just the HDF5 library.
+  (MAM - 2009/11/04)
   
 * The PathScale MPI implementation, accessing a Panasas file system, would
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file does not
   exist. This is due to the MPI_File_open() call failing if the mode has
-  the MPI_MODE_EXCL bit set. (See bug 1468 for details.) AKC - 2009/8/11
+  the MPI_MODE_EXCL bit set.
+  (AKC - 2009/08/11 - HDFFV-988)
  
 * Parallel tests failed with 16 processes with data inconsistency at testphdf5
   / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
-  with MPI IO. CMC - 2009/04/28
+  with MPI IO.
+  (CMC - 2009/04/28)
 
 * For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh and
   tools/h5copy/testh5copy.sh will fail some of its sub-tests. These sub-tests
@@ -567,28 +609,13 @@ Known Problems
   echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
   echo SKIP H5LSTEST $FILEOUT
   ==================================================
-  AKC - 2008/11/10
+  (AKC - 2008/11/10)
   
-* The STDIO VFD does not work on some architectures, possibly due to 32/64
-  bit or large file issues.  The basic STDIO VFD test is known to fail on
-  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
-  10.7.0.  The STDIO VFD test has been disabled while we investigate and
-  a fix should appear in a future release, possibly 1.8.9.
-  
-* The links test can fail under the stdio VFD due to some issues with external
-  links.  This will be investigated and fixed in a future release.  See JIRA
-  issue HDFFV-7768 for more information.  DER - 10/14/2011
-  
-* h5diff can report inconsistent results when comparing datasets of enum type
-  that contain invalid values.  This is due to how enum types are handled in
-  the library and will be addressed in the next release.  See JIRA issue
-  HDFFV-7527.  DER - 10/14/2011
-
 * For Red Storm, a Cray XT3 system, the yod command sometimes gives the
   message,  "yod allocation delayed for node recovery".  This interferes with
   test suites that do not expect to see this message.  See the section of "Red
   Storm" in file INSTALL_parallel for a way to deal with this problem.
-  AKC - 2008/05/28
+  (AKC - 2008/05/28)
 
 * On an Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
   use -mp -O1 compilation flags to build the libraries. A higher level of 
@@ -607,7 +634,7 @@ Known Problems
   However, after fixing the bug, the checksum value was no longer the same as 
   before on little-endian system.  Library releases after 1.6.4 can still read 
   datasets created or rewritten with an HDF5 library of v1.6.2 or before.  
-  SLU - 2005/6/30
+  (SLU - 2005/06/30)
 
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
   messages like "INFO: 0031-XXX ...".  This is from the command `poe'.
@@ -621,28 +648,4 @@ Known Problems
   These are sockets used by the poe command and left behind due to failed 
   commands.  First, ask your system administrator to clean them out.  
   Lastly, request IBM to provide a means to run poe without the debug socket.
-
-* The --enable-static-exec configure flag will only statically link libraries
-  if the static version of that library is present. If only the shared version
-  of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
-  for example, only have shared versions), the flag should still result in a 
-  successful compilation, but note that the installed executables will not be 
-  fully static. Thus, the only guarantee on these systems is that the 
-  executable is statically linked with just the HDF5 library.
-
-* There is also a configure error on Altix machines that incorrectly reports 
-  when a version of Szip without an encoder is being used.
-
-* On cobalt, an SGI Altix SMP ia64 system, Intel compiler version 10.1 (which
-  is the default on that system) does not work properly and results in
-  failures during make check (in a static build) and make installcheck (during
-  a shared build). This appears to be a compiler optimization problem.
-  Reducing optimization by setting CFLAGS to -O1 or below resolves the issue.
-  Alternatively, using a newer version of the compiler (11.0) also works as
-  intended. MAM - 2010/06/01
-
-* On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
-  to aprun -np X, because the H5lib_settings.c file was not generated
-  properly. Not setting those environment variables works, because
-  configure was able to automatically detect that it's a Cray system
-  and used the proper launch commands when necessary. 
+  (AKC - 2004/12/08)
