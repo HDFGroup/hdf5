@@ -380,6 +380,7 @@ The following platforms and compilers have been tested for this release.
     Ubuntu 11.10 3.0.0-16-generic #29-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
                                   GNU Fortran (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
+    hopper.nersc.gov              pgcc 11.9-0 64-bit target on x86-64 Linux -tp k8e
     
 
 Tested Configuration Features Summary
@@ -415,6 +416,7 @@ CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
 Linux 2.6.32-220.7.1.el6.ppc64             n        y      n        y     y     y
 SGI Linux 2.6.32.19                        y        y      y        y     y     y
+CLE hopper.nersc.gov                       y        y(3)   y        y     y     n
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
@@ -437,6 +439,7 @@ CentOS 5.5 Linux 2.6.16 x86_64 Intel    W  y       y         y         n
 CentOS 5.5 Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
 Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
 SGI Linux 2.6.32.19                        y       y         y         y 
+CLE hopper.nersc.gov                       n       n         n         n
 
            (1) Fortran compiled with gfortran.
            (2) With PGI and Absoft compilers.
@@ -637,3 +640,9 @@ Known Problems
   Reducing optimization by setting CFLAGS to -O1 or below resolves the issue.
   Alternatively, using a newer version of the compiler (11.0) also works as
   intended. MAM - 2010/06/01
+
+* On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
+  to aprun -np X, because the H5lib_settings.c file was not generated
+  properly. Not setting those environment variables works, because
+  configure was able to automatically detect that it's a Cray system
+  and used the proper launch commands when necessary. 
