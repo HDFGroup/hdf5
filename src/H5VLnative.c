@@ -27,6 +27,7 @@
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5R_PACKAGE		/*suppress error about including H5Rpkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
@@ -50,6 +51,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Rpkg.h"		/* References   			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
@@ -1177,8 +1179,7 @@ H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments
                 /* Set return value */
                 *ret = H5D__get_offset(dset);
                 if(!H5F_addr_defined(*ret))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HADDR_UNDEF, "unable to get space status")
-
+                    *ret = HADDR_UNDEF;
                 break;
             }
         default:
@@ -2507,7 +2508,7 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_lis
                     case H5R_BADTYPE:
                     case H5R_MAXTYPE:
                     default:
-                        HDassert("unknown reference type" && 0);
+                        //HDassert("unknown reference type" && 0);
                         HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
                 } /* end switch */
                 break;
@@ -2686,6 +2687,26 @@ H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, va_
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
                 break;
             }
+        case H5VL_REF_CREATE:
+            {
+                void        *ref      = va_arg (arguments, void *);
+                const char  *name     = va_arg (arguments, char *);
+                H5R_type_t  ref_type  = va_arg (arguments, H5R_type_t);
+                hid_t       space_id  = va_arg (arguments, hid_t);
+                H5G_loc_t   loc;             /* File location */
+                H5S_t       *space = NULL;   /* Pointer to dataspace containing region */
+                
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+                if(space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+                /* Create reference */
+                if((ret_value = H5R_create(ref, &loc, name, ref_type, space, H5AC_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
+
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
     }
@@ -2760,6 +2781,54 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments)
                                                lapl_id, H5AC_ind_dxpl_id)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
+                break;
+            }
+        /* H5Rget_region */
+        case H5VL_REF_GET_REGION:
+            {
+                hid_t       *ret     =  va_arg (arguments, hid_t *);
+                H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
+                void        *ref     =  va_arg (arguments, void *);
+                H5S_t       *space = NULL;    /* Dataspace object */
+
+                /* Get the dataspace with the correct region selected */
+                if((space = H5R_get_region(loc.oloc->file, H5AC_ind_dxpl_id, ref)) == NULL)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
+
+                /* Atomize */
+                if((*ret = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+
+                break;
+            }
+        /* H5Rget_obj_type2 */
+        case H5VL_REF_GET_TYPE:
+            {
+                H5O_type_t  *obj_type  =  va_arg (arguments, H5O_type_t *);
+                H5R_type_t  ref_type   =  va_arg (arguments, H5R_type_t);
+                void        *ref       =  va_arg (arguments, void *);
+
+                /* Get the object information */
+                if(H5R_get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref_type, ref, obj_type) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object type")
+                break;
+            }
+        /* H5Rget_name */
+        case H5VL_REF_GET_NAME:
+            {
+                ssize_t     *ret       = va_arg (arguments, ssize_t *);
+                char        *name      = va_arg (arguments, char *);
+                size_t      size       = va_arg (arguments, size_t);
+                H5R_type_t  ref_type   = va_arg (arguments, H5R_type_t);
+                void        *ref       = va_arg (arguments, void *);
+                H5F_t       *file;        /* File object */
+
+                /* Get the file pointer from the entry */
+                file = loc.oloc->file;
+
+                /* Get name */
+                if((*ret = H5R_get_name(file, H5P_DEFAULT, H5AC_dxpl_id, id, ref_type, ref, name, size)) < 0)
+                    HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
                 break;
             }
         default:

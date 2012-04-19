@@ -36,13 +36,6 @@
 /* Number of reserved IDs in ID group */
 #define H5R_RESERVED_ATOMS  0
 
-/* Static functions */
-static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
-        H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
-static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
-static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
-    H5R_type_t ref_type, const void *_ref, char *name, size_t size);
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5R_init
@@ -163,7 +156,7 @@ H5R_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t
+herr_t
 H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id)
 {
     H5G_loc_t	obj_loc;		/* Group hier. location of object */
@@ -307,8 +300,6 @@ done:
 herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
 {
-    H5G_loc_t   loc;            /* File location */
-    H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
     herr_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -317,8 +308,6 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     /* Check args */
     if(ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
@@ -327,12 +316,10 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "reference type not supported")
     if(space_id == (-1) && ref_type == H5R_DATASET_REGION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
-    if(space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    /* Create reference */
-    if((ret_value = H5R_create(ref, &loc, name, ref_type, space, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
+    /* create the ref through the VOL */
+    if(H5VL_object_generic(loc_id, H5VL_REF_CREATE, ref, name, ref_type, space_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -573,7 +560,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5S_t *
+H5S_t *
 H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref)
 {
     H5O_loc_t oloc;             /* Object location */
@@ -647,28 +634,20 @@ done:
 hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5G_loc_t loc;          /* Object's group location */
-    H5S_t *space = NULL;    /* Dataspace object */
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "iRt*x", id, ref_type, ref);
 
     /* Check args */
-    if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(ref_type != H5R_DATASET_REGION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-    /* Get the dataspace with the correct region selected */
-    if((space = H5R_get_region(loc.oloc->file, H5AC_ind_dxpl_id, ref)) == NULL)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
-
-    /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+    /* Get the space id through the VOL */
+    if(H5VL_object_get(id, H5VL_REF_GET_REGION, &ret_value, ref_type, ref) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -788,23 +767,20 @@ herr_t
 H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
     H5O_type_t *obj_type)
 {
-    H5G_loc_t loc;              /* Object location */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iRt*x*Ot", id, ref_type, ref, obj_type);
 
     /* Check args */
-    if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-    /* Get the object information */
-    if(H5R_get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref_type, ref, obj_type) < 0)
-	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object type")
+    /* get the object type through the VOL */
+    if((ret_value = H5VL_object_get(id, H5VL_REF_GET_TYPE, obj_type, ref_type, ref)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -941,28 +917,20 @@ ssize_t
 H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     size_t size)
 {
-    H5G_loc_t loc;      /* Group location */
-    H5F_t *file;        /* File object */
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("Zs", "iRt*x*sz", id, ref_type, _ref, name, size);
 
     /* Check args */
-    if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-    /* Get the file pointer from the entry */
-    file = loc.oloc->file;
-
-    /* Get name */
-    if((ret_value = H5R_get_name(file, H5P_DEFAULT, H5AC_dxpl_id, id, ref_type, _ref, name, size)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
-
+    /* get the object type through the VOL */
+    if(H5VL_object_get(id, H5VL_REF_GET_NAME, &ret_value, name, size, ref_type, _ref) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rget_name() */

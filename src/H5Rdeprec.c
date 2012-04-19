@@ -133,7 +133,6 @@ H5R_init_deprec_interface(void)
 H5G_obj_t
 H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 {
-    H5G_loc_t loc;              /* Object location */
     H5O_type_t obj_type;        /* Object type */
     H5G_obj_t ret_value;        /* Return value */
 
@@ -141,16 +140,14 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
     H5TRACE3("Go", "iRt*x", id, ref_type, ref);
 
     /* Check args */
-    if(H5G_loc(id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference type")
     if(ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference pointer")
 
-    /* Get the object information */
-    if(H5R_get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref_type, ref, &obj_type) < 0)
-	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
+    /* get the object type through the VOL */
+    if((ret_value = H5VL_object_get(id, H5VL_REF_GET_TYPE, &obj_type, ref_type, ref)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
     /* Set return value */
     ret_value = H5G_map_obj_type(obj_type);

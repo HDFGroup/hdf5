@@ -26,29 +26,6 @@
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
 
-/* types for all file get API routines */
-typedef enum H5VL_file_get_t {
-    H5VL_FILE_GET_FAPL	            = 0, 	/*file access property list		*/
-    H5VL_FILE_GET_FCPL	            = 1,	/*file creation property list		*/
-    H5VL_FILE_GET_SIZE	            = 2,	/*file size             		*/
-    H5VL_FILE_GET_FREE_SPACE	    = 3,	/*file freespace         		*/
-    H5VL_FILE_GET_INFO	            = 4,	/*file info             		*/
-    H5VL_FILE_GET_INTENT	    = 5,	/*file intent           		*/
-    H5VL_FILE_GET_NAME	            = 6,	/*file name             		*/
-    H5VL_FILE_GET_OBJ_COUNT	    = 7,	/*object count in file	        	*/
-    H5VL_FILE_GET_OBJ_IDS	    = 8,	/*object ids in file     		*/
-    H5VL_FILE_GET_MDC_CONF	    = 9,	/*file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR	    = 10,	/*file metadata cache hit rate		*/
-    H5VL_FILE_GET_MDC_SIZE	    = 11,       /*file metadata cache size		*/
-    H5VL_FILE_GET_FREE_SECTIONS     = 12        /*file free selections                  */
-} H5VL_file_get_t;
-
-/* types for all file general operations */
-typedef enum H5VL_file_generic_t {
-    H5VL_FILE_GET_VFD_HANDLE	    = 0, 	/*file VFD handle       		*/
-    H5VL_FILE_IS_HDF5               = 1         /* is HDF5?                             */
-} H5VL_file_generic_t;
-
 /* types for all attr get API routines */
 typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_SPACE           = 0,         /* dataspace                           */
@@ -70,11 +47,41 @@ typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_OFFSET          = 6          /* offset                              */
 } H5VL_dataset_get_t;
 
+/* types for all file general operations */
+typedef enum H5VL_file_generic_t {
+    H5VL_FILE_GET_VFD_HANDLE	    = 0, 	/*file VFD handle       		*/
+    H5VL_FILE_IS_HDF5               = 1         /* is HDF5?                             */
+} H5VL_file_generic_t;
+
+/* types for all file get API routines */
+typedef enum H5VL_file_get_t {
+    H5VL_FILE_GET_FAPL	            = 0, 	/*file access property list		*/
+    H5VL_FILE_GET_FCPL	            = 1,	/*file creation property list		*/
+    H5VL_FILE_GET_SIZE	            = 2,	/*file size             		*/
+    H5VL_FILE_GET_FREE_SPACE	    = 3,	/*file freespace         		*/
+    H5VL_FILE_GET_INFO	            = 4,	/*file info             		*/
+    H5VL_FILE_GET_INTENT	    = 5,	/*file intent           		*/
+    H5VL_FILE_GET_NAME	            = 6,	/*file name             		*/
+    H5VL_FILE_GET_OBJ_COUNT	    = 7,	/*object count in file	        	*/
+    H5VL_FILE_GET_OBJ_IDS	    = 8,	/*object ids in file     		*/
+    H5VL_FILE_GET_MDC_CONF	    = 9,	/*file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR	    = 10,	/*file metadata cache hit rate		*/
+    H5VL_FILE_GET_MDC_SIZE	    = 11,       /*file metadata cache size		*/
+    H5VL_FILE_GET_FREE_SECTIONS     = 12        /*file free selections                  */
+} H5VL_file_get_t;
+
 /* types for all group get API routines */
 typedef enum H5VL_group_get_t {
     H5VL_GROUP_GET_GCPL	    = 0,	/*group creation property list		*/
     H5VL_GROUP_GET_INFO	    = 1 	/*group info             		*/
 } H5VL_group_get_t;
+
+/* link create types for VOL */
+typedef enum H5VL_link_create_type_t {
+    H5VL_CREATE_HARD_LINK           = 0,
+    H5VL_CREATE_SOFT_LINK	    = 1,
+    H5VL_CREATE_UD_LINK	            = 2
+} H5VL_link_create_type_t;
 
 /* types for all link get API routines */
 typedef enum H5VL_link_get_t {
@@ -84,10 +91,25 @@ typedef enum H5VL_link_get_t {
     H5VL_LINK_GET_VAL       = 3         /*link value                            */
 } H5VL_link_get_t;
 
+/* types for all object general operations */
+typedef enum H5VL_object_generic_t {
+    H5VL_ATTR_DELETE_BY_IDX         = 0,        /* H5Adelete_by_idx                   */
+    H5VL_ATTR_EXISTS                = 1,        /* H5Aexists                          */
+    H5VL_ATTR_OPEN_BY_IDX           = 2,        /* H5Aopen_by_idx                     */
+    H5VL_ATTR_RENAME                = 3,        /* H5Arename                          */
+    H5VL_OBJECT_CHANGE_REF_COUNT    = 4,        /* H5Oincr/decr_refcount              */
+    H5VL_OBJECT_EXISTS              = 5,        /* H5Oexists(_by_name)                */
+    H5VL_OBJECT_SET_COMMENT         = 6,        /* H5Oset_comment(_by_name)           */
+    H5VL_REF_CREATE                 = 7         /* H5Rcreate                          */
+} H5VL_object_generic_t;
+
 /* types for all object get API routines */
 typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_INFO	    = 0,	/*object info	                	*/
-    H5VL_OBJECT_GET_COMMENT	    = 1 	/*object comment            		*/
+    H5VL_OBJECT_GET_COMMENT	    = 1, 	/*object comment            		*/
+    H5VL_REF_GET_REGION             = 2,        /*dataspace of region                   */
+    H5VL_REF_GET_TYPE               = 3,        /*type of object                        */
+    H5VL_REF_GET_NAME               = 4         /*object name                           */
 } H5VL_object_get_t;
 
 /* types for all object lookup API routines */
@@ -99,23 +121,6 @@ typedef enum H5VL_object_lookup_t {
     H5VL_OBJECT_LOOKUP_BY_REF       = 4
 } H5VL_object_lookup_t;
 
-/* types for all attr general operations */
-typedef enum H5VL_object_generic_t {
-    H5VL_ATTR_DELETE_BY_IDX         = 0,        /* H5Adelete_by_idx                   */
-    H5VL_ATTR_EXISTS                = 1,        /* H5Aexists                          */
-    H5VL_ATTR_OPEN_BY_IDX           = 2,        /* H5Aopen_by_idx                     */
-    H5VL_ATTR_RENAME                = 3,        /* H5Arename                          */
-    H5VL_OBJECT_CHANGE_REF_COUNT    = 4,        /* H5Oincr/decr_refcount              */
-    H5VL_OBJECT_EXISTS              = 5,        /* H5Oexists(_by_name)                */
-    H5VL_OBJECT_SET_COMMENT         = 6         /* H5Oset_comment(_by_name)           */
-} H5VL_object_generic_t;
-
-/* types for all object lookup API routines */
-typedef enum H5VL_link_create_type_t {
-    H5VL_CREATE_HARD_LINK           = 0,
-    H5VL_CREATE_SOFT_LINK	    = 1,
-    H5VL_CREATE_UD_LINK	            = 2
-} H5VL_link_create_type_t;
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
