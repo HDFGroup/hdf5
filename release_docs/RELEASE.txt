@@ -696,6 +696,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5unjam: Fixed sefgault when used -V (show version) option.
+          HDFFV-8001 (JKM 2012/04/19)
         - h5repack: Fixed a failure when change the chunk size of a specified
           chunked dataset with unlimited max dims. HDFFV-7993 (JKM 2012/04/11)
         - h5diff: Fixed failure for comparing same named object with different
