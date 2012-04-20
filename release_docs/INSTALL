@@ -49,17 +49,9 @@ CONTENTS
 
         6. Support
 
-        A. Warnings about compilers
-        A.1. GNU (Intel platforms)
-        A.2. DEC
-        A.3. SGI (Irix64 6.2)
-        A.4. Windows/NT
-
-        B. Large (>2GB) versus small (<2GB) file capability
-
-        C. Building and testing with other compilers
-        C.1.  Building and testing with Intel compilers
-        C.2.  Building and testing with PGI compilers
+        A. Building and testing with other compilers
+        A.1.  Building and testing with Intel compilers
+        A.2.  Building and testing with PGI compilers
 
 *****************************************************************************
 
@@ -113,9 +105,10 @@ CONTENTS
 
 2.1. Windows
         Users of Microsoft Windows should see the INSTALL_Windows files for
-        detailed instructions.
+        detailed instructions.  INSTALL_Cygwin and INSTALL_MinGW also exist for 
+        those platforms.
 
-2.2. RedStorm (Cray XT3)
+2.2. Red Storm (Cray XT3)
         Users of the Red Storm machine, after reading this file, should read
         the Red Storm section in the INSTALL_parallel file for specific
         instructions for the Red Storm machine.  The same instructions would
@@ -200,20 +193,6 @@ CONTENTS
             $ cd build-fortran
             $ ../hdf5-X.Y.Z/configure --enable-fortran ...
 
-        Unfortunately, this does not work on recent Irix platforms (6.5?
-        and later) because that `make' does not understand the VPATH variable. 
-        However, HDF5 also supports Irix `pmake' which has a .PATH target 
-        which serves a similar purpose. Here's what the Irix man pages say 
-        about VPATH, the facility used by HDF5 makefiles for this feature:
-
-                The VPATH facility is a derivation of the undocumented
-                VPATH feature in the System V Release 3 version of make.
-                System V Release 4 has a new VPATH implementation, much
-                like the pmake(1) .PATH feature. This new feature is also
-                undocumented in the standard System V Release 4 manual
-                pages.  For this reason it is not available in the IRIX
-                version of make. The VPATH facility should not be used
-                with the new parallel make option.
 
 4.3. Configuring
         HDF5 uses the GNU autoconf system for configuration, which
@@ -275,14 +254,9 @@ CONTENTS
         Several machine architectures support 32-bit or 64-bit binaries.
         The options below describe how to enable support for different options.
 
-        On Irix64, the default compiler is `cc'. To use an alternate compiler,
-        specify it with the CC variable:
-
-            $ CC='cc -n32' ./configure
-
-        Similarly, users compiling on a Solaris machine and desiring to
-        build the distribution with 64-bit support should specify the
-        correct flags with the CC variable:
+        Users compiling on older Solaris machines using the Sun compiler and
+        desiring to build the distribution with 64-bit support may need to
+        specify the compiler 'cc' with the appropriate flag:
 
             $ CC='cc -m64' ./configure
 
@@ -347,8 +321,7 @@ CONTENTS
         install program detected automatically by configure. If none is
         found, the shell script bin/install-sh is used. Configure does not
         check that the install script actually works; if a bad install is 
-        detected on your system (e.g., on the ASCI blue machine as of 
-        March 2, 1999) you have two choices:
+        detected on your system you have two choices:
 
             1. Copy the bin/install-sh program to your $HOME/bin
                directory, name it `install', and make sure that $HOME/bin
@@ -601,51 +574,11 @@ CONTENTS
 
 
 *****************************************************************************
-			    APPENDIX
+                                APPENDICES
 *****************************************************************************
 
-A. Warnings about compilers
-        Output from the following compilers should be extremely suspected
-        when used to compile the HDF5 Library, especially if optimizations are
-        enabled. In all cases, HDF5 attempts to work around the compiler bugs.
-
-A.1. GNU (Intel platforms)
-        Versions before 2.8.1 have serious problems allocating registers
-        when functions contain operations on `long long' datatypes.
-
-A.2. COMPAQ/DEC
-        The V5.2-038 compiler (and possibly others) occasionally
-        generates incorrect code for memcpy() calls when optimizations
-        are enabled, resulting in unaligned access faults. HDF5 works
-        around the problem by casting the second argument to `char *'.
-        The Fortran module (5.4.1a) fails in compiling some Fortran
-        programs.  Use 5.5.0 or higher.
-
-A.3. SGI (Irix64 6.2)
-        The Mongoose 7.00 compiler has serious optimization bugs and
-        should be upgraded to MIPSpro 7.2.1.2m. Patches are available
-        from SGI.
-
-A.4. Windows/NT
-        The Microsoft Win32 5.0 compiler is unable to cast unsigned long
-        long values to doubles. HDF5 works around this bug by first
-        casting to signed long long and then to double.
-
-        A link warning: defaultlib "LIBC" conflicts with use of other libs
-        appears for debug version of VC++ 6.0. This warning will not affect
-        building and testing HDF5 Libraries. 
-
-
-B. Large (>2GB) versus small (<2GB) file capability
-        In order to read or write files that could potentially be larger
-        than 2GB, it is necessary to use the non-ANSI `long long' data
-        type on some platforms. However, some compilers (e.g., GNU gcc
-        versions before 2.8.1 on Intel platforms) are unable to produce
-        correct machine code for this datatype. 
-
-
-C. Building and testing with other compilers
-C.1.  Building and testing with Intel compilers
+A. Building and testing with other compilers
+A.1.  Building and testing with Intel compilers
         When Intel compilers are used (icc or ecc), you will need to modify
         the generated "libtool" program after configuration is finished.
         On or around line 104 of the libtool file, there are lines which 
@@ -691,7 +624,7 @@ C.1.  Building and testing with Intel compilers
              ftp://ftp.hdfgroup.org/HDF5/current/
 
 
-C.2.  Building and testing with PGI compilers
+A.2.  Building and testing with PGI compilers
         When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
         modify the generated "libtool" program after configuration is finished.
         On or around line 104 of the libtool file, there are lines which 
