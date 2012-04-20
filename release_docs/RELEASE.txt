@@ -201,7 +201,8 @@ Bug Fixes since HDF5-1.8.8
 
     Tools
     -----
-    - h5unjam: Fixed sefgault when used -V (show version) option.
+    - h5unjam: Fixed a segmentation fault the occurred when h5unjam was used 
+      with the -V (show version) option.
       HDFFV-8001 (JKM 2012/04/19)
     - h5repack: Fixed a failure that occurred when repacking the chunk size 
       of a specified chunked dataset with unlimited max dims. 
