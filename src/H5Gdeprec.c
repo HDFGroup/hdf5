@@ -251,7 +251,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     /* Create the group through the VOL */
-    if((ret_value = H5VL_group_create(loc_id, name, tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT)) < 0)
+    if((ret_value = H5VL_group_create(loc_id, name, tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
@@ -293,7 +293,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the group through the VOL */
-    if((ret_value = H5VL_group_open(loc_id, name, H5P_DEFAULT)) < 0)
+    if((ret_value = H5VL_group_open(loc_id, name, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
@@ -338,7 +338,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, H5L_SAME_LOC, new_name, 
-                                         lcpl_id, H5P_DEFAULT)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -348,7 +348,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, cur_loc_id, new_name, 
-                                         lcpl_id, H5P_DEFAULT)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
     else
@@ -397,7 +397,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, new_loc_id, new_name, 
-                                         lcpl_id, H5P_DEFAULT)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -412,7 +412,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, new_loc_id, new_name, 
-                                         lcpl_id, H5P_DEFAULT)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
     else
@@ -494,7 +494,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_move(src_loc_id, src_name, H5L_SAME_LOC, dst_name, 
-                                   FALSE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                                   FALSE, H5P_DEFAULT, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -520,7 +520,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_move(src_loc_id, src_name, dst_loc_id, dst_name, 
-                                   FALSE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                                   FALSE, H5P_DEFAULT, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -604,7 +604,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_delete(loc_id, name, NULL, H5P_DEFAULT)) < 0)
+    if((ret_value = H5VL_link_delete(loc_id, name, NULL, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

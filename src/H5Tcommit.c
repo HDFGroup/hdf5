@@ -153,7 +153,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* commite the datatype through the VOL */
-    if((ret_value = H5VL_datatype_commit(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id)) < 0)
+    if((ret_value = H5VL_datatype_commit(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -561,7 +561,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Open the datatype through the VOL */
-    if((ret_value = H5VL_datatype_open(loc_id, name, tapl_id)) < 0)
+    if((ret_value = H5VL_datatype_open(loc_id, name, tapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
 done:

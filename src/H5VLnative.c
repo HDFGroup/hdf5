@@ -64,54 +64,54 @@ static hid_t H5VL_NATIVE_g = 0;
 /* Prototypes */
 static herr_t H5VL_native_term(void);
 
-static hid_t H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id);
-static hid_t H5VL_native_attr_open(hid_t loc_id, void *location, const char *attr_name, hid_t aapl_id);
-static herr_t H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf);
-static herr_t H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf);
-static herr_t H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, va_list arguments);
-static herr_t H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name);
-static herr_t H5VL_native_attr_close(hid_t attr_id);
+static hid_t H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
+static hid_t H5VL_native_attr_open(hid_t loc_id, void *location, const char *attr_name, hid_t aapl_id, hid_t req);
+static herr_t H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf, hid_t req);
+static herr_t H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t req);
+static herr_t H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid_t req);
+static herr_t H5VL_native_attr_close(hid_t attr_id, hid_t req);
 
 static herr_t H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, 
-                                          hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
-static hid_t H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id);
+                                          hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
+static hid_t H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id, hid_t req);
 
-static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id);
-static hid_t H5VL_native_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id);
+static hid_t H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
+static hid_t H5VL_native_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id, hid_t req);
 static herr_t H5VL_native_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-                                       hid_t file_space_id, hid_t plist_id, void *buf);
+                                       hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
 static herr_t H5VL_native_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-                                        hid_t file_space_id, hid_t plist_id, const void *buf);
-static herr_t H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[]);
-static herr_t H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments);
-static herr_t H5VL_native_dataset_close(hid_t dataset_id);
+                                        hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
+static herr_t H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[], hid_t req);
+static herr_t H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_dataset_close(hid_t dataset_id, hid_t req);
 
-static hid_t  H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-static hid_t  H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id);
-static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope);
-static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, va_list arguments);
-static herr_t H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, va_list arguments);
-static herr_t H5VL_native_file_close(hid_t fid);
+static hid_t  H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
+static hid_t  H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
+static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope, hid_t req);
+static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_file_close(hid_t fid, hid_t req);
 
-static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id);
-static hid_t H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id);
-static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, va_list arguments);
-static herr_t H5VL_native_group_close(hid_t group_id);
+static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
+static hid_t H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id, hid_t req);
+static herr_t H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_group_close(hid_t group_id, hid_t req);
 
 static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, 
-                                      const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+                                      const char *link_name, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-                                    const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
-static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, va_list arguments);
-static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id);
+                                    const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 
-static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id);
+static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
-                                      const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id );
-static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments);
-static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments);
-static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, va_list arguments);
-static herr_t H5VL_native_object_close(hid_t object_id);
+                                      const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_close(hid_t object_id, hid_t req);
 
 H5VL_class_t H5VL_native_g = {
     "native",					/* name */
@@ -292,7 +292,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t UNUSED aapl_id)
+H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t UNUSED aapl_id, hid_t UNUSED req)
 {
     H5G_loc_t       loc;                /* Object location */
     H5P_genplist_t  *plist;             /* Property list pointer */
@@ -360,7 +360,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_attr_open(hid_t loc_id, void *location, const char *attr_name, hid_t UNUSED aapl_id)
+H5VL_native_attr_open(hid_t loc_id, void *location, const char *attr_name, hid_t UNUSED aapl_id, hid_t UNUSED req)
 {
     H5G_loc_t    loc;             /* Object location */
     H5A_t        *attr = NULL;    /* Attribute opened */
@@ -422,7 +422,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf)
+H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf, hid_t UNUSED req)
 {
     H5A_t *attr;                /* Attribute object for ID */
     H5T_t *mem_type;            /* Memory datatype */
@@ -457,7 +457,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf)
+H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t UNUSED req)
 {
     H5A_t *attr;                /* Attribute object for ID */
     H5T_t *mem_type;            /* Memory datatype */
@@ -493,7 +493,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, va_list arguments)
+H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     H5A_t       *attr;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -587,7 +587,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name)
+H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid_t UNUSED req)
 {
     H5G_loc_t   loc;                    /* Object location */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -631,7 +631,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_attr_close(hid_t attr_id)
+H5VL_native_attr_close(hid_t attr_id, hid_t UNUSED req)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
@@ -665,7 +665,7 @@ done:
  */
 static herr_t
 H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
-                            hid_t tcpl_id, hid_t tapl_id)
+                            hid_t tcpl_id, hid_t tapl_id, hid_t UNUSED req)
 {
     H5G_loc_t	loc;                    /* Location to commit datatype */
     H5T_t	*type;                  /* Datatype for ID */
@@ -703,7 +703,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id)
+H5VL_native_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id, hid_t UNUSED req)
 {
     H5T_t      *type = NULL;           /* Datatype opened in file */
     H5G_loc_t	 loc;                   /* Group location of object to open */
@@ -774,7 +774,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id)
+H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t UNUSED req)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
@@ -861,7 +861,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id)
+H5VL_native_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id, hid_t UNUSED req)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t	 loc;		        /* Object location of group */
@@ -933,7 +933,7 @@ done:
  */
 static herr_t
 H5VL_native_dataset_read(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-                         hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
+                         hid_t file_space_id, hid_t plist_id, void *buf, hid_t UNUSED req)
 {
     H5D_t	  *dset = NULL;
     const H5S_t   *mem_space = NULL;
@@ -999,7 +999,7 @@ done:
  */
 static herr_t
 H5VL_native_dataset_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-                          hid_t file_space_id, hid_t dxpl_id, const void *buf)
+                          hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
 {
     H5D_t	  *dset = NULL;
     const H5S_t   *mem_space = NULL;
@@ -1064,7 +1064,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[])
+H5VL_native_dataset_set_extent(hid_t dset_id, const hsize_t size[], hid_t UNUSED req)
 {
     H5D_t	*dset = NULL;
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -1098,7 +1098,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, va_list arguments)
+H5VL_native_dataset_get(hid_t id, H5VL_dataset_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     H5D_t	*dset = NULL;
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -1205,7 +1205,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_dataset_close(hid_t dset_id)
+H5VL_native_dataset_close(hid_t dset_id, hid_t UNUSED req)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
@@ -1245,7 +1245,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t UNUSED req)
 {
     H5F_t *new_file;           /* file struct */
     hid_t ret_value;
@@ -1297,7 +1297,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id)
+H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED req)
 {
     H5F_t *new_file;           /* file struct */
     hid_t ret_value;
@@ -1340,7 +1340,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_flush(hid_t object_id, H5F_scope_t scope)
+H5VL_native_file_flush(hid_t object_id, H5F_scope_t scope, hid_t UNUSED req)
 {
     H5F_t	*f = NULL;              /* File to flush */
     H5O_loc_t	*oloc = NULL;           /* Object location for ID */
@@ -1455,7 +1455,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, va_list arguments)
+H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     H5F_t	*f = NULL;              /* File struct */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1668,7 +1668,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, va_list arguments)
+H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, hid_t UNUSED req, va_list arguments)
 {
     H5F_t        *file = NULL;           /* File */
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -1724,7 +1724,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_close(hid_t file_id)
+H5VL_native_file_close(hid_t file_id, hid_t UNUSED req)
 {
     int nref;
     H5F_t *f;
@@ -1778,7 +1778,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id)
+H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t UNUSED req)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     H5G_loc_t      loc;                 /* Location to create group */
@@ -1859,7 +1859,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id)
+H5VL_native_group_open(hid_t loc_id, const char *name, hid_t gapl_id, hid_t UNUSED req)
 {
     H5G_loc_t	    loc;                /* Location to open group */
     H5G_t	   *grp = NULL;         /* New group opend */
@@ -1901,7 +1901,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, va_list arguments)
+H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1972,7 +1972,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_group_close(hid_t group_id)
+H5VL_native_group_close(hid_t group_id, hid_t UNUSED req)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 
@@ -2008,7 +2008,7 @@ done:
  */
 static herr_t
 H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const char *link_name, 
-                        hid_t lcpl_id, hid_t lapl_id)
+                        hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
 {
 
     H5P_genplist_t   *plist;                     /* Property list pointer */
@@ -2130,7 +2130,7 @@ done:
  */
 static herr_t
 H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-                      const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id)
+                      const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
 {
     H5G_loc_t	src_loc, *src_loc_p;
     H5G_loc_t	dst_loc, *dst_loc_p;
@@ -2175,7 +2175,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, va_list arguments)
+H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     H5G_loc_t	loc;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2280,7 +2280,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id)
+H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t UNUSED req)
 {
     H5G_loc_t       loc;                /* Object location */
     herr_t ret_value = SUCCEED;
@@ -2319,7 +2319,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id)
+H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t UNUSED req)
 {
     H5G_loc_t   loc;
     H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
@@ -2361,7 +2361,7 @@ done:
  */
 static herr_t 
 H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
-                        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id )
+                        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t UNUSED req)
 {
     H5G_loc_t	src_loc;                /* Source object group location */
     H5G_loc_t	dst_loc;                /* Destination group location */
@@ -2397,7 +2397,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, va_list arguments)
+H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t UNUSED req, va_list arguments)
 {
     H5G_loc_t	loc;
     H5G_loc_t   *obj_loc;
@@ -2536,7 +2536,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, va_list arguments)
+H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid_t UNUSED req, va_list arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
     H5A_t        *attr = NULL;   /* Attribute opened */
@@ -2734,7 +2734,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, va_list arguments)
+H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
     H5G_loc_t	loc;                    /* Location of group */
@@ -2853,7 +2853,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_close(hid_t object_id)
+H5VL_native_object_close(hid_t object_id, hid_t UNUSED req)
 {
     herr_t ret_value = SUCCEED;                 /* Return value */
 

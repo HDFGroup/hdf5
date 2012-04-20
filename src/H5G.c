@@ -302,7 +302,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
     /* Create the group through the VOL */
-    if((ret_value = H5VL_group_create(loc_id, name, gcpl_id, gapl_id)) < 0)
+    if((ret_value = H5VL_group_create(loc_id, name, gcpl_id, gapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
@@ -368,7 +368,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Create the group through the VOL */
-    if((ret_value = H5VL_group_create(loc_id, NULL, gcpl_id, gapl_id)) < 0)
+    if((ret_value = H5VL_group_create(loc_id, NULL, gcpl_id, gapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
 done:
@@ -413,7 +413,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Open the group through the VOL */
-    if((ret_value = H5VL_group_open(loc_id, name, gapl_id)) < 0)
+    if((ret_value = H5VL_group_open(loc_id, name, gapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group")
 
 done:
@@ -445,7 +445,7 @@ H5Gget_create_plist(hid_t uid)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", uid);
 
-    if(H5VL_group_get(uid, H5VL_GROUP_GET_GCPL, &ret_value) < 0)
+    if(H5VL_group_get(uid, H5VL_GROUP_GET_GCPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group creation properties")
 
 done:
@@ -483,7 +483,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, grp_info, NULL)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, grp_info, NULL)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -527,11 +527,11 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, grp_info, location)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, grp_info, location)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -585,12 +585,12 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, &location, group_name,
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, H5_REQUEST_NULL, &location, group_name,
                           idx_type, order, n, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, grp_info, location)) < 0)
+    if((ret_value = H5VL_group_get(loc_id, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, grp_info, location)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -624,7 +624,7 @@ H5Gclose(hid_t group_id)
     H5TRACE1("e", "i", group_id);
 
     /* Close the group through the VOL */
-    if(H5VL_group_close(group_id) < 0)
+    if(H5VL_group_close(group_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
 
 done:

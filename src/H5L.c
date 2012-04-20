@@ -330,7 +330,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_move(src_loc_id, src_name, dst_loc_id, dst_name, 
-                                   FALSE, lcpl_id, lapl_id)) < 0)
+                                   FALSE, lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -374,7 +374,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_move(src_loc_id, src_name, dst_loc_id, dst_name, 
-                                   TRUE, lcpl_id, lapl_id)) < 0)
+                                   TRUE, lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -434,7 +434,7 @@ H5Lcreate_soft(const char *link_target,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, link_loc_id, link_name, 
-                                     lcpl_id, lapl_id)) < 0)
+                                     lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -495,7 +495,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, new_loc_id, new_name, 
-                                     lcpl_id, lapl_id)) < 0)
+                                     lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -562,7 +562,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_CREATE_UD_LINK, link_loc_id, link_name, 
-                                     lcpl_id, lapl_id)) < 0)
+                                     lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -600,7 +600,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_delete(loc_id, name, NULL, lapl_id)) < 0)
+    if((ret_value = H5VL_link_delete(loc_id, name, NULL, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -657,7 +657,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     udata.dxpl_id = H5AC_dxpl_id;
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_delete(loc_id, group_name, &udata, lapl_id)) < 0)
+    if((ret_value = H5VL_link_delete(loc_id, group_name, &udata, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -703,7 +703,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, name, buf, size, NULL, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, name, buf, size, NULL, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -763,7 +763,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     udata.size = size;
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, group_name, buf, size, &udata, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, group_name, buf, size, &udata, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link val")
 
 done:
@@ -802,7 +802,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* check link existence through the VOL */
-    if(H5VL_link_get(loc_id, H5VL_LINK_EXISTS, name, &ret_value, lapl_id) < 0)
+    if(H5VL_link_get(loc_id, H5VL_LINK_EXISTS, H5_REQUEST_NULL, name, &ret_value, lapl_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -842,7 +842,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, name, linfo, NULL, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, H5_REQUEST_NULL, name, linfo, NULL, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -897,7 +897,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     udata.linfo = linfo;
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, group_name, 
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, H5_REQUEST_NULL, group_name, 
                                   linfo, &udata, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -1085,7 +1085,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     udata.name_len = -1;
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_NAME, group_name, &udata, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_NAME, H5_REQUEST_NULL, group_name, &udata, lapl_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link name")
 
     /* Set the return value */

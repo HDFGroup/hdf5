@@ -229,7 +229,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     /* Open the object through the VOL */
     if((ret_value = H5VL_object_copy(src_loc_id, src_name, dst_loc_id, dst_name, 
-                                     ocpypl_id, lcpl_id)) < 0)
+                                     ocpypl_id, lcpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 done:
     FUNC_LEAVE_API(ret_value)

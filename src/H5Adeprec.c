@@ -169,7 +169,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for location")
 
     /* Create the attribute through the VOL */
-    if((ret_value = H5VL_attr_create(loc_id, name, plist_id, H5P_DEFAULT)) < 0)
+    if((ret_value = H5VL_attr_create(loc_id, name, plist_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
 done:
@@ -214,7 +214,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the attribute through the VOL */
-    if((ret_value = H5VL_attr_open(loc_id, NULL, name, H5P_DEFAULT)) < 0)
+    if((ret_value = H5VL_attr_open(loc_id, NULL, name, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open attribute")
 
 done:
@@ -256,7 +256,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
 
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, &ret_value, ".", H5_INDEX_CRT_ORDER, 
+    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &ret_value, ".", H5_INDEX_CRT_ORDER, 
                            H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_LINK_ACCESS_DEFAULT) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 
@@ -293,7 +293,7 @@ H5Aget_num_attrs(hid_t loc_id)
     H5TRACE1("Is", "i", loc_id);
 
     /* Get the group info through the VOL using the location token */
-    if(H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, &oinfo, NULL) < 0)
+    if(H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, &oinfo, NULL) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
     ret_value = oinfo.num_attrs;

@@ -169,7 +169,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
     /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, dapl_id)) < 0)
+    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, dapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
 done:
@@ -248,7 +248,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, NULL, dcpl_id, dapl_id)) < 0)
+    if((ret_value = H5VL_dataset_create(loc_id, NULL, dcpl_id, dapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 done:
 
@@ -293,7 +293,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* Open the dataset through the VOL */
-    if((ret_value = H5VL_dataset_open(loc_id, name, dapl_id)) < 0)
+    if((ret_value = H5VL_dataset_open(loc_id, name, dapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
 done:
 
@@ -324,7 +324,7 @@ H5Dclose(hid_t dset_id)
     H5TRACE1("e", "i", dset_id);
 
     /* Close the dataset through the VOL */
-    if((ret_value = H5VL_dataset_close(dset_id)) < 0)
+    if((ret_value = H5VL_dataset_close(dset_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset")
 
 done:
@@ -357,7 +357,7 @@ H5Dget_space(hid_t dset_id)
     H5TRACE1("i", "i", dset_id);
 
     /* get the dataspace through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get data space")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -387,7 +387,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     H5TRACE2("e", "i*Ds", dset_id, allocation);
 
     /* Read data space address through the VOL and return */
-    if((ret_value=H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE_STATUS, allocation)) < 0)
+    if((ret_value=H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE_STATUS, H5_REQUEST_NULL, allocation)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
@@ -420,7 +420,7 @@ H5Dget_type(hid_t dset_id)
     H5TRACE1("i", "i", dset_id);
 
     /* get the datatype through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_TYPE, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_TYPE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get datatype")
 
 done:
@@ -452,7 +452,7 @@ H5Dget_create_plist(hid_t dset_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DCPL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DCPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset creation properties")
 
 done:
@@ -501,7 +501,7 @@ H5Dget_access_plist(hid_t dset_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DAPL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DAPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 done:
 
@@ -536,7 +536,7 @@ H5Dget_storage_size(hid_t dset_id)
     H5TRACE1("h", "i", dset_id);
 
     /* get storage size through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_STORAGE_SIZE, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_STORAGE_SIZE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, 0, "unable to get storage size")
 
 done:
@@ -567,7 +567,7 @@ H5Dget_offset(hid_t dset_id)
     H5TRACE1("a", "i", dset_id);
 
     /* get offset through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_OFFSET, &ret_value) < 0)
+    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_OFFSET, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "unable to get offset")
 
 done:
@@ -763,7 +763,7 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     vlen_bufsize.dataset_id = dataset_id;
 
     /* Get a copy of the dataspace ID */
-    if(H5VL_dataset_get(dataset_id, H5VL_DATASET_GET_SPACE, &(vlen_bufsize.fspace_id)) < 0)
+    if(H5VL_dataset_get(dataset_id, H5VL_DATASET_GET_SPACE, H5_REQUEST_NULL, &(vlen_bufsize.fspace_id)) < 0)
         //if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
 
@@ -844,7 +844,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* set the extent through the VOL */
-    if((ret_value = H5VL_dataset_set_extent(dset_id, size)) < 0)
+    if((ret_value = H5VL_dataset_set_extent(dset_id, size, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
 done:

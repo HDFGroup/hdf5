@@ -167,7 +167,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
     /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, H5P_DATASET_ACCESS_DEFAULT)) < 0)
+    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, -1)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
 done:
@@ -207,7 +207,7 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the dataset through the VOL */
-    if((ret_value = H5VL_dataset_open(loc_id, name, dapl_id)) < 0)
+    if((ret_value = H5VL_dataset_open(loc_id, name, dapl_id, -1)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
 
 done:

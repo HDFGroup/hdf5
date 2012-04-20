@@ -318,7 +318,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
 
     /* create the ref through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_REF_CREATE, ref, name, ref_type, space_id) < 0)
+    if(H5VL_object_generic(loc_id, H5VL_REF_CREATE, H5_REQUEST_NULL, ref, name, ref_type, space_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -527,11 +527,11 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, &location, ref_type, _ref) < 0)
+    if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, H5_REQUEST_NULL, &location, ref_type, _ref) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open_by_loc(obj_id, location, oapl_id)) < 0)
+    if((ret_value = H5VL_object_open_by_loc(obj_id, location, oapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -646,7 +646,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* Get the space id through the VOL */
-    if(H5VL_object_get(id, H5VL_REF_GET_REGION, &ret_value, ref_type, ref) < 0)
+    if(H5VL_object_get(id, H5VL_REF_GET_REGION, H5_REQUEST_NULL, &ret_value, ref_type, ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -779,7 +779,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* get the object type through the VOL */
-    if((ret_value = H5VL_object_get(id, H5VL_REF_GET_TYPE, obj_type, ref_type, ref)) < 0)
+    if((ret_value = H5VL_object_get(id, H5VL_REF_GET_TYPE, H5_REQUEST_NULL, obj_type, ref_type, ref)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -929,7 +929,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* get the object type through the VOL */
-    if(H5VL_object_get(id, H5VL_REF_GET_NAME, &ret_value, name, size, ref_type, _ref) < 0)
+    if(H5VL_object_get(id, H5VL_REF_GET_NAME, H5_REQUEST_NULL, &ret_value, name, size, ref_type, _ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 done:
     FUNC_LEAVE_API(ret_value)
