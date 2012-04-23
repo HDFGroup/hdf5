@@ -74,6 +74,8 @@ New Features
  
     Parallel Library
     ----------------
+    - Corrected memory allocation error in MPI datatype construction code.
+      (QAK - 2012/04/23)
     - Add two new routines to set/get the atomicity parameter in the
       MPI library to perform atomic operations. Some file systems (for
       example PVFS2) do not support atomic updates, so those routines
