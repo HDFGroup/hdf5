@@ -696,6 +696,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed not to check and display dangling link status without 
+          --follow-symlinks option. This also improved performance when 
+          comparing lots of external links without the --follow-symlinks
+          option.  HDFFV-7998 (JKM 2012/04/26)
         - h5unjam: Fixed sefgault when used -V (show version) option.
           HDFFV-8001 (JKM 2012/04/19)
         - h5repack: Fixed a failure when change the chunk size of a specified

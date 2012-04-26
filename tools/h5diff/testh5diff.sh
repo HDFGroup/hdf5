@@ -209,6 +209,11 @@ $SRC_H5DIFF_TESTFILES/h5diff_466.txt
 $SRC_H5DIFF_TESTFILES/h5diff_467.txt
 $SRC_H5DIFF_TESTFILES/h5diff_468.txt
 $SRC_H5DIFF_TESTFILES/h5diff_469.txt
+$SRC_H5DIFF_TESTFILES/h5diff_471.txt
+$SRC_H5DIFF_TESTFILES/h5diff_472.txt
+$SRC_H5DIFF_TESTFILES/h5diff_473.txt
+$SRC_H5DIFF_TESTFILES/h5diff_474.txt
+$SRC_H5DIFF_TESTFILES/h5diff_475.txt
 $SRC_H5DIFF_TESTFILES/h5diff_480.txt
 $SRC_H5DIFF_TESTFILES/h5diff_481.txt
 $SRC_H5DIFF_TESTFILES/h5diff_482.txt
@@ -969,6 +974,17 @@ TOOLTEST h5diff_467.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dangl
 TOOLTEST h5diff_468.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4 
 # ext link vs. ext dangling
 TOOLTEST h5diff_469.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2
+
+#----------------------------------------
+# dangling links without follow symlink 
+# (HDFFV-7998)
+# test - soft dangle links (same and different paths), 
+#      - external dangle links (same and different paths)
+TOOLTEST h5diff_471.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5
+TOOLTEST h5diff_472.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1
+TOOLTEST h5diff_473.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link4
+TOOLTEST h5diff_474.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4
+TOOLTEST h5diff_475.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link1
 
 # ##############################################################################
 # # test for group diff recursivly

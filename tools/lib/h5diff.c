@@ -868,8 +868,8 @@ hsize_t h5diff(const char *fname1,
 
 
     /* get any symbolic links info */
-    l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, TRUE);
-    l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, TRUE);
+    l_ret1 = H5tools_get_symlink_info(file1_id, obj1fullname, &trg_linfo1, options->follow_links);
+    l_ret2 = H5tools_get_symlink_info(file2_id, obj2fullname, &trg_linfo2, options->follow_links);
 
     /*---------------------------------------------
      * check for following symlinks 
@@ -1697,7 +1697,7 @@ hsize_t diff(hid_t file1_id,
          */
 
         /* target object1 - get type and name */
-        ret = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, TRUE);
+        ret = H5tools_get_symlink_info(file1_id, path1, &linkinfo1, options->follow_links);
         /* dangling link */
         if (ret == 0)
         {
@@ -1715,7 +1715,7 @@ hsize_t diff(hid_t file1_id,
             goto out;
 
         /* target object2 - get type and name */
-        ret = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, TRUE);
+        ret = H5tools_get_symlink_info(file2_id, path2, &linkinfo2, options->follow_links );
         /* dangling link */
         if (ret == 0)
         {
