@@ -108,7 +108,10 @@ Bug Fixes since HDF5-1.8.9
 
     Tools
     -----
-    - None
+    - h5diff: Fixed not to check and display dangling link status without 
+      --follow-symlinks option. This also improved performance when 
+      comparing lots of external links without the --follow-symlinks
+      option.  HDFFV-7998 (JKM 2012/04/26)
 
     F90 API
     -------
