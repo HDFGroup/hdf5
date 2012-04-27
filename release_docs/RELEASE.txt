@@ -469,6 +469,9 @@ CLE hopper.nersc.gov                       n       n         n         n
 
 Known Problems
 ==============
+* The ph5diff (parallel h5diff) can intermittently hang in parallel mode
+  when comparing the two HDF5 files that contains common name objects with 
+  different object types.   (JKM - 2012/04/27)
 * On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
   to aprun -np X, because the H5lib_settings.c file was not generated
   properly. Not setting those environment variables works, because
