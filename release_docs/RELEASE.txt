@@ -65,7 +65,7 @@ New Features
       using new H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG, modified by new API
       routines: H5Padd_merge_committed_dtype_path(),
       H5Pfree_merge_committed_dtype_paths(), H5Pset_mcdt_search_cb() and
-      H5_DLL herr_t H5Pget_mcdt_search_cb().  (QAK - 2012/03/30)
+      H5Pget_mcdt_search_cb().  (QAK - 2012/03/30)
     - Added new feature which allows working with files in memory in the 
       same ways files are worked with on disk. New API routines include 
       H5Pset_file_image, H5Pget_file_image, H5Pset_file_image_callbacks, 
@@ -87,7 +87,7 @@ New Features
       file, with the '-M'/'--metadata_block_size' command line parameter.
       (QAK - 2012/03/30)
     - h5stat: Added ability to display a summary of the file space usage for a
-      file, with the '-S' command line parameter.  (QAK - 2012/03/28)
+      file, with the '-S'/'--summary' command line parameter.  (QAK - 2012/03/28)
     - h5dump: Added capability for "-a" option to show attributes containing "/" 
       by using an escape character. For example, for a dataset "/dset" 
       containing attribute "speed(m/h)", use "h5dump -a "/dset/speed(\/h)" 
@@ -114,7 +114,7 @@ New Features
 
     High-Level APIs
     ---------------
-    - New API: h5ltpath_valid (Fortran: h5ltpath_valid_f) checks
+    - New API: H5LTpath_valid (Fortran: h5ltpath_valid_f) checks
       if a path is correct, determines if a link resolves to a valid
       object, and checks that the link does not dangle. (MSB - 2012/03/15)
 
