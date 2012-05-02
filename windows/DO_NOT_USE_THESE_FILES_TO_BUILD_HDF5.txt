@@ -1,0 +1,21 @@
+**************************************************************************
+  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+**************************************************************************
+
+Building HDF5 from the Visual Studio solutions and projects included in
+the windows\ folder is no longer the preferred way to build HDF5!
+
+**************************************************************************
+  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+**************************************************************************
+
+CMake is now the preferred way to construct appropriate Windows projects
+and solutions for each version of Visual Studio. 
+
+CMake can be downloaded from http://www.cmake.org/
+
+Instructions for building and testing HDF5 using CMake can be found in
+the CMake.txt file in the release_docs\ folder.
+
+The files in the windows\ folder are for the small number of users who
+require them and will be removed HDF5 1.10.

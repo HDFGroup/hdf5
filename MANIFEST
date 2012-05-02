@@ -442,12 +442,15 @@
 ./release_docs/INSTALL_MinGW.txt
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
-./release_docs/INSTALL_Windows_From_Command_Line.txt
-./release_docs/INSTALL_Windows_Short_VS2008.TXT
 ./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
-./release_docs/Using_CMake.txt
+./release_docs/USING_CMake.txt
 ./release_docs/USING_Windows.txt
+
+./release_docs/obsolete_windows_docs/DO_NOT_USE_THESE_FILES_TO_BUILD_HDF5.txt
+./release_docs/obsolete_windows_docs/INSTALL_Windows.txt
+./release_docs/obsolete_windows_docs/INSTALL_Windows_From_Command_Line.txt
+./release_docs/obsolete_windows_docs/INSTALL_Windows_Short_VS2008.txt
 
 ./src/.indent.pro      _DO_NOT_DISTRIBUTE_
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
@@ -2173,6 +2176,7 @@
 # Batch scripts
 ./windows/copy_hdf.bat
 ./windows/COPYING
+./windows/DO_NOT_USE_THESE_FILES_TO_BUILD_HDF5.txt
 ./windows/hdf5bt.BAT
 ./windows/hdf5build.BAT
 ./windows/hdf5build_examples.BAT
