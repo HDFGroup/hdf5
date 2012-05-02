@@ -495,7 +495,7 @@ Known Problems
   bit or large file issues.  The basic STDIO VFD test is known to fail on
   64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
   10.7.0.  The STDIO VFD test has been disabled while we investigate and
-  a fix should appear in a future release, possibly 1.8.9.
+  a fix should appear in a future release.
   (DER - 2011/10/14)
 
 * h5diff can report inconsistent results when comparing datasets of enum type
