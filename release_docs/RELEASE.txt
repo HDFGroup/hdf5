@@ -477,9 +477,21 @@ CLE hopper.nersc.gov                       n       n         n         n
 
 Known Problems
 ==============
+* This h5dump test failed in BG/P machines (probably other machines that uses
+  command script to launch executables).
+
+     h5dump --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
+tno-subset.h5
+  The reason is that there are embedded spaces in the dataset name and they
+  got interpreted by the command script launcher as meta-characters and
+  the single dataset name becomes three arguments to h5dump.
+  This command passes if run by hand, just not via the test script.
+  (AKC - 2012/05/03)
+
 * The ph5diff (parallel h5diff) tool can intermittently hang in parallel mode
   when comparing two HDF5 files that contain objects with the same names but
   with different object types.   (JKM - 2012/04/27)
+
 * On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
   to aprun -np X, because the H5lib_settings.c file was not generated
   properly. Not setting those environment variables works, because
