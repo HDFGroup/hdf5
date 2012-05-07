@@ -354,7 +354,7 @@ int main(int argc, char **argv)
   if (OFF_T_64 % 2147483647 != 1)
     return 1;
 
-  // stat breaks on SCO OpenServer
+  /* stat breaks on SCO OpenServer */
   struct stat buf;
   stat( argv[0], &buf );
   if (!S_ISREG(buf.st_mode))
