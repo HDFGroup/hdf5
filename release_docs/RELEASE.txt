@@ -368,6 +368,10 @@ The following platforms and compilers have been tested for this release.
     (tejeda)                      GNU Fortran (GCC) version 4.6.1
                                   Intel C, C++ and Fortran compilers 12.1.0.038 Build 20110811
 
+    Mac OS X Lion 10.7.3	  GCC 4.2.1 gcc
+    32- and 64-bit		  GNU Fortran (GCC) 4.6.1 gfortran
+    (duck)                        GCC 4.2.1 g++
+
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
@@ -429,6 +433,8 @@ Windows Vista                              n        y(4)   n        y     y     
 Windows Vista x64                          n        y(4)   n        y     y     y
 Mac OS X 10.8 Intel 32-bit                 n        y      n        y     y     n 
 Mac OS X 10.8 Intel 64-bit                 n        y      n        y     y     y
+Mac OS X Lion 10.7.3 32-bit                n        y      n        y     y     n
+Mac OS X Lion 10.7.3 64-bit                n        y      n        y     y     y
 AIX 5.3 32- and 64-bit                     y        y      y        y     y     y
 FreeBSD 8.2-STABLE 32&64 bit               n        x      n        x     y     y
 CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
@@ -453,6 +459,8 @@ Windows Vista                              y       y(4)      y         y
 Windows Vista x64                          y       y(4)      y         y
 Mac OS X 10.8 Intel 32-bit                 y       n         y         n        
 Mac OS X 10.8 Intel 64-bit                 y       n         y         n        
+Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
+Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 AIX 5.3 32- and 64-bit                     n       n         n         y        
 FreeBSD 8.2-STABLE 32&64 bit               y       x         x         y        
 CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y       y(2)      y         y        
