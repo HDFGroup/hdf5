@@ -477,10 +477,24 @@ CLE hopper.nersc.gov                       n       n         n         n
 
 Known Problems
 ==============
+* The test h5repacktst fails in AIX 32bit mode because the test is using more
+  memory than the default value in the 32bit mode.  The failure message is
+  typically like "time: 0551-010 The process was stopped abnormally. Try
+  again". This is only a test problem, not a library coding problem. Request
+  more memory to run the testing.  For example:
+  $ env LDR_CNTRL=MAXDATA=0x20000000@DSA make check 
+  (AKC - 2012/05/09 HDFFV-8016)
+
+* The test file_image will fail its subtest of "initial file image and
+  callbacks in ore VFD" if the source directory is not writable by the test.
+  The subtest violates the standard of not to modify the source directory when
+  --srcdir is used. (AKC - 2012/05/09 HDFFV-8009)
+  
 * The test dt_arith.c under the test/ directory has several errors involving 
   "long double" on Mac Lion and Duck, when any level of optimization is
   enabled.  The only working option is debugging. We'll address this problem in
   the next release. (SLU - 2012/05/08)
+
 * This h5dump test failed in BG/P machines (probably other machines that uses
   command script to launch executables).
 
