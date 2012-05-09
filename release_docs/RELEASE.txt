@@ -500,7 +500,7 @@ Known Problems
 
     $ env LDR_CNRTL=MAXDATA=0x20000000@DSA make check
 
-  (ACK - 2012/05/09 - HDFFV-8016)
+  (AKC - 2012/05/09 - HDFFV-8016)
 
 * The file_image test will fail in the "initial file image and callbacks in
   the core VFD" sub-test if the source directory is read-only as the test
