@@ -316,13 +316,13 @@ The following platforms and compilers have been tested for this release.
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20110731 
     (ostrich)                     GNU Fortran (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3)
 
-    Linux 2.6.18-108chaos	      Intel C, C++, Fortran Compilers Version 11.1
+    Linux 2.6.18-108chaos         Intel C, C++, Fortran Compilers Version 11.1
     #1 SMP x86_64 GNU/Linux
-    (LLNL Aztec)		  
+    (LLNL Aztec)
 
-    IBM Blue Gene/P 		      XL C for Blue Gene/P, bgxlc V9.0
-    (LLNL uDawn)		          XL C++ for Blue Gene/P, bgxlC V9.0
-    				              XL Fortran for Blue Gene/P, bgxlf90 V11.1
+    IBM Blue Gene/P               XL C for Blue Gene/P, bgxlc V9.0
+    (LLNL uDawn)                  XL C++ for Blue Gene/P, bgxlC V9.0
+                                  XL Fortran for Blue Gene/P, bgxlf0 V11.1
 
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
     (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
@@ -372,9 +372,9 @@ The following platforms and compilers have been tested for this release.
                                   Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
-    Mac OS X Lion 10.7.3	      GCC 4.2.1 gcc
-    32- and 64-bit		          GNU Fortran (GCC) 4.6.1 gfortran
-    (duck)                        GCC 4.2.1 g++
+    Mac OS X Lion 10.7.3          GCC 4.2.1 gcc
+    32- and 64-bit                GNU Fortran (GCC) 4.6.1 gfortran
+    (duck)                        GCC 4.2.1. g++
 
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
