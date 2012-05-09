@@ -316,13 +316,13 @@ The following platforms and compilers have been tested for this release.
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20110731 
     (ostrich)                     GNU Fortran (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3)
 
-    Linux 2.6.18-108chaos	  Intel C, C++, Fortran Compilers Version 11.1
+    Linux 2.6.18-108chaos	      Intel C, C++, Fortran Compilers Version 11.1
     #1 SMP x86_64 GNU/Linux
     (LLNL Aztec)		  
 
-    IBM Blue Gene/P 		  XL C for Blue Gene/P, bgxlc V9.0
-    (LLNL uDawn)		  XL C++ for Blue Gene/P, bgxlC V9.0
-    				  XL Fortran for Blue Gene/P, bgxlf90 V11.1
+    IBM Blue Gene/P 		      XL C for Blue Gene/P, bgxlc V9.0
+    (LLNL uDawn)		          XL C++ for Blue Gene/P, bgxlC V9.0
+    				              XL Fortran for Blue Gene/P, bgxlf90 V11.1
 
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
     (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
@@ -358,18 +358,22 @@ The following platforms and compilers have been tested for this release.
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
-    Mac OS X 10.8.0 (Intel 64-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1
-    Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1
-    (fred)                        GNU Fortran (GCC) 4.6.10
-                                  Intel C, C++ and Fortran compilers 12.1.0.038 Build 20110811
+    Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
+    Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
+    Intel 64-bit                      (Apple Inc. build 5666) (dot 3)
+    (fred)                        GNU Fortan (GCC) 4.6.1 (gfortran)
+                                  Intel C (icc), Fortran (ifort), C++ (icpc)
+                                      12.1.0.038 Build 20110811
 
-    Mac OS X 10.8.0 (Intel 32-bit) i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (Apple Inc. build 5666) (dot 3)
-    Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 
-    (tejeda)                      GNU Fortran (GCC) version 4.6.1
-                                  Intel C, C++ and Fortran compilers 12.1.0.038 Build 20110811
+    Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
+    Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
+    Intel 32-bit                      (Apple Inc. build 5666) (dot 3)
+    (tejeda)                      GNU Fortran (GCC) 4.6.1 (gfortran)
+                                  Intel C (icc), Fortran (ifort), C++ (icpc)
+                                      12.1.0.038 Build 20110811
 
-    Mac OS X Lion 10.7.3	  GCC 4.2.1 gcc
-    32- and 64-bit		  GNU Fortran (GCC) 4.6.1 gfortran
+    Mac OS X Lion 10.7.3	      GCC 4.2.1 gcc
+    32- and 64-bit		          GNU Fortran (GCC) 4.6.1 gfortran
     (duck)                        GCC 4.2.1 g++
 
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
@@ -431,8 +435,8 @@ Windows XP                                 n        y(4)   n        y     y     
 Windows XP x64                             n        y(4)   n        y     y     y
 Windows Vista                              n        y(4)   n        y     y     y
 Windows Vista x64                          n        y(4)   n        y     y     y
-Mac OS X 10.8 Intel 32-bit                 n        y      n        y     y     n 
-Mac OS X 10.8 Intel 64-bit                 n        y      n        y     y     y
+Mac OS X Snow Leopard 10.6.8 32-bit        n        y      n        y     y     n 
+Mac OS X Snow Leopard 10.6.8 64-bit        n        y      n        y     y     y
 Mac OS X Lion 10.7.3 32-bit                n        y      n        y     y     n
 Mac OS X Lion 10.7.3 64-bit                n        y      n        y     y     y
 AIX 5.3 32- and 64-bit                     y        y      y        y     y     y
@@ -444,8 +448,8 @@ CentOS 5.5 Linux 2.6.18 x86_64 GNU (1)  W  y        y(3)   y        y     y     
 CentOS 5.5 Linux 2.6.18 x86_64 Intel    W  n        y      n        y     y     y
 CentOS 5.5 Linux 2.6.18 x86_64 PGI      W  n        y      n        y     y     y
 Linux 2.6.32-220.7.1.el6.ppc64             n        y      n        y     y     y
-SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y    y
-Red Hat Enterprise Linux 6                 y        y      y        y     y    y
+SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y     y
+Red Hat Enterprise Linux 6                 y        y      y        y     y     y
 CLE hopper.nersc.gov                       y        y(3)   y        y     y     n
 
 
@@ -457,8 +461,8 @@ Windows XP                                 y       y(4)      y         n
 Windows XP x64                             y       y(4)      y         n        
 Windows Vista                              y       y(4)      y         y
 Windows Vista x64                          y       y(4)      y         y
-Mac OS X 10.8 Intel 32-bit                 y       n         y         n        
-Mac OS X 10.8 Intel 64-bit                 y       n         y         n        
+Mac OS X Snow Leopard 10.6.8 32-bit        y       n         y         n        
+Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 AIX 5.3 32- and 64-bit                     n       n         n         y        
@@ -485,38 +489,46 @@ CLE hopper.nersc.gov                       n       n         n         n
 
 Known Problems
 ==============
-* The test h5repacktst fails in AIX 32bit mode because the test is using more
-  memory than the default value in the 32bit mode.  The failure message is
-  typically like "time: 0551-010 The process was stopped abnormally. Try
-  again". This is only a test problem, not a library coding problem. Request
-  more memory to run the testing.  For example:
-  $ env LDR_CNTRL=MAXDATA=0x20000000@DSA make check 
-  (AKC - 2012/05/09 HDFFV-8016)
+* The h5repacktst test fails on AIX 32-bit because the test uses more
+  memory than the default amount. The failure message typically looks like:
 
-* The test file_image will fail its subtest of "initial file image and
-  callbacks in ore VFD" if the source directory is not writable by the test.
-  The subtest violates the standard of not to modify the source directory when
-  --srcdir is used. (AKC - 2012/05/09 HDFFV-8009)
+    "time: 0551-010 The process was stopped abnormally. Try again."
+
+  This is an issue with the test only and does not represent a problem with
+  the library. To allow the test to pass, request more memory when testing
+  via appropriate command such as:
+
+    $ env LDR_CNRTL=MAXDATA=0x20000000@DSA make check
+
+  (ACK - 2012/05/09 - HDFFV-8016)
+
+* The file_image test will fail in the "initial file image and callbacks in
+  the core VFD" sub-test if the source directory is read-only as the test
+  fails to create its test files in the build directory. This will be
+  resolved in a future release.
+  (AKC - 2012/05/05 - HDFFV-8009)
   
-* The test dt_arith.c under the test/ directory has several errors involving 
-  "long double" on Mac Lion and Duck, when any level of optimization is
-  enabled.  The only working option is debugging. We'll address this problem in
-  the next release. (SLU - 2012/05/08)
+* The dt_arith test reports several errors involving "long double" on
+  Mac OS X 10.7 Lion when any level of optimization is enabled. The test does
+  not fail in debug mode. This will be addressed in a future release.
+  (SLU - 2012/05/08)
 
-* This h5dump test failed in BG/P machines (probably other machines that uses
-  command script to launch executables).
+* The following h5dump test case fails in BG/P machines (and potentially other
+  machines that use a command script to launch executables):
 
-     h5dump --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
-tno-subset.h5
-  The reason is that there are embedded spaces in the dataset name and they
-  got interpreted by the command script launcher as meta-characters and
-  the single dataset name becomes three arguments to h5dump.
-  This command passes if run by hand, just not via the test script.
+   h5dump --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0"
+     tno-subset.h5
+  
+  This is due to the embedded spaces in the dataset name being interpreted
+  by the command script launcher as meta-characters, thus passing three
+  arguments to h5dump's -d flag. The command passes if run by hand, just
+  not via the test script.
   (AKC - 2012/05/03)
 
 * The ph5diff (parallel h5diff) tool can intermittently hang in parallel mode
   when comparing two HDF5 files that contain objects with the same names but
-  with different object types.   (JKM - 2012/04/27)
+  with different object types.
+  (JKM - 2012/04/27)
 
 * On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
   to aprun -np X, because the H5lib_settings.c file was not generated
