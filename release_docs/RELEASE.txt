@@ -269,10 +269,10 @@ Platform                                 C        F90    F90      C++   zlib  SZ
                                          parallel        parallel
 Solaris2.10 32-bit                         n        y      n        y     y     y
 Solaris2.10 64-bit                         n        y      n        y     y     y
-Windows XP                                 n        y(4)   n        y     y     y
-Windows XP x64                             n        y(4)   n        y     y     y
-Windows Vista                              n        y(4)   n        y     y     y
-Windows Vista x64                          n        y(4)   n        y     y     y
+Windows XP                                 n        y      n        y     y     y
+Windows XP x64                             n        y      n        y     y     y
+Windows 7                                  y        y      n        y     y     y
+Windows 7     x64                          y        y      n        y     y     y
 OpenVMS Alpha                              n        y      n        y     y     n
 Mac OS X 10.7 Intel 32-bit                 n        y      n        y     y     y
 Mac OS X 10.7 Intel 64-bit                 n        y      n        y     y     y
@@ -292,10 +292,10 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe     
 Solaris2.10 32-bit                         y       y         y         y        
 Solaris2.10 64-bit                         y       y         y         y        
-Windows XP                                 y       y(4)      y         n        
-Windows XP x64                             y       y(4)      y         n        
-Windows Vista                              y       y(4)      y         y
-Windows Vista x64                          y       y(4)      y         y
+Windows XP                                 y       y         y         n        
+Windows XP x64                             y       y         y         n        
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
 OpenVMS Alpha                              n       n         n         n
 Mac OS X 10.7 Intel 32-bit                 y(5)    n         y         n        
 Mac OS X 10.7 Intel 64-bit                 y(5)    n         y         n        
@@ -393,10 +393,6 @@ Known Problems
   complaining about it, we (Elena, Quincey, and I) decided to leave it as 
   it is (see bug report #1279).  Quincey will make a plan for 1.10.
   SLU - 2010/2/2
-
-* MinGW has a missing libstdc++.dll.a library file and will not successfully link
-  C++ applications/tests. Do not use the enable-cxx configure option. Read all of
-  the INSTALL_MINGW.txt file for all restrictions. ADB - 2009/11/11
   
 * The PathScale MPI implementation, accessing a Panasas file system, would
   cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file does not
