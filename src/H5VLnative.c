@@ -1924,7 +1924,7 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, hid_t UNUSED req,
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for group")
                 break;
             }
-            /* H5Fget_info2 */
+        /* H5Gget_info */
         case H5VL_GROUP_GET_INFO:
             {
                 H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
@@ -2414,8 +2414,8 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     obj_loc = *location;
-    obj_loc->oloc = (H5O_loc_t *) H5MM_malloc (sizeof (H5O_loc_t));//*location;
-    obj_loc->path = (H5G_name_t *) H5MM_malloc (sizeof (H5G_name_t));//&obj_path;
+    obj_loc->oloc = (H5O_loc_t *) H5MM_malloc (sizeof (H5O_loc_t));
+    obj_loc->path = (H5G_name_t *) H5MM_malloc (sizeof (H5G_name_t));
     H5G_loc_reset(obj_loc);
 
     switch (lookup_type) {
@@ -2508,7 +2508,6 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t 
                     case H5R_BADTYPE:
                     case H5R_MAXTYPE:
                     default:
-                        //HDassert("unknown reference type" && 0);
                         HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
                 } /* end switch */
                 break;
