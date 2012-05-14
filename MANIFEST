@@ -445,7 +445,7 @@
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
 ./release_docs/INSTALL_Windows_Short_VS2008.TXT
 ./release_docs/RELEASE.txt
-./release_docs/Using_CMake.txt
+./release_docs/USING_CMake.txt
 ./release_docs/USING_Windows.txt
 
 ./src/.indent.pro      _DO_NOT_DISTRIBUTE_
