@@ -864,6 +864,11 @@ CONFIGURE_FILE (
     ${HDF5_RESOURCES_DIR}/libhdf5.settings.cmake.in 
     ${HDF5_BINARY_DIR}/libhdf5.settings @ONLY
 )
+INSTALL (
+    FILES ${HDF5_BINARY_DIR}/libhdf5.settings
+    DESTINATION ${HDF5_INSTALL_LIB_DIR}
+    COMPONENT libraries
+)
 
 #-----------------------------------------------------------------------------
 # Add Document File(s) to CMake Install
