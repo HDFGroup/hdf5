@@ -529,7 +529,7 @@
 ./release_docs/CMake.txt
 ./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
-./release_docs/USING_CMake.txt
+./release_docs/Using_CMake.txt
 
 ./src/.indent.pro      _DO_NOT_DISTRIBUTE_
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
