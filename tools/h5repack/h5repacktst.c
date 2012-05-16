@@ -3547,7 +3547,6 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-
 static
 int write_dset_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
@@ -3811,17 +3810,23 @@ int write_dset_in(hid_t loc_id,
 
     {
 
+        hsize_t TEST_BUFSIZE = (128 * 1024 * 1024);  /* 128MB */
         double   *dbuf;                           /* information to write */
         size_t   size;
         hsize_t  sdims[] = {1};
-        hsize_t  tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
+        hsize_t  tdims[] = {TEST_BUFSIZE / sizeof(double) + 1};
         unsigned u;
 
         /* allocate and initialize array data to write */
-        size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
+        size = ( TEST_BUFSIZE / sizeof(double) + 1 ) * sizeof(double);
         dbuf = (double*)malloc( size );
+        if (NULL == dbuf)
+        {
+            printf ("\nError: Cannot allocate memory for \"arrayd\" data buffer size %dMB.\n", (int) size / 1000000 );
+            goto out;
+        }
 
-        for( u = 0; u < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; u++)
+        for( u = 0; u < TEST_BUFSIZE / sizeof(double) + 1; u++)
             dbuf[u] = u;
 
         if (make_diffs)
@@ -3830,7 +3835,7 @@ int write_dset_in(hid_t loc_id,
             dbuf[6] = 0;
         }
 
-        /* create a type larger than H5TOOLS_MALLOCSIZE */
+        /* create a type larger than TEST_BUFSIZE */
         if ((tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims)) < 0)
             goto out;
         size = H5Tget_size(tid);
