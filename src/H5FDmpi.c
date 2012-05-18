@@ -488,3 +488,5 @@ H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype *btype, MPI_Datatype *ftyp
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_setup_collective() */
+
+#endif /* H5_HAVE_PARALLEL */

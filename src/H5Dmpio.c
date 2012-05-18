@@ -1542,7 +1542,6 @@ static herr_t
 H5D__final_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t mpi_buf_count, MPI_Datatype *mpi_file_type, MPI_Datatype *mpi_buf_type)
 {
-    hbool_t     plist_is_setup = FALSE; /* Whether the dxpl has been customized */
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1550,7 +1549,6 @@ H5D__final_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     /* Pass buf type, file type to the file driver.  */
     if(H5FD_mpi_setup_collective(io_info->dxpl_id, mpi_buf_type, mpi_file_type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
-    plist_is_setup = TRUE;
 
     if(io_info->op_type == H5D_IO_OP_WRITE) {
         if((io_info->io_ops.single_write)(io_info, type_info, mpi_buf_count, NULL, NULL) < 0)
