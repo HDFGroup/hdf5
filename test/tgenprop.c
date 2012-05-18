@@ -1575,6 +1575,46 @@ test_genprop_class_addprop(void)
 
 /****************************************************************
 **
+**  test_genprop_list_add_remove_prop(): Test adding then removing the
+**  same properties to a standard HDF5 property list. This is testing
+**  also for a memory leak that could be caused by not freeing the
+**  removed property resources from the property list.
+**
+****************************************************************/
+static void
+test_genprop_list_add_remove_prop(void)
+{
+    hid_t pid;          /* Property List ID */
+    herr_t ret;		/* Generic return value	*/
+
+    /* Create a dataset creation property list */
+    pid = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(pid, FAIL, "H5Pcreate");
+
+    /* Insert temporary property into class (with no callbacks) */
+    ret = H5Pinsert2(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
+
+    /* Delete added property */
+    ret = H5Premove(pid, PROP1_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Insert temporary property into class (with no callbacks) */
+    ret = H5Pinsert2(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
+
+    /* Delete added property */
+    ret = H5Premove(pid, PROP1_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Close property list */
+    ret = H5Pclose(pid);
+    CHECK(ret, FAIL, "H5Pclose");
+
+} /* end test_genprop_list_add_remove_prop() */
+
+/****************************************************************
+**
 **  test_genprop_equal(): Test basic generic property list code.
 **      More tests for H5Pequal()
 **
@@ -1989,6 +2029,8 @@ test_genprop(void)
 
     test_genprop_list_addprop();    /* Test adding properties to HDF5 property list */
     test_genprop_class_addprop();   /* Test adding properties to HDF5 property class */
+
+    test_genprop_list_add_remove_prop();  /* Test adding and removing the same property several times to HDF5 property list */
 
     test_genprop_equal();       /* Tests for more H5Pequal verification */
     test_genprop_path();        /* Tests for class path verification */

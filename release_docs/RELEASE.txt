@@ -100,7 +100,8 @@ Bug Fixes since HDF5-1.8.9
 
     Library
     -------
-    - None
+    - Fix a memory leak exposed when inserting/removing a property
+    from a property list several times. HDFFV-8022. (MSC 2012/05/18)
 
     Parallel Library
     ----------------
