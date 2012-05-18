@@ -536,8 +536,9 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (obj_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rdereference2() */

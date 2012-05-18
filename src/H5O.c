@@ -250,8 +250,9 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
 
     FUNC_LEAVE_API(ret_value)
@@ -315,8 +316,9 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_idx() */
@@ -377,8 +379,9 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */
@@ -650,8 +653,9 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_name() */
@@ -709,8 +713,9 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx() */

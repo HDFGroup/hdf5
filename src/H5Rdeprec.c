@@ -204,6 +204,11 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
+    if (NULL != location) {
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (obj_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
+    }
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rdereference1() */
 

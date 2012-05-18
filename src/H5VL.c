@@ -991,6 +991,12 @@ H5VL_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id, hid_t req)
         /* Open the object through the VOL */
         if((ret_value = H5VL_object_open_by_loc(loc_id, location, tapl_id, req)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
+        if (NULL != location) {
+            /* free the location token through the VOL */
+            if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
+        }
     }
     else {
         /* call the corresponding VOL open callback */
@@ -1167,6 +1173,12 @@ H5VL_dataset_open(hid_t loc_id, const char *name, hid_t dapl_id, hid_t req)
         /* Open the object through the VOL */
         if((ret_value = H5VL_object_open_by_loc(loc_id, location, dapl_id, req)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
+        if (NULL != location) {
+            /* free the location token through the VOL */
+            if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
+        }
     }
     else {
         /* call the corresponding VOL open callback */
@@ -1812,8 +1824,9 @@ H5VL_group_open(hid_t loc_id, const char *name, hid_t gapl_id, hid_t req)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
         if (NULL != location) {
-            free (location);
-            location = NULL;
+            /* free the location token through the VOL */
+            if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
         }
     }
     else {
@@ -2313,6 +2326,50 @@ H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, hid_t req, ...)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_lookup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object_free_loc
+ *
+ * Purpose:	Free the location token
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_object_free_loc(hid_t loc_id, void *location, hid_t req)
+{
+    H5VL_id_wrapper_t *id_wrapper;              /* user id structure */
+    H5I_type_t        id_type;
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    id_type = H5I_get_type(loc_id);
+    /* Check id */
+    if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
+       H5I_ATTR_PUBLIC != id_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
+
+    /* unwrap the ID struct */
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    if(NULL == id_wrapper->vol_plugin->object_cls.free_loc)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object free_loc' method")
+
+    if((ret_value = (id_wrapper->vol_plugin->object_cls.free_loc)(location, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "freeing location token of object location failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_object_free_loc() */
 
 
 /*-------------------------------------------------------------------------

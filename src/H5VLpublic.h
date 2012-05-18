@@ -95,11 +95,11 @@ typedef enum H5VL_link_get_t {
 /* types for all object general operations */
 typedef enum H5VL_object_generic_t {
     H5VL_ATTR_DELETE_BY_IDX         = 0,        /* H5Adelete_by_idx                   */
-    H5VL_ATTR_OPEN_BY_IDX           = 2,        /* H5Aopen_by_idx                     */
-    H5VL_ATTR_RENAME                = 3,        /* H5Arename                          */
-    H5VL_OBJECT_CHANGE_REF_COUNT    = 4,        /* H5Oincr/decr_refcount              */
-    H5VL_OBJECT_SET_COMMENT         = 6,        /* H5Oset_comment(_by_name)           */
-    H5VL_REF_CREATE                 = 7         /* H5Rcreate                          */
+    H5VL_ATTR_OPEN_BY_IDX           = 1,        /* H5Aopen_by_idx                     */
+    H5VL_ATTR_RENAME                = 2,        /* H5Arename                          */
+    H5VL_OBJECT_CHANGE_REF_COUNT    = 3,        /* H5Oincr/decr_refcount              */
+    H5VL_OBJECT_SET_COMMENT         = 4,        /* H5Oset_comment(_by_name)           */
+    H5VL_REF_CREATE                 = 5         /* H5Rcreate                          */
 } H5VL_object_generic_t;
 
 /* types for all object get API routines */
@@ -190,6 +190,7 @@ typedef struct H5VL_object_class_t {
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
     herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t req, va_list arguments);
+    herr_t (*free_loc)(void *location, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
     herr_t (*generic)(hid_t id, H5VL_object_generic_t generic_type, hid_t req, va_list arguments);
     herr_t (*close) (hid_t obj_id, hid_t req);

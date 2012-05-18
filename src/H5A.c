@@ -338,8 +338,9 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_by_name() */
@@ -611,8 +612,9 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
 done:
     if (NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_by_name() */
@@ -1694,8 +1696,9 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
     if(NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Aget_info_by_name() */
@@ -1868,7 +1871,6 @@ herr_t
 H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     const char *new_attr_name, hid_t lapl_id)
 {
-    void *location = NULL;
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1892,6 +1894,8 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
 
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_attr_name, new_attr_name)) {
+        void *location = NULL;
+
         /* Get the token for the Object location through the VOL */
         if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
@@ -1899,13 +1903,15 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
         /* get the attribute info through the VOL */
         if(H5VL_object_generic(loc_id, H5VL_ATTR_RENAME, H5_REQUEST_NULL, location, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
+
+        if(NULL != location) {
+            /* free the location token through the VOL */
+            if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
+        }
     } /* end if */
 
 done:
-    if(NULL != location) {
-        free (location);
-        location = NULL;
-    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Arename_by_name() */
 
@@ -2091,6 +2097,11 @@ done:
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object")
     } /* end if */
 
+    if(NULL != location) {
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
+    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Aiterate_by_name() */
 
@@ -2181,8 +2192,9 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
 done:
     if(NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* H5Adelete_by_name() */
@@ -2247,8 +2259,9 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
 done:
     if(NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* H5Adelete_by_idx() */
@@ -2634,8 +2647,9 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 
 done:
     if(NULL != location) {
-        free (location);
-        location = NULL;
+        /* free the location token through the VOL */
+        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
     }
     FUNC_LEAVE_API(ret_value)
 } /* H5Aexists_by_name() */

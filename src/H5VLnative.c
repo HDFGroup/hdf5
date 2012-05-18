@@ -109,6 +109,7 @@ static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id
 static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                                       const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_free_loc(void *location, hid_t req);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_close(hid_t object_id, hid_t req);
@@ -164,6 +165,7 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_object_open,                /* open */
         H5VL_native_object_copy,                /* copy */
         H5VL_native_object_lookup,              /* lookup */
+        H5VL_native_object_free_loc,            /* free location */
         H5VL_native_object_get,                 /* get */
         H5VL_native_object_generic,             /* generic */
         H5VL_native_object_close                /* close */
@@ -337,9 +339,6 @@ H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_
         /* Go do the real work for attaching the attribute to the dataset */
         if((ret_value = H5A_create(obj_loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
-
-        if(H5G_loc_free(obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
     }
 
 done:
@@ -381,9 +380,6 @@ H5VL_native_attr_open(hid_t loc_id, void *location, const char *attr_name, hid_t
         /* Read in attribute from object header */
         if(NULL == (attr = H5O_attr_open_by_name(obj_loc->oloc, attr_name, H5AC_ind_dxpl_id)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header")
-
-        if(H5G_loc_free(obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
     }
     else { /* H5Aopen */
         /* Read in attribute from object header */
@@ -523,9 +519,6 @@ H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, hid_t UNUSED req, va_li
                     /* Check if the attribute exists */
                     if((*ret = H5O_attr_exists(obj_loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
-
-                    if(H5G_loc_free(obj_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 break;
             }
@@ -656,9 +649,6 @@ H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid
         /* Delete the attribute from the location */
         if(H5O_attr_remove(obj_loc->oloc, attr_name, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
-
-        if(H5G_loc_free(obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")        
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1991,9 +1981,6 @@ H5VL_native_group_get(hid_t obj_id, H5VL_group_get_t get_type, hid_t UNUSED req,
                     /* Retrieve the group's information */
                     if(H5G__obj_info(obj_loc->oloc, grp_info, H5AC_ind_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
-
-                    if(H5G_loc_free(obj_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 break;
             }
@@ -2386,10 +2373,6 @@ H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t UNUSE
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(ret_value < 0)
-        if(H5G_loc_free(obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_open() */
 
@@ -2570,6 +2553,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_native_object_free_loc
+ *
+ * Purpose:	Free the location token
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_native_object_free_loc(void *location, hid_t req)
+{
+    H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5G_loc_free(obj_loc) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    if (NULL != obj_loc->oloc) {
+        H5MM_free(obj_loc->oloc);
+    }
+    if (NULL != obj_loc->path) {
+        H5MM_free(obj_loc->path);
+    }
+    if (NULL != obj_loc) {
+        H5MM_free(obj_loc);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_object_free_loc() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_native_object_generic
  *
  * Purpose:	Perform a plugin specific operation for an objectibute
@@ -2602,10 +2624,6 @@ H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid
                 /* Delete the attribute from the location */
                 if(H5O_attr_remove_by_idx(obj_loc->oloc, idx_type, order, n, H5AC_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
-
-                if(H5G_loc_free(obj_loc) < 0)
-                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
                 break;
             }
         /* H5Aopen_by_idx */
@@ -2654,9 +2672,6 @@ H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid
                     /* Call attribute rename routine */
                     if(H5O_attr_rename(obj_loc->oloc, H5AC_dxpl_id, old_name, new_name) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
-
-                    if(H5G_loc_free(obj_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
                 break;
             }
@@ -2771,16 +2786,10 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t UNUSED req, v
                 if(NULL == obj_loc) {
                     obj_loc = &loc;
                 }
-                else {
-                    loc_set = TRUE;
-                }
 
                 /* Retrieve the object's information */
                 if(H5O_get_info(obj_loc->oloc, H5AC_ind_dxpl_id, TRUE, obj_info) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
-
-                if(loc_set && H5G_loc_free(obj_loc) < 0)
-                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
                 break;
             }
         /* H5Oget_comment / H5Oget_comment_by_name */
