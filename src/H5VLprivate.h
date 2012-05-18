@@ -75,6 +75,7 @@ H5_DLL herr_t H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, hid_t req
 
 H5_DLL herr_t H5VL_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
 H5_DLL hid_t H5VL_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id, hid_t req);
+H5_DLL herr_t H5VL_datatype_close(hid_t type_id, hid_t req);
 
 H5_DLL hid_t  H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 H5_DLL hid_t  H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);

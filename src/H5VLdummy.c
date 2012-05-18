@@ -74,7 +74,8 @@ H5VL_class_t H5VL_dummy_g = {
     },
     {                                           /* datatype_cls */
         NULL,                                   /* commit */
-        NULL                                    /* open */
+        NULL,                                   /* open */
+        NULL                                    /* close */
     },
     {                                           /* dataset_cls */
         NULL,                                   /* create */

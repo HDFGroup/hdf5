@@ -444,7 +444,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, new_loc_id, new_name, 
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, new_loc_id, new_name, 
                                      lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -558,7 +558,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* change the ref count through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_OBJECT_EXISTS, H5_REQUEST_NULL, name, lapl_id, &ret_value) < 0)
+    if(H5VL_object_get(loc_id, H5VL_OBJECT_EXISTS, H5_REQUEST_NULL, name, lapl_id, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:

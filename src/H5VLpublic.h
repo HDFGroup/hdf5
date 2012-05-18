@@ -28,12 +28,13 @@
 
 /* types for all attr get API routines */
 typedef enum H5VL_attr_get_t {
-    H5VL_ATTR_GET_SPACE           = 0,         /* dataspace                           */
-    H5VL_ATTR_GET_TYPE            = 1,         /* datatype                            */
-    H5VL_ATTR_GET_ACPL            = 2,         /* creation property list              */
-    H5VL_ATTR_GET_NAME            = 3,         /* access property list                */
-    H5VL_ATTR_GET_STORAGE_SIZE    = 4,         /* storage size                        */
-    H5VL_ATTR_GET_INFO            = 5          /* offset                              */
+    H5VL_ATTR_EXISTS              = 0,         /* H5Aexists                          */
+    H5VL_ATTR_GET_SPACE           = 1,         /* dataspace                           */
+    H5VL_ATTR_GET_TYPE            = 2,         /* datatype                            */
+    H5VL_ATTR_GET_ACPL            = 3,         /* creation property list              */
+    H5VL_ATTR_GET_NAME            = 4,         /* access property list                */
+    H5VL_ATTR_GET_STORAGE_SIZE    = 5,         /* storage size                        */
+    H5VL_ATTR_GET_INFO            = 6          /* offset                              */
 } H5VL_attr_get_t;
 
 /* types for all dataset get API routines */
@@ -78,9 +79,9 @@ typedef enum H5VL_group_get_t {
 
 /* link create types for VOL */
 typedef enum H5VL_link_create_type_t {
-    H5VL_CREATE_HARD_LINK           = 0,
-    H5VL_CREATE_SOFT_LINK	    = 1,
-    H5VL_CREATE_UD_LINK	            = 2
+    H5VL_LINK_CREATE_HARD           = 0,
+    H5VL_LINK_CREATE_SOFT	    = 1,
+    H5VL_LINK_CREATE_UD	            = 2
 } H5VL_link_create_type_t;
 
 /* types for all link get API routines */
@@ -94,22 +95,21 @@ typedef enum H5VL_link_get_t {
 /* types for all object general operations */
 typedef enum H5VL_object_generic_t {
     H5VL_ATTR_DELETE_BY_IDX         = 0,        /* H5Adelete_by_idx                   */
-    H5VL_ATTR_EXISTS                = 1,        /* H5Aexists                          */
     H5VL_ATTR_OPEN_BY_IDX           = 2,        /* H5Aopen_by_idx                     */
     H5VL_ATTR_RENAME                = 3,        /* H5Arename                          */
     H5VL_OBJECT_CHANGE_REF_COUNT    = 4,        /* H5Oincr/decr_refcount              */
-    H5VL_OBJECT_EXISTS              = 5,        /* H5Oexists(_by_name)                */
     H5VL_OBJECT_SET_COMMENT         = 6,        /* H5Oset_comment(_by_name)           */
     H5VL_REF_CREATE                 = 7         /* H5Rcreate                          */
 } H5VL_object_generic_t;
 
 /* types for all object get API routines */
 typedef enum H5VL_object_get_t {
-    H5VL_OBJECT_GET_INFO	    = 0,	/*object info	                	*/
-    H5VL_OBJECT_GET_COMMENT	    = 1, 	/*object comment            		*/
-    H5VL_REF_GET_REGION             = 2,        /*dataspace of region                   */
-    H5VL_REF_GET_TYPE               = 3,        /*type of object                        */
-    H5VL_REF_GET_NAME               = 4         /*object name                           */
+    H5VL_OBJECT_EXISTS              = 0,        /* H5Oexists_by_name)                */
+    H5VL_OBJECT_GET_INFO	    = 1,	/*object info	                	*/
+    H5VL_OBJECT_GET_COMMENT	    = 2, 	/*object comment            		*/
+    H5VL_REF_GET_REGION             = 3,        /*dataspace of region                   */
+    H5VL_REF_GET_TYPE               = 4,        /*type of object                        */
+    H5VL_REF_GET_NAME               = 5         /*object name                           */
 } H5VL_object_get_t;
 
 /* types for all object lookup API routines */
@@ -140,6 +140,7 @@ typedef struct H5VL_datatype_class_t {
     herr_t (*commit)(hid_t loc_id, const char *name, hid_t type_id, 
                      hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
     hid_t  (*open)  (hid_t loc_id, const char * name, hid_t tapl_id, hid_t req);
+    herr_t (*close) (hid_t type_id, hid_t req);
 }H5VL_datatype_class_t;
 
 /* H5D routines */

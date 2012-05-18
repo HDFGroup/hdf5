@@ -128,7 +128,8 @@ H5VL_class_t H5VL_native_g = {
     },
     {                                           /* datatype_cls */
         H5VL_native_datatype_commit,            /* commit */
-        H5VL_native_datatype_open               /* open */
+        H5VL_native_datatype_open,              /* open */
+        H5VL_native_object_close                /* close */
     },
     {                                           /* dataset_cls */
         H5VL_native_dataset_create,             /* create */
@@ -493,22 +494,49 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
     H5A_t       *attr;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* check arguments */
-    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
-
     switch (get_type) {
+        /* H5Aexists/exists_by_name */
+        case H5VL_ATTR_EXISTS:
+            {
+                char    *name      = va_arg (arguments, char *);
+                void    *location  = va_arg (arguments, void *);
+                htri_t	*ret       = va_arg (arguments, htri_t *);
+                H5G_loc_t   loc;
+
+                if(H5G_loc(id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                if(NULL == location) { /* H5Aexists */
+                    /* Check if the attribute exists */
+                    if((*ret = H5O_attr_exists(loc.oloc, name, H5AC_ind_dxpl_id)) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+                }
+                else {
+                    H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
+                    /* Check if the attribute exists */
+                    if((*ret = H5O_attr_exists(obj_loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+                    if(H5G_loc_free(obj_loc) < 0)
+                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                }
+                break;
+            }
         /* H5Aget_space */
         case H5VL_ATTR_GET_SPACE:
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                /* check arguments */
+                if(NULL == (attr = (H5A_t *)H5I_object_verify(id, H5I_ATTR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
                 if((*ret_id = H5A_get_space(attr)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of attribute")
@@ -519,6 +547,10 @@ H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, 
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
+                /* check arguments */
+                if(NULL == (attr = (H5A_t *)H5I_object_verify(id, H5I_ATTR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
                 if((*ret_id = H5A_get_type(attr)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of attribute")
                 break;
@@ -527,6 +559,10 @@ H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, 
         case H5VL_ATTR_GET_ACPL:
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                /* check arguments */
+                if(NULL == (attr = (H5A_t *)H5I_object_verify(id, H5I_ATTR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
                 if((*ret_id = H5A_get_create_plist(attr)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for attr")
@@ -540,6 +576,10 @@ H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, 
                 size_t	buf_size = va_arg (arguments, size_t);
                 char    *buf = va_arg (arguments, char *);
 
+                /* check arguments */
+                if(NULL == (attr = (H5A_t *)H5I_object_verify(id, H5I_ATTR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
                 /* Call private function in turn */
                 if(0 > (*ret_val = H5A_get_name(attr, buf_size, buf)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
@@ -551,6 +591,10 @@ H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, 
             {
                 H5A_info_t   *ainfo = va_arg (arguments, H5A_info_t *);
 
+                /* check arguments */
+                if(NULL == (attr = (H5A_t *)H5I_object_verify(id, H5I_ATTR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
                 if(H5A_get_info(attr, ainfo) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get attribute info")
 
@@ -559,6 +603,10 @@ H5VL_native_attr_get(hid_t attr_id, H5VL_attr_get_t get_type, hid_t UNUSED req, 
         case H5VL_ATTR_GET_STORAGE_SIZE:
             {
                 hsize_t *ret = va_arg (arguments, hsize_t *);
+
+                /* check arguments */
+                if(NULL == (attr = (H5A_t *)H5I_object_verify(id, H5I_ATTR)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
                 /* Set return value */
                 *ret = attr->shared->data_size;
@@ -2021,7 +2069,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     switch (create_type) {
-        case H5VL_CREATE_HARD_LINK:
+        case H5VL_LINK_CREATE_HARD:
             {
                 H5G_loc_t    cur_loc;
                 H5G_loc_t    link_loc;
@@ -2064,7 +2112,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const
                 }
                 break;
             }
-        case H5VL_CREATE_SOFT_LINK:
+        case H5VL_LINK_CREATE_SOFT:
             {
                 char        *target_name;
                 H5G_loc_t   link_loc;               /* Group location for new link */
@@ -2081,7 +2129,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const
                     HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
                 break;
             }
-        case H5VL_CREATE_UD_LINK:
+        case H5VL_LINK_CREATE_UD:
             {
                 H5G_loc_t   link_loc;               /* Group location for new link */
                 H5L_type_t link_type;
@@ -2560,33 +2608,6 @@ H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid
 
                 break;
             }
-        /* H5Aexists/exists_by_name */
-        case H5VL_ATTR_EXISTS:
-            {
-                char    *name      = va_arg (arguments, char *);
-                void    *location  = va_arg (arguments, void *);
-                htri_t	*ret       = va_arg (arguments, htri_t *);
-                H5G_loc_t   loc;
-
-                if(H5G_loc(loc_id, &loc) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-                if(NULL == location) { /* H5Aexists */
-                    /* Check if the attribute exists */
-                    if((*ret = H5O_attr_exists(loc.oloc, name, H5AC_ind_dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
-                }
-                else {
-                    H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
-                    /* Check if the attribute exists */
-                    if((*ret = H5O_attr_exists(obj_loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
-                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
-
-                    if(H5G_loc_free(obj_loc) < 0)
-                        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-                }
-                break;
-            }
         /* H5Aopen_by_idx */
         case H5VL_ATTR_OPEN_BY_IDX:
             {
@@ -2652,22 +2673,6 @@ H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid
                 if(H5O_link(oloc, update_ref, H5AC_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
-                break;
-            }
-        /* H5Oexists_by_name */
-        case H5VL_OBJECT_EXISTS:
-            {
-                char      *name     = va_arg (arguments, char *);
-                hid_t     lapl_id   = va_arg (arguments, hid_t);
-                htri_t	  *ret      = va_arg (arguments, htri_t *);
-                H5G_loc_t loc;
-
-                if(H5G_loc(loc_id, &loc) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-                /* Check if the object exists */
-                if((*ret = H5G_loc_exists(&loc, name, lapl_id, H5AC_dxpl_id)) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
                 break;
             }
         /* H5Oset_comment */
@@ -2744,6 +2749,18 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t UNUSED req, v
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     switch (get_type) {
+        /* H5Oexists_by_name */
+        case H5VL_OBJECT_EXISTS:
+            {
+                char      *name     = va_arg (arguments, char *);
+                hid_t     lapl_id   = va_arg (arguments, hid_t);
+                htri_t	  *ret      = va_arg (arguments, htri_t *);
+
+                /* Check if the object exists */
+                if((*ret = H5G_loc_exists(&loc, name, lapl_id, H5AC_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+                break;
+            }
         /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
         case H5VL_OBJECT_GET_INFO:
             {

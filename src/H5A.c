@@ -251,6 +251,10 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
 done:
+    if (NULL != location) {
+        free (location);
+        location = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate2() */
 
@@ -2576,7 +2580,7 @@ H5Aexists(hid_t obj_id, const char *attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
     /* get the attribute info through the VOL */
-    if(H5VL_object_generic(obj_id, H5VL_ATTR_EXISTS, H5_REQUEST_NULL, attr_name, NULL, &ret_value) < 0)
+    if(H5VL_attr_get(obj_id, H5VL_ATTR_EXISTS, H5_REQUEST_NULL, attr_name, NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -2625,7 +2629,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* get the attribute info through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_EXISTS, H5_REQUEST_NULL, attr_name, location, &ret_value) < 0)
+    if(H5VL_attr_get(loc_id, H5VL_ATTR_EXISTS, H5_REQUEST_NULL, attr_name, location, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:

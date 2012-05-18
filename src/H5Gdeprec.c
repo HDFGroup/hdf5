@@ -337,7 +337,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, H5L_SAME_LOC, new_name, 
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, H5L_SAME_LOC, new_name, 
                                          lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
@@ -347,7 +347,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, cur_loc_id, new_name, 
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, cur_loc_id, new_name, 
                                          lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
@@ -396,7 +396,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_CREATE_HARD_LINK, new_loc_id, new_name, 
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, new_loc_id, new_name, 
                                          lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
@@ -411,7 +411,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
-        if((ret_value = H5VL_link_create(H5VL_CREATE_SOFT_LINK, new_loc_id, new_name, 
+        if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, new_loc_id, new_name, 
                                          lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */

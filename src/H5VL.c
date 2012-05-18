@@ -759,12 +759,16 @@ H5VL_attr_get(hid_t uid, H5VL_attr_get_t get_type, hid_t req, ...)
 {
     H5VL_id_wrapper_t *id_wrapper;              /* user id structure */
     va_list           arguments;             /* argument list passed from the API call */
+    H5I_type_t        id_type;               /* Type of ID */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    id_type = H5I_get_type(uid);
     /* Check id */
-    if(H5I_ATTR_PUBLIC != H5I_get_type(uid))
+    if(H5I_FILE_PUBLIC != id_type && H5I_GROUP_PUBLIC != id_type &&
+       H5I_DATASET_PUBLIC != id_type && H5I_DATATYPE_PUBLIC !=  id_type &&
+       H5I_ATTR_PUBLIC != id_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a user ID")
 
     /* get the ID struct */
@@ -774,7 +778,7 @@ H5VL_attr_get(hid_t uid, H5VL_attr_get_t get_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->attr_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr get' method")
 
-    va_start (arguments, get_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->attr_cls.get)(id_wrapper->obj_id, get_type, req, 
                                                            arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -785,7 +789,7 @@ H5VL_attr_get(hid_t uid, H5VL_attr_get_t get_type, hid_t req, ...)
         H5VL_id_wrapper_t *temp_id_wrapper;              /* user id structure */
         hid_t	        *ret_id;
 
-        va_start (arguments, get_type);
+        va_start (arguments, req);
         ret_id = va_arg (arguments, hid_t *);
 
         if(H5T_committed((H5T_t *)H5I_object_verify(*ret_id, H5I_DATATYPE))) {
@@ -1007,6 +1011,44 @@ H5VL_datatype_open(hid_t loc_id, const char *name, hid_t tapl_id, hid_t req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_datatype_close
+ *
+ * Purpose:	Closes a datatype through the VOL
+ *
+ * Return:      Success: Positive
+ *		Failure: Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_close(hid_t uid, hid_t req)
+{
+    H5VL_id_wrapper_t   *id_wrapper;   /* wrapper object of the datatype to be closed */
+    herr_t		ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* get the ID struct */
+    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(uid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
+
+    /* check if the corresponding VOL close callback exists */
+    if(NULL == id_wrapper->vol_plugin->datatype_cls.close)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype close' method")
+
+    /* call the corresponding VOL close callback */
+    if((ret_value = (id_wrapper->vol_plugin->datatype_cls.close)(id_wrapper->obj_id, req)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1302,7 +1344,7 @@ H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->dataset_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
 
-    va_start (arguments, get_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->dataset_cls.get)(id_wrapper->obj_id, get_type, req, 
                                                            arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -1313,7 +1355,7 @@ H5VL_dataset_get(hid_t uid, H5VL_dataset_get_t get_type, hid_t req, ...)
         H5VL_id_wrapper_t *temp_id_wrapper;              /* user id structure */
         hid_t	        *ret_id;
 
-        va_start (arguments, get_type);
+        va_start (arguments, req);
         ret_id = va_arg (arguments, hid_t *);
 
         if(H5T_committed((H5T_t *)H5I_object_verify(*ret_id, H5I_DATATYPE))) {
@@ -1571,7 +1613,7 @@ H5VL_file_get(hid_t uid, H5VL_file_get_t get_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->file_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file get' method")
 
-    va_start(arguments, get_type);
+    va_start(arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->file_cls.get)(id_wrapper->obj_id, get_type, req, 
                                                            arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -1619,7 +1661,7 @@ H5VL_file_generic(hid_t uid, H5VL_file_generic_t generic_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->file_cls.generic)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file generic' method")
 
-    va_start (arguments, generic_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->file_cls.generic)(id_wrapper->obj_id, generic_type, req, 
                                                                arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "generic failed")
@@ -1762,12 +1804,17 @@ H5VL_group_open(hid_t loc_id, const char *name, hid_t gapl_id, hid_t req)
                                         the location of the object */
 
         /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, name, gapl_id, req) < 0)
+        if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, req, &location, name, gapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
         /* Open the object through the VOL */
         if((ret_value = H5VL_object_open_by_loc(loc_id, location, gapl_id, req)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
+        if (NULL != location) {
+            free (location);
+            location = NULL;
+        }
     }
     else {
         /* call the corresponding VOL open callback */
@@ -1826,7 +1873,7 @@ H5VL_group_get(hid_t uid, H5VL_group_get_t get_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->group_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `group get' method")
 
-    va_start (arguments, get_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->group_cls.get)
         (id_wrapper->obj_id, get_type, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -1910,7 +1957,7 @@ H5VL_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const char *
     FUNC_ENTER_NOAPI(FAIL)
 
     /* unwrap the target high level ID if the creation call is H5Lcreate_hard */
-    if(H5VL_CREATE_HARD_LINK == create_type) {
+    if(H5VL_LINK_CREATE_HARD == create_type) {
         H5P_genplist_t *plist;      /* Property list pointer */
         hid_t cur_id;
 
@@ -2061,7 +2108,7 @@ H5VL_link_get(hid_t uid, H5VL_link_get_t get_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->link_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link get' method")
 
-    va_start (arguments, get_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->link_cls.get)
         (id_wrapper->obj_id, get_type, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -2258,7 +2305,7 @@ H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->object_cls.lookup)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object lookup' method")
 
-    va_start (arguments, lookup_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->object_cls.lookup)(id_wrapper->obj_id, lookup_type, req, 
                                                                 arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "lookup of object location failed")
@@ -2306,7 +2353,7 @@ H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, hid_t req, ...)
     if(NULL == id_wrapper->vol_plugin->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
 
-    va_start (arguments, get_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->object_cls.get)(id_wrapper->obj_id, get_type, req, 
                                                              arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
@@ -2353,7 +2400,7 @@ H5VL_object_generic(hid_t uid, H5VL_object_generic_t generic_type, hid_t req, ..
     if(NULL == id_wrapper->vol_plugin->object_cls.generic)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object generic' method")
 
-    va_start (arguments, generic_type);
+    va_start (arguments, req);
     if((ret_value = (id_wrapper->vol_plugin->object_cls.generic)(id_wrapper->obj_id, generic_type, req, 
                                                                arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "generic failed")
@@ -2363,7 +2410,7 @@ H5VL_object_generic(hid_t uid, H5VL_object_generic_t generic_type, hid_t req, ..
         H5VL_id_wrapper_t *temp_id_wrapper;              /* user id structure */
         hid_t	        *ret_id;
 
-        va_start (arguments, generic_type);
+        va_start (arguments, req);
         ret_id = va_arg (arguments, hid_t *);
 
         /* Create a new id that points to a struct that holds the attr id and the VOL plugin */

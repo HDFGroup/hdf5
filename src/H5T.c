@@ -1731,7 +1731,7 @@ H5Tclose(hid_t type_id)
 
     /* if this is a named datatype, go through the VOL layer */
     if (H5I_DATATYPE_PUBLIC == H5I_get_type(type_id)) {
-        if(H5VL_object_close(type_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_datatype_close(type_id, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to free datatype")
     }
     else {
