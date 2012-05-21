@@ -170,6 +170,8 @@ STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_MINOR ${_h5public_h_contents})
 STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z.]*)\".*$"
+    "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
 #MESSAGE (STATUS "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
 #-----------------------------------------------------------------------------
@@ -435,6 +437,19 @@ ENDIF (CMAKE_COMPILER_IS_GNUCC)
 IF (CMAKE_COMPILER_IS_GNUCXX)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+
+#-----------------------------------------------------------------------------
+# Use gcc visibility flag.
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_VISIBILITY "Enable gcc4 visibility=hidden for Libraries and Programs" OFF)
+IF (HDF5_ENABLE_VISIBILITY)
+  IF (CMAKE_COMPILER_IS_GNUCC)
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fvisibility=hidden")
+  ENDIF (CMAKE_COMPILER_IS_GNUCC)
+  IF (CMAKE_COMPILER_IS_GNUCXX)
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+  ENDIF (CMAKE_COMPILER_IS_GNUCXX)
+ENDIF (HDF5_ENABLE_VISIBILITY)
 
 #-----------------------------------------------------------------------------
 # All libs/tests/examples need the main include directories
