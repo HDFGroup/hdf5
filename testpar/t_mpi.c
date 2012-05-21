@@ -1178,13 +1178,17 @@ main(int argc, char **argv)
      * MPIO MPIO File size range test
      *=======================================*/
     MPI_BANNER("MPIO File size range test...");
+#ifndef H5_HAVE_WIN32_API
     ret_code = test_mpio_gb_file(filenames[0]);
     ret_code = errors_sum(ret_code);
     if (mpi_rank==0 && ret_code > 0){
 	printf("***FAILED with %d total errors\n", ret_code);
 	nerrors += ret_code;
     }
-
+#else
+    if (mpi_rank==0) {
+        printf(" will be skipped on Windows (JIRA HDDFV-8064)\n");
+#endif
 
     /*=======================================
      * MPIO independent overlapping writes
