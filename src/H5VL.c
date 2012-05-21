@@ -940,7 +940,8 @@ H5VL_datatype_commit(hid_t uid, const char *name, hid_t type_id, hid_t lcpl_id,
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
     id_wrapper2->vol_plugin = id_wrapper1->vol_plugin;
 
-    H5I_subst(type_id, id_wrapper2);
+    H5I_register_cb(type_id, H5VL_get_wrapper_struct, id_wrapper2);
+    //H5I_subst(type_id, id_wrapper2);
     //H5I_remove_verify(type_id, H5I_DATATYPE);
     
 #endif

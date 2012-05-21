@@ -52,9 +52,25 @@ typedef struct H5F_olist_t {
     size_t     max_index;            /* Maximum # of IDs to put into array */
 } H5F_olist_t;
 
+/* User data for traversal routine to get ID counts */
+typedef struct {
+    ssize_t *obj_count;   /* number of objects counted so far */
+    unsigned types;      /* types of objects to be counted */
+} H5F_trav_obj_cnt_t;
+
+/* User data for traversal routine to get ID lists */
+typedef struct {
+    size_t max_objs;
+    hid_t *oid_list;
+    ssize_t *obj_count;   /* number of objects counted so far */
+    unsigned types;      /* types of objects to be counted */
+} H5F_trav_obj_ids_t;
+
 /* PRIVATE PROTOTYPES */
 static herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5F_get_obj_count_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5F_get_obj_ids_cb(void *obj_ptr, hid_t obj_id, void *key);
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
@@ -359,36 +375,65 @@ done:
 ssize_t
 H5Fget_obj_count(hid_t file_id, unsigned types)
 {
-    H5F_t   *f = NULL;         /* File to query */
-    ssize_t ret_value;         /* Return value */
-    size_t  obj_count = 0;      /* Number of opened objects */
+    ssize_t ret_value = 0;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("Zs", "iIu", file_id, types);
 
-    if (H5I_FILE_PUBLIC == H5I_get_type(file_id)) {
-        H5VL_id_wrapper_t    *id_wrapper;    /* wrapper object */
-
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(file_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        file_id = id_wrapper->obj_id;
-    }
-
-    if(file_id != (hid_t)H5F_OBJ_ALL && (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
 
-    /* Perform the query */
-    if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
+    if(file_id != (hid_t)H5F_OBJ_ALL) {
+        if(H5VL_file_get(file_id, H5VL_FILE_GET_OBJ_COUNT, H5_REQUEST_NULL, &ret_value, types) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object count in file(s)")
+    }
+    /* iterate over all open files and get the obj count for each */
+    else {
+        H5F_trav_obj_cnt_t udata;
 
-    /* Set the return value */
-    ret_value = (ssize_t)obj_count;
+        udata.obj_count = &ret_value;
+        udata.types = types | H5F_OBJ_LOCAL;
+
+        if(H5I_iterate(H5I_FILE_PUBLIC, H5F_get_obj_count_cb, &udata, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")        
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_obj_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_obj_count_cb
+ *
+ * Purpose: H5F_get_obj_count_cb callback function.  It calls in the
+ *          VOL and gets the object count for the file ID passed
+ *
+ * Return:      TRUE if the value has been added.
+ *              FALSE otherwise.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F_get_obj_count_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
+{
+    H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
+    ssize_t            obj_count = 0;
+    int                ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL_file_get(obj_id, H5VL_FILE_GET_OBJ_COUNT, H5_REQUEST_NULL, &obj_count, udata->types) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
+
+    *(udata->obj_count) += obj_count; 
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_get_obj_count_cb */
 
 
 /*-------------------------------------------------------------------------
@@ -444,34 +489,33 @@ done:
 ssize_t
 H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 {
-    H5F_t     *f = NULL;        /* File to query */
-    size_t    obj_id_count = 0; /* Number of open objects */
-    ssize_t   ret_value;        /* Return value */
+    ssize_t   ret_value = 0;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("Zs", "iIuz*i", file_id, types, max_objs, oid_list);
 
-    if (H5I_FILE_PUBLIC == H5I_get_type(file_id)) {
-        H5VL_id_wrapper_t     *id_wrapper;        /* wrapper object */
-
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(file_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        file_id = id_wrapper->obj_id;
-    }
-
-    /* Check arguments */
-    if(file_id != (hid_t)H5F_OBJ_ALL && (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
     HDassert(oid_list);
 
-    /* Perform the query */
-    if(H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_id_count) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
+    /* Check arguments */
+    if(file_id != (hid_t)H5F_OBJ_ALL) {
+        if(H5VL_file_get(file_id, H5VL_FILE_GET_OBJ_IDS, H5_REQUEST_NULL, 
+                         types, max_objs, oid_list, &ret_value) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object count in file(s)")
+    }
+    /* iterate over all open files and get the obj count for each */
+    else {
+        H5F_trav_obj_ids_t udata;
 
-    /* Set the return value */
-    ret_value = (ssize_t)obj_id_count;
+        udata.types = types | H5F_OBJ_LOCAL;
+        udata.max_objs = max_objs;
+        udata.oid_list = oid_list;
+        udata.obj_count = &ret_value;
+
+        if(H5I_iterate(H5I_FILE_PUBLIC, H5F_get_obj_ids_cb, &udata, TRUE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
+    }
 
     if (H5VL_replace_with_uids (oid_list, ret_value) <= 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get IDs")
@@ -479,6 +523,45 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_obj_ids() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_obj_ids_cb
+ *
+ * Purpose: H5F_get_obj_ids_cb callback function.  It calls in the
+ *          VOL and gets the object ids for the file ID passed
+ *
+ * Return:      TRUE if the value has been added.
+ *              FALSE otherwise.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5F_get_obj_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
+{
+    H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
+    ssize_t            obj_count = 0;
+    int                ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL_file_get(obj_id, H5VL_FILE_GET_OBJ_IDS, H5_REQUEST_NULL, udata->types,
+                     udata->max_objs, udata->oid_list, &obj_count) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
+
+    *(udata->obj_count) += obj_count; 
+    udata->max_objs -= obj_count;
+    udata->oid_list += obj_count;
+
+    if(udata->max_objs <= 0)
+        ret_value = H5_ITER_STOP;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_get_obj_count_cb */
 
 
 /*-------------------------------------------------------------------------

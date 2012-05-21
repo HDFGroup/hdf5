@@ -1539,6 +1539,38 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, hid_t UNUSED req, v
 
                 break;
             }
+        /* H5Fget_obj_count */
+        case H5VL_FILE_GET_OBJ_COUNT:
+            {
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+                unsigned types = va_arg (arguments, unsigned);
+                size_t  obj_count = 0;      /* Number of opened objects */
+
+                /* Perform the query */
+                if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                break;
+            }
+        /* H5Fget_obj_ids */
+        case H5VL_FILE_GET_OBJ_IDS:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                size_t max_objs = va_arg (arguments, size_t);
+                hid_t *oid_list = va_arg (arguments, hid_t *);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+                size_t  obj_count = 0;      /* Number of opened objects */
+
+                /* Perform the query */
+                if(H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                break;
+            }
         /* H5Fget_filesize */
         case H5VL_FILE_GET_SIZE:
             {
