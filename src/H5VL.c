@@ -811,9 +811,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_attr_delete
+ * Function:	H5VL_attr_remove
  *
- * Purpose:	Deletes an attribute through the VOL
+ * Purpose:	Removes an attribute through the VOL
  *
  * Return:	Success:	Non Negative
  *
@@ -825,7 +825,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid_t req)
+H5VL_attr_remove(hid_t loc_id, void *location, const char *attr_name, hid_t req)
 {
     H5VL_id_wrapper_t   *id_wrapper;              /* user id structure */
     herr_t              ret_value = SUCCEED;
@@ -836,9 +836,9 @@ H5VL_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid_t req)
     if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
 
-    if((ret_value = (id_wrapper->vol_plugin->attr_cls.delete)
+    if((ret_value = (id_wrapper->vol_plugin->attr_cls.remove)
         (id_wrapper->obj_id, location, attr_name, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "delete failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "remove failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2133,9 +2133,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_link_delete
+ * Function:	H5VL_link_remove
  *
- * Purpose:	Copy or delete a link from src to dst.
+ * Purpose:	Removes a link through the VOL.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2144,7 +2144,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5VL_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req)
+H5_DLL herr_t H5VL_link_remove(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req)
 {
     H5VL_id_wrapper_t    *id_wrapper;
     herr_t               ret_value = SUCCEED;  /* Return value */
@@ -2154,18 +2154,18 @@ H5_DLL herr_t H5VL_link_delete(hid_t loc_id, const char *name, void *udata, hid_
     if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")        
 
-    /* check if the corresponding VOL delete callback exists */
-    if(NULL == id_wrapper->vol_plugin->link_cls.delete)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link delete' method")
+    /* check if the corresponding VOL remove callback exists */
+    if(NULL == id_wrapper->vol_plugin->link_cls.remove)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link remove' method")
 
-    /* call the corresponding VOL delete callback */
-    if((ret_value = (id_wrapper->vol_plugin->link_cls.delete)
+    /* call the corresponding VOL remove callback */
+    if((ret_value = (id_wrapper->vol_plugin->link_cls.remove)
         (id_wrapper->obj_id, name, udata, lapl_id, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link delete failed")
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link remove failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_link_delete() */
+} /* end H5VL_link_remove() */
 
 
 /*-------------------------------------------------------------------------

@@ -131,7 +131,7 @@ typedef struct H5VL_attr_class_t {
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf, hid_t req);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf, hid_t req);
     herr_t (*get)   (hid_t file_id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-    herr_t (*delete)(hid_t loc_id, void *location, const char *attr_name, hid_t req);
+    herr_t (*remove)(hid_t loc_id, void *location, const char *attr_name, hid_t req);
     herr_t (*close) (hid_t attr_id, hid_t req);
 } H5VL_attr_class_t;
 
@@ -181,7 +181,7 @@ typedef struct H5VL_link_class_t {
     herr_t (*move)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                      const char *dest_name, hbool_t copy_flag, hid_t lcpl, hid_t lapl, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_link_get_t get_type, hid_t req, va_list arguments);
-    herr_t (*delete)(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
+    herr_t (*remove)(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 } H5VL_link_class_t;
 
 /* H5O routines */

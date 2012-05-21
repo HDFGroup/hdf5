@@ -2135,7 +2135,7 @@ H5Adelete(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the attribute through the VOL */
-    if(H5VL_attr_delete(loc_id, NULL, name, H5_REQUEST_NULL) < 0)
+    if(H5VL_attr_remove(loc_id, NULL, name, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -2187,7 +2187,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the attribute through the VOL */
-    if(H5VL_attr_delete(loc_id, location, attr_name, H5_REQUEST_NULL) < 0)
+    if(H5VL_attr_remove(loc_id, location, attr_name, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:

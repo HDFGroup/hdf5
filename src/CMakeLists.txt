@@ -592,7 +592,7 @@ SET (H5VL_SRCS
     ${HDF5_SRC_DIR}/H5VLdummy.c
     ${HDF5_SRC_DIR}/H5VLnative.c
 )
-SET (H5FD_HDRS
+SET (H5VL_HDRS
     ${HDF5_SRC_DIR}/H5VLpublic.h
     ${HDF5_SRC_DIR}/H5VLpkg.h
     ${HDF5_SRC_DIR}/H5VLdummy.h

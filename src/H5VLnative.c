@@ -69,7 +69,7 @@ static hid_t H5VL_native_attr_open(hid_t loc_id, void *location, const char *att
 static herr_t H5VL_native_attr_read(hid_t attr_id, hid_t dtype_id, void *buf, hid_t req);
 static herr_t H5VL_native_attr_write(hid_t attr_id, hid_t dtype_id, const void *buf, hid_t req);
 static herr_t H5VL_native_attr_get(hid_t id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid_t req);
+static herr_t H5VL_native_attr_remove(hid_t loc_id, void *location, const char *attr_name, hid_t req);
 static herr_t H5VL_native_attr_close(hid_t attr_id, hid_t req);
 
 static herr_t H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, 
@@ -103,7 +103,7 @@ static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t
 static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                                     const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
+static herr_t H5VL_native_link_remove(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
@@ -124,7 +124,7 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_attr_read,                  /* read */
         H5VL_native_attr_write,                 /* write */
         H5VL_native_attr_get,                   /* get */
-        H5VL_native_attr_delete,                /* delete */
+        H5VL_native_attr_remove,                /* remove */
         H5VL_native_attr_close                  /* close */
     },
     {                                           /* datatype_cls */
@@ -159,7 +159,7 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_link_create,                /* create */
         H5VL_native_link_move,                  /* move */
         H5VL_native_link_get,                   /* get */
-        H5VL_native_link_delete                 /* delete */
+        H5VL_native_link_remove                 /* remove */
     },
     {                                           /* object_cls */
         H5VL_native_object_open,                /* open */
@@ -615,7 +615,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_attr_delete
+ * Function:	H5VL_native_attr_remove
  *
  * Purpose:	Deletes an attribute from a location
  *
@@ -628,7 +628,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid_t UNUSED req)
+H5VL_native_attr_remove(hid_t loc_id, void *location, const char *attr_name, hid_t UNUSED req)
 {
     H5G_loc_t   loc;                    /* Object location */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -652,7 +652,7 @@ H5VL_native_attr_delete(hid_t loc_id, void *location, const char *attr_name, hid
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_attr_delete() */
+} /* end H5VL_native_attr_remove() */
 
 
 /*-------------------------------------------------------------------------
@@ -2298,7 +2298,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_link_delete
+ * Function:	H5VL_native_link_remove
  *
  * Purpose:	Removes the specified NAME from the group graph and
  *		decrements the link count for the object to which NAME
@@ -2315,7 +2315,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t UNUSED req)
+H5VL_native_link_remove(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t UNUSED req)
 {
     H5G_loc_t       loc;                /* Object location */
     herr_t ret_value = SUCCEED;
@@ -2337,7 +2337,7 @@ H5VL_native_link_delete(hid_t loc_id, const char *name, void *udata, hid_t lapl_
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_link_delete() */
+} /* end H5VL_native_link_remove() */
 
 
 /*-------------------------------------------------------------------------

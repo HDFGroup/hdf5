@@ -604,7 +604,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_delete(loc_id, name, NULL, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_link_remove(loc_id, name, NULL, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
