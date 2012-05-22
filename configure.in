@@ -4388,6 +4388,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
+                 tools/h5dump/testh5dumppbits.sh
                  tools/h5dump/testh5dumpxml.sh
                  tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
