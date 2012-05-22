@@ -1186,7 +1186,7 @@ main(int argc, char **argv)
 	nerrors += ret_code;
     }
 #else
-    if (mpi_rank==0) {
+    if (mpi_rank==0)
         printf(" will be skipped on Windows (JIRA HDDFV-8064)\n");
 #endif
 
