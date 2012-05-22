@@ -43,6 +43,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
+      charsets.ddl
       file_space.ddl
       filter_fail.ddl
       packedbits.ddl
@@ -239,6 +240,7 @@ IF (BUILD_TESTING)
       tvlstr.h5.xml
   )
   SET (HDF5_REFERENCE_TEST_FILES
+      charsets.h5
       file_space.h5
       filter_fail.h5
       packedbits.h5
@@ -676,6 +678,8 @@ IF (BUILD_TESTING)
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
           h5dump-help.out
+          charsets.out
+          charsets.out.err
           file_space.out
           file_space.out.err
           filter_fail.out
@@ -1059,6 +1063,9 @@ IF (BUILD_TESTING)
 
   # test printing characters in ASCII instead of decimal
   ADD_H5_TEST (tchar1 0 --enable-error-stack -r tchar.h5)
+
+  # test datatypes in ASCII and UTF8
+  ADD_H5_TEST (charsets 0 --enable-error-stack charsets.h5)
 
   # rev. 2004
   # tests for super block

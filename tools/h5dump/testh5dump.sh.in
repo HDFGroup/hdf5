@@ -75,6 +75,7 @@ test -d $TESTDIR || mkdir $TESTDIR
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
+$SRC_H5DUMP_TESTFILES/charsets.h5
 $SRC_H5DUMP_TESTFILES/file_space.h5
 $SRC_H5DUMP_TESTFILES/filter_fail.h5
 $SRC_H5DUMP_TESTFILES/packedbits.h5
@@ -161,6 +162,7 @@ $SRC_H5DUMP_TESTFILES/tvms.h5
 "
 
 LIST_OTHER_TEST_FILES="
+$SRC_H5DUMP_TESTFILES/charsets.ddl
 $SRC_H5DUMP_TESTFILES/file_space.ddl
 $SRC_H5DUMP_TESTFILES/filter_fail.ddl
 $SRC_H5DUMP_TESTFILES/packedbits.ddl
@@ -690,6 +692,9 @@ TOOLTEST tno-subset.ddl --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0]
 
 # test printing characters in ASCII instead of decimal
 TOOLTEST tchar1.ddl --enable-error-stack -r tchar.h5
+
+# test datatypes in ASCII and UTF8
+TOOLTEST charsets.ddl --enable-error-stack charsets.h5
 
 # rev. 2004
 

@@ -2119,14 +2119,38 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_str_reset(buffer);
 
         h5tools_str_append(buffer, "%s ", STRPAD);
-        if (str_pad == H5T_STR_NULLTERM)
-            h5tools_str_append(buffer, "H5T_STR_NULLTERM;");
-        else if (str_pad == H5T_STR_NULLPAD)
-            h5tools_str_append(buffer, "H5T_STR_NULLPAD;");
-        else if (str_pad == H5T_STR_SPACEPAD)
-            h5tools_str_append(buffer, "H5T_STR_SPACEPAD;");
-        else
-            h5tools_str_append(buffer, "H5T_STR_ERROR;");
+        switch (str_pad) {
+            case H5T_STR_NULLTERM:
+                h5tools_str_append(buffer, "H5T_STR_NULLTERM;");
+                break;
+            case H5T_STR_NULLPAD:
+                h5tools_str_append(buffer, "H5T_STR_NULLPAD;");
+                break;
+            case H5T_STR_SPACEPAD:
+                h5tools_str_append(buffer, "H5T_STR_SPACEPAD;");
+                break;
+            case H5T_STR_RESERVED_3:
+            case H5T_STR_RESERVED_4:
+            case H5T_STR_RESERVED_5:
+            case H5T_STR_RESERVED_6:
+            case H5T_STR_RESERVED_7:
+            case H5T_STR_RESERVED_8:
+            case H5T_STR_RESERVED_9:
+            case H5T_STR_RESERVED_10:
+            case H5T_STR_RESERVED_11:
+            case H5T_STR_RESERVED_12:
+            case H5T_STR_RESERVED_13:
+            case H5T_STR_RESERVED_14:
+            case H5T_STR_RESERVED_15:
+                h5tools_str_append(buffer, "H5T_STR_UNKNOWN;");
+                break;
+            case H5T_STR_ERROR:
+                h5tools_str_append(buffer, "H5T_STR_ERROR;");
+                break;
+            default:
+                h5tools_str_append(buffer, "ERROR;");
+            break;
+        }
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
 
         ctx->need_prefix = TRUE;
@@ -2136,10 +2160,35 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
         h5tools_str_append(buffer, "%s ", CSET);
 
-        if (cset == H5T_CSET_ASCII)
-            h5tools_str_append(buffer, "H5T_CSET_ASCII;");
-        else
-            h5tools_str_append(buffer, "unknown_cset;");
+        switch (cset) {
+            case H5T_CSET_ASCII:
+                h5tools_str_append(buffer, "H5T_CSET_ASCII;");
+                break;
+            case H5T_CSET_UTF8:
+                h5tools_str_append(buffer, "H5T_CSET_UTF8;");
+                break;
+            case H5T_CSET_RESERVED_2:
+            case H5T_CSET_RESERVED_3:
+            case H5T_CSET_RESERVED_4:
+            case H5T_CSET_RESERVED_5:
+            case H5T_CSET_RESERVED_6:
+            case H5T_CSET_RESERVED_7:
+            case H5T_CSET_RESERVED_8:
+            case H5T_CSET_RESERVED_9:
+            case H5T_CSET_RESERVED_10:
+            case H5T_CSET_RESERVED_11:
+            case H5T_CSET_RESERVED_12:
+            case H5T_CSET_RESERVED_13:
+            case H5T_CSET_RESERVED_14:
+            case H5T_CSET_RESERVED_15:
+                h5tools_str_append(buffer, "H5T_CSET_UNKNOWN;");
+            case H5T_CSET_ERROR:
+                h5tools_str_append(buffer, "H5T_CSET_ERROR;");
+                break;
+            default:
+                h5tools_str_append(buffer, "ERROR;");
+            break;
+        }
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
 
         ctx->need_prefix = TRUE;
