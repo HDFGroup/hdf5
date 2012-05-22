@@ -530,9 +530,15 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, H5_REQUEST_NULL, &location, ref_type, _ref) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
+
     /* Open the object through the VOL */
     if((ret_value = H5VL_object_open_by_loc(obj_id, location, oapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+#if 0
+    /* Create reference */
+    if((ret_value = H5R_dereference(file, oapl_id, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
+#endif
 
 done:
     if (NULL != location) {

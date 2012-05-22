@@ -2314,9 +2314,13 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
 
     /* Check if the property has been deleted */
     if(NULL != H5SL_search(plist->del, name)) {
+        char *temp_name = NULL;
         /* Remove the property name from the deleted property skip list */
-        if(NULL == H5SL_remove(plist->del, name))
+        if(NULL == (temp_name = H5SL_remove(plist->del, name)))
             HGOTO_ERROR(H5E_PLIST,H5E_CANTDELETE,FAIL,"can't remove property from deleted skip list")
+
+        /* free the name of the removed property */
+        H5MM_xfree(temp_name);
     } /* end if */
     else {
         H5P_genclass_t *tclass;     /* Temporary class pointer */

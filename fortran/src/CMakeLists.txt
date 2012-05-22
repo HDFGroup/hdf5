@@ -84,9 +84,6 @@ ADD_CUSTOM_COMMAND (
 # f90CStub lib
 #-----------------------------------------------------------------------------
 SET (f90CStub_C_SRCS
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
-
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90kit.c
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_f.c
@@ -114,11 +111,17 @@ ENDIF (H5_HAVE_PARALLEL)
 
 SET_SOURCE_FILES_PROPERTIES (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
 
-ADD_LIBRARY (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS})
+SET (f90CStub_C_HDRS
+    # generated files
+    ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
+)
+
+ADD_LIBRARY (${HDF5_F90_C_LIB_TARGET} ${LIB_TYPE} ${f90CStub_C_SRCS} ${f90CStub_C_HDRS})
 TARGET_LINK_LIBRARIES (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_NAME} ${LIB_TYPE})
 SET_TARGET_PROPERTIES (${HDF5_F90_C_LIB_TARGET} PROPERTIES FOLDER libraries/fortran)
+SET_TARGET_PROPERTIES (${HDF5_F90_C_LIB_TARGET} PROPERTIES LINKER_LANGUAGE C)
 
 #-----------------------------------------------------------------------------
 # Fortran 2003 standard
