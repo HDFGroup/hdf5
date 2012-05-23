@@ -31311,6 +31311,7 @@ do
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/h5dump/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;
     "tools/h5dump/testh5dump.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dump.sh" ;;
+    "tools/h5dump/testh5dumppbits.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dumppbits.sh" ;;
     "tools/h5dump/testh5dumpxml.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dumpxml.sh" ;;
     "tools/h5ls/testh5ls.sh") CONFIG_FILES="$CONFIG_FILES tools/h5ls/testh5ls.sh" ;;
     "tools/h5import/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5import/Makefile" ;;
