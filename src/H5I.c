@@ -94,6 +94,8 @@ typedef struct H5I_id_info_t {
     unsigned	count;		/* ref. count for this atom		    */
     unsigned    app_count;      /* ref. count of application visible atoms  */
     const void	*obj_ptr;	/* pointer associated with the atom	    */
+    const void  *aux_ptr;       /* auxilary pointer associated with the atom */
+    H5I_free_t	free_aux;	/*release auxilary structure method         */
     struct H5I_id_info_t *next;	/* link to next atom (in case of hash-clash)*/
 } H5I_id_info_t;
 
@@ -823,6 +825,8 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     id_ptr->count = 1; /*initial reference count*/
     id_ptr->app_count = !!app_ref;
     id_ptr->obj_ptr = object;
+    id_ptr->aux_ptr = NULL;
+    id_ptr->free_aux = NULL;
     id_ptr->next = NULL;
 
     /* hash bucket already full, prepend to front of chain */
@@ -1018,25 +1022,11 @@ void *
 H5I_object_verify(hid_t id, H5I_type_t id_type)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
-    H5VL_id_wrapper_t               *id_wrapper;              /* user id structure */
     void		*ret_value = NULL;	/*return value		*/
 
     FUNC_ENTER_NOAPI(NULL)
 
     HDassert(id_type >= 1 && id_type < H5I_next_type);
-
-    /* Temp workaround for tests to pass */
-#if 1
-    if ((H5I_FILE_PUBLIC == H5I_get_type(id) && H5I_FILE_PUBLIC != id_type) || 
-        (H5I_GROUP_PUBLIC == H5I_get_type(id) && H5I_GROUP_PUBLIC != id_type) ||
-        (H5I_DATATYPE_PUBLIC == H5I_get_type(id) && H5I_DATATYPE_PUBLIC != id_type) ||
-        (H5I_DATASET_PUBLIC == H5I_get_type(id) && H5I_DATASET_PUBLIC != id_type) ||
-        (H5I_ATTR_PUBLIC == H5I_get_type(id) && H5I_ATTR_PUBLIC != id_type)) {
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        id = id_wrapper->obj_id;       
-    }
-#endif
 
     /* Verify that the type of the ID is correct & lookup the ID */
     if(id_type == H5I_TYPE(id) && NULL != (id_ptr = H5I_find_id(id))) {
@@ -1352,7 +1342,8 @@ H5I_dec_ref(hid_t id)
      */
     if(1 == id_ptr->count) {
         /* (Casting away const OK -QAK) */
-        if(!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0) {
+        if((!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0) &&
+           (!id_ptr->free_aux || (id_ptr->free_aux)((void *)id_ptr->aux_ptr) >= 0)) {
             H5I_remove(id);
             ret_value = 0;
         } /* end if */
@@ -2227,9 +2218,6 @@ H5Iget_file_id(hid_t id)
     if((ret_value = H5I_get_file_id(id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
-    if (H5VL_replace_with_uids (&ret_value, 1) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_file_id() */
@@ -2259,18 +2247,6 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
     FUNC_ENTER_NOAPI_NOINIT
 
     id_type = H5I_get_type(obj_id);
-    /* get the actual OBJ_ID from an upper ID level */
-    /* MSC - this is a workaround to allow the test suite to pass and
-     at some point needs to be removed once all high level operations
-     that needs to go through the VOL actually go through the VOL*/
-    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
-        H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
-        H5I_ATTR_PUBLIC == id_type) {
-        H5VL_id_wrapper_t       *id_wrapper;              /* user id structure */
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        obj_id = id_wrapper->obj_id;
-    }
 
     /* Get object type */
     type = H5I_TYPE(obj_id);
@@ -2278,10 +2254,6 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
         /* Increment reference count on file ID */
         if(H5I_inc_ref(obj_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-
-        /* Increment reference count on upper level ID. */
-        if(H5VL_inc_ref_uid(obj_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing user ID failed")
 
         /* Set return value */
         ret_value = obj_id;
@@ -2307,157 +2279,65 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_replace_with_uids
- *
- * Purpose:     change the ids used by the HDF5 libraries to the UIDs that
- *              are provided to the user
- *
- * Return:	How many IDs were replaced.
- *
- * Programmer:	Mohamad Chaarawi
- *              Feb 2012
- *
- *-------------------------------------------------------------------------
- */
-int
-H5VL_replace_with_uids(hid_t *old_list, ssize_t num_ids)
-{
-    ssize_t j;
-    H5I_type_t type;
-    int  ret_value = 0;      /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    for (j=0 ; j<num_ids ; j++) {
-        H5I_id_type_t   *type_ptr;      /*ptr to the type       */
-        hbool_t replaced = FALSE;
-
-        type = H5I_get_type(old_list[j]);
-
-        if (H5I_FILE == type) {
-            type_ptr = H5I_id_type_list_g[H5I_FILE_PUBLIC];
-        }
-        else if (H5I_GROUP == type) {
-            type_ptr = H5I_id_type_list_g[H5I_GROUP_PUBLIC];
-        }
-        else if (H5I_DATASET == type) {
-            type_ptr = H5I_id_type_list_g[H5I_DATASET_PUBLIC];
-        }
-        else if (H5I_DATATYPE == type) {
-            type_ptr = H5I_id_type_list_g[H5I_DATATYPE_PUBLIC];
-        }
-        else if (H5I_ATTR == type) {
-            type_ptr = H5I_id_type_list_g[H5I_ATTR_PUBLIC];
-        }
-        else {
-            ret_value ++;
-            continue;
-        }
-            
-        if(type_ptr == NULL || type_ptr->count <= 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-
-        /* Only iterate through hash table if there are IDs in group */
-        if(type_ptr->ids > 0) {
-            H5I_id_info_t       *id_ptr;        /*ptr to the new ID     */
-            H5VL_id_wrapper_t *id_wrapper;                    /* user id structure */
-            unsigned i;                 /*counter               */
-
-            /* Start at the beginning of the array */
-            for(i = 0; i < type_ptr->hash_size; i++) {
-                id_ptr = type_ptr->id_list[i];
-                while(id_ptr) {
-                    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id_ptr->id)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-                    if (id_wrapper->obj_id == old_list[j]) {
-                        old_list[j] = id_ptr->id;
-                        ret_value ++;
-                        replaced = TRUE;
-                        break;
-                    }
-                    id_ptr = id_ptr->next;
-                } /* end while */
-                if (replaced)
-                    break;
-            } /* end for */
-        } /* end if */
-    }
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_replace_with_uids() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_inc_ref_uid
+ * Function:	H5I_register_aux
  *
  * Purpose:     increment the ref count on the high level ID given the low level ID
  *
- * Return:	How many IDs were replaced.
+ * Return:	Success: postive
+ *              Failure: FAIL
  *
  * Programmer:	Mohamad Chaarawi
- *              Feb 2012
+ *              May 2012
  *
  *-------------------------------------------------------------------------
  */
-int
-H5VL_inc_ref_uid(hid_t id, hbool_t app_ref)
+herr_t
+H5I_register_aux(hid_t id, void *aux_ptr, H5I_free_t free_func)
 {
-    H5I_id_type_t   *type_ptr;      /*ptr to the type       */
-    H5I_type_t type;
-    int  ret_value = 0;      /* Return value */
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
+    herr_t		ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI(FAIL)
-        
-    type = H5I_get_type(id);
+    FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5I_FILE == type) {
-        type_ptr = H5I_id_type_list_g[H5I_FILE_PUBLIC];
+    if(NULL != (id_ptr = H5I_find_id(id))) {
+        id_ptr->aux_ptr = aux_ptr;
+        id_ptr->free_aux = free_func;
     }
-    else if (H5I_GROUP == type) {
-        type_ptr = H5I_id_type_list_g[H5I_GROUP_PUBLIC];
-    }
-    else if (H5I_DATASET == type) {
-        type_ptr = H5I_id_type_list_g[H5I_DATASET_PUBLIC];
-    }
-    else if (H5I_DATATYPE == type) {
-        type_ptr = H5I_id_type_list_g[H5I_DATATYPE_PUBLIC];
-    }
-    else if (H5I_ATTR == type) {
-        type_ptr = H5I_id_type_list_g[H5I_ATTR_PUBLIC];
-    }
-    else {
-        HGOTO_DONE(ret_value)
-    }
-
-    if(type_ptr == NULL || type_ptr->count <= 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-
-    /* Only iterate through hash table if there are IDs in group */
-    if(type_ptr->ids > 0) {
-        H5I_id_info_t       *id_ptr;        /*ptr to the new ID     */
-        H5VL_id_wrapper_t *id_wrapper;                    /* user id structure */
-        unsigned i;                 /*counter               */
-
-        /* Start at the beginning of the array */
-        for(i = 0; i < type_ptr->hash_size; i++) {
-            id_ptr = type_ptr->id_list[i];
-            while(id_ptr) {
-                if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id_ptr->id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-                if (id_wrapper->obj_id == id) {
-                    /* Increment reference count on atom. */
-                    if((ret_value = H5I_inc_ref(id_ptr->id, app_ref)) < 0)
-                        HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-                    HGOTO_DONE(ret_value)
-                }
-                id_ptr = id_ptr->next;
-            } /* end while */
-        } /* end for */
-    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_inc_ref_uid() */
+} /* end H5I_register_aux() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_get_aux
+ *
+ * Purpose:     return the aux ptr
+ *
+ * Return:	Success:	Non-null auxilary pointer associated with the
+ *				specified ID.
+ *		Failure:	NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5I_get_aux(hid_t id)
+{
+    H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
+    void *		ret_value = NULL;	/*return value		*/
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != (id_ptr = H5I_find_id(id))) {
+        ret_value = (void *)id_ptr->aux_ptr;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_get_aux() */
 
 
 /*-------------------------------------------------------------------------

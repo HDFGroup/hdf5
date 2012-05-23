@@ -147,7 +147,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, plist_id);
 
     /* check arguments */
-    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
@@ -208,7 +208,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* check arguments */
-    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
@@ -253,7 +253,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     H5TRACE2("i", "iIu", loc_id, idx);
 
     /* check arguments */
-    if(H5I_ATTR_PUBLIC == H5I_get_type(loc_id))
+    if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
 
     if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &ret_value, ".", H5_INDEX_CRT_ORDER, 

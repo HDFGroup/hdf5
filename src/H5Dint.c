@@ -1919,7 +1919,7 @@ H5D__iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t op,
 
     /* Check args */
     HDassert(buf);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id) || H5I_DATATYPE_PUBLIC == H5I_get_type(type_id));
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
     HDassert(space);
     HDassert(H5S_has_extent(space));
     HDassert(op);
@@ -1955,7 +1955,7 @@ H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id) || H5I_DATATYPE_PUBLIC == H5I_get_type(type_id));
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
     HDassert(space);
     HDassert(H5P_isa_class(plist_id, H5P_DATASET_XFER));
     HDassert(buf);
@@ -2042,7 +2042,7 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
     FUNC_ENTER_PACKAGE
 
     HDassert(op_data);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id) || H5I_DATATYPE_PUBLIC == H5I_get_type(type_id));
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object(type_id)))

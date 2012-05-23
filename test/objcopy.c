@@ -1850,11 +1850,6 @@ test_copy_named_datatype_attr_self(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     /* create named datatype */
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* MSC - workaround named datatypes */
-    if(H5Tclose(tid) < 0) goto error;
-    if((tid = H5Topen2(fid_src, NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
-
     /* create dataspace */
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
 
@@ -9634,10 +9629,6 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     if((tid3 = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
     if((H5Tcommit2(fid_src, SRC_NDT_INT, tid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid3) < 0) TEST_ERROR
-    if((tid3 = H5Topen2(fid_src, SRC_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-
     /* set dataspace dimensions */
     dim1d[0]=DIM_SIZE_1;
 
@@ -9656,10 +9647,6 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     /* create an anonymous committed datatype (short) */
     if((tid5 = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
     if((H5Tcommit_anon(fid_src, tid5, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid4) < 0) TEST_ERROR
-    if((tid4 = H5Topen2(fid_src, SRC_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create an attribute of anon ndt (short); attach to committed datatype (double) */
     if((aid = H5Acreate2(tid4, SRC_ATTR, tid5, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -9689,10 +9676,6 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     if((tid2 = H5Tcopy(H5T_NATIVE_FLOAT)) < 0) TEST_ERROR
     if((H5Tcommit2(fid_dst, DST_NDT_FLOAT, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid2) < 0) TEST_ERROR
-    if((tid2 = H5Topen2(fid_dst, DST_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
-
     /* create an attribute of native integer; attach to committed datatype (float) */
     if((aid = H5Acreate2(tid2, DST_ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -9705,10 +9688,6 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     /* create anonymous committed datatype (short) */
     if((tid4 = H5Tcopy(H5T_NATIVE_SHORT)) < 0) TEST_ERROR
     if((H5Tcommit_anon(fid_dst, tid4, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid3) < 0) TEST_ERROR
-    if((tid3 = H5Topen2(fid_dst, DST_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create an attribute of anon ndt (short); attach to ndt (double) */
     if((aid = H5Acreate2(tid3, DST_ATTR, tid4, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -10468,10 +10447,6 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)TEST_ERROR
     if((H5Tcommit2(fid_dst, DST_NDT_INT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid) < 0) TEST_ERROR
-    if((tid = H5Topen2(fid_dst, DST_NDT_INT, H5P_DEFAULT)) < 0) TEST_ERROR
-
     /* create an attribute attached to committed datatype */
     if((aid = H5Acreate2(tid, DST_ATTR, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -10484,10 +10459,6 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create committed datatype in root group */
     if((tid = H5Tcopy(H5T_NATIVE_FLOAT)) < 0)TEST_ERROR
     if((H5Tcommit2(fid_dst, DST_NDT_FLOAT, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid) < 0) TEST_ERROR
-    if((tid = H5Topen2(fid_dst, DST_NDT_FLOAT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create an attribute attached to committed datatype */
     if((aid = H5Acreate2(tid, DST_ATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -10544,10 +10515,6 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     /* create a committed datatype at root group */
     if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)TEST_ERROR
     if((H5Tcommit2(fid_dst, DST_NDT_DOUBLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* MSC - workaround committed datatypes */
-    if(H5Tclose(tid) < 0) TEST_ERROR
-    if((tid = H5Topen2(fid_dst, DST_NDT_DOUBLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* get datatype */
     if((tid_short = H5Topen2(fid_dst, "/" DST_GRP2 "/" DST_NDT_SHORT, H5P_DEFAULT)) < 0) TEST_ERROR

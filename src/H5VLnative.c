@@ -717,9 +717,29 @@ H5VL_native_datatype_commit(hid_t loc_id, const char *name, hid_t type_id, hid_t
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-    /* Commit the type */
-    if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
+    if (NULL != name) { /* H5Tcommit */
+        /* Commit the type */
+        if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
+    }
+    else { /* H5Tcommit_anon */
+        /* Commit the type */
+        if(H5T__commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
+
+        /* Release the datatype's object header */
+        {
+            H5O_loc_t *oloc;         /* Object location for datatype */
+
+            /* Get the new committed datatype's object location */
+            if(NULL == (oloc = H5T_oloc(type)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get object location of committed datatype")
+
+            /* Decrement refcount on committed datatype's object header in memory */
+            if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+        } /* end if */
+    }
 
 done:
 
@@ -1821,12 +1841,11 @@ H5VL_native_file_close(hid_t file_id, hid_t UNUSED req)
             if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
-
     /*
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if(H5I_dec_ref(f->file_id) < 0)
+    if(H5I_dec_app_ref(f->file_id) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:

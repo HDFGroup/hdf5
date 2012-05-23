@@ -477,7 +477,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
 
     /* Check args */
     id_type = H5I_get_type(loc_id);
-    if(!(H5I_GROUP_PUBLIC == id_type || H5I_FILE_PUBLIC == id_type))
+    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")

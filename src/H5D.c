@@ -649,7 +649,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid operator")
     if(NULL == buf)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
-    if(H5I_DATATYPE != H5I_get_type(type_id) && H5I_DATATYPE_PUBLIC != H5I_get_type(type_id))
+    if(H5I_DATATYPE != H5I_get_type(type_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid datatype")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
@@ -688,7 +688,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     H5TRACE4("e", "iii*x", type_id, space_id, plist_id, buf);
 
     /* Check args */
-    if((H5I_DATATYPE != H5I_get_type(type_id) && H5I_DATATYPE_PUBLIC != H5I_get_type(type_id)) || 
+    if((H5I_DATATYPE != H5I_get_type(type_id)) || 
        buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
@@ -750,9 +750,8 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     H5TRACE4("e", "iii*h", dataset_id, type_id, space_id, size);
 
     /* Check args */
-    if(H5I_DATASET_PUBLIC != H5I_get_type(dataset_id) ||
-       (H5I_DATATYPE != H5I_get_type(type_id) && H5I_DATATYPE_PUBLIC != H5I_get_type(type_id)) || 
-       size == NULL)
+    if(H5I_DATASET != H5I_get_type(dataset_id) ||
+       (H5I_DATATYPE != H5I_get_type(type_id)) || size == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")

@@ -1133,7 +1133,7 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* Check arguments */
     id_type = H5I_get_type(id);
-    if(!(H5I_GROUP_PUBLIC == id_type || H5I_FILE_PUBLIC == id_type))
+    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
@@ -1276,7 +1276,7 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     id_type = H5I_get_type(grp_id);
 
     /* Check args */
-    if(!(H5I_GROUP_PUBLIC == id_type || H5I_FILE_PUBLIC == id_type))
+    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
@@ -1637,7 +1637,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
     H5G_loc_t temp_loc;             /* For UD callback */
     hbool_t temp_loc_init = FALSE;  /* Temporary location for UD callback (temp_loc) has been initialized */
     hbool_t obj_created = FALSE;    /* Whether an object was created (through a hard link) */
-    H5VL_id_wrapper_t  *id_wrapper;              /* wrapper for the group ID */
+    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1732,15 +1732,11 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
             if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register ID for group")
 
-            /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
-            /* Allocate new id structure */
-            if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-            id_wrapper->obj_id = grp_id;
-            id_wrapper->vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
-
-            if((grp_id = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+            /* attach VOL information to the ID */
+            vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
+            if (H5I_register_aux(grp_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            vol_plugin->nrefs++;
 
             /* Make callback */
             if((link_class->create_func)(name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size, H5P_DEFAULT) < 0)
@@ -1765,7 +1761,7 @@ done:
 
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0) {
-        if(H5I_dec_app_ref(id_wrapper->obj_id) < 0 && H5I_dec_app_ref(grp_id) < 0)
+        if(H5I_dec_app_ref(grp_id) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
     } /* end if */
     else if(grp != NULL) {

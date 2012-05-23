@@ -46,11 +46,6 @@
 #define H5I_REFID_HASHSIZE		64
 #define H5I_VFL_HASHSIZE		64
 #define H5I_VOL_HASHSIZE		64
-#define H5I_FILE_PUBLIC_HASHSIZE	64
-#define H5I_GROUP_PUBLIC_HASHSIZE	64
-#define H5I_DATASET_PUBLIC_HASHSIZE	64
-#define H5I_ATTR_PUBLIC_HASHSIZE	64
-#define H5I_DATATYPE_PUBLIC_HASHSIZE	64
 #define H5I_GENPROPCLS_HASHSIZE		64
 #define H5I_GENPROPOBJ_HASHSIZE		128
 #define H5I_ERRCLS_HASHSIZE		64
@@ -79,5 +74,7 @@ H5_DLL int H5I_dec_app_ref_always_close(hid_t id);
 H5_DLL int H5I_inc_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
 H5_DLL int H5I_get_type_ref(H5I_type_t type);
+H5_DLL herr_t H5I_register_aux(hid_t id, void *aux_ptr, H5I_free_t free_func);
+H5_DLL void *H5I_get_aux(hid_t id);
 #endif /* _H5Iprivate_H */
 

@@ -2395,30 +2395,11 @@ done:
  *-------------------------------------------------------------------------
  */
 H5O_loc_t *
-H5O_get_loc(hid_t id)
+H5O_get_loc(hid_t object_id)
 {
-    H5VL_id_wrapper_t       *id_wrapper;              /* user id structure */
-    hid_t       object_id;
-    H5I_type_t  id_type;
     H5O_loc_t   *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    id_type = H5I_get_type(id);
-
-    /* get the actual ID from an upper ID level */
-    /* MSC - this is a workaround to allow the test suite to pass and
-     at some point needs to be removed once all high level operations
-     that needs to go through the VOL actually go through the VOL*/
-    if (H5I_GROUP_PUBLIC == id_type || H5I_DATASET_PUBLIC == id_type || 
-        H5I_DATATYPE_PUBLIC == id_type) {
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, NULL, "invalid user identifier")
-        object_id = id_wrapper->obj_id;
-    }
-    else {
-        object_id = id;
-    }
 
     switch(H5I_get_type(object_id)) {
         case H5I_GROUP:

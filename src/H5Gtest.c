@@ -515,7 +515,6 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
 {
     void *obj_ptr;              /* Pointer to object for ID */
     H5G_name_t *obj_path;       /* Pointer to group hier. path for obj */
-    H5I_type_t  id_type; 
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -523,20 +522,6 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
     /* Sanity check */
     HDassert(user_path_len);
     HDassert(obj_hidden);
-
-    id_type = H5I_get_type(obj_id);
-    /* get the actual OBJ_ID from an upper ID level */
-    /* MSC - this is a workaround to allow the test suite to pass and
-     at some point needs to be removed once all high level operations
-     that needs to go through the VOL actually go through the VOL*/
-    if (H5I_FILE_PUBLIC == id_type || H5I_GROUP_PUBLIC == id_type ||
-        H5I_DATASET_PUBLIC == id_type || H5I_DATATYPE_PUBLIC == id_type ||
-        H5I_ATTR_PUBLIC == id_type) {
-        H5VL_id_wrapper_t       *id_wrapper;              /* user id structure */
-        if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid user identifier")
-        obj_id = id_wrapper->obj_id;
-    }
 
     /* Get pointer to object for ID */
     if(NULL == (obj_ptr = H5I_object(obj_id)))

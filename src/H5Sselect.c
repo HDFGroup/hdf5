@@ -1240,7 +1240,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
 
     /* Check args */
     HDassert(buf);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id) || H5I_DATATYPE_PUBLIC == H5I_get_type(type_id));
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
     HDassert(space);
     HDassert(op);
 

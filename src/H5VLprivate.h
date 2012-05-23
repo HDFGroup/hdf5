@@ -31,12 +31,6 @@
 /****************************/
 #define H5_REQUEST_NULL -1
 
-/* type of the ID passed to users */
-typedef struct H5VL_id_wrapper_t {
-    hid_t obj_id;  /* actual id for object */
-    H5VL_class_t *vol_plugin;  /* pointer to the VOL structure */
-} H5VL_id_wrapper_t;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -53,9 +47,7 @@ H5_DLL int H5VL_term_interface(void);
 H5_DLL H5VL_class_t *H5VL_get_class(hid_t id);
 //H5_DLL hsize_t H5VL_sb_size(H5F_t *file);
 H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
-
-H5_DLL herr_t H5VL_replace_with_uids(hid_t *oid_list, ssize_t num_ids);
-H5_DLL int H5VL_inc_ref_uid(hid_t fid, hbool_t app_ref);
+H5_DLL herr_t H5VL_close(H5VL_class_t *vol_plugin);
 
 H5_DLL hid_t H5VL_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
 H5_DLL hid_t H5VL_attr_open(hid_t loc_id, void *location, const char *name, hid_t aapl_id, hid_t req);

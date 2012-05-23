@@ -1166,19 +1166,19 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 
                 id_type = H5Iget_type(oid_list[i]);
                 switch(id_type) {
-                    case H5I_FILE_PUBLIC:
+                    case H5I_FILE:
                         if(oid_list[i] != fid1 && oid_list[i] != fid2
                            && oid_list[i] != fid3 && oid_list[i] != fid4)
                             ERROR("H5Fget_obj_ids");
                         break;
 
-                    case H5I_GROUP_PUBLIC:
+                    case H5I_GROUP:
                         if(oid_list[i] != gid1 && oid_list[i] != gid2
                            && oid_list[i] != gid3)
                             ERROR("H5Fget_obj_ids");
                         break;
 
-                    case H5I_DATASET_PUBLIC:
+                    case H5I_DATASET:
                         VERIFY(oid_list[i], did, "H5Fget_obj_ids");
                         break;
 

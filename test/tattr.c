@@ -9832,12 +9832,6 @@ test_attr_bug3(hid_t fcpl, hid_t fapl)
     did = H5Dcreate2(fid, "dset", tid2, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate2");
 
-    /* MSC - workaround committed datatypes */
-    ret = H5Tclose(tid1);
-    CHECK(ret, FAIL, "H5Tclose");
-    tid1 = H5Topen2(fid, "dtype", H5P_DEFAULT);
-    CHECK(tid1, FAIL, "H5Topen2");
-
     /* Create attribute on datatype, using that datatype as its datatype */
     aid1 = H5Acreate2(tid1, "attr", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aid1, FAIL, "H5Acreate2");
@@ -9979,12 +9973,6 @@ test_attr_bug4(hid_t fcpl, hid_t fapl)
     aid2 = H5Acreate2(did, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aid2, FAIL, "H5Acreate2");
 
-    /* MSC - workaround committed datatypes */
-    ret = H5Tclose(tid);
-    CHECK(ret, FAIL, "H5Tclose");
-    tid = H5Topen2(fid, "dtype", H5P_DEFAULT);
-    CHECK(tid, FAIL, "H5Topen2");
-
     /* Create attribute on datatype (this is the main test) */
     aid3 = H5Acreate2(tid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aid3, FAIL, "H5Acreate2");
@@ -10069,11 +10057,6 @@ test_attr_bug5(hid_t fcpl, hid_t fapl)
     aidd1 = H5Acreate2(did1, BUG3_ATTR_NAME, tid1, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aidd1, FAIL, "H5Acreate2");
 
-    /* MSC - workaround committed datatypes */
-    ret = H5Tclose(tid1);
-    CHECK(ret, FAIL, "H5Tclose");
-    tid1 = H5Topen2(fid1, BUG3_DT_NAME, H5P_DEFAULT);
-    CHECK(tid1, FAIL, "H5Topen2");
     /* Create attribute on datatype */
     aidt1 = H5Acreate2(tid1, BUG3_ATTR_NAME, tid1, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aidt1, FAIL, "H5Acreate2");
@@ -10278,11 +10261,7 @@ test_attr_bug7(hid_t fcpl, hid_t fapl)
      */
     sid = H5Screate_simple(1, &dims_s, NULL);
     CHECK(sid, FAIL, "H5Screate_simple");
-    /* MSC - workaround committed datatypes */
-    ret = H5Tclose(tid);
-    CHECK(ret, FAIL, "H5Tclose");
-    tid = H5Topen2(fid, TYPE1_NAME, H5P_DEFAULT);
-    CHECK(tid, FAIL, "H5Topen2");
+
     aid = H5Acreate2(tid, ATTR1_NAME, H5T_STD_I8LE, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aid, FAIL, "H5Acreate2");
 

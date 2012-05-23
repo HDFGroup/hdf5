@@ -45,11 +45,6 @@ typedef enum H5I_type_t {
     H5I_REFERENCE,	        /*type ID for Reference objects		    */
     H5I_VFL,			/*type ID for virtual file layer	    */
     H5I_VOL,			/*type ID for virtual object layer	    */
-    H5I_FILE_PUBLIC,		/*type ID for upper level file ID objects   */
-    H5I_GROUP_PUBLIC,		/*type ID for upper level group ID objects  */
-    H5I_DATASET_PUBLIC,		/*type ID for upper level dataset ID objects    */
-    H5I_ATTR_PUBLIC,	/*type ID for upper level attribute ID objects  */
-    H5I_DATATYPE_PUBLIC,	/*type ID for upper level datatype ID objects   */
     H5I_GENPROP_CLS,            /*type ID for generic property list classes */
     H5I_GENPROP_LST,            /*type ID for generic property lists        */
     H5I_ERROR_CLASS,            /*type ID for error classes		    */

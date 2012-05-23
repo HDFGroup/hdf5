@@ -154,7 +154,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     /* commite the datatype through the VOL */
     if((ret_value = H5VL_datatype_commit(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, H5_REQUEST_NULL)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tcommit2() */
@@ -271,12 +271,6 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
-    /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-
     /* Get correct property list */
     if(H5P_DEFAULT == tcpl_id)
         tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
@@ -291,22 +285,10 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
-    /* Commit the type */
-    if(H5T__commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
-
-    /* Release the datatype's object header */
-    {
-        H5O_loc_t *oloc;         /* Object location for datatype */
-
-        /* Get the new committed datatype's object location */
-        if(NULL == (oloc = H5T_oloc(type)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get object location of committed datatype")
-
-        /* Decrement refcount on committed datatype's object header in memory */
-        if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
-           HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
-    } /* end if */
+    /* commite the datatype through the VOL */
+    if((ret_value = H5VL_datatype_commit(loc_id, NULL, type_id, 0, tcpl_id, tapl_id, 
+                                         H5_REQUEST_NULL)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
     FUNC_LEAVE_API(ret_value)

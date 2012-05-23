@@ -814,7 +814,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata; /* User data for callback */
-    H5VL_id_wrapper_t   *id_wrapper; /* user id structure of new opend group*/
+    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -835,15 +835,11 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
-    /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
-    /* Allocate new id structure */
-    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    id_wrapper->obj_id = gid;
-    id_wrapper->vol_plugin = H5F_get_vol_cls(loc.oloc->file);
-
-    if((gid = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+    /* attach VOL information to the ID */
+    vol_plugin = H5F_get_vol_cls(loc.oloc->file);
+    if (H5I_register_aux(gid, vol_plugin, (H5I_free_t)H5VL_close) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    vol_plugin->nrefs++;
 
     /* Set up user data for callback */
     udata.gid = gid;
@@ -857,7 +853,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
 done:
     /* Release the group opened */
     if(gid > 0) {
-        if(H5I_dec_app_ref(id_wrapper->obj_id) < 0 && H5I_dec_app_ref(gid) < 0)
+        if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     } /* end if */
     else if(grp && H5G_close(grp) < 0)
@@ -1095,7 +1091,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_loc_t	loc;                /* Location of group passed in */
     H5G_loc_t	start_loc;          /* Location of starting group */
     unsigned    rc;		    /* Reference count of object    */
-    H5VL_id_wrapper_t  *id_wrapper; /* wrapper for the group ID */
+    H5VL_class_t *vol_plugin;       /* VOL structure attached to id */
     herr_t      ret_value;          /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
@@ -1119,15 +1115,11 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     if(H5G_loc(gid, &start_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-    /* MSC - Create a new id that points to a struct that holds the group id and the VOL plugin */
-    /* Allocate new id structure */
-    if(NULL == (id_wrapper = (H5VL_id_wrapper_t *)H5MM_malloc(sizeof(H5VL_id_wrapper_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    id_wrapper->obj_id = gid;
-    id_wrapper->vol_plugin = H5F_get_vol_cls(loc.oloc->file);
-
-    if((gid = H5I_register(H5I_GROUP_PUBLIC, id_wrapper, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+    /* attach VOL information to the ID */
+    vol_plugin = H5F_get_vol_cls(loc.oloc->file);
+    if (H5I_register_aux(gid, vol_plugin, (H5I_free_t)H5VL_close) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    vol_plugin->nrefs++;
 
     /* Set up user data */
     udata.gid = gid;
@@ -1204,7 +1196,7 @@ done:
 
     /* Release the group opened */
     if(gid > 0) {
-        if(H5I_dec_app_ref(id_wrapper->obj_id) < 0 && H5I_dec_app_ref(gid) < 0)
+        if(H5I_dec_app_ref(gid) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
     } /* end if */
     else if(grp && H5G_close(grp) < 0)
