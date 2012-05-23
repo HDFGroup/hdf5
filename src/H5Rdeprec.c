@@ -196,7 +196,8 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, H5_REQUEST_NULL, &location, ref_type, _ref) < 0)
+    if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, &location, H5_REQUEST_NULL,
+                           ref_type, _ref) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */

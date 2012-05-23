@@ -825,7 +825,7 @@ H5VL_datatype_open(hid_t id, const char *name, hid_t tapl_id, hid_t req)
                                         the location of the object */
 
         /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, req, &location, name, tapl_id) < 0)
+        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, req, name, tapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
         /* Open the object through the VOL */
@@ -964,7 +964,7 @@ H5VL_dataset_open(hid_t id, const char *name, hid_t dapl_id, hid_t req)
                                         the location of the object */
 
         /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, req, &location, name, dapl_id) < 0)
+        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, req, name, dapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
         /* Open the object through the VOL */
@@ -1509,7 +1509,7 @@ H5VL_group_open(hid_t id, const char *name, hid_t gapl_id, hid_t req)
                                         the location of the object */
 
         /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, req, &location, name, gapl_id) < 0)
+        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, req, name, gapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
         /* Open the object through the VOL */
@@ -1897,7 +1897,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_lookup(hid_t id, H5VL_object_lookup_t lookup_type, hid_t req, ...)
+H5VL_object_lookup(hid_t id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */
@@ -1912,7 +1912,7 @@ H5VL_object_lookup(hid_t id, H5VL_object_lookup_t lookup_type, hid_t req, ...)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object lookup' method")
 
     va_start (arguments, req);
-    if((ret_value = (vol_plugin->object_cls.lookup)(id, lookup_type, req, arguments)) < 0)
+    if((ret_value = (vol_plugin->object_cls.lookup)(id, lookup_type, location, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "lookup of object location failed")
     va_end (arguments);
 done:

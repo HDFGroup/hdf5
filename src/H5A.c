@@ -309,7 +309,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get correct property list */
@@ -599,7 +599,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the attribute through the VOL */
@@ -1676,7 +1676,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 #endif
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the attribute through the VOL */
@@ -1893,7 +1893,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
         void *location = NULL;
 
         /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+        if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
         /* get the attribute info through the VOL */
@@ -2066,7 +2066,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
@@ -2179,7 +2179,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the attribute through the VOL */
@@ -2246,7 +2246,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* get the attribute info through the VOL */
@@ -2634,7 +2634,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, obj_name, lapl_id) < 0)
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, obj_name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* get the attribute info through the VOL */

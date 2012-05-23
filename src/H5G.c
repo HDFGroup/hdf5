@@ -527,7 +527,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
@@ -586,7 +586,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, H5_REQUEST_NULL, &location, group_name,
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, &location, H5_REQUEST_NULL, group_name,
                           idx_type, order, n, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 

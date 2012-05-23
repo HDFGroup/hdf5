@@ -108,7 +108,7 @@ static herr_t H5VL_native_link_remove(hid_t loc_id, const char *name, void *udat
 static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                                       const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
-static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_free_loc(void *location, hid_t req);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, va_list arguments);
@@ -2479,17 +2479,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, hid_t UNUSED req, va_list arguments)
+H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **loc_token, 
+                          hid_t UNUSED req, va_list arguments)
 {
     H5G_loc_t	loc;
     H5G_loc_t   *obj_loc;
-    H5G_loc_t   **location;
+    H5G_loc_t   **location = (H5G_loc_t **)loc_token;
     haddr_t     obj_addr;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    location = va_arg (arguments, H5G_loc_t **);
     *location = (H5G_loc_t *) H5MM_malloc (sizeof (H5G_loc_t));
 
     if(H5G_loc(loc_id, &loc) < 0)

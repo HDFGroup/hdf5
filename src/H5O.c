@@ -241,7 +241,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
@@ -306,7 +306,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, H5_REQUEST_NULL, &location, group_name,
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, &location, H5_REQUEST_NULL, group_name,
                           idx_type, order, n, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
@@ -370,7 +370,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     H5TRACE2("i", "ia", loc_id, addr);
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_ADDR, H5_REQUEST_NULL, &location, addr) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_ADDR, &location, H5_REQUEST_NULL, addr) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Open the object through the VOL */
@@ -644,7 +644,7 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, H5_REQUEST_NULL, &location, name, lapl_id) < 0)
+    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, name, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* Get the group info through the VOL using the location token */
@@ -703,7 +703,7 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, H5_REQUEST_NULL, &location, group_name,
+    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, &location, H5_REQUEST_NULL, group_name,
                           idx_type, order, n, lapl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
