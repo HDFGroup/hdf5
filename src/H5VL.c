@@ -1826,7 +1826,7 @@ H5VL_object_open_by_loc(hid_t id, void *obj_loc, hid_t lapl_id, hid_t req)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object open' method")
 
     /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->object_cls.open)(id, obj_loc, lapl_id, req)) < 0)
+    if((ret_value = (vol_plugin->object_cls.open)(obj_loc, lapl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /* attach VOL information to the ID */

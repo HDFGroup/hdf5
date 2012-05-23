@@ -105,7 +105,7 @@ static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_
 static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_link_remove(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 
-static hid_t H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t req);
+static hid_t H5VL_native_object_open(void *location, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                                       const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
@@ -2405,17 +2405,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_native_object_open(hid_t loc_id, void *location, hid_t lapl_id, hid_t UNUSED req)
+H5VL_native_object_open(void *location, hid_t lapl_id, hid_t UNUSED req)
 {
-    H5G_loc_t   loc;
     H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!H5F_addr_defined(obj_loc->oloc->addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no address supplied")
 
@@ -2617,7 +2614,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_native_object_free_loc(void *location, hid_t req)
+H5VL_native_object_free_loc(void *location, hid_t UNUSED req)
 {
     H5G_loc_t   *obj_loc = (H5G_loc_t *)location;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -2625,7 +2622,7 @@ H5VL_native_object_free_loc(void *location, hid_t req)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(H5G_loc_free(obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
     if (NULL != obj_loc->oloc) {
         H5MM_free(obj_loc->oloc);
@@ -2832,7 +2829,6 @@ H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t UNUSED req, v
             {
                 H5O_info_t  *obj_info = va_arg (arguments, H5O_info_t *);
                 H5G_loc_t   *obj_loc = va_arg (arguments, H5G_loc_t *);
-                hbool_t     loc_set = FALSE;
 
                 if(NULL == obj_loc) {
                     obj_loc = &loc;
