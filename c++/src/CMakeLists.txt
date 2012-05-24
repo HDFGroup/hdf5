@@ -103,6 +103,9 @@ INSTALL (
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (HDF5_EXPORTED_TARGETS)
+
+  INSTALL_TARGET_PDB (${HDF5_CPP_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} cpplibraries)
+  
   INSTALL (
       TARGETS
           ${HDF5_CPP_LIB_TARGET}
