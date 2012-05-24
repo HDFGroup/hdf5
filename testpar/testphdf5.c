@@ -411,9 +411,13 @@ int main(int argc, char **argv)
     AddTest("cngrpw", collective_group_write, NULL,
       "collective group and dataset write", &collngroups_params);
     AddTest("ingrpr", independent_group_read, NULL,
-      "independent group and dataset read", &collngroups_params);
+	    "independent group and dataset read", &collngroups_params);
+#ifndef H5_HAVE_WIN32_API
     AddTest("bigdset", big_dataset, NULL,
             "big dataset test", PARATESTFILE);
+#else
+    printf("big dataset test will be skipped on Windows (JIRA HDDFV-8064)\n");
+#endif
     AddTest("fill", dataset_fillvalue, NULL,
       "dataset fill value", PARATESTFILE);
 
