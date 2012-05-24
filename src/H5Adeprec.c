@@ -256,7 +256,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
 
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &ret_value, ".", H5_INDEX_CRT_ORDER, 
+    if(H5VL_object_misc(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &ret_value, ".", H5_INDEX_CRT_ORDER, 
                            H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_LINK_ACCESS_DEFAULT) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 

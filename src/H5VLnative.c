@@ -90,7 +90,8 @@ static hid_t  H5VL_native_file_create(const char *name, unsigned flags, hid_t fc
 static hid_t  H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 static herr_t H5VL_native_file_flush(hid_t fid, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_native_file_get(hid_t file_id, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_file_optional(hid_t loc_id, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_file_close(hid_t fid, hid_t req);
 
 static hid_t H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
@@ -111,7 +112,8 @@ static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hi
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_free_loc(void *location, hid_t req);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_native_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_misc(hid_t id, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
+static herr_t H5VL_native_object_optional(hid_t id, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_close(hid_t object_id, hid_t req);
 
 H5VL_class_t H5VL_native_g = {
@@ -146,7 +148,8 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_file_open,                  /* open */
         H5VL_native_file_flush,                 /* flush */
         H5VL_native_file_get,                   /* get */
-        H5VL_native_file_generic,               /* generic */
+        H5VL_native_file_misc,                  /* misc */
+        H5VL_native_file_optional,              /* optional */
         H5VL_native_file_close                  /* close */
     },
     {                                           /* group_cls */
@@ -167,7 +170,8 @@ H5VL_class_t H5VL_native_g = {
         H5VL_native_object_lookup,              /* lookup */
         H5VL_native_object_free_loc,            /* free location */
         H5VL_native_object_get,                 /* get */
-        H5VL_native_object_generic,             /* generic */
+        H5VL_native_object_misc,                /* misc */
+        H5VL_native_object_optional,            /* optional */
         H5VL_native_object_close                /* close */
     }
 };
@@ -1591,6 +1595,124 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, hid_t UNUSED req, v
                 *ret = (ssize_t)obj_count;
                 break;
             }
+        /* H5Fget_intent */
+        case H5VL_FILE_GET_INTENT:
+            {
+                unsigned *ret = va_arg (arguments, unsigned *);
+
+                /* HDF5 uses some flags internally that users don't know about.
+                 * Simplify things for them so that they only get either H5F_ACC_RDWR
+                 * or H5F_ACC_RDONLY.
+                 */
+                if(H5F_INTENT(f) & H5F_ACC_RDWR)
+                    *ret = H5F_ACC_RDWR;
+                else
+                    *ret = H5F_ACC_RDONLY;
+                break;
+            }
+        /* H5Fget_name */
+        case H5VL_FILE_GET_NAME:
+            {
+                char      *name = va_arg (arguments, char *);
+                ssize_t   *ret  = va_arg (arguments, ssize_t *);
+                size_t     size = va_arg (arguments, size_t);
+                size_t     len;
+
+                len = HDstrlen(H5F_OPEN_NAME(f));
+
+                if(name) {
+                    HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
+                    if(len >= size)
+                        name[size-1]='\0';
+                } /* end if */
+
+                /* Set the return value for the API call */
+                *ret = (ssize_t)len;
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
+    } /* end switch */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_file_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_file_misc
+ *
+ * Purpose:	Perform an operation
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (misc_type) {
+        /* H5Fis_hdf5 */
+        case H5VL_FILE_IS_HDF5:
+            {
+                htri_t     *ret    = va_arg (arguments, htri_t *);
+                const char *name   = va_arg (arguments, const char *);
+
+                if((*ret = H5F_is_hdf5(name)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't determine if file is an HDF5 file")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_file_misc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_file_optional
+ *
+ * Purpose:	Perform a plugin specific operation on a native file
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_file_optional(hid_t id, H5VL_file_optional_t optional_type, hid_t UNUSED req, va_list arguments)
+{
+    H5F_t        *f = NULL;           /* File */
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check/fix arguments. */
+    if(H5I_FILE == H5I_get_type(id)) {
+        if(NULL == (f = (H5F_t *)H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+    } /* end if */
+    else {
+        H5G_loc_t     loc;        /* Object location */
+        /* Get symbol table entry */
+        if(H5G_loc(id, &loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
+        f = loc.oloc->file;
+    } /* end else */
+
+    switch (optional_type) {
         /* H5Fget_filesize */
         case H5VL_FILE_GET_SIZE:
             {
@@ -1663,41 +1785,6 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, hid_t UNUSED req, v
                 finfo->free.version = HDF5_FREESPACE_VERSION;
                 break;
             }
-        /* H5Fget_intent */
-        case H5VL_FILE_GET_INTENT:
-            {
-                unsigned *ret = va_arg (arguments, unsigned *);
-
-                /* HDF5 uses some flags internally that users don't know about.
-                 * Simplify things for them so that they only get either H5F_ACC_RDWR
-                 * or H5F_ACC_RDONLY.
-                 */
-                if(H5F_INTENT(f) & H5F_ACC_RDWR)
-                    *ret = H5F_ACC_RDWR;
-                else
-                    *ret = H5F_ACC_RDONLY;
-                break;
-            }
-        /* H5Fget_name */
-        case H5VL_FILE_GET_NAME:
-            {
-                char      *name = va_arg (arguments, char *);
-                ssize_t   *ret  = va_arg (arguments, ssize_t *);
-                size_t     size = va_arg (arguments, size_t);
-                size_t     len;
-
-                len = HDstrlen(H5F_OPEN_NAME(f));
-
-                if(name) {
-                    HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
-                    if(len >= size)
-                        name[size-1]='\0';
-                } /* end if */
-
-                /* Set the return value for the API call */
-                *ret = (ssize_t)len;
-                break;
-            }
         /* H5Fget_mdc_config */
         case H5VL_FILE_GET_MDC_CONF:
             {
@@ -1736,59 +1823,50 @@ H5VL_native_file_get(hid_t obj_id, H5VL_file_get_t get_type, hid_t UNUSED req, v
                     *cur_num_entries_ptr = (int)cur_num_entries;
                 break;
             }
-        default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
-    } /* end switch */
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_file_get() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_native_file_generic
- *
- * Purpose:	Perform a plugin specific operation on a native file
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              April, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, hid_t UNUSED req, va_list arguments)
-{
-    H5F_t        *file = NULL;           /* File */
-    herr_t       ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    switch (generic_type) {
         /* H5Fget_vfd_handle */
         case H5VL_FILE_GET_VFD_HANDLE:
             {
                 void **file_handle = va_arg (arguments, void **);
                 hid_t  fapl        = va_arg (arguments, hid_t);
 
-                /* Get the file */
-                if(NULL == (file = (H5F_t *)H5I_object_verify(loc_id, H5I_FILE)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
-
                 /* Retrieve the VFD handle for the file */
-                if(H5F_get_vfd_handle(file, fapl, file_handle) < 0)
+                if(H5F_get_vfd_handle(f, fapl, file_handle) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
                 break;
             }
-        /* H5Fis_hdf5 */
-        case H5VL_FILE_IS_HDF5:
+        /* H5Fclear_elink_file_cache */
+        case H5VL_FILE_CLEAR_ELINK_CACHE:
             {
-                htri_t     *ret    = va_arg (arguments, htri_t *);
-                const char *name   = va_arg (arguments, const char *);
+                /* Release the EFC */
+                if(f->shared->efc)
+                    if(H5F_efc_release(f->shared->efc) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+                break;
+            }
+        /* H5Freopen */
+        case H5VL_FILE_REOPEN:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((*ret = H5F_is_hdf5(name)) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't determine if file is an HDF5 file")
+                if((*ret_id = H5F_reopen(f)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+                break;
+            }
+        /* H5Freset_mdc_hit_rate_stats */
+        case H5VL_FILE_RESET_MDC_HIT_RATE:
+            {
+                /* Reset the hit rate statistic */
+                if(H5AC_reset_cache_hit_rate_stats(f->shared->cache) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't reset cache hit rate")
+                break;
+            }
+        case H5VL_FILE_SET_MDC_CONFIG:
+            {
+                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+
+                /* set the resize configuration  */
+                if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
                 break;
             }
         default:
@@ -1797,7 +1875,7 @@ H5VL_native_file_generic(hid_t loc_id, H5VL_file_generic_t generic_type, hid_t U
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_file_generic() */
+} /* end H5VL_native_file_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -2498,7 +2576,7 @@ H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void *
     H5G_loc_reset(obj_loc);
 
     switch (lookup_type) {
-        case H5VL_OBJECT_LOOKUP:
+        case H5VL_OBJECT_LOOKUP_BY_ID:
             obj_loc->oloc->addr = loc.oloc->addr;
             obj_loc->oloc->file = loc.oloc->file;
             obj_loc->oloc->holding_file = loc.oloc->holding_file;
@@ -2640,7 +2718,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_object_generic
+ * Function:	H5VL_native_object_misc
  *
  * Purpose:	Perform a plugin specific operation for an objectibute
  *
@@ -2653,14 +2731,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid_t UNUSED req, va_list arguments)
+H5VL_native_object_misc(hid_t loc_id, H5VL_object_misc_t misc_type, hid_t UNUSED req, va_list arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
     H5A_t        *attr = NULL;   /* Attribute opened */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    switch (generic_type) {
+    switch (misc_type) {
         /* H5Adelete_by_idx */
         case H5VL_ATTR_DELETE_BY_IDX:
             {
@@ -2780,11 +2858,41 @@ H5VL_native_object_generic(hid_t loc_id, H5VL_object_generic_t generic_type, hid
 
 done:
     /* Cleanup on failure */
-    if(H5VL_ATTR_OPEN_BY_IDX == generic_type && ret_value < 0)
+    if(H5VL_ATTR_OPEN_BY_IDX == misc_type && ret_value < 0)
         if(attr && H5A_close(attr) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_object_generic() */
+} /* end H5VL_native_object_misc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_object_optional
+ *
+ * Purpose:	Perform a plugin specific operation for an objectibute
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_object_optional(hid_t loc_id, H5VL_object_optional_t optional_type, hid_t UNUSED req, va_list arguments)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (optional_type) {
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this operation on object");       
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_object_optional() */
 
 
 /*-------------------------------------------------------------------------

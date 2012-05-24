@@ -485,7 +485,7 @@ H5Oincr_refcount(hid_t object_id)
     H5TRACE1("e", "i", object_id);
 
     /* change the ref count through the VOL */
-    if(H5VL_object_generic(object_id, H5VL_OBJECT_CHANGE_REF_COUNT, H5_REQUEST_NULL, 1) < 0)
+    if(H5VL_object_misc(object_id, H5VL_OBJECT_CHANGE_REF_COUNT, H5_REQUEST_NULL, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -522,7 +522,7 @@ H5Odecr_refcount(hid_t object_id)
     H5TRACE1("e", "i", object_id);
 
     /* change the ref count through the VOL */
-    if(H5VL_object_generic(object_id, H5VL_OBJECT_CHANGE_REF_COUNT, H5_REQUEST_NULL, H5_REQUEST_NULL) < 0)
+    if(H5VL_object_misc(object_id, H5VL_OBJECT_CHANGE_REF_COUNT, H5_REQUEST_NULL, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -747,7 +747,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     H5TRACE2("e", "i*s", obj_id, comment);
 
     /* set comment on object through the VOL */
-    if(H5VL_object_generic(obj_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, ".", comment, H5P_LINK_ACCESS_DEFAULT) < 0)
+    if(H5VL_object_misc(obj_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, ".", comment, H5P_LINK_ACCESS_DEFAULT) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
@@ -791,7 +791,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* set comment on object through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, name, comment, lapl_id) < 0)
+    if(H5VL_object_misc(loc_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, name, comment, lapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:

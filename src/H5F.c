@@ -830,7 +830,7 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file handle pointer")
 
-    if((ret_value = H5VL_file_generic(file_id, H5VL_FILE_GET_VFD_HANDLE, H5_REQUEST_NULL, file_handle, fapl)) < 0)
+    if((ret_value = H5VL_file_optional(file_id, H5VL_FILE_GET_VFD_HANDLE, H5_REQUEST_NULL, file_handle, fapl)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
 done:
@@ -895,7 +895,7 @@ done:
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
-    if((ret_value = H5VL_file_generic(H5VL_FILE_IS_HDF5, &ret_value, name)) < 0)
+    if((ret_value = H5VL_file_optional(H5VL_FILE_IS_HDF5, &ret_value, name)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
 
     FUNC_LEAVE_API(ret_value)
@@ -2027,54 +2027,73 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5F_t	*old_file = NULL;
-    H5F_t	*new_file = NULL;
     hid_t	ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
 
-    /* Check arguments */
-    if(NULL == (old_file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-
-    /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if(NULL == (new_file = H5F_new(old_file->shared, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
+    if(H5VL_file_optional(file_id, H5VL_FILE_REOPEN, H5_REQUEST_NULL, &ret_value) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
-    /* Keep old file's read/write intent in new file */
-    new_file->intent = old_file->intent;
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Freopen() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_reopen
+ *
+ * Purpose:	Reopen a file.  The new file handle which is returned points
+ *		to the same file as the specified file handle.  Both handles
+ *		share caches and other information.  The only difference
+ *		between the handles is that the new handle is not mounted
+ *		anywhere and no files are mounted on it.
+ *
+ * Return:	Success:	New file ID
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, October 16, 1998
+ *
+ * Modifications:
+ *              Quincey Koziol, May 14, 2002
+ *              Keep old file's read/write intent in reopened file.
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_reopen(H5F_t *f)
+{
+    H5F_t	*new_file = NULL;
+    hid_t        ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get a new "top level" file struct, sharing the same "low level" file struct */
+    if(NULL == (new_file = H5F_new(f->shared, H5P_FILE_CREATE_DEFAULT, 
+                                   H5P_FILE_ACCESS_DEFAULT, NULL)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+
+    /* Keep old file's read/write intent in new file */
+    new_file->intent = f->intent;
     /* Duplicate old file's names */
-    new_file->open_name = H5MM_xstrdup(old_file->open_name);
-    new_file->actual_name = H5MM_xstrdup(old_file->actual_name);
+    new_file->open_name = H5MM_xstrdup(f->open_name);
+    new_file->actual_name = H5MM_xstrdup(f->actual_name);
 
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
-#if 1 /*MSC - This needs to go through the VOL */
-    {
-        H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
-        if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(file_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-        /* attach VOL information to the ID */
-        if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        vol_plugin->nrefs++;
-    }
-#endif
-
 done:
     if(ret_value < 0 && new_file)
-	if(H5F_dest(new_file, H5AC_dxpl_id, FALSE) < 0)
-	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+        if(H5F_dest(new_file, H5AC_dxpl_id, FALSE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Freopen() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_reopen() */
 
 
 /*-------------------------------------------------------------------------
@@ -2510,7 +2529,7 @@ H5Fget_freespace(hid_t file_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Hs", "i", file_id);
 
-    if(H5VL_file_get(file_id, H5VL_FILE_GET_FREE_SPACE, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_file_optional(file_id, H5VL_FILE_GET_FREE_SPACE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free space")
 
 done:
@@ -2544,7 +2563,7 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", file_id, size);
 
-    if((ret_value = H5VL_file_get(file_id, H5VL_FILE_GET_SIZE, H5_REQUEST_NULL, size)) < 0)
+    if((ret_value = H5VL_file_optional(file_id, H5VL_FILE_GET_SIZE, H5_REQUEST_NULL, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:
@@ -2715,8 +2734,9 @@ H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     if((NULL == config_ptr) || (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
 
-    if((ret_value = H5VL_file_get(file_id, H5VL_FILE_GET_MDC_CONF, H5_REQUEST_NULL, config_ptr)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get mdc config")
+    if((ret_value = H5VL_file_optional(file_id, H5VL_FILE_GET_MDC_CONF, H5_REQUEST_NULL, 
+                                       config_ptr)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get mdc configuration")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2741,19 +2761,13 @@ done:
 herr_t
 H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
 {
-    H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
 
-    /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
-    /* set the resize configuration  */
-    if(H5AC_set_cache_auto_resize_config(file->shared->cache, config_ptr) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")
+    if(H5VL_file_optional(file_id, H5VL_FILE_RESET_MDC_HIT_RATE, H5_REQUEST_NULL, config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "uanvle to set MDC configuration")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2787,7 +2801,8 @@ H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate_ptr)
     if(NULL == hit_rate_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL hit rate pointer")
 
-    if((ret_value = H5VL_file_get(file_id, H5VL_FILE_GET_MDC_HR, H5_REQUEST_NULL, hit_rate_ptr)) < 0)
+    if((ret_value = H5VL_file_optional(file_id, H5VL_FILE_GET_MDC_HR, H5_REQUEST_NULL, 
+                                       hit_rate_ptr)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
 
 done:
@@ -2822,9 +2837,9 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     H5TRACE5("e", "i*z*z*z*Is", file_id, max_size_ptr, min_clean_size_ptr,
              cur_size_ptr, cur_num_entries_ptr);
 
-    if((ret_value = H5VL_file_get(file_id, H5VL_FILE_GET_MDC_SIZE, H5_REQUEST_NULL, max_size_ptr, 
-                                  min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC hit rate")
+    if((ret_value = H5VL_file_optional(file_id, H5VL_FILE_GET_MDC_SIZE, H5_REQUEST_NULL, max_size_ptr, 
+                                       min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get MDC size")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2854,18 +2869,12 @@ done:
 herr_t
 H5Freset_mdc_hit_rate_stats(hid_t file_id)
 {
-    H5F_t      *file;                   /* File object for file ID */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
-    /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
-    /* Reset the hit rate statistic */
-    if(H5AC_reset_cache_hit_rate_stats(file->shared->cache) < 0)
+    if(H5VL_file_optional(file_id, H5VL_FILE_RESET_MDC_HIT_RATE, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't reset cache hit rate")
 
 done:
@@ -2940,7 +2949,7 @@ H5Fget_info2(hid_t file_id, H5F_info2_t *finfo)
     if(!finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    if((ret_value = H5VL_file_get(file_id, H5VL_FILE_GET_INFO, H5_REQUEST_NULL, finfo)) < 0)
+    if((ret_value = H5VL_file_optional(file_id, H5VL_FILE_GET_INFO, H5_REQUEST_NULL, finfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2975,9 +2984,9 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
     if(sect_info && nsects == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
-    if(H5VL_file_get(file_id, H5VL_FILE_GET_FREE_SECTIONS, H5_REQUEST_NULL, sect_info, &ret_value, 
-                     type, nsects) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file info")
+    if(H5VL_file_optional(file_id, H5VL_FILE_GET_FREE_SECTIONS, H5_REQUEST_NULL, sect_info, 
+                          &ret_value, type, nsects) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file free sections")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_free_sections() */
@@ -3000,20 +3009,13 @@ done:
 herr_t
 H5Fclear_elink_file_cache(hid_t file_id)
 {
-    H5F_t         *file;        /* File */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", file_id);
 
-    /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-
-    /* Release the EFC */
-    if(file->shared->efc)
-        if(H5F_efc_release(file->shared->efc) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+    if(H5VL_file_optional(file_id, H5VL_FILE_CLEAR_ELINK_CACHE, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
 
 done:
     FUNC_LEAVE_API(ret_value)

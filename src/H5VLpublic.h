@@ -48,28 +48,36 @@ typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_OFFSET          = 6          /* offset                              */
 } H5VL_dataset_get_t;
 
-/* types for all file general operations */
-typedef enum H5VL_file_generic_t {
-    H5VL_FILE_GET_VFD_HANDLE	    = 0, 	/*file VFD handle       		*/
-    H5VL_FILE_IS_HDF5               = 1         /* is HDF5?                             */
-} H5VL_file_generic_t;
-
 /* types for all file get API routines */
 typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_FAPL	            = 0, 	/*file access property list		*/
     H5VL_FILE_GET_FCPL	            = 1,	/*file creation property list		*/
-    H5VL_FILE_GET_SIZE	            = 2,	/*file size             		*/
-    H5VL_FILE_GET_FREE_SPACE	    = 3,	/*file freespace         		*/
-    H5VL_FILE_GET_INFO	            = 4,	/*file info             		*/
-    H5VL_FILE_GET_INTENT	    = 5,	/*file intent           		*/
-    H5VL_FILE_GET_NAME	            = 6,	/*file name             		*/
-    H5VL_FILE_GET_OBJ_COUNT	    = 7,	/*object count in file	        	*/
-    H5VL_FILE_GET_OBJ_IDS	    = 8,	/*object ids in file     		*/
-    H5VL_FILE_GET_MDC_CONF	    = 9,	/*file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR	    = 10,	/*file metadata cache hit rate		*/
-    H5VL_FILE_GET_MDC_SIZE	    = 11,       /*file metadata cache size		*/
-    H5VL_FILE_GET_FREE_SECTIONS     = 12        /*file free selections                  */
+    H5VL_FILE_GET_INTENT	    = 2,	/*file intent           		*/
+    H5VL_FILE_GET_NAME	            = 3,	/*file name             		*/
+    H5VL_FILE_GET_OBJ_COUNT	    = 4,	/*object count in file	        	*/
+    H5VL_FILE_GET_OBJ_IDS	    = 5,	/*object ids in file     		*/
 } H5VL_file_get_t;
+
+/* types for all file misc operations */
+typedef enum H5VL_file_misc_t {
+    H5VL_FILE_IS_HDF5               = 0         /* is HDF5?                             */
+} H5VL_file_misc_t;
+
+/* types for all file optional operations */
+typedef enum H5VL_file_optional_t {
+    H5VL_FILE_CLEAR_ELINK_CACHE     = 0,
+    H5VL_FILE_GET_FREE_SECTIONS     = 1,        /*file free selections                  */
+    H5VL_FILE_GET_FREE_SPACE	    = 2,	/*file freespace         		*/
+    H5VL_FILE_GET_INFO	            = 3,	/*file info             		*/
+    H5VL_FILE_GET_MDC_CONF	    = 4,	/*file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR	    = 5,	/*file metadata cache hit rate		*/
+    H5VL_FILE_GET_MDC_SIZE	    = 6,       /*file metadata cache size		*/
+    H5VL_FILE_GET_SIZE	            = 7,	/*file size             		*/
+    H5VL_FILE_GET_VFD_HANDLE	    = 8, 	/*file VFD handle       		*/
+    H5VL_FILE_REOPEN                = 9,
+    H5VL_FILE_RESET_MDC_HIT_RATE    = 10,
+    H5VL_FILE_SET_MDC_CONFIG        = 11
+} H5VL_file_optional_t;
 
 /* types for all group get API routines */
 typedef enum H5VL_group_get_t {
@@ -93,14 +101,19 @@ typedef enum H5VL_link_get_t {
 } H5VL_link_get_t;
 
 /* types for all object general operations */
-typedef enum H5VL_object_generic_t {
+typedef enum H5VL_object_misc_t {
     H5VL_ATTR_DELETE_BY_IDX         = 0,        /* H5Adelete_by_idx                   */
     H5VL_ATTR_OPEN_BY_IDX           = 1,        /* H5Aopen_by_idx                     */
     H5VL_ATTR_RENAME                = 2,        /* H5Arename                          */
     H5VL_OBJECT_CHANGE_REF_COUNT    = 3,        /* H5Oincr/decr_refcount              */
     H5VL_OBJECT_SET_COMMENT         = 4,        /* H5Oset_comment(_by_name)           */
     H5VL_REF_CREATE                 = 5         /* H5Rcreate                          */
-} H5VL_object_generic_t;
+} H5VL_object_misc_t;
+
+/* types for all object general operations */
+typedef enum H5VL_object_optional_t {
+    H5VL_OPTIONAL = 0
+} H5VL_object_optional_t;
 
 /* types for all object get API routines */
 typedef enum H5VL_object_get_t {
@@ -114,13 +127,12 @@ typedef enum H5VL_object_get_t {
 
 /* types for all object lookup API routines */
 typedef enum H5VL_object_lookup_t {
-    H5VL_OBJECT_LOOKUP              = 0,
+    H5VL_OBJECT_LOOKUP_BY_ID        = 0,
     H5VL_OBJECT_LOOKUP_BY_NAME	    = 1,
     H5VL_OBJECT_LOOKUP_BY_IDX	    = 2,
     H5VL_OBJECT_LOOKUP_BY_ADDR	    = 3,
     H5VL_OBJECT_LOOKUP_BY_REF       = 4
 } H5VL_object_lookup_t;
-
 
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
@@ -162,7 +174,8 @@ typedef struct H5VL_file_class_t {
     hid_t  (*open)  (const char *name, unsigned flags, hid_t fapl_id, hid_t req);
     herr_t (*flush) (hid_t file_id, H5F_scope_t scope, hid_t req);
     herr_t (*get)   (hid_t file_id, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-    herr_t (*generic)(hid_t loc_id, H5VL_file_generic_t generic_type, hid_t req, va_list arguments);
+    herr_t (*misc)(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
+    herr_t (*optional)(hid_t id, H5VL_file_optional_t op_type, hid_t req, va_list arguments);
     herr_t (*close) (hid_t file_id, hid_t req);
 } H5VL_file_class_t;
 
@@ -192,7 +205,8 @@ typedef struct H5VL_object_class_t {
     herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
     herr_t (*free_loc)(void *location, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
-    herr_t (*generic)(hid_t id, H5VL_object_generic_t generic_type, hid_t req, va_list arguments);
+    herr_t (*misc)  (hid_t id, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
+    herr_t (*optional)(hid_t id, H5VL_object_optional_t op_type, hid_t req, va_list arguments);
     herr_t (*close) (hid_t obj_id, hid_t req);
 } H5VL_object_class_t;
 

@@ -737,7 +737,7 @@ H5VL_attr_close(hid_t id, hid_t req)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
             
     /* if the VOL class does not implement a specific attr close
-       callback, try the generic object close */    
+       callback, try the object close */    
     if(NULL == vol_plugin->attr_cls.close){
         if(H5VL_object_close(id, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
@@ -1182,7 +1182,7 @@ H5VL_dataset_close(hid_t id, hid_t req)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
             
     /* if the VOL class does not implement a specific dataset close
-       callback, try the generic object close */    
+       callback, try the object close */    
     if(NULL == vol_plugin->dataset_cls.close){
         if(H5VL_object_close(id, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
@@ -1225,8 +1225,8 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req)
     if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_plugin) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-    /* check if the corresponding VOL open callback exists */
-    if(NULL == vol_plugin->file_cls.open)
+    /* check if the corresponding VOL open callback exists */ 
+   if(NULL == vol_plugin->file_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file open' method")
     /* call the corresponding VOL open callback */
     if((ret_value = (vol_plugin->file_cls.open)(name, flags, fapl_id, req)) < 0)
@@ -1363,7 +1363,45 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_file_generic
+ * Function:	H5VL_file_misc
+ *
+ * Purpose:	perform a specified operation through the VOL
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_file_misc(hid_t id, H5VL_file_misc_t misc_type, hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    H5VL_class_t     *vol_plugin;            /* VOL structure attached to id */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(NULL == vol_plugin->file_cls.misc)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file misc' method")
+
+    va_start (arguments, req);
+    if((ret_value = (vol_plugin->file_cls.misc)(id, misc_type, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_file_misc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_file_optional
  *
  * Purpose:	perform a plugin specific operation
  *
@@ -1376,7 +1414,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_generic(hid_t id, H5VL_file_generic_t generic_type, hid_t req, ...)
+H5VL_file_optional(hid_t id, H5VL_file_optional_t optional_type, hid_t req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     H5VL_class_t     *vol_plugin;            /* VOL structure attached to id */
@@ -1387,17 +1425,31 @@ H5VL_file_generic(hid_t id, H5VL_file_generic_t generic_type, hid_t req, ...)
     if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(NULL == vol_plugin->file_cls.generic)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file generic' method")
+    if(NULL == vol_plugin->file_cls.optional)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file optional' method")
 
     va_start (arguments, req);
-    if((ret_value = (vol_plugin->file_cls.generic)(id, generic_type, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "generic failed")
+    if((ret_value = (vol_plugin->file_cls.optional)(id, optional_type, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "optional failed")
     va_end (arguments);
+
+    /* if we are re-opening the file ,attach the VOL info to the new id */
+    if(H5VL_FILE_REOPEN == optional_type) {
+        hid_t           *ret_id;
+
+        va_start (arguments, req);
+        ret_id = va_arg (arguments, hid_t *);
+
+        /* attach VOL information to the ID */
+        if (H5I_register_aux(*ret_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+        vol_plugin->nrefs++;
+        va_end (arguments);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_file_generic() */
+} /* end H5VL_file_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -1602,7 +1654,7 @@ H5VL_group_close(hid_t id, hid_t req)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* if the VOL class does not implement a specific group close
-       callback, try the generic object close */
+       callback, try the object close */
     if(NULL == vol_plugin->group_cls.close) {
         if(H5VL_object_close(id, req) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
@@ -1994,7 +2046,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_generic
+ * Function:	H5VL_object_misc
  *
  * Purpose:	perform a plugin specific operation
  *
@@ -2007,7 +2059,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, ...)
+H5VL_object_misc(hid_t id, H5VL_object_misc_t misc_type, hid_t req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */
@@ -2018,15 +2070,15 @@ H5VL_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, ...
     if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(NULL == vol_plugin->object_cls.generic)
-	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object generic' method")
+    if(NULL == vol_plugin->object_cls.misc)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object misc' method")
 
     va_start (arguments, req);
-    if((ret_value = (vol_plugin->object_cls.generic)(id, generic_type, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "generic failed")
+    if((ret_value = (vol_plugin->object_cls.misc)(id, misc_type, req, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
     va_end (arguments);
 
-    if(H5VL_ATTR_OPEN_BY_IDX == generic_type) {
+    if(H5VL_ATTR_OPEN_BY_IDX == misc_type) {
         hid_t	        *ret_id;
 
         va_start (arguments, req);
@@ -2041,7 +2093,7 @@ H5VL_object_generic(hid_t id, H5VL_object_generic_t generic_type, hid_t req, ...
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_generic() */
+} /* end H5VL_object_misc() */
 
 
 /*-------------------------------------------------------------------------

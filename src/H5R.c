@@ -318,7 +318,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "reference region dataspace id must be valid")
 
     /* create the ref through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_REF_CREATE, H5_REQUEST_NULL, ref, name, ref_type, space_id) < 0)
+    if(H5VL_object_misc(loc_id, H5VL_REF_CREATE, H5_REQUEST_NULL, ref, name, ref_type, space_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:

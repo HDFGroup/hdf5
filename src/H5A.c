@@ -665,7 +665,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &ret_value, 
+    if(H5VL_object_misc(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &ret_value, 
                          obj_name, idx_type, order, n, aapl_id, lapl_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to open attribute")
 
@@ -1529,7 +1529,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &attr_id, 
+    if(H5VL_object_misc(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &attr_id, 
                          obj_name, idx_type, order, n, H5P_DEFAULT, lapl_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to open attribute")
 
@@ -1753,7 +1753,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 #endif
 
     /* open the attribute through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &attr_id, 
+    if(H5VL_object_misc(loc_id, H5VL_ATTR_OPEN_BY_IDX, H5_REQUEST_NULL, &attr_id, 
                          obj_name, idx_type, order, n, H5P_DEFAULT, lapl_id) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to open attribute")
 
@@ -1842,7 +1842,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_name, new_name))
         /* rename the attribute info through the VOL */
-        if(H5VL_object_generic(loc_id, H5VL_ATTR_RENAME, H5_REQUEST_NULL, NULL, old_name, new_name) < 0)
+        if(H5VL_object_misc(loc_id, H5VL_ATTR_RENAME, H5_REQUEST_NULL, NULL, old_name, new_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
 
 done:
@@ -1897,7 +1897,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
         /* get the attribute info through the VOL */
-        if(H5VL_object_generic(loc_id, H5VL_ATTR_RENAME, H5_REQUEST_NULL, location, old_attr_name, new_attr_name) < 0)
+        if(H5VL_object_misc(loc_id, H5VL_ATTR_RENAME, H5_REQUEST_NULL, location, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
         if(NULL != location) {
@@ -2250,7 +2250,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
 
     /* get the attribute info through the VOL */
-    if(H5VL_object_generic(loc_id, H5VL_ATTR_DELETE_BY_IDX, H5_REQUEST_NULL, location, idx_type, order, n) < 0)
+    if(H5VL_object_misc(loc_id, H5VL_ATTR_DELETE_BY_IDX, H5_REQUEST_NULL, location, idx_type, order, n) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
