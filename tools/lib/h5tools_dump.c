@@ -261,7 +261,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
 {
-    HERR_INIT(int, SUCCEED)
+    int            ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     unsigned char *mem = (unsigned char*) _mem;
     hsize_t        i;         /*element counter  */
     size_t         size;      /*size of each datum  */
@@ -390,7 +390,6 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
         h5tools_str_close(&buffer);
     }/* else bin */
 
-CATCH
     return ret_value;
 }
 
@@ -430,7 +429,7 @@ h5tools_print_region_data_blocks(hid_t region_id,
     hsize_t      numelem;
     hsize_t      numindex;
     size_t       jndx;
-    int          indx;
+    unsigned     indx;
     int          type_size;
     int          ret_value = SUCCEED;
     hid_t        mem_space = -1;
@@ -466,7 +465,7 @@ h5tools_print_region_data_blocks(hid_t region_id,
     if((type_size = H5Tget_size(type_id)) == 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
-    if((region_buf = HDmalloc(type_size * numelem)) == NULL)
+    if((region_buf = HDmalloc(type_size * (size_t)numelem)) == NULL)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate region buffer");
 
     /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
@@ -781,7 +780,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
     hsize_t  curr_pos = 0;
     hsize_t  total_size[H5S_MAX_RANK];
     size_t   jndx;
-    int      indx;
+    unsigned indx;
     int      type_size;
     int      ret_value = SUCCEED;
     unsigned int region_flags; /* buffer extent flags */
@@ -808,7 +807,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
     if((type_size = H5Tget_size(type_id)) == 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
-    if((region_buf = HDmalloc(type_size * npoints)) == NULL)
+    if((region_buf = HDmalloc(type_size * (size_t)npoints)) == NULL)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for region");
 
     curr_pos = 0;
@@ -1668,7 +1667,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, h5tools_conte
                         hid_t type, hid_t space, void *mem)
 {
     HERR_INIT(herr_t, SUCCEED)
-    int                 i; /*counters  */
+    unsigned       i;      /*counters  */
     hsize_t        nelmts; /*total selected elmts */
 
     ctx->ndims = H5Sget_simple_extent_ndims(space);
