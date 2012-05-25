@@ -5,15 +5,15 @@ SET (CTEST_CUSTOM_WARNING_EXCEPTION
     "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning C4090:"
     "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning:[ \t]*passing argument"
     "H5detect.c[0-9 \t:]*warning:[ \t]*passing argument"
-    "H5detect.c[0-9 \t:]*note:[ \t]*expected .void .. but argument is of type .volatile"
-    "include/string.h[0-9 \t:]*note:[ \t]*expected .void .. but argument is of type .volatile"
-    "note:[ \t]*expected .void .. but argument is of type .volatile"
+    "note.*expected.*void.*but argument is of type.*volatile"
     "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
     "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
     "SZIP.src.*:[ \t]*warning"
     "POSIX name for this item is deprecated"
     "disabling jobserver mode"
     "config.cmake.xlatefile.c"
+    "warning.*implicit declaration of function"
+#    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
 )
  
 SET (CTEST_CUSTOM_MEMCHECK_IGNORE
