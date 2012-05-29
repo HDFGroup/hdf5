@@ -441,9 +441,9 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &obj_id) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET_ID, &obj_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &name) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &name) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
 
     /* Create the link through the VOL */

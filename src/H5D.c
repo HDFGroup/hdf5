@@ -161,11 +161,11 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5D_CRT_TYPE_ID_NAME, &type_id) < 0)
+    if(H5P_set(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5D_CRT_SPACE_ID_NAME, &space_id) < 0)
+    if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
-    if(H5P_set(plist, H5D_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+    if(H5P_set(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
     /* Create the dataset through the VOL */
@@ -242,9 +242,9 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5D_CRT_TYPE_ID_NAME, &type_id) < 0)
+    if(H5P_set(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5D_CRT_SPACE_ID_NAME, &space_id) < 0)
+    if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
     /* Create the dataset through the VOL */

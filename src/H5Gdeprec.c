@@ -247,7 +247,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* get creation properties */
-    if(H5P_set(plist, H5G_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+    if(H5P_set(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     /* Create the group through the VOL */
@@ -331,9 +331,9 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 
     if(type == H5L_TYPE_HARD) {
         /* set creation properties */
-        if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+        if(H5P_set(plist, H5VL_LINK_TARGET_ID, &cur_loc_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+        if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
         /* Create the link through the VOL */
@@ -343,7 +343,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
         /* set creation properties */
-        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+        if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */
@@ -390,9 +390,9 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 
     if(type == H5L_TYPE_HARD) {
         /* set creation properties */
-        if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+        if(H5P_set(plist, H5VL_LINK_TARGET_ID, &cur_loc_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+        if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
         /* Create the link through the VOL */
@@ -407,7 +407,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
             new_loc_id = cur_loc_id;
 
         /* set creation properties */
-        if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+        if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
         /* Create the link through the VOL */

@@ -429,7 +429,7 @@ H5Lcreate_soft(const char *link_target,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &link_target) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &link_target) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
     /* Create the link through the VOL */
@@ -488,9 +488,9 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET_ID, &cur_loc_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
     /* Create the link through the VOL */
@@ -553,11 +553,11 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5L_CRT_LINK_TYPE_NAME, &link_type) < 0)
+    if(H5P_set(plist, H5VL_LINK_TYPE, &link_type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5L_CRT_UDATA_NAME, &udata) < 0)
+    if(H5P_set(plist, H5VL_LINK_UDATA, &udata) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5L_CRT_UDATA_SIZE_NAME, &udata_size) < 0)
+    if(H5P_set(plist, H5VL_LINK_UDATA_SIZE, &udata_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */

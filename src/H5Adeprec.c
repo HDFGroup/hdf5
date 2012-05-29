@@ -161,11 +161,11 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5A_CRT_TYPE_ID_NAME, &type_id) < 0)
+    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
-    if(H5P_set(plist, H5A_CRT_SPACE_ID_NAME, &space_id) < 0)
+    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
-    if(H5P_set(plist, H5A_CRT_LOCATION_NAME, &location) < 0)
+    if(H5P_set(plist, H5VL_ATTR_LOCATION, &location) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for location")
 
     /* Create the attribute through the VOL */

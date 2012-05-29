@@ -204,17 +204,17 @@ H5P_dcrt_reg_prop(H5P_genclass_t *pclass)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type ID property*/
-    if(H5P_register_real(pclass, H5D_CRT_TYPE_ID_NAME, sizeof(hid_t), &type_id, 
+    if(H5P_register_real(pclass, H5VL_DSET_TYPE_ID, sizeof(hid_t), &type_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space ID property */
-    if(H5P_register_real(pclass, H5D_CRT_SPACE_ID_NAME, sizeof(hid_t), &space_id, 
+    if(H5P_register_real(pclass, H5VL_DSET_SPACE_ID, sizeof(hid_t), &space_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the lcpl ID property */
-    if(H5P_register_real(pclass, H5D_CRT_LCPL_ID_NAME, sizeof(hid_t), &lcpl_id, 
+    if(H5P_register_real(pclass, H5VL_DSET_LCPL_ID, sizeof(hid_t), &lcpl_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

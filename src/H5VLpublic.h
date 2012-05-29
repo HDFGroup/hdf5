@@ -26,6 +26,26 @@
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
 
+/* Dataset creation property names */
+#define H5VL_DSET_TYPE_ID        "dataset_type_id"
+#define H5VL_DSET_SPACE_ID       "dataset_space_id"
+#define H5VL_DSET_LCPL_ID        "dataset_lcpl_id"
+
+/* Attribute creation property names */
+#define H5VL_ATTR_TYPE_ID        "attr_type_id"
+#define H5VL_ATTR_SPACE_ID       "attr_space_id"
+#define H5VL_ATTR_LOCATION       "attr_location"
+
+/* Link creation property names */
+#define H5VL_LINK_TARGET_ID      "target location id"
+#define H5VL_LINK_TARGET_NAME    "target name"
+#define H5VL_LINK_TYPE           "link type"
+#define H5VL_LINK_UDATA          "udata"
+#define H5VL_LINK_UDATA_SIZE     "udata size"
+
+/* Group creation property names */
+#define H5VL_GRP_LCPL_ID "group_lcpl_id"
+
 /* types for all attr get API routines */
 typedef enum H5VL_attr_get_t {
     H5VL_ATTR_EXISTS              = 0,         /* H5Aexists                          */
@@ -142,7 +162,7 @@ typedef struct H5VL_attr_class_t {
     hid_t  (*open)  (hid_t loc_id, void *location, const char *attr_name, hid_t aapl_id, hid_t req);
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf, hid_t req);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf, hid_t req);
-    herr_t (*get)   (hid_t file_id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
+    herr_t (*get)   (hid_t loc_id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
     herr_t (*remove)(hid_t loc_id, void *location, const char *attr_name, hid_t req);
     herr_t (*close) (hid_t attr_id, hid_t req);
 } H5VL_attr_class_t;
@@ -163,7 +183,7 @@ typedef struct H5VL_dataset_class_t {
                      hid_t xfer_plist_id, void * buf, hid_t req);
     herr_t (*write) (hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                      hid_t xfer_plist_id, const void * buf, hid_t req);
-    herr_t (*set_extent) (hid_t uid, const hsize_t size[], hid_t req);
+    herr_t (*set_extent) (hid_t loc_id, const hsize_t size[], hid_t req);
     herr_t (*get)   (hid_t file_id, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
     herr_t (*close) (hid_t dataset_id, hid_t req);
 } H5VL_dataset_class_t;

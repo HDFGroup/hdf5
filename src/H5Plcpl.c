@@ -146,23 +146,23 @@ H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &intmd_group, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    if(H5P_register_real(pclass, H5L_CRT_TARGET_ID_NAME, H5L_CRT_TARGET_ID_SIZE, &target_id,
+    if(H5P_register_real(pclass, H5VL_LINK_TARGET_ID, H5L_CRT_TARGET_ID_SIZE, &target_id,
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    if(H5P_register_real(pclass, H5L_CRT_TARGET_NAME_NAME, H5L_CRT_TARGET_NAME_SIZE, &target_name,
+    if(H5P_register_real(pclass, H5VL_LINK_TARGET_NAME, H5L_CRT_TARGET_NAME_SIZE, &target_name,
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    if(H5P_register_real(pclass, H5L_CRT_LINK_TYPE_NAME, H5L_CRT_LINK_TYPE_SIZE, &link_type,
+    if(H5P_register_real(pclass, H5VL_LINK_TYPE, H5L_CRT_LINK_TYPE_SIZE, &link_type,
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    if(H5P_register_real(pclass, H5L_CRT_UDATA_NAME, H5L_CRT_UDATA_SIZE, &udata,
+    if(H5P_register_real(pclass, H5VL_LINK_UDATA, H5L_CRT_UDATA_SIZE, &udata,
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    if(H5P_register_real(pclass, H5L_CRT_UDATA_SIZE_NAME, H5L_CRT_UDATA_SIZE_SIZE, &udata_size,
+    if(H5P_register_real(pclass, H5VL_LINK_UDATA_SIZE, H5L_CRT_UDATA_SIZE_SIZE, &udata_size,
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

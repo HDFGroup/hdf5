@@ -587,11 +587,11 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5L_CRT_LINK_TYPE_NAME, &link_type) < 0)
+    if(H5P_set(plist, H5VL_LINK_TYPE, &link_type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5L_CRT_UDATA_NAME, &ext_link_buf) < 0)
+    if(H5P_set(plist, H5VL_LINK_UDATA, &ext_link_buf) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
-    if(H5P_set(plist, H5L_CRT_UDATA_SIZE_NAME, &buf_size) < 0)
+    if(H5P_set(plist, H5VL_LINK_UDATA_SIZE, &buf_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */

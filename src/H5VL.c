@@ -1702,7 +1702,7 @@ H5VL_link_create(H5VL_link_create_type_t create_type, hid_t id, const char *new_
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-        if(H5P_get(plist, H5L_CRT_TARGET_ID_NAME, &cur_id) < 0)
+        if(H5P_get(plist, H5VL_LINK_TARGET_ID, &cur_id) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
 
         if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(cur_id)))

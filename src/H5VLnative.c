@@ -316,11 +316,11 @@ H5VL_native_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* get creation properties */
-    if(H5P_get(plist, H5A_CRT_TYPE_ID_NAME, &type_id) < 0)
+    if(H5P_get(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5A_CRT_SPACE_ID_NAME, &space_id) < 0)
+    if(H5P_get(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for space id")
-    if(H5P_get(plist, H5A_CRT_LOCATION_NAME, &location) < 0)
+    if(H5P_get(plist, H5VL_ATTR_LOCATION, &location) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     if(H5G_loc(loc_id, &loc) < 0)
@@ -852,11 +852,11 @@ H5VL_native_dataset_create(hid_t loc_id, const char *name, hid_t dcpl_id, hid_t 
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* get creation properties */
-    if(H5P_get(plist, H5D_CRT_TYPE_ID_NAME, &type_id) < 0)
+    if(H5P_get(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
-    if(H5P_get(plist, H5D_CRT_SPACE_ID_NAME, &space_id) < 0)
+    if(H5P_get(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for space id")
-    if(H5P_get(plist, H5D_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+    if(H5P_get(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     /* Check arguments */
@@ -1960,7 +1960,7 @@ H5VL_native_group_create(hid_t loc_id, const char *name, hid_t gcpl_id, hid_t ga
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* get creation properties */
-    if(H5P_get(plist, H5G_CRT_LCPL_ID_NAME, &lcpl_id) < 0)
+    if(H5P_get(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for lcpl id")
 
     if(H5G_loc(loc_id, &loc) < 0)
@@ -2192,9 +2192,9 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const
                 hid_t        cur_loc_id;
                 char         *cur_name = NULL;
 
-                if(H5P_get(plist, H5L_CRT_TARGET_ID_NAME, &cur_loc_id) < 0)
+                if(H5P_get(plist, H5VL_LINK_TARGET_ID, &cur_loc_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id")
-                if(H5P_get(plist, H5L_CRT_TARGET_NAME_NAME, &cur_name) < 0)
+                if(H5P_get(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current name")
 
                 if(cur_loc_id != H5L_SAME_LOC && H5G_loc(cur_loc_id, &cur_loc) < 0)
@@ -2236,7 +2236,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const
                 if(H5G_loc(loc_id, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-                if(H5P_get(plist, H5L_CRT_TARGET_NAME_NAME, &target_name) < 0)
+                if(H5P_get(plist, H5VL_LINK_TARGET_NAME, &target_name) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for targe name")
 
                 /* Create the link */
@@ -2255,11 +2255,11 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t loc_id, const
                 if(H5G_loc(loc_id, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
-                if(H5P_get(plist, H5L_CRT_LINK_TYPE_NAME, &link_type) < 0)
+                if(H5P_get(plist, H5VL_LINK_TYPE, &link_type) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link type")
-                if(H5P_get(plist, H5L_CRT_UDATA_NAME, &udata) < 0)
+                if(H5P_get(plist, H5VL_LINK_UDATA, &udata) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata")
-                if(H5P_get(plist, H5L_CRT_UDATA_SIZE_NAME, &udata_size) < 0)
+                if(H5P_get(plist, H5VL_LINK_UDATA_SIZE, &udata_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata size")
 
                 /* Create link */
