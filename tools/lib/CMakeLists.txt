@@ -75,10 +75,26 @@ IF (APPLE)
     ENDIF (HDF5_BUILD_WITH_INSTALL_NAME)
 ENDIF (APPLE)
 
+IF (MSVC)
+  GET_TARGET_PROPERTY (target_name ${HDF5_TOOLS_LIB_TARGET} RELWITHDEBINFO_OUTPUT_NAME)
+  MESSAGE (STATUS "target_name is ${target_name} with config ${CMAKE_BUILD_TYPE}")
+  INSTALL (
+    FILES
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${target_name}.pdb
+    DESTINATION
+        ${HDF5_INSTALL_LIB_DIR}
+    CONFIGURATIONS RelWithDebInfo
+    COMPONENT toolslibraries
+  )
+  ENDIF (MSVC)
+
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (HDF5_EXPORTED_TARGETS)
+
+  INSTALL_TARGET_PDB (${HDF5_TOOLS_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} toolslibraries)
+  
   INSTALL (
       TARGETS
           ${HDF5_TOOLS_LIB_TARGET}

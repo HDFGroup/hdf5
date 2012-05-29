@@ -43,6 +43,37 @@ MACRO (TARGET_NAMING target libtype)
 ENDMACRO (TARGET_NAMING)
 
 #-------------------------------------------------------------------------------
+MACRO (INSTALL_TARGET_PDB target targetdestination targetcomponent)
+  IF (WIN32 AND MSVC)
+    GET_TARGET_PROPERTY (target_name ${target} RELWITHDEBINFO_OUTPUT_NAME)
+    INSTALL (
+      FILES
+          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${target_name}.pdb
+      DESTINATION
+          ${targetdestination}
+      CONFIGURATIONS RelWithDebInfo
+      COMPONENT ${targetcomponent}
+  )
+  ENDIF (WIN32 AND MSVC)
+ENDMACRO (INSTALL_TARGET_PDB)
+
+#-------------------------------------------------------------------------------
+MACRO (INSTALL_PROGRAM_PDB target targetdestination targetcomponent)
+  IF (WIN32 AND MSVC)
+    GET_TARGET_PROPERTY (target_name ${target} RELWITHDEBINFO_OUTPUT_NAME)
+    GET_TARGET_PROPERTY (target_prefix h5dump PREFIX)
+    INSTALL (
+      FILES
+          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${target_prefix}${target_name}.pdb
+      DESTINATION
+          ${targetdestination}
+      CONFIGURATIONS RelWithDebInfo
+      COMPONENT ${targetcomponent}
+  )
+  ENDIF (WIN32 AND MSVC)
+ENDMACRO (INSTALL_PROGRAM_PDB)
+
+#-------------------------------------------------------------------------------
 MACRO (HDF_SET_LIB_OPTIONS libtarget libname libtype)
   # message (STATUS "${libname} libtype: ${libtype}")
   IF (${libtype} MATCHES "SHARED")

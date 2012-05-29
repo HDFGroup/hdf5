@@ -97,6 +97,7 @@
 #define FILE65  "file_space.h5"
 #define FILE66  "packedbits.h5"
 #define FILE67  "zerodim.h5"
+#define FILE68  "charsets.h5"
 
 
 
@@ -7132,6 +7133,54 @@ gent_packedbits(void)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    gent_charsets
+ *
+ * Purpose:     Generate a file to be used in the character set test
+ *              Contains:
+ *              1) a ascii datatype
+ *              2) a utf8 datatype
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_charsets(void)
+{
+    hid_t fid, did, sid;
+    herr_t status;
+    hsize_t dim[] = {1}; /* Dataspace dimensions */
+    typedef struct CharSetInfo {
+            const char *ascii_p_;
+            const char *utf8_p_;
+    } CharSetInfo;
+
+    sid = H5Screate_simple( 1, dim, NULL );
+    fid = H5Fcreate( FILE68, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+
+    hid_t charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
+
+    hid_t ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
+    status = H5Tset_cset( ascii_dtid, H5T_CSET_ASCII );
+    H5Tinsert( charset_dtid, "ascii", HOFFSET(CharSetInfo, ascii_p_ ), ascii_dtid );
+
+    hid_t utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
+    status = H5Tset_cset( utf8_dtid, H5T_CSET_UTF8 );
+    H5Tinsert( charset_dtid, "utf8", HOFFSET( CharSetInfo, utf8_p_ ), utf8_dtid );
+
+    did = H5Dcreate2( fid, "CharSets", charset_dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+
+    const char * writeData[] = { "ascii", "utf8", };
+    status = H5Dwrite( did, charset_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, writeData );
+
+    H5Tclose( charset_dtid );
+    H5Tclose( ascii_dtid );
+    H5Tclose( utf8_dtid );
+    H5Sclose( sid );
+    H5Dclose( did );
+    H5Fclose( fid );
+}
+
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
@@ -7207,6 +7256,7 @@ int main(void)
     gent_extlinks();
     gent_fs_strategy_threshold();
     gent_packedbits();
+    gent_charsets();
 
     return 0;
 }
