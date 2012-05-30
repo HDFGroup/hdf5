@@ -1619,7 +1619,7 @@ H5D_btree_idx_support(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
 {
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_t *oh = NULL;                   /* Dataset's object header */
-    herr_t ret_value;                   /* Return value */
+    htri_t ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

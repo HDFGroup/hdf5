@@ -117,7 +117,6 @@ H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
     /* Read records */
     for(u = 0; u < nrecords; u++) {
         symbol_info_t *symbol = NULL;   /* Symbol (dataset) */
-        int can_read;                   /* Boolean: whether we can read the dataset */
         htri_t attr_exists;             /* Whether the sequence number attribute exists */
         unsigned long file_u;           /* Attribute sequence number (writer's "u") */
 
@@ -129,7 +128,6 @@ H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
         symbol->nrecords = nrecords / 5;
 
         /* Wait until we can read the dataset */
-        can_read = 0;
         do {
             /* Check if sequence attribute exists */
             if((attr_exists = H5Aexists_by_name(fid, symbol->name, "seq", H5P_DEFAULT)) < 0)

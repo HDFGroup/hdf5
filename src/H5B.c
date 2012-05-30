@@ -625,7 +625,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud, unsigned idx,
         unsigned        i;
 
         /*
-         * We must clone the old btree so readers with an  out-of-date version
+         * We must clone the old btree so readers with an out-of-date version
          * of the parent can still see all its children, via the shadowed
          * non-split bt.  Remove it from cache but do not mark it free on disk.
          */
@@ -639,16 +639,14 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud, unsigned idx,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPIN, FAIL, "unable to pin old b-tree node")
         bt_pinned = TRUE;
 
-        /* Unprotect  bt so we can move it.  Also, note that it will be  marked
-         * dirty so it will be written to the new location. */
-        HDassert(bt_ud->cache_flags & H5AC__DIRTIED_FLAG);
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt_ud->addr, bt_ud->bt, bt_ud->cache_flags) < 0)
+        /* Unprotect  bt so we can move it.  Do not mark it dirty yet so it is
+         * not flushed to the old location (however unlikely). */
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt_ud->addr, bt_ud->bt, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release old b-tree")
-        bt_ud->cache_flags = H5AC__NO_FLAGS_SET;
 
         /* Move the location of the old child on the disk */
         if(H5AC_move_entry(f, H5AC_BT, bt_ud->addr, new_bt_addr) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree node")
         bt_ud->addr = new_bt_addr;
 
         /* Re-protect bt at new address */
@@ -729,7 +727,7 @@ H5B_split(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud, unsigned idx,
     } /* end if */
 
     bt_ud->bt->right = split_bt_ud->addr;
-    bt_ud->cache_flags |= H5AC__DIRTIED_FLAG;
+    HDassert(bt_ud->cache_flags & H5AC__DIRTIED_FLAG);
 
 done:
     if(ret_value < 0) {

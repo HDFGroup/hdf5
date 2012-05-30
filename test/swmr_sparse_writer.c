@@ -142,16 +142,11 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         /* Set the record's ID (equal to its position) */
         record.rec_id = start;
 
-        /* Extend the dataset's dataspace to hold the new record */
-        symbol->nrecords++;
-        if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
-            return(-1);
-
         /* Get the dataset's dataspace */
         if((file_sid = H5Dget_space(symbol->dsid)) < 0)
             return(-1);
 
-        /* Choose the last record in the dataset */
+        /* Choose a random record in the dataset */
         if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
             return(-1);
 
