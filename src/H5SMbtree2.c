@@ -67,6 +67,8 @@ const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
     H5SM_message_compare,             /* Record comparison callback */
     H5SM_message_encode,              /* Record encoding callback */
     H5SM_message_decode,              /* Record decoding callback */
+    NULL,                             /* Create flush dependency */
+    NULL,                             /* Update flush dependency */
     H5SM_bt2_debug,                   /* Record debugging callback */
     H5SM_bt2_crt_dbg_context,	      /* Create debugging context */
     H5SM_bt2_dst_context 	      /* Destroy debugging context */

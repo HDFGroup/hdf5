@@ -308,7 +308,8 @@ done:
  */
 herr_t
 H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable)
+    H5_index_t idx_type, H5_iter_order_t order, void *parent,
+    H5A_attr_table_t *atable)
 {
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     hsize_t nrec;                       /* # of records in v2 B-tree */
@@ -324,7 +325,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     HDassert(atable);
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in "name" B-tree */
@@ -355,7 +356,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
 
         /* Iterate over the links in the group, building a table of the link messages */
         if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, ainfo, H5_INDEX_NAME,
-                H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
+                H5_ITER_NATIVE, (hsize_t)0, parent, NULL, &attr_op, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Sort attribute table in correct iteration order */
@@ -711,7 +712,8 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
             /* Check if we are using "dense" attribute storage */
             if(H5F_addr_defined(ainfo->fheap_addr)) {
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+                /*!FIXME use ohdr proxy -NAF */
+                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in "name" B-tree */
@@ -1252,7 +1254,7 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
 
 
      if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
-            H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
+            H5_ITER_NATIVE, (hsize_t)0, NULL, NULL, &attr_op, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
 done:

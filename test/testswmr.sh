@@ -69,7 +69,7 @@ while [ $# -gt 0 ]; do
 done
 
 # Loop over index types
-for index_type in "-i b1" "-i ea"
+for index_type in "-i b1" "-i ea" "-i b2" 
 do
     # Try with and without compression
     for compress in "" "-c 1"

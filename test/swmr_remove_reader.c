@@ -10,7 +10,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     hid_t dsid;                 /* Dataset ID */
     hid_t file_sid;             /* Dataset's space ID */
     hssize_t snpoints;          /* Number of elements in dataset */
-    hsize_t start, count = 1;   /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
 
     /* Open dataset for symbol */
     if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
@@ -32,10 +32,10 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     if(snpoints > 0) {
         /* Choose a random record in the dataset, choosing the last record half
          * the time */
-        start = (hsize_t)(random() % (snpoints * 2));
-        if(start > (hsize_t)(snpoints - 1))
-            start = (hsize_t)(snpoints - 1);
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        start[1] = (hsize_t)(random() % (snpoints * 2));
+        if(start[1] > (hsize_t)(snpoints - 1))
+            start[1] = (hsize_t)(snpoints - 1);
+        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             return(-1);
 
         /* Read record from dataset */
@@ -54,7 +54,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
         /* Verify record value - note that it may be the fill value, because the
          * chunk may be deleted before the object header has the updated
          * dimensions */
-        if(record->rec_id != start && record->rec_id != (uint64_t)0) {
+        if(record->rec_id != start[1] && record->rec_id != (uint64_t)0) {
             printf("Incorrect record value!\n");
             printf("Symbol = '%s', # of records = %lld, record->rec_id = %llx\n", sym_name, (long long)snpoints, (unsigned long long)record->rec_id);
             return(-1);

@@ -108,7 +108,7 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  */
 herr_t
 H5B2_hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
-    uint16_t depth)
+    void *parent, uint16_t depth)
 {
     size_t sz_max_nrec;                 /* Temporary variable for range checking */
     unsigned u_max_nrec_size;           /* Temporary variable for range checking */
@@ -132,6 +132,7 @@ H5B2_hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
     HDassert(cparam->merge_percent < (cparam->split_percent / 2));
 
     /* Initialize basic information */
+    hdr->parent = parent;
     hdr->rc = 0;
     hdr->pending_delete = FALSE;
 
@@ -206,6 +207,12 @@ HDmemset(hdr->page, 0, hdr->node_size);
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create internal 'branch' node node pointer block factory")
         } /* end for */
     } /* end if */
+
+    /* Determine if we are doing SWMR writes.  Only enable for data chunks for
+     * now. */
+    hdr->swmr_write = (H5F_INTENT(hdr->f) & H5F_ACC_SWMR_WRITE) > 0
+            && (hdr->cls->id == H5B2_CDSET_ID
+            || hdr->cls->id == H5B2_CDSET_FILT_ID);
 
     /* Create the callback context, if the callback exists */
     if(hdr->cls->crt_context) {
@@ -283,7 +290,7 @@ done:
  */
 haddr_t
 H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
-    void *ctx_udata)
+    void *ctx_udata, void *parent)
 {
     H5B2_hdr_t *hdr = NULL;     /* The new v2 B-tree header information */
     haddr_t ret_value;          /* Return value */
@@ -301,7 +308,7 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
-    if(H5B2_hdr_init(hdr, cparam, ctx_udata, (uint16_t)0) < 0)
+    if(H5B2_hdr_init(hdr, cparam, ctx_udata, parent, (uint16_t)0) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
@@ -590,7 +597,7 @@ H5B2_hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
 
     /* Delete all nodes in B-tree */
     if(H5F_addr_defined(hdr->root.addr))
-        if(H5B2_delete_node(hdr, dxpl_id, hdr->depth, &hdr->root, hdr->remove_op, hdr->remove_op_data) < 0)
+        if(H5B2_delete_node(hdr, dxpl_id, hdr->depth, &hdr->root, hdr, hdr->remove_op, hdr->remove_op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
     /* Indicate that the heap header should be deleted & file space freed */

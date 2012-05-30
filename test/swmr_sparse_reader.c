@@ -11,7 +11,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 {
     hid_t dsid;                 /* Dataset ID */
     hid_t file_sid;             /* Dataset's space ID */
-    hsize_t start, count = 1;   /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0}, count[2] = {1, 1};   /* Hyperslab selection values */
 
     /* Open dataset for symbol */
     if((dsid = H5Dopen2(fid, symbol->name, H5P_DEFAULT)) < 0)
@@ -23,8 +23,8 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Choose the random record in the dataset (will be the same as chosen by
      * the writer) */
-    start = (hsize_t)random() % symbol->nrecords;;
-    if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+    start[1] = (hsize_t)random() % symbol->nrecords;
+    if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         return(-1);
 
     /* Emit informational message */
@@ -39,14 +39,14 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
      * header chunk afer the first.  Until this is fixed, just allow the read
      * value to be 0. */
     record->rec_id = (uint64_t)ULLONG_MAX;
-#else /* FILLVAL_WORKS */
+#else /* OHDR_DEPS_WORK */
     record->rec_id = (uint64_t)0;
-#endif /* FILLVAL_WORKS */
+#endif /* OHDR_DEPS_WORK */
     if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0)
         return(-1);
 
     /* Verify record value */
-    if(record->rec_id != start
+    if(record->rec_id != start[1]
 #ifndef OHDR_DEPS_WORK
              && record->rec_id != (uint64_t)0
 #endif

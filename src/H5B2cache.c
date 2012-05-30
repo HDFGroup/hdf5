@@ -73,16 +73,19 @@ static H5B2_hdr_t *H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, vo
 static herr_t H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_hdr_t *hdr, unsigned UNUSED * flags_ptr);
 static herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_hdr_t *hdr);
 static herr_t H5B2_cache_hdr_clear(H5F_t *f, H5B2_hdr_t *hdr, hbool_t destroy);
+static herr_t H5B2_cache_hdr_notify(H5AC_notify_action_t action, H5B2_hdr_t *hdr);
 static herr_t H5B2_cache_hdr_size(const H5F_t *f, const H5B2_hdr_t *hdr, size_t *size_ptr);
 static H5B2_internal_t *H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_internal_t *i, unsigned UNUSED * flags_ptr);
 static herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal);
 static herr_t H5B2_cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
+static herr_t H5B2_cache_internal_notify(H5AC_notify_action_t action, H5B2_internal_t *internal);
 static herr_t H5B2_cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
 static H5B2_leaf_t *H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l, unsigned UNUSED * flags_ptr);
 static herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf);
 static herr_t H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
+static herr_t H5B2_cache_leaf_notify(H5AC_notify_action_t action, H5B2_leaf_t *leaf);
 static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
 
 
@@ -97,7 +100,7 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     (H5AC_flush_func_t)H5B2_cache_hdr_flush,
     (H5AC_dest_func_t)H5B2_cache_hdr_dest,
     (H5AC_clear_func_t)H5B2_cache_hdr_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5B2_cache_hdr_notify,
     (H5AC_size_func_t)H5B2_cache_hdr_size,
 }};
 
@@ -108,7 +111,7 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     (H5AC_flush_func_t)H5B2_cache_internal_flush,
     (H5AC_dest_func_t)H5B2_cache_internal_dest,
     (H5AC_clear_func_t)H5B2_cache_internal_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5B2_cache_internal_notify,
     (H5AC_size_func_t)H5B2_cache_internal_size,
 }};
 
@@ -119,7 +122,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     (H5AC_flush_func_t)H5B2_cache_leaf_flush,
     (H5AC_dest_func_t)H5B2_cache_leaf_dest,
     (H5AC_clear_func_t)H5B2_cache_leaf_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5B2_cache_leaf_notify,
     (H5AC_size_func_t)H5B2_cache_leaf_size,
 }};
 
@@ -238,7 +241,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Initialize B-tree header info */
     cparam.cls = H5B2_client_class_g[id];
-    if(H5B2_hdr_init(hdr, &cparam, udata->ctx_udata, depth) < 0)
+    if(H5B2_hdr_init(hdr, &cparam, udata->ctx_udata, udata->parent, depth) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
 
     /* Set the B-tree header's address */
@@ -348,6 +351,23 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree header to disk")
 
 	hdr->cache_info.is_dirty = FALSE;
+
+	/* Clear shadowed node lists, as the header has been flushed and all
+	 * nodes must be shadowed again (if doing SWMR writes).  Note that this
+	 * algorithm does one extra iteration at the end, as the last node's
+	 * shadowed_next pointer points to itself. */
+	while(hdr->shadowed_internal) {
+            H5B2_internal_t *next = hdr->shadowed_internal->shadowed_next;
+
+            hdr->shadowed_internal->shadowed_next = NULL;
+            hdr->shadowed_internal = next;
+        } /* end while */
+        while(hdr->shadowed_leaf) {
+            H5B2_leaf_t *next = hdr->shadowed_leaf->shadowed_next;
+
+            hdr->shadowed_leaf->shadowed_next = NULL;
+            hdr->shadowed_leaf = next;
+        } /* end while */
     } /* end if */
 
     if(destroy)
@@ -445,6 +465,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2_cache_hdr_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 24 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_cache_hdr_notify(H5AC_notify_action_t action, H5B2_hdr_t *hdr)
+{
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        HDassert(hdr->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(H5AC_create_flush_dependency(hdr->parent, hdr) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(H5AC_destroy_flush_dependency(hdr->parent, hdr) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_cache_hdr_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_cache_hdr_size
  *
  * Purpose:	Compute the size in bytes of a B-tree header
@@ -523,6 +598,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Share B-tree information */
     internal->hdr = udata->hdr;
+    internal->parent = udata->parent;
 
     /* Read header from disk */
     if(H5F_block_read(f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, dxpl_id, udata->hdr->page) < 0)
@@ -787,6 +863,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2_cache_internal_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 25 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_cache_internal_notify(H5AC_notify_action_t action, H5B2_internal_t *internal)
+{
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(internal);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(internal->hdr->swmr_write) {
+        HDassert(internal->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(H5AC_create_flush_dependency(internal->parent, internal) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(H5AC_destroy_flush_dependency(internal->parent, internal) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_cache_internal_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2_cache_internal_size
  *
  * Purpose:	Compute the size in bytes of a B-tree internal node
@@ -865,6 +996,7 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Share B-tree header information */
     leaf->hdr = udata->hdr;
+    leaf->parent = udata->parent;
 
     /* Read header from disk */
     if(H5F_block_read(udata->f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, dxpl_id, udata->hdr->page) < 0)
@@ -1092,6 +1224,61 @@ H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *leaf, hbool_t destroy)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_leaf_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_cache_leaf_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 25 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2_cache_leaf_notify(H5AC_notify_action_t action, H5B2_leaf_t *leaf)
+{
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(leaf);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(leaf->hdr->swmr_write) {
+        HDassert(leaf->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(H5AC_create_flush_dependency(leaf->parent, leaf) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(H5AC_destroy_flush_dependency(leaf->parent, leaf) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_cache_leaf_notify() */
 
 
 /*-------------------------------------------------------------------------

@@ -94,6 +94,8 @@ struct H5B2_class_t {
     herr_t (*compare)(const void *rec1, const void *rec2); 		/* Compare two native records */
     herr_t (*encode)(uint8_t *raw, const void *record, void *ctx);  	/* Encode record from native form to disk storage form */
     herr_t (*decode)(const uint8_t *raw, void *record, void *ctx);  	/* Decode record from disk storage form to native form */
+    herr_t (*crt_flush_dep)(void *record, void *udata, void *parent);   /* Create a flush dependency with record as child */
+    herr_t (*upd_flush_dep)(void *record, void *udata, void *old_parent, void *new_parent); /* Update a flush dependency with record as child */
     herr_t (*debug)(FILE *stream, const H5F_t *f, hid_t dxpl_id,    	/* Print a record for debugging */
         int indent, int fwidth, const void *record, const void *ctx);
     void *(*crt_dbg_ctx)(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr); 	/* Create debugging context */
@@ -128,8 +130,9 @@ typedef struct H5B2_t H5B2_t;
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL H5B2_t *H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
-    void *ctx_udata);
-H5_DLL H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata);
+    void *ctx_udata, void *parent);
+H5_DLL H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
+    void *parent);
 H5_DLL herr_t H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr/*out*/);
 H5_DLL herr_t H5B2_insert(H5B2_t *bt2, hid_t dxpl_id, void *udata);
 H5_DLL herr_t H5B2_iterate(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op,
@@ -145,13 +148,18 @@ H5_DLL herr_t H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata,
 H5_DLL herr_t H5B2_remove(H5B2_t *b2, hid_t dxpl_id, void *udata,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id,
-    H5_iter_order_t order, hsize_t idx, H5B2_remove_t op, void *op_data);
+    H5_iter_order_t order, hsize_t idx, void *udata, H5B2_remove_t op,
+    void *op_data);
 H5_DLL herr_t H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec);
 H5_DLL herr_t H5B2_size(H5B2_t *bt2, hid_t dxpl_id,
     hsize_t *btree_size);
 H5_DLL herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    void *ctx_udata, H5B2_remove_t op, void *op_data);
+    void *ctx_udata, void *parent, H5B2_remove_t op, void *op_data);
+H5_DLL htri_t H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata,
+    void *child);
+H5_DLL herr_t H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata,
+    void *child);
 
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);

@@ -13,9 +13,9 @@ gen_skeleton(const char *filename, unsigned verbose, int comp_level,
     hid_t tid;          /* Datatype for dataset elements */
     hid_t sid;          /* Dataspace ID */
     hid_t aid;          /* Attribute ID */
-    hsize_t dims = 0;   /* Dataset starting dimensions */
-    hsize_t max_dims = H5S_UNLIMITED;   /* Dataset maximum dimensions */
-    hsize_t chunk_dims = CHUNK_SIZE;    /* Chunk dimensions */
+    hsize_t dims[2] = {1, 0}; /* Dataset starting dimensions */
+    hsize_t max_dims[2] = {1, H5S_UNLIMITED}; /* Dataset maximum dimensions */
+    hsize_t chunk_dims[2] = {1, CHUNK_SIZE}; /* Chunk dimensions */
 #ifdef FILLVAL_WORKS
     symbol_t fillval;   /* Dataset fill value */
 #endif /* FILLVAL_WORKS */
@@ -30,6 +30,8 @@ gen_skeleton(const char *filename, unsigned verbose, int comp_level,
     if(strcmp(index_type, "b1"))
         if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return(-1);
+    if(!strcmp(index_type, "b2"))
+        max_dims[0] = H5S_UNLIMITED;
 
 #ifdef QAK
 /* Increase the initial size of the metadata cache */
@@ -95,13 +97,13 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
         return(-1);
 
     /* Create dataspace for creating datasets */
-    if((sid = H5Screate_simple(1, &dims, &max_dims)) < 0)
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
         return(-1);
 
     /* Create dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         return(-1);
-    if(H5Pset_chunk(dcpl, 1, &chunk_dims) < 0)
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
         return(-1);
     if(comp_level >= 0) {
         if(H5Pset_deflate(dcpl, (unsigned)comp_level) < 0)
@@ -158,7 +160,7 @@ usage(void)
     printf("Usage error!\n");
     printf("Usage: swmr_generator [-q] [-c <deflate compression level>] [-i <index type>]\n");
     printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    printf("<index type> should be b1, b2, fa, or ea (fa and b2 not yet implemented)\n");
+    printf("<index type> should be b1, b2, fa, or ea (fa not yet implemented)\n");
     printf("Defaults to verbose (no '-q' given), no compression ('-c -1') and v1 b-tree\n");
     printf("    (-i b1)");
     exit(1);
@@ -189,7 +191,8 @@ int main(int argc, const char *argv[])
                     case 'i':
                         index_type = argv[u + 1];
                         if(strcmp(index_type, "b1")
-                                && strcmp(index_type, "ea"))
+                                && strcmp(index_type, "ea")
+                                && strcmp(index_type, "b2"))
                             usage();
                         u += 2;
                         break;

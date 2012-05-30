@@ -141,8 +141,8 @@ typedef struct H5B_class_t {
     herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
 
     /* flush dependency functions */
-    herr_t      (*create_flush_dep)(void*, void *, void *);
-    herr_t      (*update_flush_dep)(void*, void *, void *, void*);
+    herr_t      (*create_flush_dep)(void*, void*, void*);
+    herr_t      (*update_flush_dep)(void*, void*, void*, void*);
 } H5B_class_t;
 
 /* Information about B-tree */

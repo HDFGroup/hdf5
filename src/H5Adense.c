@@ -126,6 +126,7 @@ typedef struct H5A_bt2_ud_rm_t {
     /* downward */
     H5A_bt2_ud_common_t common;         /* Common info for B-tree user data (must be first) */
     haddr_t corder_bt2_addr;            /* v2 B-tree address of creation order index */
+    void *parent;                       /* Flush dependency parent */
 } H5A_bt2_ud_rm_t;
 
 /*
@@ -140,6 +141,7 @@ typedef struct H5A_bt2_ud_rmbi_t {
     H5HF_t      *shared_fheap;          /* Fractal heap handle for shared messages */
     H5_index_t  idx_type;               /* Index type for operation */
     haddr_t     other_bt2_addr;         /* v2 B-tree address of "other" index */
+    void        *parent;                /* Flush dependency parent */
 } H5A_bt2_ud_rmbi_t;
 
 
@@ -183,7 +185,7 @@ typedef struct H5A_bt2_ud_rmbi_t {
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
+H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo, void *parent)
 {
     H5HF_create_t fheap_cparam;         /* Fractal heap creation parameters */
     H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
@@ -246,7 +248,7 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
             H5O_FHEAP_ID_LEN;           /* Fractal heap ID */
     bt2_cparam.split_percent = H5A_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5A_NAME_BT2_MERGE_PERC;
-    if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam, NULL)))
+    if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for name index")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -267,7 +269,7 @@ HDfprintf(stderr, "%s: ainfo->name_bt2_addr = %a\n", FUNC, ainfo->name_bt2_addr)
                 H5O_FHEAP_ID_LEN;       /* Fractal heap ID */
         bt2_cparam.split_percent = H5A_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5A_CORDER_BT2_MERGE_PERC;
-        if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam, NULL)))
+        if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam, NULL, parent)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create v2 B-tree for creation order index")
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -339,7 +341,8 @@ H5A_dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
+H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
+    const char *name, void *parent)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -383,7 +386,7 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *na
     } /* end if */
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open v2 B-tree for name index")
 
     /* Create the "udata" information for v2 B-tree record find */
@@ -442,6 +445,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     unsigned mesg_flags = 0;            /* Flags for storing message */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
+    H5O_t *oh = NULL;                   /* Attribute's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -527,8 +531,15 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to insert attribute into fractal heap")
     } /* end else */
 
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+        /* Pin the attribute's object header */
+        /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
+        if(NULL == (oh = H5O_pin(&attr->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header")
+
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the callback information for v2 B-tree record insertion */
@@ -551,8 +562,9 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     /* Check if we should create a creation order index v2 B-tree record */
     if(ainfo->index_corder) {
         /* Open the creation order index v2 B-tree */
+        /*!FIXME use ohdr proxy -NAF */
         HDassert(H5F_addr_defined(ainfo->corder_bt2_addr));
-        if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, ainfo->corder_bt2_addr, NULL)))
+        if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, ainfo->corder_bt2_addr, NULL, oh)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Insert the record into the creation order index v2 B-tree */
@@ -562,6 +574,8 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
 done:
     /* Release resources */
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header")
     if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
@@ -636,6 +650,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
     H5B2_t *bt2_corder = NULL;          /* v2 B-tree handle for creation order index */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for attribute data */
     uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
+    H5O_t *oh = NULL;                   /* Attribute's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -659,8 +674,16 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
         if(H5F_addr_defined(op_data->corder_bt2_addr)) {
             H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
 
+            /* Check for SWMR writes to the file */
+            if(H5F_INTENT(op_data->f) & H5F_ACC_SWMR_WRITE)
+                /* Pin the attribute's object header */
+                /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
+                if(NULL == (oh = H5O_pin(&op_data->attr->oloc, op_data->dxpl_id)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header")
+
             /* Open the creation order index v2 B-tree */
-            if(NULL == (bt2_corder = H5B2_open(op_data->f, op_data->dxpl_id, op_data->corder_bt2_addr, NULL)))
+            /*!FIXME use ohdr proxy -NAF */
+            if(NULL == (bt2_corder = H5B2_open(op_data->f, op_data->dxpl_id, op_data->corder_bt2_addr, NULL, oh)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
             /* Create the "udata" information for v2 B-tree record modify */
@@ -721,6 +744,8 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 
 done:
     /* Release resources */
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header")
     if(bt2_corder && H5B2_close(bt2_corder, op_data->dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index")
     if(wb && H5WB_unwrap(wb) < 0)
@@ -752,6 +777,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
+    H5O_t *oh = NULL;                   /* Attribute's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -789,8 +815,16 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     if(NULL == (fheap = H5HF_open(f, dxpl_id, ainfo->fheap_addr)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+        /* Pin the attribute's object header */
+        /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
+        if(NULL == (oh = H5O_pin(&attr->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header")
+
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    /*!FIXME use ohdr proxy -NAF */
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the "udata" information for v2 B-tree record modify */
@@ -819,6 +853,8 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
 done:
     /* Release resources */
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header")
     if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
@@ -888,8 +924,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *old_name,
-    const char *new_name)
+H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
+    const char *old_name, const char *new_name, void *parent)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -936,7 +972,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the "udata" information for v2 B-tree record modify */
@@ -1011,7 +1047,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
 	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
     /* Delete old attribute from dense storage */
-    if(H5A_dense_remove(f, dxpl_id, ainfo, old_name) < 0)
+    if(H5A_dense_remove(f, dxpl_id, ainfo, old_name, parent) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
 
 done:
@@ -1140,8 +1176,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainfo,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
+H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
+    const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t skip, void *parent, hsize_t *last_attr,
     const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1215,7 +1252,7 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainf
         } /* end if */
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL, parent)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Construct the user data for v2 B-tree iterator callback */
@@ -1241,7 +1278,7 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainf
     else {
         /* Build the table of attributes for this object */
         /* (build table using the name index, but sort according to idx_type) */
-        if(H5A_dense_build_table(f, dxpl_id, ainfo, idx_type, order, &atable) < 0)
+        if(H5A_dense_build_table(f, dxpl_id, ainfo, idx_type, order, parent, &atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes")
 
         /* Iterate over attributes in table */
@@ -1291,7 +1328,7 @@ H5A_dense_remove_bt2_cb(const void *_record, void *_udata)
     /* Check for removing the link from the creation order index */
     if(H5F_addr_defined(udata->corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
-        if(NULL == (bt2_corder = H5B2_open(udata->common.f, udata->common.dxpl_id, udata->corder_bt2_addr, NULL)))
+        if(NULL == (bt2_corder = H5B2_open(udata->common.f, udata->common.dxpl_id, udata->corder_bt2_addr, NULL, udata->parent)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1342,7 +1379,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
+H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
+    const char *name, void *parent)
 {
     H5A_bt2_ud_rm_t udata;              /* User data for v2 B-tree record removal */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1386,7 +1424,7 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     } /* end if */
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1399,6 +1437,7 @@ H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     udata.common.found_op = H5A_dense_fnd_cb;       /* v2 B-tree comparison callback */
     udata.common.found_op_data = &attr_copy;
     udata.corder_bt2_addr = ainfo->corder_bt2_addr;
+    udata.parent = parent;
 
     /* Remove the record from the name index v2 B-tree */
     if(H5B2_remove(bt2_name, dxpl_id, &udata, H5A_dense_remove_bt2_cb, &udata) < 0)
@@ -1500,7 +1539,7 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
         } /* end else */
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(bt2_udata->f, bt2_udata->dxpl_id, bt2_udata->other_bt2_addr, NULL)))
+        if(NULL == (bt2 = H5B2_open(bt2_udata->f, bt2_udata->dxpl_id, bt2_udata->other_bt2_addr, NULL, bt2_udata->parent)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Set the common information for the v2 B-tree remove operation */
@@ -1562,7 +1601,7 @@ done:
  */
 herr_t
 H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
+    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, void *parent)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
@@ -1632,7 +1671,7 @@ H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
         } /* end if */
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, bt2_addr, NULL, parent)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for index")
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1642,15 +1681,16 @@ H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
         udata.shared_fheap = shared_fheap;
         udata.idx_type = idx_type;
         udata.other_bt2_addr = idx_type == H5_INDEX_NAME ? ainfo->corder_bt2_addr : ainfo->name_bt2_addr;
+        udata.parent = parent;
 
         /* Remove the record from the name index v2 B-tree */
-        if(H5B2_remove_by_idx(bt2, dxpl_id, order, n, H5A_dense_remove_by_idx_bt2_cb, &udata) < 0)
+        if(H5B2_remove_by_idx(bt2, dxpl_id, order, n, NULL, H5A_dense_remove_by_idx_bt2_cb, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTREMOVE, FAIL, "unable to remove attribute from v2 B-tree index")
     } /* end if */
     else {
         /* Build the table of attributes for this object */
         /* (build table using the name index, but sort according to idx_type) */
-        if(H5A_dense_build_table(f, dxpl_id, ainfo, idx_type, order, &atable) < 0)
+        if(H5A_dense_build_table(f, dxpl_id, ainfo, idx_type, order, parent, &atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error building table of attributes")
 
         /* Check for skipping too many attributes */
@@ -1658,7 +1698,7 @@ H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
 
         /* Delete appropriate attribute from dense storage */
-        if(H5A_dense_remove(f, dxpl_id, ainfo, ((atable.attrs[n])->shared)->name) < 0)
+        if(H5A_dense_remove(f, dxpl_id, ainfo, ((atable.attrs[n])->shared)->name, parent) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
     } /* end else */
 
@@ -1692,7 +1732,8 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
+H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
+    const char *name, void *parent)
 {
     H5A_bt2_ud_common_t udata;          /* User data for v2 B-tree modify */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1735,7 +1776,7 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     } /* end if */
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the "udata" information for v2 B-tree record 'find' */
@@ -1846,7 +1887,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
+H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo, void *parent)
 {
     H5A_bt2_ud_common_t udata;          /* v2 B-tree user data for deleting attributes */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
@@ -1876,7 +1917,7 @@ H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
     udata.found_op_data = NULL;
 
     /* Delete name index v2 B-tree */
-    if(H5B2_delete(f, dxpl_id, ainfo->name_bt2_addr, NULL, H5A_dense_delete_bt2_cb, &udata) < 0)
+    if(H5B2_delete(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent, H5A_dense_delete_bt2_cb, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for name index")
     ainfo->name_bt2_addr = HADDR_UNDEF;
 
@@ -1888,7 +1929,7 @@ H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
     /* Check if we should delete the creation order index v2 B-tree */
     if(H5F_addr_defined(ainfo->corder_bt2_addr)) {
         /* Delete the creation order index, without adjusting the ref. count on the attributes  */
-        if(H5B2_delete(f, dxpl_id, ainfo->corder_bt2_addr, NULL, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, ainfo->corder_bt2_addr, NULL, parent, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete v2 B-tree for creation order index")
         ainfo->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */

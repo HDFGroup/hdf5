@@ -138,7 +138,7 @@ create_btree(H5F_t *f, hid_t dxpl, const H5B2_create_t *cparam,
     H5B2_t **bt2, haddr_t *bt2_addr)
 {
     /* Create the v2 B-tree & get its address */
-    if(NULL == (*bt2 = H5B2_create(f, dxpl, cparam, f)))
+    if(NULL == (*bt2 = H5B2_create(f, dxpl, cparam, f, NULL)))
         FAIL_STACK_ERROR
     if(H5B2_get_addr(*bt2, bt2_addr/*out*/) < 0)
         FAIL_STACK_ERROR
@@ -177,7 +177,7 @@ reopen_btree(H5F_t *f, hid_t dxpl, H5B2_t **bt2, haddr_t bt2_addr,
             FAIL_STACK_ERROR
 
         /* Re-open v2 B-tree */
-        if(NULL == (*bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+        if(NULL == (*bt2 = H5B2_open(f, dxpl, bt2_addr, f, NULL)))
             FAIL_STACK_ERROR
     } /* end if */
 
@@ -2854,7 +2854,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     }
 
     /* Re-open v2 B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f, NULL)))
         FAIL_STACK_ERROR
 
     /* Check up on B-tree after re-open */
@@ -6551,7 +6551,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     } /* end for */
 
     /* Re-open v2 B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f, NULL)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
@@ -6636,7 +6636,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     }
 
     /* Re-open v2 B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f, NULL)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
@@ -6646,7 +6646,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         rrecord = HSIZET_MAX;
 
         /* Remove random record */
-        if(H5B2_remove_by_idx(bt2, dxpl, H5_ITER_INC, (hsize_t)rem_idx, remove_cb, &rrecord) < 0)
+        if(H5B2_remove_by_idx(bt2, dxpl, H5_ITER_INC, (hsize_t)rem_idx, NULL, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
@@ -6725,14 +6725,14 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     }
 
     /* Re-open v2 B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f, NULL)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
     for(u = 0; u < INSERT_MANY; u++) {
         /* Remove first record */
         rrecord = HSIZET_MAX;
-        if(H5B2_remove_by_idx(bt2, dxpl, H5_ITER_INC, (hsize_t)0, remove_cb, &rrecord) < 0)
+        if(H5B2_remove_by_idx(bt2, dxpl, H5_ITER_INC, (hsize_t)0, NULL, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
@@ -6811,14 +6811,14 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     }
 
     /* Re-open v2 B-tree */
-    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f, NULL)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
     for(u = 0; u < INSERT_MANY; u++) {
         /* Remove last record */
         rrecord = HSIZET_MAX;
-        if(H5B2_remove_by_idx(bt2, dxpl, H5_ITER_DEC, (hsize_t)0, remove_cb, &rrecord) < 0)
+        if(H5B2_remove_by_idx(bt2, dxpl, H5_ITER_DEC, (hsize_t)0, NULL, remove_cb, &rrecord) < 0)
             FAIL_STACK_ERROR
 
         /* Make certain that the record value is correct */
@@ -7173,7 +7173,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, dxpl, bt2_addr, f, NULL, NULL) < 0)
+    if(H5B2_delete(f, dxpl, bt2_addr, f, NULL, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -7231,7 +7231,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, f, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, f, NULL, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -7289,7 +7289,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, dxpl, bt2_addr, f, NULL, NULL) < 0)
+    if(H5B2_delete(f, dxpl, bt2_addr, f, NULL, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -7347,7 +7347,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, dxpl, bt2_addr, f, NULL, NULL) < 0)
+    if(H5B2_delete(f, dxpl, bt2_addr, f, NULL, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */

@@ -59,7 +59,8 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 {
     hid_t tid;                          /* Datatype ID for records */
     hid_t mem_sid;                      /* Memory dataspace ID */
-    hsize_t start, count = 1;           /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
+    hsize_t dim[2] = {1, 0};            /* Dataspace dimensions */
     symbol_t record;                    /* The record to add to the dataset */
     H5AC_cache_config_t mdc_config_orig; /* Original metadata cache configuration */
     H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
@@ -102,7 +103,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         record.rec_id = symbol->nrecords;
 
         /* Get the coordinate to write */
-        start = symbol->nrecords;
+        start[1] = symbol->nrecords;
 
         /* Cork the metadata cache, to prevent the object header from being
          * flushed before the data has been written */
@@ -111,7 +112,8 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
         /* Extend the dataset's dataspace to hold the new record */
         symbol->nrecords++;
-        if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+        dim[1] = symbol->nrecords;
+        if(H5Dset_extent(symbol->dsid, dim) < 0)
             return(-1);
 
         /* Get the dataset's dataspace */
@@ -119,7 +121,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
             return(-1);
 
         /* Choose the last record in the dataset */
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             return(-1);
 
         /* Write record to the dataset */
@@ -242,7 +244,7 @@ int main(int argc, const char *argv[])
 
     /* Create randomized set of numbers */
     curr_time = time(NULL);
-    srandom((unsigned)curr_time);
+    srandom(15);//srandom((unsigned)curr_time);
 
     /* Emit informational message */
     if(verbose)

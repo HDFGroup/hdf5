@@ -157,7 +157,7 @@ H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id)
     bt2_cparam.merge_percent = H5HF_HUGE_BT2_MERGE_PERC;
 
     /* Create v2 B-tree for tracking 'huge' objects */
-    if(NULL == (hdr->huge_bt2 = H5B2_create(hdr->f, dxpl_id, &bt2_cparam, hdr->f)))
+    if(NULL == (hdr->huge_bt2 = H5B2_create(hdr->f, dxpl_id, &bt2_cparam, hdr->f, NULL)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking 'huge' heap objects")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -339,7 +339,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
         /* Check if v2 B-tree is open yet */
         if(NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f)))
+            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' heap objects")
         } /* end if */
     } /* end else */
@@ -545,7 +545,7 @@ H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
         /* Check if v2 B-tree is open yet */
         if(NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f)))
+            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' heap objects")
         } /* end if */
 
@@ -636,7 +636,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
         /* Check if v2 B-tree is open yet */
         if(NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f)))
+            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' heap objects")
         } /* end if */
 
@@ -784,7 +784,7 @@ H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
         /* Check if v2 B-tree is open yet */
         if(NULL == hdr->huge_bt2) {
             /* Open existing v2 B-tree */
-            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f)))
+            if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL)))
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' heap objects")
         } /* end if */
 
@@ -914,7 +914,7 @@ H5HF_huge_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
     /* Check if v2 B-tree is open yet */
     if(NULL == hdr->huge_bt2) {
         /* Open existing v2 B-tree */
-        if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f)))
+        if(NULL == (hdr->huge_bt2 = H5B2_open(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for tracking 'huge' heap objects")
     } /* end if */
 
@@ -1037,7 +1037,7 @@ H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id)
 
         /* Delete the v2 B-tree */
         /* (any v2 B-tree class will work here) */
-        if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL, NULL) < 0)
+        if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
 
         /* Reset the information about 'huge' objects in the file */
@@ -1105,7 +1105,7 @@ H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
     } /* end else */
 
     /* Delete the v2 B-tree */
-    if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, op, &udata) < 0)
+    if(H5B2_delete(hdr->f, dxpl_id, hdr->huge_bt2_addr, hdr->f, NULL, op, &udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
 
 done:

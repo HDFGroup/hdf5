@@ -124,6 +124,7 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     cache_udata.f = f;
     cache_udata.ctx_udata = dbg_ctx;
+    cache_udata.parent = NULL;
     if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
@@ -242,6 +243,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
      */
     cache_udata.f = f;
     cache_udata.ctx_udata = dbg_ctx;
+    cache_udata.parent = NULL;
     if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
@@ -251,7 +253,7 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree internal node
      */
-    if(NULL == (internal = H5B2_protect_internal(hdr, dxpl_id, addr, nrec, depth, H5AC_READ)))
+    if(NULL == (internal = H5B2_protect_internal(hdr, dxpl_id, addr, NULL, nrec, depth, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Print opening message */
@@ -374,6 +376,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
      */
     cache_udata.f = f;
     cache_udata.ctx_udata = dbg_ctx;
+    cache_udata.parent = NULL;
     if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree header")
 
@@ -383,7 +386,7 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree leaf node
      */
-    if(NULL == (leaf = H5B2_protect_leaf(hdr, dxpl_id, addr, nrec, H5AC_READ)))
+    if(NULL == (leaf = H5B2_protect_leaf(hdr, dxpl_id, addr, NULL, nrec, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
     /* Print opening message */

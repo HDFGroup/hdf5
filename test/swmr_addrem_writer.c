@@ -8,7 +8,7 @@ open_skeleton(const char *filename, unsigned verbose)
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
     hid_t sid;		/* Dataspace ID */
-    hsize_t dim;        /* Dataspace dimension */
+    hsize_t dim[2];        /* Dataspace dimension */
     unsigned u, v;      /* Local index variable */
 
     /* Create file access property list */
@@ -54,11 +54,11 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
                 return(-1);
             if((sid = H5Dget_space(symbol_info[u][v].dsid)) < 0)
                 return -1;
-            if(1 != H5Sget_simple_extent_ndims(sid))
+            if(2 != H5Sget_simple_extent_ndims(sid))
                 return -1;
-            if(H5Sget_simple_extent_dims(sid, &dim, NULL) < 0)
+            if(H5Sget_simple_extent_dims(sid, dim, NULL) < 0)
                 return -1;
-            symbol_info[u][v].nrecords = (hsize_t)dim;
+            symbol_info[u][v].nrecords = dim[1];
         } /* end for */
 
     return(fid);
@@ -69,7 +69,8 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
 {
     hid_t tid;                          /* Datatype ID for records */
     hid_t mem_sid;                      /* Memory dataspace ID */
-    hsize_t start, count;               /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
+    hsize_t dim[2] = {1, 0};            /* Dataspace dimensions */
     symbol_t buf[MAX_SIZE_CHANGE];      /* Write buffer */
     H5AC_cache_config_t mdc_config_orig; /* Original metadata cache configuration */
     H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
@@ -80,8 +81,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     memset(&buf, 0, sizeof(buf));
 
     /* Create a dataspace for the record to add */
-    count = 1;
-    if((mem_sid = H5Screate_simple(1, &count, NULL)) < 0)
+    if((mem_sid = H5Screate_simple(2, count, NULL)) < 0)
         return(-1);
 
     /* Create datatype for appending records */
@@ -110,22 +110,22 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         symbol = choose_dataset();
 
         /* Decide whether to shrink or expand, and by how much */
-	count = (hsize_t)random() % (MAX_SIZE_CHANGE * 2) + 1;
+	count[1] = (hsize_t)random() % (MAX_SIZE_CHANGE * 2) + 1;
 
-	if(count > MAX_SIZE_CHANGE) {
+	if(count[1] > MAX_SIZE_CHANGE) {
             /* Add records */
-            count -= MAX_SIZE_CHANGE;
+            count[1] -= MAX_SIZE_CHANGE;
 
             /* Set the buffer's IDs (equal to its position) */
-            for(v=0; v<count; v++)
+            for(v=0; v<count[1]; v++)
                 buf[v].rec_id = (uint64_t)symbol->nrecords + (uint64_t)v;
 
             /* Set the memory space to the correct size */
-            if(H5Sset_extent_simple(mem_sid, 1, &count, NULL) < 0)
+            if(H5Sset_extent_simple(mem_sid, 2, count, NULL) < 0)
                 return(-1);
 
             /* Get the coordinates to write */
-            start = symbol->nrecords;
+            start[1] = symbol->nrecords;
 
             /* Cork the metadata cache, to prevent the object header from being
              * flushed before the data has been written */
@@ -133,8 +133,9 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
                 return(-1);*/
 
              /* Extend the dataset's dataspace to hold the new record */
-            symbol->nrecords+= count;
-            if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+            symbol->nrecords+= count[1];
+            dim[1] = symbol->nrecords;
+            if(H5Dset_extent(symbol->dsid, dim) < 0)
                 return(-1);
 
             /* Get the dataset's dataspace */
@@ -142,7 +143,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
                 return(-1);
 
             /* Choose the last record in the dataset */
-            if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+            if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
                 return(-1);
 
             /* Write record to the dataset */
@@ -159,11 +160,12 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         } /* end if */
         else {
             /* Shrink the dataset's dataspace */
-            if(count > symbol->nrecords)
+            if(count[1] > symbol->nrecords)
                 symbol->nrecords = 0;
             else
-                symbol->nrecords -= count;
-            if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+                symbol->nrecords -= count[1];
+            dim[1] = symbol->nrecords;
+            if(H5Dset_extent(symbol->dsid, dim) < 0)
                 return(-1);
         } /* end else */
 
@@ -267,7 +269,7 @@ int main(int argc, const char *argv[])
 
     /* Create randomized set of numbers */
     curr_time = time(NULL);
-    srandom((unsigned)curr_time);
+    //srandom((unsigned)curr_time);
 
     /* Emit informational message */
     if(verbose)

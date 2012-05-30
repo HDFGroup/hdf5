@@ -8,7 +8,7 @@ open_skeleton(const char *filename, unsigned verbose)
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
     hid_t sid;		/* Dataspace ID */
-    hsize_t dim;        /* Dataspace dimension */
+    hsize_t dim[2];     /* Dataspace dimensions */
     unsigned u, v;      /* Local index variable */
 
     /* Create file access property list */
@@ -54,11 +54,11 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
                 return(-1);
             if((sid = H5Dget_space(symbol_info[u][v].dsid)) < 0)
                 return -1;
-            if(1 != H5Sget_simple_extent_ndims(sid))
+            if(2 != H5Sget_simple_extent_ndims(sid))
                 return -1;
-            if(H5Sget_simple_extent_dims(sid, &dim, NULL) < 0)
+            if(H5Sget_simple_extent_dims(sid, dim, NULL) < 0)
                 return -1;
-            symbol_info[u][v].nrecords = (hsize_t)dim;
+            symbol_info[u][v].nrecords = dim[1];
         } /* end for */
 
     return(fid);
@@ -68,6 +68,7 @@ static int
 remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned long flush_count)
 {
     unsigned long shrink_to_flush;      /* # of removals before flush */
+    hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
     unsigned long u, v;                 /* Local index variables */
 
     /* Remove records from random datasets, according to frequency distribution */
@@ -85,7 +86,8 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
 	    symbol->nrecords = 0;
 	else
 	    symbol->nrecords -= remove_size;
-	if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+        dim[1] = symbol->nrecords;
+	if(H5Dset_extent(symbol->dsid, dim) < 0)
 	    return(-1);
 
         /* Check for flushing file */

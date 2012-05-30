@@ -10,7 +10,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     hid_t dsid;                 /* Dataset ID */
     hid_t file_sid;             /* Dataset's space ID */
     hssize_t snpoints;          /* Number of elements in dataset */
-    hsize_t start, count = 1;   /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0}, count[2] = {1, 1};   /* Hyperslab selection values */
 
     /* Open dataset for symbol */
     if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
@@ -31,8 +31,8 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     /* Check if there are records for symbol */
     if(snpoints > 0) {
         /* Choose the last record in the dataset */
-        start = (hsize_t)(snpoints - 1);
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        start[1] = (hsize_t)(snpoints - 1);
+        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             return(-1);
 
         /* Read record from dataset */
@@ -41,7 +41,7 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
             return(-1);
 
         /* Verify record value */
-        if(record->rec_id != start) {
+        if(record->rec_id != start[1]) {
             printf("Incorrect record value!\n");
             printf("Symbol = '%s', # of records = %lld, record->rec_id = %llu\n", sym_name, (long long)snpoints, (unsigned long long)record->rec_id);
             return(-1);

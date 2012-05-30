@@ -333,7 +333,7 @@ H5O_ainfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
+H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -346,7 +346,8 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 
     /* If the object is using "dense" attribute storage, delete it */
     if(H5F_addr_defined(ainfo->fheap_addr))
-        if(H5A_dense_delete(f, dxpl_id, ainfo) < 0)
+        /*!FIXME use ohdr proxy -NAF */
+        if(H5A_dense_delete(f, dxpl_id, ainfo, open_oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
 
 done:
@@ -427,12 +428,14 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     *ainfo_dst = *ainfo_src;
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
-        /* copy dense attribute */
-        
+        /* Prepare to copy dense attributes - actual copy in post_copy */
+
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);
 
-        if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
+        /*!FIXME Must pass something for the parent, once we have a way to
+         * depend on an object being copied (ohdr proxy?) -NAF */
+        if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
 
         /* Reset metadata tag */

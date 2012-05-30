@@ -437,7 +437,8 @@ typedef struct H5O_storage_chunk_earray_t {
 struct H5B2_t;                          /* Defined in H5B2pkg.h          */
 
 typedef struct H5O_storage_chunk_bt2_t {
-    struct H5B2_t *bt2;
+    haddr_t     dset_ohdr_addr;         /* File address dataset's object header */
+    struct H5B2_t *bt2;                 /* Pointer to b-tree 2 struct */
 } H5O_storage_chunk_bt2_t;
 
 typedef struct H5O_storage_chunk_t {

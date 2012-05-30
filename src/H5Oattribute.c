@@ -280,7 +280,8 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
                 H5O_mesg_operator_t op;         /* Wrapper for operator */
 
                 /* Create dense storage for attributes */
-                if(H5A_dense_create(loc->file, dxpl_id, &ainfo) < 0)
+                /*!FIXME use ohdr proxy -NAF */
+                if(H5A_dense_create(loc->file, dxpl_id, &ainfo, oh) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes")
 
                 /* Set up user data for callback */
@@ -507,7 +508,8 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
         /* Check for attributes in dense storage */
         if(H5F_addr_defined(ainfo.fheap_addr)) {
             /* Open attribute with dense storage */
-            if(NULL == (opened_attr = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
+            /*!FIXME use ohdr proxy -NAF */
+            if(NULL == (opened_attr = H5A_dense_open(loc->file, dxpl_id, &ainfo, name, oh)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
         } /* end if */
         else {
@@ -1205,7 +1207,7 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
         /* Rename the attribute data in dense storage */
-        if(H5A_dense_rename(loc->file, dxpl_id, &ainfo, old_name, new_name) < 0)
+        if(H5A_dense_rename(loc->file, dxpl_id, &ainfo, old_name, new_name, oh) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
     } /* end if */
     else {
@@ -1306,7 +1308,8 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
         oh = NULL;
 
         /* Iterate over attributes in dense storage */
-        if((ret_value = H5A_dense_iterate(loc->file, dxpl_id, loc_id, &ainfo, idx_type, order, skip, last_attr, attr_op, op_data)) < 0)
+        /*!FIXME use ohdr proxy -NAF */
+        if((ret_value = H5A_dense_iterate(loc->file, dxpl_id, loc_id, &ainfo, idx_type, order, skip, oh, last_attr, attr_op, op_data)) < 0)
             HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
     } /* end if */
     else {
@@ -1420,7 +1423,8 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo,
         size_t u;                       /* Local index */
 
         /* Build the table of attributes for this object */
-        if(H5A_dense_build_table(loc->file, dxpl_id, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, &atable) < 0)
+        /*!FIXME use ohdr proxy -NAF */
+        if(H5A_dense_build_table(loc->file, dxpl_id, ainfo, H5_INDEX_NAME, H5_ITER_NATIVE, oh, &atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Inspect attributes in table for ones that can't be converted back
@@ -1475,7 +1479,8 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo,
             } /* end for */
 
             /* Remove the dense storage */
-            if(H5A_dense_delete(loc->file, dxpl_id, ainfo) < 0)
+            /*!FIXME use ohdr proxy -NAF */
+            if(H5A_dense_delete(loc->file, dxpl_id, ainfo, oh) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
         } /* end if */
     } /* end if */
@@ -1591,7 +1596,8 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
         /* Delete attribute from dense storage */
-        if(H5A_dense_remove(loc->file, dxpl_id, &ainfo, name) < 0)
+        /*!FIXME use ohdr proxy -NAF */
+        if(H5A_dense_remove(loc->file, dxpl_id, &ainfo, name, oh) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
     } /* end if */
     else {
@@ -1675,7 +1681,8 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
         /* Delete attribute from dense storage */
-        if(H5A_dense_remove_by_idx(loc->file, dxpl_id, &ainfo, idx_type, order, n) < 0)
+        /*!FIXME use ohdr proxy -NAF */
+        if(H5A_dense_remove_by_idx(loc->file, dxpl_id, &ainfo, idx_type, order, n, oh) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
     } /* end if */
     else {
@@ -1860,7 +1867,8 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
         /* Check if attribute exists in dense storage */
-        if((ret_value = H5A_dense_exists(loc->file, dxpl_id, &ainfo, name)) < 0)
+        /*!FIXME use ohdr proxy -NAF */
+        if((ret_value = H5A_dense_exists(loc->file, dxpl_id, &ainfo, name, oh)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
     } /* end if */
     else {
@@ -1928,8 +1936,9 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         else if(ainfo_exists > 0) {
             /* Check if name index available */
             if(H5F_addr_defined(ainfo.name_bt2_addr)) {
+                /*!FIXME use ohdr proxy -NAF */
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo.name_bt2_addr, NULL)))
+                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo.name_bt2_addr, NULL, oh)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Get name index B-tree size */
@@ -1939,8 +1948,9 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 
             /* Check if creation order index available */
             if(H5F_addr_defined(ainfo.corder_bt2_addr)) {
+                /*!FIXME use ohdr proxy -NAF */
                 /* Open the creation order index v2 B-tree */
-                if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, ainfo.corder_bt2_addr, NULL)))
+                if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, ainfo.corder_bt2_addr, NULL, oh)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
                 /* Get creation order index B-tree size */

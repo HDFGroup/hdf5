@@ -72,12 +72,13 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 {
     hid_t tid;                          /* Datatype ID for records */
     hid_t mem_sid;                      /* Memory dataspace ID */
-    hsize_t start, count = 1;           /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
     symbol_t record;                    /* The record to add to the dataset */
     H5AC_cache_config_t mdc_config_orig; /* Original metadata cache configuration */
     H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
     unsigned long rec_to_flush;         /* # of records left to write before flush */
     volatile int dummy;                 /* Dummy varialbe for busy sleep */
+    hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
     unsigned long u, v;                 /* Local index variables */
 
     /* Reset the record */
@@ -122,8 +123,9 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
          * add the sequence attribute */
         if(symbol->nrecords == 0) {
             symbol->nrecords = nrecords / 5;
+            dim[1] = symbol->nrecords;
 
-            if(H5Dset_extent(symbol->dsid, &symbol->nrecords) < 0)
+            if(H5Dset_extent(symbol->dsid, dim) < 0)
                 return(-1);
 
             if((file_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -137,17 +139,17 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
             return(-1);
 
         /* Get the coordinate to write */
-        start = (hsize_t)random() % symbol->nrecords;
+        start[1] = (hsize_t)random() % symbol->nrecords;
 
         /* Set the record's ID (equal to its position) */
-        record.rec_id = start;
+        record.rec_id = start[1];
 
         /* Get the dataset's dataspace */
         if((file_sid = H5Dget_space(symbol->dsid)) < 0)
             return(-1);
 
         /* Choose a random record in the dataset */
-        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
             return(-1);
 
         /* Write record to the dataset */

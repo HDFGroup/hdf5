@@ -114,6 +114,8 @@ const H5B2_class_t H5G_BT2_NAME[1]={{   /* B-tree class information */
     H5G_dense_btree2_name_compare,      /* Record comparison callback */
     H5G_dense_btree2_name_encode,       /* Record encoding callback */
     H5G_dense_btree2_name_decode,       /* Record decoding callback */
+    NULL,                               /* Create flush dependency */
+    NULL,                               /* Update flush dependency */
     H5G_dense_btree2_name_debug,        /* Record debugging callback */
     NULL,                               /* Create debugging context */
     NULL                                /* Destroy debugging context */
@@ -130,6 +132,8 @@ const H5B2_class_t H5G_BT2_CORDER[1]={{ /* B-tree class information */
     H5G_dense_btree2_corder_compare,    /* Record comparison callback */
     H5G_dense_btree2_corder_encode,     /* Record encoding callback */
     H5G_dense_btree2_corder_decode,     /* Record decoding callback */
+    NULL,                               /* Create flush dependency */
+    NULL,                               /* Update flush dependency */
     H5G_dense_btree2_corder_debug,      /* Record debugging callback */
     NULL,                               /* Create debugging context */
     NULL                                /* Destroy debugging context */
