@@ -25,6 +25,7 @@
 #include "H5public.h"
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
+#include "H5Opublic.h"
 
 /* Dataset creation property names */
 #define H5VL_DSET_TYPE_ID        "dataset_type_id"
@@ -213,6 +214,9 @@ typedef struct H5VL_link_class_t {
                      hid_t lcpl_id, hid_t lapl_id, hid_t req);
     herr_t (*move)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                      const char *dest_name, hbool_t copy_flag, hid_t lcpl, hid_t lapl, hid_t req);
+    herr_t (*iterate) (hid_t loc_id, const char *name, hbool_t recursive, 
+                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                       H5L_iterate_t op, void *op_data, hid_t lapl_id);
     herr_t (*get)   (hid_t loc_id, H5VL_link_get_t get_type, hid_t req, va_list arguments);
     herr_t (*remove)(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 } H5VL_link_class_t;
@@ -222,6 +226,8 @@ typedef struct H5VL_object_class_t {
     hid_t  (*open)  (void *obj_loc, hid_t lapl_id, hid_t req);
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+    herr_t (*visit) (hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, 
+                     H5O_iterate_t op, void *op_data, hid_t lapl_id);
     herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
     herr_t (*free_loc)(void *location, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
@@ -234,6 +240,7 @@ typedef struct H5VL_object_class_t {
 typedef struct H5VL_class_t {
     const char *name;
     unsigned	nrefs;		/* Ref count for times struct is pointed to */
+    herr_t  (*initialize)(void);
     herr_t  (*terminate)(void);
     H5VL_attr_class_t          attr_cls;
     H5VL_datatype_class_t      datatype_cls;

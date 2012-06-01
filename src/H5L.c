@@ -703,8 +703,9 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, name, buf, size, NULL, lapl_id)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, name, buf, 
+                                  size, NULL, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1123,9 +1124,6 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx_p, H5L_iterate_t op, void *op_data)
 {
     H5I_type_t  id_type;        /* Type of ID */
-    H5G_link_iterate_t lnk_op;  /* Link operator */
-    hsize_t     last_lnk;       /* Index of last object looked at */
-    hsize_t	idx;            /* Internal location to hold index */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1142,21 +1140,10 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
     if(!op)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
-    /* Set up iteration beginning/end info */
-    idx = (idx_p == NULL ? 0 : *idx_p);
-    last_lnk = 0;
-
-    /* Build link operator info */
-    lnk_op.op_type = H5G_LINK_OP_NEW;
-    lnk_op.op_func.op_new = op;
-
-    /* Iterate over the links */
-    if((ret_value = H5G_iterate(id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_iterate(id, ".", FALSE, idx_type, order, idx_p,
+                                      op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
-
-    /* Set the index we stopped at */
-    if(idx_p)
-        *idx_p = last_lnk;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1190,9 +1177,6 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
     H5L_iterate_t op, void *op_data, hid_t lapl_id)
 {
-    H5G_link_iterate_t lnk_op;  /* Link operator */
-    hsize_t     last_lnk;       /* Index of last object looked at */
-    hsize_t	idx;            /* Internal location to hold index */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1214,21 +1198,10 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up iteration beginning/end info */
-    idx = (idx_p == NULL ? 0 : *idx_p);
-    last_lnk = 0;
-
-    /* Build link operator info */
-    lnk_op.op_type = H5G_LINK_OP_NEW;
-    lnk_op.op_func.op_new = op;
-
-    /* Iterate over the links */
-    if((ret_value = H5G_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_iterate(loc_id, group_name, FALSE, idx_type, order, idx_p,
+                                      op, op_data, lapl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
-
-    /* Set the index we stopped at */
-    if(idx_p)
-        *idx_p = last_lnk;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1285,9 +1258,10 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
-    /* Call internal group visitation routine */
-    if((ret_value = H5G_visit(grp_id, ".", idx_type, order, op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_iterate(grp_id, ".", TRUE, idx_type, order, NULL,
+                                      op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1347,9 +1321,10 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Call internal group visitation routine */
-    if((ret_value = H5G_visit(loc_id, group_name, idx_type, order, op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+    /* visit the links through the VOL */
+    if((ret_value = H5VL_link_iterate(loc_id, group_name, TRUE, idx_type, order, NULL,
+                                      op, op_data, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -2162,15 +2162,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5P_set_vol
  *
- * Purpose:	Set the file vol (VOL_ID) for a file access property list 
- *              (PLIST_ID) and supply an optional struct containing the 
- *              vol-specific properites (VOL_INFO).  The vol properties will 
+ * Purpose:	Set the vol plugin for a file access property list 
+ *              (PLIST_ID).  The vol properties will 
  *              be copied into the property list and the reference count on 
- *              the vol will be incremented, allowing the caller to close the 
- *              vol ID but still use the property list.
+ *              the vol will be incremented.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Mohamad Chaarawi

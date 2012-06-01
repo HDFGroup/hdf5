@@ -86,12 +86,17 @@ H5_DLL herr_t H5VL_link_create(H5VL_link_create_type_t create_type, hid_t loc_id
                                const char *link_name, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 H5_DLL herr_t H5VL_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                              const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+H5_DLL herr_t H5VL_link_iterate(hid_t loc_id, const char *name, hbool_t recursive, 
+                                H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                                H5L_iterate_t op, void *op_data, hid_t lapl_id);
 H5_DLL herr_t H5VL_link_get(hid_t loc_id, H5VL_link_get_t get_type, hid_t req, ...);
 H5_DLL herr_t H5VL_link_remove(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 
 H5_DLL hid_t H5VL_object_open_by_loc(hid_t loc_id, void *obj_loc, hid_t lapl_id, hid_t req);
 H5_DLL herr_t H5VL_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                                const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+H5_DLL herr_t H5VL_object_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id);
 H5_DLL herr_t H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, hid_t req, ...);
 H5_DLL herr_t H5VL_object_misc(hid_t id, H5VL_object_misc_t misc_type, hid_t req, ...);
 H5_DLL herr_t H5VL_object_optional(hid_t id, H5VL_object_misc_t optional_type, hid_t req, ...);

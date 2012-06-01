@@ -103,12 +103,18 @@ static herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, hid_t
                                       const char *link_name, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_link_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                                     const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+static herr_t H5VL_native_link_iterate(hid_t loc_id, const char *name, hbool_t recursive, 
+                                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                                       H5L_iterate_t op, void *op_data, hid_t lapl_id);
 static herr_t H5VL_native_link_get(hid_t loc_id, H5VL_link_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_link_remove(hid_t loc_id, const char *name, void *udata, hid_t lapl_id, hid_t req);
 
 static hid_t H5VL_native_object_open(void *location, hid_t lapl_id, hid_t req);
 static herr_t H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
                                       const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+static herr_t H5VL_native_object_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                       H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
+                                       hid_t lapl_id);
 static herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_free_loc(void *location, hid_t req);
 static herr_t H5VL_native_object_get(hid_t id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
@@ -116,10 +122,11 @@ static herr_t H5VL_native_object_misc(hid_t id, H5VL_object_misc_t misc_type, hi
 static herr_t H5VL_native_object_optional(hid_t id, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_native_object_close(hid_t object_id, hid_t req);
 
-H5VL_class_t H5VL_native_g = {
+static H5VL_class_t H5VL_native_g = {
     "native",					/* name */
     0,                                          /* nrefs */
-    H5VL_native_term,                           /*terminate */
+    NULL,                           /* initialize */
+    H5VL_native_term,                           /* terminate */
     {                                           /* attribute_cls */
         H5VL_native_attr_create,                /* create */
         H5VL_native_attr_open,                  /* open */
@@ -161,12 +168,14 @@ H5VL_class_t H5VL_native_g = {
     {                                           /* link_cls */
         H5VL_native_link_create,                /* create */
         H5VL_native_link_move,                  /* move */
+        H5VL_native_link_iterate,               /* iterate */
         H5VL_native_link_get,                   /* get */
         H5VL_native_link_remove                 /* remove */
     },
     {                                           /* object_cls */
         H5VL_native_object_open,                /* open */
         H5VL_native_object_copy,                /* copy */
+        H5VL_native_object_visit,               /* visit */
         H5VL_native_object_lookup,              /* lookup */
         H5VL_native_object_free_loc,            /* free location */
         H5VL_native_object_get,                 /* get */
@@ -2326,6 +2335,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_native_link_iterate
+ *
+ * Purpose:	Iterates through links in a group
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5VL_native_link_iterate(hid_t loc_id, const char *name, hbool_t recursive, 
+                                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, 
+                                       H5L_iterate_t op, void *op_data, hid_t lapl_id)
+{
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!recursive) {
+        H5G_link_iterate_t lnk_op;  /* Link operator */
+        hsize_t     last_lnk;       /* Index of last object looked at */
+        hsize_t	idx;            /* Internal location to hold index */
+
+        /* Set up iteration beginning/end info */
+        idx = (idx_p == NULL ? 0 : *idx_p);
+        last_lnk = 0;
+
+        /* Build link operator info */
+        lnk_op.op_type = H5G_LINK_OP_NEW;
+        lnk_op.op_func.op_new = op;
+
+        /* Iterate over the links */
+        if((ret_value = H5G_iterate(loc_id, name, idx_type, order, idx, &last_lnk, &lnk_op, 
+                                    op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+
+        /* Set the index we stopped at */
+        if(idx_p)
+            *idx_p = last_lnk;
+    }
+    else {
+        /* Call internal group visitation routine */
+        if((ret_value = H5G_visit(loc_id, name, idx_type, order, op, op_data, 
+                                  lapl_id, H5AC_ind_dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_link_iterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_native_link_get
  *
  * Purpose:	Gets certain data about a link
@@ -2538,6 +2602,40 @@ H5VL_native_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_object_copy() */
+
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_object_visit
+ *
+ * Purpose:	Iterates through all objects linked to an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5VL_native_object_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                       H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
+                                       hid_t lapl_id)
+{
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Call internal object visitation routine */
+    if((ret_value = H5O_visit(loc_id, obj_name, idx_type, order, op, op_data, 
+                              lapl_id, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_object_visit() */
+
 
 
 /*-------------------------------------------------------------------------

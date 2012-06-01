@@ -80,9 +80,6 @@ typedef struct {
 
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
-static herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
-    hid_t dxpl_id);
 static herr_t H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr);
 static const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
@@ -748,7 +745,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
 
     /* set comment on object through the VOL */
     if(H5VL_object_misc(obj_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, ".", comment, H5P_LINK_ACCESS_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -792,7 +789,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
 
     /* set comment on object through the VOL */
     if(H5VL_object_misc(loc_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, name, comment, lapl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -825,7 +822,7 @@ H5Oget_comment(hid_t loc_id, char *comment, size_t bufsize)
 
     if(H5VL_object_get(loc_id, H5VL_OBJECT_GET_COMMENT, H5_REQUEST_NULL, &ret_value, comment, bufsize,
                        ".", H5P_LINK_ACCESS_DEFAULT) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -924,9 +921,9 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
-    /* Call internal object visitation routine */
-    if((ret_value = H5O_visit(obj_id, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+    /* iterate over the objects through the VOL */
+    if((ret_value = H5VL_object_visit(obj_id, ".", idx_type, order, op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -990,9 +987,9 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Call internal object visitation routine */
-    if((ret_value = H5O_visit(loc_id, obj_name, idx_type, order, op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visitation failed")
+    /* iterate over the objects through the VOL */
+    if((ret_value = H5VL_object_visit(loc_id, obj_name, idx_type, order, op, op_data, lapl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3205,7 +3202,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id)

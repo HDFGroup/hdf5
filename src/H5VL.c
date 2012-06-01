@@ -192,8 +192,6 @@ H5VL_free_cls(H5VL_class_t *cls)
     if(cls->terminate && cls->terminate() < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "vol plugin '%s' did not terminate cleanly", cls->name)
 
-    H5MM_xfree(cls);
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_free_cls() */
@@ -430,7 +428,6 @@ H5VL_fapl_close(H5VL_class_t *vol_cls)
 
     if(NULL != vol_cls) {
         vol_cls->nrefs--;
-        //H5MM_xfree(vol_cls);
     }
 
 done:
@@ -459,9 +456,6 @@ H5VL_close(H5VL_class_t *vol_plugin)
     FUNC_ENTER_NOAPI(FAIL)
 
     vol_plugin->nrefs--;
-
-    if(0 == vol_plugin->nrefs)
-        H5MM_xfree(vol_plugin);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1775,6 +1769,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_link_iterate
+ *
+ * Purpose:	Iterate over links in a group
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5VL_link_iterate(hid_t loc_id, const char *name, hbool_t recursive, 
+                         H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                         H5L_iterate_t op, void *op_data, hid_t lapl_id)
+{
+    H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(NULL == vol_plugin->link_cls.iterate)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link iterate' method")
+
+    if((ret_value = (vol_plugin->link_cls.iterate)(loc_id, name, recursive, idx_type,
+                                                   order, idx, op, op_data, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)    
+} /* end H5VL_link_iterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_link_get
  *
  * Purpose:	Get specific information about the link through the VOL
@@ -1932,6 +1963,42 @@ H5VL_object_copy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_object_visit
+ *
+ * Purpose:	Iterate over links in a group
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5VL_object_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                         H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id)
+{
+    H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(NULL == vol_plugin->object_cls.visit)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link iterate' method")
+
+    if((ret_value = (vol_plugin->object_cls.visit)(loc_id, obj_name, idx_type, order, op, 
+                                                   op_data, lapl_id)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "object visitation failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)    
+} /* end H5VL_object_visit() */
 
 
 /*-------------------------------------------------------------------------

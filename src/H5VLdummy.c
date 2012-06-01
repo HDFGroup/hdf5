@@ -62,6 +62,7 @@ static hid_t  H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcp
 H5VL_class_t H5VL_dummy_g = {
     "dummy",					/* name */
     0,                                          /* nrefs */
+    H5VL_dummy_init,
     H5VL_dummy_term,                           /*terminate */
     {                                           /* attribute_cls */
         NULL,                                   /* create */

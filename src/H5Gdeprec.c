@@ -77,10 +77,6 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5G_link_hard(hid_t cur_loc_id, const char *cur_name,
-    hid_t new_loc_id, const char *new_name);
-static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
-    hid_t dst_loc_id, const char *dst_name);
 static herr_t H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -424,60 +420,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_hard
- *
- * Purpose:	Creates a hard link from NEW_NAME to CUR_NAME.
- *
- *		CUR_NAME must name an existing object.  CUR_NAME and
- *              NEW_NAME are interpreted relative to CUR_LOC_ID and
- *              NEW_LOC_ID, which are either file IDs or group IDs.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_link_hard(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
-    const char *new_name)
-{
-    H5G_loc_t	cur_loc, *cur_loc_p;    /* Information about current link's group */
-    H5G_loc_t	new_loc, *new_loc_p;    /* Information about new link's group */
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Finish checking arguments */
-    if(cur_loc_id == H5L_SAME_LOC && new_loc_id == H5L_SAME_LOC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not be both H5L_SAME_LOC")
-    if(cur_loc_id != H5L_SAME_LOC && H5G_loc(cur_loc_id, &cur_loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(new_loc_id != H5L_SAME_LOC && H5G_loc(new_loc_id, &new_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-    /* Set up current & new location pointers */
-    cur_loc_p = &cur_loc;
-    new_loc_p = &new_loc;
-    if(cur_loc_id == H5L_SAME_LOC)
-        cur_loc_p = new_loc_p;
-    else if(new_loc_id == H5L_SAME_LOC)
-   	new_loc_p = cur_loc_p;
-    else if(cur_loc_p->oloc->file != new_loc_p->oloc->file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
-
-    /* Create the link */
-    if(H5L_create_hard(cur_loc_p, cur_name, new_loc_p, new_name,
-                H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_link_hard() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Gmove
  *
  * Purpose:	Moves and renames a link.  The new API to do this is H5Lmove.
@@ -529,63 +471,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_move
- *
- * Purpose:	Renames an object within an HDF5 file and moves it to a new
- *              group.  The original name SRC is unlinked from the group graph
- *              and then inserted with the new name DST (which can specify a
- *              new path for the object) as an atomic operation. The names
- *              are interpreted relative to SRC_LOC_ID and
- *              DST_LOC_ID, which are either file IDs or group ID.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Monday, November  6, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
-    const char *dst_name)
-{
-    H5G_loc_t	src_loc, *src_loc_p;    /* Group info for source location */
-    H5G_loc_t	dst_loc, *dst_loc_p;    /* Group info for destination location */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check arguments */
-    if(src_loc_id == H5L_SAME_LOC && dst_loc_id == H5L_SAME_LOC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should not both be H5L_SAME_LOC")
-    if(src_loc_id != H5L_SAME_LOC && H5G_loc(src_loc_id, &src_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(dst_loc_id != H5L_SAME_LOC && H5G_loc(dst_loc_id, &dst_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!src_name || !*src_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no current name specified")
-    if(!dst_name || !*dst_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
-
-    /* Set up src & dst location pointers */
-    src_loc_p = &src_loc;
-    dst_loc_p = &dst_loc;
-    if(src_loc_id == H5L_SAME_LOC)
-        src_loc_p = dst_loc_p;
-    else if(dst_loc_id == H5L_SAME_LOC)
-        dst_loc_p = src_loc_p;
-
-    /* Move the link */
-    if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, FALSE, H5P_DEFAULT,
-            H5P_DEFAULT, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_LINK, H5E_CANTMOVE, FAIL, "unable to move link")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_move() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Gunlink
  *
  * Purpose:	Removes a link.  The new API is H5Ldelete/H5Ldelete_by_idx.
@@ -623,21 +508,19 @@ done:
 herr_t
 H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 {
-    H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*szx", loc_id, name, size, buf);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
-    /* Call the new link routine which provides this capability */
-    if(H5L_get_val(&loc, name, buf, size, H5P_DEFAULT, H5AC_ind_dxpl_id) < 0)
-      HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "couldn't get link info")
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, name, buf, 
+                                  size, NULL, H5P_LINK_ACCESS_DEFAULT)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -664,18 +547,17 @@ done:
 herr_t
 H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
-    H5G_loc_t	loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", loc_id, name, comment);
 
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
-    if(H5G_loc_set_comment(&loc, name, comment, H5P_DEFAULT, H5AC_dxpl_id) < 0)
+    /* set comment on object through the VOL */
+    if(H5VL_object_misc(loc_id, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, 
+                        name,  comment, H5P_LINK_ACCESS_DEFAULT) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -709,21 +591,22 @@ done:
 int
 H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 {
-    H5G_loc_t	loc;
+    ssize_t size;
     int	ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("Is", "i*sz*s", loc_id, name, bufsize, buf);
 
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(bufsize > 0 && !buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
 
-    if((ret_value = (int)H5G_loc_get_comment(&loc, name, buf, bufsize, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get comment value")
+    if(H5VL_object_get(loc_id, H5VL_OBJECT_GET_COMMENT, H5_REQUEST_NULL, 
+                       &size, buf, bufsize, name, H5P_LINK_ACCESS_DEFAULT) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
+
+    ret_value = (int)size;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -792,6 +675,26 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     /* Set the index we stopped at */
     if(idx_p)
         *idx_p = (int)last_obj;
+
+#if 0
+    herr_t	ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
+
+    /* Check args */
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_p && *idx_p < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
+    if(!op)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_iterate(loc_id, name, FALSE, H5_INDEX_NAME, H5_ITER_INC, (hsize_t *)idx_p,
+                                      op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+#endif 
 
 done:
     FUNC_LEAVE_API(ret_value)
