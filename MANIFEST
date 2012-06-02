@@ -138,7 +138,7 @@
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
 ./examples/testh5cc.sh.in
-
+./examples/README
 
 
 #------------------------------------------------------------------------------
