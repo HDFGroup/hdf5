@@ -462,7 +462,7 @@ H5MF_aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr,
                 || H5F_addr_eq((aggr->addr + aggr->size), sect->sect_info.addr)) {
 #ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: section {%a, %Hu} adjoins aggr = {%a, %Hu}\n", "H5MF_aggr_can_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr, aggr->size);
-#endif /* H5MF_AGGR_DBEUG */
+#endif /* H5MF_AGGR_DEBUG */
             /* Check if aggregator would get too large and should be absorbed into section */
             if((aggr->size + sect->sect_info.size) >= aggr->alloc_size)
                 *shrink = H5MF_SHRINK_SECT_ABSORB_AGGR;
@@ -510,9 +510,9 @@ H5MF_aggr_absorb(const H5F_t UNUSED *f, H5F_blk_aggr_t *aggr, H5MF_free_section_
     if((aggr->size + sect->sect_info.size) >= aggr->alloc_size && allow_sect_absorb) {
         /* Check if the section adjoins the beginning or end of the aggregator */
         if(H5F_addr_eq((sect->sect_info.addr + sect->sect_info.size), aggr->addr)) {
-#ifdef H5MF_AGGR_DBEUG
+#ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: aggr {%a, %Hu} adjoins front of section = {%a, %Hu}\n", "H5MF_aggr_absorb", aggr->addr, aggr->size, sect->sect_info.addr, sect->sect_info.size);
-#endif /* H5MF_AGGR_DBEUG */
+#endif /* H5MF_AGGR_DEBUG */
             /* Absorb aggregator onto end of section */
             sect->sect_info.size += aggr->size;
         } /* end if */
@@ -520,9 +520,9 @@ HDfprintf(stderr, "%s: aggr {%a, %Hu} adjoins front of section = {%a, %Hu}\n", "
             /* Sanity check */
             HDassert(H5F_addr_eq((aggr->addr + aggr->size), sect->sect_info.addr));
 
-#ifdef H5MF_AGGR_DBEUG
+#ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: aggr {%a, %Hu} adjoins end of section = {%a, %Hu}\n", "H5MF_aggr_absorb", aggr->addr, aggr->size, sect->sect_info.addr, sect->sect_info.size);
-#endif /* H5MF_AGGR_DBEUG */
+#endif /* H5MF_AGGR_DEBUG */
             /* Absorb aggregator onto beginning of section */
             sect->sect_info.addr -= aggr->size;
             sect->sect_info.size += aggr->size;
@@ -536,9 +536,9 @@ HDfprintf(stderr, "%s: aggr {%a, %Hu} adjoins end of section = {%a, %Hu}\n", "H5
     else {
         /* Check if the section adjoins the beginning or end of the aggregator */
         if(H5F_addr_eq((sect->sect_info.addr + sect->sect_info.size), aggr->addr)) {
-#ifdef H5MF_AGGR_DBEUG
+#ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: section {%a, %Hu} adjoins front of aggr = {%a, %Hu}\n", "H5MF_aggr_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr, aggr->size);
-#endif /* H5MF_AGGR_DBEUG */
+#endif /* H5MF_AGGR_DEBUG */
             /* Absorb section onto front of aggregator */
             aggr->addr -= sect->sect_info.size;
             aggr->size += sect->sect_info.size;
@@ -552,9 +552,9 @@ HDfprintf(stderr, "%s: section {%a, %Hu} adjoins front of aggr = {%a, %Hu}\n", "
             /* Sanity check */
             HDassert(H5F_addr_eq((aggr->addr + aggr->size), sect->sect_info.addr));
 
-#ifdef H5MF_AGGR_DBEUG
+#ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: section {%a, %Hu} adjoins end of aggr = {%a, %Hu}\n", "H5MF_aggr_absorb", sect->sect_info.addr, sect->sect_info.size, aggr->addr, aggr->size);
-#endif /* H5MF_AGGR_DBEUG */
+#endif /* H5MF_AGGR_DEBUG */
             /* Absorb section onto end of aggregator */
             aggr->size += sect->sect_info.size;
         } /* end if */
@@ -637,9 +637,9 @@ H5MF_aggr_reset(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr)
         /* Retain aggregator info */
         tmp_addr = aggr->addr;
         tmp_size = aggr->size;
-#ifdef H5MF_AGGR_DBEUG
+#ifdef H5MF_AGGR_DEBUG
 HDfprintf(stderr, "%s: tmp_addr = %a, tmp_size = %Hu\n", FUNC, tmp_addr, tmp_size);
-#endif /* H5MF_AGGR_DBEUG */
+#endif /* H5MF_AGGR_DEBUG */
 
         /* Reset aggregator block information */
         aggr->tot_size = 0;

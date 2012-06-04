@@ -522,7 +522,6 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
 {
     size_t obj_id_count=0;      /* Number of open IDs */
     H5F_olist_t olist;          /* Structure to hold search results */
-    htri_t type_exists;         /* Whether objects of a type are open */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
