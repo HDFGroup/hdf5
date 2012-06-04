@@ -2219,6 +2219,7 @@
 ./config/cmake/FindSZIP.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/GetTimeOfDayTest.cpp
+./config/cmake/HDF5CXXTests.c
 ./config/cmake/HDF5Tests.c
 ./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
@@ -2246,6 +2247,7 @@
 ./config/cmake/CPack.cmake
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
+
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt
