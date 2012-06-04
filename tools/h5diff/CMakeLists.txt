@@ -51,304 +51,278 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
-  SET (HDF5_REFERENCE_FILES
-      h5diff_10.txt
-      h5diff_100.txt
-      #h5diff_101.txt
-      #h5diff_102.txt
-      #h5diff_103.txt
-      #h5diff_104.txt
-      h5diff_11.txt
-      h5diff_12.txt
-      h5diff_13.txt
-      h5diff_14.txt
-      h5diff_15.txt
-      h5diff_16_1.txt
-      h5diff_16_2.txt
-      h5diff_16_3.txt
-      h5diff_17.txt
-      h5diff_171.txt
-      h5diff_172.txt
-      h5diff_18_1.txt
-      h5diff_18.txt
-      h5diff_20.txt
-      h5diff_200.txt
-      h5diff_201.txt
-      h5diff_202.txt
-      h5diff_203.txt
-      h5diff_204.txt
-      h5diff_205.txt
-      h5diff_206.txt
-      h5diff_207.txt
-      h5diff_208.txt
-      h5diff_220.txt
-      h5diff_221.txt
-      h5diff_222.txt
-      h5diff_223.txt
-      h5diff_224.txt
-      h5diff_21.txt
-      h5diff_22.txt
-      h5diff_23.txt
-      h5diff_24.txt
-      h5diff_25.txt
-      h5diff_26.txt
-      h5diff_27.txt
-      h5diff_28.txt
-      h5diff_300.txt
-      h5diff_400.txt
-      h5diff_401.txt
-      h5diff_402.txt
-      h5diff_403.txt
-      h5diff_404.txt
-      h5diff_405.txt
-      h5diff_406.txt
-      h5diff_407.txt
-      h5diff_408.txt
-      h5diff_409.txt
-      h5diff_410.txt
-      h5diff_411.txt
-      h5diff_412.txt
-      h5diff_413.txt
-      h5diff_414.txt
-      h5diff_415.txt
-      h5diff_416.txt
-      h5diff_417.txt
-      h5diff_418.txt
-      h5diff_419.txt
-      h5diff_420.txt
-      h5diff_421.txt
-      h5diff_422.txt
-      h5diff_423.txt
-      h5diff_424.txt
-      h5diff_425.txt
-      h5diff_450.txt
-      h5diff_451.txt
-      h5diff_452.txt
-      h5diff_453.txt
-      h5diff_454.txt
-      h5diff_455.txt
-      h5diff_456.txt
-      h5diff_457.txt
-      h5diff_458.txt
-      h5diff_459.txt
-      h5diff_465.txt
-      h5diff_466.txt
-      h5diff_467.txt
-      h5diff_468.txt
-      h5diff_469.txt
-      h5diff_471.txt
-      h5diff_472.txt
-      h5diff_473.txt
-      h5diff_474.txt
-      h5diff_475.txt
-      h5diff_480.txt
-      h5diff_481.txt
-      h5diff_482.txt
-      h5diff_483.txt
-      h5diff_484.txt
-      h5diff_485.txt
-      h5diff_486.txt
-      h5diff_487.txt
-      h5diff_50.txt
-      h5diff_51.txt
-      h5diff_52.txt
-      h5diff_53.txt
-      h5diff_54.txt
-      h5diff_55.txt
-      h5diff_56.txt
-      h5diff_57.txt
-      h5diff_58.txt
-      h5diff_500.txt
-      h5diff_501.txt
-      h5diff_502.txt
-      h5diff_503.txt
-      h5diff_504.txt
-      h5diff_505.txt
-      h5diff_506.txt
-      h5diff_507.txt
-      h5diff_508.txt
-      h5diff_509.txt
-      h5diff_510.txt
-      h5diff_511.txt
-      h5diff_512.txt
-      h5diff_513.txt
-      h5diff_514.txt
-      h5diff_515.txt
-      h5diff_516.txt
-      h5diff_517.txt
-      h5diff_518.txt
-      h5diff_530.txt
-      h5diff_540.txt
-      h5diff_600.txt
-      h5diff_601.txt
-      h5diff_603.txt
-      h5diff_604.txt
-      h5diff_605.txt
-      h5diff_606.txt
-      h5diff_607.txt
-      h5diff_608.txt
-      h5diff_609.txt
-      h5diff_610.txt
-      h5diff_612.txt
-      h5diff_613.txt
-      h5diff_614.txt
-      h5diff_615.txt
-      h5diff_616.txt
-      h5diff_617.txt
-      h5diff_618.txt
-      h5diff_619.txt
-      h5diff_621.txt
-      h5diff_622.txt
-      h5diff_623.txt
-      h5diff_624.txt
-      h5diff_625.txt
-      h5diff_626.txt
-      h5diff_627.txt
-      h5diff_628.txt
-      h5diff_629.txt
-      h5diff_630.txt
-      h5diff_631.txt
-      h5diff_640.txt
-      h5diff_641.txt
-      h5diff_642.txt
-      h5diff_643.txt
-      h5diff_644.txt
-      h5diff_645.txt
-      h5diff_646.txt
-      h5diff_70.txt
-      h5diff_700.txt
-      h5diff_701.txt
-      h5diff_702.txt
-      h5diff_703.txt
-      h5diff_704.txt
-      h5diff_705.txt
-      h5diff_706.txt
-      h5diff_707.txt
-      h5diff_708.txt
-      h5diff_709.txt
-      h5diff_710.txt
-      h5diff_80.txt
-      h5diff_90.txt
-  )
-  SET (HDF5_REFERENCE_TEST_FILES
-      h5diff_basic1.h5
-      h5diff_basic2.h5
-      h5diff_types.h5
-      h5diff_dtypes.h5
-      h5diff_attr1.h5
-      h5diff_attr2.h5
-      h5diff_dset1.h5
-      h5diff_dset2.h5
-      h5diff_hyper1.h5
-      h5diff_hyper2.h5
-      h5diff_empty.h5
-      h5diff_links.h5
-      h5diff_softlinks.h5
-      h5diff_linked_softlink.h5
-      h5diff_extlink_src.h5
-      h5diff_extlink_trg.h5
-      h5diff_ext2softlink_src.h5
-      h5diff_ext2softlink_trg.h5
-      h5diff_dset_zero_dim_size1.h5
-      h5diff_dset_zero_dim_size2.h5
-      h5diff_danglelinks1.h5
-      h5diff_danglelinks2.h5
-      h5diff_grp_recurse1.h5
-      h5diff_grp_recurse2.h5
-      h5diff_grp_recurse_ext1.h5
-      h5diff_grp_recurse_ext2-1.h5
-      h5diff_grp_recurse_ext2-2.h5
-      h5diff_grp_recurse_ext2-3.h5
-      h5diff_exclude1-1.h5
-      h5diff_exclude1-2.h5
-      h5diff_exclude2-1.h5
-      h5diff_exclude2-2.h5
-      h5diff_exclude3-1.h5
-      h5diff_exclude3-2.h5
-      h5diff_comp_vl_strs.h5
-      h5diff_attr_v_level1.h5
-      h5diff_attr_v_level2.h5
-      compounds_array_vlen1.h5
-      compounds_array_vlen2.h5
-      non_comparables1.h5
-      non_comparables2.h5
+  SET (LIST_HDF5_TEST_FILES
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_basic1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_basic2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_types.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dtypes.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_hyper1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_hyper2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_empty.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_links.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_softlinks.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_linked_softlink.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_extlink_src.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_extlink_trg.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ext2softlink_src.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ext2softlink_trg.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset_zero_dim_size1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_dset_zero_dim_size2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_danglelinks1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_danglelinks2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_grp_recurse1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_grp_recurse2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_grp_recurse_ext1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_grp_recurse_ext2-1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_grp_recurse_ext2-2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_grp_recurse_ext2-3.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude1-1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude1-2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude2-1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude2-2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude3-1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude3-2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_comp_vl_strs.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
   )
 
-  FOREACH (txt_file ${HDF5_REFERENCE_FILES})
-    SET (txtdest "${PROJECT_BINARY_DIR}/${txt_file}")
-    #MESSAGE (STATUS " Copying ${txt_file}")
+  SET (LIST_OTHER_TEST_FILES
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_10.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_100.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_11.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_12.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_13.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_14.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_15.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_16_1.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_16_2.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_16_3.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_17.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_171.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_172.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_18_1.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_18.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_20.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_200.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_201.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_202.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_203.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_204.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_205.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_206.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_207.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_208.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_220.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_221.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_222.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_223.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_224.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_21.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_22.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_23.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_24.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_25.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_26.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_27.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_28.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_300.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_400.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_401.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_402.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_403.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_404.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_405.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_406.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_407.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_408.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_409.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_410.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_411.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_412.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_413.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_414.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_415.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_416.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_417.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_418.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_419.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_420.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_421.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_422.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_423.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_424.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_425.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_450.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_451.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_452.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_453.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_454.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_455.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_456.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_457.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_458.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_459.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_465.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_466.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_467.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_468.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_469.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_471.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_472.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_473.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_474.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_475.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_480.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_481.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_482.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_483.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_484.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_485.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_486.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_487.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_50.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_51.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_52.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_53.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_54.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_55.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_56.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_57.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_58.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_500.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_501.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_502.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_503.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_504.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_505.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_506.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_507.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_508.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_509.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_510.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_511.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_512.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_513.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_514.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_515.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_516.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_517.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_518.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_530.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_540.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_600.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_601.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_603.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_604.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_605.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_606.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_607.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_608.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_609.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_610.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_612.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_613.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_614.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_615.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_616.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_617.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_618.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_619.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_621.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_622.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_623.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_624.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_625.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_626.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_627.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_628.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_629.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_630.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_631.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_640.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_641.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_642.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_643.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_644.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_645.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_646.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_70.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_700.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_701.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_702.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_703.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_704.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_705.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_706.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_707.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_708.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_709.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_710.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_80.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
+  )
+
+  # Make testfiles dir under build dir
+  FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+
+  #
+  # copy test files from source to build dir
+  #
+  FOREACH (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+    GET_FILENAME_COMPONENT(fname "${h5_tstfiles}" NAME)
+    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #MESSAGE (STATUS " Copying ${fname}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/${txt_file} ${txtdest}
+        ARGS       -E copy_if_different ${h5_tstfiles} ${dest}
     )
-  ENDFOREACH (txt_file ${HDF5_REFERENCE_FILES})
+  ENDFOREACH (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
 
-  FOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    SET (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-    #MESSAGE (STATUS " Copying ${h5_file}")
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5diff
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/${h5_file} ${dest}
-    )
-  ENDFOREACH (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
+  #
+  # Overwrite system dependent files (Windows)
+  #
   IF (WIN32 AND NOT CYGWIN)
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101w.txt ${PROJECT_BINARY_DIR}/h5diff_101.txt
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_101.txt
     )
 
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_102.txt
     )
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt ${PROJECT_BINARY_DIR}/h5diff_103.txt
-    )
-
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5diff
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/h5diff_104.txt
-    )
-  ELSE (WIN32 AND NOT CYGWIN)
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5diff
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101.txt ${PROJECT_BINARY_DIR}/h5diff_101.txt
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_103.txt
     )
 
     ADD_CUSTOM_COMMAND (
         TARGET     h5diff
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102.txt ${PROJECT_BINARY_DIR}/h5diff_102.txt
-    )
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5diff
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103.txt ${PROJECT_BINARY_DIR}/h5diff_103.txt
-    )
-
-    ADD_CUSTOM_COMMAND (
-        TARGET     h5diff
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104.txt ${PROJECT_BINARY_DIR}/h5diff_104.txt
+        ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_104.txt
     )
   ENDIF (WIN32 AND NOT CYGWIN)
   
@@ -362,6 +336,7 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
+      SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       IF (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       ENDIF (NOT ${resultcode} STREQUAL "0")
@@ -373,14 +348,14 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DIFF-clear-${resultfile}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}.out ${resultfile}.out.err
+              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
       )
       ADD_TEST (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
               -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
@@ -398,6 +373,7 @@ IF (BUILD_TESTING)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
+      SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       IF (NOT ${resultcode} STREQUAL "0")
         SET_TESTS_PROPERTIES (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       ENDIF (NOT ${resultcode} STREQUAL "0")
@@ -409,14 +385,14 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME PH5DIFF-clear-${resultfile}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}_p.out ${resultfile}_p.out.err
+              -E remove ./testfiles/${resultfile}_p.out ./testfiles/${resultfile}_p.out.err
       )
       ADD_TEST (
           NAME PH5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${MPIEXEC};${MPIEXEC_PREFLAGS};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_POSTFLAGS};$<TARGET_FILE:ph5diff>"
               -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=P_${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
@@ -438,7 +414,7 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DIFF-clear-${testname}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ${testname}.out ${testname}.out.err
+              -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err
       )
       # if there was a previous test
       IF (NOT "${last_test}" STREQUAL "")
@@ -865,6 +841,7 @@ IF (BUILD_TESTING)
           h5diff_90.out
           h5diff_90.out.err
     )
+    SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
