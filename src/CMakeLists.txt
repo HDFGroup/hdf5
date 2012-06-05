@@ -589,6 +589,7 @@ IDE_GENERATED_PROPERTIES ("H5V" "${H5V_HDRS}" "${H5V_SRCS}" )
 
 SET (H5VL_SRCS
     ${HDF5_SRC_DIR}/H5VL.c
+    ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLdummy.c
     ${HDF5_SRC_DIR}/H5VLnative.c
 )
