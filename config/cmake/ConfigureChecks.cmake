@@ -123,6 +123,8 @@ IF (WIN32)
     SET (WINDOWS 1) # MinGW tries to imitate Windows
   ENDIF (MINGW)
   SET (H5_HAVE_WIN32_API 1)
+  SET (CMAKE_REQUIRED_LIBRARIES "ws2_32.lib;wsock32.lib")
+  SET (CMAKE_REQUIRED_FLAGS "/DWIN32_LEAN_AND_MEAN=1 /DNOGDI=1")
   IF (NOT UNIX AND NOT CYGWIN AND NOT MINGW)
     SET (WINDOWS 1)
     IF (MSVC)
@@ -151,7 +153,7 @@ IF (WINDOWS)
   # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
   # (This flag should be _unset_ for all machines, except for Windows)
   SET (H5_HAVE_WINDOW_PATH 1)
-  SET (LINK_LIBS ${LINK_LIBS} "kernel32")
+#  SET (LINK_LIBS ${LINK_LIBS} "kernel32")
 ENDIF (WINDOWS)
 
 IF (WINDOWS)
@@ -177,6 +179,9 @@ IF (WINDOWS)
   SET (H5_HAVE_TIMEZONE 1)
   SET (H5_HAVE_GETTIMEOFDAY 1)
   SET (H5_LONE_COLON 0)
+  
+  SET (H5_HAVE_LIBWS2_32 1)
+  SET (H5_HAVE_LIBWSOCK32 1)
 ENDIF (WINDOWS)
 
 #-----------------------------------------------------------------------------
@@ -201,10 +206,10 @@ ENDIF (CYGWIN)
 #-----------------------------------------------------------------------------
 IF (NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     H5_HAVE_LIBM)
+  CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  H5_HAVE_LIBWS2_32)
+  CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname H5_HAVE_LIBWSOCK32)
 ENDIF (NOT WINDOWS)
 
-CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  H5_HAVE_LIBWS2_32)
-CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname H5_HAVE_LIBWSOCK32)
 CHECK_LIBRARY_EXISTS_CONCAT ("ucb"    gethostname  H5_HAVE_LIBUCB)
 CHECK_LIBRARY_EXISTS_CONCAT ("socket" connect      H5_HAVE_LIBSOCKET)
 CHECK_LIBRARY_EXISTS ("c" gethostbyname "" NOT_NEED_LIBNSL)
@@ -213,6 +218,8 @@ IF (NOT NOT_NEED_LIBNSL)
   CHECK_LIBRARY_EXISTS_CONCAT ("nsl"    gethostbyname  H5_HAVE_LIBNSL)
 ENDIF (NOT NOT_NEED_LIBNSL)
 
+# For other tests to use the same libraries
+SET (CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${LINK_LIBS})
 
 SET (USE_INCLUDES "")
 IF (WINDOWS)
@@ -546,9 +553,6 @@ H5_CHECK_TYPE_SIZE (off64_t        H5_SIZEOF_OFF64_T)
 IF (NOT H5_SIZEOF_OFF64_T)
   SET (H5_SIZEOF_OFF64_T 0)
 ENDIF (NOT H5_SIZEOF_OFF64_T)
-
-# For other tests to use the same libraries
-SET (CMAKE_REQUIRED_LIBRARIES ${LINK_LIBS})
 
 #-----------------------------------------------------------------------------
 # Check if the dev_t type is a scalar type
@@ -1165,3 +1169,18 @@ H5ConversionTests (H5_NO_ALIGNMENT_RESTRICTIONS "Checking IF alignment restricti
 IF (CYGWIN)
   SET (H5_CYGWIN_ULLONG_TO_LDOUBLE_ROUND_PROBLEM 1)
 ENDIF (CYGWIN)
+
+# -----------------------------------------------------------------------
+# wrapper script variables
+# 
+SET (prefix ${CMAKE_INSTALL_PREFIX})
+SET (exec_prefix "\${prefix}")
+SET (libdir "${exec_prefix}/lib")
+SET (includedir "\${prefix}/include")
+SET (host_os ${CMAKE_HOST_SYSTEM_NAME})
+SET (CC ${CMAKE_C_COMPILER})
+SET (CXX ${CMAKE_CXX_COMPILER})
+SET (FC ${CMAKE_Fortran_COMPILER})
+FOREACH (LINK_LIB ${LINK_LIBS})
+  SET (LIBS "${LIBS} -l${LINK_LIB}")
+ENDFOREACH (LINK_LIB ${LINK_LIBS})
