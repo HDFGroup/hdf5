@@ -258,6 +258,7 @@ extern "C" {
 /* Function prototypes */
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL herr_t H5VLunregister(hid_t driver_id);
+H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
 
 #ifdef __cplusplus
 }

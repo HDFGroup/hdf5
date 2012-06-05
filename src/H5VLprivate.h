@@ -45,8 +45,8 @@ struct H5F_t;
 
 H5_DLL int H5VL_term_interface(void);
 H5_DLL H5VL_class_t *H5VL_get_class(hid_t id);
-//H5_DLL hsize_t H5VL_sb_size(H5F_t *file);
 H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
+H5_DLL ssize_t H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL herr_t H5VL_close(H5VL_class_t *vol_plugin);
 
 H5_DLL hid_t H5VL_attr_create(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);

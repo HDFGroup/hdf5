@@ -265,3 +265,33 @@ H5VLunregister(hid_t vol_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLunregister() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLget_plugin_name
+ *
+ * Purpose:	Returns the plugin name for the VOL associated with the 
+ *              object or file ID
+ *
+ * Return:      Success:        The length of the plugin name
+ *              Failure:        Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size)
+{
+    ssize_t    ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "*x", id, name, size);
+
+    if((ret_value = H5VL_get_plugin_name(id, name, size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Can't get plugin name")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLget_plugin_name() */

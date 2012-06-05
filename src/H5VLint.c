@@ -260,6 +260,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_get_plugin_name
+ *
+ * Purpose:	Private version of H5VLget_plugin_name
+ *
+ * Return:      Success:        The length of the plugin name
+ *              Failure:        Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size)
+{
+    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
+    size_t              len;
+    ssize_t             ret_value;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux (id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Object/File does not contain VOL information")
+
+    len = HDstrlen(vol_plugin->name);
+
+    if(name) {
+        HDstrncpy(name, vol_plugin->name, MIN(len + 1,size));
+        if(len >= size)
+            name[size-1]='\0';
+    } /* end if */
+
+    /* Set the return value for the API call */
+    ret_value = (ssize_t)len;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_plugin_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_attr_create
  *
  * Purpose:	Creates an attribute through the VOL
