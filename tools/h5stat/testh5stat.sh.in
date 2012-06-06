@@ -77,6 +77,7 @@ $SRC_H5STAT_TESTFILES/h5stat_newgrat.h5
 LIST_OTHER_TEST_FILES="
 $SRC_H5STAT_TESTFILES/h5stat_help1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_help2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_notexist.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters-file.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters-F.ddl
@@ -189,6 +190,8 @@ COPY_TESTFILES_TO_TESTDIR
 # Test for help flag
 TOOLTEST h5stat_help1.ddl -h
 TOOLTEST h5stat_help2.ddl --help
+# Test when h5stat a file that does not exist
+TOOLTEST h5stat_notexist.ddl notexist.h5
 
 # Test file with groups, compressed datasets, user-applied fileters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
