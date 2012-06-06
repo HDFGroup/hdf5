@@ -81,23 +81,26 @@ typedef enum H5VL_file_get_t {
 
 /* types for all file misc operations */
 typedef enum H5VL_file_misc_t {
-    H5VL_FILE_IS_HDF5               = 0         /* is HDF5?                             */
+    H5VL_FILE_IS_HDF5               = 0,         /* is HDF5?                             */
+    H5VL_FILE_MOUNT                 = 1,
+    H5VL_FILE_UNMOUNT               = 2
 } H5VL_file_misc_t;
 
 /* types for all file optional operations */
 typedef enum H5VL_file_optional_t {
     H5VL_FILE_CLEAR_ELINK_CACHE     = 0,
-    H5VL_FILE_GET_FREE_SECTIONS     = 1,        /*file free selections                  */
-    H5VL_FILE_GET_FREE_SPACE	    = 2,	/*file freespace         		*/
-    H5VL_FILE_GET_INFO	            = 3,	/*file info             		*/
-    H5VL_FILE_GET_MDC_CONF	    = 4,	/*file metadata cache configuration	*/
-    H5VL_FILE_GET_MDC_HR	    = 5,	/*file metadata cache hit rate		*/
-    H5VL_FILE_GET_MDC_SIZE	    = 6,       /*file metadata cache size		*/
-    H5VL_FILE_GET_SIZE	            = 7,	/*file size             		*/
-    H5VL_FILE_GET_VFD_HANDLE	    = 8, 	/*file VFD handle       		*/
-    H5VL_FILE_REOPEN                = 9,
-    H5VL_FILE_RESET_MDC_HIT_RATE    = 10,
-    H5VL_FILE_SET_MDC_CONFIG        = 11
+    H5VL_FILE_GET_FILE_IMAGE        = 1,        /*file image */
+    H5VL_FILE_GET_FREE_SECTIONS     = 2,        /*file free selections                  */
+    H5VL_FILE_GET_FREE_SPACE	    = 3,	/*file freespace         		*/
+    H5VL_FILE_GET_INFO	            = 4,	/*file info             		*/
+    H5VL_FILE_GET_MDC_CONF	    = 5,	/*file metadata cache configuration	*/
+    H5VL_FILE_GET_MDC_HR	    = 6,	/*file metadata cache hit rate		*/
+    H5VL_FILE_GET_MDC_SIZE	    = 7,        /*file metadata cache size		*/
+    H5VL_FILE_GET_SIZE	            = 8,	/*file size             		*/
+    H5VL_FILE_GET_VFD_HANDLE	    = 9, 	/*file VFD handle       		*/
+    H5VL_FILE_REOPEN                = 10,
+    H5VL_FILE_RESET_MDC_HIT_RATE    = 11,
+    H5VL_FILE_SET_MDC_CONFIG        = 12
 } H5VL_file_optional_t;
 
 /* types for all group get API routines */

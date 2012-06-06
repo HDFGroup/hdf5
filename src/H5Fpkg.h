@@ -302,6 +302,8 @@ H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 
 /* File mount related routines */
+H5_DLL herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id, hid_t dxpl_id);
+H5_DLL herr_t H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL herr_t H5F_close_mounts(H5F_t *f);
 H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);

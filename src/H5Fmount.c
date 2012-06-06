@@ -28,11 +28,9 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
-    hid_t plist_id, hid_t dxpl_id);
-static herr_t H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 static void H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 
 
@@ -126,7 +124,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 	  hid_t UNUSED plist_id, hid_t dxpl_id)
 {
@@ -292,7 +290,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_t	*child_group = NULL;	/* Child's group in parent mtab	*/
@@ -470,28 +468,33 @@ H5F_is_mount(const H5F_t *file)
 herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
-    H5G_loc_t	loc;
-    H5F_t	*child = NULL;
+    H5VL_class_t       *vol_plugin1;            /* VOL structure attached to loc_id */
+    H5VL_class_t       *vol_plugin2;            /* VOL structure attached to child_id */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_FILE_MOUNT_DEFAULT;
     else
         if(TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
-    /* Do the mount */
-    if(H5F_mount(&loc, name, child, plist_id, H5AC_dxpl_id) < 0)
+    if (NULL == (vol_plugin1 = (H5VL_class_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc_id does not contain VOL information")
+    if (NULL == (vol_plugin2 = (H5VL_class_t *)H5I_get_aux(child_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "child_id does not contain VOL information")
+
+    /* check if both objects are associated with the same VOL plugin */
+    if (vol_plugin1 != vol_plugin2)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
+
+    if((ret_value = H5VL_file_misc(loc_id, H5VL_FILE_MOUNT, H5_REQUEST_NULL, 
+                                   name, child_id, plist_id)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
@@ -533,8 +536,7 @@ H5Funmount(hid_t loc_id, const char *name)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Unmount */
-    if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
+    if((ret_value = H5VL_file_misc(loc_id, H5VL_FILE_UNMOUNT, H5_REQUEST_NULL, name)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:

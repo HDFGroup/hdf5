@@ -1678,6 +1678,43 @@ H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t UNUSED req
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't determine if file is an HDF5 file")
                 break;
             }
+        /* H5Fmount */
+        case H5VL_FILE_MOUNT:
+            {
+                const char *name       = va_arg (arguments, const char *);
+                hid_t       child_id   = va_arg (arguments, hid_t);
+                hid_t       plist_id   = va_arg (arguments, hid_t);
+                H5G_loc_t   loc;
+                H5F_t	   *child = NULL;
+
+                /* Check arguments */
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+                if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+                /* Do the mount */
+                if(H5F_mount(&loc, name, child, plist_id, H5AC_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
+
+                break;
+            }
+        /* H5Fmount */
+        case H5VL_FILE_UNMOUNT:
+            {
+                const char *name       = va_arg (arguments, const char *);
+                H5G_loc_t   loc;
+
+                /* Check arguments */
+                if(H5G_loc(loc_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+                /* Unmount */
+                if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
+
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
     }
@@ -1732,6 +1769,18 @@ H5VL_native_file_optional(hid_t id, H5VL_file_optional_t optional_type, hid_t UN
                 if(HADDR_UNDEF == (eof = H5FDget_eof(f->shared->lf)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
                 *ret = (hsize_t)eof;
+                break;
+            }
+        /* H5Fget_file_image */
+        case H5VL_FILE_GET_FILE_IMAGE:
+            {
+                void       *buf_ptr   = va_arg (arguments, void *);
+                ssize_t    *ret       = va_arg (arguments, ssize_t *);
+                size_t      buf_len   = va_arg (arguments, size_t );
+
+                /* Do the actual work */
+                if((*ret = H5F_get_file_image(f, buf_ptr, buf_len)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "get file image failed")
                 break;
             }
         /* H5Fget_freespace */

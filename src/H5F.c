@@ -2615,17 +2615,48 @@ done:
 ssize_t
 H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
 {
-    H5F_t      *file;                   /* File object for file ID */
-    H5FD_t     *fd_ptr;                 /* file driver */
-    haddr_t     eoa;                    /* End of file address */
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "i*xz", file_id, buf_ptr, buf_len);
 
+    /* check id */
+    if(H5I_FILE != H5I_get_type(file_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* get image through the VOL */
+    if(H5VL_file_optional(file_id, H5VL_FILE_GET_FILE_IMAGE, H5_REQUEST_NULL, 
+                          buf_ptr, &ret_value, buf_len) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file image")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_file_image() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_file_image
+ *
+ * Purpose:     Private version of H5Fget_file_image
+ *
+ * Return:      Success:        Bytes copied / number of bytes needed.
+ *              Failure:        negative value
+ *
+ * Programmer:  John Mainzer
+ *              11/15/11
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
+{
+    H5FD_t     *fd_ptr;                 /* file driver */
+    haddr_t     eoa;                    /* End of file address */
+    ssize_t     ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
     /* Check args */
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
     if(!file || !file->shared || !file->shared->lf)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file_id yields invalid file pointer")
     fd_ptr = file->shared->lf;
@@ -2700,8 +2731,8 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
     } /* end if */
     
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Fget_file_image() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_get_file_image() */
 
 
 /*-------------------------------------------------------------------------
