@@ -554,23 +554,21 @@ IF (NOT H5_SIZEOF_OFF64_T)
   SET (H5_SIZEOF_OFF64_T 0)
 ENDIF (NOT H5_SIZEOF_OFF64_T)
 
-#-----------------------------------------------------------------------------
-# Check if the dev_t type is a scalar type
-#-----------------------------------------------------------------------------
 IF (NOT WINDOWS)
+  #-----------------------------------------------------------------------------
+  # Check if the dev_t type is a scalar type
+  #-----------------------------------------------------------------------------
   HDF5_FUNCTION_TEST (DEV_T_IS_SCALAR)
-ENDIF (NOT WINDOWS)
 
-# ----------------------------------------------------------------------
-# Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
-# to be done after any POSIX/BSD defines to ensure that the test gets
-# the correct POSIX level on linux.
-CHECK_VARIABLE_EXISTS (CLOCK_MONOTONIC HAVE_CLOCK_MONOTONIC)
+  # ----------------------------------------------------------------------
+  # Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
+  # to be done after any POSIX/BSD defines to ensure that the test gets
+  # the correct POSIX level on linux.
+  CHECK_VARIABLE_EXISTS (CLOCK_MONOTONIC HAVE_CLOCK_MONOTONIC)
 
-#-----------------------------------------------------------------------------
-# Check a bunch of time functions
-#-----------------------------------------------------------------------------
-IF (NOT WINDOWS)
+  #-----------------------------------------------------------------------------
+  # Check a bunch of time functions
+  #-----------------------------------------------------------------------------
   FOREACH (test
       HAVE_TM_GMTOFF
       HAVE___TM_GMTOFF
@@ -587,25 +585,24 @@ IF (NOT WINDOWS)
       HDF5_FUNCTION_TEST (HAVE_TIMEZONE)
 #      HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
   ENDIF (NOT CYGWIN AND NOT MINGW)
-ENDIF (NOT WINDOWS)
 
-# ----------------------------------------------------------------------
-# Does the struct stat have the st_blocks field?  This field is not Posix.
-#
-IF (NOT WINDOWS)
+  # ----------------------------------------------------------------------
+  # Does the struct stat have the st_blocks field?  This field is not Posix.
+  #
   HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
+  
 ENDIF (NOT WINDOWS)
 
 # ----------------------------------------------------------------------
 # How do we figure out the width of a tty in characters?
 #
-CHECK_FUNCTION_EXISTS (_getvideoconfig   H5_HAVE__GETVIDEOCONFIG)
-CHECK_FUNCTION_EXISTS (gettextinfo       H5_HAVE_GETTEXTINFO)
-CHECK_FUNCTION_EXISTS (_scrsize          H5_HAVE__SCRSIZE)
 CHECK_FUNCTION_EXISTS (ioctl             H5_HAVE_IOCTL)
 HDF5_FUNCTION_TEST (HAVE_STRUCT_VIDEOCONFIG)
 HDF5_FUNCTION_TEST (HAVE_STRUCT_TEXT_INFO)
 IF (NOT WINDOWS)
+  CHECK_FUNCTION_EXISTS (_getvideoconfig   H5_HAVE__GETVIDEOCONFIG)
+  CHECK_FUNCTION_EXISTS (gettextinfo       H5_HAVE_GETTEXTINFO)
+  CHECK_FUNCTION_EXISTS (_scrsize          H5_HAVE__SCRSIZE)
   CHECK_FUNCTION_EXISTS (GetConsoleScreenBufferInfo    H5_HAVE_GETCONSOLESCREENBUFFERINFO)
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" H5_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" H5_HAVE_TIOCGETD)
