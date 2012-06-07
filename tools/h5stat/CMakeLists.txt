@@ -41,6 +41,7 @@ IF (BUILD_TESTING)
   SET (HDF5_REFERENCE_FILES
       h5stat_help1.ddl
       h5stat_help2.ddl
+      h5stat_notexist.ddl
       h5stat_filters.ddl
       h5stat_filters-file.ddl
       h5stat_filters-F.ddl
@@ -133,6 +134,8 @@ IF (BUILD_TESTING)
           h5stat_help1.out.err
           h5stat_help2.out
           h5stat_help2.out.err
+          h5stat_notexist.out
+          h5stat_notexist.out.err
           h5stat_filters.out
           h5stat_filters.out.err
           h5stat_filters-file.out
@@ -167,6 +170,9 @@ IF (BUILD_TESTING)
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)
   ADD_H5_TEST (h5stat_help2 0 --help)
+
+# Test when h5stat a file that does not exist
+  ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
 
 # Test file with groups, compressed datasets, user-applied fileters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
