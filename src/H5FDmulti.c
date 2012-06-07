@@ -309,7 +309,8 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
 
     /* Initialize */
     ALL_MEMBERS(mt) {
-	memb_map[mt] = (H5FD_MEM_DRAW==mt?mt:H5FD_MEM_SUPER);
+	/* Treat global heap as raw data, not metadata */
+	memb_map[mt] = ((mt == H5FD_MEM_DRAW || mt == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : H5FD_MEM_SUPER);
 	memb_fapl[mt] = -1;
 	memb_name[mt] = NULL;
 	memb_addr[mt] = HADDR_UNDEF;

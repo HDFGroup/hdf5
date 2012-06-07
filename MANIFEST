@@ -1276,6 +1276,7 @@
 ./tools/h5stat/testfiles/h5stat_newgrat-UA.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat-UG.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.h5
+./tools/h5stat/testfiles/h5stat_notexist.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
