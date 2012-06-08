@@ -115,6 +115,7 @@ herr_t
 H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
+    H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -123,8 +124,11 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     HDassert(f->shared);
     HDassert(buf);
 
+    /* Treat global heap as raw data */
+    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
     /* Check if this information is in the metadata accumulator */
-    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && type != H5FD_MEM_DRAW) {
+    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
         if(size < H5F_ACCUM_MAX_SIZE) {
             /* Sanity check */
             HDassert(!f->shared->accum.buf || (f->shared->accum.alloc_size >= f->shared->accum.size));
@@ -173,7 +177,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                         f->shared->accum.dirty_off += amount_before;
 
                     /* Dispatch to driver */
-                    if(H5FD_read(f->shared->lf, dxpl_id, type, addr, amount_before, f->shared->accum.buf) < 0)
+                    if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, amount_before, f->shared->accum.buf) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
                 } /* end if */
                 else
@@ -187,7 +191,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
                     H5_ASSIGN_OVERFLOW(amount_after, ((addr + size) - (f->shared->accum.loc + f->shared->accum.size)), hsize_t, size_t);
 
                     /* Dispatch to driver */
-                    if(H5FD_read(f->shared->lf, dxpl_id, type, (f->shared->accum.loc + f->shared->accum.size), amount_after, (f->shared->accum.buf + f->shared->accum.size + amount_before)) < 0)
+                    if(H5FD_read(f->shared->lf, dxpl_id, map_type, (f->shared->accum.loc + f->shared->accum.size), amount_after, (f->shared->accum.buf + f->shared->accum.size + amount_before)) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
                 } /* end if */
 
@@ -201,13 +205,13 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
             /* Current read doesn't overlap with metadata accumulator, read it from file */
             else {
                 /* Dispatch to driver */
-                if(H5FD_read(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
+                if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
             } /* end else */
         } /* end if */
         else {
             /* Read the data */
-            if(H5FD_read(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
+            if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
 
             /* Check for overlap w/dirty accumulator */
@@ -250,7 +254,7 @@ H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     } /* end if */
     else {
         /* Read the data */
-        if(H5FD_read(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
+        if(H5FD_read(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "driver read request failed")
     } /* end else */
 
@@ -415,6 +419,7 @@ herr_t
 H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     size_t size, const void *buf)
 {
+    H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -424,8 +429,11 @@ H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr,
     HDassert(f->intent & H5F_ACC_RDWR);
     HDassert(buf);
 
+    /* Treat global heap as raw data */
+    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
+
     /* Check for accumulating metadata */
-    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && type != H5FD_MEM_DRAW) {
+    if((f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
         if(size < H5F_ACCUM_MAX_SIZE) {
             /* Sanity check */
             HDassert(!f->shared->accum.buf || (f->shared->accum.alloc_size >= f->shared->accum.size));
@@ -719,7 +727,7 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
         } /* end if */
         else {
             /* Write the data */
-            if(H5FD_write(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
+            if(H5FD_write(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
 
             /* Check for overlap w/accumulator */
@@ -804,7 +812,7 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
     } /* end if */
     else {
         /* Write the data */
-        if(H5FD_write(f->shared->lf, dxpl_id, type, addr, size, buf) < 0)
+        if(H5FD_write(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
     } /* end else */
 
@@ -846,6 +854,7 @@ H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t UNUSED type, haddr_t addr,
         /* Sanity check */
         /* (The metadata accumulator should not intersect w/raw data */
         HDassert(H5FD_MEM_DRAW != type);
+        HDassert(H5FD_MEM_GHEAP != type); /* (global heap data is being treated as raw data currently) */
 
         /* Check for overlapping the beginning of the accumulator */
         if(H5F_addr_le(addr, f->shared->accum.loc)) {

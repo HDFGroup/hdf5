@@ -1022,11 +1022,28 @@ H5FD_log_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
+H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 {
     H5FD_log_t	*file = (H5FD_log_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(file->fa.flags != 0) {
+	if(H5F_addr_gt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
+	    hsize_t size = addr - file->eoa;
+
+            /* Retain the flavor of the space allocated by the extension */
+	    if(file->fa.flags & H5FD_LOG_FLAVOR) {
+		HDassert(addr < file->iosize);
+		H5_CHECK_OVERFLOW(size, hsize_t, size_t);
+		HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
+	    } /* end if */
+
+            /* Log the extension like an allocation */
+	    if(file->fa.flags & H5FD_LOG_ALLOC)
+		HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Allocated\n", file->eoa, addr, size, flavors[type]);
+	} /* end if */
+    } /* end if */
 
     file->eoa = addr;
 

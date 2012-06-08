@@ -160,7 +160,8 @@ H5MF_init_merge_flags(H5F_t *f)
             all_metadata_same = TRUE;
             for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
                 /* Skip checking raw data free list mapping */
-                if(type != H5FD_MEM_DRAW) {
+                /* (global heap is treated as raw data) */
+                if(type != H5FD_MEM_DRAW && type != H5FD_MEM_GHEAP) {
                     /* Check for any different type mappings */
                     if(f->shared->fs_type_map[type] != f->shared->fs_type_map[H5FD_MEM_SUPER]) {
                         all_metadata_same = FALSE;
@@ -183,9 +184,12 @@ H5MF_init_merge_flags(H5F_t *f)
             HDmemset(f->shared->fs_aggr_merge, 0, sizeof(f->shared->fs_aggr_merge));
 
             /* Check if merging raw data should be allowed */
+            /* (treat global heaps as raw data) */
             if(H5FD_MEM_DRAW == f->shared->fs_type_map[H5FD_MEM_DRAW] ||
-                    H5FD_MEM_DEFAULT == f->shared->fs_type_map[H5FD_MEM_DRAW])
+                    H5FD_MEM_DEFAULT == f->shared->fs_type_map[H5FD_MEM_DRAW]) {
                 f->shared->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
+                f->shared->fs_aggr_merge[H5FD_MEM_GHEAP] = H5F_FS_MERGE_RAWDATA;
+	    } /* end if */
             break;
 
         case H5MF_AGGR_MERGE_DICHOTOMY:
@@ -193,7 +197,9 @@ H5MF_init_merge_flags(H5F_t *f)
             HDmemset(f->shared->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f->shared->fs_aggr_merge));
 
             /* Allow merging raw data allocations together */
+            /* (treat global heaps as raw data) */
             f->shared->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
+            f->shared->fs_aggr_merge[H5FD_MEM_GHEAP] = H5F_FS_MERGE_RAWDATA;
             break;
 
         case H5MF_AGGR_MERGE_TOGETHER:
@@ -744,6 +750,7 @@ H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type, haddr_t addr,
     hsize_t size, hsize_t extra_requested)
 {
     haddr_t     end;            /* End of block to extend */
+    H5FD_mem_t  map_type;       /* Mapped type */
     htri_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -755,18 +762,21 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
     HDassert(f);
     HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
 
+    /* Set mapped type, treating global heap as raw data */
+    map_type = (alloc_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : alloc_type;
+
     /* Compute end of block to extend */
     end = addr + size;
 
     /* Check if the block is exactly at the end of the file */
-    if((ret_value = H5FD_try_extend(f->shared->lf, alloc_type, f, end, extra_requested)) < 0)
+    if((ret_value = H5FD_try_extend(f->shared->lf, map_type, f, end, extra_requested)) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending file")
     else if(ret_value == FALSE) {
         H5F_blk_aggr_t *aggr;   /* Aggregator to use */
 
         /* Check for test block able to extend aggregation block */
-        aggr = (alloc_type == H5FD_MEM_DRAW) ?  &(f->shared->sdata_aggr) : &(f->shared->meta_aggr);
-        if((ret_value = H5MF_aggr_try_extend(f, aggr, alloc_type, end, extra_requested)) < 0)
+        aggr = (map_type == H5FD_MEM_DRAW) ?  &(f->shared->sdata_aggr) : &(f->shared->meta_aggr);
+        if((ret_value = H5MF_aggr_try_extend(f, aggr, map_type, end, extra_requested)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending aggregation block")
         else if(ret_value == FALSE) {
             H5FD_mem_t  fs_type;                /* Free space type (mapped from allocation type) */

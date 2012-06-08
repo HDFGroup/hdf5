@@ -937,36 +937,9 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function: init_iter
+ * Function: iter_free
  *
- * Purpose: Initialize iter structure
- *
- * Return: Success: 0
- *
- * Failure: Never fails
- *
- * Programmer: Elena Pourmal
- *             Saturday, August 12, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-iter_init(iter_t *iter, hid_t fid)
-{
-    /* Clear everything to zeros */
-    HDmemset(iter, 0, sizeof(*iter));
-
-    /* Set the file ID for later use in callbacks */
-    iter->fid = fid;
-
-    return 0;
-} /* iter_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function: free_iter
- *
- * Purpose: Freee iter structure
+ * Purpose: Free iter structure
  *
  * Return: Success: 0
  *
@@ -1610,7 +1583,7 @@ main(int argc, const char *argv[])
 {
     iter_t              iter;
     const char         *fname = NULL;
-    hid_t               fid;
+    hid_t               fid = -1;
     hid_t               fcpl;
     struct handler_t   *hand = NULL;
     H5F_info2_t         finfo;
@@ -1633,6 +1606,8 @@ main(int argc, const char *argv[])
 
     printf("Filename: %s\n", fname);
 
+    HDmemset(&iter, 0, sizeof(iter));
+
     fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
     if(fid < 0) {
         error_msg("unable to open file \"%s\"\n", fname);
@@ -1641,7 +1616,7 @@ main(int argc, const char *argv[])
     } /* end if */
 
     /* Initialize iter structure */
-    iter_init(&iter, fid);
+    iter.fid = fid;
 
     if(H5Fget_filesize(fid, &iter.filesize) < 0)
         warn_msg("Unable to retrieve file size\n");
@@ -1708,7 +1683,7 @@ done:
         /* Free iter structure */
         iter_free(&iter);
     
-        if(H5Fclose(fid) < 0) {
+        if(fid >= 0 && H5Fclose(fid) < 0) {
             error_msg("unable to close file \"%s\"\n", fname);
             h5tools_setstatus(EXIT_FAILURE);
         }
