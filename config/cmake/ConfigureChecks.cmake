@@ -153,23 +153,16 @@ IF (WINDOWS)
   # that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
   # (This flag should be _unset_ for all machines, except for Windows)
   SET (H5_HAVE_WINDOW_PATH 1)
-#  SET (LINK_LIBS ${LINK_LIBS} "kernel32")
 ENDIF (WINDOWS)
 
 IF (WINDOWS)
-  SET (H5_HAVE_IO_H 1)
-  SET (H5_HAVE_SETJMP_H 1)
   SET (H5_HAVE_STDDEF_H 1)
   SET (H5_HAVE_SYS_STAT_H 1)
-  SET (H5_HAVE_SYS_TIMEB_H 1)
   SET (H5_HAVE_SYS_TYPES_H 1)
-  SET (H5_HAVE_WINSOCK_H 1)
   SET (H5_HAVE_LIBM 1)
   SET (H5_HAVE_STRDUP 1)
   SET (H5_HAVE_SYSTEM 1)
-  SET (H5_HAVE_DIFFTIME 1)
   SET (H5_HAVE_LONGJMP 1)
-  SET (H5_STDC_HEADERS 1)
   IF (NOT MINGW)
     SET (H5_HAVE_GETHOSTNAME 1)
   ENDIF (NOT MINGW)
@@ -189,9 +182,7 @@ ENDIF (WINDOWS)
 # something not quite correct with the actual test implementation. This affects
 # the 'dt_arith' test and most likely lots of other code
 # ----------------------------------------------------------------------------
-IF (WINDOWS)
-  SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
-ENDIF (WINDOWS)
+SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
 
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
@@ -283,9 +274,7 @@ ENDMACRO (HDF5_FUNCTION_TEST)
 #-----------------------------------------------------------------------------
 # Check for these functions before the time headers are checked
 #-----------------------------------------------------------------------------
-IF (NOT WINDOWS)
-  HDF5_FUNCTION_TEST (STDC_HEADERS)
-ENDIF (NOT WINDOWS)
+HDF5_FUNCTION_TEST (STDC_HEADERS)
 
 CHECK_FUNCTION_EXISTS (difftime          H5_HAVE_DIFFTIME)
 #CHECK_FUNCTION_EXISTS (gettimeofday      H5_HAVE_GETTIMEOFDAY)
@@ -590,16 +579,13 @@ IF (NOT WINDOWS)
   # Does the struct stat have the st_blocks field?  This field is not Posix.
   #
   HDF5_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
-  
-ENDIF (NOT WINDOWS)
 
-# ----------------------------------------------------------------------
-# How do we figure out the width of a tty in characters?
-#
-CHECK_FUNCTION_EXISTS (ioctl             H5_HAVE_IOCTL)
-HDF5_FUNCTION_TEST (HAVE_STRUCT_VIDEOCONFIG)
-HDF5_FUNCTION_TEST (HAVE_STRUCT_TEXT_INFO)
-IF (NOT WINDOWS)
+  # ----------------------------------------------------------------------
+  # How do we figure out the width of a tty in characters?
+  #
+  CHECK_FUNCTION_EXISTS (ioctl             H5_HAVE_IOCTL)
+  HDF5_FUNCTION_TEST (HAVE_STRUCT_VIDEOCONFIG)
+  HDF5_FUNCTION_TEST (HAVE_STRUCT_TEXT_INFO)
   CHECK_FUNCTION_EXISTS (_getvideoconfig   H5_HAVE__GETVIDEOCONFIG)
   CHECK_FUNCTION_EXISTS (gettextinfo       H5_HAVE_GETTEXTINFO)
   CHECK_FUNCTION_EXISTS (_scrsize          H5_HAVE__SCRSIZE)
@@ -645,9 +631,9 @@ CHECK_FUNCTION_EXISTS (vasprintf         H5_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           H5_HAVE_WAITPID)
 
 CHECK_FUNCTION_EXISTS (vsnprintf         H5_HAVE_VSNPRINTF)
-IF (H5_HAVE_VSNPRINTF)
-  HDF5_FUNCTION_TEST (VSNPRINTF_WORKS)
-ENDIF (H5_HAVE_VSNPRINTF)
+#IF (H5_HAVE_VSNPRINTF)
+#  HDF5_FUNCTION_TEST (VSNPRINTF_WORKS)
+#ENDIF (H5_HAVE_VSNPRINTF)
 
 #-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
