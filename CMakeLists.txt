@@ -308,6 +308,15 @@ IF (HDF5_ENABLE_COVERAGE)
 ENDIF (HDF5_ENABLE_COVERAGE)
 
 #-----------------------------------------------------------------------------
+# Option to indicate using dmalloc
+#-----------------------------------------------------------------------------
+# OPTION (HDF5_ENABLE_USING_DMALLOC "Indicate that dmalloc is used" OFF)
+# IF (HDF5_ENABLE_USING_DMALLOC)
+#   FIND_PACKAGE (DMALLOC)
+#   SET (H5_HAVE_DMALLOC DMALLOC_FOUND)   
+# ENDIF (HDF5_ENABLE_USING_DMALLOC)
+
+#-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
@@ -366,10 +375,17 @@ IF (CMAKE_BUILD_TYPE MATCHES Debug)
       -DH5I_DEBUG -DH5HL_DEBUG -DH5HG_DEBUG -DH5G_DEBUG -DH5F_DEBUG
       -DH5E_DEBUG -DH5D_DEBUG -DH5B_DEBUG -DH5AC_DEBUG -UNDEBUG
   )
+  # Enable tracing of the API
   OPTION (HDF5_ENABLE_TRACE "Enable API tracing capability" ON)
   IF (HDF5_ENABLE_TRACE)
     ADD_DEFINITIONS (-DH5_DEBUG_API )
   ENDIF (HDF5_ENABLE_TRACE)
+  # Enable instrumenting of the library's internal operations
+  OPTION (HDF5_ENABLE_INSTRUMENT "Instrument The library" OFF)
+  IF (HDF5_ENABLE_INSTRUMENT)
+    SET (H5_HAVE_INSTRUMENTED_LIBRARY 1)
+  ENDIF (HDF5_ENABLE_INSTRUMENT)
+  MARK_AS_ADVANCED (HDF5_Enable_Instrument)
   #-- NMake Makefiles will overwhelm the console with warnings if -Wall is used.
   IF (NOT WIN32)
     ADD_DEFINITIONS (-Wall)
@@ -468,6 +484,7 @@ IF (HDF5_ENABLE_PARALLEL)
     # and once set, they are cached as false and not regenerated
     SET (CMAKE_REQUIRED_LIBRARIES "${MPI_C_LIBRARIES}" )
     CHECK_FUNCTION_EXISTS (MPI_File_get_size H5_HAVE_MPI_GET_SIZE) 
+    SET (H5_MPI_FILE_SET_SIZE_BIG 1)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
@@ -749,6 +766,9 @@ IF (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
     IF (HDF5_ENABLE_PARALLEL)
       MESSAGE (FATAL " **** Parallel and C++ options are mutually exclusive **** ")
     ENDIF (HDF5_ENABLE_PARALLEL)
+    IF (CMAKE_NO_STD_NAMESPACE)
+      SET (H5_NO_STD 1)
+    ENDIF (CMAKE_NO_STD_NAMESPACE)
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/c++ ${PROJECT_BINARY_DIR}/c++)
   ENDIF (HDF5_BUILD_CPP_LIB)
 ENDIF (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")

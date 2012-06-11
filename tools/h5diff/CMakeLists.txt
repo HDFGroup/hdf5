@@ -1428,6 +1428,9 @@ ENDIF (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+
+INSTALL_PROGRAM_PDB (h5diff ${HDF5_INSTALL_BIN_DIR}/tools toolsapplications)
+
 INSTALL (
     TARGETS
         h5diff
@@ -1438,6 +1441,9 @@ INSTALL (
 )
 
 IF (H5_HAVE_PARALLEL)
+
+  INSTALL_PROGRAM_PDB (ph5diff ${HDF5_INSTALL_BIN_DIR}/tools toolsapplications)
+
   INSTALL (
       TARGETS
           ph5diff

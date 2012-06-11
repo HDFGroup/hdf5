@@ -270,6 +270,10 @@ ENDIF (WIN32 AND NOT CYGWIN)
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (HDF5_EXPORTED_TARGETS)
+
+  INSTALL_TARGET_PDB (${HDF5_F90_C_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
+  INSTALL_TARGET_PDB (${HDF5_F90_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} fortlibraries)
+
   INSTALL (
       TARGETS
           ${HDF5_F90_C_LIB_TARGET}

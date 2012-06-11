@@ -171,7 +171,6 @@
 ./fortran/examples/nested_derived_type.f90
 ./fortran/examples/rwdset_fortran2003.f90
 
-
 ./fortran/src/H5_f.c
 ./fortran/src/H5_ff.f90
 ./fortran/src/H5_ff_F90.f90
@@ -1854,8 +1853,6 @@
 ./tools/h5repack/testfiles/h5repack_named_dtypes.h5
 ./tools/h5repack/testfiles/h5repack_refs.h5
 
-
-
 # jam utility and tests
 ./tools/h5jam/h5jam.c
 ./tools/h5jam/h5unjam.c
@@ -2106,6 +2103,7 @@
 ./config/cmake/FindSZIP.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/GetTimeOfDayTest.cpp
+./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
 ./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
@@ -2133,6 +2131,7 @@
 ./config/cmake/CPack.cmake
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
+
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt

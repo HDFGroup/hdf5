@@ -418,7 +418,7 @@
 /* #undef H5_HAVE_WINDOW_PATH */
 
 /* Define to 1 if you have the <winsock.h> header file. */
-/* #undef H5_HAVE_WINSOCK_H */
+/* #undef H5_HAVE_WINSOCK2_H */
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #define H5_HAVE_ZLIB_H 1
