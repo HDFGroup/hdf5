@@ -443,7 +443,7 @@
 #define H5_HAVE_WINDOW_PATH 1
 
 /* Define to 1 if you have the <winsock.h> header file. */
-#define H5_HAVE_WINSOCK_H 1
+#define H5_HAVE_WINSOCK2_H 1
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #define H5_HAVE_ZLIB_H 1
