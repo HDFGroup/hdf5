@@ -268,6 +268,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLis_registered
+ *
+ * Purpose:	Tests whether a VOL class has been registered or not
+ *
+ * Return:	Positive if the VOL class has been registered
+ *              Zero if it is unregistered
+ *              Negative on error (if the class is not a valid class ID)
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5VLis_registered(hid_t id)
+{
+    htri_t ret_value = FALSE;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "Ll", id);
+
+    /* Check arguments */
+    if(NULL != H5I_object_verify(id, H5I_VOL))
+        ret_value = TRUE;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLis_registered() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VLget_plugin_name
  *
  * Purpose:	Returns the plugin name for the VOL associated with the 

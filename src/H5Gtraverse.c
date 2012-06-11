@@ -215,7 +215,6 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
     if (H5I_register_aux(cur_grp, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
     /* Check for generic default property list and use link access default if so */
     if(_lapl_id == H5P_DEFAULT) {

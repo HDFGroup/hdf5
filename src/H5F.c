@@ -338,7 +338,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
 
     /* Increment the reference count on the VOL struct and insert it into the property list */
-    f->vol_cls->nrefs ++;
     if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &(f->vol_cls)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
 
@@ -2157,7 +2156,6 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
         /* attach VOL information to the ID */
         if (H5I_register_aux(file->file_id, file->vol_cls, (H5I_free_t)H5VL_close) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        file->vol_cls->nrefs++;
     } else {
         /* Increment reference count on atom. */
         if(H5I_inc_ref(file->file_id, app_ref) < 0)

@@ -139,7 +139,7 @@ hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
-    void *location = NULL;
+    H5VL_loc_params_t   loc_params;
     H5P_genplist_t      *plist;            /* Property list pointer */
     hid_t		ret_value;              /* Return value */
 
@@ -156,6 +156,9 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
 
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.loc_data.loc_by_id.id = loc_id;
+
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -165,7 +168,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
     if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
-    if(H5P_set(plist, H5VL_ATTR_LOCATION, &location) < 0)
+    if(H5P_set(plist, H5VL_ATTR_LOC_PARAMS, &loc_params) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for location")
 
     /* Create the attribute through the VOL */
@@ -202,6 +205,7 @@ done:
 hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
+    H5VL_loc_params_t loc_params; 
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -213,9 +217,12 @@ H5Aopen_name(hid_t loc_id, const char *name)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.loc_data.loc_by_id.id = loc_id;
+
     /* Open the attribute through the VOL */
-    if((ret_value = H5VL_attr_open(loc_id, NULL, name, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open attribute")
+    if((ret_value = H5VL_attr_open(loc_id, loc_params, name, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to open attribute")
 
 done:
     FUNC_LEAVE_API(ret_value)

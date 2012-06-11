@@ -227,9 +227,8 @@ H5O_init_interface(void)
 hid_t
 H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 {
+    H5VL_loc_params_t loc_params;
     hid_t       ret_value = FAIL;
-    void       *location = NULL; /* a pointer to VOL specific token that indicates 
-                                    the location of the object */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, lapl_id);
@@ -237,21 +236,14 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, name, lapl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open_by_loc(loc_id, location, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(loc_id, loc_params, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
-    if (NULL != location) {
-        /* free the location token through the VOL */
-        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-    }
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
 
@@ -283,7 +275,7 @@ hid_t
 H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
-    void       *location = NULL;
+    H5VL_loc_params_t loc_params;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -302,21 +294,17 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, &location, H5_REQUEST_NULL, group_name,
-                          idx_type, order, n, lapl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open_by_loc(loc_id, location, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(loc_id, loc_params, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
-    if (NULL != location) {
-        /* free the location token through the VOL */
-        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_idx() */
 
@@ -360,26 +348,20 @@ hid_t
 H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 {
     hid_t       lapl_id = H5P_LINK_ACCESS_DEFAULT; /* lapl to use to open this object */
-    void       *location = NULL;
+    H5VL_loc_params_t loc_params;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "ia", loc_id, addr);
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_ADDR, &location, H5_REQUEST_NULL, addr) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ADDR;
+    loc_params.loc_data.loc_by_addr.addr = addr;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open_by_loc(loc_id, location, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(loc_id, loc_params, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
-    if (NULL != location) {
-        /* free the location token through the VOL */
-        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_by_addr() */
 

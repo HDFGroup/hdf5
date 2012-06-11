@@ -44,8 +44,8 @@
 /****************/
 
 /* Definitions for UDATA */
-#define H5A_CRT_LOCATION_SIZE   sizeof(void *)
-#define H5A_CRT_LOCATION_DEF    NULL
+#define H5A_CRT_LOCATION_SIZE   sizeof(H5VL_loc_params_t)
+#define H5A_CRT_LOCATION_DEF {H5VL_OBJECT_LOOKUP_BY_ID, {{FAIL}}}
 
 /******************/
 /* Local Typedefs */
@@ -105,7 +105,7 @@ H5P_acrt_reg_prop(H5P_genclass_t *pclass)
 {
     hid_t type_id = FAIL;
     hid_t space_id = FAIL;
-    void *location = H5A_CRT_LOCATION_DEF;
+    H5VL_loc_params_t loc_params = H5A_CRT_LOCATION_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -121,7 +121,7 @@ H5P_acrt_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the lcpl ID property */
-    if(H5P_register_real(pclass, H5VL_ATTR_LOCATION, H5A_CRT_LOCATION_SIZE, &location, 
+    if(H5P_register_real(pclass, H5VL_ATTR_LOC_PARAMS, H5A_CRT_LOCATION_SIZE, &loc_params, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

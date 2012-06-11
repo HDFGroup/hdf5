@@ -2299,10 +2299,12 @@ H5I_register_aux(hid_t id, void *aux_ptr, H5I_free_t free_func)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL != (id_ptr = H5I_find_id(id))) {
-        id_ptr->aux_ptr = aux_ptr;
-        id_ptr->free_aux = free_func;
-    }
+    if(NULL == (id_ptr = H5I_find_id(id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "Invalid ID")
+
+    id_ptr->aux_ptr = aux_ptr;
+    id_ptr->free_aux = free_func;
+
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

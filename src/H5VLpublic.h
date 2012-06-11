@@ -26,6 +26,7 @@
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
 #include "H5Opublic.h"
+#include "H5Rpublic.h"
 
 /* Dataset creation property names */
 #define H5VL_DSET_TYPE_ID        "dataset_type_id"
@@ -35,7 +36,7 @@
 /* Attribute creation property names */
 #define H5VL_ATTR_TYPE_ID        "attr_type_id"
 #define H5VL_ATTR_SPACE_ID       "attr_space_id"
-#define H5VL_ATTR_LOCATION       "attr_location"
+#define H5VL_ATTR_LOC_PARAMS       "attr_location"
 
 /* Link creation property names */
 #define H5VL_LINK_TARGET_ID      "target location id"
@@ -158,12 +159,50 @@ typedef enum H5VL_object_lookup_t {
     H5VL_OBJECT_LOOKUP_BY_REF       = 4
 } H5VL_object_lookup_t;
 
+struct H5VL_loc_by_id {
+    hid_t id;
+};
+
+struct H5VL_loc_by_name {
+    const char *name;
+    hid_t lapl_id;
+};
+
+struct H5VL_loc_by_idx {
+    const char *name;
+    H5_index_t idx_type;
+    H5_iter_order_t order;
+    hsize_t n;
+    hid_t lapl_id;
+};
+
+struct H5VL_loc_by_addr {
+    haddr_t addr;
+};
+
+struct H5VL_loc_by_ref {
+    H5R_type_t ref_type;
+    const void *_ref;
+};
+
+/* Structure to hold parameters for object location */
+typedef struct H5VL_loc_params_t {
+    H5VL_object_lookup_t type;
+    union{
+        struct H5VL_loc_by_id   loc_by_id;
+        struct H5VL_loc_by_name loc_by_name;
+        struct H5VL_loc_by_idx  loc_by_idx;
+        struct H5VL_loc_by_addr loc_by_addr;
+        struct H5VL_loc_by_ref  loc_by_ref;
+    }loc_data;
+} H5VL_loc_params_t;
+
 #define H5VL_VOL_DEFAULT 0   /* Default VOL plugin value */
 
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
     hid_t  (*create)(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
-    hid_t  (*open)  (hid_t loc_id, void *location, const char *attr_name, hid_t aapl_id, hid_t req);
+    hid_t  (*open)  (hid_t loc_id, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf, hid_t req);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
@@ -226,7 +265,7 @@ typedef struct H5VL_link_class_t {
 
 /* H5O routines */
 typedef struct H5VL_object_class_t {
-    hid_t  (*open)  (void *obj_loc, hid_t lapl_id, hid_t req);
+    hid_t  (*open)  (hid_t id, H5VL_loc_params_t params, hid_t lapl_id, hid_t req);
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
     herr_t (*visit) (hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, 
@@ -242,7 +281,6 @@ typedef struct H5VL_object_class_t {
 /* Class information for each VOL driver */
 typedef struct H5VL_class_t {
     const char *name;
-    unsigned	nrefs;		/* Ref count for times struct is pointed to */
     herr_t  (*initialize)(void);
     herr_t  (*terminate)(void);
     H5VL_attr_class_t          attr_cls;
@@ -260,7 +298,8 @@ extern "C" {
 
 /* Function prototypes */
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
-H5_DLL herr_t H5VLunregister(hid_t driver_id);
+H5_DLL herr_t H5VLunregister(hid_t plugin_id);
+H5_DLL htri_t H5VLis_registered(hid_t id);
 H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
 
 #ifdef __cplusplus

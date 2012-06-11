@@ -55,21 +55,20 @@ static hid_t H5VL_DUMMY_g = 0;
 
 /* Prototypes */
 static herr_t H5VL_dummy_term(void);
-static hid_t  H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id);
-static herr_t H5VL_dummy_file_close(hid_t fid);
-static hid_t  H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+static hid_t  H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
+static herr_t H5VL_dummy_file_close(hid_t fid, hid_t req);
+static hid_t  H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
 
 H5VL_class_t H5VL_dummy_g = {
     "dummy",					/* name */
-    0,                                          /* nrefs */
-    H5VL_dummy_init,
+    NULL,
     H5VL_dummy_term,                           /*terminate */
     {                                           /* attribute_cls */
         NULL,                                   /* create */
         NULL,                                   /* open */
         NULL,                                   /* read */
         NULL,                                   /* write */
-        NULL,                                   /* delete */
+        NULL,                                   /* get */
         NULL,                                   /* delete */
         NULL                                    /* close */
     },
@@ -93,6 +92,7 @@ H5VL_class_t H5VL_dummy_g = {
         NULL,
         NULL,
         NULL,
+        NULL,
         H5VL_dummy_file_close                   /* close */
     },
     {                                           /* group_cls */
@@ -105,11 +105,16 @@ H5VL_class_t H5VL_dummy_g = {
         NULL,                                   /* create */
         NULL,                                   /* delete */
         NULL,                                   /* move */
+        NULL,
         NULL
     },
     {                                           /* object_cls */
         NULL,
         NULL,                                   /* copy */
+        NULL,
+        NULL,
+        NULL,
+        NULL,
         NULL,
         NULL,
         NULL
@@ -162,7 +167,6 @@ H5VL_dummy_init(void)
 
     /* Set return value */
     ret_value = &H5VL_dummy_g;
-    ret_value->nrefs ++;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dummy_init() */
@@ -187,7 +191,6 @@ H5VL_dummy_term(void)
 
     /* Reset VOL ID */
     H5VL_DUMMY_g = 0;
-    H5VL_dummy_g.nrefs = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_dummy_term() */
@@ -239,7 +242,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id)
+H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -263,7 +266,7 @@ H5VL_dummy_file_open(const char *name, unsigned flags, hid_t fapl_id)
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -287,7 +290,7 @@ H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_dummy_file_close(hid_t file_id)
+H5VL_dummy_file_close(hid_t file_id, hid_t req)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

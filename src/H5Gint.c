@@ -839,7 +839,6 @@ H5G_iterate(hid_t loc_id, const char *group_name,
     vol_plugin = H5F_get_vol_cls(loc.oloc->file);
     if (H5I_register_aux(gid, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
     /* Set up user data for callback */
     udata.gid = gid;
@@ -1119,7 +1118,6 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     vol_plugin = H5F_get_vol_cls(loc.oloc->file);
     if (H5I_register_aux(gid, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
     /* Set up user data */
     udata.gid = gid;

@@ -189,9 +189,6 @@ H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Increment the reference count on vol and copy vol info */
-    vol_cls->nrefs++;
-
     /* Set the vol properties for the list */
     if(H5P_set(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol ID")
@@ -223,10 +220,6 @@ H5VL_fapl_close(H5VL_class_t *vol_cls)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL != vol_cls) {
-        vol_cls->nrefs--;
-    }
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_fapl_close() */
@@ -251,8 +244,6 @@ H5VL_close(H5VL_class_t *vol_plugin)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
-
-    vol_plugin->nrefs--;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -336,7 +327,6 @@ H5VL_attr_create(hid_t id, const char *name, hid_t acpl_id, hid_t aapl_id, hid_t
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -358,7 +348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_attr_open(hid_t id, void *location, const char *name, hid_t aapl_id, hid_t req)
+H5VL_attr_open(hid_t id, H5VL_loc_params_t loc_params, const char *name, hid_t aapl_id, hid_t req)
 {
     H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     hid_t		ret_value;             /* Return value */
@@ -374,13 +364,12 @@ H5VL_attr_open(hid_t id, void *location, const char *name, hid_t aapl_id, hid_t 
     }
 
     /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->attr_cls.open) (id, location, name, aapl_id, req)) < 0)
+    if((ret_value = (vol_plugin->attr_cls.open) (id, loc_params, name, aapl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -500,7 +489,6 @@ H5VL_attr_get(hid_t id, H5VL_attr_get_t get_type, hid_t req, ...)
             /* attach VOL information to the ID */
             if (H5I_register_aux(*ret_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            vol_plugin->nrefs++;
         }
         va_end (arguments);
     }
@@ -620,7 +608,6 @@ H5VL_datatype_commit(hid_t id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     if (H5I_register_aux(type_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -651,24 +638,17 @@ H5VL_datatype_open(hid_t id, const char *name, hid_t tapl_id, hid_t req)
 
     if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->datatype_cls.open) {
-        void       *location = NULL; /* a pointer to VOL specific token that indicates 
-                                        the location of the object */
+        H5VL_loc_params_t loc_params;
 
-        /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, req, name, tapl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.loc_data.loc_by_name.name = name;
 
-        /* Open the object through the VOL */
-        if((ret_value = H5VL_object_open_by_loc(id, location, tapl_id, req)) < 0)
+        /* Open the object class */
+        if((ret_value = H5VL_object_open(id, loc_params, tapl_id, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
-
-        if (NULL != location) {
-            /* free the location token through the VOL */
-            if(H5VL_object_free_loc (id, location, H5_REQUEST_NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-        }
     }
     else {
         /* call the corresponding VOL open callback */
@@ -678,7 +658,6 @@ H5VL_datatype_open(hid_t id, const char *name, hid_t tapl_id, hid_t req)
         /* attach VOL information to the ID */
         if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        vol_plugin->nrefs++;
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -758,7 +737,6 @@ H5VL_dataset_create(hid_t id, const char *name, hid_t dcpl_id, hid_t dapl_id, hi
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -792,22 +770,14 @@ H5VL_dataset_open(hid_t id, const char *name, hid_t dapl_id, hid_t req)
 
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->dataset_cls.open) {
-        void       *location = NULL; /* a pointer to VOL specific token that indicates 
-                                        the location of the object */
+        H5VL_loc_params_t loc_params;
 
-        /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, req, name, dapl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.loc_data.loc_by_name.name = name;
 
-        /* Open the object through the VOL */
-        if((ret_value = H5VL_object_open_by_loc(id, location, dapl_id, req)) < 0)
+        /* Open the object class */
+        if((ret_value = H5VL_object_open(id, loc_params, dapl_id, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
-
-        if (NULL != location) {
-            /* free the location token through the VOL */
-            if(H5VL_object_free_loc (id, location, H5_REQUEST_NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-        }
     }
     else {
         /* call the corresponding VOL open callback */
@@ -817,7 +787,6 @@ H5VL_dataset_open(hid_t id, const char *name, hid_t dapl_id, hid_t req)
         /* attach VOL information to the ID */
         if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        vol_plugin->nrefs++;
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -978,7 +947,6 @@ H5VL_dataset_get(hid_t id, H5VL_dataset_get_t get_type, hid_t req, ...)
             /* attach VOL information to the ID */
             if (H5I_register_aux(*ret_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            vol_plugin->nrefs++;
         }
         va_end (arguments);
     }
@@ -1067,7 +1035,6 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req)
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1113,7 +1080,6 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1275,7 +1241,6 @@ H5VL_file_optional(hid_t id, H5VL_file_optional_t optional_type, hid_t req, ...)
         /* attach VOL information to the ID */
         if (H5I_register_aux(*ret_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        vol_plugin->nrefs++;
         va_end (arguments);
     }
 
@@ -1355,7 +1320,6 @@ H5VL_group_create(hid_t id, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1389,22 +1353,14 @@ H5VL_group_open(hid_t id, const char *name, hid_t gapl_id, hid_t req)
 
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->group_cls.open) {
-        void       *location = NULL; /* a pointer to VOL specific token that indicates 
-                                        the location of the object */
+        H5VL_loc_params_t loc_params;
 
-        /* Get the token for the Object location through the VOL */
-        if(H5VL_object_lookup (id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, req, name, gapl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.loc_data.loc_by_name.name = name;
 
-        /* Open the object through the VOL */
-        if((ret_value = H5VL_object_open_by_loc(id, location, gapl_id, req)) < 0)
+        /* Open the object class */
+        if((ret_value = H5VL_object_open(id, loc_params, gapl_id, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
-
-        if (NULL != location) {
-            /* free the location token through the VOL */
-            if(H5VL_object_free_loc (id, location, H5_REQUEST_NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-        }
     }
     else {
         /* call the corresponding VOL open callback */
@@ -1414,7 +1370,6 @@ H5VL_group_open(hid_t id, const char *name, hid_t gapl_id, hid_t req)
         /* attach VOL information to the ID */
         if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        vol_plugin->nrefs++;
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1718,7 +1673,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_object_open_by_loc
+ * Function:	H5VL_object_open
  *
  * Purpose:	Opens a object through the VOL
  *
@@ -1732,7 +1687,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_object_open_by_loc(hid_t id, void *obj_loc, hid_t lapl_id, hid_t req)
+H5VL_object_open(hid_t id, H5VL_loc_params_t params, hid_t lapl_id, hid_t req)
 {
     H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     hid_t		ret_value;              /* Return value */
@@ -1747,17 +1702,16 @@ H5VL_object_open_by_loc(hid_t id, void *obj_loc, hid_t lapl_id, hid_t req)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object open' method")
 
     /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->object_cls.open)(obj_loc, lapl_id, req)) < 0)
+    if((ret_value = (vol_plugin->object_cls.open)(id, params, lapl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /* attach VOL information to the ID */
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free_t)H5VL_close) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_object_open_by_loc() */
+} /* end H5VL_object_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -1988,12 +1942,9 @@ H5VL_object_misc(hid_t id, H5VL_object_misc_t misc_type, hid_t req, ...)
 
         va_start (arguments, req);
         ret_id = va_arg (arguments, hid_t *);
-
         /* attach VOL information to the ID */
         if (H5I_register_aux(*ret_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-        vol_plugin->nrefs++;
-
         va_end (arguments);
     }
 done:

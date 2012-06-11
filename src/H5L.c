@@ -1711,7 +1711,6 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
             vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
             if (H5I_register_aux(grp_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            vol_plugin->nrefs++;
 
             /* Make callback */
             if((link_class->create_func)(name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size, H5P_DEFAULT) < 0)

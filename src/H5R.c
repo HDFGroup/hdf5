@@ -511,8 +511,7 @@ done:
 hid_t
 H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_ref)
 {
-    void       *location = NULL; /* a pointer to VOL specific token that indicates 
-                                    the location of the object */
+    H5VL_loc_params_t loc_params;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -526,15 +525,14 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (obj_id, H5VL_OBJECT_LOOKUP_BY_REF, &location, H5_REQUEST_NULL, 
-                           ref_type, _ref) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
-
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_REF;
+    loc_params.loc_data.loc_by_ref.ref_type = ref_type;
+    loc_params.loc_data.loc_by_ref._ref = _ref;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open_by_loc(obj_id, location, oapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(obj_id, loc_params, oapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
 #if 0
     /* Create reference */
     if((ret_value = H5R_dereference(file, oapl_id, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
@@ -542,11 +540,6 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 #endif
 
 done:
-    if (NULL != location) {
-        /* free the location token through the VOL */
-        if(H5VL_object_free_loc (obj_id, location, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-    }
     FUNC_LEAVE_API(ret_value)
 }   /* end H5Rdereference2() */
 
