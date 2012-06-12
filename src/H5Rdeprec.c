@@ -197,9 +197,10 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     loc_params.type = H5VL_OBJECT_LOOKUP_BY_REF;
     loc_params.loc_data.loc_by_ref.ref_type = ref_type;
     loc_params.loc_data.loc_by_ref._ref = _ref;
+    loc_params.loc_data.loc_by_ref.plist_id = H5P_DATASET_ACCESS_DEFAULT;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(obj_id, loc_params, H5P_DATASET_ACCESS_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(obj_id, loc_params, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:

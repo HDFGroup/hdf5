@@ -513,7 +513,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_attr_remove(hid_t id, void *location, const char *attr_name, hid_t req)
+H5VL_attr_remove(hid_t id, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req)
 {
     H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t              ret_value = SUCCEED;
@@ -523,7 +523,7 @@ H5VL_attr_remove(hid_t id, void *location, const char *attr_name, hid_t req)
     if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux (id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if((ret_value = (vol_plugin->attr_cls.remove)(id, location, attr_name, req)) < 0)
+    if((ret_value = (vol_plugin->attr_cls.remove)(id, loc_params, attr_name, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "remove failed")
 
 done:
@@ -645,9 +645,10 @@ H5VL_datatype_open(hid_t id, const char *name, hid_t tapl_id, hid_t req)
 
         loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
+        loc_params.loc_data.loc_by_name.plist_id = tapl_id;
 
         /* Open the object class */
-        if((ret_value = H5VL_object_open(id, loc_params, tapl_id, H5_REQUEST_NULL)) < 0)
+        if((ret_value = H5VL_object_open(id, loc_params, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
     }
     else {
@@ -774,9 +775,10 @@ H5VL_dataset_open(hid_t id, const char *name, hid_t dapl_id, hid_t req)
 
         loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
+        loc_params.loc_data.loc_by_name.plist_id = dapl_id;
 
         /* Open the object class */
-        if((ret_value = H5VL_object_open(id, loc_params, dapl_id, H5_REQUEST_NULL)) < 0)
+        if((ret_value = H5VL_object_open(id, loc_params, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
     }
     else {
@@ -1357,9 +1359,10 @@ H5VL_group_open(hid_t id, const char *name, hid_t gapl_id, hid_t req)
 
         loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
+        loc_params.loc_data.loc_by_name.plist_id = gapl_id;
 
         /* Open the object class */
-        if((ret_value = H5VL_object_open(id, loc_params, gapl_id, H5_REQUEST_NULL)) < 0)
+        if((ret_value = H5VL_object_open(id, loc_params, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
     }
     else {
@@ -1687,7 +1690,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_object_open(hid_t id, H5VL_loc_params_t params, hid_t lapl_id, hid_t req)
+H5VL_object_open(hid_t id, H5VL_loc_params_t params, hid_t req)
 {
     H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     hid_t		ret_value;              /* Return value */
@@ -1702,7 +1705,7 @@ H5VL_object_open(hid_t id, H5VL_loc_params_t params, hid_t lapl_id, hid_t req)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object open' method")
 
     /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->object_cls.open)(id, params, lapl_id, req)) < 0)
+    if((ret_value = (vol_plugin->object_cls.open)(id, params, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 
     /* attach VOL information to the ID */

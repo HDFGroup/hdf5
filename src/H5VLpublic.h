@@ -165,7 +165,7 @@ struct H5VL_loc_by_id {
 
 struct H5VL_loc_by_name {
     const char *name;
-    hid_t lapl_id;
+    hid_t plist_id;
 };
 
 struct H5VL_loc_by_idx {
@@ -173,7 +173,7 @@ struct H5VL_loc_by_idx {
     H5_index_t idx_type;
     H5_iter_order_t order;
     hsize_t n;
-    hid_t lapl_id;
+    hid_t plist_id;
 };
 
 struct H5VL_loc_by_addr {
@@ -183,6 +183,7 @@ struct H5VL_loc_by_addr {
 struct H5VL_loc_by_ref {
     H5R_type_t ref_type;
     const void *_ref;
+    hid_t plist_id;
 };
 
 /* Structure to hold parameters for object location */
@@ -206,7 +207,7 @@ typedef struct H5VL_attr_class_t {
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf, hid_t req);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-    herr_t (*remove)(hid_t loc_id, void *location, const char *attr_name, hid_t req);
+    herr_t (*remove)(hid_t loc_id, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
     herr_t (*close) (hid_t attr_id, hid_t req);
 } H5VL_attr_class_t;
 
@@ -265,7 +266,7 @@ typedef struct H5VL_link_class_t {
 
 /* H5O routines */
 typedef struct H5VL_object_class_t {
-    hid_t  (*open)  (hid_t id, H5VL_loc_params_t params, hid_t lapl_id, hid_t req);
+    hid_t  (*open)  (hid_t id, H5VL_loc_params_t params, hid_t req);
     herr_t (*copy)  (hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
     herr_t (*visit) (hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, 

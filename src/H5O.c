@@ -238,9 +238,10 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 
     loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(loc_id, loc_params, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(loc_id, loc_params, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -299,9 +300,10 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;
     loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(loc_id, loc_params, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(loc_id, loc_params, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -347,7 +349,6 @@ done:
 hid_t
 H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 {
-    hid_t       lapl_id = H5P_LINK_ACCESS_DEFAULT; /* lapl to use to open this object */
     H5VL_loc_params_t loc_params;
     hid_t       ret_value = FAIL;
 
@@ -358,7 +359,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
     loc_params.loc_data.loc_by_addr.addr = addr;
 
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_open(loc_id, loc_params, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_object_open(loc_id, loc_params, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
 done:
@@ -564,8 +565,7 @@ done:
 herr_t
 H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
 {
-    void        *location = NULL;       /* a pointer to VOL specific token that indicates 
-                                           the location of the object */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -575,15 +575,14 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
     if(!oinfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.loc_data.loc_by_id.id = loc_id;
+
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, oinfo, NULL)) < 0)
+    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, oinfo, loc_params)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
-    if (NULL != location) {
-        free (location);
-        location = NULL;
-    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info() */
 
@@ -604,8 +603,7 @@ done:
 herr_t
 H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    void        *location = NULL;       /* a pointer to VOL specific token that indicates 
-                                           the location of the object */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -622,20 +620,15 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup (loc_id, H5VL_OBJECT_LOOKUP_BY_NAME, &location, H5_REQUEST_NULL, name, lapl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, oinfo, location)) < 0)
+    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, oinfo, loc_params)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
-    if (NULL != location) {
-        /* free the location token through the VOL */
-        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_name() */
 
@@ -658,8 +651,7 @@ herr_t
 H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_info_t *oinfo, hid_t lapl_id)
 {
-    void        *location = NULL;       /* a pointer to VOL specific token that indicates 
-                                           the location of the object */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -681,21 +673,18 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Get the token for the Object location through the VOL */
-    if(H5VL_object_lookup(loc_id, H5VL_OBJECT_LOOKUP_BY_IDX, &location, H5_REQUEST_NULL, group_name,
-                          idx_type, order, n, lapl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate object")
+    loc_params.type = H5VL_OBJECT_LOOKUP_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, oinfo, location)) < 0)
+    if((ret_value = H5VL_object_get(loc_id, H5VL_OBJECT_GET_INFO, H5_REQUEST_NULL, oinfo, loc_params)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
-    if (NULL != location) {
-        /* free the location token through the VOL */
-        if(H5VL_object_free_loc (loc_id, location, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location token")
-    }
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx() */
 

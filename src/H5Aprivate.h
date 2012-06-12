@@ -84,5 +84,9 @@ H5_DLL herr_t H5O_attr_iterate(hid_t loc_id, hid_t dxpl_id, H5_index_t idx_type,
     const H5A_attr_iter_op_t *op, void *op_data);
 H5_DLL herr_t H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
                                  const char *new_attr_name, hid_t lapl_id);
+H5_DLL herr_t H5A_delete_by_idx(H5G_loc_t loc, const char *obj_name, H5_index_t idx_type,
+                                H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+H5_DLL htri_t H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
+                                 hid_t lapl_id);
 #endif /* _H5Aprivate_H */
 
