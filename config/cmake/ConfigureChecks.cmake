@@ -631,9 +631,11 @@ CHECK_FUNCTION_EXISTS (vasprintf         H5_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           H5_HAVE_WAITPID)
 
 CHECK_FUNCTION_EXISTS (vsnprintf         H5_HAVE_VSNPRINTF)
-#IF (H5_HAVE_VSNPRINTF)
-#  HDF5_FUNCTION_TEST (VSNPRINTF_WORKS)
-#ENDIF (H5_HAVE_VSNPRINTF)
+IF (NOT WINDOWS)
+  IF (H5_HAVE_VSNPRINTF)
+    HDF5_FUNCTION_TEST (VSNPRINTF_WORKS)
+  ENDIF (H5_HAVE_VSNPRINTF)
+ENDIF (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
