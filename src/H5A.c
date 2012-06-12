@@ -234,7 +234,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     if(H5P_DEFAULT == acpl_id)
         acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = loc_id;
 
     /* Get the plist structure */
@@ -314,7 +314,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(H5P_DEFAULT == acpl_id)
         acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -542,7 +542,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = loc_id;
 
     /* Open the attribute through the VOL */
@@ -598,7 +598,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -1660,7 +1660,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -1822,7 +1822,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     if(HDstrcmp(old_name, new_name)) {
         H5VL_loc_params_t loc_params;
 
-        loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+        loc_params.type = H5VL_OBJECT_BY_ID;
         loc_params.loc_data.loc_by_id.id = loc_id;
 
         /* rename the attribute info through the VOL */
@@ -1876,7 +1876,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     if(HDstrcmp(old_attr_name, new_attr_name)) {
         H5VL_loc_params_t loc_params;
 
-        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = obj_name;
         loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -2043,7 +2043,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -2104,7 +2104,7 @@ H5Adelete(hid_t loc_id, const char *name)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = loc_id;
 
     /* Open the attribute through the VOL */
@@ -2155,7 +2155,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -2217,7 +2217,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -2600,7 +2600,7 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = obj_id;
 
     /* get the attribute info through the VOL */
@@ -2648,7 +2648,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = obj_name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 

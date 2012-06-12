@@ -643,7 +643,7 @@ H5VL_datatype_open(hid_t id, const char *name, hid_t tapl_id, hid_t req)
     if(NULL == vol_plugin->datatype_cls.open) {
         H5VL_loc_params_t loc_params;
 
-        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
         loc_params.loc_data.loc_by_name.plist_id = tapl_id;
 
@@ -773,7 +773,7 @@ H5VL_dataset_open(hid_t id, const char *name, hid_t dapl_id, hid_t req)
     if(NULL == vol_plugin->dataset_cls.open) {
         H5VL_loc_params_t loc_params;
 
-        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
         loc_params.loc_data.loc_by_name.plist_id = dapl_id;
 
@@ -1357,7 +1357,7 @@ H5VL_group_open(hid_t id, const char *name, hid_t gapl_id, hid_t req)
     if(NULL == vol_plugin->group_cls.open) {
         H5VL_loc_params_t loc_params;
 
-        loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+        loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
         loc_params.loc_data.loc_by_name.plist_id = gapl_id;
 
@@ -1811,7 +1811,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_lookup(hid_t id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, ...)
+H5VL_object_lookup(hid_t id, H5VL_loc_type_t lookup_type, void **location, hid_t req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */

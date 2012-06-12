@@ -45,7 +45,7 @@
 
 /* Definitions for UDATA */
 #define H5A_CRT_LOCATION_SIZE   sizeof(H5VL_loc_params_t)
-#define H5A_CRT_LOCATION_DEF {H5VL_OBJECT_LOOKUP_BY_ID, {{FAIL}}}
+#define H5A_CRT_LOCATION_DEF {H5VL_OBJECT_BY_ID, {{FAIL}}}
 
 /******************/
 /* Local Typedefs */

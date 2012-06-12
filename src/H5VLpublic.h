@@ -150,14 +150,14 @@ typedef enum H5VL_object_get_t {
     H5VL_REF_GET_NAME               = 5         /*object name                           */
 } H5VL_object_get_t;
 
-/* types for all object lookup API routines */
-typedef enum H5VL_object_lookup_t {
-    H5VL_OBJECT_LOOKUP_BY_ID        = 0,
-    H5VL_OBJECT_LOOKUP_BY_NAME	    = 1,
-    H5VL_OBJECT_LOOKUP_BY_IDX	    = 2,
-    H5VL_OBJECT_LOOKUP_BY_ADDR	    = 3,
-    H5VL_OBJECT_LOOKUP_BY_REF       = 4
-} H5VL_object_lookup_t;
+/* types for different ways that objects are located in an HDF5 container */
+typedef enum H5VL_loc_type_t {
+    H5VL_OBJECT_BY_ID       = 0,
+    H5VL_OBJECT_BY_NAME	    = 1,
+    H5VL_OBJECT_BY_IDX	    = 2,
+    H5VL_OBJECT_BY_ADDR	    = 3,
+    H5VL_OBJECT_BY_REF      = 4
+} H5VL_loc_type_t;
 
 struct H5VL_loc_by_id {
     hid_t id;
@@ -186,9 +186,10 @@ struct H5VL_loc_by_ref {
     hid_t plist_id;
 };
 
-/* Structure to hold parameters for object location */
+/* Structure to hold parameters for object locations. 
+   either: BY_ID, BY_NAME, BY_IDX, BY_ADDR, BY_REF */
 typedef struct H5VL_loc_params_t {
-    H5VL_object_lookup_t type;
+    H5VL_loc_type_t type;
     union{
         struct H5VL_loc_by_id   loc_by_id;
         struct H5VL_loc_by_name loc_by_name;
@@ -271,7 +272,7 @@ typedef struct H5VL_object_class_t {
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
     herr_t (*visit) (hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, 
                      H5O_iterate_t op, void *op_data, hid_t lapl_id);
-    herr_t (*lookup)(hid_t loc_id, H5VL_object_lookup_t lookup_type, void **location, hid_t req, va_list arguments);
+    herr_t (*lookup)(hid_t loc_id, H5VL_loc_type_t lookup_type, void **location, hid_t req, va_list arguments);
     herr_t (*free_loc)(void *location, hid_t req);
     herr_t (*get)   (hid_t loc_id, H5VL_object_get_t get_type, hid_t req, va_list arguments);
     herr_t (*misc)  (hid_t id, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);

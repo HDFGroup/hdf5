@@ -156,7 +156,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = loc_id;
 
     /* Get the plist structure */
@@ -217,7 +217,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = loc_id;
 
     /* Open the attribute through the VOL */

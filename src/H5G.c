@@ -483,7 +483,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_ID;
+    loc_params.type = H5VL_OBJECT_BY_ID;
     loc_params.loc_data.loc_by_id.id = loc_id;
 
     /* Get the group info through the VOL using the location token */
@@ -529,7 +529,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_NAME;
+    loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
@@ -583,7 +583,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    loc_params.type = H5VL_OBJECT_LOOKUP_BY_IDX;
+    loc_params.type = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name = group_name;
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
     loc_params.loc_data.loc_by_idx.order = order;

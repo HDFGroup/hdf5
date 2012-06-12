@@ -100,7 +100,7 @@ H5_DLL herr_t H5VL_object_visit(hid_t loc_id, const char *obj_name, H5_index_t i
 H5_DLL herr_t H5VL_object_get(hid_t uid, H5VL_object_get_t get_type, hid_t req, ...);
 H5_DLL herr_t H5VL_object_misc(hid_t id, H5VL_object_misc_t misc_type, hid_t req, ...);
 H5_DLL herr_t H5VL_object_optional(hid_t id, H5VL_object_misc_t optional_type, hid_t req, ...);
-H5_DLL herr_t H5VL_object_lookup(hid_t uid, H5VL_object_lookup_t lookup_type, void **location, hid_t req, ...);
+H5_DLL herr_t H5VL_object_lookup(hid_t uid, H5VL_loc_type_t lookup_type, void **location, hid_t req, ...);
 H5_DLL herr_t H5VL_object_free_loc(hid_t loc_id, void *location, hid_t req);
 H5_DLL herr_t H5VL_object_close(hid_t uid, hid_t req);
 
