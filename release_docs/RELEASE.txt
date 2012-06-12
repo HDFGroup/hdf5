@@ -1129,6 +1129,13 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The data conversion test dt_arith.c has failures (segmentation fault) from
+  "long double" to other datatypes during hard conversion when the library
+  is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
+  with optimization (-O3, -O2, and -O1).  Some newer versions of GCC do not 
+  have this problem.  Users should disable optimization or try newer version
+  of GCC. (Issue 8017. SLU - 2012/6/12)
+
 * The data conversion test dt_arith.c fails in "long double" to integer
   conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
   is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
