@@ -423,7 +423,7 @@ ENDIF (HDF5_ENABLE_EMBEDDED_LIBINFO)
 OPTION (HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings" OFF)
 IF (HDF5_DISABLE_COMPILER_WARNINGS)
   # MSVC uses /w to suppress warnings.  It also complains if another
-  # warning level is given, so remove it.CMAKE_NO_STD_NAMESPACE
+  # warning level is given, so remove it.
   IF (MSVC)
     SET (HDF5_WARNINGS_BLOCKED 1)
     STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -667,6 +667,12 @@ IF (WIN32 AND NOT CYGWIN)
   ENDIF (HDF5_ENABLE_THREADSAFE)
 ENDIF (WIN32 AND NOT CYGWIN)
 
+# -----------------------------------------------------------------------
+# wrapper script variables
+# 
+#SET (CFLAGS "${C_DEFINES}")
+#SET (CXXFLAGS "${CXX_DEFINES}")
+
 #-----------------------------------------------------------------------------
 # Add the HDF5 Library Target to the build
 #-----------------------------------------------------------------------------
@@ -739,6 +745,12 @@ IF (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   IF (HDF5_BUILD_FORTRAN)
     OPTION (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF)
     INCLUDE (${HDF5_RESOURCES_DIR}/HDF5UseFortran.cmake)
+
+    # -----------------------------------------------------------------------
+    # wrapper script variables
+    # 
+#    SET (FCFLAGS "${Fortran_DEFINES}")
+
     ADD_SUBDIRECTORY (${HDF5_SOURCE_DIR}/fortran ${PROJECT_BINARY_DIR}/fortran)
     IF (HDF5_BUILD_HL_LIB)
       IF (EXISTS "${HDF5_SOURCE_DIR}/hl/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/hl/fortran")
@@ -950,7 +962,7 @@ ENDIF (NOT HDF5_EXTERNALLY_CONFIGURED)
 # Set the cpack variables
 #-----------------------------------------------------------------------------
 IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
-  SET (CPACK_PACKAGE_VENDOR "HDF Group")
+  SET (CPACK_PACKAGE_VENDOR "HDF_Group")
   SET (CPACK_PACKAGE_NAME "${HDF5_PACKAGE_NAME}")
   SET (CPACK_PACKAGE_INSTALL_DIRECTORY "${HDF5_PACKAGE_NAME}")
   SET (CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${HDF5_PACKAGE_NAME}-${HDF5_PACKAGE_VERSION}-${LIB_TYPE}")
@@ -964,15 +976,41 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     SET (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/release_docs/RELEASE.txt")
   ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs")
   SET (CPACK_PACKAGE_RELOCATABLE TRUE)
+
   IF (WIN32)
     SET (CPACK_MONOLITHIC_INSTALL ON)
-    SET (CPACK_NSIS_CONTACT "help@hdfgroup.org")
+    SET (CPACK_NSIS_CONTACT "${HDF5_PACKAGE_BUGREPORT}")
     SET (CPACK_NSIS_MODIFY_PATH ON)
     SET (CPACK_NSIS_PACKAGE_NAME "HDF5 ${HDF5_PACKAGE_VERSION}")
   ELSE (WIN32)
-    SET (CPACK_RPM_COMPONENT_INSTALL ON)
-    SET (CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+    SET (CPACK_PACKAGING_INSTALL_PREFIX "/usr")
     SET (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
+
+    SET (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
+    SET (CPACK_DEBIAN_PACKAGE_MAINTAINER "${HDF5_PACKAGE_BUGREPORT}")
+    
+    SET (CPACK_RPM_COMPONENT_INSTALL ON)
+    SET (CPACK_RPM_PACKAGE_RELOCATABLE ON)
+    SET (CPACK_RPM_PACKAGE_LICENSE "BSD-style")
+    SET (CPACK_RPM_PACKAGE_GROUP "Development/Libraries")
+    SET (CPACK_RPM_PACKAGE_URL "${HDF5_PACKAGE_URL}")
+    SET (CPACK_RPM_PACKAGE_SUMMARY "HDF5 is a unique technology suite that makes possible the management of extremely large and complex data collections.")
+    SET (CPACK_RPM_PACKAGE_DESCRIPTION 
+        "The HDF5 technology suite includes:
+
+    * A versatile data model that can represent very complex data objects and a wide variety of metadata.
+
+    * A completely portable file format with no limit on the number or size of data objects in the collection.
+
+    * A software library that runs on a range of computational platforms, from laptops to massively parallel systems, and implements a high-level API with C, C++, Fortran 90, and Java interfaces.
+
+    * A rich set of integrated performance features that allow for access time and storage space optimizations.
+
+    * Tools and applications for managing, manipulating, viewing, and analyzing the data in the collection.
+
+The HDF5 data model, file format, API, library, and tools are open and distributed without charge.
+"
+    )
   ENDIF (WIN32)
   
   INCLUDE(InstallRequiredSystemLibraries)
