@@ -883,60 +883,43 @@ done:
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_API(ret_value)
-#if 0
-    htri_t	ret_value;              /* Return value */
+} /* end H5Fis_hdf5() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fis_accessable
+ *
+ * Purpose:	Check if the file can be opened with the given fapl.
+ *
+ * Return:	Success:	TRUE/FALSE
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Fis_accessable(const char *name, hid_t fapl_id)
+{
+    htri_t	ret_value = TRUE;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "*s", name);
+    H5TRACE2("t", "*si", name, fapl_id);
 
     /* Check args and all the boring stuff. */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
-    if((ret_value = H5VL_file_optional(H5VL_FILE_IS_HDF5, &ret_value, name)) < 0)
+#if 0
+    if(H5VL_file_optional(H5VL_FILE_IS_HDF5, &ret_value, name) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
-
-    FUNC_LEAVE_API(ret_value)
 #endif
-} /* end H5Fis_hdf5() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_is_hdf5
- *
- * Purpose:	private version of H5Fis_hdf5.
- *
- * Return:	Success:	TRUE/FALSE
- *
- *		Failure:	Negative
- *
- * Programmer:	Unknown
- *
- *-------------------------------------------------------------------------
- */
-htri_t
-H5F_is_hdf5(const char *name)
-{
-    H5FD_t *file = NULL;           /* Low-level file struct */
-    htri_t	ret_value;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Open the file at the virtual file layer */
-    if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
-        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
-
-    /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF != H5F_locate_signature(file, H5AC_ind_dxpl_id));
 
 done:
-    /* Close the file */
-    if(file)
-        if(H5FD_close(file) < 0 && ret_value >= 0)
-            HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fis_accessable() */
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Fis_hdf5() */
 
 
 /*-------------------------------------------------------------------------

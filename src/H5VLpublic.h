@@ -82,9 +82,8 @@ typedef enum H5VL_file_get_t {
 
 /* types for all file misc operations */
 typedef enum H5VL_file_misc_t {
-    H5VL_FILE_IS_HDF5               = 0,         /* is HDF5?                             */
-    H5VL_FILE_MOUNT                 = 1,
-    H5VL_FILE_UNMOUNT               = 2
+    H5VL_FILE_MOUNT                 = 0,
+    H5VL_FILE_UNMOUNT               = 1
 } H5VL_file_misc_t;
 
 /* types for all file optional operations */

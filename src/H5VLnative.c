@@ -1712,16 +1712,6 @@ H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t UNUSED req
     FUNC_ENTER_NOAPI_NOINIT
 
     switch (misc_type) {
-        /* H5Fis_hdf5 */
-        case H5VL_FILE_IS_HDF5:
-            {
-                htri_t     *ret    = va_arg (arguments, htri_t *);
-                const char *name   = va_arg (arguments, const char *);
-
-                if((*ret = H5F_is_hdf5(name)) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't determine if file is an HDF5 file")
-                break;
-            }
         /* H5Fmount */
         case H5VL_FILE_MOUNT:
             {
