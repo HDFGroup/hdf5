@@ -411,7 +411,13 @@ SET (LINUX_LFS 0)
 SET (HDF5_EXTRA_FLAGS)
 IF (NOT WINDOWS)
   # Linux Specific flags
-  SET (HDF5_EXTRA_FLAGS -D_POSIX_SOURCE=199506L -D_BSD_SOURCE)
+  # This was originally defined as _POSIX_SOURCE which was updated to
+  # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
+  # functionality so clock_gettime and CLOCK_MONOTONIC are defined
+  # correctly.
+  # POSIX feature information can be found in the gcc manual at:
+  # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
+  SET (HDF5_EXTRA_FLAGS -D_POSIX_C_SOURCE=199506L -D_BSD_SOURCE)
   OPTION (HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   IF (HDF5_ENABLE_LARGE_FILE)
     SET (msg "Performing TEST_LFS_WORKS")
