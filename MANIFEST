@@ -632,6 +632,7 @@
 ./src/H5EAstat.c
 ./src/H5EAtest.c
 ./src/H5F.c
+./src/H5Fint.c
 ./src/H5Faccum.c
 ./src/H5Fcwfs.c
 ./src/H5Fdbg.c
@@ -659,6 +660,12 @@
 ./src/H5FAprivate.h
 ./src/H5FAstat.c
 ./src/H5FAtest.c
+./src/H5VLpublic.h
+./src/H5VLprivate.h
+./src/H5VL.c
+./src/H5VLint.c
+./src/H5VLnative.h
+./src/H5VLnative.c
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
