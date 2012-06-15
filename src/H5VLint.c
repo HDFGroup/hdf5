@@ -183,7 +183,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
+H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info)
 {
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -192,6 +192,9 @@ H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
     /* Set the vol properties for the list */
     if(H5P_set(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol ID")
+    /* Set the vol properties for the list */
+    if(H5P_set(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -214,7 +217,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_close(H5VL_class_t *vol_cls)
+H5VL_fapl_close(H5VL_class_t *vol_cls, const void *vol_info)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 

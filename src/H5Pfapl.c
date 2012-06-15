@@ -131,6 +131,10 @@
 #define H5F_ACS_VOL_SIZE                sizeof(void *)
 #define H5F_ACS_VOL_DEF                 H5VL_NATIVE
 
+/* Definition for vol info */
+#define H5F_ACS_VOL_INFO_SIZE              sizeof(void*)
+#define H5F_ACS_VOL_INFO_DEF               NULL
+
 /* Definition of pointer to initial file image info */
 #define H5F_ACS_FILE_IMAGE_INFO_SIZE            sizeof(H5FD_file_image_info_t)
 #define H5F_ACS_FILE_IMAGE_INFO_DEF             H5FD_DEFAULT_FILE_IMAGE_INFO
@@ -234,6 +238,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     hbool_t want_posix_fd = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
     unsigned efc_size = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
     H5VL_class_t *vol_cls = H5F_ACS_VOL_DEF;                    /* Default VOL plugin */
+    void *vol_info = H5F_ACS_VOL_INFO_DEF;                       /* Default VOL plugin */
     H5FD_file_image_info_t file_image_info = H5F_ACS_FILE_IMAGE_INFO_DEF;  /* Default file image info and callbacks */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -324,6 +329,10 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5F_ACS_VOL_NAME, H5F_ACS_VOL_SIZE, &vol_cls, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the file VOL INFO */
+    if(H5P_register_real(pclass, H5F_ACS_VOL_INFO_NAME, H5F_ACS_VOL_INFO_SIZE, &vol_info, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
     /* Register the initial file image info */
     if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &file_image_info, NULL, NULL, NULL, H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -368,9 +377,16 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
     if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
 
-    /* Set the vol for the property list */
-    if(H5VL_fapl_open(plist, vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
+    if(NULL != vol_cls) {
+        void  *vol_info;
+
+        /* Retrieve VOL plugin info property */
+        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
+        /* Set the vol for the property list */
+        if(H5VL_fapl_open(plist, vol_cls, vol_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
+    }
 
     /* Retrieve driver ID property */
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
@@ -430,8 +446,14 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
     if(H5P_get(src_plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
     if(NULL != vol_cls) {
+        void  *vol_info;
+
+        /* Retrieve VOL plugin property */
+        if(H5P_get(dst_plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
+
         /* Set the vp; for the destination property list */
-        if(H5VL_fapl_open(dst_plist, vol_cls) < 0)
+        if(H5VL_fapl_open(dst_plist, vol_cls, vol_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
     } /* end if */
 
@@ -488,8 +510,12 @@ H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
     if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
     if(NULL != vol_cls) {
+        void  *vol_info;
+        /* Retrieve VOL plugin info property */
+        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
         /* Close the driver for the property list */
-        if(H5VL_fapl_close(vol_cls) < 0)
+        if(H5VL_fapl_close(vol_cls, vol_info) < 0)
             HGOTO_DONE(FAIL) /* Can't return errors when library is shutting down */
     } /* end if */
 
@@ -2176,25 +2202,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls)
+H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info)
 {
     H5VL_class_t *old_vol_cls;
+    const void   *old_vol_info;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the current vol information */
     if(H5P_get(plist, H5F_ACS_VOL_NAME, &old_vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol class")
+    if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &old_vol_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
 
     /* Close the vol for the property list */
-    if(H5VL_fapl_close(old_vol_cls)<0)
+    if(H5VL_fapl_close(old_vol_cls, old_vol_info)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset vol")
 
     /* Set the vol for the property list */
-    if(H5VL_fapl_open(plist, vol_cls)<0)
+    if(H5VL_fapl_open(plist, vol_cls, vol_info)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_vol() */
@@ -2216,7 +2244,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_vol(hid_t plist_id, hid_t new_vol_id)
+H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     H5VL_class_t *vol_cls;
@@ -2232,7 +2260,7 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file vol ID")
 
     /* Set the vol */
-    if(H5P_set_vol(plist, vol_cls) < 0)
+    if(H5P_set_vol(plist, vol_cls, new_vol_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
 
 done:

@@ -284,7 +284,7 @@ H5Pset_fapl_native(hid_t fapl_id)
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_vol(plist, &H5VL_native_g);
+    ret_value = H5P_set_vol(plist, &H5VL_native_g, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

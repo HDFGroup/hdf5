@@ -337,10 +337,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
 
-    /* Increment the reference count on the VOL struct and insert it into the property list */
-    if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &(f->vol_cls)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
-
     /* Set the driver "info" in the property list */
     driver_info = H5FD_fapl_get(f->shared->lf);
     if(driver_info != NULL && H5P_set(new_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
@@ -352,6 +348,11 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     } else if(f->shared->fc_degree != H5F_CLOSE_DEFAULT && H5P_set(new_plist, H5F_ACS_CLOSE_DEGREE_NAME, &(f->shared->fc_degree)) < 0) {
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
     }
+
+    /* MSC TODO move this to the upper VOL get routine & set the vol info too*/
+    /* Set the VOL class in the property list */
+    if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &(f->vol_cls)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

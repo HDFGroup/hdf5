@@ -291,7 +291,7 @@ H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
 H5_DLL void *H5Pget_driver_info(hid_t plist_id);
-H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id);
+H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
 /*
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t vol_id, const void *vol_info);
