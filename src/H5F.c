@@ -838,7 +838,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fis_hdf5
+ * Function:	H5F_is_hdf5
  *
  * Purpose:	Check the file signature to detect an HDF5 file.
  *
@@ -858,17 +858,12 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Fis_hdf5(const char *name)
+H5F_is_hdf5(const char *name)
 {
     H5FD_t	*file = NULL;           /* Low-level file struct */
     htri_t	ret_value;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "*s", name);
-
-    /* Check args and all the boring stuff. */
-    if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Open the file at the virtual file layer */
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
@@ -883,12 +878,12 @@ done:
         if(H5FD_close(file) < 0 && ret_value >= 0)
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Fis_hdf5() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_is_hdf5() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Fis_accessable
+ * Function:	H5Fis_accessible
  *
  * Purpose:	Check if the file can be opened with the given fapl.
  *
@@ -901,7 +896,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5Fis_accessable(const char *name, hid_t fapl_id)
+H5Fis_accessible(const char *name, hid_t fapl_id)
 {
     htri_t	ret_value = TRUE;              /* Return value */
 
@@ -912,15 +907,12 @@ H5Fis_accessable(const char *name, hid_t fapl_id)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
-#if 0
-    if(H5VL_file_optional(H5VL_FILE_IS_HDF5, &ret_value, name) < 0)
+    if(H5VL_file_misc(fapl_id, H5VL_FILE_IS_ACCESSIBLE, &ret_value, name) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file handle")
-#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fis_accessable() */
-
+} /* end H5Fis_accessible() */
 
 
 /*-------------------------------------------------------------------------

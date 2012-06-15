@@ -1705,7 +1705,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
+H5VL_native_file_misc(hid_t id, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
 
@@ -1722,7 +1722,7 @@ H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t UNUSED req
                 H5F_t	   *child = NULL;
 
                 /* Check arguments */
-                if(H5G_loc(loc_id, &loc) < 0)
+                if(H5G_loc(id, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
                 if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
@@ -1740,13 +1740,24 @@ H5VL_native_file_misc(hid_t loc_id, H5VL_file_misc_t misc_type, hid_t UNUSED req
                 H5G_loc_t   loc;
 
                 /* Check arguments */
-                if(H5G_loc(loc_id, &loc) < 0)
+                if(H5G_loc(id, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
                 /* Unmount */
                 if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
+                break;
+            }
+        /* H5Fis_accessible */
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                htri_t *ret       = va_arg (arguments, htri_t *);
+                const char *name  = va_arg (arguments, const char *);
+
+                /* Call private routine */
+                if((*ret = H5F_is_hdf5(name)) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
                 break;
             }
         default:

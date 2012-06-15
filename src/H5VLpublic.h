@@ -83,7 +83,8 @@ typedef enum H5VL_file_get_t {
 /* types for all file misc operations */
 typedef enum H5VL_file_misc_t {
     H5VL_FILE_MOUNT                 = 0,
-    H5VL_FILE_UNMOUNT               = 1
+    H5VL_FILE_UNMOUNT               = 1,
+    H5VL_FILE_IS_ACCESSIBLE         = 2
 } H5VL_file_misc_t;
 
 /* types for all file optional operations */
@@ -205,7 +206,8 @@ typedef struct H5VL_t H5VL_t;
 
 /* H5A routines */
 typedef struct H5VL_attr_class_t {
-    hid_t  (*create)(hid_t loc_id, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
+    hid_t  (*create)(hid_t loc_id, const char *attr_name, hid_t acpl_id, 
+                     hid_t aapl_id, hid_t req);
     hid_t  (*open)  (hid_t loc_id, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
     herr_t (*read)  (hid_t attr_id, hid_t mem_type_id, void *buf, hid_t req);
     herr_t (*write) (hid_t attr_id, hid_t mem_type_id, const void *buf, hid_t req);
@@ -237,7 +239,8 @@ typedef struct H5VL_dataset_class_t {
 
 /* H5F routines */
 typedef struct H5VL_file_class_t {
-    hid_t  (*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
+    hid_t  (*create)(const char *name, unsigned flags, hid_t fcpl_id, 
+                     hid_t fapl_id, hid_t req);
     hid_t  (*open)  (const char *name, unsigned flags, hid_t fapl_id, hid_t req);
     herr_t (*flush) (hid_t file_id, H5F_scope_t scope, hid_t req);
     herr_t (*get)   (hid_t file_id, H5VL_file_get_t get_type, hid_t req, va_list arguments);

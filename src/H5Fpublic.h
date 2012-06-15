@@ -175,7 +175,7 @@ extern "C" {
 
 /* Functions in H5F.c */
 H5_DLL htri_t H5Fis_hdf5(const char *filename);
-H5_DLL htri_t H5Fis_accessable(const char *filename, hid_t fapl_id);
+H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
 H5_DLL hid_t  H5Fcreate(const char *filename, unsigned flags,
 		  	  hid_t create_plist, hid_t access_plist);
 H5_DLL hid_t  H5Fopen(const char *filename, unsigned flags,

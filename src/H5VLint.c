@@ -1187,7 +1187,15 @@ H5VL_file_misc(hid_t id, H5VL_file_misc_t misc_type, hid_t req, ...)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
+    if (misc_type == H5VL_FILE_IS_ACCESSIBLE) {
+        H5P_genplist_t     *plist;                 /* Property list pointer */
+        /* get the VOL info from the fapl */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+        if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_plugin) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin")
+    }
+    else if (NULL == (vol_plugin = (H5VL_class_t *)H5I_get_aux(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     if(NULL == vol_plugin->file_cls.misc)

@@ -516,6 +516,7 @@ H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
 H5_DLL herr_t H5F_close(H5F_t *f);
 H5_DLL herr_t H5F_try_close(H5F_t *f);
 H5_DLL hid_t H5F_reopen(H5F_t *f);
+H5_DLL htri_t H5F_is_hdf5(const char *name);
 
 /* Functions than retrieve values from the file struct */
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);

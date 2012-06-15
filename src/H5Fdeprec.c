@@ -169,5 +169,46 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info1() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fis_hdf5
+ *
+ * Purpose:	Check the file signature to detect an HDF5 file.
+ *
+ * Bugs:	This function is not robust: it only uses the default file
+ *		driver when attempting to open the file when in fact it
+ *		should use all known file drivers.
+ *
+ * Return:	Success:	TRUE/FALSE
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Unknown
+ *
+ * Modifications:
+ *		Robb Matzke, 1999-08-02
+ *		Rewritten to use the virtual file layer.
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Fis_hdf5(const char *name)
+{
+    htri_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "*s", name);
+
+    /* Check args and all the boring stuff. */
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
+
+    /* Call private routine */
+    if((ret_value = H5F_is_hdf5(name)) < 0)
+	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fis_hdf5() */
+
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
