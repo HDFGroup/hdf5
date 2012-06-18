@@ -461,7 +461,7 @@ ADD_DEFINITIONS (${HDF5_EXTRA_FLAGS})
 #-----------------------------------------------------------------------------
 # Check for HAVE_OFF64_T functionality
 #-----------------------------------------------------------------------------
-IF (NOT WINDOWS)
+IF (NOT WINDOWS OR MINGW)
   HDF5_FUNCTION_TEST (HAVE_OFF64_T)
   IF (H5_HAVE_OFF64_T)
     CHECK_FUNCTION_EXISTS (lseek64            H5_HAVE_LSEEK64)
@@ -478,7 +478,7 @@ IF (NOT WINDOWS)
     CHECK_FUNCTION_EXISTS (fstat64            H5_HAVE_FSTAT64)
     CHECK_FUNCTION_EXISTS (stat64             H5_HAVE_STAT64)
   ENDIF (HAVE_STAT64_STRUCT)
-ENDIF (NOT WINDOWS)
+ENDIF (NOT WINDOWS OR MINGW)
 
 #-----------------------------------------------------------------------------
 #  Check the size in bytes of all the int and float types
