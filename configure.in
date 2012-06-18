@@ -1286,6 +1286,10 @@ case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
     ;;
+  MINGW*)
+    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_HAVE_LIBRARY([ws2_32])
+    ;;
   *)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
