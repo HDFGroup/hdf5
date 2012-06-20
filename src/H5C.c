@@ -468,37 +468,18 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->epoch_marker_ringbuf_last	= 0;
     cache_ptr->epoch_marker_ringbuf_size	= 0;
 
+    /* Initialize all epoch marker entries' fields to zero/FALSE/NULL */
+    HDmemset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
+
+    /* Set non-zero/FALSE/NULL fields for epoch markers */
     for ( i = 0; i < H5C__MAX_EPOCH_MARKERS; i++ )
     {
-        (cache_ptr->epoch_marker_active)[i]		 = FALSE;
 #ifndef NDEBUG
         ((cache_ptr->epoch_markers)[i]).magic		 =
 					       H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
-        ((cache_ptr->epoch_markers)[i]).size		 = (size_t)0;
-        ((cache_ptr->epoch_markers)[i]).image_ptr	 = NULL;
-        ((cache_ptr->epoch_markers)[i]).image_up_to_date = FALSE;
         ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class;
-        ((cache_ptr->epoch_markers)[i]).is_dirty	 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).dirtied		 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).is_protected	 = FALSE;
-	((cache_ptr->epoch_markers)[i]).is_read_only	 = FALSE;
-	((cache_ptr->epoch_markers)[i]).ro_ref_count	 = 0;
-        ((cache_ptr->epoch_markers)[i]).is_pinned	 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).in_slist	 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).ht_next		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).ht_prev		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).next		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).prev		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).aux_next	 = NULL;
-        ((cache_ptr->epoch_markers)[i]).aux_prev	 = NULL;
-#if H5C_COLLECT_CACHE_ENTRY_STATS
-        ((cache_ptr->epoch_markers)[i]).accesses	 = 0;
-        ((cache_ptr->epoch_markers)[i]).clears		 = 0;
-        ((cache_ptr->epoch_markers)[i]).flushes		 = 0;
-        ((cache_ptr->epoch_markers)[i]).pins		 = 0;
-#endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
     }
 
     /* metadata journaling related fields */
@@ -674,6 +655,12 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
 
             switch ( (cache_ptr->resize_ctl).decr_mode )
             {
+                case H5C_decr__off:
+                    HDfprintf(stdout,
+                              "%sAuto cache resize -- decrease off.  HR = %lf\n",
+                              cache_ptr->prefix, hit_rate);
+                    break;
+
                 case H5C_decr__threshold:
                     HDassert( hit_rate >
                               (cache_ptr->resize_ctl).upper_hr_threshold );
@@ -832,57 +819,6 @@ H5C_dest(H5F_t * f, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_dest_empty
- *
- * Purpose:     Destroy an empty cache.
- *
- *              This function fails if the cache is not empty on entry.
- *
- *		Note that *cache_ptr has been freed upon successful return.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *		6/2/04
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_dest_empty(H5C_t * cache_ptr)
-{
-    herr_t ret_value=SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C_dest_empty, FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if ( ( ! cache_ptr ) ||
-         ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ||
-         ( cache_ptr->index_len != 0 ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Bad cache_ptr or non-empty cache on entry.")
-    }
-
-
-    if ( cache_ptr->slist_ptr != NULL ) {
-
-        H5SL_close(cache_ptr->slist_ptr);
-        cache_ptr->slist_ptr = NULL;
-    }
-
-    cache_ptr->magic = 0;
-
-    cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C_dest_empty() */
 
 
 /*-------------------------------------------------------------------------
@@ -1080,30 +1016,17 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 	{
 	    flushed_entries_last_pass = FALSE;
             node_ptr = H5SL_first(cache_ptr->slist_ptr);
-
-	    if ( node_ptr != NULL ) {
-
-		next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-                if ( next_entry_ptr == NULL ) {
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "next_entry_ptr == NULL 1 ?!?!");
-                }
-#ifndef NDEBUG
-		HDassert( next_entry_ptr->magic ==
-				H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
-                HDassert( next_entry_ptr->is_dirty );
-                HDassert( next_entry_ptr->in_slist );
-
-	    } else {
-
-		next_entry_ptr = NULL;
-
-	    }
-
 	    HDassert( node_ptr != NULL );
+
+            next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+            if(NULL == next_entry_ptr)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
+#ifndef NDEBUG
+            HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
+#endif /* NDEBUG */
+            HDassert( next_entry_ptr->is_dirty );
+            HDassert( next_entry_ptr->in_slist );
+
 
 #if H5C_DO_SANITY_CHECKS
 	    /* For sanity checking, try to verify that the skip list has
@@ -1182,8 +1105,7 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 #ifndef NDEBUG
 		if ( entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
 
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "entry_ptr->magic invalid ?!?!");
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry_ptr->magic is invalid ?!?!")
 
                 } else
 #endif /* NDEBUG */
@@ -1206,11 +1128,8 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 
 		    next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
 
-		    if ( next_entry_ptr == NULL ) {
-
-                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                    "next_entry_ptr == NULL 2 ?!?!");
-		    }
+		    if ( NULL == next_entry_ptr )
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
 #ifndef NDEBUG
 		    HDassert( next_entry_ptr->magic ==
 				    H5C__H5C_CACHE_ENTRY_T_MAGIC );
@@ -1531,9 +1450,7 @@ H5C_flush_to_min_clean(H5F_t * f,
 #endif /* end modified code -- commented out for now */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_flush_to_min_clean() */
 
 
@@ -1726,7 +1643,7 @@ H5C_get_entry_status(const H5F_t *f,
                      hbool_t * is_protected_ptr,
 		     hbool_t * is_pinned_ptr)
 {
-    H5C_t *             cache_ptr;
+    H5C_t             * cache_ptr;
     H5C_cache_entry_t *	entry_ptr = NULL;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
@@ -1972,6 +1889,20 @@ H5C_insert_entry(H5F_t *             f,
     insert_pinned    = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
+
+    /* verify that the new entry isn't already in the hash table -- scream
+     * and die if it is.
+     */
+
+    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+
+    if(test_entry_ptr != NULL) {
+        if(test_entry_ptr == entry_ptr)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "entry already in cache.")
+        else
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "duplicate entry in cache.")
+    } /* end if */
+
 #ifndef NDEBUG
     entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
@@ -1981,6 +1912,12 @@ H5C_insert_entry(H5F_t *             f,
 
     entry_ptr->image_ptr = NULL;
     entry_ptr->image_up_to_date = FALSE;
+
+    entry_ptr->is_protected = FALSE;
+    entry_ptr->is_read_only = FALSE;
+    entry_ptr->ro_ref_count = 0;
+
+    entry_ptr->is_pinned = insert_pinned;
 
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
@@ -2098,38 +2035,6 @@ H5C_insert_entry(H5F_t *             f,
                         "H5C_make_space_in_cache failed.")
         }
     }
-
-    /* verify that the new entry isn't already in the hash table -- scream
-     * and die if it is.
-     */
-
-    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
-
-    if ( test_entry_ptr != NULL ) {
-
-        if ( test_entry_ptr == entry_ptr ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                        "entry already in cache.")
-
-        } else {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                        "duplicate entry in cache, addr = %llu", (unsigned long long)addr)
-        }
-    }
-
-    /* we don't initialize the protected field until here as it is
-     * possible that the entry is already in the cache, and already
-     * protected.  If it is, we don't want to make things worse by
-     * marking it unprotected.
-     */
-
-    entry_ptr->is_protected = FALSE;
-    entry_ptr->is_read_only = FALSE;
-    entry_ptr->ro_ref_count = 0;
-
-    entry_ptr->is_pinned = insert_pinned;
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
@@ -2745,9 +2650,8 @@ done:
 herr_t
 H5C_resize_entry(void *thing, size_t new_size)
 {
-    H5C_t *             cache_ptr;
+    H5C_t             * cache_ptr;
     H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
-    size_t             	size_increase;
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_resize_entry, FAIL)
@@ -2780,6 +2684,7 @@ H5C_resize_entry(void *thing, size_t new_size)
         if ( cache_ptr->flash_size_increase_possible ) {
 
             if ( new_size > entry_ptr->size ) {
+                size_t             	size_increase;
 
                 size_increase = new_size - entry_ptr->size;
 
@@ -2862,8 +2767,8 @@ done:
 herr_t
 H5C_pin_protected_entry(void *thing)
 {
-    H5C_t *             cache_ptr;
-    H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing;
+    H5C_t             * cache_ptr;
+    H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)thing; /* Pointer to entry to pin */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_pin_protected_entry, FAIL)
@@ -4212,8 +4117,8 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
 herr_t
 H5C_unpin_entry(void *_entry_ptr)
 {
-    H5C_t      *cache_ptr;
-    H5C_cache_entry_t *entry_ptr = (H5C_cache_entry_t *)_entry_ptr;
+    H5C_t             * cache_ptr;
+    H5C_cache_entry_t * entry_ptr = (H5C_cache_entry_t *)_entry_ptr; /* Pointer to entry to unpin */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_unpin_entry, FAIL)
@@ -6214,27 +6119,19 @@ H5C_flush_invalidate_cache(const H5F_t * f,
         if ( cache_ptr->slist_len == 0 ) {
 
             node_ptr = NULL;
-	    next_entry_ptr = NULL;
             HDassert( cache_ptr->slist_size == 0 );
 
         } else {
 
+            /* Start at beginning of skip list each time */
             node_ptr = H5SL_first(cache_ptr->slist_ptr);
+            HDassert( node_ptr != NULL );
 
-	    if ( node_ptr == NULL ) {
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-			    "slist_len != 0 && node_ptr == NULL");
-	    }
-
+            /* Get cache entry for this node */
             next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-            if ( next_entry_ptr == NULL ) {
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                            "next_entry_ptr == NULL 1 ?!?!");
-            }
-#ifndef NDEBUG
+            if ( NULL == next_entry_ptr )
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
             HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
             HDassert( next_entry_ptr->is_dirty );
             HDassert( next_entry_ptr->in_slist );
 
@@ -6304,8 +6201,7 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 #ifndef NDEBUG
             if ( entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
 
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                            "entry_ptr->magic is invalid ?!?!");
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry_ptr->magic is invalid ?!?!")
 
             } else
 #endif /* NDEBUG */
@@ -6327,19 +6223,13 @@ H5C_flush_invalidate_cache(const H5F_t * f,
 
 	        next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
 
-	        if ( next_entry_ptr == NULL ) {
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "next_entry_ptr == NULL 2 ?!?!");
-	        }
-#ifndef NDEBUG
-	        HDassert( next_entry_ptr->magic ==
-				H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
+	        if ( NULL == next_entry_ptr )
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "next_entry_ptr == NULL ?!?!")
+	        HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
                 HDassert( next_entry_ptr->is_dirty );
                 HDassert( next_entry_ptr->in_slist );
 
             } else {
-
 	        next_entry_ptr = NULL;
             }
 
@@ -6592,7 +6482,7 @@ H5C_flush_invalidate_cache(const H5F_t * f,
     } else if ( cur_pel_len > 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-	            "Can't unpin all pinned entries 2.")
+	            "Can't unpin all pinned entries.")
 
     }
 
@@ -6650,7 +6540,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
     hbool_t		was_dirty;
     herr_t		status;
     int			type_id;
-    unsigned		serialize_flags = 0;
+    unsigned		serialize_flags = H5C__SERIALIZE_NO_FLAGS_SET;
     haddr_t		new_addr;
     size_t		new_len;
     void *		new_image_ptr;
@@ -6695,17 +6585,6 @@ H5C_flush_single_entry(const H5F_t *	   f,
             }
         }
     }
-#if 0
-    /* this should be useful for debugging from time to time.
-     * lets leave it in for now.       -- JRM 12/15/04
-     */
-    else {
-        HDfprintf(stdout,
-               "H5C_flush_single_entry(): non-existant entry. addr = %a\n",
-               addr);
-        HDfflush(stdout);
-    }
-#endif
 #endif /* H5C_DO_SANITY_CHECKS */
 
     if ( ( entry_ptr != NULL ) && ( entry_ptr->is_protected ) )
@@ -6745,7 +6624,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
             if ( NULL == (dxpl = H5I_object(dxpl_id)) ) {
 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                            "not a dataset creation property list")
+                            "not a dataset transfer property list")
             }
 
             /* Get the transfer mode property */
@@ -6756,12 +6635,6 @@ H5C_flush_single_entry(const H5F_t *	   f,
             }
 
             /* Sanity check transfer mode */
-	    /* I'm surprised that this sanity check is working at
-	     * present -- will need to look into it at some point.
-	     *
-	     * 					JRM -- 7/7/07
-	     */
-
             HDassert( xfer_mode == H5FD_MPIO_COLLECTIVE );
         }
 
@@ -6810,133 +6683,6 @@ H5C_flush_single_entry(const H5F_t *	   f,
 
         /* Update the replacement policy for the flush or eviction. */
         if ( destroy ) { /* AKA eviction */
-
-#if 0 /* JRM */
-            /* This test code may come in handy -- lets keep it for a while.
-             *
-             * Note that it will cause spurious errors in the serial case
-             * unless we are maintaining the clean and dirty LRU lists.
-             */
-            {
-                if ( entry_ptr->is_dirty )
-                {
-                    if ( cache_ptr->dLRU_head_ptr == NULL )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->dLRU_head_ptr == NULL.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->dLRU_tail_ptr == NULL )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->dLRU_tail_ptr == NULL.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->dLRU_list_len <= 0 )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->dLRU_list_len <= 0.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->dLRU_list_size <= 0 )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->dLRU_list_size <= 0.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->dLRU_list_size < entry_ptr->size )
-                        HDfprintf(stdout,
-                          "%s: cache_ptr->dLRU_list_size < entry_ptr->size.\n",
-                          FUNC);
-
-                    if ( ( (cache_ptr->dLRU_list_size) == entry_ptr->size ) &&
-                         ( ! ( (cache_ptr->dLRU_list_len) == 1 ) ) )
-                        HDfprintf(stdout,
-                          "%s: dLRU_list_size == size && dLRU_list_len != 1\n",
-                          FUNC);
-
-                    if ( ( entry_ptr->aux_prev == NULL ) &&
-                         ( cache_ptr->dLRU_head_ptr != entry_ptr ) )
-                        HDfprintf(stdout,
-                                  "%s: entry_ptr->aux_prev == NULL && dLRU_head_ptr != entry_ptr\n",
-                                  FUNC);
-
-                    if ( ( entry_ptr->aux_next == NULL ) &&
-                         ( cache_ptr->dLRU_tail_ptr != entry_ptr ) )
-                        HDfprintf(stdout,
-                                  "%s: entry_ptr->aux_next == NULL && dLRU_tail_ptr != entry_ptr\n",
-                                  FUNC);
-
-                    if ( ( cache_ptr->dLRU_list_len == 1 ) &&
-                         ( ! ( ( cache_ptr->dLRU_head_ptr == entry_ptr ) &&
-                               ( cache_ptr->dLRU_tail_ptr == entry_ptr ) &&
-                               ( entry_ptr->aux_next == NULL ) &&
-                               ( entry_ptr->aux_prev == NULL ) &&
-                               ( cache_ptr->dLRU_list_size == entry_ptr->size )
-                             )
-                         )
-                       )
-                    {
-                        HDfprintf(stdout,
-                               "%s: single entry dlru sanity check fails\n",
-                               FUNC);
-                    }
-
-                }
-                else
-                {
-                    if ( cache_ptr->cLRU_head_ptr == NULL )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->cLRU_head_ptr == NULL.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->cLRU_tail_ptr == NULL )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->cLRU_tail_ptr == NULL.\n",
-                                   FUNC);
-
-                    if ( cache_ptr->cLRU_list_len <= 0 )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->cLRU_list_len <= 0.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->cLRU_list_size <= 0 )
-                        HDfprintf(stdout,
-                                  "%s: cache_ptr->cLRU_list_size <= 0.\n",
-                                  FUNC);
-
-                    if ( cache_ptr->cLRU_list_size < entry_ptr->size )
-                        HDfprintf(stdout,
-                          "%s: cache_ptr->cLRU_list_size < entry_ptr->size.\n",
-                          FUNC);
-
-                    if ( ( (cache_ptr->cLRU_list_size) == entry_ptr->size ) &&
-                         ( ! ( (cache_ptr->cLRU_list_len) == 1 ) ) )
-                        HDfprintf(stdout,
-                              "%s: cLRU_list_size == size && cLRU_list_len != 1\n",
-                              FUNC);
-
-                    if ( ( entry_ptr->aux_prev == NULL ) &&
-                         ( cache_ptr->cLRU_head_ptr != entry_ptr ) )
-                        HDfprintf(stdout, "%s: entry_ptr->aux_prev == NULL && cLRU_head_ptr != entry_ptr\n", FUNC);
-
-                    if ( ( entry_ptr->aux_next == NULL ) &&
-                         ( cache_ptr->cLRU_tail_ptr != entry_ptr ) )
-                        HDfprintf(stdout, "%s: entry_ptr->aux_next == NULL && cLRU_tail_ptr != entry_ptr\n", FUNC);
-
-                    if ( ( cache_ptr->cLRU_list_len == 1 ) &&
-                         ( ! ( ( cache_ptr->cLRU_head_ptr == entry_ptr ) &&
-                               ( cache_ptr->cLRU_tail_ptr == entry_ptr ) &&
-                               ( entry_ptr->aux_next == NULL ) &&
-                               ( entry_ptr->aux_prev == NULL ) &&
-                               ( cache_ptr->cLRU_list_size == entry_ptr->size )
-                             )
-                         )
-                       )
-                    {
-                        HDfprintf(stdout,
-                                  "%s: single entry clru sanity check fails\n",
-                                  FUNC);
-                    }
-                }
-            }
-#endif /* JRM */
 
             H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
 
@@ -7108,7 +6854,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
 	     * the image was up to date on entry, serialize_flags should
 	     * still be 0 at this point.
 	     */
-            if ( serialize_flags != 0 ) {
+            if ( serialize_flags != H5C__SERIALIZE_NO_FLAGS_SET) {
 
                 /* In the parallel case, resizes and moves in
 		 * the serialize operation can cause problems.
@@ -7196,9 +6942,7 @@ H5C_flush_single_entry(const H5F_t *	   f,
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_flush_single_entry() */
 
 
@@ -7365,13 +7109,13 @@ H5C_load_entry(H5F_t *             f,
      */
 
     HDassert( ( dirty == FALSE ) || ( type->id == 5 || type->id == 6) );
-    HDassert( entry->size < H5C_MAX_ENTRY_SIZE );
 #ifndef NDEBUG
     entry->magic                = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
     entry->cache_ptr            = f->shared->cache;
     entry->addr                 = addr;
     entry->size                 = len;
+    HDassert(entry->size < H5C_MAX_ENTRY_SIZE);
     entry->image_ptr            = image;
     entry->image_up_to_date     = TRUE;
     entry->type                 = type;
@@ -7666,27 +7410,6 @@ H5C_make_space_in_cache(H5F_t *	f,
 		     * from the tail.
 		     */
 
-#if 0 /* This debuging code may be useful in the future -- keep it for now. */
-		    if ( ! ( prev_ptr->is_dirty ) ) {
-			HDfprintf(stdout, "%s: ! prev_ptr->is_dirty\n",
-				  FUNC);
-		    }
-		    if ( prev_ptr->aux_next != next_ptr ) {
-			HDfprintf(stdout, "%s: prev_ptr->next != next_ptr\n",
-				  FUNC);
-		    }
-		    if ( prev_ptr->is_protected ) {
-			HDfprintf(stdout, "%s: prev_ptr->is_protected\n",
-				  FUNC);
-		    }
-		    if ( prev_ptr->is_pinned ) {
-			HDfprintf(stdout, "%s:prev_ptr->is_pinned\n",
-				  FUNC);
-		    }
-
-		    HDfprintf(stdout, "%s: re-starting scan of dirty list\n",
-		      	     FUNC);
-#endif /* JRM */
 	            entry_ptr = cache_ptr->dLRU_tail_ptr;
 
 		} else {

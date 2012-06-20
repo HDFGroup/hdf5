@@ -19,17 +19,20 @@
  *		This file contains common #defines, type definitions, and
  *		externs for tests of the cache implemented in H5C.c
  */
-#include "h5test.h"
-#include "H5Iprivate.h"
-#include "H5ACprivate.h"
+#ifndef _CACHE_COMMON_H
+#define _CACHE_COMMON_H
 
 #define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-
-#include "H5Cpkg.h"
-
 #define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
 
+/* Include library header files */
+#include "H5ACprivate.h"
+#include "H5Cpkg.h"
 #include "H5Fpkg.h"
+#include "H5Iprivate.h"
+
+/* Include test header files */
+#include "h5test.h"
 
 #define NO_CHANGE       	-1
 
@@ -357,12 +360,12 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
 }
 
 
-#define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)             \
+#define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)              \
 {                                                                       \
     int k;                                                              \
     int depth = 0;                                                      \
-    H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                        \
-    k = H5C__HASH_FCN(Addr);                                           \
+    H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                         \
+    k = H5C__HASH_FCN(Addr);                                            \
     entry_ptr = ((cache_ptr)->index)[k];                                \
     while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) ) \
     {                                                                   \
@@ -371,7 +374,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
     }                                                                   \
     if ( entry_ptr )                                                    \
     {                                                                   \
-        H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
+        H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k)  \
         if ( entry_ptr != ((cache_ptr)->index)[k] )                     \
         {                                                               \
             if ( (entry_ptr)->ht_next )                                 \
@@ -391,67 +394,38 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
 
 /* Macros used in H5AC level tests */
 
-#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)       \
-( ( (a).version                == (b).version ) &&                 \
-  ( (a).rpt_fcn_enabled        == (b).rpt_fcn_enabled ) &&         \
-  ( (a).open_trace_file        == (b).open_trace_file ) &&         \
-  ( (a).close_trace_file       == (b).close_trace_file ) &&        \
-  ( ( (a).open_trace_file == FALSE ) ||                            \
-    ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) && \
-  ( (a).evictions_enabled      == (b).evictions_enabled ) &&       \
-  ( ( ! cmp_set_init ) ||                                          \
-    ( (a).set_initial_size     == (b).set_initial_size ) ) &&      \
-  ( ( ! cmp_init_size ) ||                                         \
-    ( (a).initial_size         == (b).initial_size ) ) &&          \
-  ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) && \
-  ( (a).max_size               == (b).max_size ) &&                \
-  ( (a).min_size               == (b).min_size ) &&                \
-  ( (a).epoch_length           == (b).epoch_length ) &&            \
-  ( (a).incr_mode              == (b).incr_mode ) &&               \
-  ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) && \
-  ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&     \
-  ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
-  ( (a).max_increment          == (b).max_increment ) &&           \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&         \
-  ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) && \
-  ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) && \
-  ( (a).decr_mode              == (b).decr_mode ) &&               \
-  ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) && \
-  ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&     \
-  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&     \
-  ( (a).max_decrement          == (b).max_decrement ) &&           \
-  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) &&  \
-  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
-  ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
-
-
-#define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
-( ( (a).version                == (b).version ) &&                \
-  ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) && \
-  ( (a).max_size               == (b).max_size ) &&               \
-  ( (a).min_size               == (b).min_size ) &&               \
-  ( (a).epoch_length           == (b).epoch_length ) &&           \
-  ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) && \
-  ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&     \
-  ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
-  ( (a).max_increment          == (b).max_increment ) &&          \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) &&   \
-  ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) && \
-  ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) && \
-  ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&     \
-  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
-  ( (a).max_decrement          == (b).max_decrement ) &&          \
-  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
-  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
+#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)        \
+  ( ( (a).version                 == (b).version ) &&                 \
+    ( (a).rpt_fcn_enabled         == (b).rpt_fcn_enabled ) &&         \
+    ( (a).open_trace_file         == (b).open_trace_file ) &&         \
+    ( (a).close_trace_file        == (b).close_trace_file ) &&        \
+    ( ( (a).open_trace_file == FALSE ) ||                             \
+      ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) &&  \
+    ( (a).evictions_enabled       == (b).evictions_enabled ) &&       \
+    ( ( ! cmp_set_init ) ||                                           \
+      ( (a).set_initial_size      == (b).set_initial_size ) ) &&      \
+    ( ( ! cmp_init_size ) ||                                          \
+      ( (a).initial_size          == (b).initial_size ) ) &&          \
+    ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) && \
+    ( (a).max_size                == (b).max_size ) &&                \
+    ( (a).min_size                == (b).min_size ) &&                \
+    ( (a).epoch_length            == (b).epoch_length ) &&            \
+    ( (a).incr_mode               == (b).incr_mode ) &&               \
+    ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) && \
+    ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&      \
+    ( (a).apply_max_increment     == (b).apply_max_increment ) &&     \
+    ( (a).max_increment           == (b).max_increment ) &&           \
+    ( (a).flash_incr_mode         == (b).flash_incr_mode ) &&         \
+    ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) && \
+    ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) && \
+    ( (a).decr_mode               == (b).decr_mode ) &&               \
+    ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) && \
+    ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&      \
+    ( (a).apply_max_decrement     == (b).apply_max_decrement ) &&     \
+    ( (a).max_decrement           == (b).max_decrement ) &&           \
+    ( (a).epochs_before_eviction  == (b).epochs_before_eviction ) &&  \
+    ( (a).apply_empty_reserve     == (b).apply_empty_reserve ) &&     \
+    ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
 
 
 #define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
@@ -517,18 +491,6 @@ extern hbool_t run_full_test;
 extern hbool_t try_core_file_driver;
 extern hbool_t core_file_driver_failed;
 extern const char *failure_mssg;
-extern int express_test;
-extern int failures;
-
-extern test_entry_t pico_entries[NUM_PICO_ENTRIES];
-extern test_entry_t nano_entries[NUM_NANO_ENTRIES];
-extern test_entry_t micro_entries[NUM_MICRO_ENTRIES];
-extern test_entry_t tiny_entries[NUM_TINY_ENTRIES];
-extern test_entry_t small_entries[NUM_SMALL_ENTRIES];
-extern test_entry_t medium_entries[NUM_MEDIUM_ENTRIES];
-extern test_entry_t large_entries[NUM_LARGE_ENTRIES];
-extern test_entry_t huge_entries[NUM_HUGE_ENTRIES];
-extern test_entry_t monster_entries[NUM_MONSTER_ENTRIES];
 
 extern test_entry_t * entries[NUMBER_OF_ENTRY_TYPES];
 extern const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];
@@ -743,6 +705,9 @@ void verify_unprotected(void);
 
 /*** H5AC level utility functions ***/
 
+hbool_t resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
+    const H5C_auto_size_ctl_t *b, hbool_t compare_init);
+
 void check_and_validate_cache_hit_rate(hid_t file_id,
                                        double * hit_rate_ptr,
                                        hbool_t dump_data,
@@ -760,4 +725,6 @@ void validate_mdc_config(hid_t file_id,
                          H5AC_cache_config_t * ext_config_ptr,
                          hbool_t compare_init,
                          int test_num);
+
+#endif /* _CACHE_COMMON_H */
 

@@ -206,6 +206,9 @@ int virt_num_data_entries = NUM_DATA_ENTRIES;
 
 int data_index[NUM_DATA_ENTRIES];
 
+#define DO_WRITE_REQ_ACK	FALSE
+#define DO_SYNC_AFTER_WRITE	TRUE
+
 
 /*****************************************************************************
  * struct mssg
@@ -232,9 +235,6 @@ int data_index[NUM_DATA_ENTRIES];
  *
  *****************************************************************************/
 
-#define DO_WRITE_REQ_ACK	FALSE
-#define DO_SYNC_AFTER_WRITE	TRUE
-
 #define	WRITE_REQ_CODE		0
 #define	WRITE_REQ_ACK_CODE	1
 #define READ_REQ_CODE		2
@@ -253,7 +253,7 @@ struct mssg_t
     int		dest;
     long int	mssg_num;
     haddr_t	base_addr;
-    int		len;
+    unsigned	len;
     int		ver;
     unsigned	magic;
 };
@@ -267,41 +267,40 @@ MPI_Datatype mpi_mssg_t;	/* for MPI derived type created from mssg */
 
 /* stats functions */
 
-void print_stats(void);
-void reset_stats(void);
+static void reset_stats(void);
 
 /* MPI setup functions */
 
-hbool_t set_up_file_communicator(void);
+static hbool_t set_up_file_communicator(void);
 
 
 /* data array manipulation functions */
 
-int addr_to_datum_index(haddr_t base_addr);
-void init_data(void);
+static int addr_to_datum_index(haddr_t base_addr);
+static void init_data(void);
 
 
 /* test coodination related functions */
 
-int do_express_test(void);
-void do_sync(void);
-int get_max_nerrors(void);
+static int do_express_test(void);
+static void do_sync(void);
+static int get_max_nerrors(void);
 
 
 /* mssg xfer related functions */
 
-hbool_t recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset);
-hbool_t send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag);
-hbool_t setup_derived_types(void);
-hbool_t takedown_derived_types(void);
+static hbool_t recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset);
+static hbool_t send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag);
+static hbool_t setup_derived_types(void);
+static hbool_t takedown_derived_types(void);
 
 
 /* server functions */
 
-hbool_t server_main(void);
-hbool_t serve_read_request(struct mssg_t * mssg_ptr);
-hbool_t serve_sync_request(struct mssg_t * mssg_ptr);
-hbool_t serve_write_request(struct mssg_t * mssg_ptr);
+static hbool_t server_main(void);
+static hbool_t serve_read_request(struct mssg_t * mssg_ptr);
+static hbool_t serve_sync_request(struct mssg_t * mssg_ptr);
+static hbool_t serve_write_request(struct mssg_t * mssg_ptr);
 
 
 /* call back functions & related data structures */
@@ -352,87 +351,49 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
 
 /* test utility functions */
 
-void expunge_entry(H5F_t * file_ptr, int32_t idx);
-void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
+static void expunge_entry(H5F_t * file_ptr, int32_t idx);
+static void insert_entry(H5C_t * cache_ptr, H5F_t * file_ptr,
                   int32_t idx, unsigned int flags);
-void local_pin_and_unpin_random_entries(H5F_t * file_ptr, int min_idx,
+static void local_pin_and_unpin_random_entries(H5F_t * file_ptr, int min_idx,
                                         int max_idx, int min_count,
                                         int max_count);
-void local_pin_random_entry(H5F_t * file_ptr, int min_idx, int max_idx);
-void local_unpin_all_entries(H5F_t * file_ptr, hbool_t via_unprotect);
-int local_unpin_next_pinned_entry(H5F_t * file_ptr, int start_idx,
+static void local_pin_random_entry(H5F_t * file_ptr, int min_idx, int max_idx);
+static void local_unpin_all_entries(H5F_t * file_ptr, hbool_t via_unprotect);
+static int local_unpin_next_pinned_entry(H5F_t * file_ptr, int start_idx,
                                   hbool_t via_unprotect);
-void lock_and_unlock_random_entries(H5F_t * file_ptr, int min_idx, int max_idx,
+static void lock_and_unlock_random_entries(H5F_t * file_ptr, int min_idx, int max_idx,
                                     int min_count, int max_count);
-void lock_and_unlock_random_entry(H5F_t * file_ptr,
+static void lock_and_unlock_random_entry(H5F_t * file_ptr,
                                   int min_idx, int max_idx);
-void lock_entry(H5F_t * file_ptr, int32_t idx);
-void mark_entry_dirty(int32_t idx);
-void pin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global, hbool_t dirty);
-void pin_protected_entry(int32_t idx, hbool_t global);
-void move_entry(H5F_t * file_ptr, int32_t old_idx, int32_t new_idx);
-void resize_entry(int32_t idx, size_t  new_size);
-hbool_t setup_cache_for_test(hid_t * fid_ptr, H5F_t ** file_ptr_ptr,
+static void lock_entry(H5F_t * file_ptr, int32_t idx);
+static void mark_entry_dirty(int32_t idx);
+static void pin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global, hbool_t dirty);
+static void pin_protected_entry(int32_t idx, hbool_t global);
+static void move_entry(H5F_t * file_ptr, int32_t old_idx, int32_t new_idx);
+static void resize_entry(int32_t idx, size_t  new_size);
+static hbool_t setup_cache_for_test(hid_t * fid_ptr, H5F_t ** file_ptr_ptr,
                              H5C_t ** cache_ptr_ptr);
-void setup_rand(void);
-hbool_t take_down_cache(hid_t fid);
-void unlock_entry(H5F_t * file_ptr, int32_t type, unsigned int flags);
-void unpin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global,
+static void setup_rand(void);
+static hbool_t take_down_cache(hid_t fid);
+static void unlock_entry(H5F_t * file_ptr, int32_t type, unsigned int flags);
+static void unpin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global,
                  hbool_t dirty, hbool_t via_unprotect);
 
 
 /* test functions */
 
-hbool_t server_smoke_check(void);
-hbool_t smoke_check_1(void);
-hbool_t smoke_check_2(void);
-hbool_t smoke_check_3(void);
-hbool_t smoke_check_4(void);
-hbool_t smoke_check_5(void);
-hbool_t trace_file_check(void);
+static hbool_t server_smoke_check(void);
+static hbool_t smoke_check_1(void);
+static hbool_t smoke_check_2(void);
+static hbool_t smoke_check_3(void);
+static hbool_t smoke_check_4(void);
+static hbool_t smoke_check_5(void);
+static hbool_t trace_file_check(void);
 
 
 /*****************************************************************************/
 /****************************** stats functions ******************************/
 /*****************************************************************************/
-
-/*****************************************************************************
- *
- * Function:	print_stats()
- *
- * Purpose:	Print the rudementary stats maintained by t_cache.
- *
- * 		This is a debugging function, which will not normally
- * 		be run as part of t_cache.
- *
- * Return:	void
- *
- * Programmer:	JRM -- 4/17/06
- *
- * Modifications:
- *
- *		None.
- *
- *****************************************************************************/
-
-void
-print_stats(void)
-{
-    HDfprintf(stdout,
-	      "%d: destroys = %ld\n",
-              world_mpi_rank, datum_destroys );
-    HDfprintf(stdout,
-	      "%d: datum flushes / pinned flushes / loads  = %ld / %ld / %ld\n",
-              world_mpi_rank, datum_flushes, datum_pinned_flushes,
-	      datum_loads );
-    HDfprintf(stdout,
-	      "%d: pins: global / global dirty / local = %ld / %ld / %ld\n",
-	      world_mpi_rank, global_pins, global_dirty_pins, local_pins);
-    HDfflush(stdout);
-
-    return;
-
-} /* print_stats() */
 
 /*****************************************************************************
  *
@@ -450,7 +411,7 @@ print_stats(void)
  *
  *****************************************************************************/
 
-void
+static void
 reset_stats(void)
 {
     datum_destroys        = 0;
@@ -489,7 +450,7 @@ reset_stats(void)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 set_up_file_communicator(void)
 {
     const char * fcn_name = "set_up_file_communicator()";
@@ -636,13 +597,8 @@ set_up_file_communicator(void)
  *
  * Programmer:	JRM -- 12/20/05
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-int
+static int
 addr_to_datum_index(haddr_t base_addr)
 {
     /* const char * fcn_name = "addr_to_datum_index()"; */
@@ -689,14 +645,8 @@ addr_to_datum_index(haddr_t base_addr)
  *
  * Programmer:	JRM -- 12/20/05
  *
- * Modifications:
- *
- *		JRM -- 7/11/06
- *		Added support for the local_len field.
- *
  *****************************************************************************/
-
-void
+static void
 init_data(void)
 {
     /* const char * fcn_name = "init_data()"; */
@@ -772,13 +722,8 @@ init_data(void)
  *
  * Programmer:	JRM -- 4/25/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-int
+static int
 do_express_test(void)
 {
     const char * fcn_name = "do_express_test()";
@@ -826,13 +771,8 @@ do_express_test(void)
  *
  * Programmer:	JRM -- 5/10/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-void
+static void
 do_sync(void)
 {
     const char * fcn_name = "do_sync()";
@@ -902,13 +842,8 @@ do_sync(void)
  *
  * Programmer:	JRM -- 1/3/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-int
+static int
 get_max_nerrors(void)
 {
     const char * fcn_name = "get_max_nerrors()";
@@ -963,7 +898,7 @@ get_max_nerrors(void)
 
 #define CACHE_TEST_TAG	99 /* different from any used by the library */
 
-hbool_t
+static hbool_t
 recv_mssg(struct mssg_t *mssg_ptr,
 	  int mssg_tag_offset)
 {
@@ -1047,8 +982,7 @@ recv_mssg(struct mssg_t *mssg_ptr,
  *		Added the add_req_to_tag parameter and supporting code.
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 send_mssg(struct mssg_t *mssg_ptr,
 	  hbool_t add_req_to_tag)
 {
@@ -1102,7 +1036,7 @@ send_mssg(struct mssg_t *mssg_ptr,
 
 } /* send_mssg() */
 
-
+
 /*****************************************************************************
  *
  * Function:	setup_derived_types()
@@ -1116,13 +1050,8 @@ send_mssg(struct mssg_t *mssg_ptr,
  *
  * Programmer:	JRM -- 12/22/05
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 setup_derived_types(void)
 {
     const char * fcn_name = "setup_derived_types()";
@@ -1196,7 +1125,7 @@ setup_derived_types(void)
 
 } /* setup_derived_types */
 
-
+
 /*****************************************************************************
  *
  * Function:	takedown_derived_types()
@@ -1210,13 +1139,8 @@ setup_derived_types(void)
  *
  * Programmer:	JRM -- 12/22/05
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 takedown_derived_types(void)
 {
     const char * fcn_name = "takedown_derived_types()";
@@ -1244,6 +1168,7 @@ takedown_derived_types(void)
 /***************************** server functions ******************************/
 /*****************************************************************************/
 
+
 /*****************************************************************************
  *
  * Function:	server_main()
@@ -1267,8 +1192,7 @@ takedown_derived_types(void)
  *		Updated for sync message.
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 server_main(void)
 {
     const char * fcn_name = "server_main()";
@@ -1302,7 +1226,8 @@ server_main(void)
 
 		case WRITE_REQ_ACK_CODE:
                     success = FALSE;
-		    HDfprintf(stdout, "%s: Received write ack?!?.\n", fcn_name);
+                    if(verbose)
+                        HDfprintf(stdout, "%s: Received write ack?!?.\n", fcn_name);
 		    break;
 
 		case READ_REQ_CODE:
@@ -1311,8 +1236,8 @@ server_main(void)
 
 		case READ_REQ_REPLY_CODE:
                     success = FALSE;
-		    HDfprintf(stdout, "%s: Received read req reply?!?.\n",
-			      fcn_name);
+                    if(verbose)
+                        HDfprintf(stdout, "%s: Received read req reply?!?.\n", fcn_name);
 		    break;
 
 		case SYNC_REQ_CODE:
@@ -1321,27 +1246,21 @@ server_main(void)
 
 		case SYNC_ACK_CODE:
                     success = FALSE;
-		    HDfprintf(stdout, "%s: Received sync ack?!?.\n",
-			      fcn_name);
+                    if(verbose)
+                        HDfprintf(stdout, "%s: Received sync ack?!?.\n", fcn_name);
 		    break;
 
 		case DONE_REQ_CODE:
 		    done_count++;
-                    /* HDfprintf(stdout, "%d:%s: done_count = %d.\n",
-                              world_mpi_rank, fcn_name, done_count); */
-		    if ( done_count >= file_mpi_size ) {
-
+		    if(done_count >= file_mpi_size)
 			done = TRUE;
-		    }
 		    break;
 
 		default:
                     nerrors++;
                     success = FALSE;
-                    if ( verbose ) {
-		        HDfprintf(stdout, "%d:%s: Unknown request code.\n",
-                                  world_mpi_rank, fcn_name);
-                    }
+                    if(verbose)
+		        HDfprintf(stdout, "%d:%s: Unknown request code.\n", world_mpi_rank, fcn_name);
 		    break;
             }
         }
@@ -1351,7 +1270,7 @@ server_main(void)
 
 } /* server_main() */
 
-
+
 /*****************************************************************************
  *
  * Function:	serve_read_request()
@@ -1369,13 +1288,8 @@ server_main(void)
  *
  * Programmer:	JRM -- 12/22/05
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 serve_read_request(struct mssg_t * mssg_ptr)
 {
     const char * fcn_name = "serve_read_request()";
@@ -1454,7 +1368,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
 
 } /* serve_read_request() */
 
-
+
 /*****************************************************************************
  *
  * Function:	serve_sync_request()
@@ -1475,13 +1389,8 @@ serve_read_request(struct mssg_t * mssg_ptr)
  *
  * Programmer:	JRM -- 5/10/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 serve_sync_request(struct mssg_t * mssg_ptr)
 {
     const char * fcn_name = "serve_sync_request()";
@@ -1522,7 +1431,7 @@ serve_sync_request(struct mssg_t * mssg_ptr)
 
 } /* serve_sync_request() */
 
-
+
 /*****************************************************************************
  *
  * Function:	serve_write_request()
@@ -1548,8 +1457,7 @@ serve_sync_request(struct mssg_t * mssg_ptr)
  *		doesn't work, it will help narrow down the possibilities.
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 serve_write_request(struct mssg_t * mssg_ptr)
 {
     const char * fcn_name = "serve_write_request()";
@@ -1711,14 +1619,9 @@ datum_get_load_size(const void * udata_ptr,
  * Programmer:	John Mainzer
  *              9/20/07
  *
- * Modifications:
- *
- * 		None
- *
  *-------------------------------------------------------------------------
  */
-
-void *
+static void *
 datum_deserialize(const void * image_ptr,
                   UNUSED size_t len,
                   void * udata_ptr,
@@ -1789,13 +1692,13 @@ datum_deserialize(const void * image_ptr,
 
     if ( success ) {
 
-         if ( ( mssg.req != READ_REQ_REPLY_CODE ) ||
-              ( mssg.src != world_server_mpi_rank ) ||
-              ( mssg.dest != world_mpi_rank ) ||
-              ( mssg.base_addr != entry_ptr->base_addr ) ||
-              ( mssg.len != entry_ptr->len ) ||
-              ( mssg.ver < entry_ptr->ver ) ||
-              ( mssg.magic != MSSG_MAGIC ) ) {
+        if ( ( mssg.req != READ_REQ_REPLY_CODE ) ||
+             ( mssg.src != world_server_mpi_rank ) ||
+             ( mssg.dest != world_mpi_rank ) ||
+             ( mssg.base_addr != entry_ptr->base_addr ) ||
+             ( mssg.len != entry_ptr->len ) ||
+             ( mssg.ver < entry_ptr->ver ) ||
+             ( mssg.magic != MSSG_MAGIC ) ) {
 
             nerrors++;
             success = FALSE;
@@ -1804,56 +1707,56 @@ datum_deserialize(const void * image_ptr,
                           world_mpi_rank, fcn_name);
             }
 #if 0 /* This has been useful debugging code -- keep it for now. */
-        if ( mssg.req != READ_REQ_REPLY_CODE ) {
+            if ( mssg.req != READ_REQ_REPLY_CODE ) {
 
-            HDfprintf(stdout, "%d:%s: mssg.req != READ_REQ_REPLY_CODE.\n",
-                      world_mpi_rank, fcn_name);
-            HDfprintf(stdout, "%d:%s: mssg.req = %d.\n",
-                          world_mpi_rank, fcn_name, (int)(mssg.req));
-        }
+                HDfprintf(stdout, "%d:%s: mssg.req != READ_REQ_REPLY_CODE.\n",
+                          world_mpi_rank, fcn_name);
+                HDfprintf(stdout, "%d:%s: mssg.req = %d.\n",
+                              world_mpi_rank, fcn_name, (int)(mssg.req));
+            }
 
-        if ( mssg.src != world_server_mpi_rank ) {
+            if ( mssg.src != world_server_mpi_rank ) {
 
-            HDfprintf(stdout, "%d:%s: mssg.src != world_server_mpi_rank.\n",
-                      world_mpi_rank, fcn_name);
-        }
+                HDfprintf(stdout, "%d:%s: mssg.src != world_server_mpi_rank.\n",
+                          world_mpi_rank, fcn_name);
+            }
 
-        if ( mssg.dest != world_mpi_rank ) {
+            if ( mssg.dest != world_mpi_rank ) {
 
-            HDfprintf(stdout, "%d:%s: mssg.dest != world_mpi_rank.\n",
-                      world_mpi_rank, fcn_name);
-        }
+                HDfprintf(stdout, "%d:%s: mssg.dest != world_mpi_rank.\n",
+                          world_mpi_rank, fcn_name);
+            }
 
-        if ( mssg.base_addr != entry_ptr->base_addr ) {
+            if ( mssg.base_addr != entry_ptr->base_addr ) {
 
-            HDfprintf(stdout,
-                      "%d:%s: mssg.base_addr != entry_ptr->base_addr.\n",
-                       world_mpi_rank, fcn_name);
-            HDfprintf(stdout, "%d:%s: mssg.base_addr = %a.\n",
-                      world_mpi_rank, fcn_name, mssg.base_addr);
-            HDfprintf(stdout, "%d:%s: entry_ptr->base_addr = %a.\n",
-                      world_mpi_rank, fcn_name, entry_ptr->base_addr);
-        }
+                HDfprintf(stdout,
+                          "%d:%s: mssg.base_addr != entry_ptr->base_addr.\n",
+                           world_mpi_rank, fcn_name);
+                HDfprintf(stdout, "%d:%s: mssg.base_addr = %a.\n",
+                          world_mpi_rank, fcn_name, mssg.base_addr);
+                HDfprintf(stdout, "%d:%s: entry_ptr->base_addr = %a.\n",
+                          world_mpi_rank, fcn_name, entry_ptr->base_addr);
+            }
 
-        if ( mssg.len != entry_ptr->len ) {
+            if ( mssg.len != entry_ptr->len ) {
 
-            HDfprintf(stdout, "%d:%s: mssg.len != entry_ptr->len.\n",
-                      world_mpi_rank, fcn_name);
-            HDfprintf(stdout, "%d:%s: mssg.len = %a.\n",
-                      world_mpi_rank, fcn_name, mssg.len);
-        }
+                HDfprintf(stdout, "%d:%s: mssg.len != entry_ptr->len.\n",
+                          world_mpi_rank, fcn_name);
+                HDfprintf(stdout, "%d:%s: mssg.len = %a.\n",
+                          world_mpi_rank, fcn_name, mssg.len);
+            }
 
-        if ( mssg.ver < entry_ptr->ver ) {
+            if ( mssg.ver < entry_ptr->ver ) {
 
-            HDfprintf(stdout, "%d:%s: mssg.ver < entry_ptr->ver.\n",
-                      world_mpi_rank, fcn_name);
-        }
+                HDfprintf(stdout, "%d:%s: mssg.ver < entry_ptr->ver.\n",
+                          world_mpi_rank, fcn_name);
+            }
 
-        if ( mssg.magic != MSSG_MAGIC ) {
+            if ( mssg.magic != MSSG_MAGIC ) {
 
-            HDfprintf(stdout, "%d:%s: mssg.magic != MSSG_MAGIC.\n",
-                      world_mpi_rank, fcn_name);
-        }
+                HDfprintf(stdout, "%d:%s: mssg.magic != MSSG_MAGIC.\n",
+                          world_mpi_rank, fcn_name);
+            }
 #endif /* JRM */
         } else {
 
@@ -1891,8 +1794,7 @@ datum_deserialize(const void * image_ptr,
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t
+static herr_t
 datum_image_len(void *thing, size_t *image_len)
 {
     int idx;
@@ -1938,14 +1840,9 @@ datum_image_len(void *thing, size_t *image_len)
  * Programmer:	John Mainzer
  *              10/30/07
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
-
-herr_t
+static herr_t
 datum_serialize(const H5F_t UNUSED *f,
                 hid_t UNUSED dxpl_id,
                 haddr_t UNUSED addr,
@@ -1957,8 +1854,8 @@ datum_serialize(const H5F_t UNUSED *f,
                 size_t * new_len_ptr,
                 void ** new_image_ptr_ptr)
 {
-
     const char * fcn_name = "datum_serialize()";
+    hbool_t was_dirty = FALSE;
     herr_t ret_value = SUCCEED;
     int idx;
     struct datum * entry_ptr;
@@ -2005,65 +1902,67 @@ datum_serialize(const H5F_t UNUSED *f,
                   world_mpi_rank, fcn_name);
     }
 
-        if ( ret_value == SUCCEED ) {
+    if ( ret_value == SUCCEED ) {
 
-	   if ( entry_ptr->header.is_dirty ) {
+        if ( entry_ptr->header.is_dirty ) {
 
-	        /* compose the message */
-	        mssg.req       = WRITE_REQ_CODE;
-                mssg.src       = world_mpi_rank;
-                mssg.dest      = world_server_mpi_rank;
-                mssg.mssg_num  = -1; /* set by send function */
-                mssg.base_addr = entry_ptr->base_addr;
-                mssg.len       = entry_ptr->len;
-                mssg.ver       = entry_ptr->ver;
-                mssg.magic     = MSSG_MAGIC;
+	    was_dirty = TRUE; /* so we will receive the ack if requested */
 
-                if ( ! send_mssg(&mssg, FALSE) ) {
+            /* compose the message */
+            mssg.req       = WRITE_REQ_CODE;
+            mssg.src       = world_mpi_rank;
+            mssg.dest      = world_server_mpi_rank;
+            mssg.mssg_num  = -1; /* set by send function */
+            mssg.base_addr = entry_ptr->base_addr;
+            mssg.len       = entry_ptr->len;
+            mssg.ver       = entry_ptr->ver;
+            mssg.magic     = MSSG_MAGIC;
 
-                    nerrors++;
-                    ret_value = FAIL;
-                    if ( verbose ) {
-                        HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
-                                  world_mpi_rank, fcn_name);
-                    }
-                }
-                else
-                {
-                    entry_ptr->header.is_dirty = FALSE;
-                    entry_ptr->dirty = FALSE;
+            if ( ! send_mssg(&mssg, FALSE) ) {
+
+                nerrors++;
+                ret_value = FAIL;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed.\n",
+                              world_mpi_rank, fcn_name);
                 }
             }
+            else
+            {
+                entry_ptr->header.is_dirty = FALSE;
+                entry_ptr->dirty = FALSE;
+            }
         }
+    }
 
 #if DO_WRITE_REQ_ACK
 
-        if ( ( ret_value == SUCCEED ) && ( entry_ptr->header.is_dirty ) ) {
+    if ( ( ret_value == SUCCEED ) && ( was_dirty ) ) {
 
-            if ( ! recv_mssg(&mssg, WRITE_REQ_ACK_CODE) ) {
+        if ( ! recv_mssg(&mssg, WRITE_REQ_ACK_CODE) ) {
 
-                nerrors++;
-                ret_value = FAIL;
-                if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
-                              world_mpi_rank, fcn_name);
-                }
-            } else if ( ( mssg.req != WRITE_REQ_ACK_CODE ) ||
-	                ( mssg.src != world_server_mpi_rank ) ||
-	                ( mssg.dest != world_mpi_rank ) ||
-	                ( mssg.base_addr != entry_ptr->base_addr ) ||
-	                ( mssg.len != entry_ptr->len ) ||
-	                ( mssg.ver != entry_ptr->ver ) ||
-	                ( mssg.magic != MSSG_MAGIC ) ) {
+            nerrors++;
+            ret_value = FAIL;
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: recv_mssg() failed.\n",
+                          world_mpi_rank, fcn_name);
+            }
+        } else if ( ( mssg.req != WRITE_REQ_ACK_CODE ) ||
+                    ( mssg.src != world_server_mpi_rank ) ||
+                    ( mssg.dest != world_mpi_rank ) ||
+                    ( mssg.base_addr != entry_ptr->base_addr ) ||
+                    ( mssg.len != entry_ptr->len ) ||
+                    ( mssg.ver != entry_ptr->ver ) ||
+                    ( mssg.magic != MSSG_MAGIC ) ) {
 
-                nerrors++;
-                ret_value = FAIL;
-                if ( verbose ) {
-                    HDfprintf(stdout, "%d:%s: Bad data in write req ack.\n",
-                              world_mpi_rank, fcn_name);
-                }
+            nerrors++;
+            ret_value = FAIL;
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: Bad data in write req ack.\n",
+                          world_mpi_rank, fcn_name);
             }
         }
+    }
 
 #endif /* DO_WRITE_REQ_ACK */
 
@@ -2094,14 +1993,9 @@ datum_serialize(const H5F_t UNUSED *f,
  * Programmer:	John Mainzer
  *              9/19/07
  *
- * Modifications:
- *
- * 		None.
- *
  *-------------------------------------------------------------------------
  */
-
-herr_t
+static herr_t
 datum_free_icr(void * thing)
 {
     int idx;
@@ -2138,7 +2032,6 @@ datum_free_icr(void * thing)
     datum_destroys++;
 
     return(SUCCEED);
-
 } /* datum_free_icr() */
 
 
@@ -2146,6 +2039,7 @@ datum_free_icr(void * thing)
 /************************** test utility functions ***************************/
 /*****************************************************************************/
 
+
 /*****************************************************************************
  * Function:    expunge_entry()
  *
@@ -2159,13 +2053,8 @@ datum_free_icr(void * thing)
  * Programmer:  John Mainzer
  *              07/11/06
  *
- * Modifications:
- *
- *              None.
- *
  *****************************************************************************/
-
-void
+static void
 expunge_entry(H5F_t * file_ptr,
               int32_t idx)
 {
@@ -2227,7 +2116,7 @@ expunge_entry(H5F_t * file_ptr,
 
 } /* expunge_entry() */
 
-
+
 /*****************************************************************************
  * Function:    insert_entry()
  *
@@ -2249,8 +2138,7 @@ expunge_entry(H5F_t * file_ptr,
  *              any pins must be global pins.
  *
  *****************************************************************************/
-
-void
+static void
 insert_entry(H5C_t * cache_ptr,
              H5F_t * file_ptr,
              int32_t idx,
@@ -2338,7 +2226,7 @@ insert_entry(H5C_t * cache_ptr,
 
 } /* insert_entry() */
 
-
+
 /*****************************************************************************
  * Function:    local_pin_and_unpin_random_entries()
  *
@@ -2352,11 +2240,8 @@ insert_entry(H5C_t * cache_ptr,
  * Programmer:  John Mainzer
  *              4/12/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
-void
+static void
 local_pin_and_unpin_random_entries(H5F_t * file_ptr,
                                    int min_idx,
                                    int max_idx,
@@ -2410,7 +2295,7 @@ local_pin_and_unpin_random_entries(H5F_t * file_ptr,
 
 } /* local_pin_and_unpin_random_entries() */
 
-
+
 /*****************************************************************************
  * Function:    local_pin_random_entry()
  *
@@ -2426,11 +2311,8 @@ local_pin_and_unpin_random_entries(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              4/12/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
-void
+static void
 local_pin_random_entry(H5F_t * file_ptr,
                        int min_idx,
                        int max_idx)
@@ -2461,7 +2343,7 @@ local_pin_random_entry(H5F_t * file_ptr,
 
 } /* local_pin_random_entry() */
 
-
+
 /*****************************************************************************
  * Function:    local_unpin_all_entries()
  *
@@ -2474,11 +2356,8 @@ local_pin_random_entry(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              4/12/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
-void
+static void
 local_unpin_all_entries(H5F_t * file_ptr,
 			hbool_t via_unprotect)
 {
@@ -2503,7 +2382,7 @@ local_unpin_all_entries(H5F_t * file_ptr,
 
 } /* local_unpin_all_entries() */
 
-
+
 /*****************************************************************************
  * Function:    local_unpin_next_pinned_entry()
  *
@@ -2519,11 +2398,8 @@ local_unpin_all_entries(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              4/12/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
-int
+static int
 local_unpin_next_pinned_entry(H5F_t * file_ptr,
                               int start_idx,
 			      hbool_t via_unprotect)
@@ -2565,7 +2441,7 @@ local_unpin_next_pinned_entry(H5F_t * file_ptr,
 
 } /* local_unpin_next_pinned_entry() */
 
-
+
 /*****************************************************************************
  * Function:    lock_and_unlock_random_entries()
  *
@@ -2580,11 +2456,8 @@ local_unpin_next_pinned_entry(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              1/12/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
-void
+static void
 lock_and_unlock_random_entries(H5F_t * file_ptr,
                                int min_idx,
                                int max_idx,
@@ -2616,7 +2489,7 @@ lock_and_unlock_random_entries(H5F_t * file_ptr,
 
 } /* lock_and_unlock_random_entries() */
 
-
+
 /*****************************************************************************
  * Function:    lock_and_unlock_random_entry()
  *
@@ -2630,11 +2503,8 @@ lock_and_unlock_random_entries(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              1/4/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
-void
+static void
 lock_and_unlock_random_entry(H5F_t * file_ptr,
                              int min_idx,
                              int max_idx)
@@ -2663,7 +2533,7 @@ lock_and_unlock_random_entry(H5F_t * file_ptr,
 
 } /* lock_and_unlock_random_entry() */
 
-
+
 /*****************************************************************************
  * Function:    lock_entry()
  *
@@ -2683,8 +2553,7 @@ lock_and_unlock_random_entry(H5F_t * file_ptr,
  * 		datum.
  *
  *****************************************************************************/
-
-void
+static void
 lock_entry(H5F_t * file_ptr,
            int32_t idx)
 {
@@ -2743,8 +2612,7 @@ lock_entry(H5F_t * file_ptr,
  *              4/14/06
  *
  *****************************************************************************/
-
-void
+static void
 mark_entry_dirty(int32_t idx)
 {
     const char * fcn_name = "mark_entry_dirty()";
@@ -2785,7 +2653,7 @@ mark_entry_dirty(int32_t idx)
 
 } /* mark_entry_dirty() */
 
-
+
 /*****************************************************************************
  * Function:    pin_entry()
  *
@@ -2798,10 +2666,7 @@ mark_entry_dirty(int32_t idx)
  * Programmer:  John Mainzer
  *              4/11/06
  *
- * Modifications:
- *
  *****************************************************************************/
-
 void
 pin_entry(H5F_t * file_ptr,
           int32_t idx,
@@ -2855,7 +2720,7 @@ pin_entry(H5F_t * file_ptr,
 
 } /* pin_entry() */
 
-
+
 /*****************************************************************************
  * Function:    pin_protected_entry()
  *
@@ -2869,13 +2734,8 @@ pin_entry(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              01/04/06
  *
- * Modifications:
- *
- *              None.
- *
  *****************************************************************************/
-
-void
+static void
 pin_protected_entry(int32_t idx,
 		    hbool_t global)
 {
@@ -2930,7 +2790,7 @@ pin_protected_entry(int32_t idx,
 
 } /* pin_protected_entry() */
 
-
+
 /*****************************************************************************
  * Function:    move_entry()
  *
@@ -2946,14 +2806,8 @@ pin_protected_entry(int32_t idx,
  * Programmer:  John Mainzer
  *              1/10/06
  *
- * Modifications:
- *
- *              7/11/06 -- JRM
- *              Added support for the phony_len field in datum.
- *
  *****************************************************************************/
-
-void
+static void
 move_entry(H5F_t * file_ptr,
            int32_t old_idx,
            int32_t new_idx)
@@ -2986,7 +2840,35 @@ move_entry(H5F_t * file_ptr,
         old_addr = old_entry_ptr->base_addr;
         new_addr = new_entry_ptr->base_addr;
 
-        result = H5AC_move_entry(file_ptr,  &(types[0]), old_addr, new_addr);
+        /* Moving will mark the entry dirty if it is not already */
+        old_entry_ptr->dirty = TRUE;
+
+        /* touch up versions, base_addrs, and data_index.  Do this 
+         * now as it is possible that the rename will trigger a 
+         * sync point.
+         */
+        if(old_entry_ptr->ver < new_entry_ptr->ver)
+	    old_entry_ptr->ver = new_entry_ptr->ver;
+        else
+            (old_entry_ptr->ver)++;
+
+        old_entry_ptr->base_addr = new_addr;
+        new_entry_ptr->base_addr = old_addr;
+
+        data_index[old_entry_ptr->index] = new_idx;
+        data_index[new_entry_ptr->index] = old_idx;
+
+        tmp                  = old_entry_ptr->index;
+        old_entry_ptr->index = new_entry_ptr->index;
+        new_entry_ptr->index = tmp;
+
+	if(old_entry_ptr->local_len != new_entry_ptr->local_len) {
+	    tmp_len                  = old_entry_ptr->local_len;
+	    old_entry_ptr->local_len = new_entry_ptr->local_len;
+	    new_entry_ptr->local_len = tmp_len;
+	} /* end if */
+
+        result = H5AC_move_entry(file_ptr, &(types[0]), old_addr, new_addr);
 
         if ( ( result < 0 ) || ( old_entry_ptr->header.addr != new_addr ) ) {
 
@@ -3000,44 +2882,13 @@ move_entry(H5F_t * file_ptr,
 
             HDassert( ((old_entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
             HDassert( old_entry_ptr->header.is_dirty );
-            old_entry_ptr->dirty = TRUE;
 
-            /* touch up versions, base_addrs, and data_index */
-
-            if ( old_entry_ptr->ver < new_entry_ptr->ver ) {
-
-		old_entry_ptr->ver = new_entry_ptr->ver;
-
-            } else {
-
-                (old_entry_ptr->ver)++;
-
-            }
-
-            old_entry_ptr->base_addr = new_addr;
-            new_entry_ptr->base_addr = old_addr;
-
-            data_index[old_entry_ptr->index] = new_idx;
-            data_index[new_entry_ptr->index] = old_idx;
-
-            tmp                  = old_entry_ptr->index;
-            old_entry_ptr->index = new_entry_ptr->index;
-            new_entry_ptr->index = tmp;
-
-	    if ( old_entry_ptr->local_len != new_entry_ptr->local_len ) {
-
-	        tmp_len                  = old_entry_ptr->local_len;
-	        old_entry_ptr->local_len = new_entry_ptr->local_len;
-	        new_entry_ptr->local_len = tmp_len;
-	    }
         }
     }
 
-    return;
-
 } /* move_entry() */
 
-
+
 /*****************************************************************************
  * Function:    resize_entry()
  *
@@ -3052,13 +2903,8 @@ move_entry(H5F_t * file_ptr,
  * Programmer:  John Mainzer
  *              7/11/06
  *
- * Modifications:
- *
- *              None
- *
  *****************************************************************************/
-
-void
+static void
 resize_entry(int32_t idx,
 	     size_t  new_size)
 {
@@ -3111,7 +2957,7 @@ resize_entry(int32_t idx,
 
 } /* resize_entry() */
 
-
+
 /*****************************************************************************
  *
  * Function:	setup_cache_for_test()
@@ -3130,13 +2976,8 @@ resize_entry(int32_t idx,
  *
  * Programmer:	JRM -- 1/4/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 setup_cache_for_test(hid_t * fid_ptr,
                      H5F_t ** file_ptr_ptr,
                      H5C_t ** cache_ptr_ptr)
@@ -3283,7 +3124,7 @@ setup_cache_for_test(hid_t * fid_ptr,
 
 } /* setup_cache_for_test() */
 
-
+
 /*****************************************************************************
  *
  * Function:	setup_rand()
@@ -3303,8 +3144,7 @@ setup_cache_for_test(hid_t * fid_ptr,
  *		Modified function to facilitate setting predefined seeds.
  *
  *****************************************************************************/
-
-void
+static void
 setup_rand(void)
 {
     const char * fcn_name = "setup_rand()";
@@ -3351,7 +3191,7 @@ setup_rand(void)
 
 } /* setup_rand() */
 
-
+
 /*****************************************************************************
  *
  * Function:	take_down_cache()
@@ -3367,13 +3207,8 @@ setup_rand(void)
  *
  * Programmer:	JRM -- 1/4/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 take_down_cache(hid_t fid)
 {
     const char * fcn_name = "take_down_cache()";
@@ -3410,7 +3245,7 @@ take_down_cache(hid_t fid)
 
 } /* take_down_cache() */
 
-
+
 /*****************************************************************************
  * Function:    unlock_entry()
  *
@@ -3429,8 +3264,7 @@ take_down_cache(hid_t fid)
  * 		Updated for the new local_len field in datum.
  *
  *****************************************************************************/
-
-void
+static void
 unlock_entry(H5F_t * file_ptr,
              int32_t idx,
              unsigned int flags)
@@ -3492,7 +3326,7 @@ unlock_entry(H5F_t * file_ptr,
 
 } /* unlock_entry() */
 
-
+
 /*****************************************************************************
  * Function:    unpin_entry()
  *
@@ -3511,8 +3345,7 @@ unlock_entry(H5F_t * file_ptr,
  * 		Added assertion that entry is pinned on entry.
  *
  *****************************************************************************/
-
-void
+static void
 unpin_entry(H5F_t * file_ptr,
             int32_t idx,
             hbool_t global,
@@ -3591,6 +3424,7 @@ unpin_entry(H5F_t * file_ptr,
 /****************************** test functions *******************************/
 /*****************************************************************************/
 
+
 /*****************************************************************************
  *
  * Function:	server_smoke_check()
@@ -3617,8 +3451,7 @@ unpin_entry(H5F_t * file_ptr,
  *		write request ack message.
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 server_smoke_check(void)
 {
     const char * fcn_name = "server_smoke_check()";
@@ -3814,6 +3647,7 @@ server_smoke_check(void)
 
 } /* server_smoke_check() */
 
+
 /*****************************************************************************
  *
  * Function:	smoke_check_1()
@@ -3826,13 +3660,8 @@ server_smoke_check(void)
  *
  * Programmer:	JRM -- 1/4/06
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 smoke_check_1(void)
 {
     const char * fcn_name = "smoke_check_1()";
@@ -3968,7 +3797,7 @@ smoke_check_1(void)
 
 } /* smoke_check_1() */
 
-
+
 /*****************************************************************************
  *
  * Function:	smoke_check_2()
@@ -3993,8 +3822,7 @@ smoke_check_1(void)
  *		Modified test to move pinned entries.
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 smoke_check_2(void)
 {
     const char * fcn_name = "smoke_check_2()";
@@ -4177,7 +4005,7 @@ smoke_check_2(void)
 
 } /* smoke_check_2() */
 
-
+
 /*****************************************************************************
  *
  * Function:	smoke_check_3()
@@ -4205,8 +4033,7 @@ smoke_check_2(void)
  *		Added pinned entry tests.		JRM - 4/14/06
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 smoke_check_3(void)
 {
     const char * fcn_name = "smoke_check_3()";
@@ -4488,7 +4315,7 @@ smoke_check_3(void)
 
 } /* smoke_check_3() */
 
-
+
 /*****************************************************************************
  *
  * Function:	smoke_check_4()
@@ -4518,8 +4345,7 @@ smoke_check_3(void)
  *							JRM - 8/15/06
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 smoke_check_4(void)
 {
     const char * fcn_name = "smoke_check_4()";
@@ -4794,7 +4620,7 @@ smoke_check_4(void)
 
 } /* smoke_check_4() */
 
-
+
 /*****************************************************************************
  *
  * Function:	smoke_check_5()
@@ -4815,8 +4641,7 @@ smoke_check_4(void)
  *		H5AC_resize_entry().
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 smoke_check_5(void)
 {
     const char * fcn_name = "smoke_check_5()";
@@ -4986,7 +4811,7 @@ smoke_check_5(void)
 
 } /* smoke_check_5() */
 
-
+
 /*****************************************************************************
  *
  * Function:	trace_file_check()
@@ -5008,7 +4833,7 @@ smoke_check_5(void)
  *                    - H5AC_flush()
  *                    - H5AC_insert_entry()
  *                    - H5AC_mark_entry_dirty()
- *                      H5AC_move_entry()
+ *                    - H5AC_move_entry()
  *                    - H5AC_pin_protected_entry()
  *                    - H5AC_protect()
  *                    - H5AC_unpin_entry()
@@ -5036,8 +4861,7 @@ smoke_check_5(void)
  *		to support the new flash cache size increment code.
  *
  *****************************************************************************/
-
-hbool_t
+static hbool_t
 trace_file_check(void)
 {
     hbool_t success = TRUE;
@@ -5361,7 +5185,7 @@ trace_file_check(void)
 
 } /* trace_file_check() */
 
-
+
 /*****************************************************************************
  *
  * Function:	main()
@@ -5374,12 +5198,7 @@ trace_file_check(void)
  *
  * Programmer:	JRM -- 12/23/05
  *
- * Modifications:
- *
- *		None.
- *
  *****************************************************************************/
-
 int
 main(int argc, char **argv)
 {
@@ -5566,6 +5385,8 @@ finish:
 	}
 	printf("===================================\n");
     }
+
+    takedown_derived_types();
 
     /* close HDF5 library */
     H5close();

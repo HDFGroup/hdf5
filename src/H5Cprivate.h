@@ -32,7 +32,7 @@
 
 #include "H5Cpublic.h"		/* public prototypes		        */
 
-/* Pivate headers needed by this header */
+/* Private headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
 
@@ -60,7 +60,7 @@
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
  * on cache activity.  In general, this #define should be set to 0.
  */
-#define H5C_COLLECT_CACHE_STATS	1
+#define H5C_COLLECT_CACHE_STATS	0
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
  * in individual cache entries.
@@ -427,6 +427,7 @@ typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
 typedef herr_t (*H5C_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);
 
+#define H5C__SERIALIZE_NO_FLAGS_SET	((unsigned)0)
 #define H5C__SERIALIZE_RESIZED_FLAG	((unsigned)0x1)
 #define H5C__SERIALIZE_MOVED_FLAG	((unsigned)0x2)
 
@@ -1392,8 +1393,6 @@ H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
 
 H5_DLL herr_t H5C_dest(H5F_t * f,
 		       hid_t  dxpl_id);
-
-H5_DLL herr_t H5C_dest_empty(H5C_t * cache_ptr);
 
 H5_DLL herr_t H5C_expunge_entry(H5F_t *             f,
 		                hid_t               dxpl_id,
