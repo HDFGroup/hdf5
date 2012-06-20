@@ -100,17 +100,17 @@ struct move_entry_test_spec
 
 /* private function declarations: */
 
-static unsigned smoke_check_1(void);
-static unsigned smoke_check_2(void);
-static unsigned smoke_check_3(void);
-static unsigned smoke_check_4(void);
-static unsigned smoke_check_5(void);
-static unsigned smoke_check_6(void);
-static unsigned smoke_check_7(void);
-static unsigned smoke_check_8(void);
-static unsigned smoke_check_9(void);
-static unsigned smoke_check_10(void);
-static unsigned write_permitted_check(void);
+static unsigned smoke_check_1(int express_test);
+static unsigned smoke_check_2(int express_test);
+static unsigned smoke_check_3(int express_test);
+static unsigned smoke_check_4(int express_test);
+static unsigned smoke_check_5(int express_test);
+static unsigned smoke_check_6(int express_test);
+static unsigned smoke_check_7(int express_test);
+static unsigned smoke_check_8(int express_test);
+static unsigned smoke_check_9(int express_test);
+static unsigned smoke_check_10(int express_test);
+static unsigned write_permitted_check(int express_test);
 static unsigned check_insert_entry(void);
 static unsigned check_flush_cache(void);
 static void check_flush_cache__empty_cache(H5F_t * file_ptr);
@@ -222,7 +222,7 @@ static unsigned check_auto_cache_resize_aux_fcns(void);
  */
 
 static unsigned
-smoke_check_1(void)
+smoke_check_1(int express_test)
 {
     const char * fcn_name = "smoke_check_1";
     hbool_t show_progress = FALSE;
@@ -400,8 +400,7 @@ smoke_check_1(void)
                   fcn_name, failure_mssg);
     }
 
-
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_1() */
 
@@ -429,7 +428,7 @@ smoke_check_1(void)
  */
 
 static unsigned
-smoke_check_2(void)
+smoke_check_2(int express_test)
 {
     const char * fcn_name = "smoke_check_2";
     hbool_t show_progress = FALSE;
@@ -607,7 +606,7 @@ smoke_check_2(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_2() */
 
@@ -634,7 +633,7 @@ smoke_check_2(void)
  */
 
 static unsigned
-smoke_check_3(void)
+smoke_check_3(int express_test)
 {
     const char * fcn_name = "smoke_check_3";
     hbool_t show_progress = FALSE;
@@ -812,7 +811,7 @@ smoke_check_3(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_3() */
 
@@ -840,7 +839,7 @@ smoke_check_3(void)
  */
 
 static unsigned
-smoke_check_4(void)
+smoke_check_4(int express_test)
 {
     const char * fcn_name = "smoke_check_4";
     hbool_t show_progress = FALSE;
@@ -1018,7 +1017,7 @@ smoke_check_4(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_4() */
 
@@ -1046,7 +1045,7 @@ smoke_check_4(void)
  */
 
 static unsigned
-smoke_check_5(void)
+smoke_check_5(int express_test)
 {
     const char * fcn_name = "smoke_check_5";
     herr_t result;
@@ -1261,7 +1260,7 @@ smoke_check_5(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_5() */
 
@@ -1289,7 +1288,7 @@ smoke_check_5(void)
  */
 
 static unsigned
-smoke_check_6(void)
+smoke_check_6(int express_test)
 {
     const char * fcn_name = "smoke_check_6";
     herr_t result;
@@ -1504,7 +1503,7 @@ smoke_check_6(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_6() */
 
@@ -1532,7 +1531,7 @@ smoke_check_6(void)
  */
 
 static unsigned
-smoke_check_7(void)
+smoke_check_7(int express_test)
 {
     const char * fcn_name = "smoke_check_7";
     herr_t result;
@@ -1748,7 +1747,7 @@ smoke_check_7(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_7() */
 
@@ -1776,7 +1775,7 @@ smoke_check_7(void)
  */
 
 static unsigned
-smoke_check_8(void)
+smoke_check_8(int express_test)
 {
     const char * fcn_name = "smoke_check_8";
     herr_t result;
@@ -1872,8 +1871,7 @@ smoke_check_8(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    file_ptr = setup_cache((size_t)(2 * 1024),
-                            (size_t)(1 * 1024));
+    file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
     cache_ptr = file_ptr->shared->cache;
 
     if ( pass ) {
@@ -1992,7 +1990,7 @@ smoke_check_8(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_8() */
 
@@ -2021,7 +2019,7 @@ smoke_check_8(void)
  */
 
 static unsigned
-smoke_check_9(void)
+smoke_check_9(int express_test)
 {
     const char * fcn_name = "smoke_check_9";
     herr_t result;
@@ -2313,7 +2311,7 @@ smoke_check_9(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_9() */
 
@@ -2342,7 +2340,7 @@ smoke_check_9(void)
  */
 
 static unsigned
-smoke_check_10(void)
+smoke_check_10(int express_test)
 {
     const char * fcn_name = "smoke_check_10";
     herr_t result;
@@ -2629,7 +2627,7 @@ smoke_check_10(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* smoke_check_10() */
 
@@ -2654,7 +2652,7 @@ smoke_check_10(void)
  */
 
 static unsigned
-write_permitted_check(void)
+write_permitted_check(int express_test)
 {
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
@@ -2842,7 +2840,7 @@ write_permitted_check(void)
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* write_permitted_check() */
 
@@ -3140,7 +3138,7 @@ check_insert_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_insert_entry() */
 
@@ -3225,7 +3223,7 @@ check_flush_cache(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_flush_cache() */
 
@@ -12734,8 +12732,8 @@ check_get_entry_status(void)
     hbool_t	  is_pinned;
     size_t	  entry_size;
     H5F_t *       file_ptr = NULL;
-    test_entry_t * base_addr;
-    test_entry_t * entry_ptr;
+    test_entry_t * base_addr = NULL;
+    test_entry_t * entry_ptr = NULL;
 
     TESTING("H5C_get_entry_status() functionality");
 
@@ -12748,8 +12746,18 @@ check_get_entry_status(void)
         file_ptr = setup_cache((size_t)(2 * 1024 * 1024),
                                 (size_t)(1 * 1024 * 1024));
 
-        base_addr = entries[0];
-        entry_ptr = &(base_addr[0]);
+        if ( file_ptr == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        }
+        else {
+
+            base_addr = entries[0];
+            entry_ptr = &(base_addr[0]);
+
+        }
     }
 
     if ( pass ) {
@@ -12776,9 +12784,13 @@ check_get_entry_status(void)
         }
     }
 
-    protect_entry(file_ptr, 0, 0);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+        protect_entry(file_ptr, 0, 0);
+
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( pass ) {
 
@@ -12800,7 +12812,11 @@ check_get_entry_status(void)
         }
     }
 
-    protect_entry(file_ptr, 0, 0);
+    if ( pass ) {
+
+        protect_entry(file_ptr, 0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -12822,7 +12838,11 @@ check_get_entry_status(void)
         }
     }
 
-    unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
+    if ( pass ) {
+
+        unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -12844,7 +12864,11 @@ check_get_entry_status(void)
         }
     }
 
-    mark_entry_dirty(0, 0);
+    if ( pass ) {
+
+        mark_entry_dirty(0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -12866,7 +12890,11 @@ check_get_entry_status(void)
         }
     }
 
-    unpin_entry(0, 0);
+    if ( pass ) {
+
+        unpin_entry(0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -12901,7 +12929,7 @@ check_get_entry_status(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_get_entry_status() */
 
@@ -12990,9 +13018,13 @@ check_expunge_entry(void)
      * it without marking it dirty.
      */
 
-    protect_entry(file_ptr, 0, 0);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+        protect_entry(file_ptr, 0, 0);
+
+        unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( pass ) {
 
@@ -13027,7 +13059,11 @@ check_expunge_entry(void)
      * Also verify that the entry was loaded and destroyed, but
      * not flushed.
      */
-    expunge_entry(file_ptr, 0, 0);
+    if ( pass ) {
+
+        expunge_entry(file_ptr, 0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -13107,9 +13143,13 @@ check_expunge_entry(void)
      * it with the dirty flag set.
      */
 
-    protect_entry(file_ptr, 0, 1);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, 0, 1, H5C__DIRTIED_FLAG);
+        protect_entry(file_ptr, 0, 1);
+
+        unprotect_entry(file_ptr, 0, 1, H5C__DIRTIED_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -13145,7 +13185,11 @@ check_expunge_entry(void)
      * Also verify that the entry was loaded and destroyed, but not
      * flushed.
      */
-    expunge_entry(file_ptr, 0, 1);
+    if ( pass ) {
+
+        expunge_entry(file_ptr, 0, 1);
+
+    }
 
     if ( pass ) {
 
@@ -13194,7 +13238,7 @@ check_expunge_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_expunge_entry() */
 
@@ -13615,7 +13659,7 @@ check_multiple_read_protect(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_multiple_read_protect() */
 
@@ -13728,7 +13772,7 @@ check_move_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_move_entry() */
 
@@ -13806,14 +13850,18 @@ check_move_entry__run_test(H5F_t * file_ptr,
         }
     }
 
-    protect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
+    if ( pass ) {
 
-    if(spec_ptr->is_dirty)
-        flags |= H5C__DIRTIED_FLAG;
+        protect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
 
-    unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
+        if(spec_ptr->is_dirty)
+            flags |= H5C__DIRTIED_FLAG;
 
-    move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
+        unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
+
+        move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
+
+    }
 
     if ( pass ) {
 
@@ -13926,9 +13974,20 @@ check_pin_protected_entry(void)
 
         file_ptr = setup_cache((size_t)(2 * 1024 * 1024),
                                 (size_t)(1 * 1024 * 1024));
+
+        if ( file_ptr == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        }
     }
 
-    protect_entry(file_ptr, 0, 0);
+    if ( pass ) {
+
+        protect_entry(file_ptr, 0, 0);
+
+    }
 
     if ( pass ) {
 
@@ -13971,7 +14030,7 @@ check_pin_protected_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_pin_protected_entry() */
 
@@ -14048,11 +14107,20 @@ check_resize_entry(void)
 
         file_ptr = setup_cache((size_t)(2 * 1024 * 1024),
                                 (size_t)(1 * 1024 * 1024));
-        cache_ptr = file_ptr->shared->cache;
+        if ( file_ptr == NULL ) {
 
-        base_addr = entries[LARGE_ENTRY_TYPE];
-        entry_ptr = &(base_addr[0]);
-	entry_size = LARGE_ENTRY_SIZE;
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        } 
+        else  
+        {
+            cache_ptr = file_ptr->shared->cache;
+
+            base_addr = entries[LARGE_ENTRY_TYPE];
+            entry_ptr = &(base_addr[0]);
+            entry_size = LARGE_ENTRY_SIZE;
+        }
     }
 
     if ( pass ) {
@@ -14069,7 +14137,11 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+    if ( pass ) {
+
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+
+    }
 
     if ( pass ) {
 
@@ -14195,7 +14267,11 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+    if ( pass ) {
+
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+
+    }
 
     if ( pass ) {
 
@@ -14276,9 +14352,13 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__PIN_ENTRY_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__PIN_ENTRY_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -14398,10 +14478,14 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, 
-		    H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0,
+                        H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -14448,7 +14532,7 @@ check_resize_entry(void)
     }
 
 
-    /* now repreat the above tests with several entries in the cache: */
+    /* now repeat the above tests with several entries in the cache: */
 
     if ( pass ) {
 
@@ -14467,14 +14551,18 @@ check_resize_entry(void)
 	entry_size = LARGE_ENTRY_SIZE;
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
+    if ( pass ) {
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__NO_FLAGS_SET);
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
+
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( pass ) {
 
@@ -14491,7 +14579,11 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+    if ( pass ) {
+
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+
+    }
 
     if ( pass ) {
 
@@ -14619,7 +14711,11 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+    if ( pass ) {
+
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+
+    }
 
     if ( pass ) {
 
@@ -14700,9 +14796,13 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__PIN_ENTRY_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, H5C__PIN_ENTRY_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -14824,10 +14924,14 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+    if ( pass ) {
 
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, 
-		    H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 3);
+
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 3, 
+                        H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -14873,15 +14977,18 @@ check_resize_entry(void)
 	}
     }
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__DELETED_FLAG);
+    if ( pass ) {
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DELETED_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 2);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 2, H5C__DELETED_FLAG);
 
-    protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
-    unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__DELETED_FLAG);
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 1);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 1, H5C__DELETED_FLAG);
 
+        protect_entry(file_ptr, LARGE_ENTRY_TYPE, 0);
+        unprotect_entry(file_ptr, LARGE_ENTRY_TYPE, 0, H5C__DELETED_FLAG);
+
+    }
 
     if ( pass ) {
 
@@ -14910,7 +15017,7 @@ check_resize_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_resize_entry() */
 
@@ -14946,7 +15053,7 @@ check_evictions_enabled(void)
     size_t	   entry_size;
     H5F_t *        file_ptr = NULL;
     H5C_t *        cache_ptr = NULL;
-    test_entry_t * base_addr;
+    test_entry_t * base_addr = NULL;
     test_entry_t * entry_ptr;
 
     TESTING("evictions enabled/disabled functionality");
@@ -14999,10 +15106,19 @@ check_evictions_enabled(void)
 
         file_ptr = setup_cache((size_t)(1 * 1024 * 1024),
                                 (size_t)(     512 * 1024));
-        cache_ptr = file_ptr->shared->cache;
+        if ( file_ptr == NULL ) {
 
-        base_addr = entries[MONSTER_ENTRY_TYPE];
-	entry_size = MONSTER_ENTRY_SIZE;
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        } 
+        else  
+        {
+            cache_ptr = file_ptr->shared->cache;
+
+            base_addr = entries[MONSTER_ENTRY_TYPE];
+            entry_size = MONSTER_ENTRY_SIZE;
+        }
     }
 
     if ( show_progress ) /* 2 */
@@ -15046,11 +15162,15 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* fill the cache */
-    for ( i = 0; i < 16 ; i++ )
-    {
-        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
-        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* fill the cache */
+        for ( i = 0; i < 16 ; i++ )
+        {
+            protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
+            unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
+        }
+
     }
 
     if ( show_progress ) /* 5 */
@@ -15078,9 +15198,13 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* protect and unprotect another entry */
-    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* protect and unprotect another entry */
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 16, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 7 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15141,8 +15265,12 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* insert an entry */
-    insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 17, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* insert an entry */
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 17, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 10 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15240,9 +15368,13 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* protect and unprotect another entry */
-    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* protect and unprotect another entry */
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 18, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 15 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15268,8 +15400,12 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* insert another entry */
-    insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* insert another entry */
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 17 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15312,9 +15448,13 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* protect and unprotect an entry that is in the cache */
-    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* protect and unprotect an entry that is in the cache */
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 19, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 20 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15340,9 +15480,13 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* protect and unprotect an entry that isn't in the cache */
-    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* protect and unprotect an entry that isn't in the cache */
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 20, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 22 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15458,12 +15602,15 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* protect and unprotect an entry that isn't in the cache, forcing
-     * the cache to grow.
-     */
-    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21);
-    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21, H5C__NO_FLAGS_SET);
+    if ( pass ) {
 
+        /* protect and unprotect an entry that isn't in the cache, forcing
+         * the cache to grow.
+         */
+        protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21);
+        unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 21, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 27 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15506,8 +15653,12 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* insert an entry */
-    insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 22, H5C__NO_FLAGS_SET);
+    if ( pass ) {
+
+        /* insert an entry */
+        insert_entry(file_ptr, MONSTER_ENTRY_TYPE, 22, H5C__NO_FLAGS_SET);
+
+    }
 
     if ( show_progress ) /* 30 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
@@ -15602,7 +15753,7 @@ check_evictions_enabled(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_evictions_enabled() */
 
@@ -15676,7 +15827,7 @@ check_flush_protected_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_flush_protected_err() */
 
@@ -15768,7 +15919,7 @@ check_destroy_pinned_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_destroy_pinned_err() */
 
@@ -15854,7 +16005,7 @@ check_destroy_protected_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_destroy_protected_err() */
 
@@ -15879,7 +16030,7 @@ static unsigned
 check_duplicate_insert_err(void)
 {
     const char * fcn_name = "check_duplicate_insert_err";
-    herr_t result;
+    herr_t result = -1;
     H5F_t * file_ptr = NULL;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -15933,7 +16084,7 @@ check_duplicate_insert_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_duplicate_insert_err() */
 
@@ -16028,7 +16179,7 @@ check_move_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_move_err() */
 
@@ -16116,7 +16267,7 @@ check_double_pin_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_double_pin_err() */
 
@@ -16215,7 +16366,7 @@ check_double_unpin_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_double_unpin_err() */
 
@@ -16326,7 +16477,7 @@ check_pin_entry_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_pin_entry_errs() */
 
@@ -16376,7 +16527,7 @@ check_double_protect_err(void)
 
     if ( pass ) {
 
-        cache_entry_ptr = H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
 			               &(types[0]), entry_ptr->addr,
 				       &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
@@ -16405,7 +16556,7 @@ check_double_protect_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_double_protect_err() */
 
@@ -16482,7 +16633,7 @@ check_double_unprotect_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_double_unprotect_err() */
 
@@ -16562,7 +16713,7 @@ check_mark_entry_dirty_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_mark_entry_dirty_errs() */
 
@@ -16686,7 +16837,7 @@ check_expunge_entry_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_expunge_entry_errs() */
 
@@ -16788,7 +16939,7 @@ check_resize_entry_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_resize_entry_errs() */
 
@@ -16914,7 +17065,7 @@ check_unprotect_ro_dirty_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_unprotect_ro_dirty_err() */
 
@@ -16969,7 +17120,7 @@ check_protect_ro_rw_err(void)
 
     if ( pass ) {
 
-        thing_ptr = H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
 			         &(types[0]), entry_ptr->addr,
 				 &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
@@ -16998,7 +17149,7 @@ check_protect_ro_rw_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_protect_ro_rw_err() */
 
@@ -17124,7 +17275,7 @@ check_check_evictions_enabled_err(void)
     }
 
 
-    if ( pass ) {
+    if ( cache_ptr ) {
 
         takedown_cache(file_ptr, FALSE, FALSE);
     }
@@ -17137,7 +17288,7 @@ check_check_evictions_enabled_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_evictions_enabled_err() */
 
@@ -20300,6 +20451,10 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
+    /* now repeat the above tests using the add space flash cache size
+     * increment algorithm.
+     */
+
     if ( pass ) {
 
         auto_size_ctl.version                = H5C__CURR_AUTO_SIZE_CTL_VER;
@@ -20509,6 +20664,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         insert_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
+
 	/* protect and unprotect a couple times to increment cache_accesses */
         protect_entry(file_ptr, HUGE_ENTRY_TYPE, 1);
         unprotect_entry(file_ptr, HUGE_ENTRY_TYPE, 1, H5C__NO_FLAGS_SET);
@@ -21349,7 +21505,7 @@ check_auto_cache_resize(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize() */
 
@@ -21447,7 +21603,17 @@ check_auto_cache_resize_disable(void)
 
         file_ptr = setup_cache((size_t)(2 * 1024),
                                 (size_t)(1 * 1024));
-        cache_ptr = file_ptr->shared->cache;
+
+        if ( file_ptr == NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "file_ptr NULL from setup_cache.";
+
+        } 
+        else {
+
+            cache_ptr = file_ptr->shared->cache;
+        }
     }
 
     if ( pass ) {
@@ -22489,8 +22655,12 @@ check_auto_cache_resize_disable(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* flush the cache and destroy all entries so we start from a known point */
-    flush_cache(file_ptr, TRUE, FALSE, FALSE);
+    if ( pass ) {
+
+        /* flush the cache and destroy all entries so we start from a known point */
+        flush_cache(file_ptr, TRUE, FALSE, FALSE);
+
+    }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
@@ -22712,8 +22882,12 @@ check_auto_cache_resize_disable(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* flush the cache and destroy all entries so we start from a known point */
-    flush_cache(file_ptr, TRUE, FALSE, FALSE);
+    if ( pass ) {
+
+        /* flush the cache and destroy all entries so we start from a known point */
+        flush_cache(file_ptr, TRUE, FALSE, FALSE);
+
+    }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
@@ -22942,8 +23116,12 @@ check_auto_cache_resize_disable(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* flush the cache and destroy all entries so we start from a known point */
-    flush_cache(file_ptr, TRUE, FALSE, FALSE);
+    if ( pass ) {
+
+        /* flush the cache and destroy all entries so we start from a known point */
+        flush_cache(file_ptr, TRUE, FALSE, FALSE);
+
+    }
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
@@ -24057,7 +24235,7 @@ check_auto_cache_resize_disable(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_disable() */
 
@@ -24762,7 +24940,7 @@ check_auto_cache_resize_epoch_markers(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_epoch_markers() */
 
@@ -24787,34 +24965,6 @@ check_auto_cache_resize_epoch_markers(void)
  *
  *-------------------------------------------------------------------------
  */
-
-#define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
-( ( (a).version                == (b).version ) &&                \
-  ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
-  ( ( ! compare_init ) ||                                         \
-    ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) &&     \
-  ( (a).max_size               == (b).max_size ) &&               \
-  ( (a).min_size               == (b).min_size ) &&               \
-  ( (a).epoch_length           == (b).epoch_length ) &&           \
-  ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) &&     \
-  ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&     \
-  ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
-  ( (a).max_increment          == (b).max_increment ) &&          \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) &&     \
-  ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) &&     \
-  ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) &&     \
-  ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&     \
-  ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
-  ( (a).max_decrement          == (b).max_decrement ) &&          \
-  ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
-  ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
 
 static unsigned
 check_auto_cache_resize_input_errs(void)
@@ -24922,8 +25072,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 1.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 1.";
@@ -24994,8 +25144,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 2.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 2.";
@@ -25069,8 +25219,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 3.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 3.";
@@ -25145,8 +25295,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 4.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 4.";
@@ -25218,8 +25368,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 5.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 5.";
@@ -25293,8 +25443,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 6.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 6.";
@@ -25365,8 +25515,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 7.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 7.";
@@ -25441,8 +25591,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 8.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 8.";
@@ -25513,8 +25663,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 9.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 9.";
@@ -25585,8 +25735,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 10.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 10.";
@@ -25660,8 +25810,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 11.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 11.";
@@ -25732,8 +25882,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 12.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 12.";
@@ -25808,8 +25958,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 13.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 13.";
@@ -25881,8 +26031,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 14.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 14.";
@@ -25956,8 +26106,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 15.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 15.";
@@ -26028,8 +26178,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 16.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 16.";
@@ -26100,8 +26250,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 17.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 17.";
@@ -26176,8 +26326,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 18.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 18.";
@@ -26251,8 +26401,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 19.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 19.";
@@ -26326,8 +26476,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 20.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 20.";
@@ -26399,8 +26549,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 21.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 21.";
@@ -26474,8 +26624,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 22.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 22.";
@@ -26547,8 +26697,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 23.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 23.";
@@ -26623,8 +26773,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 24.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 24.";
@@ -26696,8 +26846,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 25.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 25.";
@@ -26771,8 +26921,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 26.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 26.";
@@ -26843,8 +26993,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 27.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 27.";
@@ -26917,8 +27067,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 28.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 28.";
@@ -26989,8 +27139,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 29.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 29.";
@@ -27063,8 +27213,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 30.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 30.";
@@ -27135,8 +27285,8 @@ check_auto_cache_resize_input_errs(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_auto_resize_config failed 31.";
 
-        } else if ( ! RESIZE_CONFIGS_ARE_EQUAL(test_auto_size_ctl, \
-                                               ref_auto_size_ctl, FALSE) ) {
+        } else if ( ! resize_configs_are_equal(&test_auto_size_ctl, \
+                                               &ref_auto_size_ctl, FALSE) ) {
 
             pass = FALSE;
             failure_mssg = "Unexpected auto resize config 31.";
@@ -27185,7 +27335,7 @@ check_auto_cache_resize_input_errs(void)
         }
     }
 
-    if ( pass ) {
+    if ( cache_ptr ) {
 
         takedown_cache(file_ptr, FALSE, FALSE);
     }
@@ -27198,7 +27348,7 @@ check_auto_cache_resize_input_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_input_errs() */
 
@@ -27347,7 +27497,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( hit_rate != 0.0 ) {
+        } else if ( hit_rate > FP_EPSILON ) {   /* i.e. hit_rate != 0.0 */
 
             pass = FALSE;
             failure_mssg =
@@ -27380,7 +27530,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( hit_rate != 0.0 ) {
+        } else if ( hit_rate > FP_EPSILON ) {   /* i.e. hit_rate != 0.0 */
 
             pass = FALSE;
             failure_mssg =
@@ -27425,7 +27575,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( ! DBL_REL_EQUAL(hit_rate, 0.5, 0.00001) ) {
+        } else if ( ! DBL_REL_EQUAL(hit_rate, 0.5, FP_EPSILON) ) { /* i.e. hit_rate != 0.5 */
 
             pass = FALSE;
             failure_mssg =
@@ -27508,7 +27658,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( ! DBL_REL_EQUAL(hit_rate, 0.5, 0.00001) ) {
+        } else if ( ! DBL_REL_EQUAL(hit_rate, 0.5, FP_EPSILON) ) { /* i.e. hit_rate != 0.5 */
 
             pass = FALSE;
             failure_mssg =
@@ -27764,7 +27914,7 @@ check_auto_cache_resize_aux_fcns(void)
         }
     }
 
-    if ( pass ) {
+    if ( cache_ptr ) {
 
         takedown_cache(file_ptr, FALSE, FALSE);
     }
@@ -27777,7 +27927,7 @@ check_auto_cache_resize_aux_fcns(void)
                   fcn_name, failure_mssg);
     }
 
-    return !pass;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_aux_fcns() */
 
@@ -27802,48 +27952,30 @@ check_auto_cache_resize_aux_fcns(void)
 int
 main(void)
 {
-    const char  *envval = NULL;
     unsigned nerrs = 0;
+    int express_test;
 
     H5open();
 
     express_test = GetTestExpress();
 
-    if ( express_test >= 3 ) {
-
-	skip_long_tests = TRUE;
-
-    } else {
-
-	skip_long_tests = FALSE;
-    }
-
-#ifdef NDEBUG
-    run_full_test = TRUE;
-#else /* NDEBUG */
-    run_full_test = FALSE;
-#endif /* NDEBUG */
-
-#if 0
-    run_full_test = TRUE;
-#endif
     printf("=========================================\n");
     printf("Internal cache tests\n");
     printf("        express_test = %d\n", express_test);
-    printf("        skip_long_tests = %d\n", (int)skip_long_tests);
     printf("=========================================\n");
 
-    nerrs += smoke_check_1();
-    nerrs += smoke_check_2();
-    nerrs += smoke_check_3();
-    nerrs += smoke_check_4();
-    nerrs += smoke_check_5();
-    nerrs += smoke_check_6();
-    nerrs += smoke_check_7();
-    nerrs += smoke_check_8();
-    nerrs += smoke_check_9();
-    nerrs += smoke_check_10();
-    nerrs += write_permitted_check();
+    nerrs += smoke_check_1(express_test);
+    nerrs += smoke_check_2(express_test);
+    nerrs += smoke_check_3(express_test);
+    nerrs += smoke_check_4(express_test);
+    nerrs += smoke_check_5(express_test);
+    nerrs += smoke_check_6(express_test);
+    nerrs += smoke_check_7(express_test);
+    nerrs += smoke_check_8(express_test);
+    nerrs += smoke_check_9(express_test);
+    nerrs += smoke_check_10(express_test);
+
+    nerrs += write_permitted_check(express_test);
 
     nerrs += check_insert_entry();
     nerrs += check_flush_cache();

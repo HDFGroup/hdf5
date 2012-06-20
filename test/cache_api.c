@@ -38,7 +38,7 @@ static unsigned check_fapl_mdc_api_calls(void);
 
 static unsigned check_file_mdc_api_calls(void);
 
-static unsigned mdc_api_call_smoke_check(void);
+static unsigned mdc_api_call_smoke_check(int express_test);
 
 static unsigned check_fapl_mdc_api_errs(void);
 
@@ -67,11 +67,8 @@ static unsigned check_file_mdc_api_errs(void);
  * Programmer:	John Mainzer
  *              4/12/04
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 static unsigned
 check_fapl_mdc_api_calls(void)
 {
@@ -265,8 +262,8 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(default_auto_size_ctl, \
-                                        cache_ptr->resize_ctl, TRUE) ) {
+	if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
+                                        &cache_ptr->resize_ctl, TRUE) ) {
 
 
             pass = FALSE;
@@ -414,8 +411,8 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(mod_auto_size_ctl, \
-                                        cache_ptr->resize_ctl, TRUE) ) {
+	if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
+                                        &cache_ptr->resize_ctl, TRUE) ) {
 
 
             pass = FALSE;
@@ -865,12 +862,11 @@ check_file_mdc_api_calls(void)
 #define NUM_RANDOM_ACCESSES     200000
 
 static unsigned
-mdc_api_call_smoke_check(void)
+mdc_api_call_smoke_check(int express_test)
 {
     const char * fcn_name = "mdc_api_call_smoke_check()";
     char filename[512];
     hbool_t valid_chunk;
-    hbool_t report_progress = FALSE;
     hbool_t dump_hit_rate = FALSE;
     int64_t min_accesses = 1000;
     double min_hit_rate = 0.90;
@@ -883,7 +879,6 @@ mdc_api_call_smoke_check(void)
     hid_t properties;
     char dset_name[64];
     int i, j, k, l, m, n;
-    int progress_counter;
     herr_t status;
     hsize_t dims[2];
     hsize_t a_size[2];
@@ -993,7 +988,7 @@ mdc_api_call_smoke_check(void)
 
     TESTING("MDC API smoke check");
 
-    if ( skip_long_tests > 0 ) {
+    if ( express_test > 0 ) {
 
         SKIPPED();
 
@@ -1013,12 +1008,6 @@ mdc_api_call_smoke_check(void)
      */
 
     /* setup the file name */
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"\nSetting up file ... ");
-        HDfflush(stdout);
-    }
 
     if ( pass ) {
 
@@ -1058,20 +1047,8 @@ mdc_api_call_smoke_check(void)
     /* verify that the cache is now set to the alternate config */
     validate_mdc_config(file_id, &mod_config_1, TRUE, 2);
 
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Done.\n"); /* setting up file */
-        HDfflush(stdout);
-    }
-
 
     /* create the datasets */
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Creating datasets ... ");
-        HDfflush(stdout);
-    }
 
     if ( pass ) {
 
@@ -1121,8 +1098,7 @@ mdc_api_call_smoke_check(void)
 
                 sprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
-				            dataspace_id, H5P_DEFAULT,
-					    properties, H5P_DEFAULT);
+				            dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
 
@@ -1178,21 +1154,8 @@ mdc_api_call_smoke_check(void)
         }
     }
 
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Done.\n");
-        HDfflush(stdout);
-    }
-
     /* initialize all datasets on a round robin basis */
     i = 0;
-    progress_counter = 0;
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, "Initializing datasets ");
-        HDfflush(stdout);
-    }
 
     while ( ( pass ) && ( i < DSET_SIZE ) )
     {
@@ -1260,23 +1223,6 @@ mdc_api_call_smoke_check(void)
 
         i += CHUNK_SIZE;
 
-        if ( ( pass ) && ( report_progress ) ) {
-
-	    progress_counter += CHUNK_SIZE;
-
-	    if ( progress_counter >= DSET_SIZE / 20 ) {
-
-	        progress_counter = 0;
-	        HDfprintf(stdout, ".");
-                HDfflush(stdout);
-	    }
-	}
-    }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout," Done.\n"); /* initializing data sets */
-        HDfflush(stdout);
     }
 
     /* set alternate config 2 */
@@ -1294,14 +1240,7 @@ mdc_api_call_smoke_check(void)
 
     /* do random reads on all datasets */
 
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, "Doing random reads on all datasets ");
-        HDfflush(stdout);
-    }
-
     n = 0;
-    progress_counter = 0;
     while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         m = rand() % NUM_DSETS;
@@ -1384,24 +1323,6 @@ mdc_api_call_smoke_check(void)
         }
 
         n++;
-
-        if ( ( pass ) && ( report_progress ) ) {
-
-	    progress_counter++;
-
-	    if ( progress_counter >= NUM_RANDOM_ACCESSES / 20 ) {
-
-	        progress_counter = 0;
-	        HDfprintf(stdout, ".");
-                HDfflush(stdout);
-	    }
-	}
-    }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, " Done.\n"); /* random reads on all data sets */
-        HDfflush(stdout);
     }
 
 
@@ -1445,15 +1366,8 @@ mdc_api_call_smoke_check(void)
 
     /* do random reads on data set 0 only */
 
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, "Doing random reads on dataset 0 ");
-        HDfflush(stdout);
-    }
-
     m = 0;
     n = 0;
-    progress_counter = 0;
     while ( ( pass ) && ( n < NUM_RANDOM_ACCESSES ) )
     {
         i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
@@ -1531,31 +1445,6 @@ mdc_api_call_smoke_check(void)
         }
 
         n++;
-
-        if ( ( pass ) && ( report_progress ) ) {
-
-	    progress_counter++;
-
-	    if ( progress_counter >= NUM_RANDOM_ACCESSES / 20 ) {
-
-	        progress_counter = 0;
-	        HDfprintf(stdout, ".");
-                HDfflush(stdout);
-	    }
-	}
-    }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout, " Done.\n"); /* random reads data set 0 */
-        HDfflush(stdout);
-    }
-
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Shutting down ... ");
-        HDfflush(stdout);
     }
 
 
@@ -1614,13 +1503,6 @@ mdc_api_call_smoke_check(void)
 	    failure_mssg = "HDremove() failed.\n";
         }
     }
-
-    if ( ( pass ) && ( report_progress ) ) {
-
-	HDfprintf(stdout,"Done.\n"); /* shutting down */
-        HDfflush(stdout);
-    }
-
 
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
@@ -2151,7 +2033,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* size_t      max_size               = */ (16 * 1024 * 1024),
     /* size_t      min_size               = */ ( 1 * 1024 * 1024),
     /* long int    epoch_length           = */ 50000,
-    /* enum H5C_cache_incr_mode incr_mode = */ -1,
+    /* enum H5C_cache_incr_mode incr_mode = */ (enum H5C_cache_incr_mode)-1,
     /* double      lower_hr_threshold     = */ 0.9,
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
@@ -2322,7 +2204,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
     /* enum H5C_cache_flash_incr_mode       */
-    /*                    flash_incr_mode = */ -1,
+    /*                    flash_incr_mode = */ (enum H5C_cache_flash_incr_mode)-1,
     /* double      flash_multiple         = */ 2.0,
     /* double      flash_threshold        = */ 0.5,
     /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
@@ -2490,7 +2372,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /*                    flash_incr_mode = */ H5C_flash_incr__off,
     /* double      flash_multiple         = */ 2.0,
     /* double      flash_threshold        = */ 0.5,
-    /* enum H5C_cache_decr_mode decr_mode = */ -1,
+    /* enum H5C_cache_decr_mode decr_mode = */ (enum H5C_cache_decr_mode)-1,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
     /* hbool_t     apply_max_decrement    = */ TRUE,
@@ -3531,24 +3413,15 @@ int
 main(void)
 {
     unsigned nerrs = 0;
+    int express_test;
 
     H5open();
 
     express_test = GetTestExpress();
 
-    if ( express_test >= 3 ) {
-
-        skip_long_tests = TRUE;
-
-    } else {
-
-        skip_long_tests = FALSE;
-    }
-
     printf("===================================\n");
     printf("Cache API tests\n");
     printf("        express_test = %d\n", express_test);
-    printf("        skip_long_tests = %d\n", (int)skip_long_tests);
     printf("===================================\n");
 
 
@@ -3559,7 +3432,7 @@ main(void)
     nerrs += check_file_mdc_api_calls();
 #endif
 #if 1
-    nerrs += mdc_api_call_smoke_check();
+    nerrs += mdc_api_call_smoke_check(express_test);
 #endif
 #if 1
     nerrs += check_fapl_mdc_api_errs();

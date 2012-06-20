@@ -20,7 +20,7 @@
  *		implemented in H5C.c
  */
 #include "h5test.h"
-#include "H5ACprivate.h"
+#include "H5Cprivate.h"
 #include "H5Iprivate.h"
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
@@ -58,24 +58,20 @@ haddr_t saved_actual_base_addr = HADDR_UNDEF;   /* Store the address of the
 
 hbool_t write_permitted = TRUE;
 hbool_t pass = TRUE; /* set to false on error */
-hbool_t skip_long_tests = TRUE;
-hbool_t run_full_test = TRUE;
 hbool_t try_core_file_driver = FALSE;
 hbool_t core_file_driver_failed = FALSE;
 const char *failure_mssg = NULL;
-int failures = 0;
-int express_test = 0;
 
-test_entry_t pico_entries[NUM_PICO_ENTRIES];
-test_entry_t nano_entries[NUM_NANO_ENTRIES];
-test_entry_t micro_entries[NUM_MICRO_ENTRIES];
-test_entry_t tiny_entries[NUM_TINY_ENTRIES];
-test_entry_t small_entries[NUM_SMALL_ENTRIES];
-test_entry_t medium_entries[NUM_MEDIUM_ENTRIES];
-test_entry_t large_entries[NUM_LARGE_ENTRIES];
-test_entry_t huge_entries[NUM_HUGE_ENTRIES];
-test_entry_t monster_entries[NUM_MONSTER_ENTRIES];
-test_entry_t variable_entries[NUM_VARIABLE_ENTRIES];
+static test_entry_t pico_entries[NUM_PICO_ENTRIES];
+static test_entry_t nano_entries[NUM_NANO_ENTRIES];
+static test_entry_t micro_entries[NUM_MICRO_ENTRIES];
+static test_entry_t tiny_entries[NUM_TINY_ENTRIES];
+static test_entry_t small_entries[NUM_SMALL_ENTRIES];
+static test_entry_t medium_entries[NUM_MEDIUM_ENTRIES];
+static test_entry_t large_entries[NUM_LARGE_ENTRIES];
+static test_entry_t huge_entries[NUM_HUGE_ENTRIES];
+static test_entry_t monster_entries[NUM_MONSTER_ENTRIES];
+static test_entry_t variable_entries[NUM_VARIABLE_ENTRIES];
 
 static herr_t pico_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
 static herr_t nano_get_load_size(const void *udata_ptr, size_t *image_len_ptr);
@@ -268,7 +264,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     PICO_ENTRY_TYPE,
     "pico_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)pico_get_load_size,
     (H5C_deserialize_func_t)pico_deserialize,
     (H5C_image_len_func_t)pico_image_len,
@@ -279,7 +275,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NANO_ENTRY_TYPE,
     "nano_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)nano_get_load_size,
     (H5C_deserialize_func_t)nano_deserialize,
     (H5C_image_len_func_t)nano_image_len,
@@ -290,7 +286,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     MICRO_ENTRY_TYPE,
     "micro_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)micro_get_load_size,
     (H5C_deserialize_func_t)micro_deserialize,
     (H5C_image_len_func_t)micro_image_len,
@@ -301,7 +297,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     TINY_ENTRY_TYPE,
     "tiny_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)tiny_get_load_size,
     (H5C_deserialize_func_t)tiny_deserialize,
     (H5C_image_len_func_t)tiny_image_len,
@@ -312,7 +308,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     SMALL_ENTRY_TYPE,
     "small_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)small_get_load_size,
     (H5C_deserialize_func_t)small_deserialize,
     (H5C_image_len_func_t)small_image_len,
@@ -323,7 +319,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     MEDIUM_ENTRY_TYPE,
     "medium_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)medium_get_load_size,
     (H5C_deserialize_func_t)medium_deserialize,
     (H5C_image_len_func_t)medium_image_len,
@@ -334,7 +330,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     LARGE_ENTRY_TYPE,
     "large_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)large_get_load_size,
     (H5C_deserialize_func_t)large_deserialize,
     (H5C_image_len_func_t)large_image_len,
@@ -345,7 +341,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     HUGE_ENTRY_TYPE,
     "huge_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)huge_get_load_size,
     (H5C_deserialize_func_t)huge_deserialize,
     (H5C_image_len_func_t)huge_image_len,
@@ -356,7 +352,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     MONSTER_ENTRY_TYPE,
     "monster_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)monster_get_load_size,
     (H5C_deserialize_func_t)monster_deserialize,
     (H5C_image_len_func_t)monster_image_len,
@@ -367,7 +363,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     VARIABLE_ENTRY_TYPE,
     "variable_entry",
     H5FD_MEM_DEFAULT,
-    H5AC__CLASS_NO_FLAGS_SET,
+    H5C__CLASS_NO_FLAGS_SET,
     (H5C_get_load_size_func_t)variable_get_load_size,
     (H5C_deserialize_func_t)variable_deserialize,
     (H5C_image_len_func_t)variable_image_len,
@@ -376,7 +372,8 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
   }
 };
 
-/* address translation funtions: */
+
+/* address translation functions: */
 
 
 /*-------------------------------------------------------------------------
@@ -1638,7 +1635,7 @@ entry_in_cache(H5C_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:	reset_entries
  *
- * Purpose:	reset the contents of the entries arrays to know values.
+ * Purpose:	reset the contents of the entries arrays to known values.
  *
  * Return:	void
  *
@@ -1962,7 +1959,7 @@ verify_entry_status(H5C_t * cache_ptr,
 
 	        pass = FALSE;
 	        sprintf(msg,
-                        "%d entry (%d, %d) size actualexpected = %ld/%ld.\n",
+                        "%d entry (%d, %d) size actual/expected = %ld/%ld.\n",
 			tag,
 	                (int)expected[i].entry_type,
 		        (int)expected[i].entry_index,
@@ -2521,12 +2518,6 @@ takedown_cache(H5F_t * file_ptr,
 	    saved_cache = NULL;
 	}
 
-        if ( H5F_addr_defined(saved_actual_base_addr) ) {
-
-            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
-                                          (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
-            saved_actual_base_addr = HADDR_UNDEF;
-        }
     }
 
     if ( saved_fapl_id != H5P_DEFAULT ) {
@@ -2536,6 +2527,18 @@ takedown_cache(H5F_t * file_ptr,
     }
 
     if ( saved_fid != -1 ) {
+
+        if ( H5F_addr_defined(saved_actual_base_addr) ) {
+
+            if ( NULL == file_ptr )  {
+                file_ptr = (H5F_t *)H5I_object_verify(saved_fid, H5I_FILE);
+                HDassert ( file_ptr );
+            }
+
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DEFAULT, saved_actual_base_addr,
+                                          (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
+            saved_actual_base_addr = HADDR_UNDEF;
+        }
 
 	if ( H5Fclose(saved_fid) < 0  ) {
 
@@ -2653,38 +2656,31 @@ flush_cache(H5F_t * file_ptr,
             hbool_t dump_stats,
             hbool_t dump_detailed_stats)
 {
-    H5C_t * cache_ptr;
-    herr_t result = 0;
-
     verify_unprotected();
 
-    if ( pass ) {
+    if(pass) {
+        H5C_t * cache_ptr;
+        herr_t result = 0;
 
         HDassert(file_ptr);
 
         cache_ptr = file_ptr->shared->cache;
 
-        if ( destroy_entries ) {
-
+        if(destroy_entries)
             result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                      H5C__FLUSH_INVALIDATE_FLAG);
 
-        } else {
-
+        else
             result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                      H5C__NO_FLAGS_SET);
+
+        if(dump_stats)
+            H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
+
+        if(result < 0) {
+            pass = FALSE;
+            failure_mssg = "error in H5C_flush_cache().";
         }
-    }
-
-    if ( dump_stats ) {
-
-        H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
-    }
-
-    if ( result < 0 ) {
-
-        pass = FALSE;
-        failure_mssg = "error in H5C_flush_cache().";
     }
 
     return;
@@ -2735,7 +2731,7 @@ insert_entry(H5F_t * file_ptr,
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-	insert_pinned = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
+	insert_pinned = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
 	entry_ptr->is_dirty = TRUE;
 
@@ -2767,24 +2763,19 @@ insert_entry(H5F_t * file_ptr,
                        (int)(entry_ptr->addr != entry_ptr->header.addr));
 #endif
         }
-	HDassert( entry_ptr->cache_ptr == NULL );
+	HDassert(entry_ptr->cache_ptr == NULL);
 
         entry_ptr->file_ptr = file_ptr;
         entry_ptr->cache_ptr = cache_ptr;
 
-	if ( insert_pinned ) {
+	if(insert_pinned)
+	    HDassert(entry_ptr->header.is_pinned);
+	else
+	    HDassert(!(entry_ptr->header.is_pinned));
+        entry_ptr->is_pinned = insert_pinned;
 
-	    HDassert( entry_ptr->header.is_pinned );
-	    entry_ptr->is_pinned = TRUE;
-
-	} else {
-
-	    HDassert( ! ( entry_ptr->header.is_pinned ) );
-	    entry_ptr->is_pinned = FALSE;
-
-	}
-        HDassert( entry_ptr->header.is_dirty );
-        HDassert( ((entry_ptr->header).type)->id == type );
+        HDassert(entry_ptr->header.is_dirty);
+        HDassert(((entry_ptr->header).type)->id == type);
     }
 
     return;
@@ -2954,64 +2945,6 @@ move_entry(H5C_t * cache_ptr,
     return;
 
 } /* move_entry() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	pin_protected_entry()
- *
- * Purpose:	Pin the specified protected entry.
- *
- *		Do nothing if pass is FALSE on entry.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              5/17/06
- *
- *-------------------------------------------------------------------------
- */
-void
-pin_protected_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
-{
-    herr_t result;
-    test_entry_t * base_addr;
-    test_entry_t * entry_ptr;
-
-    if(pass) {
-#ifndef NDEBUG
-        H5C_t * cache_ptr = file_ptr->shared->cache;
-#endif /* NDEBUG */
-
-        HDassert(cache_ptr);
-        HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
-        HDassert((0 <= idx) && (idx <= max_indices[type]));
-
-        base_addr = entries[type];
-        entry_ptr = &(base_addr[idx]);
-
-        HDassert(entry_ptr->index == idx);
-        HDassert(entry_ptr->type == type);
-        HDassert(entry_ptr == entry_ptr->self);
-	HDassert(entry_ptr->cache_ptr == cache_ptr);
-        HDassert(entry_ptr->header.is_protected);
-	HDassert(!entry_ptr->header.is_pinned);
-
-        result = H5C_pin_protected_entry((void *)entry_ptr);
-
-        if((result < 0) || !entry_ptr->header.is_protected
-                || !entry_ptr->header.is_pinned
-                || (entry_ptr->header.type != &(types[type]))
-                || (entry_ptr->size != entry_ptr->header.size)
-                || (entry_ptr->addr != entry_ptr->header.addr)) {
-            pass = FALSE;
-            failure_mssg = "error in H5C_pin_protected_entry().";
-        } /* end if */
-
-	entry_ptr->is_pinned = TRUE;
-        HDassert(((entry_ptr->header).type)->id == type);
-    } /* end if */
-
-} /* pin_protected_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -3287,8 +3220,8 @@ unprotect_entry(H5F_t * file_ptr,
         HDassert( entry_ptr->header.is_protected );
         HDassert( entry_ptr->is_protected );
 
-	pin_flag_set = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
-	unpin_flag_set = ((flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
+	pin_flag_set = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0);
+	unpin_flag_set = (hbool_t)((flags & H5C__UNPIN_ENTRY_FLAG) != 0);
 
 	HDassert ( ! ( pin_flag_set && unpin_flag_set ) );
 	HDassert ( ( ! pin_flag_set ) || ( ! (entry_ptr->is_pinned) ) );
@@ -3332,12 +3265,12 @@ unprotect_entry(H5F_t * file_ptr,
 
 	    if ( pin_flag_set ) {
 
-	        HDassert ( entry_ptr->header.is_pinned );
+	        HDassert(entry_ptr->header.is_pinned);
 		entry_ptr->is_pinned = TRUE;
 
 	    } else if ( unpin_flag_set ) {
 
-	        HDassert ( ! ( entry_ptr->header.is_pinned ) );
+	        HDassert(!(entry_ptr->header.is_pinned));
 		entry_ptr->is_pinned = FALSE;
 
             }
@@ -4950,6 +4883,62 @@ check_and_validate_cache_size(hid_t file_id,
 
 } /* check_and_validate_cache_size() */
 
+hbool_t
+resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
+    const H5C_auto_size_ctl_t *b,
+    hbool_t compare_init)
+{
+    if(a->version != b->version)
+        return(FALSE);
+    else if(a->rpt_fcn != b->rpt_fcn)
+        return(FALSE);
+    else if(compare_init && (a->set_initial_size != b->set_initial_size))
+        return(FALSE);
+    else if(compare_init && (a->initial_size != b->initial_size))
+        return(FALSE);
+    else if(HDfabs(a->min_clean_fraction - b->min_clean_fraction) > FP_EPSILON)
+        return(FALSE);
+    else if(a->max_size != b->max_size)
+        return(FALSE);
+    else if(a->min_size != b->min_size)
+        return(FALSE);
+    else if(a->epoch_length != b->epoch_length)
+        return(FALSE);
+    else if(a->incr_mode != b->incr_mode)
+        return(FALSE);
+    else if(HDfabs(a->lower_hr_threshold - b->lower_hr_threshold) > FP_EPSILON)
+        return(FALSE);
+    else if(HDfabs(a->increment - b->increment) > FP_EPSILON)
+        return(FALSE);
+    else if(a->apply_max_increment != b->apply_max_increment)
+        return(FALSE);
+    else if(a->max_increment != b->max_increment)
+        return(FALSE);
+    else if(a->flash_incr_mode != b->flash_incr_mode)
+        return(FALSE);
+    else if(HDfabs(a->flash_multiple - b->flash_multiple) > FP_EPSILON)
+        return(FALSE);
+    else if(HDfabs(a->flash_threshold - b->flash_threshold) > FP_EPSILON)
+        return(FALSE);
+    else if(a->decr_mode != b->decr_mode)
+        return(FALSE);
+    else if(HDfabs(a->upper_hr_threshold - b->upper_hr_threshold) > FP_EPSILON)
+        return(FALSE);
+    else if(HDfabs(a->decrement - b->decrement) > FP_EPSILON)
+        return(FALSE);
+    else if(a->apply_max_decrement != b->apply_max_decrement)
+        return(FALSE);
+    else if(a->max_decrement != b->max_decrement)
+        return(FALSE);
+    else if(a->epochs_before_eviction != b->epochs_before_eviction)
+        return(FALSE);
+    else if(a->apply_empty_reserve != b->apply_empty_reserve)
+        return(FALSE);
+    else if(HDfabs(a->empty_reserve - b->empty_reserve) > FP_EPSILON)
+        return(FALSE);
+    return(TRUE);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	validate_mdc_config()
@@ -5018,7 +5007,7 @@ validate_mdc_config(hid_t file_id,
     /* compare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! RESIZE_CONFIGS_ARE_EQUAL(int_config, cache_ptr->resize_ctl,
+	if ( ! resize_configs_are_equal(&int_config, &cache_ptr->resize_ctl,
                                         compare_init) ) {
 
             pass = FALSE;
