@@ -693,6 +693,12 @@ Bug Fixes since HDF5-1.8.0 release
         (ADB - 2011/08/15)
       - perf_serial test added to Windows projects and check batch file. 
         (ADB - 2009/06/11)
+    Fortran
+    --------
+      - Fixed a typo in return value of the nh5dread_f_c function ( was 1
+        instead of 0 on success); fixed the return value to make it consistent
+        with other Fortran functions; cleaned the code from debug statements.
+        (EIP - 2012/06/23)
 
     Tools
     -----
