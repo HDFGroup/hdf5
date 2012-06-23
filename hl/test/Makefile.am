@@ -44,8 +44,8 @@ if BUILD_ALL_CONDITIONAL
 endif
 
 # Temporary files.  These files are the ones created by running `make test'.
-CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-9].h5 test_image[1-3].h5 \
-        file_img[1-2].h5 test_lite[1-2].h5 test_table.h5 test_packet_table.h5 \
-        test_packet_compress.h5 test_detach.h5
+CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-9].h5 test_ds10.h5 \
+	test_image[1-3].h5 file_img[1-2].h5 test_lite[1-4].h5 test_table.h5 \
+	test_packet_table.h5 test_packet_compress.h5 test_detach.h5
 
 include $(top_srcdir)/config/conclude.am
