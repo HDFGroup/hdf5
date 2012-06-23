@@ -519,7 +519,7 @@ test_core(void)
     udata_t *udata;
     unsigned char *file_image;
     char    filename[1024];
-    char    src_dir_filename[1024];
+    char    copied_filename[1024];
     const char *tmp = NULL;
     size_t  size;
     hsize_t dims[2];
@@ -542,16 +542,15 @@ test_core(void)
     tmp = h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
     VERIFY(tmp != NULL, "h5_fixname failed");
 
-    /* convert file name to srcdir file name.  Make a copy as 
-     * H5_get_srcdir_filename() simply sets up the file name in its
-     * own buffer each time it is called -- overwriting the previous
-     * value.
-     */
-    tmp = H5_get_srcdir_filename(filename);
-    VERIFY(tmp != NULL, "H5_get_srcdir_filename failed");
-    VERIFY(strlen(tmp) < 1023, "srcdir file name too long.");
-    HDstrncpy(src_dir_filename, tmp, 1023);
-    src_dir_filename[1023] = '\0';
+    /* Append ".copy" to the filename from the source directory */
+    VERIFY(HDstrlen(filename) < (1023 - 5), "file name too long.");
+    HDstrncpy(copied_filename, filename, 1023);
+    copied_filename[1023] = '\0';
+    HDstrcat(copied_filename, ".copy");
+
+    /* Make a copy of the data file from svn. */
+    ret = h5_make_local_copy(filename, copied_filename);
+    VERIFY(ret >= 0, "h5_make_local_copy");
 
     /* Allocate and initialize udata */
     udata = (udata_t *)HDmalloc(sizeof(udata_t));
@@ -566,7 +565,7 @@ test_core(void)
 
     /* Test open (no file image) */
     reset_udata(udata);
-    file = H5Fopen(src_dir_filename, H5F_ACC_RDWR, fapl);
+    file = H5Fopen(copied_filename, H5F_ACC_RDONLY, fapl);
     VERIFY(file >= 0, "H5Fopen failed");
     VERIFY(udata->used_callbacks == MALLOC, "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN, "Malloc callback came from wrong sourc in core open");
@@ -579,7 +578,7 @@ test_core(void)
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE, "Free callback came from wrong sourc in core close");
 
     /* Reopen file */
-    file = H5Fopen(src_dir_filename, H5F_ACC_RDWR, fapl);
+    file = H5Fopen(copied_filename, H5F_ACC_RDWR, fapl);
     VERIFY(file >= 0, "H5Fopen failed");
 
     /* Set up a new dset */
@@ -613,7 +612,7 @@ test_core(void)
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE, "Free callback came from wrong sourc in core close");
 
     /* Create file image buffer */
-    fd = HDopen(src_dir_filename, O_RDONLY, 0666);
+    fd = HDopen(copied_filename, O_RDONLY, 0666);
     VERIFY(fd > 0, "open failed");
     ret = HDfstat(fd, &sb);
     VERIFY(ret == 0, "fstat failed");
@@ -627,13 +626,14 @@ test_core(void)
     if(H5Pset_file_image(fapl, file_image, size) < 0) FAIL_STACK_ERROR
 
     /* Test open with file image */
-    if((file = H5Fopen("dne.h5", H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
+    if((file = H5Fopen("dne.h5", H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Release resources */
     h5_cleanup(FILENAME, fapl); 
     HDfree(udata);
     HDfree(file_image);
+    HDremove(copied_filename);
     
     PASSED();
 
