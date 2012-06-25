@@ -1781,7 +1781,6 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     hsize_t             nelmts = 1;
     int                 ndims;
     int                 i;
-    int                 depth;
     int                 status = -1;
     int                 stdindent = COL;    /* should be 3 */
     void               *buf = NULL;
@@ -1883,9 +1882,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
             p_type = h5tools_get_native_type(type);
 
             /* Check if we have VL data in the dataset's datatype */
-            if (h5tools_detect_vlen_str(p_type) == TRUE)
-                vl_data = TRUE;
-            if (H5Tdetect_class(p_type, H5T_VLEN) == TRUE)
+            if (h5tools_detect_vlen(p_type) == TRUE)
                 vl_data = TRUE;
 
             H5Tclose(type);
@@ -2952,7 +2949,7 @@ xml_print_refs(hid_t did, int source)
     string_dataformat.do_escape = display_escape;
     outputformat = &string_dataformat;
 
-    for (i = 0; i < ssiz; i++) {
+    for (i = 0; i < (hsize_t)ssiz; i++) {
         const char *path = lookup_ref_path(*refbuf);
         ctx.indent_level++;
 

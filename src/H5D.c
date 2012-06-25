@@ -20,7 +20,7 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5D_init_pub_interface
+#define H5_INTERFACE_INIT_FUNC	H5D__init_pub_interface
 
 
 /***********/
@@ -46,6 +46,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
+
+static herr_t H5D__init_pub_interface(void);
 
 
 /*********************/
@@ -75,9 +77,9 @@ H5FL_BLK_EXTERN(type_conv);
 
 /*--------------------------------------------------------------------------
 NAME
-   H5D_init_pub_interface -- Initialize interface-specific information
+   H5D__init_pub_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5D_init_pub_interface()
+    herr_t H5D__init_pub_interface()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -86,12 +88,12 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5D_init_pub_interface(void)
+H5D__init_pub_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(H5D_init())
-} /* H5D_init_pub_interface() */
+} /* H5D__init_pub_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -248,7 +250,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* build and open the new dataset */
-    if(NULL == (dset = H5D_create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
+    if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */
@@ -484,7 +486,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Read data space address and return */
-    if(FAIL==(ret_value=H5D_get_space_status(dset, allocation, H5AC_ind_dxpl_id)))
+    if(H5D__get_space_status(dset, allocation, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
 done:
@@ -786,7 +788,8 @@ H5Dget_storage_size(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")
 
     /* Set return value */
-    ret_value = H5D_get_storage_size(dset, H5AC_ind_dxpl_id);
+    if(H5D__get_storage_size(dset, H5AC_ind_dxpl_id, &ret_value) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataset's storage")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -821,7 +824,9 @@ H5Dget_offset(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a dataset")
 
     /* Set return value */
-    ret_value = H5D_get_offset(dset);
+    ret_value = H5D__get_offset(dset);
+    if(!H5F_addr_defined(ret_value))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HADDR_UNDEF, "unable to get space status")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -909,7 +914,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     if(!(H5S_has_extent(space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
-    ret_value = H5D_iterate(buf, type_id, space, op, operator_data);
+    ret_value = H5D__iterate(buf, type_id, space, op, operator_data);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1040,14 +1045,14 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     /* Set the memory manager to the special allocation routine */
-    if(H5P_set_vlen_mem_manager(plist, H5D_vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
+    if(H5P_set_vlen_mem_manager(plist, H5D__vlen_get_buf_size_alloc, &vlen_bufsize, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't set VL data allocation routine")
 
     /* Set the initial number of bytes required */
     vlen_bufsize.size = 0;
 
-    /* Call H5D_iterate with args, etc. */
-    ret_value = H5D_iterate(&bogus, type_id, space, H5D_vlen_get_buf_size, &vlen_bufsize);
+    /* Call H5D__iterate with args, etc. */
+    ret_value = H5D__iterate(&bogus, type_id, space, H5D__vlen_get_buf_size, &vlen_bufsize);
 
     /* Get the size if we succeeded */
     if(ret_value >= 0)
@@ -1098,7 +1103,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Private function */
-    if(H5D_set_extent(dset, size, H5AC_dxpl_id) < 0)
+    if(H5D__set_extent(dset, size, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
 
 done:

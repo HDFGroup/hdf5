@@ -73,6 +73,7 @@ SET_TARGET_PROPERTIES (testhdf5_fortran PROPERTIES LINKER_LANGUAGE Fortran)
 SET_TARGET_PROPERTIES (testhdf5_fortran PROPERTIES FOLDER test/fortran)
 
 ADD_TEST (NAME testhdf5_fortran COMMAND $<TARGET_FILE:testhdf5_fortran>)
+SET_TESTS_PROPERTIES(testhdf5_fortran PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
 
 #-- Adding test for testhdf5_fortran_1_8
 ADD_EXECUTABLE (testhdf5_fortran_1_8
@@ -96,6 +97,7 @@ SET_TARGET_PROPERTIES (testhdf5_fortran_1_8 PROPERTIES LINKER_LANGUAGE Fortran)
 SET_TARGET_PROPERTIES (testhdf5_fortran_1_8 PROPERTIES FOLDER test/fortran)
 
 ADD_TEST (NAME testhdf5_fortran_1_8 COMMAND $<TARGET_FILE:testhdf5_fortran_1_8>)
+SET_TESTS_PROPERTIES(testhdf5_fortran_1_8 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
 
 #-- Adding test for fortranlib_test_F03
 IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
@@ -121,6 +123,7 @@ IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
   SET_TARGET_PROPERTIES (fortranlib_test_F03 PROPERTIES FOLDER test/fortran)
 
   ADD_TEST (NAME fortranlib_test_F03 COMMAND $<TARGET_FILE:fortranlib_test_F03>)
+  SET_TESTS_PROPERTIES(fortranlib_test_F03 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
 ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
 
 #-- Adding test for fflush1

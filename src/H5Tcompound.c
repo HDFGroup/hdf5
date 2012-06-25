@@ -56,6 +56,7 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5T_pack(const H5T_t *dt);
+static htri_t H5T_is_packed(const H5T_t *dt);
 
 
 /*********************/
@@ -298,7 +299,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_get_member_size
+ * Function:	H5T__get_member_size
  *
  * Purpose:	Returns the size of the specified member.
  *
@@ -311,16 +312,15 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5T_get_member_size(const H5T_t *dt, unsigned membno)
+H5T__get_member_size(const H5T_t *dt, unsigned membno)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(dt);
     HDassert(membno < dt->shared->u.compnd.nmembs);
 
-
     FUNC_LEAVE_NOAPI(dt->shared->u.compnd.memb[membno].type->shared->size)
-} /* end H5T_get_member_size() */
+} /* end H5T__get_member_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -370,7 +370,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Insert */
-    if(H5T_insert(parent, name, offset, member) < 0)
+    if(H5T__insert(parent, name, offset, member) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "unable to insert member")
 
 done:
@@ -416,7 +416,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_insert
+ * Function:	H5T__insert
  *
  * Purpose:	Adds a new MEMBER to the compound datatype PARENT.  The new
  *		member will have a NAME that is unique within PARENT and an
@@ -431,14 +431,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
+H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
     unsigned	idx;                        /* Index of member to insert */
     size_t	total_size;
     unsigned	i;                          /* Local index variable */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(parent && H5T_COMPOUND == parent->shared->type);
@@ -492,7 +492,7 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     HDassert(!(parent->shared->u.compnd.packed));
 
     /* Determine if the compound datatype becomes packed */
-    H5T_update_packed(parent);
+    H5T__update_packed(parent);
 
     /* Set the "force conversion" flag if the field's datatype indicates */
     if(member->shared->force_conv == TRUE)
@@ -504,12 +504,12 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
         /* (can't use a partial datatype and later versions of the format are
          *  more efficient, so might as well upgrade all members also... -QAK)
          */
-        if(H5T_upgrade_version(parent, member->shared->version) < 0)
+        if(H5T__upgrade_version(parent, member->shared->version) < 0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade member encoding version")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_insert() */
+} /* end H5T__insert() */
 
 
 /*-------------------------------------------------------------------------
@@ -567,7 +567,7 @@ H5T_pack(const H5T_t *dt)
             } /* end for */
 
             /* Remove padding between members */
-            if(H5T_sort_value(dt, NULL) < 0)
+            if(H5T__sort_value(dt, NULL) < 0)
 		HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
             for(i = 0, offset = 0; i < dt->shared->u.compnd.nmembs; i++) {
                 dt->shared->u.compnd.memb[i].offset = offset;
@@ -602,7 +602,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
+static htri_t
 H5T_is_packed(const H5T_t *dt)
 {
     htri_t      ret_value = TRUE;       /* Return value */
@@ -625,7 +625,7 @@ H5T_is_packed(const H5T_t *dt)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_update_packed
+ * Function:	H5T__update_packed
  *
  * Purpose:	Checks whether a datatype which is compound became packed
  *              after recent changes.  This function does not assume that
@@ -642,11 +642,11 @@ H5T_is_packed(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 void
-H5T_update_packed(const H5T_t *dt)
+H5T__update_packed(const H5T_t *dt)
 {
     unsigned    i;                      /* Index */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(dt);
     HDassert(dt->shared->type == H5T_COMPOUND);
@@ -667,5 +667,5 @@ H5T_update_packed(const H5T_t *dt)
         dt->shared->u.compnd.packed = FALSE;
 
     FUNC_LEAVE_NOAPI_VOID
-} /* end H5T_update_packed() */
+} /* end H5T__update_packed() */
 

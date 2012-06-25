@@ -1,4 +1,4 @@
-</dset> is of type H5G_DATASET and </l1> is of type H5G_LINK
+Not comparable: </dset> is of type H5G_DATASET and </l1> is of type H5G_LINK
 --------------------------------
 Some objects are not comparable
 --------------------------------

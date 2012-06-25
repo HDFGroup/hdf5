@@ -108,6 +108,51 @@
      INTEGER(HID_T) :: decoded_sid1
      INTEGER(HID_T) :: decoded_tid1
 
+     INTEGER(HID_T) :: fixed_str1, fixed_str2
+     LOGICAL :: are_equal
+     INTEGER(SIZE_T), PARAMETER :: str_size = 10 
+     INTEGER(SIZE_T) :: query_size
+
+     ! Test h5tcreate_f with H5T_STRING_F option:
+     !   Create fixed-length string in two ways and make sure they are the same
+
+     CALL h5tcopy_f(H5T_FORTRAN_S1, fixed_str1, error)
+     CALL check("h5tcopy_f", error, total_error)
+     CALL h5tset_size_f(fixed_str1, str_size, error)
+     CALL check("h5tset_size_f", error, total_error)
+     CALL h5tset_strpad_f(fixed_str1, H5T_STR_NULLTERM_F, error)
+     CALL check("h5tset_strpad_f", error, total_error)
+     
+     CALL h5tcreate_f(H5T_STRING_F, str_size, fixed_str2, error)
+     CALL check("h5tcreate_f", error, total_error)
+     CALL h5tset_strpad_f(fixed_str2, H5T_STR_NULLTERM_F, error)
+     CALL check("h5tset_strpad_f", error, total_error)
+     
+     CALL h5tequal_f(fixed_str1, fixed_str2, are_equal, error)
+     IF(.NOT.are_equal)THEN
+        CALL check("h5tcreate_f", -1, total_error)
+     ENDIF
+     
+     CALL h5tget_size_f(fixed_str1, query_size, error)
+     CALL check("h5tget_size_f", error, total_error)
+     
+     IF(query_size.NE.str_size)THEN
+        CALL check("h5tget_size_f", -1, total_error)
+     ENDIF
+     
+     CALL h5tget_size_f(fixed_str2, query_size, error)
+     CALL check("h5tget_size_f", error, total_error)
+
+     IF(query_size.NE.str_size)THEN
+        CALL check("h5tget_size_f", -1, total_error)
+     ENDIF
+     
+     CALL h5tclose_f(fixed_str1,error)
+     CALL check("h5tclose_f", error, total_error)
+     
+     CALL h5tclose_f(fixed_str2,error)
+     CALL check("h5tclose_f", error, total_error)
+
      data_dims(1) = dimsize
      !
      ! Initialize data buffer.

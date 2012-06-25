@@ -17,8 +17,7 @@
 
 #include "H5LTprivate.h"
 #include "H5LTf90proto.h"
-
-
+#include "H5Eprivate.h"
 
 /*-------------------------------------------------------------------------
 * Function: H5LTmake_dataset_c
@@ -1719,13 +1718,13 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
                             _fcd dsetname,
                             int_f *attrnamelen,
                             _fcd attrname,
-                            void *buf)
+                            _fcd buf, size_t_f *buf_size)
 {
     int     ret_value = -1;
     herr_t  ret;
-    hid_t   c_loc_id;
     char    *c_name = NULL;
     char    *c_attrname = NULL;
+    char    *c_buf = NULL;
     int     c_namelen;
     int     c_attrnamelen;
 
@@ -1741,26 +1740,33 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id,
     c_attrname = (char *)HD5f2cstring(attrname, c_attrnamelen);
     if (c_attrname == NULL)
         goto done;
+    /*
+     * Allocate buffer to hold C attribute string
+     */
+    if ((c_buf = HDmalloc((size_t)*buf_size + 1)) == NULL)
+      goto done;
 
     /*
-    * Call H5LTget_attribute_int function.
-    */
-    c_loc_id = (hid_t)*loc_id;
-
-    ret = H5LTget_attribute_string(c_loc_id,c_name,c_attrname,buf);
-
+     * Call H5LTget_attribute_int function.
+     */
+    ret = H5LTget_attribute_string((hid_t)*loc_id,c_name,c_attrname,c_buf);
     if (ret < 0)
         goto done;
 
-    ret_value = 0;
+    /*
+     * Convert C name to FORTRAN and place it in the given buffer
+     */
+    HD5packFstring(c_buf, _fcdtocp(buf), (size_t)*buf_size); 
 
+    ret_value = 0;
 
 done:
     if(c_name!=NULL)
         free(c_name);
     if(c_attrname!=NULL)
         free(c_attrname);
-
+    if(c_buf!=NULL)
+        free(c_buf);
 
     return ret_value;
 }
@@ -2157,7 +2163,7 @@ nh5ltpath_valid_c(hid_t_f *loc_id,
     /*
      * convert FORTRAN name to C name
      */
-    if( NULL == (c_path = (char *)HD5f2cstring(path, (int)*pathlen)))
+    if( NULL == (c_path = (char *)HD5f2cstring(path, (size_t)*pathlen)))
       goto done;
     
     check_object_valid = FALSE;

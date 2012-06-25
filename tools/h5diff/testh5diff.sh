@@ -156,6 +156,8 @@ $SRC_H5DIFF_TESTFILES/h5diff_208.txt
 $SRC_H5DIFF_TESTFILES/h5diff_220.txt
 $SRC_H5DIFF_TESTFILES/h5diff_221.txt
 $SRC_H5DIFF_TESTFILES/h5diff_222.txt
+$SRC_H5DIFF_TESTFILES/h5diff_223.txt
+$SRC_H5DIFF_TESTFILES/h5diff_224.txt
 $SRC_H5DIFF_TESTFILES/h5diff_21.txt
 $SRC_H5DIFF_TESTFILES/h5diff_22.txt
 $SRC_H5DIFF_TESTFILES/h5diff_23.txt
@@ -207,11 +209,19 @@ $SRC_H5DIFF_TESTFILES/h5diff_466.txt
 $SRC_H5DIFF_TESTFILES/h5diff_467.txt
 $SRC_H5DIFF_TESTFILES/h5diff_468.txt
 $SRC_H5DIFF_TESTFILES/h5diff_469.txt
+$SRC_H5DIFF_TESTFILES/h5diff_471.txt
+$SRC_H5DIFF_TESTFILES/h5diff_472.txt
+$SRC_H5DIFF_TESTFILES/h5diff_473.txt
+$SRC_H5DIFF_TESTFILES/h5diff_474.txt
+$SRC_H5DIFF_TESTFILES/h5diff_475.txt
 $SRC_H5DIFF_TESTFILES/h5diff_480.txt
 $SRC_H5DIFF_TESTFILES/h5diff_481.txt
 $SRC_H5DIFF_TESTFILES/h5diff_482.txt
 $SRC_H5DIFF_TESTFILES/h5diff_483.txt
 $SRC_H5DIFF_TESTFILES/h5diff_484.txt
+$SRC_H5DIFF_TESTFILES/h5diff_485.txt
+$SRC_H5DIFF_TESTFILES/h5diff_486.txt
+$SRC_H5DIFF_TESTFILES/h5diff_487.txt
 $SRC_H5DIFF_TESTFILES/h5diff_50.txt
 $SRC_H5DIFF_TESTFILES/h5diff_51.txt
 $SRC_H5DIFF_TESTFILES/h5diff_52.txt
@@ -817,13 +827,20 @@ TOOLTEST h5diff_221.txt -c non_comparables1.h5 non_comparables2.h5 /g2
 
 # entire file
 # All the comparables should display differences.
-if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
+if test -n "$pmode"; then
     # parallel mode: 
-    # skip due to ph5diff hangs on koala (linux64-LE) randomly.    
+    # skip due to ph5diff hangs on koala (linux64-LE) and ember intermittently.
+    # (HDFFV-8003 - TBD)
     SKIP -c non_comparables1.h5 non_comparables2.h5
 else
     TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
 fi    
+
+# non-comparable test for common objects (same name) with different object types
+# (HDFFV-7644)
+TOOLTEST h5diff_223.txt -c non_comparables1.h5 non_comparables2.h5 /diffobjtypes
+# swap files
+TOOLTEST h5diff_224.txt -c non_comparables2.h5 non_comparables1.h5 /diffobjtypes
     
 # ##############################################################################
 # # Links compare without --follow-symlinks nor --no-dangling-links
@@ -958,6 +975,17 @@ TOOLTEST h5diff_467.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dangl
 TOOLTEST h5diff_468.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4 
 # ext link vs. ext dangling
 TOOLTEST h5diff_469.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2
+
+#----------------------------------------
+# dangling links without follow symlink 
+# (HDFFV-7998)
+# test - soft dangle links (same and different paths), 
+#      - external dangle links (same and different paths)
+TOOLTEST h5diff_471.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5
+TOOLTEST h5diff_472.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1
+TOOLTEST h5diff_473.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link4
+TOOLTEST h5diff_474.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4
+TOOLTEST h5diff_475.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link1
 
 # ##############################################################################
 # # test for group diff recursivly

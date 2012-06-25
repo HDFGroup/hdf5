@@ -189,7 +189,7 @@ for arg in $@ ; do
         get_output_file="yes"
       fi
       ;;
-    -E|-M)
+    -E|-M|-MT)
       allargs="$allargs $arg"
       compile_args="$compile_args $arg"
       dash_c="yes"

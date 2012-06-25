@@ -3184,8 +3184,13 @@ error:
  * To verify that a block can be extended from the aggregator
  *
  *	Test 1: Allocate block A from meta_aggr which is at end of file
- *		Try to extend a block which adjoins the aggregator
- *		H5MF_try_extend() succeeds: meta_aggr is extended by extended-request and meta_aggr's info is updated
+ *		Try to extend the block which adjoins the aggregator that is at end of file
+ *		  a. block size < (% * aggr->alloc_size)
+ *		     The block is allocated from the aggregator
+ *		  b. block size > (% * aggr->alloc_size) but block size < aggr->alloc_size
+ *		     The block is extended by aggr->alloc_size and the block is allocated from the aggregator
+ *		  c. block size > (% * aggr->alloc_size) but block size > aggr->alloc_size
+ *		     The block is extended by extended-request and the block is allocated from the aggregator
  *
  *	Test 2: Allocate block A from meta_aggr
  *		Allocate block B from sdata_aggr so that meta_aggr is not at end of file
@@ -3252,7 +3257,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
 
         new_addr = addr - 10;
 
-        /* Try to extend the block */
+        /* Try to extend the block by an amount < (% * aggr->alloc_size) */
         extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE50));
 
         /* should succeed */
@@ -3263,15 +3268,42 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
 
         if (new_ma_addr != (addr+TEST_BLOCK_SIZE50))
             TEST_ERROR
-        if (new_ma_size != f->shared->meta_aggr.alloc_size) TEST_ERROR
-
-        /* Restore info for meta_aggr */
-        f->shared->meta_aggr.addr = ma_addr;
-        f->shared->meta_aggr.size = ma_size;
+        if (new_ma_size != (f->shared->meta_aggr.alloc_size - TEST_BLOCK_SIZE50)) TEST_ERROR
 
         /* Free the allocated blocks */
-        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE30);
-        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, (ma_addr+ma_size), (hsize_t)TEST_BLOCK_SIZE50);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE50);
+
+        /* Try to extend the block by an amount > (% * aggr->alloc_size) but amount < aggr->alloc_size */
+        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE700));
+
+        /* should succeed */
+        if(!extended)
+            TEST_ERROR
+
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+
+        if (new_ma_addr != (addr + TEST_BLOCK_SIZE700))
+            TEST_ERROR
+        if (new_ma_size != (f->shared->meta_aggr.alloc_size * 2 - TEST_BLOCK_SIZE700)) TEST_ERROR
+
+        /* Free the allocated blocks */
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE700);
+
+        /* Try to extend the block by an amount > (% * aggr->alloc_size) but amount > aggr->alloc_size */
+        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)new_addr, (hsize_t)10, (hsize_t)(TEST_BLOCK_SIZE2058));
+
+        /* should succeed */
+        if(!extended)
+            TEST_ERROR
+
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+
+        if (new_ma_addr != (addr + TEST_BLOCK_SIZE2058))
+            TEST_ERROR
+        if (new_ma_size != f->shared->meta_aggr.size) TEST_ERROR
+
+        /* Free the allocated blocks */
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr, (hsize_t)TEST_BLOCK_SIZE2058);
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR

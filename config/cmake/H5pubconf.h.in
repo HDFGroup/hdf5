@@ -6,6 +6,9 @@
 /* Define if the Windows virtual file driver should be compiled */
 #cmakedefine H5_HAVE_WINDOWS @H5_HAVE_WINDOWS@
 
+/* Define if using MinGW */
+#cmakedefine H5_HAVE_MINGW @H5_HAVE_MINGW@
+
 /* Define if on the Windows platform and default WIN32 API */
 #cmakedefine H5_HAVE_WIN32_API @H5_HAVE_WIN32_API@
 
@@ -257,6 +260,9 @@
 /* Define to 1 if you have the `sz' library (-lsz). */
 #cmakedefine H5_HAVE_LIBSZ @H5_HAVE_LIBSZ@
 
+/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
+#cmakedefine H5_HAVE_LIBWS2_32 @H5_HAVE_LIBWS2_32@
+
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
 
@@ -458,7 +464,7 @@
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
 
 /* Define to 1 if you have the <winsock.h> header file. */
-#cmakedefine H5_HAVE_WINSOCK_H @H5_HAVE_WINSOCK_H@
+#cmakedefine H5_HAVE_WINSOCK2_H @H5_HAVE_WINSOCK2_H@
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine H5_HAVE_ZLIB_H @H5_HAVE_ZLIB_H@

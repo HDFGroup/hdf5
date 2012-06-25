@@ -45,7 +45,7 @@ static hid_t H5FD_NULL_g = 0;
 /* The description of a file belonging to this driver. */
 typedef struct H5FD_null_t {
     H5FD_t  pub;            /* public stuff, must be first      */
-    hid_t   inner_fapl_id;  /* FAPL of the underlying driver     */
+    hid_t   inner_fapl_id;  /* FAPL of the underlying driver    */
     H5FD_t  *inner_file;    /* Pointer to the underlying file   */
 } H5FD_null_t;
 
@@ -847,16 +847,15 @@ H5FD_null_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_null_query(const H5FD_t * _file, unsigned long *flags /* out */)
+H5FD_null_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
     const H5FD_null_t *file = (const H5FD_null_t*)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Query the inner driver */
-    if(flags) {
-        HDassert(file);
-        H5FD_query(file->inner_file, flags);
+    if(flags && file) {
+        H5FDquery(file->inner_file, flags);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

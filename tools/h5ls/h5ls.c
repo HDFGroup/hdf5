@@ -1436,13 +1436,13 @@ dump_dataset_values(hid_t dset)
     info = &outputformat;
 
     ctx.indent_level = 2;
-    ctx.cur_column = curr_pos;
+    ctx.cur_column = (size_t)curr_pos;
     /* Print all the values. */
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "    Data:\n");
     h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, info->line_ncols, 0, 0);
     ctx.need_prefix = TRUE;
-    ctx.cur_column = curr_pos;
+    ctx.cur_column = (size_t)curr_pos;
     if (h5tools_dump_dset(rawoutstream, info, &ctx, dset, -1, NULL) < 0) {
         h5tools_str_reset(&buffer);
         h5tools_str_append(&buffer, "        Unable to print data.");
@@ -1619,7 +1619,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
             if(H5Aread(attr, p_type, buf) >= 0) {
                 ctx.need_prefix = TRUE;
                 ctx.indent_level = 2;
-                ctx.cur_column = curr_pos;
+                ctx.cur_column = (size_t)curr_pos;
                 h5tools_dump_mem(rawoutstream, info, &ctx, attr, p_type, space, buf);
             }
 
@@ -1672,11 +1672,9 @@ dataset_list1(hid_t dset)
     H5S_class_t space_type;     /* type of dataspace          */
     int   i;
     hsize_t             curr_pos = 0;        /* total data element position   */
-    h5tool_link_info_t lnk_info;
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
-    h5tool_format_t     outputformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1753,7 +1751,6 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
-    h5tool_format_t     outputformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1921,7 +1918,6 @@ datatype_list2(hid_t type, const char UNUSED *name)
         h5tools_str_t       buffer;          /* string into which to render   */
         h5tools_context_t   ctx;             /* print context  */
         h5tool_format_t    *info = &ls_dataformat;
-        h5tool_format_t     outputformat;
 
         HDmemset(&ctx, 0, sizeof(ctx));
         HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1962,7 +1958,6 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
-    h5tool_format_t     outputformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2121,7 +2116,6 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
-    h5tool_format_t     outputformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2309,11 +2303,9 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     int retval = 0;
     H5O_info_t oi;              /* Information for object */
     hsize_t             curr_pos = 0;        /* total data element position   */
-    h5tool_link_info_t lnk_info;
     h5tools_str_t       buffer;          /* string into which to render   */
     h5tools_context_t   ctx;             /* print context  */
     h5tool_format_t    *info = &ls_dataformat;
-    h5tool_format_t     outputformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2820,11 +2812,9 @@ main(int argc, const char *argv[])
             /* Check the type of link given */
             if(H5Lget_info(file, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t             curr_pos = 0;        /* total data element position   */
-                h5tool_link_info_t lnk_info;
                 h5tools_str_t       buffer;          /* string into which to render   */
                 h5tools_context_t   ctx;             /* print context  */
                 h5tool_format_t    *info = &ls_dataformat;
-                h5tool_format_t     outputformat;
 
                 HDmemset(&ctx, 0, sizeof(ctx));
                 HDmemset(&buffer, 0, sizeof(h5tools_str_t));

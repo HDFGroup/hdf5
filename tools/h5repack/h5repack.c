@@ -87,10 +87,12 @@ int h5repack(const char* infile,
 */
 
 int
-h5repack_init(pack_opt_t *options, int verbose, H5F_file_space_type_t strategy, hsize_t threshold)
+h5repack_init(pack_opt_t *options, int verbose, H5F_file_space_type_t strategy,
+    hsize_t threshold)
 {
     int k, n;
-    HDmemset(options,0,sizeof(pack_opt_t));
+
+    HDmemset(options, 0, sizeof(pack_opt_t));
     options->min_comp = 1024;
     options->verbose  = verbose;
 
@@ -204,10 +206,12 @@ int h5repack_addlayout(const char* str,
     if (obj_list==NULL)
         return -1;
 
-    /* set global layout option */
+    /* set layout option */
+    options->layout_g = pack.layout;
+
+    /* no individual dataset specified */
     if (options->all_layout==1 )
     {
-        options->layout_g=pack.layout;
         if (pack.layout==H5D_CHUNKED)
         {
             /* -2 means the NONE option, remove chunking
@@ -226,6 +230,7 @@ int h5repack_addlayout(const char* str,
         }
     }
 
+    /* individual dataset specified */
     if (options->all_layout==0)
         options_add_layout(obj_list,
         n_objs,
@@ -502,7 +507,7 @@ int copy_attr(hid_t loc_in,
         if (type_class == H5T_COMPOUND) {
         	int nmembers = H5Tget_nmembers(wtype_id) ;
         	for (j=0; j<nmembers; j++) {
-        		hid_t mtid = H5Tget_member_type( wtype_id, j );
+        		hid_t mtid = H5Tget_member_type( wtype_id, (unsigned) j );
         		H5T_class_t mtclass = H5Tget_class(mtid);
         		H5Tclose(mtid);
 

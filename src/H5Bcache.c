@@ -152,6 +152,10 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* entries used */
     UINT16DECODE(p, bt->nchildren);
 
+    /* Check if bt->nchildren is greater than two_k */
+    if(bt->nchildren > shared->two_k)
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "number of children is greater than maximum")
+
     /* sibling pointers */
     H5F_addr_decode(udata->f, (const uint8_t **)&p, &(bt->left));
     H5F_addr_decode(udata->f, (const uint8_t **)&p, &(bt->right));

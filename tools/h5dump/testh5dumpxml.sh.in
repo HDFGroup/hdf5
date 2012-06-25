@@ -26,6 +26,7 @@ DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
+CP='cp'
 
 nerrors=0
 verbose=yes
@@ -34,8 +35,176 @@ verbose=yes
 if test -z "$srcdir"; then
    srcdir=.
 fi
+# source dirs
+SRC_TOOLS="$srcdir/../"
 
-test -d ../testfiles || mkdir ../testfiles
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES_XML="
+$SRC_H5DUMP_TESTFILES/tall.h5
+$SRC_H5DUMP_TESTFILES/tarray1.h5
+$SRC_H5DUMP_TESTFILES/tarray2.h5
+$SRC_H5DUMP_TESTFILES/tarray3.h5
+$SRC_H5DUMP_TESTFILES/tarray6.h5
+$SRC_H5DUMP_TESTFILES/tarray7.h5
+$SRC_H5DUMP_TESTFILES/tattr.h5
+$SRC_H5DUMP_TESTFILES/tbitfields.h5
+$SRC_H5DUMP_TESTFILES/tcompound.h5
+$SRC_H5DUMP_TESTFILES/tcompound2.h5
+$SRC_H5DUMP_TESTFILES/tcompound_complex.h5
+$SRC_H5DUMP_TESTFILES/tdatareg.h5
+$SRC_H5DUMP_TESTFILES/tdset.h5
+$SRC_H5DUMP_TESTFILES/tdset2.h5
+$SRC_H5DUMP_TESTFILES/tempty.h5
+$SRC_H5DUMP_TESTFILES/tenum.h5
+$SRC_H5DUMP_TESTFILES/textlink.h5
+$SRC_H5DUMP_TESTFILES/tfpformat.h5
+$SRC_H5DUMP_TESTFILES/tgroup.h5
+$SRC_H5DUMP_TESTFILES/thlink.h5
+$SRC_H5DUMP_TESTFILES/tloop.h5
+$SRC_H5DUMP_TESTFILES/tloop2.h5
+$SRC_H5DUMP_TESTFILES/tmany.h5
+$SRC_H5DUMP_TESTFILES/tname-amp.h5
+$SRC_H5DUMP_TESTFILES/tname-apos.h5
+$SRC_H5DUMP_TESTFILES/tname-gt.h5
+$SRC_H5DUMP_TESTFILES/tname-lt.h5
+$SRC_H5DUMP_TESTFILES/tname-quot.h5
+$SRC_H5DUMP_TESTFILES/tname-sp.h5
+$SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5
+$SRC_H5DUMP_TESTFILES/tnestedcomp.h5
+$SRC_H5DUMP_TESTFILES/tnodata.h5
+$SRC_H5DUMP_TESTFILES/tobjref.h5
+$SRC_H5DUMP_TESTFILES/topaque.h5
+$SRC_H5DUMP_TESTFILES/torderattr.h5
+$SRC_H5DUMP_TESTFILES/tref.h5
+$SRC_H5DUMP_TESTFILES/tref-escapes.h5
+$SRC_H5DUMP_TESTFILES/tref-escapes-at.h5
+$SRC_H5DUMP_TESTFILES/tsaf.h5
+$SRC_H5DUMP_TESTFILES/tslink.h5
+$SRC_H5DUMP_TESTFILES/tstring.h5
+$SRC_H5DUMP_TESTFILES/tstring-at.h5
+$SRC_H5DUMP_TESTFILES/tstr.h5
+$SRC_H5DUMP_TESTFILES/tstr2.h5
+$SRC_H5DUMP_TESTFILES/tudlink.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes1.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes2.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes3.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes4.h5
+$SRC_H5DUMP_TESTFILES/tvldtypes5.h5
+$SRC_H5DUMP_TESTFILES/tvlstr.h5
+"
+
+LIST_OTHER_TEST_FILES_XML="
+$SRC_H5DUMP_TESTFILES/tall.h5.xml
+$SRC_H5DUMP_TESTFILES/tall-2A.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray1.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray2.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray3.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray6.h5.xml
+$SRC_H5DUMP_TESTFILES/tarray7.h5.xml
+$SRC_H5DUMP_TESTFILES/tattr.h5.xml
+$SRC_H5DUMP_TESTFILES/tbitfields.h5.xml
+$SRC_H5DUMP_TESTFILES/tcompound_complex.h5.xml
+$SRC_H5DUMP_TESTFILES/tcompound.h5.xml
+$SRC_H5DUMP_TESTFILES/tcompound2.h5.xml
+$SRC_H5DUMP_TESTFILES/tdatareg.h5.xml
+$SRC_H5DUMP_TESTFILES/tdset.h5.xml
+$SRC_H5DUMP_TESTFILES/tdset2.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-dtd.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-dtd-2.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-dtd-uri.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-nons.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-nons-2.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-nons-uri.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-ns.h5.xml
+$SRC_H5DUMP_TESTFILES/tempty-ns-2.h5.xml
+$SRC_H5DUMP_TESTFILES/tenum.h5.xml
+$SRC_H5DUMP_TESTFILES/textlink.h5.xml
+$SRC_H5DUMP_TESTFILES/tfpformat.h5.xml
+$SRC_H5DUMP_TESTFILES/tgroup.h5.xml
+$SRC_H5DUMP_TESTFILES/thlink.h5.xml
+$SRC_H5DUMP_TESTFILES/tloop.h5.xml
+$SRC_H5DUMP_TESTFILES/tloop2.h5.xml
+$SRC_H5DUMP_TESTFILES/tmany.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-amp.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-apos.h5.xml
+$SRC_H5DUMP_TESTFILES/tnamed_dtype_attr.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-gt.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-lt.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-quot.h5.xml
+$SRC_H5DUMP_TESTFILES/tname-sp.h5.xml
+$SRC_H5DUMP_TESTFILES/tnestedcomp.h5.xml
+$SRC_H5DUMP_TESTFILES/tnodata.h5.xml
+$SRC_H5DUMP_TESTFILES/tobjref.h5.xml
+$SRC_H5DUMP_TESTFILES/topaque.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr1.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr2.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr3.h5.xml
+$SRC_H5DUMP_TESTFILES/torderattr4.h5.xml
+$SRC_H5DUMP_TESTFILES/tref.h5.xml
+$SRC_H5DUMP_TESTFILES/tref-escapes.h5.xml
+$SRC_H5DUMP_TESTFILES/tref-escapes-at.h5.xml
+$SRC_H5DUMP_TESTFILES/tsaf.h5.xml
+$SRC_H5DUMP_TESTFILES/tslink.h5.xml
+$SRC_H5DUMP_TESTFILES/tstr.h5.xml
+$SRC_H5DUMP_TESTFILES/tstr2.h5.xml
+$SRC_H5DUMP_TESTFILES/tstring.h5.xml
+$SRC_H5DUMP_TESTFILES/tstring-at.h5.xml
+$SRC_H5DUMP_TESTFILES/tudlink.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes1.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes2.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes3.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes4.h5.xml
+$SRC_H5DUMP_TESTFILES/tvldtypes5.h5.xml
+$SRC_H5DUMP_TESTFILES/tvlstr.h5.xml
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            if [ -a $tstfile ]; then
+                $CP -f $tstfile $TESTDIR
+            else
+                echo "Error: FAILED to copy $tstfile"
+                echo "       $tstfile doesn't exist!"
+                exit $EXIT_FAILURE
+            fi
+        fi
+    done
+}
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".

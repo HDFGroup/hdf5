@@ -782,7 +782,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5G_name_replace_cb
  *
- * Purpose: H5I_search callback function to replace group entry names
+ * Purpose: H5I_iterate callback function to replace group entry names
  *
  * Return: Success: 0, Failure: -1
  *
@@ -1166,15 +1166,18 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
 
             /* Search through group IDs */
             if(search_group)
-                H5I_search(H5I_GROUP, H5G_name_replace_cb, &names, FALSE);
+                if(H5I_iterate(H5I_GROUP, H5G_name_replace_cb, &names, FALSE) < 0)
+		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over groups")
 
             /* Search through dataset IDs */
             if(search_dataset)
-                H5I_search(H5I_DATASET, H5G_name_replace_cb, &names, FALSE);
+                if(H5I_iterate(H5I_DATASET, H5G_name_replace_cb, &names, FALSE) < 0)
+		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datasets")
 
             /* Search through datatype IDs */
             if(search_datatype)
-                H5I_search(H5I_DATATYPE, H5G_name_replace_cb, &names, FALSE);
+                if(H5I_iterate(H5I_DATATYPE, H5G_name_replace_cb, &names, FALSE) < 0)
+		    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over datatypes")
         } /* end if */
     } /* end if */
 

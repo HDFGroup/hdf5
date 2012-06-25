@@ -310,7 +310,7 @@ main (int argc, const char *argv[])
         leave (EXIT_FAILURE);
     }
 
-    fsize = sbuf.st_size;
+    fsize = (off_t)sbuf.st_size;
 
     h5fid = HDopen(input_file, O_RDONLY, 0);
     if(h5fid < 0) {
@@ -455,7 +455,7 @@ copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
     exit (EXIT_FAILURE);
   }
 
-      howmuch = sbuf.st_size;
+      howmuch = (ssize_t)sbuf.st_size;
     }
   else
       howmuch = limit;

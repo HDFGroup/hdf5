@@ -43,6 +43,9 @@ static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
 static void *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
+static herr_t H5O_dtype_shared_post_copy_upd(const H5O_loc_t *src_oloc,
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id,
+    H5O_copy_t *cpy_info);
 
 static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
@@ -63,6 +66,7 @@ static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_SHARED_COPY_FILE_REAL	H5O_dtype_copy_file
 #define H5O_SHARED_POST_COPY_FILE	H5O_dtype_shared_post_copy_file
 #undef  H5O_SHARED_POST_COPY_FILE_REAL
+#define H5O_SHARED_POST_COPY_FILE_UPD   H5O_dtype_shared_post_copy_upd
 #define H5O_SHARED_DEBUG		H5O_dtype_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_dtype_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
@@ -80,7 +84,7 @@ static herr_t H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_DTYPE_CHECK_VERSION(DT, VERS, MIN_VERS, IOF, CLASS, ERR)           \
     if(((VERS) < (MIN_VERS)) && !(*(IOF) & H5O_DECODEIO_NOCHANGE)) {           \
         (VERS) = (MIN_VERS);                                                   \
-        if(H5T_upgrade_version((DT), (VERS)) < 0)                              \
+        if(H5T__upgrade_version((DT), (VERS)) < 0)                              \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade " CLASS " encoding version") \
         *(IOF) |= H5O_DECODEIO_DIRTY;                                          \
     } /* end if */
@@ -321,7 +325,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                     } /* end if */
 
                     /* Allocate space for the field's datatype */
-                    if(NULL == (temp_type = H5T_alloc()))
+                    if(NULL == (temp_type = H5T__alloc()))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Decode the field's datatype information */
@@ -345,7 +349,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                         /* Check if this member is an array field */
                         if(ndims > 0) {
                             /* Create the array datatype for the field */
-                            if((array_dt = H5T_array_create(temp_type, ndims, dim)) == NULL) {
+                            if((array_dt = H5T__array_create(temp_type, ndims, dim)) == NULL) {
                                 for(j = 0; j <= i; j++)
                                     H5MM_xfree(dt->shared->u.compnd.memb[j].name);
                                 H5MM_xfree(dt->shared->u.compnd.memb);
@@ -405,12 +409,12 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                 } /* end for */
 
                 /* Check if the compound type is packed */
-                H5T_update_packed(dt);
+                H5T__update_packed(dt);
 
                 /* Upgrade the compound if requested */
                 if(version < upgrade_to) {
                     version = upgrade_to;
-                    if(H5T_upgrade_version(dt, upgrade_to) < 0)
+                    if(H5T__upgrade_version(dt, upgrade_to) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade compound encoding version")
                     /* We won't mark the message dirty since there were no
                      * errors in the file, simply type versions that we will no
@@ -449,7 +453,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
              * Enumeration datatypes...
              */
             dt->shared->u.enumer.nmembs = dt->shared->u.enumer.nalloc = flags & 0xffff;
-            if(NULL == (dt->shared->parent = H5T_alloc()))
+            if(NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if(H5O_dtype_decode_helper(f, ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode parent datatype")
@@ -491,7 +495,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             } /* end if */
 
             /* Decode base type of VL information */
-            if(NULL == (dt->shared->parent = H5T_alloc()))
+            if(NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if(H5O_dtype_decode_helper(f, ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode VL parent type")
@@ -531,7 +535,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                 *pp += dt->shared->u.array.ndims * 4;
 
             /* Decode base type of array */
-            if(NULL == (dt->shared->parent = H5T_alloc()))
+            if(NULL == (dt->shared->parent = H5T__alloc()))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "memory allocation failed")
             if(H5O_dtype_decode_helper(f, ioflags, pp, dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode array parent type")
@@ -1093,7 +1097,7 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh, unsigned
     HDassert(p);
 
     /* Allocate datatype message */
-    if(NULL == (dt = H5T_alloc()))
+    if(NULL == (dt = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Perform actual decode of message */
@@ -1354,7 +1358,7 @@ H5O_dtype_reset(void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(dt)
-        H5T_free(dt);
+        H5T__free(dt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dtype_reset() */
@@ -1573,6 +1577,40 @@ done:
         H5O_msg_free(mesg_type->id, dst_mesg);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dtype_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_dtype_shared_post_copy_upd
+ *
+ * Purpose:     Update a message after the shared message operations
+ *              during the post-copy loop
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              November 8, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_dtype_shared_post_copy_upd(const H5O_loc_t UNUSED *src_oloc,
+    const void UNUSED *mesg_src, H5O_loc_t UNUSED *dst_oloc, void *mesg_dst,
+    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info)
+{
+    H5T_t       *dt_dst = (H5T_t *)mesg_dst;    /* Destination datatype */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
+        HDassert(H5T_committed(dt_dst));
+        dt_dst->oloc.file = dt_dst->sh_loc.file;
+        dt_dst->oloc.addr = dt_dst->sh_loc.u.loc.oh_addr;
+    } /* end if */
+    else
+        HDassert(!H5T_committed(dt_dst));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_dtype_shared_post_copy_upd */
 
 
 /*--------------------------------------------------------------------------

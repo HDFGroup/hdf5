@@ -1051,6 +1051,7 @@ void
 init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 {
     int i;
+    unsigned j;
 
     HDassert(ctx->ndims);
 
@@ -1058,8 +1059,8 @@ init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
     for (i = (ctx->ndims - 2); i >= 0; i--) {
         ctx->acc[i] = ctx->acc[i + 1] * dims[i + 1];
     }
-    for (i = 0; i < ctx->ndims; i++)
-        ctx->pos[i] = 0;
+    for (j = 0; j < ctx->ndims; j++)
+        ctx->pos[j] = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -1525,7 +1526,7 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
     if((type_size = H5Tget_size(type_id)) == 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
-    if((region_buf = HDmalloc(type_size * numelem)) == NULL)
+    if((region_buf = HDmalloc(type_size * (size_t)numelem)) == NULL)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate region buffer");
 
     /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
@@ -1670,7 +1671,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
     if((type_size = H5Tget_size(type_id)) == 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Tget_size failed");
 
-    if((region_buf = HDmalloc(type_size * npoints)) == NULL)
+    if((region_buf = HDmalloc(type_size * (size_t)npoints)) == NULL)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "Could not allocate buffer for region");
 
     /* Allocate space for the dimension array */

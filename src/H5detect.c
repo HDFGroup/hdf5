@@ -648,7 +648,7 @@ H5TN_init_interface(void)\n\
 
 	/* The part common to fixed and floating types */
 	printf("\
-    if(NULL == (dt = H5T_alloc()))\n\
+    if(NULL == (dt = H5T__alloc()))\n\
         HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, \"datatype allocation failed\")\n\
     dt->shared->state = H5T_STATE_IMMUTABLE;\n\
     dt->shared->type = H5T_%s;\n\

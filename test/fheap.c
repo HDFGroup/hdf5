@@ -508,6 +508,7 @@ get_fill_size(const fheap_test_param_t *tparam)
         case FHEAP_TEST_FILL_SINGLE:
             return((size_t)0);
 
+        case FHEAP_TEST_FILL_N:
         default:
             HDassert(0 && "Unknown bulk fill type?!?");
     } /* end switch */
@@ -6453,7 +6454,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
 /* seed = (unsigned long)1155438845; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
-    HDsrandom(seed);
+    HDsrandom((unsigned)seed);
 
     /* Set heap ID to random (non-null) value */
     heap_id[0] = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_MAN;
@@ -7594,6 +7595,117 @@ error:
     } H5E_END_TRY;
     return(1);
 } /* test_man_remove_three_larger() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_man_incr_insert_remove
+ *
+ * Purpose:	Test incremental insert & removal of objects in heap
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Sunday, April 1, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    unsigned char heap_id[100][MAX_HEAP_ID_LEN]; /* Heap ID for object inserted */
+    struct a_type_t1 {
+        char a[10];
+        char b[29];
+    } obj1, obj2;                       /* Objects to insert/remove */
+    size_t      id_len;                 /* Size of fractal heap IDs */
+    fheap_heap_state_t state;           /* State of fractal heap */
+    int i, j;
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
+        STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(f) < 0)
+        STACK_ERROR
+
+    /* Create absolute heap */
+    if(NULL == (fh = H5HF_create(f, dxpl, cparam)))
+        FAIL_STACK_ERROR
+    if(H5HF_get_id_len(fh, &id_len) < 0)
+        FAIL_STACK_ERROR
+    if(id_len > HEAP_ID_LEN)
+        FAIL_STACK_ERROR
+    if(H5HF_get_heap_addr(fh, &fh_addr) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        FAIL_STACK_ERROR
+    HDmemset(&state, 0, sizeof(fheap_heap_state_t));
+    if(check_stats(fh, &state))
+        FAIL_STACK_ERROR
+
+    /*
+     * Test incremental insert and removal 
+     */
+    TESTING("incremental object insertion and removal")
+
+    for(i = 0; i < 100; i++) {
+        sprintf(obj1.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
+
+        for(j = 0; j < i; j++) {
+            sprintf(obj2.b, "%s%d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
+
+            if(H5HF_remove(fh, dxpl, heap_id[j]) < 0)
+                FAIL_STACK_ERROR
+            if(H5HF_insert(fh, dxpl, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
+                FAIL_STACK_ERROR
+        } /* end for */
+
+        /* Check for closing & re-opening the heap */
+        if(reopen_heap(f, dxpl, &fh, fh_addr, tparam) < 0)
+            TEST_ERROR
+
+        /* Insert object */
+        HDmemset(heap_id[i], 0, id_len);
+        if(H5HF_insert(fh, dxpl, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+     
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_man_incr_insert_remove() */
 #endif /* QAK */
 
 #ifndef QAK
@@ -15420,7 +15532,7 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
 /* seed = (unsigned long)1156158635; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
-    HDsrandom(seed);
+    HDsrandom((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
@@ -15624,7 +15736,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
 /* seed = (unsigned long)1155181717; */
 HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
-    HDsrandom(seed);
+    HDsrandom((unsigned)seed);
 
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
@@ -15838,7 +15950,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         filter_class.set_local = NULL;
         filter_class.filter = test_write_filter;
         if(H5Zregister(&filter_class) < 0) TEST_ERROR
-        if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_RESERVED + 43, 0, 0, NULL) < 0)
+        if(H5Z_append(&tmp_cparam.pline, H5Z_FILTER_RESERVED + 43, 0, (size_t)0, NULL) < 0)
             FAIL_STACK_ERROR
         test_write_filter_called = FALSE;
     } /* end if */
@@ -16292,6 +16404,7 @@ curr_test = FHEAP_TEST_NORMAL;
                 break;
 
             /* An unknown test? */
+            case FHEAP_TEST_NTESTS:
             default:
                 goto error;
         } /* end switch */
@@ -16340,6 +16453,7 @@ fill = FHEAP_TEST_FILL_LARGE;
                     break;
 
                 /* An unknown test? */
+                case FHEAP_TEST_FILL_N:
                 default:
                     goto error;
             } /* end switch */
@@ -16348,8 +16462,12 @@ fill = FHEAP_TEST_FILL_LARGE;
              * Test fractal heap managed object insertion
              */
 
+#ifndef QAK
             /* "Weird" sized objects */
             nerrors += test_man_insert_weird(fapl, &small_cparam, &tparam);
+#else /* QAK */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK */
 
 #ifdef ALL_INSERT_TESTS
             /* "Standard" sized objects, building from simple to complex heaps */
@@ -16411,6 +16529,10 @@ HDfprintf(stderr, "Uncomment tests!\n");
             nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
             tparam.del_dir = FHEAP_DEL_REVERSE;
             nerrors += test_man_remove_three_larger(fapl, &small_cparam, &tparam);
+
+            /* Incremental insert & removal */
+            tparam.del_dir = FHEAP_DEL_FORWARD;
+            nerrors += test_man_incr_insert_remove(fapl, &small_cparam, &tparam);
 #else /* QAK */
 HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
@@ -16452,6 +16574,8 @@ tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
                         nerrors += test_man_remove_2nd_indirect(fapl, &small_cparam, &tparam);
                         nerrors += test_man_remove_3rd_indirect(fapl, &small_cparam, &tparam);
                     } /* end else */
+#else /* QAK */
+HDfprintf(stderr, "Uncomment tests!\n");
 #endif /* QAK */
 
 #ifndef QAK

@@ -138,7 +138,7 @@
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
 ./examples/testh5cc.sh.in
-
+./examples/README
 
 
 #------------------------------------------------------------------------------
@@ -965,32 +965,35 @@
 ./test/filespace_1_8.h5
 ./test/filespace_1_6.h5
 ./test/freespace.c
+./test/file_image.c
+./test/file_image_core_test.h5
 ./test/fill_old.h5
 ./test/fillval.c
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
-./test/gen_bad_compound.c               _DO_NOT_DISTRIBUTE_
-./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
-./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c      _DO_NOT_DISTRIBUTE_
-./test/gen_filespace.c                  _DO_NOT_DISTRIBUTE_
-./test/gen_mergemsg.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_group.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c      _DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c      _DO_NOT_DISTRIBUTE_
-./test/gen_noencoder.c      _DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_group.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c      _DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c      _DO_NOT_DISTRIBUTE_
-./test/gen_sizes_lheap.c                _DO_NOT_DISTRIBUTE_
-./test/gen_specmetaread.c    _DO_NOT_DISTRIBUTE_
-./test/gen_udlinks.c      _DO_NOT_DISTRIBUTE_
+./test/gen_bad_ohdr.c           _DO_NOT_DISTRIBUTE_
+./test/gen_bad_compound.c       _DO_NOT_DISTRIBUTE_
+./test/gen_bogus.c              _DO_NOT_DISTRIBUTE_
+./test/gen_cross.c              _DO_NOT_DISTRIBUTE_
+./test/gen_deflate.c            _DO_NOT_DISTRIBUTE_
+./test/gen_file_image.c         _DO_NOT_DISTRIBUTE_
+./test/gen_filespace.c          _DO_NOT_DISTRIBUTE_
+./test/gen_mergemsg.c           _DO_NOT_DISTRIBUTE_
+./test/gen_new_array.c          _DO_NOT_DISTRIBUTE_
+./test/gen_new_fill.c           _DO_NOT_DISTRIBUTE_
+./test/gen_new_group.c          _DO_NOT_DISTRIBUTE_
+./test/gen_new_mtime.c          _DO_NOT_DISTRIBUTE_
+./test/gen_new_super.c          _DO_NOT_DISTRIBUTE_
+./test/gen_noencoder.c          _DO_NOT_DISTRIBUTE_
+./test/gen_nullspace.c          _DO_NOT_DISTRIBUTE_
+./test/gen_old_array.c          _DO_NOT_DISTRIBUTE_
+./test/gen_old_group.c          _DO_NOT_DISTRIBUTE_
+./test/gen_old_layout.c         _DO_NOT_DISTRIBUTE_
+./test/gen_old_mtime.c          _DO_NOT_DISTRIBUTE_
+./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
+./test/gen_specmetaread.c       _DO_NOT_DISTRIBUTE_
+./test/gen_udlinks.c            _DO_NOT_DISTRIBUTE_
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -1085,6 +1088,7 @@
 ./testpar/t_cache.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
+./testpar/t_file_image.c
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
@@ -1117,6 +1121,7 @@
 ./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
+./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
 ./tools/h5dump/binread.c
 
@@ -1273,10 +1278,13 @@
 ./tools/h5stat/testfiles/h5stat_newgrat-UA.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat-UG.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.h5
+./tools/h5stat/testfiles/h5stat_notexist.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
 # h5dump test files
+./tools/testfiles/charsets.h5
+./tools/testfiles/charsets.ddl
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
@@ -1817,6 +1825,8 @@
 ./tools/h5diff/testfiles/h5diff_220.txt
 ./tools/h5diff/testfiles/h5diff_221.txt
 ./tools/h5diff/testfiles/h5diff_222.txt
+./tools/h5diff/testfiles/h5diff_223.txt
+./tools/h5diff/testfiles/h5diff_224.txt
 ./tools/h5diff/testfiles/h5diff_300.txt
 ./tools/h5diff/testfiles/h5diff_400.txt
 ./tools/h5diff/testfiles/h5diff_401.txt
@@ -1859,6 +1869,11 @@
 ./tools/h5diff/testfiles/h5diff_467.txt
 ./tools/h5diff/testfiles/h5diff_468.txt
 ./tools/h5diff/testfiles/h5diff_469.txt
+./tools/h5diff/testfiles/h5diff_471.txt
+./tools/h5diff/testfiles/h5diff_472.txt
+./tools/h5diff/testfiles/h5diff_473.txt
+./tools/h5diff/testfiles/h5diff_474.txt
+./tools/h5diff/testfiles/h5diff_475.txt
 ./tools/h5diff/testfiles/h5diff_480.txt
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt
@@ -1940,6 +1955,7 @@
 ./tools/h5repack/testfiles/h5repack_layout.h5
 ./tools/h5repack/testfiles/h5repack_layouto.h5
 ./tools/h5repack/testfiles/h5repack_layout2.h5
+./tools/h5repack/testfiles/h5repack_layout3.h5
 ./tools/h5repack/testfiles/h5repack_early.h5
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/h5repack_deflate.h5
@@ -2075,6 +2091,7 @@
 ./hl/test/sepia.pal
 ./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
+./hl/test/test_file_image.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
@@ -2205,6 +2222,7 @@
 ./config/cmake/FindSZIP.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/GetTimeOfDayTest.cpp
+./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
 ./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
@@ -2232,6 +2250,7 @@
 ./config/cmake/CPack.cmake
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
+
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt

@@ -3964,6 +3964,9 @@ test_str_create(void)
     if((query_size = H5Tget_size(fixed_str2)) == 0) goto error;
     if(query_size != str_size) goto error;
 
+    if(H5Tclose(fixed_str1) < 0) goto error;
+    if(H5Tclose(fixed_str2) < 0) goto error;
+
     /* Create variable-length string in two ways and make sure they are the same */
     if((vlen_str1 = mkstr((size_t)H5T_VARIABLE, H5T_STR_NULLTERM)) < 0) goto error;
 
@@ -3978,6 +3981,8 @@ test_str_create(void)
     if((is_vl_str = H5Tis_variable_str(vlen_str2)) < 0) goto error;
     if(!is_vl_str) goto error; 
 
+    if(H5Tclose(vlen_str1) < 0) goto error;
+    if(H5Tclose(vlen_str2) < 0) goto error;
 
     PASSED();
     return 0;

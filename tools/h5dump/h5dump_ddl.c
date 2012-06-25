@@ -1488,15 +1488,18 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
     if(sset) {
         unsigned int i;
+        unsigned int ndims;
         hid_t sid = H5Dget_space(dsetid);
-        int ndims = H5Sget_simple_extent_ndims(sid);
+        int ndims_res = H5Sget_simple_extent_ndims(sid);
 
         H5Sclose(sid);
-        if(ndims < 0) {
+        if(ndims_res < 0) {
             error_msg("H5Sget_simple_extent_ndims failed\n");
             h5tools_setstatus(EXIT_FAILURE);
             return;
         }
+        else
+            ndims = ndims_res;
 
         if(!sset->start.data || !sset->stride.data || !sset->count.data || !sset->block.data) {
             /* they didn't specify a ``stride'' or ``block''. default to 1 in all
