@@ -825,8 +825,6 @@ H5Dget_offset(hid_t dset_id)
 
     /* Set return value */
     ret_value = H5D__get_offset(dset);
-    if(!H5F_addr_defined(ret_value))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HADDR_UNDEF, "unable to get space status")
 
 done:
     FUNC_LEAVE_API(ret_value)
