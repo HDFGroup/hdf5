@@ -167,7 +167,7 @@ static void test_file_create()
 	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
 	{} // do nothing, FAIL expected
 */
-   cout << "SKIPPED for HDFFV-8067" << endl;
+   std::cerr << "SKIPPED for HDFFV-8067" << std::endl;
 
     	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
