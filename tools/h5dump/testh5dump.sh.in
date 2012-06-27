@@ -91,6 +91,7 @@ $SRC_H5DUMP_TESTFILES/tarray6.h5
 $SRC_H5DUMP_TESTFILES/tarray7.h5
 $SRC_H5DUMP_TESTFILES/tarray8.h5
 $SRC_H5DUMP_TESTFILES/tattr.h5
+$SRC_H5DUMP_TESTFILES/tattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tattr2.h5
 $SRC_H5DUMP_TESTFILES/tattr4_be.h5
 $SRC_H5DUMP_TESTFILES/tattrreg.h5
@@ -188,6 +189,7 @@ $SRC_H5DUMP_TESTFILES/tattr-1.ddl
 $SRC_H5DUMP_TESTFILES/tattr-2.ddl
 $SRC_H5DUMP_TESTFILES/tattr-3.ddl
 $SRC_H5DUMP_TESTFILES/tattr-4_be.ddl
+$SRC_H5DUMP_TESTFILES/tattrintsize.ddl
 $SRC_H5DUMP_TESTFILES/tattrreg.ddl
 $SRC_H5DUMP_TESTFILES/tattrregR.ddl
 $SRC_H5DUMP_TESTFILES/tbin1.ddl
@@ -568,6 +570,8 @@ COPY_TESTFILES_TO_TESTDIR
 
 # test for signed/unsigned datasets
 TOOLTEST packedbits.ddl --enable-error-stack packedbits.h5
+# test for signed/unsigned attributes
+TOOLTEST tattrintsize.ddl --enable-error-stack tattrintsize.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl --enable-error-stack tgroup.h5
 # test for displaying the selected groups
