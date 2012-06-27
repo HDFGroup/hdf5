@@ -66,6 +66,7 @@ IF (BUILD_TESTING)
       tarray7.ddl
       tarray8.ddl
       tattr-1.ddl
+      tattrintsize.ddl
       tattr-2.ddl
       tattr-3.ddl
       tattr-4_be.ddl
@@ -258,6 +259,7 @@ IF (BUILD_TESTING)
       tattr.h5
       tattr2.h5
       tattr4_be.h5
+      tattrintsize.h5
       tattrreg.h5
       tbigdims.h5
       tbinary.h5
@@ -730,6 +732,8 @@ IF (BUILD_TESTING)
           tattr-3.out.err
           tattr-4_be.out
           tattr-4_be.out.err
+          tattrintsize.out
+          tattrintsize.out.err
           tattrreg.out
           tattrreg.out.err
           tattrregR.out
@@ -935,6 +939,8 @@ IF (BUILD_TESTING)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
+  # test for signed/unsigned attributes
+  ADD_H5_TEST (tattrintsize 0 --enable-error-stack tattrintsize.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
