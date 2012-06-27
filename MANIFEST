@@ -1337,6 +1337,7 @@
 ./tools/testfiles/tattr-3.ddl
 ./tools/testfiles/tattr-4_be.ddl
 ./tools/testfiles/tattr.h5
+./tools/testfiles/tattrintsize.ddl
 ./tools/testfiles/tattrintsize.h5
 ./tools/testfiles/tattr4_be.h5
 ./tools/testfiles/tattrreg.h5
