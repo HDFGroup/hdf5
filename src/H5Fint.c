@@ -114,7 +114,7 @@ H5F_init_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE)
+    if(H5I_register_type(H5I_FILE_PRIVATE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE_PRIVATE)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
@@ -148,13 +148,13 @@ H5F_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_FILE)) != 0) {
-            H5I_clear_type(H5I_FILE, FALSE, FALSE);
+	if((n = H5I_nmembers(H5I_FILE_PRIVATE)) != 0) {
+            H5I_clear_type(H5I_FILE_PRIVATE, FALSE, FALSE);
 	} else {
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
 
-	    H5I_dec_type_ref(H5I_FILE);
+	    H5I_dec_type_ref(H5I_FILE_PRIVATE);
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
 	} /* end else */
@@ -291,11 +291,22 @@ H5F_get_obj_count_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_trav_obj_cnt_t *udata = (H5F_trav_obj_cnt_t *)key;
     ssize_t            obj_count = 0;
+    H5VL_t             *vol_plugin;
+    void               *obj;
     int                ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_file_get(obj_id, H5VL_FILE_GET_OBJ_COUNT, H5_REQUEST_NULL, &obj_count, udata->types) < 0)
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5_REQUEST_NULL, 
+                     &obj_count, udata->types) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
 
     *(udata->obj_count) += obj_count; 
@@ -355,12 +366,22 @@ int
 H5F_get_obj_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_trav_obj_ids_t *udata = (H5F_trav_obj_ids_t *)key;
+    H5VL_t             *vol_plugin;
+    void               *obj;
     ssize_t            obj_count = 0;
     int                ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_file_get(obj_id, H5VL_FILE_GET_OBJ_IDS, H5_REQUEST_NULL, udata->types,
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_IDS, H5_REQUEST_NULL, udata->types,
                      udata->max_objs, udata->oid_list, &obj_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
 
@@ -1536,35 +1557,31 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t
+H5F_t *
 H5F_reopen(H5F_t *f)
 {
-    H5F_t	*new_file = NULL;
-    hid_t        ret_value;
+    H5F_t       *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
-    if(NULL == (new_file = H5F_new(f->shared, H5P_FILE_CREATE_DEFAULT, 
+    if(NULL == (ret_value = H5F_new(f->shared, H5P_FILE_CREATE_DEFAULT, 
                                    H5P_FILE_ACCESS_DEFAULT, NULL)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to reopen file")
 
     /* Keep old file's read/write intent in new file */
-    new_file->intent = f->intent;
+    ret_value->intent = f->intent;
     /* Duplicate old file's names */
-    new_file->open_name = H5MM_xstrdup(f->open_name);
-    new_file->actual_name = H5MM_xstrdup(f->actual_name);
+    ret_value->open_name = H5MM_xstrdup(f->open_name);
+    ret_value->actual_name = H5MM_xstrdup(f->actual_name);
 
-    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-
-    /* Keep this ID in file object structure */
-    new_file->file_id = ret_value;
+    if((ret_value->file_id = H5I_register(H5I_FILE_PRIVATE, ret_value, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
 
 done:
-    if(ret_value < 0 && new_file)
-        if(H5F_dest(new_file, H5AC_dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+    if(ret_value->file_id < 0 && ret_value)
+        if(H5F_dest(ret_value, H5AC_dxpl_id, FALSE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_reopen() */
@@ -1594,12 +1611,8 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     if(file->file_id == -1) {
         /* Get an atom for the file */
-        if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
+        if((file->file_id = H5I_register(H5I_FILE_PRIVATE, file, app_ref)) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
-
-        /* attach VOL information to the ID */
-        if (H5I_register_aux(file->file_id, file->vol_cls, (H5I_free_t)H5VL_close) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
     } else {
         /* Increment reference count on atom. */
         if(H5I_inc_ref(file->file_id, app_ref) < 0)

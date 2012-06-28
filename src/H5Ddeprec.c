@@ -141,6 +141,10 @@ hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
+    void    *dset = NULL;       /* dset token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;            /* Property list pointer */
     hid_t lcpl_id = H5P_LINK_CREATE_DEFAULT;
     hid_t           ret_value;          /* Return value */
@@ -166,12 +170,36 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(H5P_set(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, -1)) < 0)
+    if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, name, dcpl_id, 
+                                           H5P_DATASET_ACCESS_DEFAULT, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
-done:
+    /* Get an atom for the file */
+    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
+
+done:
+    if (ret_value < 0 && dset)
+        if(H5VL_dataset_close (dset, vol_plugin, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate1() */
 
@@ -196,6 +224,10 @@ done:
 hid_t
 H5Dopen1(hid_t loc_id, const char *name)
 {
+    void    *dset = NULL;       /* dset token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     hid_t        dapl_id = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
     hid_t        ret_value;
 
@@ -206,12 +238,35 @@ H5Dopen1(hid_t loc_id, const char *name)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Open the dataset through the VOL */
-    if((ret_value = H5VL_dataset_open(loc_id, name, dapl_id, -1)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+
+    /* Get an atom for the file */
+    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
 
 done:
-
+    if (ret_value < 0 && dset)
+        if(H5VL_dataset_close (dset, vol_plugin, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen1() */
 

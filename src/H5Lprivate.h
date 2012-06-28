@@ -49,6 +49,53 @@
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+/* User data for path traversal routine for getting link value by index */
+typedef struct {
+    /* In */
+    H5_index_t idx_type;               /* Index to use */
+    H5_iter_order_t order;              /* Order to iterate in index */
+    hsize_t n;                          /* Offset of link within index */
+    hid_t dxpl_id;                      /* DXPL to use in callback */
+    size_t size;                        /* Size of user buffer */
+
+    /* Out */
+    void *buf;                          /* User buffer */
+} H5L_trav_gvbi_t;
+
+/* User data for path traversal routine for getting link info by index */
+typedef struct {
+    /* In */
+    H5_index_t idx_type;               /* Index to use */
+    H5_iter_order_t order;              /* Order to iterate in index */
+    hsize_t n;                          /* Offset of link within index */
+    hid_t dxpl_id;                      /* DXPL to use in callback */
+
+    /* Out */
+    H5L_info_t      *linfo;             /* Buffer to return to user */
+} H5L_trav_gibi_t;
+
+/* User data for path traversal routine for getting name by index */
+typedef struct {
+    /* In */
+    H5_index_t idx_type;                /* Index to use */
+    H5_iter_order_t order;              /* Order to iterate in index */
+    hsize_t n;                          /* Offset of link within index */
+    size_t size;                        /* Size of name buffer */
+    hid_t dxpl_id;                      /* DXPL to use in callback */
+
+    /* Out */
+    char *name;                         /* Buffer to return name to user */
+    ssize_t name_len;                   /* Length of full name */
+} H5L_trav_gnbi_t;
+
+/* User data for path traversal routine for removing link by index */
+typedef struct {
+    /* In */
+    H5_index_t idx_type;               /* Index to use */
+    H5_iter_order_t order;              /* Order to iterate in index */
+    hsize_t n;                          /* Offset of link within index */
+    hid_t dxpl_id;                      /* DXPL to use in callback */
+} H5L_trav_rmbi_t;
 
 /* Structure for external link traversal callback property */
 typedef struct H5L_elink_cb_t {

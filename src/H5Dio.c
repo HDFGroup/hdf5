@@ -114,6 +114,8 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	hid_t file_space_id, hid_t plist_id, void *buf/*out*/)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -127,8 +129,15 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
     /* Read the data through the VOL */
-    if((ret_value = H5VL_dataset_read(dset_id, mem_type_id, mem_space_id, 
+    if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
                                       file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
@@ -173,6 +182,8 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -188,8 +199,15 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
     /* Write the data through the VOL */
-    if((ret_value = H5VL_dataset_write(dset_id, mem_type_id, mem_space_id, 
+    if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 
                                        file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 

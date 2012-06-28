@@ -48,6 +48,7 @@
 #include "H5Ipkg.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /* Define this to compile in support for dumping ID information */
@@ -95,7 +96,7 @@ typedef struct H5I_id_info_t {
     unsigned    app_count;      /* ref. count of application visible atoms  */
     const void	*obj_ptr;	/* pointer associated with the atom	    */
     const void  *aux_ptr;       /* auxilary pointer associated with the atom */
-    H5I_free_t	free_aux;	/*release auxilary structure method         */
+    H5I_free2_t	free_aux;	/*release auxilary structure method         */
     struct H5I_id_info_t *next;	/* link to next atom (in case of hash-clash)*/
 } H5I_id_info_t;
 
@@ -136,6 +137,7 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static int H5I_search_cb(void *obj, hid_t id, void *udata);
+static hid_t H5VL_get_id(void *object, H5I_type_t type);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -588,7 +590,9 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 
             /* Check for a 'free' function and call it, if it exists */
             /* (Casting away const OK -QAK) */
-            if(type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0) {
+            if((cur->free_aux && (cur->free_aux)((void *)cur->obj_ptr, (void *)cur->aux_ptr) < 0) ||
+               (type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0)) {
+                //if(type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0) {
                 if(force) {
 #ifdef H5I_DEBUG
                     if(H5DEBUG(I)) {
@@ -960,7 +964,6 @@ H5I_object(hid_t id)
         /* (Casting away const OK -QAK) */
         ret_value = (void *)id_ptr->obj_ptr;
     } /* end if */
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end if */
@@ -1342,8 +1345,8 @@ H5I_dec_ref(hid_t id)
      */
     if(1 == id_ptr->count) {
         /* (Casting away const OK -QAK) */
-        if((!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0) &&
-           (!id_ptr->free_aux || (id_ptr->free_aux)((void *)id_ptr->aux_ptr) >= 0)) {
+        if((!id_ptr->free_aux || (id_ptr->free_aux)((void *)id_ptr->obj_ptr, (void *)id_ptr->aux_ptr) >= 0) &&
+           (!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0)) {
             H5I_remove(id);
             ret_value = 0;
         } /* end if */
@@ -2241,15 +2244,13 @@ hid_t
 H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 {
     H5I_type_t type;            /* ID type */
-    H5I_type_t  id_type;
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    id_type = H5I_get_type(obj_id);
-
     /* Get object type */
     type = H5I_TYPE(obj_id);
+#if 0
     if(H5I_FILE == type) {
         /* Increment reference count on file ID */
         if(H5I_inc_ref(obj_id, app_ref) < 0)
@@ -2258,17 +2259,45 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
         /* Set return value */
         ret_value = obj_id;
     } /* end if */
-    else if(type == H5I_DATATYPE || type == H5I_GROUP || 
-            type == H5I_DATASET || type == H5I_ATTR) {
-        H5G_loc_t loc;              /* Location of object */
+    else 
+#endif
+    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || 
+       H5I_DATASET == type || H5I_ATTR == type) {
+        H5VL_t     *vol_plugin;
+        void       *obj;
+        void       *file = NULL;
 
-        /* Get the object location information */
-        if(H5G_loc(obj_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get object location")
+        /* get the file object */
+        if(NULL == (obj = (void *)H5I_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-        /* Get the file ID for the object */
-        if((ret_value = H5F_get_id(loc.oloc->file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+        /* Get the file through the VOL */
+        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5_REQUEST_NULL,
+                         type, app_ref, &file) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
+
+        if (NULL == file)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+
+        if (FAIL == (ret_value = H5VL_get_id(file, H5I_FILE))) {
+            /* Get an atom for the dataset */
+            if((ret_value = H5I_register(H5I_FILE, file, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+            /* attach VOL information to the ID */
+            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+            vol_plugin->nrefs ++;
+        }
+        else {
+            if(H5I_inc_ref(ret_value, app_ref) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+        }
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
@@ -2292,7 +2321,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_register_aux(hid_t id, void *aux_ptr, H5I_free_t free_func)
+H5I_register_aux(hid_t id, void *aux_ptr, H5I_free2_t free_func)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
     herr_t		ret_value = SUCCEED;	/*return value		*/
@@ -2304,7 +2333,6 @@ H5I_register_aux(hid_t id, void *aux_ptr, H5I_free_t free_func)
 
     id_ptr->aux_ptr = aux_ptr;
     id_ptr->free_aux = free_func;
-
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2340,6 +2368,54 @@ H5I_get_aux(hid_t id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_aux() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_get_id
+ *
+ * Purpose:     return ID of vol object
+ *
+ * Return:	Success:	id of object
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5VL_get_id(void *object, H5I_type_t type)
+{
+    hid_t  ret_value = FAIL;      /* Return value */
+    H5I_id_type_t   *type_ptr;      /*ptr to the type       */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    type_ptr = H5I_id_type_list_g[type];
+
+    if(type_ptr == NULL || type_ptr->count <= 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
+
+    /* Only iterate through hash table if there are IDs in group */
+    if(type_ptr->ids > 0) {
+        H5I_id_info_t *id_ptr;      /*ptr to the new ID     */
+        unsigned i;                 /*counter               */
+
+        /* Start at the beginning of the array */
+        for(i = 0; i < type_ptr->hash_size; i++) {
+            id_ptr = type_ptr->id_list[i];
+            while(id_ptr) {
+                if (id_ptr->obj_ptr == object) {
+                    HGOTO_DONE(id_ptr->id);
+                }
+                id_ptr = id_ptr->next;
+            } /* end while */
+        } /* end for */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_id() */
 
 
 /*-------------------------------------------------------------------------

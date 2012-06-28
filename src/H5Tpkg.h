@@ -396,6 +396,7 @@ struct H5T_t {
     H5T_shared_t   *shared;     /* all other information */
     H5O_loc_t       oloc;       /* Object location, if the type is a named type */
     H5G_name_t      path;       /* group hier. path if the type is a named type */
+    void           *vol_obj;
 };
 
 /* The master list of soft conversion functions */

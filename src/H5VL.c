@@ -38,6 +38,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VLpkg.h"		/* VOL package header		  	*/
 #include "H5VLprivate.h"	/* VOL          		  	*/
 
@@ -326,3 +327,75 @@ H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLget_plugin_name() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5VLregister_object
+ *
+ * Purpose:	utility routine to register the native VOL plugin to an ID
+ *
+ * Returns:     Non-negative on success or negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2012
+ *
+ *---------------------------------------------------------------------------
+ */
+hid_t
+H5VLregister_object(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls)
+{
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    hid_t ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get an atom for the object */
+    if((ret_value = H5I_register(obj_type, obj, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object")
+
+    /* Build the vol plugin struct */
+    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    vol_plugin->cls = cls;
+    vol_plugin->nrefs = 1;
+
+    switch(obj_type) {
+        case H5I_FILE:
+            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            break;
+        case H5I_GROUP:
+            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5G_close_group) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            break;
+        case H5I_DATATYPE:
+            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            break;
+        case H5I_DATASET:
+            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            break;
+        case H5I_ATTR:
+            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5A_close_attr) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            break;
+        case H5I_FILE_PRIVATE:
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    } /* end switch */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VLregister_object */

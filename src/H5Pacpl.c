@@ -43,9 +43,9 @@
 /* Local Macros */
 /****************/
 
-/* Definitions for UDATA */
+/* Definitions for locations parameters */
 #define H5A_CRT_LOCATION_SIZE   sizeof(H5VL_loc_params_t)
-#define H5A_CRT_LOCATION_DEF {H5VL_OBJECT_BY_ID, {{FAIL}}}
+#define H5A_CRT_LOCATION_DEF    {H5I_BADID}
 
 /******************/
 /* Local Typedefs */

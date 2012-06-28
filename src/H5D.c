@@ -31,6 +31,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
@@ -48,7 +49,6 @@
 /********************/
 
 static herr_t H5D__init_pub_interface(void);
-
 
 /*********************/
 /* Package Variables */
@@ -86,9 +86,16 @@ DESCRIPTION
 static herr_t
 H5D__init_pub_interface(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    herr_t          ret_value                = SUCCEED;   /* Return value */
+    FUNC_ENTER_STATIC
 
-    FUNC_LEAVE_NOAPI(H5D_init())
+    /* Initialize the atom group for the dataset IDs */
+    if(H5I_register_type(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, NULL)<H5I_FILE_PRIVATE)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    ret_value = H5D_init();
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__init_pub_interface() */
 
 
@@ -125,8 +132,12 @@ hid_t
 H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id)
 {
-    H5P_genplist_t  *plist;            /* Property list pointer */
-    hid_t           ret_value;          /* Return value */
+    void    *dset = NULL;       /* dset token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    H5P_genplist_t  *plist;     /* Property list pointer */
+    hid_t           ret_value = FAIL;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
@@ -168,12 +179,35 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     if(H5P_set(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, name, dcpl_id, dapl_id, H5_REQUEST_NULL)) < 0)
+    if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, name, dcpl_id, dapl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
-done:
+    /* Get an atom for the dataset */
+    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
+
+done:
+    if (ret_value < 0 && dset)
+        if(H5VL_dataset_close (dset, vol_plugin, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate2() */
 
@@ -217,6 +251,10 @@ hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     hid_t dapl_id)
 {
+    void    *dset = NULL;       /* dset token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5P_genplist_t  *plist;            /* Property list pointer */
     hid_t           ret_value;          /* Return value */
 
@@ -247,11 +285,35 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
 
-    /* Create the dataset through the VOL */
-    if((ret_value = H5VL_dataset_create(loc_id, NULL, dcpl_id, dapl_id, H5_REQUEST_NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
-done:
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_create(obj, loc_params, vol_plugin, NULL, dcpl_id, dapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+
+    /* Get an atom for the dataset */
+    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
+
+done:
+    if (ret_value < 0 && dset)
+        if(H5VL_dataset_close (dset, vol_plugin, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate_anon() */
 
@@ -276,6 +338,10 @@ done:
 hid_t
 H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
+    void    *dset = NULL;       /* dset token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     hid_t        ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -292,11 +358,35 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
         if(TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
-    /* Open the dataset through the VOL */
-    if((ret_value = H5VL_dataset_open(loc_id, name, dapl_id, H5_REQUEST_NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
-done:
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
 
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+
+    /* Get an atom for the dataset */
+    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
+
+done:
+    if (ret_value < 0 && dset)
+        if(H5VL_dataset_close (dset, vol_plugin, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen2() */
 
@@ -323,9 +413,26 @@ H5Dclose(hid_t dset_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
+    /* Check/fix arguments. */
+    if(H5I_DATASET != H5I_get_type(dset_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
+
+    /*
+     * Decrement the counter on the dataset.  It will be freed if the count
+     * reaches zero.  
+     *
+     * Pass in TRUE for the 3rd parameter to tell the function to remove
+     * dataset's ID even though the freeing function might fail.  Please
+     * see the comments in H5I_dec_ref for details. (SLU - 2010/9/7)
+     */
+    if(H5I_dec_app_ref_always_close(dset_id) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+
+#if 0
     /* Close the dataset through the VOL */
     if((ret_value = H5VL_dataset_close(dset_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset")
+#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -351,13 +458,22 @@ done:
 hid_t
 H5Dget_space(hid_t dset_id)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     hid_t	ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
     /* get the dataspace through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get data space")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -381,13 +497,22 @@ done:
 herr_t
 H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     herr_t 	ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Ds", dset_id, allocation);
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
     /* Read data space address through the VOL and return */
-    if((ret_value=H5VL_dataset_get(dset_id, H5VL_DATASET_GET_SPACE_STATUS, H5_REQUEST_NULL, allocation)) < 0)
+    if((ret_value=H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE_STATUS, H5_REQUEST_NULL, allocation)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
@@ -414,13 +539,22 @@ done:
 hid_t
 H5Dget_type(hid_t dset_id)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     hid_t	ret_value = FAIL;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
     /* get the datatype through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_TYPE, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_TYPE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get datatype")
 
 done:
@@ -447,12 +581,21 @@ done:
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     hid_t		ret_value = FAIL;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DCPL, H5_REQUEST_NULL, &ret_value) < 0)
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_DCPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset creation properties")
 
 done:
@@ -496,12 +639,21 @@ done:
 hid_t
 H5Dget_access_plist(hid_t dset_id)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     hid_t           ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
 
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_DAPL, H5_REQUEST_NULL, &ret_value) < 0)
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_DAPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataset access properties")
 done:
 
@@ -530,13 +682,22 @@ done:
 hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     hsize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", dset_id);
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "invalid dataset identifier")
+
     /* get storage size through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_STORAGE_SIZE, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_STORAGE_SIZE, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, 0, "unable to get storage size")
 
 done:
@@ -561,13 +722,22 @@ done:
 haddr_t
 H5Dget_offset(hid_t dset_id)
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     haddr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(HADDR_UNDEF)
     H5TRACE1("a", "i", dset_id);
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "invalid dataset identifier")
+
     /* get offset through the VOL */
-    if(H5VL_dataset_get(dset_id, H5VL_DATASET_GET_OFFSET, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_OFFSET, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "unable to get offset")
 
 done:
@@ -761,10 +931,23 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     /* Save the dataset ID */
     vlen_bufsize.dataset_id = dataset_id;
 
-    /* Get a copy of the dataspace ID */
-    if(H5VL_dataset_get(dataset_id, H5VL_DATASET_GET_SPACE, H5_REQUEST_NULL, &(vlen_bufsize.fspace_id)) < 0)
-        //if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
+    if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
+#if 0
+    {
+        H5VL_t     *vol_plugin;
+        void       *dset;
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dataset_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+        /* get the dataset object */
+        if(NULL == (dset = (void *)H5I_object(dataset_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+        /* Get a copy of the dataspace ID */
+        if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE, H5_REQUEST_NULL, &(vlen_bufsize.fspace_id)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
+    }
+#endif
 
     /* Create a scalar for the memory dataspace */
     if((vlen_bufsize.mspace_id = H5Screate(H5S_SCALAR)) < 0)
@@ -834,6 +1017,8 @@ done:
 herr_t
 H5Dset_extent(hid_t dset_id, const hsize_t size[])
 {
+    H5VL_t     *vol_plugin;
+    void       *dset;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -842,11 +1027,55 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
     /* set the extent through the VOL */
-    if((ret_value = H5VL_dataset_set_extent(dset_id, size, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
 done:
         FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_close_dataset
+ *
+ * Purpose:	Called when the ref count reaches zero on the dataset_id
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_close_dataset(void *dset, H5VL_t *vol_plugin)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Close the dataset through the VOL*/
+    if((ret_value = H5VL_dataset_close(dset, vol_plugin, H5_REQUEST_NULL)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset")
+
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        if (NULL != vol_plugin->container_name)
+            H5MM_xfree(vol_plugin->container_name);
+        if (NULL != vol_plugin)
+            H5MM_free(vol_plugin);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_close_dataset() */

@@ -806,15 +806,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_iterate(hid_t loc_id, const char *group_name,
+H5G_iterate(H5G_loc_t *loc, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     const H5G_link_iterate_t *lnk_op, void *op_data, hid_t lapl_id, hid_t dxpl_id)
 {
-    H5G_loc_t	loc;            /* Location of parent for group */
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata; /* User data for callback */
-    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -828,17 +826,12 @@ H5G_iterate(hid_t loc_id, const char *group_name,
      * Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(NULL == (grp = H5G__open_name(&loc, group_name, lapl_id, dxpl_id)))
+    if(NULL == (grp = H5G__open_name(loc, group_name, lapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-
-    /* attach VOL information to the ID */
-    vol_plugin = H5F_get_vol_cls(loc.oloc->file);
-    if (H5I_register_aux(gid, vol_plugin, (H5I_free_t)H5VL_close) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    if(H5VL_native_register_aux(gid) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
     /* Set up user data for callback */
     udata.gid = gid;
@@ -1078,7 +1071,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, H5L_iterate_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id)
 {
@@ -1087,10 +1080,8 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     htri_t linfo_exists;            /* Whether the link info message exists */
     hid_t       gid = (-1);         /* Group ID */
     H5G_t      *grp = NULL;         /* Group opened */
-    H5G_loc_t	loc;                /* Location of group passed in */
     H5G_loc_t	start_loc;          /* Location of starting group */
     unsigned    rc;		    /* Reference count of object    */
-    H5VL_class_t *vol_plugin;       /* VOL structure attached to id */
     herr_t      ret_value;          /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
@@ -1098,26 +1089,19 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
     /* Open the group to begin visiting within */
-    if((grp = H5G__open_name(&loc, group_name, lapl_id, dxpl_id)) == NULL)
+    if((grp = H5G__open_name(loc, group_name, lapl_id, dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the starting group */
     if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+    if(H5VL_native_register_aux(gid) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
     /* Get the location of the starting group */
     if(H5G_loc(gid, &start_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-    /* attach VOL information to the ID */
-    vol_plugin = H5F_get_vol_cls(loc.oloc->file);
-    if (H5I_register_aux(gid, vol_plugin, (H5I_free_t)H5VL_close) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
     /* Set up user data */
     udata.gid = gid;

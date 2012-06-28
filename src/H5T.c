@@ -274,8 +274,6 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5T_t *dst, H5T_conv_t func, hid_t dxpl_id, hbool_t api_call);
 static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
-static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
-static H5T_t *H5T_decode(const unsigned char *buf);
 static herr_t H5T_set_size(H5T_t *dt, size_t size);
 
 /* Local macro definitions */
@@ -1718,24 +1716,25 @@ H5Tclose(hid_t type_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
-
+#if 0
     /* if this is a named datatype, go through the VOL layer */
-
     if(NULL != H5I_get_aux(type_id)) {
         if(H5VL_datatype_close(type_id, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to free datatype")
     }
     else {
-        /* Check args */
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-        if(H5T_STATE_IMMUTABLE == dt->shared->state)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+#endif
 
-        /* When the reference count reaches zero the resources are freed */
-        if(H5I_dec_app_ref(type_id) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
-    }
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(H5T_STATE_IMMUTABLE == dt->shared->state)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+
+    /* When the reference count reaches zero the resources are freed */
+    if(H5I_dec_app_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose() */
@@ -2869,7 +2868,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      buf_size;               /* Encoded size of datatype */
@@ -2926,7 +2925,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5T_t *
+H5T_t *
 H5T_decode(const unsigned char *buf)
 {
     H5F_t       *f = NULL;      /* Fake file structure*/

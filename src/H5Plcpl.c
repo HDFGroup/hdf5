@@ -50,8 +50,12 @@
 #define H5L_CRT_INTERMEDIATE_GROUP_DEF          0
 
 /* Definitions for target object ID */
-#define H5L_CRT_TARGET_ID_SIZE     sizeof(hid_t)
-#define H5L_CRT_TARGET_ID_DEF      0
+#define H5L_CRT_TARGET_SIZE     sizeof(void *)
+#define H5L_CRT_TARGET_DEF      NULL
+
+/* Definitions for Location params */
+#define H5L_CRT_LOCATION_SIZE   sizeof(H5VL_loc_params_t)
+#define H5L_CRT_LOCATION_DEF    {H5I_BADID}
 
 /* Definitions for target object NAME */
 #define H5L_CRT_TARGET_NAME_SIZE   sizeof(char *)
@@ -133,7 +137,8 @@ herr_t
 H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
 {
     unsigned intmd_group = H5L_CRT_INTERMEDIATE_GROUP_DEF;      /* Default setting for creating intermediate groups */
-    hid_t target_id = H5L_CRT_TARGET_ID_DEF;
+    void* target = H5L_CRT_TARGET_DEF;
+    H5VL_loc_params_t loc_params = H5L_CRT_LOCATION_DEF;
     char *target_name = H5L_CRT_TARGET_NAME_DEF;
     H5L_type_t link_type = H5L_CRT_LINK_TYPE_DEF;
     void *udata = H5L_CRT_UDATA_DEF;
@@ -146,7 +151,11 @@ H5P_lcrt_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5L_CRT_INTERMEDIATE_GROUP_NAME, H5L_CRT_INTERMEDIATE_GROUP_SIZE, &intmd_group, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    if(H5P_register_real(pclass, H5VL_LINK_TARGET_ID, H5L_CRT_TARGET_ID_SIZE, &target_id,
+    if(H5P_register_real(pclass, H5VL_LINK_TARGET, H5L_CRT_TARGET_SIZE, &target,
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    if(H5P_register_real(pclass, H5VL_LINK_TARGET_LOC_PARAMS, H5L_CRT_LOCATION_SIZE, &loc_params, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

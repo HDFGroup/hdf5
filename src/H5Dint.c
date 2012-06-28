@@ -161,10 +161,6 @@ H5D__init_interface(void)
 
     FUNC_ENTER_STATIC
 
-    /* Initialize the atom group for the dataset IDs */
-    if(H5I_register_type(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, (H5I_free_t)H5D_close)<H5I_FILE)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
     /* Reset the "default dataset" information */
     HDmemset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
 

@@ -468,9 +468,12 @@ H5F_is_mount(const H5F_t *file)
 herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
-    H5VL_class_t       *vol_plugin1;            /* VOL structure attached to loc_id */
-    H5VL_class_t       *vol_plugin2;            /* VOL structure attached to child_id */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    void       *obj;
+    void       *file;
+    H5VL_t     *vol_plugin1;         /* VOL structure attached to loc_id */
+    H5VL_t     *vol_plugin2;         /* VOL structure attached to child_id */
+    H5I_type_t  type;
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
@@ -484,17 +487,30 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
         if(TRUE != H5P_isa_class(plist_id, H5P_FILE_MOUNT))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
-    if (NULL == (vol_plugin1 = (H5VL_class_t *)H5I_get_aux(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "loc_id does not contain VOL information")
-    if (NULL == (vol_plugin2 = (H5VL_class_t *)H5I_get_aux(child_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "child_id does not contain VOL information")
+    type = H5I_get_type(loc_id);
+    if(H5I_FILE != type && H5I_GROUP != type) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or group object")
+    }
+
+    /* get the plugin pointers */
+    if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(child_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* check if both objects are associated with the same VOL plugin */
-    if (vol_plugin1 != vol_plugin2)
+    if (vol_plugin1->cls != vol_plugin2->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
 
-    if((ret_value = H5VL_file_misc(loc_id, H5VL_FILE_MOUNT, H5_REQUEST_NULL, 
-                                   name, child_id, plist_id)) < 0)
+    /* get the group/file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the file object */
+    if(NULL == (file = (void *)H5I_object(child_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if((ret_value = H5VL_file_misc(obj, vol_plugin1, H5VL_FILE_MOUNT, H5_REQUEST_NULL, 
+                                   type, name, file, plist_id)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
@@ -524,19 +540,32 @@ done:
 herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
-    H5G_loc_t	loc;
+    void       *obj;
+    H5VL_t     *vol_plugin;         /* VOL structure attached to loc_id */
+    H5I_type_t  type;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    if((ret_value = H5VL_file_misc(loc_id, H5VL_FILE_UNMOUNT, H5_REQUEST_NULL, name)) < 0)
+    type = H5I_get_type(loc_id);
+    if(H5I_FILE != type && H5I_GROUP != type) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or group object")
+    }
+
+    /* get the plugin pointers */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* get the group/file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if((ret_value = H5VL_file_misc(obj, vol_plugin, H5VL_FILE_UNMOUNT, H5_REQUEST_NULL, type, name)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:

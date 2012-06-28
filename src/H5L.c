@@ -36,6 +36,7 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Oprivate.h"         /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /****************/
@@ -54,18 +55,6 @@ typedef struct {
     H5L_info_t      *linfo;             /* Buffer to return to user */
     hid_t           dxpl_id;            /* DXPL to use in callback */
 } H5L_trav_gi_t;
-
-/* User data for path traversal routine for getting link info by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;               /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-
-    /* Out */
-    H5L_info_t      *linfo;             /* Buffer to return to user */
-} H5L_trav_gibi_t;
 
 /* User data for path traversal callback to creating a link */
 typedef struct {
@@ -102,46 +91,10 @@ typedef struct {
     void *buf;                          /* User buffer */
 } H5L_trav_gv_t;
 
-/* User data for path traversal routine for getting link value by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;               /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-    size_t size;                        /* Size of user buffer */
-
-    /* Out */
-    void *buf;                          /* User buffer */
-} H5L_trav_gvbi_t;
-
 /* User data for path traversal routine for removing link */
 typedef struct {
     hid_t dxpl_id;                      /* DXPL to use in callback */
 } H5L_trav_rm_t;
-
-/* User data for path traversal routine for removing link by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;               /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-} H5L_trav_rmbi_t;
-
-/* User data for path traversal routine for getting name by index */
-typedef struct {
-    /* In */
-    H5_index_t idx_type;                /* Index to use */
-    H5_iter_order_t order;              /* Order to iterate in index */
-    hsize_t n;                          /* Offset of link within index */
-    size_t size;                        /* Size of name buffer */
-    hid_t dxpl_id;                      /* DXPL to use in callback */
-
-    /* Out */
-    char *name;                         /* Buffer to return name to user */
-    ssize_t name_len;                   /* Length of full name */
-} H5L_trav_gnbi_t;
 
 /********************/
 /* Local Prototypes */
@@ -312,6 +265,12 @@ herr_t
 H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
+    void    *obj1 = NULL;        /* object token of src_id */
+    H5VL_t  *vol_plugin1;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params1;
+    void    *obj2 = NULL;        /* object token of dst_id */
+    H5VL_t  *vol_plugin2;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params2;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -328,8 +287,42 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
-    /* Create the link through the VOL */
-    if((ret_value = H5VL_link_move(src_loc_id, src_name, dst_loc_id, dst_name, 
+    /* set location paramter for source object */
+    loc_params1.type = H5VL_OBJECT_BY_NAME;
+    loc_params1.loc_data.loc_by_name.name = src_name;
+    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.obj_type = H5I_get_type(src_loc_id);
+    /* set location paramter for destination object */
+    loc_params2.type = H5VL_OBJECT_BY_NAME;
+    loc_params2.loc_data.loc_by_name.name = dst_name;
+    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.obj_type = H5I_get_type(dst_loc_id);
+
+    if(H5L_SAME_LOC != src_loc_id) {
+        /* get the file object */
+        if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    if(H5L_SAME_LOC != dst_loc_id) {
+        /* get the file object */
+        if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    /* Make sure that the VOL plugins are the same */
+    if(H5L_SAME_LOC != dst_loc_id && H5L_SAME_LOC != src_loc_id) {
+        if (vol_plugin1 != vol_plugin2)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
+    /* Move the link through the VOL */
+    if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
+                                   (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
                                    FALSE, lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -356,6 +349,12 @@ herr_t
 H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id)
 {
+    void    *obj1 = NULL;        /* object token of src_id */
+    H5VL_t  *vol_plugin1;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params1;
+    void    *obj2 = NULL;        /* object token of dst_id */
+    H5VL_t  *vol_plugin2;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params2;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -372,11 +371,44 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
-    /* Create the link through the VOL */
-    if((ret_value = H5VL_link_move(src_loc_id, src_name, dst_loc_id, dst_name, 
+    /* set location paramter for source object */
+    loc_params1.type = H5VL_OBJECT_BY_NAME;
+    loc_params1.loc_data.loc_by_name.name = src_name;
+    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params1.obj_type = H5I_get_type(src_loc_id);
+    /* set location paramter for destination object */
+    loc_params2.type = H5VL_OBJECT_BY_NAME;
+    loc_params2.loc_data.loc_by_name.name = dst_name;
+    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params2.obj_type = H5I_get_type(dst_loc_id);
+
+    if(H5L_SAME_LOC != src_loc_id) {
+        /* get the file object */
+        if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    if(H5L_SAME_LOC != dst_loc_id) {
+        /* get the file object */
+        if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    /* Make sure that the VOL plugins are the same */
+    if(H5L_SAME_LOC != dst_loc_id && H5L_SAME_LOC != src_loc_id) {
+        if (vol_plugin1 != vol_plugin2)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
+    /* Move the link through the VOL */
+    if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
+                                   (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
                                    TRUE, lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcopy() */
@@ -404,6 +436,9 @@ herr_t
 H5Lcreate_soft(const char *link_target,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -424,6 +459,18 @@ H5Lcreate_soft(const char *link_target,
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = link_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(link_loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -433,7 +480,7 @@ H5Lcreate_soft(const char *link_target,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, link_loc_id, link_name, 
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin,
                                      lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -462,8 +509,14 @@ herr_t
 H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
 {
+    void    *obj1 = NULL;        /* object token of loc_id */
+    void    *obj2 = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin1 = NULL; /* VOL plugin information */
+    H5VL_t  *vol_plugin2 = NULL; /* VOL plugin information */
+    H5VL_loc_params_t loc_params1;
+    H5VL_loc_params_t loc_params2;
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value = SUCCEED;            /* Return value */
+    herr_t   ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id,
@@ -483,18 +536,51 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
+    loc_params1.type = H5VL_OBJECT_BY_NAME;
+    loc_params1.obj_type = H5I_get_type(cur_loc_id);
+    loc_params1.loc_data.loc_by_name.name = cur_name;
+    loc_params1.loc_data.loc_by_name.plist_id = lapl_id;
+
+    loc_params2.type = H5VL_OBJECT_BY_NAME;
+    loc_params2.obj_type = H5I_get_type(new_loc_id);
+    loc_params2.loc_data.loc_by_name.name = new_name;
+    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+
+    if(H5L_SAME_LOC != cur_loc_id) {
+        /* get the file object */
+        if(NULL == (obj1 = (void *)H5I_object(cur_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(cur_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    if(H5L_SAME_LOC != new_loc_id) {
+        /* get the file object */
+        if(NULL == (obj2 = (void *)H5I_object(new_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(new_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    /* Make sure that the VOL plugins are the same */
+    if(H5L_SAME_LOC != new_loc_id && H5L_SAME_LOC != cur_loc_id) {
+        if (vol_plugin1 != vol_plugin2)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* set creation properties */
-    if(H5P_set(plist, H5VL_LINK_TARGET_ID, &cur_loc_id) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET, &obj1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
-    if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &cur_name) < 0)
+    if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, new_loc_id, new_name, 
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
+                                     (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
                                      lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -531,6 +617,9 @@ herr_t
 H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     const void *udata, size_t udata_size, hid_t lcpl_id, hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -548,6 +637,18 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = link_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(link_loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -561,7 +662,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, link_loc_id, link_name, 
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin,
                                      lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
@@ -590,6 +691,9 @@ done:
 herr_t
 H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -599,8 +703,20 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(loc_id, name, NULL, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -631,7 +747,9 @@ herr_t
 H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id)
 {
-    H5L_trav_rmbi_t udata;              /* User data for callback */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -650,14 +768,23 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up user data for unlink operation */
-    udata.idx_type = idx_type;
-    udata.order = order;
-    udata.n = n;
-    udata.dxpl_id = H5AC_dxpl_id;
+    loc_params.type = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(loc_id, group_name, &udata, lapl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -688,6 +815,9 @@ herr_t
 H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -702,9 +832,21 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, name, buf, 
-                                  size, NULL, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+                                  H5_REQUEST_NULL, buf, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -735,7 +877,9 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, void *buf/*out*/, size_t size,
     hid_t lapl_id)
 {
-    H5L_trav_gvbi_t udata;              /* User data for callback */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -755,17 +899,25 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up user data for retrieving information */
-    udata.idx_type = idx_type;
-    udata.order = order;
-    udata.n = n;
-    udata.dxpl_id = H5AC_ind_dxpl_id;
-    udata.buf = buf;
-    udata.size = size;
+    loc_params.type = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_VAL, H5_REQUEST_NULL, group_name, buf, size, &udata, lapl_id)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link val")
+    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+                                  H5_REQUEST_NULL, buf, size)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -788,6 +940,9 @@ done:
 htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     htri_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -802,8 +957,20 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* check link existence through the VOL */
-    if(H5VL_link_get(loc_id, H5VL_LINK_EXISTS, H5_REQUEST_NULL, name, &ret_value, lapl_id) < 0)
+    if(H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_EXISTS, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -829,6 +996,9 @@ herr_t
 H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -842,8 +1012,21 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, H5_REQUEST_NULL, name, linfo, NULL, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
+                                  H5_REQUEST_NULL, linfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -870,7 +1053,9 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     H5L_info_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5L_trav_gibi_t udata;              /* User data for callback */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -890,16 +1075,24 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up user data for callback */
-    udata.idx_type = idx_type;
-    udata.order = order;
-    udata.n = n;
-    udata.dxpl_id = H5AC_ind_dxpl_id;
-    udata.linfo = linfo;
+    loc_params.type = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_INFO, H5_REQUEST_NULL, group_name, 
-                                  linfo, &udata, lapl_id)) < 0)
+    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, H5_REQUEST_NULL, 
+                                  linfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -1056,7 +1249,9 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5L_trav_gnbi_t udata;      /* User data for callback */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1076,21 +1271,25 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
-    /* Set up user data for callback */
-    udata.idx_type = idx_type;
-    udata.order = order;
-    udata.n = n;
-    udata.dxpl_id = H5AC_ind_dxpl_id;
-    udata.name = name;
-    udata.size = size;
-    udata.name_len = -1;
+    loc_params.type = H5VL_OBJECT_BY_IDX;
+    loc_params.loc_data.loc_by_idx.name = group_name;
+    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    loc_params.loc_data.loc_by_idx.order = order;
+    loc_params.loc_data.loc_by_idx.n = n;
+    loc_params.loc_data.loc_by_idx.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the link info through the VOL */
-    if((ret_value = H5VL_link_get(loc_id, H5VL_LINK_GET_NAME, H5_REQUEST_NULL, group_name, &udata, lapl_id)) < 0)
+    if((H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_NAME, H5_REQUEST_NULL, 
+                      name, size, &ret_value)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link name")
-
-    /* Set the return value */
-    ret_value = udata.name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1123,6 +1322,9 @@ herr_t
 H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t *idx_p, H5L_iterate_t op, void *op_data)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5I_type_t  id_type;        /* Type of ID */
     herr_t ret_value;           /* Return value */
 
@@ -1140,9 +1342,19 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
     if(!op)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(id, ".", FALSE, idx_type, order, idx_p,
-                                      op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
+    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, FALSE, idx_type, order, idx_p,
+                                      op, op_data, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1177,6 +1389,9 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
     H5L_iterate_t op, void *op_data, hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1198,9 +1413,21 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = group_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(loc_id, group_name, FALSE, idx_type, order, idx_p,
-                                      op, op_data, lapl_id)) < 0)
+    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, FALSE, idx_type, order, idx_p,
+                                      op, op_data, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1240,6 +1467,9 @@ herr_t
 H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     H5L_iterate_t op, void *op_data)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5I_type_t  id_type;                /* Type of ID */
     herr_t      ret_value;              /* Return value */
 
@@ -1258,9 +1488,19 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(grp_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(grp_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(grp_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(grp_id, ".", TRUE, idx_type, order, NULL,
-                                      op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
+    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, TRUE, idx_type, order, NULL,
+                                      op, op_data, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1300,6 +1540,9 @@ herr_t
 H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5_iter_order_t order, H5L_iterate_t op, void *op_data, hid_t lapl_id)
 {
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1321,9 +1564,21 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = group_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* visit the links through the VOL */
-    if((ret_value = H5VL_link_iterate(loc_id, group_name, TRUE, idx_type, order, NULL,
-                                      op, op_data, lapl_id)) < 0)
+    if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, TRUE, idx_type, order, NULL,
+                                      op, op_data, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1612,7 +1867,6 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
     H5G_loc_t temp_loc;             /* For UD callback */
     hbool_t temp_loc_init = FALSE;  /* Temporary location for UD callback (temp_loc) has been initialized */
     hbool_t obj_created = FALSE;    /* Whether an object was created (through a hard link) */
-    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1706,11 +1960,8 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
             if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register ID for group")
-
-            /* attach VOL information to the ID */
-            vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
-            if (H5I_register_aux(grp_id, vol_plugin, (H5I_free_t)H5VL_close) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            if(H5VL_native_register_aux(grp_id) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
             /* Make callback */
             if((link_class->create_func)(name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size, H5P_DEFAULT) < 0)

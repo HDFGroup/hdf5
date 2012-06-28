@@ -36,7 +36,8 @@
 typedef enum H5I_type_t {
     H5I_UNINIT		= (-2), /*uninitialized type			    */
     H5I_BADID		= (-1),	/*invalid Type				    */
-    H5I_FILE	= 1,    	/*type ID for File objects      	    */
+    H5I_FILE_PRIVATE    = 1,  	/*type ID for File objects      	    */
+    H5I_FILE,           	/*type ID for File objects      	    */
     H5I_GROUP,	                /*type ID for Group objects     	    */
     H5I_DATATYPE,	        /*type ID for Datatype objects		    */
     H5I_DATASPACE,	        /*type ID for Dataspace objects		    */
@@ -68,6 +69,7 @@ typedef int hid_t;
  * (failure) then the object will remain in the ID type.
  */
 typedef herr_t (*H5I_free_t)(void*);
+typedef herr_t (*H5I_free2_t)(void*,void*);
 
 /* Type of the function to compare objects & keys */
 typedef int (*H5I_search_func_t)(void *obj, hid_t id, void *key);

@@ -205,6 +205,12 @@ herr_t
 H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id)
 {
+    void    *obj1 = NULL;        /* object token of src_id */
+    H5VL_t  *vol_plugin1;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params1;
+    void    *obj2 = NULL;        /* object token of dst_id */
+    H5VL_t  *vol_plugin2;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params2;
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -227,8 +233,27 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
 
+    /* get the object */
+    if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src ID does not contain VOL information")
+    loc_params1.type = H5VL_OBJECT_BY_SELF;
+    loc_params1.obj_type = H5I_get_type(src_loc_id);
+
+    /* get the object */
+    if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst ID does not contain VOL information")
+    loc_params2.type = H5VL_OBJECT_BY_SELF;
+    loc_params2.obj_type = H5I_get_type(dst_loc_id);
+
     /* Open the object through the VOL */
-    if((ret_value = H5VL_object_copy(src_loc_id, src_name, dst_loc_id, dst_name, 
+    if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1, src_name, 
+                                     obj2, loc_params2, vol_plugin2, dst_name, 
                                      ocpypl_id, lcpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 done:

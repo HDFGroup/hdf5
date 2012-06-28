@@ -533,7 +533,7 @@ H5_DLL int H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, hbool_t *
 H5_DLL herr_t H5O_inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O_dec_rc(H5O_t *oh);
 H5_DLL herr_t H5O_free(H5O_t *oh);
-H5_DLL herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+H5_DLL herr_t H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
                         H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
                         hid_t dxpl_id);
 
