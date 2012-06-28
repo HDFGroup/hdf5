@@ -152,7 +152,7 @@ H5FD_null_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     FUNC_LEAVE_NOAPI(H5FD_null_init())
-} /* H5FD_null_init_interface() */
+} /* end H5FD_null_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -186,7 +186,7 @@ H5FD_null_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_init */
+} /* end H5FD_null_init() */
 
 
 /*---------------------------------------------------------------------------
@@ -244,7 +244,7 @@ H5Pset_fapl_null(hid_t fapl_id, hid_t inner_fapl_id)
     /* Check arguments */
     if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    
+
     if(H5P_DEFAULT == inner_fapl_id)
         inner_fapl_id = H5P_FILE_ACCESS_DEFAULT;
     else
@@ -262,7 +262,7 @@ H5Pset_fapl_null(hid_t fapl_id, hid_t inner_fapl_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /*H5Pset_fapl_null*/
+} /* end H5Pset_fapl_null() */
 
 
 /*-------------------------------------------------------------------------
@@ -308,7 +308,7 @@ H5Pget_fapl_null(hid_t fapl_id, hid_t *inner_fapl_id/*out*/)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /*H5Pget_fapl_null*/
+} /* end H5Pget_fapl_null() */
 
 
 /*-------------------------------------------------------------------------
@@ -354,7 +354,7 @@ done:
             H5MM_xfree(fa);
     } /* end if */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_fapl_get */
+} /* end H5FD_null_fapl_get() */
 
 
 /*-------------------------------------------------------------------------
@@ -409,7 +409,7 @@ done:
             H5MM_xfree(new_fa);
     } /* end if */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_fapl_copy */
+} /* end H5FD_null_fapl_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -442,7 +442,7 @@ H5FD_null_fapl_free(void *_fa)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_fapl_free */
+} /* end H5FD_null_fapl_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -470,7 +470,7 @@ H5FD_null_dxpl_copy(const void *_old_dx)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* Allocate memoryfor copy */
+    /* Allocate memory for copy */
     if(NULL == (new_dx = (H5FD_null_dxpl_t *)H5MM_malloc(sizeof(H5FD_null_dxpl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -496,7 +496,7 @@ done:
             H5MM_xfree(new_dx);
     } /* end if */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_dxpl_copy */
+} /* end H5FD_null_dxpl_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -506,7 +506,7 @@ done:
  *
  * Return:      Success:    0
  *              Failure:    -1
- 
+ *
  * Programmer:  Jacob Gruber
  *              Thursday, January 5, 2012
  *
@@ -529,7 +529,7 @@ H5FD_null_dxpl_free(void *_dx)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_dxpl_free */
+} /* end H5FD_null_dxpl_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -560,13 +560,13 @@ H5FD_null_sb_size(H5FD_t *_file)
     FUNC_ENTER_NOAPI(UFAIL)
 
     HDassert(file);
-    
+
     /* Delegate to inner file */
     ret_value = H5FD_sb_size(file->inner_file);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_sb_size */
+} /* end H5FD_null_sb_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -601,7 +601,7 @@ H5FD_null_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_sb_encode() */
+} /* end H5FD_null_sb_encode() */
 
 
 /*-------------------------------------------------------------------------
@@ -625,16 +625,16 @@ H5FD_null_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    
+
     HDassert(file);
-    
+
     /* Delegate to the inner driver */
     if(H5FD_sb_decode(file->inner_file, name, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "inner driver sb_decode failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_sb_decode() */
+} /* end H5FD_null_sb_decode() */
 
 
 
@@ -659,9 +659,9 @@ H5FD_null_sb_verify(H5FD_t *_file, const char *sb_driver_id)
     htri_t ret_value = FALSE;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    
+
     HDassert(file);
-    
+
     /* Delegate to the inner driver */
     ret_value = H5FD_sb_verify(file->inner_file, sb_driver_id);
     if(ret_value < 0)
@@ -669,7 +669,7 @@ H5FD_null_sb_verify(H5FD_t *_file, const char *sb_driver_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_null_sb_verify() */
 
 
 
@@ -749,15 +749,15 @@ done:
         if(file->inner_file) {
             if (H5FD_close(file->inner_file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "unable to close inner file")
-         }
-          
+         } /* end if */
+
         if(H5I_dec_ref(file->inner_fapl_id) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close driver ID")
         H5MM_xfree(file);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_open() */
+} /* end H5FD_null_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -784,7 +784,7 @@ H5FD_null_close(H5FD_t *_file)
     /* Close the inner file */
     if (H5FD_close(file->inner_file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close inner file")
-    
+
     /* Decrease the reference count on the inner FAPL */
     if(H5I_dec_ref(file->inner_fapl_id) < 0)
         HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
@@ -821,7 +821,7 @@ H5FD_null_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     int ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
-   
+
     HDassert(f1);
     HDassert(f2);
 
@@ -836,7 +836,7 @@ H5FD_null_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  * Function:    H5FD_null_query
  *
  * Purpose:     Set the flags that this VFL driver is capable of supporting
- *              (listed in H5FDpublic.h). Delegated to the inner driver.  
+ *              (listed in H5FDpublic.h). Delegated to the inner driver.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -854,9 +854,8 @@ H5FD_null_query(const H5FD_t *_file, unsigned long *flags /* out */)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Query the inner driver */
-    if(flags && file) {
+    if(flags && file)
         H5FDquery(file->inner_file, flags);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_null_query() */
@@ -885,20 +884,20 @@ H5FD_null_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file);
-    
+
     /* Delegate to the underlying driver */
     ret_value = H5FD_get_fs_type_map(file->inner_file, type_map);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5FD_null_get_type_map() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_null_alloc
  *
  * Purpose:     Allocate file memory in the inner driver.
- *              
+ *
  * Return:  Success:    Non-negative
  *          Failure:    Negative
  *
@@ -916,16 +915,18 @@ H5FD_null_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(file);
+
     /*
      * Get the inner data transfer property list.
      */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5FD_null_dxpl_t *dx;       /* Null-specific info */
-        
+
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
-        
+
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
         HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -933,21 +934,19 @@ H5FD_null_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
         inner_dxpl_id = dx->inner_dxpl_id;
     } /* end if */
 
-    HDassert(file);
-
     /* Delegate to the inner file */
     ret_value = H5FDalloc(file->inner_file, type, inner_dxpl_id, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5FD_null_alloc() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_null_free
  *
  * Purpose:     Free file memory in the inner file.
- *              
+ *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
  *
@@ -964,17 +963,19 @@ H5FD_null_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsiz
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
-   
+
+    HDassert(file);
+
     /*
      * Get the inner data transfer property list.
      */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5FD_null_dxpl_t *dx;       /* Null-specific info */
-        
+
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
-        
+
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
         HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -982,14 +983,12 @@ H5FD_null_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsiz
         inner_dxpl_id = dx->inner_dxpl_id;
     } /* end if */
 
-    HDassert(file);
-
     /* Delegate to the inner file */
     ret_value = H5FDfree(file->inner_file, type, inner_dxpl_id, addr, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-}
+} /* end H5FD_null_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1016,15 +1015,15 @@ H5FD_null_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     haddr_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
-   
+
     HDassert(file);
-    
+
     /* Delegate to the inner file */
     ret_value = H5FD_get_eoa(file->inner_file, type);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_null_get_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -1054,10 +1053,10 @@ H5FD_null_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 
     /* Delegate to the inner file */
     ret_value = H5FD_set_eoa(file->inner_file, type, abs_eoa);
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_set_eof */
+} /* end H5FD_null_set_eof() */
 
 
 /*-------------------------------------------------------------------------
@@ -1087,10 +1086,10 @@ H5FD_null_get_eof(const H5FD_t *_file)
 
     /* Delegate to the inner file */
     ret_value = H5FD_get_eof(file->inner_file);
-   
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_get_eof */
+} /* end H5FD_null_get_eof() */
 
 
 /*-------------------------------------------------------------------------
@@ -1116,13 +1115,13 @@ H5FD_null_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file);
-    
+
     /* Delegate to the inner file */
     ret_value = H5FD_get_vfd_handle(file->inner_file, file->inner_fapl_id, file_handle);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_null_get_handle() */
 
 
 /*-------------------------------------------------------------------------
@@ -1151,30 +1150,32 @@ H5FD_null_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(file);
+
     /*
      * Get the inner data transfer property list.
      */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5FD_null_dxpl_t *dx;       /* Null-specific info */
-        
+
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
-        
+
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
         HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
         HDassert(dx);
         inner_dxpl_id = dx->inner_dxpl_id;
     } /* end if */
-    
+
     /* Read from inner file */
-    if (H5FDread(file->inner_file, type, inner_dxpl_id, addr, size, buf)<0)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "inner file read failed")
+    if(H5FDread(file->inner_file, type, inner_dxpl_id, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "inner file read failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_read */
+} /* end H5FD_null_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -1203,16 +1204,18 @@ H5FD_null_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(file);
+
     /*
      * Get the inner data transfer property list.
      */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5FD_null_dxpl_t *dx;       /* Null-specific info */
-        
+
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
-        
+
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
         HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -1221,13 +1224,12 @@ H5FD_null_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     } /* end if */
 
     /* Delegate write to the inner file */
-    HDassert(file);
-    if (H5FDwrite(file->inner_file, type, inner_dxpl_id, addr, size, buf)<0)
+    if(H5FDwrite(file->inner_file, type, inner_dxpl_id, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "member file write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_null_write */
+} /* end H5FD_null_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -1252,26 +1254,27 @@ H5FD_null_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(file);
+
     /*
      * Get the inner data transfer property list.
      */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5FD_null_dxpl_t *dx;       /* Null driver property list */
-        
+
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
-        
+
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
         HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
         HDassert(dx);
         inner_dxpl_id = dx->inner_dxpl_id;
     } /* end if */
-    
+
     /* Delegate to the inner driver */
-    HDassert(file);
-    if (H5FD_flush(file->inner_file, inner_dxpl_id, closing) < 0)
+    if(H5FD_flush(file->inner_file, inner_dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to flush inner file")
 
 done:
@@ -1301,16 +1304,18 @@ H5FD_null_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(file);
+
     /*
      * Get the inner data transfer property list.
      */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         H5P_genplist_t *plist;      /* Property list pointer */
         H5FD_null_dxpl_t *dx;       /* Null driver property list */
-        
+
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
-        
+
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
         HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
@@ -1319,7 +1324,6 @@ H5FD_null_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     } /* end if */
 
     /* Delegate to the underlying driver */
-    HDassert(file);
     if(H5FD_truncate(file->inner_file, inner_dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to truncate inner file")
 

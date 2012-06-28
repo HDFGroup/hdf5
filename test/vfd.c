@@ -1315,7 +1315,7 @@ static herr_t
 test_null(void)
 {
     hid_t       file=(-1), null_fapl, core_fapl, family_fapl; 
-    hid_t       null_fapl2=(-1), core_fapl2=(-1), family_fapl2=(-1);
+    hid_t       null_fapl2=(-1), core_fapl2=(-1);
     hid_t       dset1=(-1), space1=(-1);
     char        filename[1024];
     void        *fhandle=NULL;
@@ -1323,7 +1323,7 @@ test_null(void)
     int         i, j, n, *points, *check, *p1, *p2;
 
     TESTING("NULL file driver");
-    
+
     /* Set property list for the CORE driver */
     core_fapl = h5_fileaccess();
     if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
@@ -1336,7 +1336,7 @@ test_null(void)
 
     /* Set the file name in the core driver */
     h5_fixname(FILENAME[10], null_fapl, filename, sizeof filename);
-    
+
     /* Create the file with the null driver */
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, null_fapl)) < 0)
         TEST_ERROR;
@@ -1389,7 +1389,7 @@ test_null(void)
         TEST_ERROR;
 
     /* Turn off the backing store in the core driver. This is done
-     * to increase the speed of the test. The nul driver only stores
+     * to increase the speed of the test. The null driver only stores
      * a reference to this fapl, so the change is immediately
      * recognized.
      */
@@ -1473,7 +1473,7 @@ test_null(void)
     family_fapl = h5_fileaccess();
     if(H5Pset_fapl_family(family_fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
-    
+
     /* Wrap null around family driver */
     null_fapl = h5_fileaccess();
     if(H5Pset_fapl_null(null_fapl, family_fapl) < 0)
@@ -1483,7 +1483,7 @@ test_null(void)
      * the member numbers are properly set up.
      */
     h5_fixname(FILENAME[11], family_fapl, filename, sizeof filename);
-    
+
     /* Create file with the null driver*/
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, null_fapl)) < 0)
         TEST_ERROR;
@@ -1503,7 +1503,7 @@ test_null(void)
     h5_cleanup(FILENAME, family_fapl);
     if(H5Pclose(null_fapl) < 0)
         TEST_ERROR;
-    
+
     PASSED();
     return 0;
 
