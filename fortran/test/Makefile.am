@@ -67,8 +67,12 @@ fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
         tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90
 
 if FORTRAN_2003_CONDITIONAL_F
+# NAG Fortran compiler doesn't like the current tH5E_F03.f90 file that has only comments
+# and no executable statements.
+# Removed from the list of modules to build. EIP 2012-06-28 
+#	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
    fortranlib_test_F03_SOURCES = fortranlib_test_F03.f90 \
-	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+	tH5F.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
 endif
 
 

@@ -118,10 +118,9 @@ fortranlib_test_1_8_LDADD = $(LDADD)
 fortranlib_test_1_8_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
 	$(LIBH5F) $(LIBHDF5)
 am__fortranlib_test_F03_SOURCES_DIST = fortranlib_test_F03.f90 \
-	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+	tH5F.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
 @FORTRAN_2003_CONDITIONAL_F_TRUE@am_fortranlib_test_F03_OBJECTS = fortranlib_test_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F.$(OBJEXT) \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5E_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5L_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5P_F03.$(OBJEXT) \
 @FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5T_F03.$(OBJEXT)
@@ -492,8 +491,13 @@ fortranlib_test_SOURCES = fortranlib_test.f90 \
 fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
         tH5F.f90 tH5O.f90 tH5A_1_8.f90 tH5G_1_8.f90
 
+
+# NAG Fortran compiler doesn't like the current tH5E_F03.f90 file that has only comments
+# and no executable statements.
+# Removed from the list of modules to build. EIP 2012-06-28 
+#	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
 @FORTRAN_2003_CONDITIONAL_F_TRUE@fortranlib_test_F03_SOURCES = fortranlib_test_F03.f90 \
-@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+@FORTRAN_2003_CONDITIONAL_F_TRUE@	tH5F.f90 tH5L_F03.f90 tH5P_F03.f90 tH5T_F03.f90
 
 fflush1_SOURCES = fflush1.f90
 fflush2_SOURCES = fflush2.f90
