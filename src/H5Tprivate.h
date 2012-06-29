@@ -24,6 +24,7 @@
 
 /* Other public headers needed by this file */
 #include "H5MMpublic.h"         /* Memory management                    */
+#include "H5VLpublic.h"         /* VOL                                  */
 
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
@@ -140,6 +141,8 @@ H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
 H5_DLL herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 H5_DLL H5T_t *H5T_decode(const unsigned char *buf);
 H5_DLL void * H5T_get_named_type(H5T_t *dt);
+H5_DLL hid_t H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req);
+
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);
 

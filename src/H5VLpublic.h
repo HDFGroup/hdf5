@@ -215,10 +215,8 @@ typedef struct H5VL_attr_class_t {
 typedef struct H5VL_datatype_class_t {
     void  *(*commit)(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
                      hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
-    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char * name, 
-                     unsigned char *buf, size_t nalloc, hid_t tapl_id, hid_t req);
-    ssize_t (*get_size) (void *obj, H5VL_loc_params_t loc_params, const char *name, 
-                         hid_t tapl_id, hid_t req);
+    void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char * name, hid_t tapl_id, hid_t req);
+    ssize_t (*get_binary) (void *obj, unsigned char *buf, size_t size, hid_t req);
     herr_t (*close) (void *dt, hid_t req);
 }H5VL_datatype_class_t;
 

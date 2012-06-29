@@ -315,25 +315,25 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get an atom for the object */
-    if((ret_value = H5I_register(obj_type, obj, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object")
-
-    /* attach VOL information and free function to the ID */
+    /* Get an atom for the object and attach VOL information and free function to the ID */
     switch(obj_type) {
         case H5I_GROUP:
+            if((ret_value = H5I_register(obj_type, obj, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object")
             if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5G_close_group) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
 
         case H5I_DATASET:
+            if((ret_value = H5I_register(obj_type, obj, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object")
             if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
 
         case H5I_DATATYPE:
-            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            if ((ret_value = H5VL_create_datatype(obj, vol_plugin, H5_REQUEST_NULL)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
             break;
 
         case H5I_FILE_PRIVATE:
@@ -658,7 +658,7 @@ done:
  */
 void *
 H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                   unsigned char *buf, size_t nalloc, hid_t tapl_id, hid_t req)
+                   hid_t tapl_id, hid_t req)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -679,7 +679,7 @@ H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to open object")
 #endif
     /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, buf, nalloc, tapl_id, req)))
+    if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, tapl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -687,7 +687,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_datatype_get_size
+ * Function:	H5VL_datatype_get_binary
  *
  * Purpose:	gets required size to serialize datatype description
  *
@@ -701,22 +701,21 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t 
-H5VL_datatype_get_size(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
-                       const char *name, hid_t tapl_id, hid_t req)
+H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t req)
 {
     ssize_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check if the type specific corresponding VOL open callback exists */
-    if(NULL == vol_plugin->cls->datatype_cls.get_size)
+    if(NULL == vol_plugin->cls->datatype_cls.get_binary)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "no datatype open callback");
     /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.get_size)(obj, loc_params, name, tapl_id, req)) < 0)
+    if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_datatype_get_size() */
+} /* end H5VL_datatype_get_binary() */
 
 
 /*-------------------------------------------------------------------------

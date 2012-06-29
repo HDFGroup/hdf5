@@ -27,7 +27,6 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 
@@ -133,9 +132,6 @@ done:
 static hid_t
 H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
-    size_t        nalloc;
-    unsigned char *buf = NULL;
-    void          *dt = NULL;       /* datatype token from VOL plugin */
     H5T_t       *type = NULL;           /* Datatype opened */
     hid_t	ret_value;              /* Return value */
 
@@ -146,16 +142,6 @@ H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hb
     /* Open the datatype */
     if(NULL == (type = H5T_open(obj_loc, dxpl_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
-
-    if(H5T_encode(type, NULL, &nalloc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
-    buf = (unsigned char *) H5MM_malloc (nalloc);
-    if(H5T_encode(type, buf, &nalloc) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't serialize datatype")
-    if(NULL == (dt = H5T_decode(buf)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't decode datatype")
-    type->vol_obj = dt;
-    H5MM_free(buf);
 
     /* Register an ID for the datatype */
     if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0)

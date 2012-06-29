@@ -620,16 +620,24 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+    /* Create the datatype through the VOL */
+    if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
+
+    /* Get an atom for the datatype */
+    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
+
+#if 0
     /* get required buf size for encoding the datatype */
-    if((nalloc = H5VL_datatype_get_size(obj, loc_params, vol_plugin, name, tapl_id, H5_REQUEST_NULL)) < 0)
+    if((nalloc = H5VL_datatype_get_binary(obj, loc_params, vol_plugin, name, tapl_id, 
+                                          NULL, 0, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
-    buf = (unsigned char *) H5MM_malloc ((size_t)nalloc);
+    if (NULL == (buf = (unsigned char *) H5MM_malloc ((size_t)nalloc)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
-    /* Create the datatype through the VOL */
-    if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, 
-                                        buf, (size_t)nalloc, tapl_id,H5_REQUEST_NULL)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
+
 
     if(NULL == (type = H5T_decode(buf)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't decode datatype")
@@ -646,6 +654,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
     vol_plugin->nrefs ++;
+#endif
 
 done:
     if (ret_value < 0 && dt)
@@ -951,6 +960,63 @@ H5T_get_named_type(H5T_t *dt)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_named_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_create_datatype
+ *
+ * Purpose:	Create a Library datatype with a plugin specific datatype object 
+ *
+ * Return:      Success: A datatype identifier 
+ *
+ *		Failure: FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
+{
+    ssize_t        nalloc;
+    unsigned char *buf = NULL;
+    H5T_t         *dt = NULL;       /* datatype token from VOL plugin */
+    hid_t          ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+   /* get required buf size for encoding the datatype */
+   if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, NULL, 0, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
+
+    /* allocate buffer to store binary description of the datatype */
+    if (NULL == (buf = (unsigned char *) H5MM_malloc ((size_t)nalloc)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate space for datatype")
+
+    /* get binary description of the datatype */
+    if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, buf, (size_t) nalloc, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
+
+    if(NULL == (dt = H5T_decode(buf)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't decode datatype")
+    dt->vol_obj = dt_obj;
+
+    H5MM_free(buf);
+
+    /* Get an atom for the datatype */
+    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
+
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+    vol_plugin->nrefs ++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_create_datatype() */
 
 
 /*-------------------------------------------------------------------------

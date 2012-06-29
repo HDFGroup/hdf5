@@ -76,12 +76,9 @@ static herr_t H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, c
 static herr_t H5VL_native_attr_close(void *attr, hid_t req);
 
 /* Datatype callbacks */
-static void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, 
-                                         hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
-static void *H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, 
-                                       unsigned char *buf, size_t nalloc, hid_t tapl_id, hid_t req);
-static ssize_t H5VL_native_datatype_get_size(void *obj, H5VL_loc_params_t loc_params, const char *name, 
-                                             hid_t tapl_id, hid_t req);
+static void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
+static void *H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
+static ssize_t H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t req);
 static herr_t H5VL_native_datatype_close(void *dt, hid_t req);
 
 /* Dataset callbacks */
@@ -152,7 +149,7 @@ static H5VL_class_t H5VL_native_g = {
     {                                           /* datatype_cls */
         H5VL_native_datatype_commit,            /* commit */
         H5VL_native_datatype_open,              /* open */
-        H5VL_native_datatype_get_size,          /* get_size */
+        H5VL_native_datatype_get_binary,          /* get_size */
         H5VL_native_datatype_close              /* close */
     },
     {                                           /* dataset_cls */
@@ -1153,7 +1150,7 @@ done:
  */
 static void *
 H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, 
-                          unsigned char *buf, size_t nalloc, hid_t tapl_id, hid_t UNUSED req)
+                          hid_t tapl_id, hid_t UNUSED req)
 {
     H5T_t       *type = NULL;           /* Datatype opened in file */
     H5G_loc_t	 loc;                   /* Group location of object to open */
@@ -1193,9 +1190,6 @@ H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *n
     if(NULL == (type = H5T_open(&type_loc, dxpl_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named datatype")
 
-    if(H5T_encode(type, buf, &nalloc) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "can't serialize datatype")
-
     ret_value = (void *)type;
 done:
     if(NULL == type)
@@ -1206,7 +1200,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_datatype_get_size
+ * Function:	H5VL_native_datatype_get_binary
  *
  * Purpose:	gets size required to encode the datatype
  *
@@ -1219,58 +1213,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5VL_native_datatype_get_size(void *obj, H5VL_loc_params_t loc_params, const char *name, 
-                              hid_t tapl_id, hid_t UNUSED req)
+H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t UNUSED req)
 {
-    H5T_t       *type = NULL;           /* Datatype opened in file */
-    H5G_loc_t	 loc;                   /* Group location of object to open */
-    H5G_name_t   path;            	/* Datatype group hier. path */
-    H5O_loc_t    oloc;            	/* Datatype object location */
-    H5O_type_t   obj_type;              /* Type of object at location */
-    H5G_loc_t    type_loc;              /* Group object for datatype */
-    hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
-    size_t       nalloc;
+    H5T_t       *type = (H5T_t *)obj;
+    size_t       nalloc = size;
     ssize_t      ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-   /* Set up datatype location to fill in */
-    type_loc.oloc = &oloc;
-    type_loc.path = &path;
-    H5G_loc_reset(&type_loc);
-
-    /*
-     * Find the named datatype object header and read the datatype message
-     * from it.
-     */
-    if(H5G_loc_find(&loc, name, &type_loc/*out*/, tapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
-    obj_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_NAMED_DATATYPE)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype")
-
-    /* Open it */
-    if(NULL == (type = H5T_open(&type_loc, dxpl_id)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
-
-    if(H5T_encode(type, NULL, &nalloc) < 0)
+    if(H5T_encode(type, buf, &nalloc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
 
     ret_value = (ssize_t) nalloc;
+
 done:
-    /* Close the datatype */
-    if(NULL != type && H5T_close(type) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to close Datatype")
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_datatype_get_size() */
+} /* end H5VL_native_datatype_get_binary() */
 
 
 /*-------------------------------------------------------------------------

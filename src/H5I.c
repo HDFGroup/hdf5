@@ -2270,11 +2270,14 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
         /* get the file object */
         if(NULL == (obj = (void *)H5I_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
         /* get the plugin pointer */
         if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
+        if (H5I_DATATYPE == type) {
+            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
+        }
         /* Get the file through the VOL */
         if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5_REQUEST_NULL,
                          type, app_ref, &file) < 0)
