@@ -52,7 +52,9 @@ IF (BUILD_TESTING)
   SET (HDF5_REFERENCE_TXT_FILES
       txtfp32.txt
       txtfp64.txt
+      txtuin16.txt
       txtuin32.txt
+      txtin8.txt
       txtin16.txt
       txtin32.txt
       textpfe64.txt
@@ -203,19 +205,19 @@ IF (BUILD_TESTING)
   SET (last_test "H5IMPORT-h5importtest")
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
-  ADD_H5_TEST (ASCII_I32 txtin16.txt txtin32.conf txtin32.h5)
+  ADD_H5_TEST (ASCII_I32 txtin32.txt txtin32.conf txtin32.h5)
 
   # ----- TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
   ADD_H5_TEST (ASCII_I16 txtin16.txt txtin16.conf txtin16.h5)
 
   # ----- TESTING "ASCII I8 - rank 3 - Output I8 LE-Chunked+Extended+Compressed " 
-  ADD_H5_TEST (ASCII_I8 txtin16.txt txtin8.conf txtin8.h5)
+  ADD_H5_TEST (ASCII_I8 txtin8.txt txtin8.conf txtin8.h5)
 
   # ----- TESTING "ASCII UI32 - rank 3 - Output BE" 
   ADD_H5_TEST (ASCII_UI32 txtuin32.txt txtuin32.conf txtuin32.h5)
 
   # ----- TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
-  ADD_H5_TEST (ASCII_UI16 txtuin32.txt txtuin16.conf txtuin16.h5)
+  ADD_H5_TEST (ASCII_UI16 txtuin16.txt txtuin16.conf txtuin16.h5)
 
   # ----- TESTING "ASCII F32 - rank 3 - Output LE " 
   ADD_H5_TEST (ASCII_F32 txtfp32.txt txtfp32.conf txtfp32.h5)

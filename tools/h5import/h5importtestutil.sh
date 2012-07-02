@@ -94,7 +94,9 @@ $SRC_H5IMPORT_TESTFILES/textpfe.conf
 $SRC_H5IMPORT_TESTFILES/txtstr.conf
 $SRC_H5IMPORT_TESTFILES/txtfp32.txt
 $SRC_H5IMPORT_TESTFILES/txtfp64.txt
+$SRC_H5IMPORT_TESTFILES/txtuin1632.txt
 $SRC_H5IMPORT_TESTFILES/txtuin32.txt
+$SRC_H5IMPORT_TESTFILES/txtin8.txt
 $SRC_H5IMPORT_TESTFILES/txtin16.txt
 $SRC_H5IMPORT_TESTFILES/txtin32.txt
 $SRC_H5IMPORT_TESTFILES/textpfe64.txt
@@ -174,20 +176,20 @@ $RUNSERIAL ./h5importtest
 ################################################
 
 TESTING "ASCII I32 rank 3 - Output BE " ;
-TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin32.conf -o txtin32.h5
+TOOLTEST $TESTDIR/txtin32.txt -c $TESTDIR/txtin32.conf -o txtin32.h5
 
 TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
 TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin16.conf -o txtin16.h5
 
 
 TESTING "ASCII I8 - rank 3 - Output I8 LE-Chunked+Extended+Compressed " 
-TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin8.conf  -o txtin8.h5
+TOOLTEST $TESTDIR/txtin8.txt -c $TESTDIR/txtin8.conf  -o txtin8.h5
 
 TESTING "ASCII UI32 - rank 3 - Output BE" 
 TOOLTEST $TESTDIR/txtuin32.txt -c $TESTDIR/txtuin32.conf -o txtuin32.h5
 
 TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
-TOOLTEST $TESTDIR/txtuin32.txt -c $TESTDIR/txtuin16.conf -o txtuin16.h5
+TOOLTEST $TESTDIR/txtuin16.txt -c $TESTDIR/txtuin16.conf -o txtuin16.h5
 
 TESTING "ASCII F32 - rank 3 - Output LE " 
 TOOLTEST $TESTDIR/txtfp32.txt -c $TESTDIR/txtfp32.conf -o txtfp32.h5
@@ -230,7 +232,7 @@ TOOLTEST $TESTDIR/textpfe64.txt -c $TESTDIR/textpfe.conf -o textpfe.h5
 
 
 
-rm -f  txtin32.txt txtin16.txt *.bin *.h5
+rm -f  txtin32.txt txtin16.txt txtin8.txt  txtuin32.txt txtuin16.txt *.bin *.h5
 rm -rf tmp_testfiles
 else
   echo "** h5import or h5importtest not available ***"
