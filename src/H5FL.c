@@ -268,8 +268,7 @@ done:
  *
  * Purpose:	Release an object & put on free list
  *
- * Return:	Success:	Non-negative
- * 		Failure:	Negative
+ * Return:	Always returns NULL
  *
  * Programmer:	Quincey Koziol
  *              Friday, March 24, 2000
