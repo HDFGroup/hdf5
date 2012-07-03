@@ -174,7 +174,7 @@ H5Tset_precision(hid_t type_id, size_t prec)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", type_id, prec);
-
+        
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")

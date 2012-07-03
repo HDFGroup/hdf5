@@ -1914,7 +1914,7 @@ H5O_copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
 
                 /* Traverse the destination file, adding committed datatypes to the skip
                 * list */
-                if(H5G_visit(H5F_FILE_ID(oloc_dst->file), "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O_copy_search_comm_dt_cb, &udata, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
+                if(H5G_visit(&dst_root_loc, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5O_copy_search_comm_dt_cb, &udata, H5P_LINK_ACCESS_DEFAULT, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
                 cpy_info->dst_dt_list_complete = TRUE;
             } /* end if */

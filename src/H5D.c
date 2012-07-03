@@ -90,7 +90,7 @@ H5D__init_pub_interface(void)
     FUNC_ENTER_STATIC
 
     /* Initialize the atom group for the dataset IDs */
-    if(H5I_register_type(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, NULL)<H5I_FILE_PRIVATE)
+    if(H5I_register_type(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, NULL)<H5I_FILE)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     ret_value = H5D_init();
@@ -183,7 +183,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -289,7 +289,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -362,7 +362,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */

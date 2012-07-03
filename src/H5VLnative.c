@@ -63,7 +63,6 @@ static hid_t H5VL_NATIVE_g = 0;
 
 /* Prototypes */
 static H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
-static herr_t H5VL_native_get_loc(void *obj, H5I_type_t type, H5G_loc_t *loc);
 static herr_t H5VL_native_term(void);
 
 /* Atrribute callbacks */
@@ -272,84 +271,6 @@ H5VL_native_term(void)
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VL_native_get_loc
- *
- * Purpose:	utility routine to get object location
- *
- * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              June, 2012
- *
- *---------------------------------------------------------------------------
- */
-static herr_t
-H5VL_native_get_loc(void *obj, H5I_type_t type, H5G_loc_t *loc)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    switch(type) {
-        case H5I_FILE:
-            /* Construct a group location for root group of the file */
-            if(H5G_root_loc((H5F_t *)obj, loc) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
-            break;
-        case H5I_GROUP:
-            if(NULL == (loc->oloc = H5G_oloc((H5G_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
-            if(NULL == (loc->path = H5G_nameof((H5G_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of group")
-            break;
-        case H5I_DATATYPE:
-            if(NULL == (loc->oloc = H5T_oloc((H5T_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
-            if(NULL == (loc->path = H5T_nameof((H5T_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
-#if 0
-                H5T_t *tmp_dt = (H5T_t *)obj;
-                H5T_t *dt = (H5T_t *)(tmp_dt->vol_obj);
-                if(NULL == (loc->oloc = H5T_oloc(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
-                if(NULL == (loc->path = H5T_nameof(dt)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of datatype")
-#endif
-            break;
-        case H5I_DATASET:
-            if(NULL == (loc->oloc = H5D_oloc((H5D_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
-             if(NULL == (loc->path = H5D_nameof((H5D_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of dataset")
-            break;
-        case H5I_ATTR:
-            if(NULL == (loc->oloc = H5A_oloc((H5A_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")
-            if(NULL == (loc->path = H5A_nameof((H5A_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path of attribute")
-            break;
-        case H5I_FILE_PRIVATE:
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    } /* end switch */
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL_native_get_loc */
-
-
-/*---------------------------------------------------------------------------
  * Function:	H5VL_native_get_file
  *
  * Purpose:	utility routine to get file object
@@ -402,7 +323,6 @@ H5VL_native_get_file(void *obj, H5I_type_t type)
                 oloc = H5A_oloc(attr);
                 break;
             }
-        case H5I_FILE_PRIVATE:
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
@@ -460,26 +380,25 @@ H5VL_native_register_aux(hid_t obj_id)
 
     switch(H5I_get_type(obj_id)) {
         case H5I_FILE:
-            if (H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
+            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
         case H5I_GROUP:
-            if (H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5G_close_group) < 0)
+            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5G_close_group) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
         case H5I_DATATYPE:
-            if (H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
+            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
         case H5I_DATASET:
-            if (H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
+            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
         case H5I_ATTR:
-            if (H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5A_close_attr) < 0)
+            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5A_close_attr) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
-        case H5I_FILE_PRIVATE:
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
@@ -555,6 +474,7 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     H5P_genplist_t  *plist;             /* Property list pointer */
     hid_t           type_id, space_id;
     H5T_t	    *type;              /* Datatype to use for attribute */
+    H5T_t	    *named_type;        /* Named Datatype to use for attribute */
     H5S_t	    *space;             /* Dataspace to use for attribute */
     H5A_t           *attr = NULL;
     void            *ret_value = NULL;
@@ -571,7 +491,7 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     if(H5P_get(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
     if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, NULL, "no write intent on file")
@@ -580,12 +500,17 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data space")
 
+    //if(NULL != (named_type = (H5T_t *)H5T_get_named_type(type)))
+    if(H5T_STATE_OPEN == type->shared->state || H5T_STATE_NAMED == type->shared->state){
+        type = (H5T_t *)(type->vol_obj);
+    }
+
     if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Acreate */
         /* Go do the real work for attaching the attribute to the dataset */
         if(NULL == (attr = H5A_create(&loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to create attribute")
     }
-    else if (loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Acreate_by_name */
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Acreate_by_name */
         H5G_name_t          obj_path;            	/* Opened object group hier. path */
         H5O_loc_t           obj_oloc;            	/* Opened object object location */
 
@@ -607,7 +532,6 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     else {
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "unknown attribute create parameters")
     }
-
     ret_value = (void *)attr;
 
 done:
@@ -642,7 +566,7 @@ H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Aopen */
@@ -771,7 +695,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_l
                 H5G_loc_t loc;
 
                 /* check arguments */
-                if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+                if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Aexists */
@@ -841,7 +765,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_l
                     H5G_loc_t loc;
                     
                     /* check arguments */
-                    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+                    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                     /* Open the attribute on the object header */
@@ -889,7 +813,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_l
                     H5G_loc_t loc;
                     
                     /* check arguments */
-                    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+                    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                     /* Open the attribute on the object header */
@@ -911,7 +835,7 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_l
                     H5G_loc_t loc;
                     
                     /* check arguments */
-                    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+                    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                     /* Open the attribute on the object header */
@@ -981,7 +905,7 @@ H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *att
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Adelete */
@@ -989,7 +913,7 @@ H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *att
         if(H5O_attr_remove(loc.oloc, attr_name, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     }
-    else if (loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Adelete_by_name */
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Adelete_by_name */
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;
@@ -1089,7 +1013,7 @@ H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -1101,7 +1025,7 @@ H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char 
     if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
 
-    if (NULL != name) { /* H5Tcommit */
+    if(NULL != name) { /* H5Tcommit */
         /* Commit the type */
         if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to commit datatype")
@@ -1164,7 +1088,7 @@ H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *n
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
    /* Set up datatype location to fill in */
@@ -1298,7 +1222,7 @@ H5VL_native_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
     /* Check arguments */
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
     if(H5I_DATATYPE != H5I_get_type(type_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype ID")
@@ -1306,7 +1230,7 @@ H5VL_native_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace ID")
 
     /* H5Dcreate_anon */
-    if (NULL == name) {
+    if(NULL == name) {
         /* build and open the new dataset */
         if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
@@ -1368,7 +1292,7 @@ H5VL_native_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *na
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     /* Set up dataset location to fill in */
@@ -1703,11 +1627,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t UNUSED req)
+H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
+                        hid_t UNUSED req)
 {
     H5F_t *new_file = NULL;
-    hid_t file_id = FAIL;
-    void  *ret_value;
+    void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1716,26 +1640,29 @@ H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t f
      * the EXCL or TRUNC bit is set.  All newly-created files are opened for
      * reading and writing.
      */
-    if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
+    if(0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
 	flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create the file */ 
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
+#if 0
     /* Get an atom for the file */
     if((file_id = H5I_register(H5I_FILE_PRIVATE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
     /* store a pointer to the VOL class in the file structure */
     new_file->vol_cls = &H5VL_native_g;
     new_file->file_id = file_id;
-
+    if(file_id < 0 && new_file && H5F_try_close(new_file) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+#endif
     ret_value = (void *)new_file;
 
 done:
-    if(file_id < 0 && new_file && H5F_try_close(new_file) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-
+    if(NULL == ret_value && new_file) 
+        if(H5F_close(new_file) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_create() */
 
@@ -1757,25 +1684,27 @@ static void *
 H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED req)
 {
     H5F_t *new_file = NULL;
-    hid_t file_id = FAIL;
-    void  *ret_value;
+    void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Open the file */ 
     if(NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+#if 0
     /* Get an atom for the file */
     if((file_id = H5I_register(H5I_FILE_PRIVATE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
     /* store a pointer to the VOL class in the file structure */
     new_file->vol_cls = &H5VL_native_g;
     new_file->file_id = file_id;
-
+    if(file_id < 0 && new_file && H5F_try_close(new_file) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+#endif
     ret_value = (void *)new_file;
 
 done:
-    if(file_id < 0 && new_file && H5F_try_close(new_file) < 0)
+    if(NULL == ret_value && new_file && H5F_try_close(new_file) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_file_open() */
@@ -1802,7 +1731,7 @@ H5VL_native_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scop
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (NULL == (f = H5VL_native_get_file(obj, loc_params.obj_type))) {
+    if(NULL == (f = H5VL_native_get_file(obj, loc_params.obj_type))) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
     }
 
@@ -1941,7 +1870,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_l
                 ssize_t   *ret  = va_arg (arguments, ssize_t *);
                 size_t     len;
 
-                if (NULL == (f = H5VL_native_get_file(obj, type))) {
+                if(NULL == (f = H5VL_native_get_file(obj, type))) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 }
 
@@ -1961,13 +1890,18 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_l
         case H5VL_OBJECT_GET_FILE:
             {
                 H5I_type_t type = va_arg (arguments, H5I_type_t);
-                hbool_t    app_ref = va_arg (arguments, hbool_t);
                 void      **ret = va_arg (arguments, void **);
+
+                if(NULL == (f = H5VL_native_get_file(obj, type))) {
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+                }
+#if 0
+                hbool_t    app_ref = va_arg (arguments, hbool_t);
                 H5F_t     *file = NULL;
                 hid_t      file_id;
                 H5G_loc_t  loc;       /* Location of object */
 
-                if (H5VL_native_get_loc(obj, type, &loc) < 0) {
+                if(H5G_loc_real(obj, type, &loc) < 0) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 }
                 /* Get the file ID for the object */
@@ -1977,7 +1911,8 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_l
                 /* return the file object */
                 if(NULL == (file = (H5F_t *)H5I_object(file_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-                *ret = (void*)file;
+#endif
+                *ret = (void*)f;
                 break;
             }
         default:
@@ -2018,7 +1953,7 @@ H5VL_native_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, v
                 hid_t       plist_id   = va_arg (arguments, hid_t);
                 H5G_loc_t   loc;
 
-                if (H5VL_native_get_loc(obj, type, &loc) < 0) {
+                if(H5G_loc_real(obj, type, &loc) < 0) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 }
                 /* Do the mount */
@@ -2034,11 +1969,11 @@ H5VL_native_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, v
                 const char *name       = va_arg (arguments, const char *);
                 H5G_loc_t   loc;
 
-                if (H5VL_native_get_loc(obj, type, &loc) < 0) {
+                if(H5G_loc_real(obj, type, &loc) < 0) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 }
                 /* Unmount */
-                if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
+                if(H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
                 break;
@@ -2145,7 +2080,7 @@ H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t U
                 H5I_type_t  type   = va_arg (arguments, H5I_type_t);
                 H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
 
-                if (NULL == (f = H5VL_native_get_file(obj, type))) {
+                if(NULL == (f = H5VL_native_get_file(obj, type))) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 }
 
@@ -2301,6 +2236,7 @@ H5VL_native_file_close(void *file, hid_t UNUSED req)
 {
     int nref;
     H5F_t *f = (H5F_t *)file;
+    hid_t file_id = FAIL;
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2310,19 +2246,27 @@ H5VL_native_file_close(void *file, hid_t UNUSED req)
      * This is only necessary to replicate previous behaviour, and could be
      * disabled by an option/property to improve performance. */
     if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        if((nref = H5I_get_ref(f->file_id, FALSE)) < 0)
+        /* get the file ID corresponding to the H5F_t struct */
+        if((file_id = H5VL_get_id(f, H5I_FILE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
+        /* get the number of references outstanding for this file ID */
+        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
             if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
-
+    /* close the file */
+    if(H5F_close(f) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
+#if 0
     /*
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
     if(H5I_dec_app_ref(f->file_id) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2362,11 +2306,11 @@ H5VL_native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *na
     if(H5P_get(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     /* if name is NULL then this is from H5Gcreate_anon */
-    if (name == NULL) {
+    if(name == NULL) {
         H5G_obj_create_t gcrt_info;         /* Information for group creation */
         /* Set up group creation info */
         gcrt_info.gcpl_id = gcpl_id;
@@ -2386,7 +2330,7 @@ H5VL_native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *na
     ret_value = (void *)grp;
 
 done:
-    if (name == NULL) {
+    if(name == NULL) {
         /* Release the group's object header, if it was created */
         if(grp) {
             H5O_loc_t *oloc;         /* Object location for group */
@@ -2426,7 +2370,7 @@ H5VL_native_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     /* Open the group */
@@ -2478,7 +2422,7 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t UNUSED req, va
                 H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
                 H5G_loc_t    loc;
 
-                if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+                if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Gget_info */
@@ -2486,7 +2430,7 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t UNUSED req, va
                     if(H5G__obj_info(loc.oloc, grp_info, H5AC_ind_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
                 }
-                else if (loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Gget_info_by_name */
+                else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Gget_info_by_name */
                     H5G_loc_t   grp_loc;                /* Location used to open group */
                     H5G_name_t  grp_path;            	/* Opened object group hier. path */
                     H5O_loc_t   grp_oloc;            	/* Opened object object location */
@@ -2511,7 +2455,7 @@ H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t UNUSED req, va
                     if(H5G_loc_free(&grp_loc) < 0)
                         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
                 }
-                else if (loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Gget_info_by_idx */
+                else if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Gget_info_by_idx */
                     H5G_loc_t   grp_loc;                /* Location used to open group */
                     H5G_name_t  grp_path;            	/* Opened object group hier. path */
                     H5O_loc_t   grp_oloc;            	/* Opened object object location */
@@ -2620,13 +2564,13 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc
                 if(H5P_get(plist, H5VL_LINK_TARGET_LOC_PARAMS, &cur_params) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current name")
 
-                if (NULL != cur_obj && H5VL_native_get_loc(cur_obj, cur_params.obj_type, &cur_loc) < 0)
+                if(NULL != cur_obj && H5G_loc_real(cur_obj, cur_params.obj_type, &cur_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                if (NULL != obj && H5VL_native_get_loc(obj, loc_params.obj_type, &link_loc) < 0)
+                if(NULL != obj && H5G_loc_real(obj, loc_params.obj_type, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 /* H5Lcreate_hard */
-                if (H5VL_OBJECT_BY_NAME == cur_params.type) {
+                if(H5VL_OBJECT_BY_NAME == cur_params.type) {
                     H5G_loc_t *cur_loc_p, *link_loc_p;
 
                     /* Set up current & new location pointers */
@@ -2658,7 +2602,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc
                 char        *target_name;
                 H5G_loc_t   link_loc;               /* Group location for new link */
 
-                if (H5VL_native_get_loc(obj, loc_params.obj_type, &link_loc) < 0)
+                if(H5G_loc_real(obj, loc_params.obj_type, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 if(H5P_get(plist, H5VL_LINK_TARGET_NAME, &target_name) < 0)
@@ -2677,7 +2621,7 @@ H5VL_native_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc
                 void *udata;
                 size_t udata_size;
 
-                if (H5VL_native_get_loc(obj, loc_params.obj_type, &link_loc) < 0)
+                if(H5G_loc_real(obj, loc_params.obj_type, &link_loc) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
                 if(H5P_get(plist, H5VL_LINK_TYPE, &link_type) < 0)
@@ -2729,9 +2673,9 @@ H5VL_native_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (NULL != src_obj && H5VL_native_get_loc(src_obj, loc_params1.obj_type, &src_loc) < 0)
+    if(NULL != src_obj && H5G_loc_real(src_obj, loc_params1.obj_type, &src_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    if (NULL != dst_obj && H5VL_native_get_loc(dst_obj, loc_params2.obj_type, &dst_loc) < 0)
+    if(NULL != dst_obj && H5G_loc_real(dst_obj, loc_params2.obj_type, &dst_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Set up src & dst location pointers */
@@ -2775,10 +2719,10 @@ static herr_t H5VL_native_link_iterate(void *obj, H5VL_loc_params_t loc_params, 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    if (!recursive) {
+    if(!recursive) {
         H5G_link_iterate_t lnk_op;  /* Link operator */
         hsize_t     last_lnk;       /* Index of last object looked at */
         hsize_t	idx;            /* Internal location to hold index */
@@ -2856,7 +2800,7 @@ H5VL_native_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t ge
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     switch (get_type) {
@@ -2990,7 +2934,7 @@ H5VL_native_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t UNUSED re
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Unlink */
@@ -3046,7 +2990,7 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
 
     switch (loc_params.type) {
@@ -3121,7 +3065,7 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
     }
 
     *opened_type = H5I_get_type (temp_id);
-    if (NULL == (ret_value = H5I_remove(temp_id))) {
+    if(NULL == (ret_value = H5I_remove(temp_id))) {
         HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
     }
 done:
@@ -3158,9 +3102,9 @@ H5VL_native_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get location for objects */
-    if (H5VL_native_get_loc(src_obj, loc_params1.obj_type, &src_loc) < 0)
+    if(H5G_loc_real(src_obj, loc_params1.obj_type, &src_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    if (H5VL_native_get_loc(dst_obj, loc_params2.obj_type, &dst_loc) < 0)
+    if(H5G_loc_real(dst_obj, loc_params2.obj_type, &dst_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Open the object */
@@ -3194,7 +3138,7 @@ static herr_t H5VL_native_object_visit(void *obj, H5VL_loc_params_t loc_params, 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     /* Call internal object visitation routine */
@@ -3380,13 +3324,13 @@ H5VL_native_object_free_loc(void *location, hid_t UNUSED req)
     if(H5G_loc_free(obj_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    if (NULL != obj_loc->oloc) {
+    if(NULL != obj_loc->oloc) {
         H5MM_free(obj_loc->oloc);
     }
-    if (NULL != obj_loc->path) {
+    if(NULL != obj_loc->path) {
         H5MM_free(obj_loc->path);
     }
-    if (NULL != obj_loc) {
+    if(NULL != obj_loc) {
         H5MM_free(obj_loc);
     }
 
@@ -3418,7 +3362,7 @@ H5VL_native_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_mis
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     switch (misc_type) {
@@ -3561,7 +3505,7 @@ H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5VL_native_get_loc(obj, loc_params.obj_type, &loc) < 0)
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
     switch (get_type) {
@@ -3570,7 +3514,7 @@ H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_
             {
                 htri_t	  *ret      = va_arg (arguments, htri_t *);
 
-                if (loc_params.type == H5VL_OBJECT_BY_NAME) {
+                if(loc_params.type == H5VL_OBJECT_BY_NAME) {
                     /* Check if the object exists */
                     if((*ret = H5G_loc_exists(&loc, loc_params.loc_data.loc_by_name.name, 
                                               loc_params.loc_data.loc_by_name.plist_id, H5AC_dxpl_id)) < 0)
@@ -3593,13 +3537,13 @@ H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_
                                     H5AC_ind_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
                 }
-                else if (loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Oget_info_by_name */
+                else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Oget_info_by_name */
                     /* Retrieve the object's information */
                     if(H5G_loc_info(&loc, loc_params.loc_data.loc_by_name.name, TRUE, obj_info, 
                                     loc_params.loc_data.loc_by_name.plist_id, H5AC_ind_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
                 }
-                else if (loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Oget_info_by_idx */
+                else if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Oget_info_by_idx */
                     H5G_loc_t   obj_loc;                /* Location used to open group */
                     H5G_name_t  obj_path;            	/* Opened object group hier. path */
                     H5O_loc_t   obj_oloc;            	/* Opened object object location */
@@ -3738,7 +3682,6 @@ H5VL_native_object_close(void UNUSED *obj, H5VL_loc_params_t loc_params, hid_t U
         case H5I_DATATYPE:
         case H5I_DATASET:
             break;
-        case H5I_FILE_PRIVATE:
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:

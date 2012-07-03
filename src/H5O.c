@@ -481,7 +481,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
 
     if(H5L_SAME_LOC != obj_id) {
         /* get the file object */
-        if(NULL == (obj1 = (void *)H5I_object(obj_id)))
+        if(NULL == (obj1 = (void *)H5VL_get_object(obj_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
         /* get the plugin pointer */
         if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(obj_id)))
@@ -489,7 +489,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     }
     if(H5L_SAME_LOC != new_loc_id) {
         /* get the file object */
-        if(NULL == (obj2 = (void *)H5I_object(new_loc_id)))
+        if(NULL == (obj2 = (void *)H5VL_get_object(new_loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
         /* get the plugin pointer */
         if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(new_loc_id)))
@@ -557,7 +557,7 @@ H5Oincr_refcount(hid_t object_id)
     loc_params.obj_type = H5I_get_type(object_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(object_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(object_id)))
@@ -608,7 +608,7 @@ H5Odecr_refcount(hid_t object_id)
     loc_params.obj_type = H5I_get_type(object_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(object_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(object_id)))
@@ -662,7 +662,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -709,7 +709,7 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -766,7 +766,7 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -834,7 +834,7 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -882,7 +882,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(obj_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
@@ -941,7 +941,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -987,7 +987,7 @@ H5Oget_comment(hid_t loc_id, char *comment, size_t bufsize)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -1045,7 +1045,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -1116,7 +1116,7 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(obj_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
@@ -1198,7 +1198,7 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -1638,7 +1638,7 @@ H5O_close(H5O_loc_t *loc)
 
 #ifdef H5O_DEBUG
     if(H5DEBUG(O)) {
-	if(H5F_FILE_ID(loc->file)< 0 && 1 == H5F_NREFS(loc->file))
+	if(/*H5F_FILE_ID(loc->file)< 0 &&*/ 1 == H5F_NREFS(loc->file))
 	    HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
 		      loc->addr,
 		      (unsigned long)H5F_NOPEN_OBJS(loc->file));
@@ -3539,7 +3539,7 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
         } /* end if */
 
         /* Call internal group visitation routine */
-        if((ret_value = H5G_visit(obj_id, ".", idx_type, order, H5O_visit_cb, &udata, lapl_id, dxpl_id)) < 0)
+        if((ret_value = H5G_visit(&obj_loc, ".", idx_type, order, H5O_visit_cb, &udata, lapl_id, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
     } /* end if */
 

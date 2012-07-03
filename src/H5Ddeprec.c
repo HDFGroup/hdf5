@@ -174,7 +174,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -242,7 +242,7 @@ H5Dopen1(hid_t loc_id, const char *name)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */

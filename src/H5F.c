@@ -40,7 +40,6 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5F__init_pub_interface(void);
 
 /*********************/
 /* Package Variables */
@@ -76,13 +75,82 @@ H5F__init_pub_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, NULL)<H5I_FILE_PRIVATE)
+    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, NULL)<H5I_FILE)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     ret_value = H5F_init();
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F__init_pub_interface() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_init
+ *
+ * Purpose:	Initialize the interface from some other layer.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, December 16, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_init(void)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_term_interface
+ *
+ * Purpose:	Terminate this interface: free all memory and reset global
+ *		variables to their initial values.  Release all ID groups
+ *		associated with this interface.
+ *
+ * Return:	Success:	Positive if anything was done that might
+ *				have affected other interfaces; zero
+ *				otherwise.
+ *
+ *		Failure:        Never fails.
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, February 19, 1999
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F_term_interface(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_interface_initialize_g) {
+	if((n = H5I_nmembers(H5I_FILE)) != 0) {
+            H5I_clear_type(H5I_FILE, FALSE, FALSE);
+	} else {
+            /* Make certain we've cleaned up all the shared file objects */
+            H5F_sfile_assert_num(0);
+
+	    H5I_dec_type_ref(H5I_FILE);
+	    H5_interface_initialize_g = 0;
+	    n = 1; /*H5I*/
+	} /* end else */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5F_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -103,19 +171,19 @@ done:
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5VL_t     *vol_plugin;
-    void       *obj;
-    hid_t ret_value;            /* Return value */
+    H5VL_t     *vol_plugin = NULL;
+    void       *obj = NULL;
+    hid_t       ret_value;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_FCPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
@@ -156,13 +224,12 @@ H5Fget_access_plist(hid_t file_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", file_id);
 
-    /* get the plugin pointer */
-    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_FAPL, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file creation properties")
@@ -399,7 +466,7 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    void    *file;              /*file token from VOL plugin */
+    void    *file = NULL;              /*file token from VOL plugin */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
     hid_t    ret_value;	        /*return value */
 
@@ -450,6 +517,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
+    ((H5F_t *)file)->file_id = ret_value;
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -498,7 +566,7 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    void    *file;              /*file token from VOL plugin */
+    void    *file = NULL;              /*file token from VOL plugin */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
     hid_t   ret_value;	        /*return value			*/
 
@@ -536,6 +604,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
+    ((H5F_t *)file)->file_id = ret_value;
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
@@ -578,7 +647,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(object_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -746,6 +815,7 @@ H5Freopen(hid_t file_id)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
     vol_plugin->nrefs ++;
+    ((H5F_t *)file)->file_id = ret_value;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1224,7 +1294,7 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(obj_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_NAME, H5_REQUEST_NULL,
@@ -1279,7 +1349,7 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(obj_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     if((ret_value = H5VL_file_optional(obj, vol_plugin, H5VL_FILE_GET_INFO, H5_REQUEST_NULL, 
@@ -1374,3 +1444,63 @@ H5Fclear_elink_file_cache(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_id
+ *
+ * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_id(H5F_t *file, hbool_t app_ref)
+{
+    hid_t       ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+#if 0
+    if (FAIL == (ret_value = H5VL_get_id(file, H5I_FILE))) {
+        /* resurrect the ID */
+        /* Get an atom for the file */
+        if((ret_value = H5I_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+        /* attach VOL information to the ID */
+        if (H5VL_native_register_aux(ret_value) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    }
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(ret_value, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+    }
+#endif
+#if 1
+    if(file->file_id == -1) {
+        /* Get an atom for the file */
+        if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
+	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+        /* attach VOL information to the ID */
+        if (H5VL_native_register_aux(file->file_id) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    } else {
+        /* Increment reference count on atom. */
+        if(H5I_inc_ref(file->file_id, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+    } /* end else */
+
+    ret_value = file->file_id;
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_id() */

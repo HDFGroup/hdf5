@@ -28,6 +28,7 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     const void *udata, size_t UNUSED udata_size, hid_t lapl_id);
@@ -539,11 +540,13 @@ herr_t
 H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	link_loc;               /* Group location to create link */
     char       *norm_obj_name = NULL;	/* Pointer to normalized current name */
     void       *ext_link_buf = NULL;    /* Buffer to contain external link */
     size_t      buf_size;               /* Size of buffer to hold external link */
     uint8_t    *p;                      /* Pointer into external link buffer */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;              /* Property list pointer */
     H5L_type_t link_type = H5L_TYPE_EXTERNAL;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -557,8 +560,6 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no file name specified")
     if(!obj_name || !*obj_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name specified")
-    if(H5G_loc(link_loc_id, &link_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!link_name || !*link_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
 
@@ -582,6 +583,18 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     p += HDstrlen(file_name) + 1;
     HDstrcpy((char *)p, norm_obj_name);       /* External link's object */
 
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = link_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(link_loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(link_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
@@ -595,8 +608,8 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist")
 
     /* Create the link through the VOL */
-    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, link_loc_id, link_name, 
-                                     lcpl_id, lapl_id)) < 0)
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin,
+                                     lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

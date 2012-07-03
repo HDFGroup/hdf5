@@ -34,6 +34,7 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
@@ -66,32 +67,6 @@ H5FL_DEFINE(H5F_file_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_init
- *
- * Purpose:	Initialize the interface from some other layer.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, December 16, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_init_interface
  *
  * Purpose:	Initialize interface-specific information.
@@ -111,57 +86,9 @@ H5F_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /*
-     * Initialize the atom group for the file IDs.
-     */
-    if(H5I_register_type(H5I_FILE_PRIVATE, (size_t)H5I_FILEID_HASHSIZE, 0, (H5I_free_t)H5F_close)<H5I_FILE_PRIVATE)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_init_interface() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_term_interface
- *
- * Purpose:	Terminate this interface: free all memory and reset global
- *		variables to their initial values.  Release all ID groups
- *		associated with this interface.
- *
- * Return:	Success:	Positive if anything was done that might
- *				have affected other interfaces; zero
- *				otherwise.
- *
- *		Failure:        Never fails.
- *
- * Programmer:	Robb Matzke
- *              Friday, February 19, 1999
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_term_interface(void)
-{
-    int	n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if(H5_interface_initialize_g) {
-	if((n = H5I_nmembers(H5I_FILE_PRIVATE)) != 0) {
-            H5I_clear_type(H5I_FILE_PRIVATE, FALSE, FALSE);
-	} else {
-            /* Make certain we've cleaned up all the shared file objects */
-            H5F_sfile_assert_num(0);
-
-	    H5I_dec_type_ref(H5I_FILE_PRIVATE);
-	    H5_interface_initialize_g = 0;
-	    n = 1; /*H5I*/
-	} /* end else */
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(n)
-} /* H5F_term_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -1336,7 +1263,6 @@ herr_t
 H5F_close(H5F_t *f)
 {
     herr_t	        ret_value = SUCCEED;    /* Return value */
-
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
@@ -1363,6 +1289,12 @@ H5F_close(H5F_t *f)
 
     /* Reset the file ID for this file */
     f->file_id = -1;
+
+    /*
+    if((file_id = H5VL_get_id(f, H5I_FILE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
+    H5I_remove(file_id);
+    */
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f) < 0)
@@ -1575,6 +1507,7 @@ H5F_reopen(H5F_t *f)
     ret_value->open_name = H5MM_xstrdup(f->open_name);
     ret_value->actual_name = H5MM_xstrdup(f->actual_name);
 
+    /*
     if((ret_value->file_id = H5I_register(H5I_FILE_PRIVATE, ret_value, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
 
@@ -1582,48 +1515,10 @@ done:
     if(ret_value->file_id < 0 && ret_value)
         if(H5F_dest(ret_value, H5AC_dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_reopen() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_id
- *
- * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
- *              appropriate.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu
- *		Oct 29, 2003
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5F_get_id(H5F_t *file, hbool_t app_ref)
-{
-    hid_t       ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(file);
-
-    if(file->file_id == -1) {
-        /* Get an atom for the file */
-        if((file->file_id = H5I_register(H5I_FILE_PRIVATE, file, app_ref)) < 0)
-	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
-    } else {
-        /* Increment reference count on atom. */
-        if(H5I_inc_ref(file->file_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-    } /* end else */
-
-    ret_value = file->file_id;
-
+    */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_id() */
+} /* end H5F_reopen() */
 
 
 /*-------------------------------------------------------------------------

@@ -158,6 +158,22 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    /*
+     * Check arguments.  We cannot commit an immutable type because H5Tclose()
+     * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
+     * a named type should always succeed.
+     */
+    if(H5T_STATE_NAMED == type->shared->state || H5T_STATE_OPEN == type->shared->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is already committed")
+    if(H5T_STATE_IMMUTABLE == type->shared->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is immutable")
+
+    /* Check for a "sensible" datatype to store on disk */
+    if(H5T_is_sensible(type) <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible")
+
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
@@ -175,9 +191,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     /* attach the vol object created using the commit call to the 
        library datatype structure */
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-
     /* set the committed type object to the VOL pluging pointer in the H5T_t struct */
     type->vol_obj = dt;
 
@@ -491,6 +504,7 @@ done:
 htri_t
 H5Tcommitted(hid_t type_id)
 {
+    H5T_t       *dt;
     H5T_t	*type;          /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
@@ -502,11 +516,12 @@ H5Tcommitted(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     if (NULL == type->vol_obj)
-        ret_value = FALSE;
+        dt = type;
     else
-        ret_value = TRUE;
+        dt = (H5T_t *)type->vol_obj;
+
     /* Set return value */
-    //ret_value = H5T_committed(type);
+    ret_value = H5T_committed(dt);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -528,7 +543,6 @@ done:
 htri_t
 H5T_committed(const H5T_t *type)
 {
-    /* Use no-init for efficiency */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type);
@@ -590,10 +604,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     void    *dt = NULL;       /* datatype token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
     H5VL_t  *vol_plugin;        /* VOL plugin information */
-    H5T_t   *type = NULL;
     H5VL_loc_params_t loc_params;
-    ssize_t    nalloc;
-    unsigned char *buf = NULL;
     hid_t     ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -703,12 +714,16 @@ H5Tget_create_plist(hid_t dtype_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
 
     /* Check if the datatype is committed */
-    if((status = H5T_committed(type)) < 0)
+    if((status = H5Tcommitted(dtype_id)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't check whether datatype is committed")
 
     /* Retrieve further information, if the datatype is committed */
     if(status > 0) {
         H5P_genplist_t  *new_plist;     /* New datatype creation property list */
+
+        /* get the named datatype object */
+        if(NULL == (type = (H5T_t *)H5VL_get_object(dtype_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
         /* Get property list object for new TCPL */
         if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_tcpl_id)))
@@ -987,7 +1002,7 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
     FUNC_ENTER_NOAPI(FAIL)
 
    /* get required buf size for encoding the datatype */
-   if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, NULL, 0, H5_REQUEST_NULL)) < 0)
+   if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, NULL, 0, req)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     /* allocate buffer to store binary description of the datatype */
@@ -995,7 +1010,7 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate space for datatype")
 
     /* get binary description of the datatype */
-    if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, buf, (size_t) nalloc, H5_REQUEST_NULL)) < 0)
+    if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, buf, (size_t) nalloc, req)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     if(NULL == (dt = H5T_decode(buf)))

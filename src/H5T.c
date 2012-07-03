@@ -2953,6 +2953,7 @@ H5T_decode(const unsigned char *buf)
     if(H5T_set_loc(ret_value, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
+    ret_value->vol_obj = NULL;
 done:
     /* Release fake file structure */
     if(f && H5F_fake_free(f) < 0)
@@ -3074,6 +3075,7 @@ H5T__create(H5T_class_t type, size_t size)
     if(H5T_STRING != type || H5T_VARIABLE != size)
         dt->shared->size = size;
 
+    dt->vol_obj = NULL;
     /* Set return value */
     ret_value = dt;
 
@@ -3138,6 +3140,10 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* check args */
     HDassert(old_dt);
+
+    /* Check if the VOL_obj exists, then this type is the one we want to copy */
+    //if(NULL != old->vol_obj)
+    //  old_dt = (H5T_t *)(old->vol_obj);
 
     /* Allocate space */
     if(NULL == (new_dt = H5FL_MALLOC(H5T_t)))
@@ -3458,6 +3464,7 @@ H5T__alloc(void)
     if(NULL == (dt->shared = H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     dt->shared->version = H5O_DTYPE_VERSION_1;
+    dt->vol_obj = NULL;
 
     /* Assign return value */
     ret_value = dt;

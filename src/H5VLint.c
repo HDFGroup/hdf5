@@ -336,7 +336,6 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
             break;
 
-        case H5I_FILE_PRIVATE:
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_FILE:
@@ -359,6 +358,42 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_register() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_get_object
+ *
+ * Purpose:     utility function to return the object pointer associated with
+ *              an hid_t. This routine is the same as H5I_object for all types
+ *              except for named datatypes, where the vol_obj is returned that 
+ *              is attached to the H5T_t struct.
+ *
+ * Return:      Success:        object pointer
+ *              Failure:        NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5VL_get_object(hid_t id)
+{
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* get the object */
+    if(NULL == (ret_value = (void *)H5I_object(id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid file identifier")
+
+    if (H5I_DATATYPE == H5I_get_type(id)) {
+        if (NULL == (ret_value = H5T_get_named_type((H5T_t *)ret_value)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_object() */
 
 
 /*-------------------------------------------------------------------------

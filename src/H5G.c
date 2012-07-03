@@ -781,14 +781,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_close_group(void *dset, H5VL_t *vol_plugin)
+H5G_close_group(void *grp, H5VL_t *vol_plugin)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Close the group through the VOL*/
-    if((ret_value = H5VL_group_close(dset, vol_plugin, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_group_close(grp, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
 
     vol_plugin->nrefs --;

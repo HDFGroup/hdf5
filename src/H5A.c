@@ -241,6 +241,9 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
+            //if((temp_id = H5T_get_named_id(type_id)) < 0)
+            //HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid type ID")
+
     /* set creation properties */
     if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
@@ -253,7 +256,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -356,7 +359,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.loc_data.loc_by_name.plist_id = lapl_id;
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -426,7 +429,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -508,7 +511,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -599,7 +602,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     /* get the plugin pointer */
@@ -956,7 +959,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     loc_params.type = H5VL_OBJECT_BY_IDX;
@@ -1121,7 +1124,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* get the attribute info through the VOL */
@@ -1204,7 +1207,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* get the attribute info through the VOL */
@@ -1277,7 +1280,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
         loc_params.obj_type = H5I_get_type(loc_id);
 
         /* get the file object */
-        if(NULL == (obj = (void *)H5I_object(loc_id)))
+        if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
         /* get the plugin pointer */
         if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -1343,7 +1346,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
         loc_params.obj_type = H5I_get_type(loc_id);
 
         /* get the file object */
-        if(NULL == (obj = (void *)H5I_object(loc_id)))
+        if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
         /* get the plugin pointer */
         if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
@@ -1597,7 +1600,7 @@ H5Adelete(hid_t loc_id, const char *name)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Open the attribute through the VOL */
@@ -1659,7 +1662,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Open the attribute through the VOL */
@@ -1734,7 +1737,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Open the attribute through the VOL */
@@ -1828,7 +1831,7 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(obj_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
@@ -1885,7 +1888,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
     /* get the dataset object */
-    if(NULL == (obj = (void *)H5I_object(loc_id)))
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;

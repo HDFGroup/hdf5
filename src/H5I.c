@@ -137,7 +137,6 @@ H5FL_DEFINE_STATIC(H5I_id_info_t);
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
 static int H5I_search_cb(void *obj, hid_t id, void *udata);
-static hid_t H5VL_get_id(void *object, H5I_type_t type);
 #ifdef H5I_DEBUG_OUTPUT
 static herr_t H5I_debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
@@ -1357,7 +1356,6 @@ H5I_dec_ref(hid_t id)
         --(id_ptr->count);
         ret_value = (int)id_ptr->count;
     } /* end else */
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_dec_ref() */
@@ -2248,19 +2246,10 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if 0
     /* Get object type */
     type = H5I_TYPE(obj_id);
-#if 0
-    if(H5I_FILE == type) {
-        /* Increment reference count on file ID */
-        if(H5I_inc_ref(obj_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
 
-        /* Set return value */
-        ret_value = obj_id;
-    } /* end if */
-    else 
-#endif
     if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || 
        H5I_DATASET == type || H5I_ATTR == type) {
         H5VL_t     *vol_plugin;
@@ -2278,16 +2267,20 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
             if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
         }
+
         /* Get the file through the VOL */
-        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5_REQUEST_NULL,
-                         type, app_ref, &file) < 0)
+        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5_REQUEST_NULL, type, &file) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
 
         if (NULL == file)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
+        if((ret_value = H5F_get_id((H5F_t*)file, TRUE)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file ID")
+
+#if 0
         if (FAIL == (ret_value = H5VL_get_id(file, H5I_FILE))) {
-            /* Get an atom for the dataset */
+            /* Get an atom for the file */
             if((ret_value = H5I_register(H5I_FILE, file, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
@@ -2301,10 +2294,49 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
             if(H5I_inc_ref(ret_value, app_ref) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
         }
+#endif
     } /* end if */
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
+#endif
 
+    /* Get object type */
+    type = H5I_TYPE(obj_id);
+    if(type == H5I_FILE) {
+        /* Increment reference count on file ID */
+        if(H5I_inc_ref(obj_id, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+
+        /* Set return value */
+        ret_value = obj_id;
+    } /* end if */
+    else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
+        H5G_loc_t loc;              /* Location of object */
+
+        if (H5I_DATATYPE == type) {
+            void *obj = NULL;
+
+            /* get the dt object */
+            if(NULL == (obj = (void *)H5I_object(obj_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
+            if(H5G_loc_real(obj, type, &loc) < 0) {
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+            }
+        }
+        else {
+            /* Get the object location information */
+            if(H5G_loc(obj_id, &loc) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get object location")
+        }
+
+        /* Get the file ID for the object */
+        if((ret_value = H5F_get_id(loc.oloc->file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_file_id() */
@@ -2386,7 +2418,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static hid_t
+hid_t
 H5VL_get_id(void *object, H5I_type_t type)
 {
     hid_t  ret_value = FAIL;      /* Return value */
@@ -2409,6 +2441,7 @@ H5VL_get_id(void *object, H5I_type_t type)
             id_ptr = type_ptr->id_list[i];
             while(id_ptr) {
                 if (id_ptr->obj_ptr == object) {
+                    ret_value = id_ptr->id;
                     HGOTO_DONE(id_ptr->id);
                 }
                 id_ptr = id_ptr->next;

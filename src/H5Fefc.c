@@ -157,16 +157,6 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
     HDassert(parent->shared);
     HDassert(name);
 
-#if 0
-    /* get the VOL info from the fapl */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(H5P_get(plist, H5F_ACS_VOL_ID_NAME, &vol_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
-    if(NULL == (vol_plugin = (H5VL_class_t *)H5I_object(vol_id)))
-	HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, NULL, "invalid vol plugin ID in file access property list")
-#endif
-
     /* Get external file cache */
     efc = parent->shared->efc;
 
@@ -174,23 +164,10 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if(!efc) {
-#if 1
         if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
                                          dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-#endif
-#if 0
-        /* check if the corresponding VOL open callback exists */
-        if(NULL == vol_plugin->file_cls.open)
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
-        /* call the corresponding VOL open callback */
-        if(NULL == (ret_value = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-        ret_value->vol_id = vol_id;
-        /* increment the ref count on the vol ID */
-        if(H5I_inc_ref(ret_value->vol_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
-#endif
+
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id.  Note
          * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
@@ -260,23 +237,10 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
-#if 1
                 if(NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id,
                                                  dxpl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-#endif
-#if 0
-                /* check if the corresponding VOL open callback exists */
-                if(NULL == vol_plugin->file_cls.open)
-                    HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
-                /* call the corresponding VOL open callback */
-                if(NULL == (ret_value = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-                ret_value->vol_id = vol_id;
-                /* increment the ref count on the vol ID */
-                if(H5I_inc_ref(ret_value->vol_id, FALSE) < 0)
-                    HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
-#endif
+
                 /* Increment the number of open objects to prevent the file from
                  * being closed out from under us - "simulate" having an open
                  * file id */
@@ -293,24 +257,12 @@ H5F_efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id,
         /* Build new entry */
         if(NULL == (ent->name = H5MM_strdup(name)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-#if 1
+
         /* Open the file */
         if(NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id,
                                          dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-#endif
-#if 0
-        /* check if the corresponding VOL open callback exists */
-        if(NULL == vol_plugin->file_cls.open)
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
-        /* call the corresponding VOL open callback */
-        if(NULL == (ent->file = (vol_plugin->file_cls.open)(name, flags, fcpl_id, fapl_id, dxpl_id)))
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
-        ent->file->vol_id = vol_id;
-        /* increment the ref count on the vol ID */
-        if(H5I_inc_ref(ent->file->vol_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL plugin")
-#endif
+
         open_file = TRUE;
 
         /* Increment the number of open objects to prevent the file from being

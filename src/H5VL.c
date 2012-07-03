@@ -380,7 +380,6 @@ H5VLregister_object(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls)
             if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5A_close_attr) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
             break;
-        case H5I_FILE_PRIVATE:
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_DATASPACE:
