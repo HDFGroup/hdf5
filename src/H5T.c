@@ -3143,7 +3143,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Check if the VOL_obj exists, then this type is the one we want to copy */
     //if(NULL != old->vol_obj)
-    //  old_dt = (H5T_t *)(old->vol_obj);
+    //old_dt = (H5T_t *)(old->vol_obj);
 
     /* Allocate space */
     if(NULL == (new_dt = H5FL_MALLOC(H5T_t)))
@@ -3153,7 +3153,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
-
+    new_dt->vol_obj = NULL;
     /* Check what sort of copy we are making */
     switch (method) {
         case H5T_COPY_TRANSIENT:

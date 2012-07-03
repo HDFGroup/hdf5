@@ -385,7 +385,7 @@ H5VL_get_object(hid_t id)
 
     /* get the object */
     if(NULL == (ret_value = (void *)H5I_object(id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid file identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
 
     if (H5I_DATATYPE == H5I_get_type(id)) {
         if (NULL == (ret_value = H5T_get_named_type((H5T_t *)ret_value)))

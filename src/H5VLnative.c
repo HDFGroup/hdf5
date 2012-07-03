@@ -473,8 +473,7 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
     hbool_t         loc_found = FALSE;  
     H5P_genplist_t  *plist;             /* Property list pointer */
     hid_t           type_id, space_id;
-    H5T_t	    *type;              /* Datatype to use for attribute */
-    H5T_t	    *named_type;        /* Named Datatype to use for attribute */
+    H5T_t	    *type, *dt;         /* Datatype to use for attribute */
     H5S_t	    *space;             /* Dataspace to use for attribute */
     H5A_t           *attr = NULL;
     void            *ret_value = NULL;
@@ -495,15 +494,15 @@ H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *att
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file or file object")
     if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, NULL, "no write intent on file")
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a type")
+    /* Get the actual datatype object if this is a named datatype */
+    if(NULL == (type = (H5T_t *)H5T_get_named_type(dt)))
+        type = dt;
+
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data space")
-
-    //if(NULL != (named_type = (H5T_t *)H5T_get_named_type(type)))
-    if(H5T_STATE_OPEN == type->shared->state || H5T_STATE_NAMED == type->shared->state){
-        type = (H5T_t *)(type->vol_obj);
-    }
 
     if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Acreate */
         /* Go do the real work for attaching the attribute to the dataset */
@@ -1022,7 +1021,7 @@ H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char 
     /* Copy the datatype - the copied one will be the type that is
        committed, and attached to original datatype above the VOL
        layer*/
-    if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
+    if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
 
     if(NULL != name) { /* H5Tcommit */
@@ -1049,11 +1048,7 @@ H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char 
         } /* end if */
     }
     ret_value = (void *)type;
-    /* Increment reference count on atom because the commit callback in the native implementation
-       return the same object as the type ID itself
-    if(H5I_inc_ref(type_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing type ID failed")
-    */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_datatype_commit() */

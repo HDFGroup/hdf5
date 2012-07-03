@@ -905,7 +905,7 @@ H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id)
 {
-    const H5T_t         *type;                  /* Datatype for dataset */
+    const H5T_t         *type, *dt;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
     H5P_genplist_t 	*dc_plist = NULL;       /* New Property list */
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
@@ -923,8 +923,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
 
     /* Get the dataset's datatype */
-    if(NULL == (type = (const H5T_t *)H5I_object(type_id)))
+    if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+    /* Get the actual datatype object if this is a named datatype */
+    if(NULL == (type = (const H5T_t *)H5T_get_named_type(dt)))
+        type = dt;
 
     /* Check if the datatype is "sensible" for use in a dataset */
     if(H5T_is_sensible(type) != TRUE)
@@ -2676,6 +2679,7 @@ hid_t
 H5D_get_type(H5D_t *dset)
 {
     H5T_t	*dt = NULL;
+    H5T_t         *type = NULL;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2697,12 +2701,35 @@ H5D_get_type(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
     /* Create an atom */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    if(H5T_committed(dt)) {
+        /* If this is a committed datatype, we need to recreate the
+           two level IDs, where the VOL object is a copy of the
+           returned datatype */
+        ssize_t        nalloc = 0;
+        size_t         size;
+        unsigned char *buf = NULL;
 
+        /* Copy the dataset's datatype */
+        if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
+                
+        H5T_set_vol_object(type, (void *)dt);
+
+        if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+
+        if (H5VL_native_register_aux(ret_value) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    }
+    else {
+        if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    }
 done:
     if(ret_value < 0) {
         if(dt && H5T_close(dt) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+        if(type && H5T_close(type) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
     } /* end if */
 

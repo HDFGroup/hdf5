@@ -160,19 +160,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    /*
-     * Check arguments.  We cannot commit an immutable type because H5Tclose()
-     * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
-     * a named type should always succeed.
-     */
-    if(H5T_STATE_NAMED == type->shared->state || H5T_STATE_OPEN == type->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is already committed")
-    if(H5T_STATE_IMMUTABLE == type->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is immutable")
-
-    /* Check for a "sensible" datatype to store on disk */
-    if(H5T_is_sensible(type) <= 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -1072,3 +1059,11 @@ H5T_close_datatype(void *type, H5VL_t *vol_plugin)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_close_datatype() */
+
+herr_t
+H5T_set_vol_object(H5T_t *type, void *vol_obj)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    type->vol_obj = vol_obj;
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
