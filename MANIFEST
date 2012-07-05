@@ -1350,6 +1350,10 @@
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl
+./tools/testfiles/tcmpdattrintsize.ddl
+./tools/testfiles/tcmpdintsize.ddl
+./tools/testfiles/tcmpdattrintsize.h5
+./tools/testfiles/tcmpdintsize.h5
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
 ./tools/testfiles/tcomp-3.ddl

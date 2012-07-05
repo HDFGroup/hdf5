@@ -91,13 +91,15 @@ $SRC_H5DUMP_TESTFILES/tarray6.h5
 $SRC_H5DUMP_TESTFILES/tarray7.h5
 $SRC_H5DUMP_TESTFILES/tarray8.h5
 $SRC_H5DUMP_TESTFILES/tattr.h5
-$SRC_H5DUMP_TESTFILES/tattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tattr2.h5
 $SRC_H5DUMP_TESTFILES/tattr4_be.h5
+$SRC_H5DUMP_TESTFILES/tattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tattrreg.h5
 $SRC_H5DUMP_TESTFILES/tbigdims.h5
 $SRC_H5DUMP_TESTFILES/tbinary.h5
 $SRC_H5DUMP_TESTFILES/tchar.h5
+$SRC_H5DUMP_TESTFILES/tcmpdattrintsize.h5
+$SRC_H5DUMP_TESTFILES/tcmpdintsize.h5
 $SRC_H5DUMP_TESTFILES/tcompound.h5
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5
 $SRC_H5DUMP_TESTFILES/tdatareg.h5
@@ -203,6 +205,8 @@ $SRC_H5DUMP_TESTFILES/tboot1.ddl
 $SRC_H5DUMP_TESTFILES/tboot2.ddl
 $SRC_H5DUMP_TESTFILES/tchar1.ddl
 $SRC_H5DUMP_TESTFILES/tchunked.ddl
+$SRC_H5DUMP_TESTFILES/tcmpdattrintsize.ddl
+$SRC_H5DUMP_TESTFILES/tcmpdintsize.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-1.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-2.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-3.ddl
@@ -570,8 +574,12 @@ COPY_TESTFILES_TO_TESTDIR
 
 # test for signed/unsigned datasets
 TOOLTEST packedbits.ddl --enable-error-stack packedbits.h5
+# test for compound signed/unsigned datasets
+TOOLTEST tcmpdintsize.ddl --enable-error-stack tcmpdintsize.h5
 # test for signed/unsigned attributes
 TOOLTEST tattrintsize.ddl --enable-error-stack tattrintsize.h5
+# test for compound signed/unsigned attributes
+TOOLTEST tcmpdattrintsize.ddl --enable-error-stack tcmpdattrintsize.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl --enable-error-stack tgroup.h5
 # test for displaying the selected groups
