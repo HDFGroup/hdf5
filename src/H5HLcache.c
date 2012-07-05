@@ -73,18 +73,20 @@
 /* Local heap prefix */
 static H5HL_prfx_t *H5HL__prefix_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5HL__prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-    void *thing, unsigned *flags_ptr);
-static herr_t H5HL__prefix_dest(H5F_t *f, void *thing);
-static herr_t H5HL__prefix_clear(H5F_t *f, void *thing, hbool_t destroy);
-static herr_t H5HL__prefix_size(const H5F_t *f, const void *thing, size_t *size_ptr);
+    H5HL_prfx_t *prfx, unsigned *flags_ptr);
+static herr_t H5HL__prefix_dest(H5F_t *f, H5HL_prfx_t *prfx);
+static herr_t H5HL__prefix_clear(H5F_t *f, H5HL_prfx_t *prfx, hbool_t destroy);
+static herr_t H5HL__prefix_notify(H5AC_notify_action_t action, H5HL_prfx_t *prfx);
+static herr_t H5HL__prefix_size(const H5F_t *f, H5HL_prfx_t *prfx, size_t *size_ptr);
 
 /* Local heap data block */
 static H5HL_dblk_t *H5HL__datablock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5HL__datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
-    void *thing, unsigned *flags_ptr);
-static herr_t H5HL__datablock_dest(H5F_t *f, void *thing);
-static herr_t H5HL__datablock_clear(H5F_t *f, void *thing, hbool_t destroy);
-static herr_t H5HL__datablock_size(const H5F_t *f, const void *thing, size_t *size_ptr);
+    H5HL_dblk_t *dblk, unsigned *flags_ptr);
+static herr_t H5HL__datablock_dest(H5F_t *f, H5HL_dblk_t *dblk);
+static herr_t H5HL__datablock_clear(H5F_t *f, H5HL_dblk_t *dblk, hbool_t destroy);
+static herr_t H5HL__datablock_notify(H5AC_notify_action_t action, H5HL_dblk_t *dblk);
+static herr_t H5HL__datablock_size(const H5F_t *f, H5HL_dblk_t *dblk, size_t *size_ptr);
 
 /* Free list de/serialization */
 static herr_t H5HL__fl_deserialize(H5HL_t *heap);
@@ -101,7 +103,7 @@ const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     (H5AC_flush_func_t)     H5HL__prefix_flush,
     (H5AC_dest_func_t)      H5HL__prefix_dest,
     (H5AC_clear_func_t)     H5HL__prefix_clear,
-    (H5AC_notify_func_t)    NULL,
+    (H5AC_notify_func_t)    H5HL__prefix_notify,
     (H5AC_size_func_t)      H5HL__prefix_size,
 }};
 
@@ -111,7 +113,7 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     (H5AC_flush_func_t)     H5HL__datablock_flush,
     (H5AC_dest_func_t)      H5HL__datablock_dest,
     (H5AC_clear_func_t)     H5HL__datablock_clear,
-    (H5AC_notify_func_t)    NULL,
+    (H5AC_notify_func_t)    H5HL__datablock_notify,
     (H5AC_size_func_t)      H5HL__datablock_size,
 }};
 
@@ -391,9 +393,8 @@ END_FUNC(STATIC) /* end H5HL__prefix_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL__prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    void *thing, unsigned UNUSED *flags_ptr))
+    H5HL_prfx_t *prfx, unsigned UNUSED *flags_ptr))
 
-    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to flush   */
     H5WB_t      *wb = NULL;                     /* Wrapped buffer for heap data */
     uint8_t heap_buf[H5HL_SPEC_READ_SIZE];      /* Buffer for heap              */
 
@@ -493,9 +494,7 @@ END_FUNC(STATIC) /* end H5HL__prefix_flush() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5HL__prefix_dest(H5F_t *f, void *thing))
-
-    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* Local heap prefix to destroy */
+H5HL__prefix_dest(H5F_t *f, H5HL_prfx_t *prfx))
 
     /* check arguments */
     HDassert(prfx);
@@ -549,9 +548,7 @@ END_FUNC(STATIC) /* end H5HL__prefix_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5HL__prefix_clear(H5F_t UNUSED *f, void *thing, hbool_t destroy))
-
-    H5HL_prfx_t *prfx = (H5HL_prfx_t *)thing;   /* The local heap prefix to operate on */
+H5HL__prefix_clear(H5F_t UNUSED *f, H5HL_prfx_t *prfx, hbool_t destroy))
 
     /* check arguments */
     HDassert(prfx);
@@ -567,6 +564,52 @@ CATCH
     /* No special processing on errors */
 
 END_FUNC(STATIC) /* end H5HL__prefix_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL__prefix_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL__prefix_notify(H5AC_notify_action_t action, H5HL_prfx_t *prfx))
+    
+    /* Sanity check */
+    HDassert(prfx);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(prfx->heap->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on child */
+                if(FAIL == H5HL__destroy_flush_depend((H5AC_info_t *)prfx, (H5AC_info_t *)prfx->heap->dblk))
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between prefix and data block, address of prefix = %llu", (unsigned long long)prfx->heap->prfx_addr);
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache");
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+CATCH
+    /* No special processing on errors */
+    
+END_FUNC(STATIC) /* end H5HL__prefix_notify() */
 
 
 /*-------------------------------------------------------------------------
@@ -586,9 +629,7 @@ END_FUNC(STATIC) /* end H5HL__prefix_clear() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5HL__prefix_size(const H5F_t UNUSED *f, const void *thing, size_t *size_ptr))
-
-    const H5HL_prfx_t *prfx = (const H5HL_prfx_t *)thing;   /* Pointer to local heap prefix to query */
+H5HL__prefix_size(const H5F_t UNUSED *f, H5HL_prfx_t *prfx, size_t *size_ptr))
 
     /* check arguments */
     HDassert(prfx);
@@ -687,9 +728,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_load() */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5HL__datablock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-    void *_thing, unsigned UNUSED * flags_ptr))
-
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
+    H5HL_dblk_t *dblk, unsigned UNUSED * flags_ptr))
 
     /* check arguments */
     HDassert(f);
@@ -741,9 +780,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_flush() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5HL__datablock_dest(H5F_t *f, void *_thing))
-
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
+H5HL__datablock_dest(H5F_t *f, H5HL_dblk_t *dblk))
 
     /* check arguments */
     HDassert(dblk);
@@ -791,9 +828,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_dest() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5HL__datablock_clear(H5F_t *f, void *_thing, hbool_t destroy))
-
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
+H5HL__datablock_clear(H5F_t *f, H5HL_dblk_t *dblk, hbool_t destroy))
 
     /* check arguments */
     HDassert(dblk);
@@ -808,6 +843,58 @@ H5HL__datablock_clear(H5F_t *f, void *_thing, hbool_t destroy))
 CATCH
 
 END_FUNC(STATIC) /* end H5HL__datablock_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL__datablock_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL__datablock_notify(H5AC_notify_action_t action, H5HL_dblk_t *dblk))
+    
+    /* Sanity check */
+    HDassert(dblk);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(dblk->heap->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(FAIL == H5HL__create_flush_depend((H5AC_info_t *)dblk->heap->prfx, (H5AC_info_t *)dblk))
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and parent, address = %llu", (unsigned long long)dblk->heap->dblk_addr);
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(FAIL == H5HL__destroy_flush_depend((H5AC_info_t *)dblk->heap->prfx, (H5AC_info_t *)dblk))
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and parent, address = %llu", (unsigned long long)dblk->heap->dblk_addr);
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache");
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+CATCH
+    /* No special processing on errors */
+
+END_FUNC(STATIC) /* end H5HL__datablock_notify() */
 
 
 /*-------------------------------------------------------------------------
@@ -827,9 +914,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_clear() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5HL__datablock_size(const H5F_t UNUSED *f, const void *_thing, size_t *size_ptr))
-
-    const H5HL_dblk_t *dblk = (const H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
+H5HL__datablock_size(const H5F_t UNUSED *f, H5HL_dblk_t *dblk, size_t *size_ptr))
 
     /* check arguments */
     HDassert(dblk);

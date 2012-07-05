@@ -95,12 +95,13 @@ typedef struct H5HL_prfx_t H5HL_prfx_t;
 
 struct H5HL_t {
     /* General heap-management fields */
-    size_t          rc;                 /* Ref. count for prefix & data block using this struct */
-    size_t          prots;              /* # of times the heap has been protected               */
-    size_t          sizeof_size;        /* Size of file sizes                                   */
-    size_t          sizeof_addr;        /* Size of file addresses                               */
-    hbool_t         single_cache_obj;   /* Indicate if the heap is a single object in the cache */
-    H5HL_free_t     *freelist;          /* the free list                                        */
+    size_t          rc;                 /* Ref. count for prefix & data block using this struct         */
+    size_t          prots;              /* # of times the heap has been protected                       */
+    size_t          sizeof_size;        /* Size of file sizes                                           */
+    size_t          sizeof_addr;        /* Size of file addresses                                       */
+    hbool_t         single_cache_obj;   /* Indicate if the heap is a single object in the cache         */
+    hbool_t         swmr_write;         /* Flag indicating the file is opened with SWMR-write access    */
+    H5HL_free_t     *freelist;          /* the free list                                                */
 
     /* Prefix-specific fields */
     H5HL_prfx_t     *prfx;              /* The prefix object for the heap                       */
@@ -153,6 +154,12 @@ typedef struct H5HL_cache_dblk_ud_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5HL__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5HL__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Heap routines */
 H5_DLL H5HL_t *H5HL__new(size_t sizeof_size, size_t sizeof_addr, size_t prfx_size);

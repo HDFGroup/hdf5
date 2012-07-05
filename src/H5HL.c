@@ -1083,3 +1083,65 @@ CATCH
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release local heap prefix");
 
 END_FUNC(PRIV) /* end H5HL_heapsize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_depend
+ *
+ * Purpose:     Create a child flush dependency between the local heap
+ *              and another piece of metadata in the file.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL_depend(H5AC_info_t *parent_entry, H5HL_t *heap))
+
+    /* Check arguments */
+    HDassert(heap);
+
+    /* Set up a flush dependency between the parent entry and the local heap */
+    if(FAIL == H5HL__create_flush_depend(parent_entry, (H5AC_info_t *)heap))
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata");
+
+CATCH
+    /* No special processing on errors */
+END_FUNC(PRIV) /* end H5HL_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_undepend
+ *
+ * Purpose:     Remove a child flush dependency between the local heap and
+ *              another piece of metadata in the file.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL_undepend(H5AC_info_t *parent_entry, H5HL_t *heap))
+
+    /* Check arguments */
+    HDassert(heap);
+
+    /* Remove a flush dependency between the parent entry and the local heap */
+    if(FAIL == H5HL__destroy_flush_depend(parent_entry, (H5AC_info_t *)heap))
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata");
+
+CATCH
+    /* No special processing on errors */
+END_FUNC(PRIV) /* end H5HL_undepend() */

@@ -227,3 +227,67 @@ CATCH
         H5E_THROW(H5E_CANTFREE, "unable to free local heap");
 
 END_FUNC(PKG) /* end H5HL__dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL__create_flush_depend
+ *
+ * Purpose:     Create a flush dependency between two data structure components
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+
+    /* Sanity check */
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Create a flush dependency between parent and child entry */
+    if(FAIL == H5AC_create_flush_dependency(parent_entry, child_entry))
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency");
+
+CATCH
+    /* No special processing on errors */
+
+END_FUNC(PKG) /* end H5HL__create_flush_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL__destroy_flush_depend
+ *
+ * Purpose:     Destroy a flush dependency between two data structure components
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5HL__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+
+    /* Sanity check */
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Destroy a flush dependency between parent and child entry */
+    if(FAIL == H5AC_destroy_flush_dependency(parent_entry, child_entry))
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency");
+
+CATCH
+    /* No special processing on errors */
+
+END_FUNC(PKG) /* end H5HL__destroy_flush_depend() */
