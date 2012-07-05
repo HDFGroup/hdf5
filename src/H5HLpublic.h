@@ -21,8 +21,6 @@
  *
  * Purpose:             Public declarations for the H5HL (local heap) package.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5HLpublic_H

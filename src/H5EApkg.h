@@ -79,15 +79,15 @@
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
     /* Extensible Array statistics fields */                                  \
-    + (h)->sizeof_size /* Number of super blocks created */              \
-    + (h)->sizeof_size /* Size of super blocks created */              \
-    + (h)->sizeof_size /* Number of data blocks created */              \
-    + (h)->sizeof_size /* Size of data blocks created */              \
-    + (h)->sizeof_size /* Max. index set */                      \
-    + (h)->sizeof_size /* Number of elements 'realized' */              \
+    + (h)->sizeof_size /* Number of super blocks created */                   \
+    + (h)->sizeof_size /* Size of super blocks created */                     \
+    + (h)->sizeof_size /* Number of data blocks created */                    \
+    + (h)->sizeof_size /* Size of data blocks created */                      \
+    + (h)->sizeof_size /* Max. index set */                                   \
+    + (h)->sizeof_size /* Number of elements 'realized' */                    \
                                                                               \
     /* Extensible Array Header specific fields */                             \
-    + (h)->sizeof_addr /* File address of index block */              \
+    + (h)->sizeof_addr /* File address of index block */                      \
     )
 
 /* Size of the extensible array index block on disk */

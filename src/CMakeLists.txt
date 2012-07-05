@@ -333,7 +333,9 @@ SET (H5HL_SRCS
     ${HDF5_SRC_DIR}/H5HL.c
     ${HDF5_SRC_DIR}/H5HLcache.c
     ${HDF5_SRC_DIR}/H5HLdbg.c
+    ${HDF5_SRC_DIR}/H5HLdblk.c
     ${HDF5_SRC_DIR}/H5HLint.c
+    ${HDF5_SRC_DIR}/H5HLprfx.c
 )
 SET (H5HL_HDRS
     ${HDF5_SRC_DIR}/H5HLpkg.h
