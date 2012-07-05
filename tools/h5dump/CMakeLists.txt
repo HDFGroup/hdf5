@@ -65,6 +65,7 @@ IF (BUILD_TESTING)
       tarray7.ddl
       tarray8.ddl
       tattr-1.ddl
+      tattrintsize.ddl
       tattr-2.ddl
       tattr-3.ddl
       tattr-4_be.ddl
@@ -81,6 +82,8 @@ IF (BUILD_TESTING)
       tboot2.ddl
       tchar1.ddl
       tchunked.ddl
+      tcmpdattrintsize.ddl
+      tcmpdintsize.ddl
       tcomp-1.ddl
       tcomp-2.ddl
       tcomp-3.ddl
@@ -256,10 +259,13 @@ IF (BUILD_TESTING)
       tattr.h5
       tattr2.h5
       tattr4_be.h5
+      tattrintsize.h5
       tattrreg.h5
       tbigdims.h5
       tbinary.h5
       tchar.h5
+      tcmpdattrintsize.h5
+      tcmpdintsize.h5
       tcompound.h5
       tcompound_complex.h5
       tdatareg.h5
@@ -726,6 +732,8 @@ IF (BUILD_TESTING)
           tattr-3.out.err
           tattr-4_be.out
           tattr-4_be.out.err
+          tattrintsize.out
+          tattrintsize.out.err
           tattrreg.out
           tattrreg.out.err
           tattrregR.out
@@ -742,6 +750,10 @@ IF (BUILD_TESTING)
           tchar1.out.err
           tchunked.out
           tchunked.out.err
+          tcmpdattrintsize.out
+          tcmpdattrintsize.out.err
+          tcmpdintsize.out
+          tcmpdintsize.out.err
           tcomp-1.out
           tcomp-1.out.err
           tcomp-2.out
@@ -931,6 +943,12 @@ IF (BUILD_TESTING)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
+  # test for compound signed/unsigned datasets
+  ADD_H5_TEST (tcmpdintsize 0 --enable-error-stack tcmpdintsize.h5)
+  # test for signed/unsigned attributes
+  ADD_H5_TEST (tattrintsize 0 --enable-error-stack tattrintsize.h5)
+  # test for compound signed/unsigned attributes
+  ADD_H5_TEST (tcmpdattrintsize 0 --enable-error-stack tcmpdattrintsize.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
