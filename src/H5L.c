@@ -316,7 +316,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     }
     /* Make sure that the VOL plugins are the same */
     if(H5L_SAME_LOC != dst_loc_id && H5L_SAME_LOC != src_loc_id) {
-        if (vol_plugin1 != vol_plugin2)
+        if (vol_plugin1->cls != vol_plugin2->cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -400,7 +400,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     }
     /* Make sure that the VOL plugins are the same */
     if(H5L_SAME_LOC != dst_loc_id && H5L_SAME_LOC != src_loc_id) {
-        if (vol_plugin1 != vol_plugin2)
+        if (vol_plugin1->cls != vol_plugin2->cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -564,7 +564,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     }
     /* Make sure that the VOL plugins are the same */
     if(H5L_SAME_LOC != new_loc_id && H5L_SAME_LOC != cur_loc_id) {
-        if (vol_plugin1 != vol_plugin2)
+        if (vol_plugin1->cls != vol_plugin2->cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -2574,7 +2574,6 @@ H5L_delete(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 
     /* Set up user data for unlink operation */
     udata.dxpl_id = dxpl_id;
-
     if(H5G_traverse(loc, norm_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, H5L_delete_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, FAIL, "can't unlink object")
 
@@ -2737,6 +2736,8 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
             if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group ID")
+            if(H5VL_native_register_aux(grp_id) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
             if(udata->copy) {
                 if((link_class->copy_func)(udata->lnk->name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size) < 0)

@@ -30,7 +30,8 @@
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
-
+#include "H5VLnative.h" 	/* Native Plugin                        */
+#include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
 /* Local Macros */
@@ -251,6 +252,8 @@ H5O__dset_open(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t a
     /* Register an ID for the dataset */
     if((ret_value = H5I_register(H5I_DATASET, dset, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset")
+    if(H5VL_native_register_aux(ret_value) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
 done:
     if(ret_value < 0)

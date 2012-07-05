@@ -43,7 +43,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
-
+#include "H5VLnative.h" 	/* Native Plugin                        */
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */
@@ -149,6 +150,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     hssize_t	snelmts;	/* elements in attribute */
     size_t	nelmts;		/* elements in attribute */
     htri_t      tri_ret;        /* htri_t return value */
+    H5A_t       *attr = NULL;
     H5A_t	*ret_value = NULL;   /* Attribute created */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, loc->oloc->addr, NULL)
@@ -178,15 +180,15 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, NULL, "datatype is not sensible")
 
     /* Build the attribute information */
-    if(NULL == (ret_value = H5FL_CALLOC(H5A_t)))
+    if(NULL == (attr = H5FL_CALLOC(H5A_t)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "memory allocation failed for attribute info")
 
-    if(NULL == (ret_value->shared = H5FL_CALLOC(H5A_shared_t)))
+    if(NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "can't allocate shared attr structure")
 
     /* If the creation property list is H5P_DEFAULT, use the default character encoding */
     if(acpl_id == H5P_DEFAULT)
-        ret_value->shared->encoding = H5F_DEFAULT_CSET;
+        attr->shared->encoding = H5F_DEFAULT_CSET;
     else {
         H5P_genplist_t  *ac_plist;      /* ACPL Property list */
 
@@ -194,57 +196,57 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         if(NULL == (ac_plist = (H5P_genplist_t *)H5I_object(acpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
-        if(H5P_get(ac_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(ret_value->shared->encoding)) < 0)
+        if(H5P_get(ac_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(attr->shared->encoding)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get character encoding flag")
     } /* end else */
 
     /* Copy the attribute name */
-    ret_value->shared->name = H5MM_xstrdup(name);
+    attr->shared->name = H5MM_xstrdup(name);
 
     /* Copy datatype */
-    if(NULL == (ret_value->shared->dt = H5T_copy(type, H5T_COPY_ALL)))
+    if(NULL == (attr->shared->dt = H5T_copy(type, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared datatype info")
 
     /* Mark datatype as being on disk now */
-    if(H5T_set_loc(ret_value->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
+    if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Set the latest format for datatype, if requested */
     if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
-        if(H5T_set_latest_version(ret_value->shared->dt) < 0)
+        if(H5T_set_latest_version(attr->shared->dt) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of datatype")
 
     /* Copy the dataspace for the attribute */
-    ret_value->shared->ds = H5S_copy(space, FALSE, TRUE);
+    attr->shared->ds = H5S_copy(space, FALSE, TRUE);
 
     /* Set the latest format for dataspace, if requested */
     if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
-        if(H5S_set_latest_version(ret_value->shared->ds) < 0)
+        if(H5S_set_latest_version(attr->shared->ds) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of dataspace")
 
     /* Copy the object header information */
-    if(H5O_loc_copy(&(ret_value->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to copy entry")
 
     /* Deep copy of the group hierarchy path */
-    if(H5G_name_copy(&(ret_value->path), loc->path, H5_COPY_DEEP) < 0)
+    if(H5G_name_copy(&(attr->path), loc->path, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy path")
 
     /* Check if any of the pieces should be (or are already) shared in the
      * SOHM table
      */
-    if(H5SM_try_share(ret_value->oloc.file, dxpl_id, NULL, 0, H5O_DTYPE_ID, ret_value->shared->dt, NULL) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, 0, H5O_DTYPE_ID, attr->shared->dt, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "trying to share datatype failed")
-    if(H5SM_try_share(ret_value->oloc.file, dxpl_id, NULL, 0, H5O_SDSPACE_ID, ret_value->shared->ds, NULL) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, 0, H5O_SDSPACE_ID, attr->shared->ds, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, NULL, "trying to share dataspace failed")
 
     /* Check whether datatype is committed & increment ref count
      * (to maintain ref. count incr/decr similarity with "shared message"
      *      type of datatype sharing)
      */
-    if(H5T_committed(ret_value->shared->dt)) {
+    if(H5T_committed(attr->shared->dt)) {
         /* Increment the reference count on the shared datatype */
-        if(H5T_link(ret_value->shared->dt, 1, dxpl_id) < 0)
+        if(H5T_link(attr->shared->dt, 1, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, NULL, "unable to adjust shared datatype link count")
     } /* end if */
 
@@ -252,32 +254,35 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      * datatype and dataspace messages themselves, or the size of the "shared"
      * messages if either or both of them are shared.
      */
-    ret_value->shared->dt_size = H5O_msg_raw_size(ret_value->oloc.file, H5O_DTYPE_ID, FALSE, ret_value->shared->dt);
-    ret_value->shared->ds_size = H5O_msg_raw_size(ret_value->oloc.file, H5O_SDSPACE_ID, FALSE, ret_value->shared->ds);
+    attr->shared->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, FALSE, attr->shared->dt);
+    attr->shared->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, FALSE, attr->shared->ds);
 
     /* Get # of elements for attribute's dataspace */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(ret_value->shared->ds)) < 0)
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, NULL, "dataspace is invalid")
     H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
 
-    HDassert(ret_value->shared->dt_size > 0);
-    HDassert(ret_value->shared->ds_size > 0);
-    ret_value->shared->data_size = nelmts * H5T_GET_SIZE(ret_value->shared->dt);
+    HDassert(attr->shared->dt_size > 0);
+    HDassert(attr->shared->ds_size > 0);
+    attr->shared->data_size = nelmts * H5T_GET_SIZE(attr->shared->dt);
 
     /* Hold the symbol table entry (and file) open */
-    if(H5O_open(&(ret_value->oloc)) < 0)
+    if(H5O_open(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to open")
-    ret_value->obj_opened = TRUE;
+    attr->obj_opened = TRUE;
 
     /* Set the version to encode the attribute with */
-    if(H5A_set_version(ret_value->oloc.file, ret_value) < 0)
+    if(H5A_set_version(attr->oloc.file, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, NULL, "unable to update attribute version")
 
     /* Insert the attribute into the object header */
-    if(H5O_attr_create(&(ret_value->oloc), dxpl_id, ret_value) < 0)
+    if(H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, NULL, "unable to create attribute in object header")
 
+    ret_value = attr;
 done:
+    if(NULL == ret_value && attr && H5A_close(attr))
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
     FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* H5A_create() */
 

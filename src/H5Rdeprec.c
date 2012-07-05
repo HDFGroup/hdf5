@@ -152,8 +152,8 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(id);
 
-    /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(id)))
+    /* get the vol object */
+    if(NULL == (obj = (void *)H5VL_get_object(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(id)))
@@ -212,6 +212,13 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
+
+    /* get the vol object */
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     loc_params.type = H5VL_OBJECT_BY_REF;
     loc_params.loc_data.loc_by_ref.ref_type = ref_type;

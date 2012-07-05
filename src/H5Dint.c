@@ -34,7 +34,8 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-
+#include "H5VLnative.h" 	/* Native Plugin                        */
+#include "H5VLprivate.h"	/* Virtual Object Layer                 */
 
 /****************/
 /* Local Macros */

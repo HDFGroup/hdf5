@@ -2180,9 +2180,20 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "ixz", id, name, size);
 
-    /* Get object location */
-    if(H5G_loc(id, &loc) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+    /* add a workaround for named datatypes for now */
+    if(H5I_TYPE(id) == H5I_DATATYPE) {
+        H5T_t *type = NULL, *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5VL_get_object(id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
+        if(H5G_loc_real((void *)type, H5I_DATATYPE, &loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    }
+    else {
+        /* Get object location */
+        if(H5G_loc(id, &loc) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
+    }
 
     /* Call internal group routine to retrieve object's name */
     if((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)

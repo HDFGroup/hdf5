@@ -26,6 +26,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 /****************/
@@ -1099,12 +1100,11 @@ H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr)
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_optional(obj, vol_plugin, H5VL_FILE_RESET_MDC_HIT_RATE, H5_REQUEST_NULL, config_ptr) < 0)
+    if(H5VL_file_optional(obj, vol_plugin, H5VL_FILE_SET_MDC_CONFIG, H5_REQUEST_NULL, config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "uanvle to set MDC configuration")
 
 done:

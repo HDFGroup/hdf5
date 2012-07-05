@@ -1697,7 +1697,7 @@ H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugi
     FUNC_ENTER_NOAPI(FAIL)
 
     /* check if both objects are associated with the same VOL plugin */
-    if (vol_plugin1 != vol_plugin2)
+    if(vol_plugin1->cls != vol_plugin2->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be copied")
 
     if(NULL == vol_plugin1->cls->object_cls.copy)

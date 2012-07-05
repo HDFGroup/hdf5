@@ -497,7 +497,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     }
     /* Make sure that the VOL plugins are the same */
     if(H5L_SAME_LOC != new_loc_id && H5L_SAME_LOC != obj_id) {
-        if (vol_plugin1 != vol_plugin2)
+        if (vol_plugin1->cls != vol_plugin2->cls)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
     }
 
@@ -3488,7 +3488,6 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     /* (Takes ownership of the obj_loc information) */
     if((obj_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-
     if(H5VL_native_register_aux(obj_id) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
@@ -3503,6 +3502,7 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     /* Check for object being a group */
     if(oinfo.type == H5O_TYPE_GROUP) {
         H5G_loc_t	start_loc;          /* Location of starting group */
+        H5G_loc_t	vis_loc;            /* Location of visited group */
 
         /* Get the location of the starting group */
         if(H5G_loc(obj_id, &start_loc) < 0)
@@ -3538,8 +3538,12 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert object node into visited list")
         } /* end if */
 
+        /* Get the location of the visited group */
+        if(H5G_loc(obj_id, &vis_loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
         /* Call internal group visitation routine */
-        if((ret_value = H5G_visit(&obj_loc, ".", idx_type, order, H5O_visit_cb, &udata, lapl_id, dxpl_id)) < 0)
+        if((ret_value = H5G_visit(&vis_loc, ".", idx_type, order, H5O_visit_cb, &udata, 
+                                  lapl_id, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
     } /* end if */
 

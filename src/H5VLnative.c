@@ -781,8 +781,8 @@ H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_l
 
                     /* Copy the name into the user's buffer, if given */
                     if(buf) {
-                        HDstrncpy(buf, attr->shared->name, MIN((size_t)(ret_value + 1), buf_size));
-                        if((size_t)ret_value >= buf_size)
+                        HDstrncpy(buf, attr->shared->name, MIN((size_t)(*ret_val + 1), buf_size));
+                        if((size_t)(*ret_val) >= buf_size)
                             buf[buf_size - 1]='\0';
                     } /* end if */
 
@@ -907,12 +907,12 @@ H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *att
     if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    if(loc_params.type == H5VL_OBJECT_BY_SELF) { /* H5Adelete */
+    if(H5VL_OBJECT_BY_SELF == loc_params.type) { /* H5Adelete */
         /* Delete the attribute from the location */
         if(H5O_attr_remove(loc.oloc, attr_name, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     }
-    else if(loc_params.type == H5VL_OBJECT_BY_NAME) { /* H5Adelete_by_name */
+    else if(H5VL_OBJECT_BY_NAME == loc_params.type) { /* H5Adelete_by_name */
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;
@@ -928,7 +928,7 @@ H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *att
         if(H5O_attr_remove(obj_loc.oloc, attr_name, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     }
-    if(loc_params.type == H5VL_OBJECT_BY_IDX) { /* H5Adelete_by_idx */
+    else if(H5VL_OBJECT_BY_IDX == loc_params.type) { /* H5Adelete_by_idx */
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;
@@ -1017,6 +1017,20 @@ H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char 
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+
+    /*
+     * Check arguments.  We cannot commit an immutable type because H5Tclose()
+     * normally fails on such types (try H5Tclose(H5T_NATIVE_INT)) but closing
+     * a named type should always succeed.
+     */
+    if(H5T_STATE_NAMED == dt->shared->state || H5T_STATE_OPEN == dt->shared->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "datatype is already committed")
+    if(H5T_STATE_IMMUTABLE == dt->shared->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "datatype is immutable")
+
+    /* Check for a "sensible" datatype to store on disk */
+    if(H5T_is_sensible(dt) <= 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible")
 
     /* Copy the datatype - the copied one will be the type that is
        committed, and attached to original datatype above the VOL

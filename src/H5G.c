@@ -649,7 +649,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, 
-                                   grp_info, loc_params)) < 0)
+                                   loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -716,7 +716,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, 
-                                   grp_info, loc_params)) < 0)
+                                   loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:

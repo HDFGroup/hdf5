@@ -905,6 +905,7 @@ herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     void *op_data)
 {
+    H5G_loc_t           loc;            /* Location of object */
     H5G_link_iterate_t lnk_op;          /* Link operator */
     hsize_t     last_obj;               /* Index of last object looked at */
     hsize_t	idx;                    /* Internal location to hold index */
@@ -914,6 +915,8 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
 
     /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
     if(idx_p && *idx_p < 0)
@@ -930,32 +933,12 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     lnk_op.op_func.op_old = op;
 
     /* Call private function. */
-    if((ret_value = H5G_iterate(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_iterate(&loc, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
 
     /* Set the index we stopped at */
     if(idx_p)
         *idx_p = (int)last_obj;
-
-#if 0
-    herr_t	ret_value;
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
-
-    /* Check args */
-    if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(idx_p && *idx_p < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
-    if(!op)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
-
-    /* iterate over the links through the VOL */
-    if((ret_value = H5VL_link_iterate(loc_id, name, FALSE, H5_INDEX_NAME, H5_ITER_INC, (hsize_t *)idx_p,
-                                      op, op_data, H5P_LINK_ACCESS_DEFAULT)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
-#endif 
 
 done:
     FUNC_LEAVE_API(ret_value)

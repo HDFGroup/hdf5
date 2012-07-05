@@ -971,7 +971,8 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the name through the VOL */
-    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_GET_NAME, H5_REQUEST_NULL, loc_params, size, name, &ret_value) < 0)
+    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_GET_NAME, H5_REQUEST_NULL, 
+                     loc_params, size, name, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get name")
 
 #if 0

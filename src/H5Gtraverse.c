@@ -45,6 +45,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"		/* Property Lists			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5VLnative.h" 	/* Native Plugin                        */
 #include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
@@ -180,7 +181,6 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     hid_t               lapl_id = (-1);         /* LAPL local to this routine */
     H5P_genplist_t     *lapl;                   /* LAPL with nlinks set */
     hid_t               cur_grp = (-1);
-    H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -210,11 +210,8 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((cur_grp = H5I_register(H5I_GROUP, grp, FALSE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
-
-    /* attach VOL information to the ID */
-    vol_plugin = H5F_get_vol_cls(grp_loc->oloc->file);
-    if (H5I_register_aux(cur_grp, vol_plugin, (H5I_free_t)H5VL_close) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+    if(H5VL_native_register_aux(cur_grp) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
     /* Check for generic default property list and use link access default if so */
     if(_lapl_id == H5P_DEFAULT) {

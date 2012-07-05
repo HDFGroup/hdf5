@@ -29,7 +29,8 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Tpkg.h"		/* Datatypes				*/
-
+#include "H5VLnative.h" 	/* Native Plugin                        */
+#include "H5VLprivate.h"	/* VOL          		  	*/
 
 /****************/
 /* Local Macros */
@@ -146,6 +147,8 @@ H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hb
     /* Register an ID for the datatype */
     if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    if(H5VL_native_register_aux(ret_value) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
 done:
     if(ret_value < 0)
@@ -216,14 +219,17 @@ done:
 static H5O_loc_t *
 H5O_dtype_get_oloc(hid_t obj_id)
 {
-    H5T_t       *type;                  /* Datatype opened */
+    H5T_t       *type=NULL, *dt=NULL;   /* Datatype opened */
     H5O_loc_t	*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Get the datatype */
-    if(NULL == (type = (H5T_t *)H5I_object(obj_id)))
+    if(NULL == (dt = (H5T_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
+
+    if(NULL == (type = (H5T_t *)H5T_get_named_type(dt)))
+        type = dt;
 
     /* Get the datatype's object header location */
     if(NULL == (ret_value = H5T_oloc(type)))

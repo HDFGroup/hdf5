@@ -350,7 +350,6 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
 
     /* Get external file cache */
     efc = parent->shared->efc;
-
     /* Check if the EFC exists.  If it does not, just call H5F_try_close().  We
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
