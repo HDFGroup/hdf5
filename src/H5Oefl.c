@@ -491,7 +491,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
         HGOTO_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to protect EFL file name heap")
 
     /* Insert "empty" name first */
-    if((size_t)(-1) == (name_offset = H5HL_insert(file_dst, dxpl_id, heap, (size_t)1, "")))
+    if(UFAIL == (name_offset = H5HL_insert(file_dst, dxpl_id, heap, (size_t)1, "")))
         HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap")
     HDassert(0 == name_offset);
 
@@ -508,7 +508,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
     /* copy the name from the source */
     for(idx = 0; idx < efl_src->nused; idx++) {
         efl_dst->slot[idx].name = H5MM_xstrdup(efl_src->slot[idx].name);
-        if((size_t)(-1) == (efl_dst->slot[idx].name_offset = H5HL_insert(file_dst, dxpl_id, heap,
+        if(UFAIL == (efl_dst->slot[idx].name_offset = H5HL_insert(file_dst, dxpl_id, heap,
                 HDstrlen(efl_dst->slot[idx].name) + 1, efl_dst->slot[idx].name)))
             HGOTO_ERROR(H5E_EFL, H5E_CANTINSERT, NULL, "can't insert file name into heap")
     } /* end for */

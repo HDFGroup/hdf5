@@ -411,8 +411,8 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
      * Add the new name to the heap.
      */
     name_offset = H5HL_insert(f, dxpl_id, heap, HDstrlen(name) + 1, name);
-    if(0 == name_offset || (size_t)(-1) == name_offset)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap")
+    if(0 == name_offset || UFAIL == name_offset)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap")
     ent->name_off = name_offset;
 
     /* Build correct information for symbol table entry based on link type */
@@ -505,7 +505,7 @@ H5G__ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
                 size_t	lnk_offset;		/* Offset to sym-link value	*/
 
                 /* Insert link value into local heap */
-                if((size_t)(-1) == (lnk_offset = H5HL_insert(f, dxpl_id, heap,
+                if(UFAIL == (lnk_offset = H5HL_insert(f, dxpl_id, heap,
                         HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap")
 

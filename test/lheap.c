@@ -36,36 +36,34 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Create a file, create a local heap, write data into the local
- *		heap, close the file, open the file, read data out of the
- *		local heap, close the file.
+ * Purpose:     Create a file, create a local heap, write data into the local
+ *              heap, close the file, open the file, read data out of the
+ *              local heap, close the file.
  *
- * Return:	Success:	zero
+ * Return:      Success:    zero
  *
- *		Failure:	non-zero
+ *              Failure:    non-zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t	fapl=H5P_DEFAULT;	/*file access properties	*/
-    hid_t	file=-1;		/*hdf5 file 			*/
-    H5F_t	*f=NULL;		/*hdf5 file pointer		*/
-    char	filename[1024];		/*file name			*/
-    haddr_t	heap_addr;		/*local heap address		*/
-    H5HL_t      *heap = NULL;           /*local heap			*/
-    size_t	obj[NOBJS];		/*offsets within the heap	*/
-    int		i, j;			/*miscellaneous counters	*/
-    char	buf[1024];		/*the value to store		*/
-    const char	*s;			/*value to read			*/
+    hid_t       fapl = H5P_DEFAULT; /* file access properties   */
+    hid_t       file = -1;          /* hdf5 file                */
+    H5F_t       *f = NULL;          /* hdf5 file pointer        */
+    char        filename[1024];     /* file name                */
+    haddr_t     heap_addr;          /* local heap address       */
+    H5HL_t      *heap = NULL;       /* local heap               */
+    size_t      obj[NOBJS];         /* offsets within the heap  */
+    int         i, j;               /* miscellaneous counters   */
+    char        buf[1024];          /* the value to store       */
+    const char  *s;                 /* value to read            */
 
     /* Reset library */
     h5_reset();
@@ -77,24 +75,24 @@ main(void)
      */
     TESTING("local heap write");
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
+    if(FAIL == (file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)))
+        goto error;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
-	H5_FAILED();
-	H5Eprint2(H5E_DEFAULT, stdout);
-	goto error;
+        H5_FAILED();
+        H5Eprint2(H5E_DEFAULT, stdout);
+        goto error;
     }
-    if (H5AC_ignore_tags(f) < 0) {
-	H5_FAILED();
-	H5Eprint2(H5E_DEFAULT, stdout);
-	goto error;
+    if(FAIL == H5AC_ignore_tags(f)) {
+        H5_FAILED();
+        H5Eprint2(H5E_DEFAULT, stdout);
+        goto error;
     }
-    if(H5HL_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)0, &heap_addr/*out*/) < 0) {
-	H5_FAILED();
-	H5Eprint2(H5E_DEFAULT, stdout);
-	goto error;
+    if(FAIL == H5HL_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)0, &heap_addr/*out*/)) {
+        H5_FAILED();
+        H5Eprint2(H5E_DEFAULT, stdout);
+        goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_WRITE))) {
+    if(NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_WRITE))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -106,18 +104,19 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if((size_t)(-1) == (obj[i] = H5HL_insert(f, H5P_DATASET_XFER_DEFAULT, heap, strlen(buf) + 1, buf))) {
-	    H5_FAILED();
-	    H5Eprint2(H5E_DEFAULT, stdout);
-	    goto error;
-	}
+        if(UFAIL == (obj[i] = H5HL_insert(f, H5P_DATASET_XFER_DEFAULT, heap, strlen(buf) + 1, buf))) {
+            H5_FAILED();
+            H5Eprint2(H5E_DEFAULT, stdout);
+            goto error;
+        }
     }
-    if(H5HL_unprotect(heap) < 0) {
+    if(FAIL == H5HL_unprotect(heap)) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if (H5Fclose(file)<0) goto error;
+    if (FAIL == H5Fclose(file))
+        goto error;
     PASSED();
 
     /*
@@ -126,16 +125,17 @@ main(void)
 
     TESTING("local heap read");
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) goto error;
+    if(FAIL == (file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)))
+        goto error;
     if(NULL == (f = (H5F_t *)H5I_object(file))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if (H5AC_ignore_tags(f) < 0) {
-	H5_FAILED();
-	H5Eprint2(H5E_DEFAULT, stdout);
-	goto error;
+    if (FAIL == H5AC_ignore_tags(f)) {
+        H5_FAILED();
+        H5Eprint2(H5E_DEFAULT, stdout);
+        goto error;
     }
     for(i = 0; i < NOBJS; i++) {
         sprintf(buf, "%03d-", i);
@@ -164,14 +164,15 @@ main(void)
             goto error;
         }
 
-        if(H5HL_unprotect(heap) < 0) {
+        if(FAIL == H5HL_unprotect(heap)) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
         }
     }
 
-    if (H5Fclose(file)<0) goto error;
+    if (FAIL == H5Fclose(file))
+        goto error;
     PASSED();
 
     /* Check opening existing file non-default sizes of lengths and addresses */
@@ -187,8 +188,10 @@ main(void)
         if(file >= 0){
             if((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
                 TEST_ERROR
-            if(H5Dclose(dset) < 0) TEST_ERROR
-            if(H5Fclose(file) < 0) TEST_ERROR
+            if(H5Dclose(dset) < 0)
+                TEST_ERROR
+            if(H5Fclose(file) < 0)
+                TEST_ERROR
         }
         else {
             H5_FAILED();
@@ -210,7 +213,7 @@ main(void)
  error:
     puts("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
-	H5Fclose(file);
+        H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 }

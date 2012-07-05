@@ -152,20 +152,20 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t 
     HDassert(size_hint > 0);
 
     /* Create the B-tree */
-    if(H5B_create(f, dxpl_id, H5B_SNODE, NULL, NULL, &(stab->btree_addr)/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
+    if(FAIL == H5B_create(f, dxpl_id, H5B_SNODE, NULL, NULL, &(stab->btree_addr)/*out*/))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
 
     /* Create symbol table private heap */
-    if(H5HL_create(f, dxpl_id, size_hint, &(stab->heap_addr)/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
+    if(FAIL == H5HL_create(f, dxpl_id, size_hint, &(stab->heap_addr)/*out*/))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
 
     /* Pin the heap down in memory */
     if(NULL == (heap = H5HL_protect(f, dxpl_id, stab->heap_addr, H5AC_WRITE)))
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Insert name into the heap */
-    if((size_t)(-1) == (name_offset = H5HL_insert(f, dxpl_id, heap, (size_t)1, "")))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert name into heap")
+    if(UFAIL == (name_offset = H5HL_insert(f, dxpl_id, heap, (size_t)1, "")))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert name into heap")
 
     /*
      * B-tree's won't work if the first name isn't at the beginning
@@ -175,7 +175,7 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t 
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(heap) < 0)
+    if(heap && FAIL == H5HL_unprotect(heap))
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -483,7 +483,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect EFL file name heap")
 
         /* Insert "empty" name first */
-        if((size_t)(-1) == H5HL_insert(file, dxpl_id, heap, (size_t)1, "")) {
+        if(UFAIL == H5HL_insert(file, dxpl_id, heap, (size_t)1, "")) {
             H5HL_unprotect(heap);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
         } /* end if */
@@ -492,7 +492,7 @@ H5D_layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
             size_t offset;      /* Offset of file name in heap */
 
             /* Insert file name into heap */
-            if((size_t)(-1) == (offset = H5HL_insert(file, dxpl_id, heap,
+            if(UFAIL == (offset = H5HL_insert(file, dxpl_id, heap,
                         HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name))) {
                 H5HL_unprotect(heap);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
