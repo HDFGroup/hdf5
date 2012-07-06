@@ -697,14 +697,20 @@ dnl Change back to the C language
 AC_LANG_POP(C++)
 
 dnl ----------------------------------------------------------------------
-dnl Check if they have Perl installed on their system.
-AC_CHECK_PROGS([PERL], [perl],, [$PATH])
+dnl Check if they have Perl installed on their system. We only need Perl
+dnl if they're using a GNU compiler.
+dnl
+AC_SUBST([PERL]) PERL=""
+if test "X$GCC" = "Xyes"; then
+  AC_CHECK_PROGS([PERL], [perl],, [$PATH])
+fi
 
 
 dnl ----------------------------------------------------------------------
 dnl Check which archiving tool to use. This needs to be done before
 dnl the AM_PROG_LIBTOOL macro.
 dnl
+
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
 fi
@@ -845,6 +851,7 @@ dnl Furthermore, the name of the compiler might tell us how to run the
 dnl resulting executable. For `mpif90' the executable should be run with
 dnl `mpiexec' from the same directory as mpif90 if it exists.
 dnl
+
 if test "X$HDF_FORTRAN" = "Xyes" ; then
   dnl Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
@@ -899,6 +906,7 @@ fi
 dnl -----------------------------------------------------------------------------
 dnl If shared libraries are being used with parallel, disable them, unless the 
 dnl user explicity enables them via the '--enable-shared' option.
+
 if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
     echo '    shared libraries disabled in parallel'
     enable_shared="no"
@@ -913,7 +921,7 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Fortran libraries are not currently supported on Mac. Disable them.
-dnl (this is overridable with --enable-unsupported).
+dnl this is overridable with '--enable-unsupported'.
 dnl
 AC_SUBST([H5_FORTRAN_SHARED])
 H5_FORTRAN_SHARED="no"
@@ -922,6 +930,7 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   H5_FORTRAN_SHARED="yes"
 
   dnl Disable fortran shared libraries on Mac. (MAM - 03/30/11)
+  
   case "`uname`" in
     Darwin*)
     H5_FORTRAN_SHARED="no"
@@ -930,6 +939,7 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   esac
 
   dnl Report results of check(s)
+  
   if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
     AC_MSG_RESULT([no])
     AC_MSG_WARN([$CHECK_WARN])
@@ -960,12 +970,14 @@ if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
   H5_CXX_SHARED="yes"
 
   dnl Disable C++ shared libraries if DD64 flag is being used.
+  
   if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
     H5_CXX_SHARED="no"
     CHECK_WARN="Shared C++ libraries not currently supported with +DD64 flag."
   fi
 
   dnl Report results of check(s)
+  
   if test "X${H5_CXX_SHARED}" = "Xno"; then
     AC_MSG_RESULT([no])
     AC_MSG_WARN([$CHECK_WARN])
@@ -990,6 +1002,7 @@ dnl pgcc version 6.0x have optimization (-O, -O2 or -O3) problem.  Detect
 dnl these versions and add option "-Mx,28,0x8" to the compiler to avoid
 dnl the problem if optimization is enabled.
 dnl
+
 if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
     echo 'adding compiler flag to avoid optimization problem in pgcc'
     CC="${CC-cc} -Mx,28,0x8"
@@ -998,6 +1011,7 @@ fi
 dnl ----------------------------------------------------------------------
 dnl Shared libraries are not currently supported under Cygwin, so configure
 dnl disables them unless --enable-unsupported has been supplied by the user.
+
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   case "`uname`" in
     CYGWIN*)
@@ -1058,7 +1072,7 @@ esac
 
 dnl ----------------------------------------------------------------------
 dnl Some users have reported problems with libtool's use of '-Wl,-rpath' to
-dnl link shared libraries in nondefulat directories. Allow users to
+dnl link shared libraries in nondefault directories. Allow users to
 dnl disable embedding the rpath information in the executables and to
 dnl instead solely rely on the information in LD_LIBRARY_PATH.
 AC_MSG_CHECKING([if -Wl,-rpath should be used to link shared libs in nondefault directories])
@@ -1271,8 +1285,12 @@ case "`uname`" in
   CYGWIN*)
     AC_CHECK_HEADERS([io.h sys/timeb.h])
     ;;
+  MINGW*)
+    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_HAVE_LIBRARY([ws2_32])
+    ;;
   *)
-    AC_CHECK_HEADERS([io.h winsock.h sys/timeb.h])
+    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
 esac
 
@@ -4384,6 +4402,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
+                 tools/h5dump/testh5dumppbits.sh
                  tools/h5dump/testh5dumpxml.sh
                  tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile

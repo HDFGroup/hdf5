@@ -44,6 +44,13 @@ TARGET_LINK_LIBRARIES (cpp_testhdf5
 )
 SET_TARGET_PROPERTIES (cpp_testhdf5 PROPERTIES FOLDER test/cpp)
 
+ADD_CUSTOM_COMMAND (
+    TARGET     cpp_testhdf5
+    POST_BUILD
+    COMMAND    ${CMAKE_COMMAND}
+    ARGS       -E copy_if_different ${HDF5_CPP_TEST_SOURCE_DIR}/th5s.h5 ${PROJECT_BINARY_DIR}/th5s.h5
+)
+
 ADD_TEST (NAME cpp_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
 
 IF (HDF5_TEST_VFD)

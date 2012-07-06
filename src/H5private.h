@@ -155,7 +155,7 @@
 #define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
 #define NOGDI                  /* Exclude Graphic Display Interface macros */
 
-#ifdef H5_HAVE_WINSOCK_H
+#ifdef H5_HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
 

@@ -3900,6 +3900,7 @@ elif test $hdf5_cv_host != $host; then
   as_fn_error $? "config.cache file is invalid" "$LINENO" 5
 fi
 
+
 case $host_os in
   aix*)
     host_os_novers=aix
@@ -7210,7 +7211,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-for ac_prog in perl
+ PERL=""
+if test "X$GCC" = "Xyes"; then
+  for ac_prog in perl
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -7251,6 +7254,8 @@ fi
 
   test -n "$PERL" && break
 done
+
+fi
 
 
 
@@ -7446,6 +7451,7 @@ $as_echo "none" >&6; }
             ;;
 esac
 
+
 if test "X$HDF_FORTRAN" = "Xyes" ; then
     ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -7500,6 +7506,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
 
+
 if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
     echo '    shared libraries disabled in parallel'
     enable_shared="no"
@@ -7519,14 +7526,16 @@ if test "X${HDF_FORTRAN}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
 $as_echo_n "checking if shared Fortran libraries are supported... " >&6; }
   H5_FORTRAN_SHARED="yes"
 
-    case "`uname`" in
+
+  case "`uname`" in
     Darwin*)
     H5_FORTRAN_SHARED="no"
     CHECK_WARN="Shared Fortran libraries not currently supported on Mac."
       ;;
   esac
 
-    if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
+
+  if test "X${H5_FORTRAN_SHARED}" = "Xno"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $CHECK_WARN" >&5
@@ -7566,12 +7575,14 @@ if test "X${HDF_CXX}" = "Xyes" && test "X${enable_shared}" != "Xno"; then
 $as_echo_n "checking if shared C++ libraries are supported... " >&6; }
   H5_CXX_SHARED="yes"
 
-    if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
+
+  if (echo dummy ${CXX} ${CXXLD} ${CFLAGS} ${CXXFLAGS} ${LDFLAGS} | grep 'DD64') > /dev/null; then
     H5_CXX_SHARED="no"
     CHECK_WARN="Shared C++ libraries not currently supported with +DD64 flag."
   fi
 
-    if test "X${H5_CXX_SHARED}" = "Xno"; then
+
+  if test "X${H5_CXX_SHARED}" = "Xno"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $CHECK_WARN" >&5
@@ -7603,10 +7614,12 @@ else
 fi
 
 
+
 if (${CC-cc} -V 2>&1 | grep '^pgcc 6.0') > /dev/null && test "X$enable_production" = "Xyes"; then
     echo 'adding compiler flag to avoid optimization problem in pgcc'
     CC="${CC-cc} -Mx,28,0x8"
 fi
+
 
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   case "`uname`" in
@@ -22258,8 +22271,71 @@ fi
 done
 
     ;;
+  MINGW*)
+    for ac_header in io.h winsock2.h sys/timeb.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lws2_32" >&5
+$as_echo_n "checking for main in -lws2_32... " >&6; }
+if ${ac_cv_lib_ws2_32_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lws2_32  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ws2_32_main=yes
+else
+  ac_cv_lib_ws2_32_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ws2_32_main" >&5
+$as_echo "$ac_cv_lib_ws2_32_main" >&6; }
+if test "x$ac_cv_lib_ws2_32_main" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBWS2_32 1
+_ACEOF
+
+  LIBS="-lws2_32 $LIBS"
+
+fi
+ac_cv_lib_ws2_32=ac_cv_lib_ws2_32_main
+
+    ;;
   *)
-    for ac_header in io.h winsock.h sys/timeb.h
+    for ac_header in io.h winsock2.h sys/timeb.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -29998,7 +30074,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/testflushrefresh.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/test/test_ld.sh hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/h5watch/Makefile hl/tools/h5watch/testh5watch.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/testflushrefresh.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5diff/Makefile tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/test/test_ld.sh hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/h5watch/Makefile hl/tools/h5watch/testh5watch.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -31275,6 +31351,7 @@ do
     "tools/Makefile") CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
     "tools/h5dump/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5dump/Makefile" ;;
     "tools/h5dump/testh5dump.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dump.sh" ;;
+    "tools/h5dump/testh5dumppbits.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dumppbits.sh" ;;
     "tools/h5dump/testh5dumpxml.sh") CONFIG_FILES="$CONFIG_FILES tools/h5dump/testh5dumpxml.sh" ;;
     "tools/h5ls/testh5ls.sh") CONFIG_FILES="$CONFIG_FILES tools/h5ls/testh5ls.sh" ;;
     "tools/h5import/Makefile") CONFIG_FILES="$CONFIG_FILES tools/h5import/Makefile" ;;

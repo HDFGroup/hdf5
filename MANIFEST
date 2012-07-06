@@ -1139,6 +1139,7 @@
 ./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
+./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
 ./tools/h5dump/binread.c
 
@@ -1151,45 +1152,47 @@
 ./tools/h5import/h5importtestutil.sh
 
 # testfiles for h5import
-./tools/h5import/testfiles/binin32.h5
-./tools/h5import/testfiles/binin16.h5
-./tools/h5import/testfiles/txtfp32.txt
-./tools/h5import/testfiles/txtstr.conf
-./tools/h5import/testfiles/txtfp32.conf
-./tools/h5import/testfiles/binin8w.conf
-./tools/h5import/testfiles/binin8.h5
-./tools/h5import/testfiles/txtfp64.conf
-./tools/h5import/testfiles/binuin32.conf
-./tools/h5import/testfiles/txtuin32.txt
-./tools/h5import/testfiles/binuin16.conf
-./tools/h5import/testfiles/txtstr.h5
-./tools/h5import/testfiles/txtfp32.h5
-./tools/h5import/testfiles/txtin32.h5
-./tools/h5import/testfiles/txtin16.h5
-./tools/h5import/testfiles/binin8w.h5
-./tools/h5import/testfiles/txtin32.txt
 ./tools/h5import/testfiles/binfp64.conf
-./tools/h5import/testfiles/binin8.conf
-./tools/h5import/testfiles/txtin8.conf
 ./tools/h5import/testfiles/binfp64.h5
-./tools/h5import/testfiles/txtstr.txt
-./tools/h5import/testfiles/txtin32.conf
-./tools/h5import/testfiles/txtin16.conf
-./tools/h5import/testfiles/txtin8.h5
-./tools/h5import/testfiles/txtuin32.conf
-./tools/h5import/testfiles/txtuin16.conf
-./tools/h5import/testfiles/binin32.conf
 ./tools/h5import/testfiles/binin16.conf
-./tools/h5import/testfiles/txtfp64.h5
-./tools/h5import/testfiles/txtin16.txt
-./tools/h5import/testfiles/txtfp64.txt
-./tools/h5import/testfiles/binuin32.h5
+./tools/h5import/testfiles/binin16.h5
+./tools/h5import/testfiles/binin32.conf
+./tools/h5import/testfiles/binin32.h5
+./tools/h5import/testfiles/binin8.conf
+./tools/h5import/testfiles/binin8.h5
+./tools/h5import/testfiles/binin8w.conf
+./tools/h5import/testfiles/binin8w.h5
+./tools/h5import/testfiles/binuin16.conf
 ./tools/h5import/testfiles/binuin16.h5
-./tools/h5import/testfiles/txtuin32.h5
-./tools/h5import/testfiles/txtuin16.h5
+./tools/h5import/testfiles/binuin32.conf
+./tools/h5import/testfiles/binuin32.h5
 ./tools/h5import/testfiles/textpfe.conf
-./tools/h5import/testfiles/textpfe64.txt
 ./tools/h5import/testfiles/textpfe.h5
+./tools/h5import/testfiles/textpfe64.txt
+./tools/h5import/testfiles/txtfp32.conf
+./tools/h5import/testfiles/txtfp32.h5
+./tools/h5import/testfiles/txtfp32.txt
+./tools/h5import/testfiles/txtfp64.conf
+./tools/h5import/testfiles/txtfp64.h5
+./tools/h5import/testfiles/txtfp64.txt
+./tools/h5import/testfiles/txtin16.conf
+./tools/h5import/testfiles/txtin16.h5
+./tools/h5import/testfiles/txtin16.txt
+./tools/h5import/testfiles/txtin32.conf
+./tools/h5import/testfiles/txtin32.h5
+./tools/h5import/testfiles/txtin32.txt
+./tools/h5import/testfiles/txtin8.conf
+./tools/h5import/testfiles/txtin8.h5
+./tools/h5import/testfiles/txtin8.txt
+./tools/h5import/testfiles/txtuin16.conf
+./tools/h5import/testfiles/txtuin16.h5
+./tools/h5import/testfiles/txtuin16.txt
+./tools/h5import/testfiles/txtuin32.conf
+./tools/h5import/testfiles/txtuin32.h5
+./tools/h5import/testfiles/txtuin32.txt
+./tools/h5import/testfiles/txtstr.conf
+./tools/h5import/testfiles/txtstr.h5
+./tools/h5import/testfiles/txtstr.txt
 
 # h5diff sources
 ./tools/h5diff/Makefile.am
@@ -1301,6 +1304,8 @@
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
 # h5dump test files
+./tools/testfiles/charsets.h5
+./tools/testfiles/charsets.ddl
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
@@ -1355,6 +1360,8 @@
 ./tools/testfiles/tattr-3.ddl
 ./tools/testfiles/tattr-4_be.ddl
 ./tools/testfiles/tattr.h5
+./tools/testfiles/tattrintsize.ddl
+./tools/testfiles/tattrintsize.h5
 ./tools/testfiles/tattr4_be.h5
 ./tools/testfiles/tattrreg.h5
 ./tools/testfiles/tattrreg.ddl 
@@ -1364,6 +1371,10 @@
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl
+./tools/testfiles/tcmpdattrintsize.ddl
+./tools/testfiles/tcmpdintsize.ddl
+./tools/testfiles/tcmpdattrintsize.h5
+./tools/testfiles/tcmpdintsize.h5
 ./tools/testfiles/tcomp-1.ddl
 ./tools/testfiles/tcomp-2.ddl
 ./tools/testfiles/tcomp-3.ddl
@@ -1889,6 +1900,11 @@
 ./tools/h5diff/testfiles/h5diff_467.txt
 ./tools/h5diff/testfiles/h5diff_468.txt
 ./tools/h5diff/testfiles/h5diff_469.txt
+./tools/h5diff/testfiles/h5diff_471.txt
+./tools/h5diff/testfiles/h5diff_472.txt
+./tools/h5diff/testfiles/h5diff_473.txt
+./tools/h5diff/testfiles/h5diff_474.txt
+./tools/h5diff/testfiles/h5diff_475.txt
 ./tools/h5diff/testfiles/h5diff_480.txt
 ./tools/h5diff/testfiles/h5diff_481.txt
 ./tools/h5diff/testfiles/h5diff_482.txt
@@ -2308,6 +2324,7 @@
 ./config/cmake/FindSZIP.cmake
 ./config/cmake/ConversionTests.c
 ./config/cmake/GetTimeOfDayTest.cpp
+./config/cmake/HDF5CXXTests.cpp
 ./config/cmake/HDF5Tests.c
 ./config/cmake/xlatefile.c
 ./config/cmake/CheckTypeSize.cmake
@@ -2335,6 +2352,7 @@
 ./config/cmake/CPack.cmake
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
+
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./c++/CMakeLists.txt

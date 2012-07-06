@@ -114,6 +114,11 @@ CHECK_FORTRAN_FEATURE(iso_c_binding
   "
        PROGRAM main
             USE iso_c_binding
+            IMPLICIT NONE
+            TYPE(C_PTR) :: ptr
+            TYPE(C_FUNPTR) :: funptr
+            CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+            ptr = C_LOC(ichr(1:1))
        END PROGRAM
   "
   FORTRAN_HAVE_ISO_C_BINDING

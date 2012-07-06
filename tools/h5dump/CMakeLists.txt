@@ -43,6 +43,7 @@ IF (BUILD_TESTING)
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
   SET (HDF5_REFERENCE_FILES
+      charsets.ddl
       file_space.ddl
       filter_fail.ddl
       packedbits.ddl
@@ -65,6 +66,7 @@ IF (BUILD_TESTING)
       tarray7.ddl
       tarray8.ddl
       tattr-1.ddl
+      tattrintsize.ddl
       tattr-2.ddl
       tattr-3.ddl
       tattr-4_be.ddl
@@ -81,6 +83,8 @@ IF (BUILD_TESTING)
       tboot2.ddl
       tchar1.ddl
       tchunked.ddl
+      tcmpdattrintsize.ddl
+      tcmpdintsize.ddl
       tcomp-1.ddl
       tcomp-2.ddl
       tcomp-3.ddl
@@ -239,6 +243,7 @@ IF (BUILD_TESTING)
       tvlstr.h5.xml
   )
   SET (HDF5_REFERENCE_TEST_FILES
+      charsets.h5
       file_space.h5
       filter_fail.h5
       packedbits.h5
@@ -256,10 +261,13 @@ IF (BUILD_TESTING)
       tattr.h5
       tattr2.h5
       tattr4_be.h5
+      tattrintsize.h5
       tattrreg.h5
       tbigdims.h5
       tbinary.h5
       tchar.h5
+      tcmpdattrintsize.h5
+      tcmpdintsize.h5
       tcompound.h5
       tcompound_complex.h5
       tdatareg.h5
@@ -676,6 +684,8 @@ IF (BUILD_TESTING)
       COMMAND    ${CMAKE_COMMAND}
           -E remove 
           h5dump-help.out
+          charsets.out
+          charsets.out.err
           file_space.out
           file_space.out.err
           filter_fail.out
@@ -726,6 +736,8 @@ IF (BUILD_TESTING)
           tattr-3.out.err
           tattr-4_be.out
           tattr-4_be.out.err
+          tattrintsize.out
+          tattrintsize.out.err
           tattrreg.out
           tattrreg.out.err
           tattrregR.out
@@ -742,6 +754,10 @@ IF (BUILD_TESTING)
           tchar1.out.err
           tchunked.out
           tchunked.out.err
+          tcmpdattrintsize.out
+          tcmpdattrintsize.out.err
+          tcmpdintsize.out
+          tcmpdintsize.out.err
           tcomp-1.out
           tcomp-1.out.err
           tcomp-2.out
@@ -931,6 +947,12 @@ IF (BUILD_TESTING)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
+  # test for compound signed/unsigned datasets
+  ADD_H5_TEST (tcmpdintsize 0 --enable-error-stack tcmpdintsize.h5)
+  # test for signed/unsigned attributes
+  ADD_H5_TEST (tattrintsize 0 --enable-error-stack tattrintsize.h5)
+  # test for compound signed/unsigned attributes
+  ADD_H5_TEST (tcmpdattrintsize 0 --enable-error-stack tcmpdattrintsize.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
@@ -1059,6 +1081,9 @@ IF (BUILD_TESTING)
 
   # test printing characters in ASCII instead of decimal
   ADD_H5_TEST (tchar1 0 --enable-error-stack -r tchar.h5)
+
+  # test datatypes in ASCII and UTF8
+  ADD_H5_TEST (charsets 0 --enable-error-stack charsets.h5)
 
   # rev. 2004
   # tests for super block
@@ -1750,11 +1775,14 @@ ENDIF (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+
+INSTALL_PROGRAM_PDB (h5dump ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+
 INSTALL (
     TARGETS
         h5dump
     RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}/tools
+        ${HDF5_INSTALL_BIN_DIR}
     COMPONENT
         toolsapplications
 )

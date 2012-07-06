@@ -2282,6 +2282,14 @@ static int test_dangle_links(const char *fname1, const char *fname2)
         goto out;
     }
 
+    status = H5Lcreate_soft("no_obj1", fid1, "soft_link4", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname1);
+        status = FAIL;
+        goto out;
+    }
+
     /* file 2 */
     status = H5Lcreate_soft("no_obj", fid2, "soft_link1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
@@ -2300,6 +2308,14 @@ static int test_dangle_links(const char *fname1, const char *fname2)
     }
 
     status = H5Lcreate_soft("/dset2", fid2, "soft_link3", H5P_DEFAULT, H5P_DEFAULT);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
+        status = FAIL;
+        goto out;
+    }
+
+    status = H5Lcreate_soft("no_obj2", fid2, "soft_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", fname2);
