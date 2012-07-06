@@ -259,8 +259,13 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */
+    if((ret_value = H5I_register2(opened_type, opened_obj, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    vol_plugin->nrefs++;
+#if 0
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -337,8 +342,9 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */
-    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5I_register2(opened_type, opened_obj, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -409,8 +415,9 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */
-    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    if((ret_value = H5I_register2(opened_type, opened_obj, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3488,9 +3495,19 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     /* (Takes ownership of the obj_loc information) */
     if((obj_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-    if(H5VL_native_register_aux(obj_id) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
+#if 0
+    {
+        H5I_type_t opened_type;
+        void *temp_obj = NULL;
 
+        opened_type = H5I_get_type (obj_id);
+        if(NULL == (temp_obj = H5I_remove(obj_id)))
+            HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
+        /* get an ID for the object */
+        if((ret_value = H5VL_native_register(opened_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+    }
+#endif
     /* Make callback for starting object */
     if((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "can't visit objects")

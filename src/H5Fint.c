@@ -1291,7 +1291,7 @@ H5F_close(H5F_t *f)
     f->file_id = -1;
 
     /*
-    if((file_id = H5VL_get_id(f, H5I_FILE)) < 0)
+    if((file_id = H5I_get_id(f, H5I_FILE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
     H5I_remove(file_id);
     */

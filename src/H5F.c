@@ -76,7 +76,8 @@ H5F__init_pub_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, NULL)<H5I_FILE)
+    if(H5I_register_type2(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, 
+                          NULL, (H5I_free2_t)H5F_close_file)<H5I_FILE)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     ret_value = H5F_init();
@@ -510,13 +511,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (file = H5VL_file_create(vol_plugin, filename, flags, fcpl_id, fapl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, file, TRUE)) < 0)
+    /* Get an atom for the file with the VOL information as the auxilary struct*/
+    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
     ((H5F_t *)file)->file_id = ret_value;
 done:
@@ -597,13 +594,9 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if(NULL == (file = H5VL_file_open(vol_plugin, filename, flags, fapl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, file, TRUE)) < 0)
+    /* Get an atom for the file with the VOL information as the auxilary struct*/
+    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
 
     ((H5F_t *)file)->file_id = ret_value;
 done:
@@ -807,15 +800,11 @@ H5Freopen(hid_t file_id)
     if (NULL == file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, file, TRUE)) < 0)
+    /* Get an atom for the file with the VOL information as the auxilary struct*/
+    if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-
     vol_plugin->nrefs ++;
+
     ((H5F_t *)file)->file_id = ret_value;
 
 done:
@@ -1468,8 +1457,9 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     HDassert(file);
 
+    /* MSC - Will need to switch to that later */
 #if 0
-    if (FAIL == (ret_value = H5VL_get_id(file, H5I_FILE))) {
+    if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
         /* resurrect the ID */
         /* Get an atom for the file */
         if((ret_value = H5I_register(H5I_FILE, file, app_ref)) < 0)
@@ -1486,18 +1476,14 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 #endif
 #if 1
     if(file->file_id == -1) {
-        /* Get an atom for the file */
-        if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
-	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
-        /* attach VOL information to the ID */
-        if (H5VL_native_register_aux(file->file_id) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+        /* resurrect the ID */
+        if((file->file_id = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     } else {
         /* Increment reference count on atom. */
         if(H5I_inc_ref(file->file_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     } /* end else */
-
     ret_value = file->file_id;
 #endif
 

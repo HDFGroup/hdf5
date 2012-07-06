@@ -186,14 +186,9 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
                                            H5P_DATASET_ACCESS_DEFAULT, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+    /* Get an atom for the dataset */
+    if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-
     vol_plugin->nrefs ++;
 
 done:
@@ -253,14 +248,9 @@ H5Dopen1(hid_t loc_id, const char *name)
     if(NULL == (dset = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
-    /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_DATASET, dset, TRUE)) < 0)
+    /* Get an atom for the dataset */
+    if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-
     vol_plugin->nrefs ++;
 
 done:

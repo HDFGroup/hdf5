@@ -2706,9 +2706,6 @@ H5D_get_type(H5D_t *dset)
         /* If this is a committed datatype, we need to recreate the
            two level IDs, where the VOL object is a copy of the
            returned datatype */
-        ssize_t        nalloc = 0;
-        size_t         size;
-        unsigned char *buf = NULL;
 
         /* Copy the dataset's datatype */
         if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
@@ -2716,11 +2713,8 @@ H5D_get_type(H5D_t *dset)
                 
         H5T_set_vol_object(type, (void *)dt);
 
-        if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
+        if((ret_value = H5VL_native_register(H5I_DATATYPE, type, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-
-        if (H5VL_native_register_aux(ret_value) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
     }
     else {
         if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)

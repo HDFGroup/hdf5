@@ -387,6 +387,7 @@ H5VL_get_object(hid_t id)
     if(NULL == (ret_value = (void *)H5I_object(id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "invalid identifier")
 
+    /* if this is a datatype, get the VOL object attached to the H5T_t struct */
     if (H5I_DATATYPE == H5I_get_type(id)) {
         if (NULL == (ret_value = H5T_get_named_type((H5T_t *)ret_value)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a named datatype")

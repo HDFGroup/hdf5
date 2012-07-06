@@ -353,7 +353,7 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VL_native_register_aux
+ * Function:	H5VL_native_register_with_aux
  *
  * Purpose:	utility routine to register the native VOL plugin to an ID
  *
@@ -364,13 +364,15 @@ done:
  *
  *---------------------------------------------------------------------------
  */
-herr_t
-H5VL_native_register_aux(hid_t obj_id)
+hid_t
+H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
 {
     H5VL_t  *vol_plugin;        /* VOL plugin information */
-    herr_t ret_value = SUCCEED;
+    hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(obj);
 
     /* Build the vol plugin struct */
     if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
@@ -378,45 +380,12 @@ H5VL_native_register_aux(hid_t obj_id)
     vol_plugin->cls = &H5VL_native_g;
     vol_plugin->nrefs = 1;
 
-    switch(H5I_get_type(obj_id)) {
-        case H5I_FILE:
-            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5F_close_file) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            break;
-        case H5I_GROUP:
-            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5G_close_group) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            break;
-        case H5I_DATATYPE:
-            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            break;
-        case H5I_DATASET:
-            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            break;
-        case H5I_ATTR:
-            if(H5I_register_aux(obj_id, vol_plugin, (H5I_free2_t)H5A_close_attr) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-            break;
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_DATASPACE:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_VOL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    } /* end switch */
+    /* Get an atom for the file with the VOL information as the auxilary struct*/
+    if((ret_value = H5I_register2(type, obj, (void *)vol_plugin, app_ref)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL_native_register_aux */
+} /* H5VL_native_register_with_aux */
 
 
 /*-------------------------------------------------------------------------
@@ -2256,7 +2225,7 @@ H5VL_native_file_close(void *file, hid_t UNUSED req)
      * disabled by an option/property to improve performance. */
     if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         /* get the file ID corresponding to the H5F_t struct */
-        if((file_id = H5VL_get_id(f, H5I_FILE)) < 0)
+        if((file_id = H5I_get_id(f, H5I_FILE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
         /* get the number of references outstanding for this file ID */
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
@@ -3074,9 +3043,9 @@ H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *ope
     }
 
     *opened_type = H5I_get_type (temp_id);
-    if(NULL == (ret_value = H5I_remove(temp_id))) {
+    if(NULL == (ret_value = H5I_remove(temp_id)))
         HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open object")
-    }
+
 done:
     /* Release the object location if we failed after copying it */
     if(temp_id < 0 && loc_found)

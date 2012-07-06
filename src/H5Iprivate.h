@@ -54,10 +54,12 @@
 
 /* Private Functions in H5I.c */
 H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func);
+H5_DLL H5I_type_t H5I_register_type2(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func, H5I_free2_t free_aux);
 H5_DLL int H5I_nmembers(H5I_type_t type);
 H5_DLL herr_t H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref);
 H5_DLL int H5I_destroy_type(H5I_type_t type);
 H5_DLL hid_t H5I_register(H5I_type_t type, const void *object, hbool_t app_ref);
+H5_DLL hid_t H5I_register2(H5I_type_t type, const void *object, const void* aux_object, hbool_t app_ref);
 H5_DLL void *H5I_subst(hid_t id, const void *new_object);
 H5_DLL void *H5I_object(hid_t id);
 H5_DLL void *H5I_object_verify(hid_t id, H5I_type_t id_type);
@@ -76,6 +78,6 @@ H5_DLL herr_t H5I_dec_type_ref(H5I_type_t type);
 H5_DLL int H5I_get_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_register_aux(hid_t id, void *aux_ptr, H5I_free2_t free_func);
 H5_DLL void *H5I_get_aux(hid_t id);
-H5_DLL hid_t H5VL_get_id(void *object, H5I_type_t type);
+H5_DLL hid_t H5I_get_id(void *object, H5I_type_t type);
 #endif /* _H5Iprivate_H */
 

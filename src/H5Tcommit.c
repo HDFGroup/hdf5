@@ -626,34 +626,6 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     if ((ret_value = H5VL_create_datatype(dt, vol_plugin, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
 
-#if 0
-    /* get required buf size for encoding the datatype */
-    if((nalloc = H5VL_datatype_get_binary(obj, loc_params, vol_plugin, name, tapl_id, 
-                                          NULL, 0, H5_REQUEST_NULL)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
-
-    if (NULL == (buf = (unsigned char *) H5MM_malloc ((size_t)nalloc)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
-
-
-
-    if(NULL == (type = H5T_decode(buf)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't decode datatype")
-    type->vol_obj = dt;
-
-    H5MM_free(buf);
-
-    /* Get an atom for the datatype */
-    if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-
-    vol_plugin->nrefs ++;
-#endif
-
 done:
     if (ret_value < 0 && dt)
         if(H5VL_datatype_close (dt, vol_plugin, H5_REQUEST_NULL) < 0)
@@ -1006,14 +978,9 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
 
     H5MM_free(buf);
 
-    /* Get an atom for the datatype */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
-
-    /* attach VOL information to the ID */
-    if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-
+    /* Get an atom for the datatype with the VOL information as the auxilary struct*/
+    if((ret_value = H5I_register2(H5I_DATATYPE, dt, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     vol_plugin->nrefs ++;
 
 done:

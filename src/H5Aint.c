@@ -778,21 +778,15 @@ H5A_get_type(H5A_t *attr)
         /* If this is a committed datatype, we need to recreate the
            two level IDs, where the VOL object is a copy of the
            returned datatype */
-        ssize_t        nalloc = 0;
-        size_t         size;
-        unsigned char *buf = NULL;
-
         /* Copy the dataset's datatype */
         if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
                 
         H5T_set_vol_object(type, (void *)dt);
 
-        if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
-
-        if (H5VL_native_register_aux(ret_value) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+        /* get an ID for the object */
+        if((ret_value = H5VL_native_register(H5I_DATATYPE, type, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     }
     else {
         if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)

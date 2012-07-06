@@ -829,10 +829,8 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name,
      */
     if(NULL == (grp = H5G__open_name(loc, group_name, lapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
+    if((gid = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-    if(H5VL_native_register_aux(gid) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
     /* Set up user data for callback */
     udata.gid = gid;
@@ -1095,10 +1093,8 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the starting group */
-    if((gid = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
+    if((gid = H5VL_native_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-    if(H5VL_native_register_aux(gid) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach native vol info to ID")
 
     /* Get the location of the starting group */
     if(H5G_loc(gid, &start_loc) < 0)
