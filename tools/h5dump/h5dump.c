@@ -1035,6 +1035,9 @@ parse_start:
             break;
         case 'w':
             h5tools_nCols = HDatoi(opt_arg);
+            if (h5tools_nCols==0) {
+                h5tools_nCols = 65535;
+            }
             last_was_dset = FALSE;
             break;
         case 'a':
