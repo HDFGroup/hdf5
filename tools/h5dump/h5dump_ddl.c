@@ -1294,7 +1294,7 @@ dump_fcontents(hid_t fid)
     }
 
     /* print objects in the files */
-    h5trav_print(fid);
+    h5trav_print(fid, sort_by, sort_order);
 
     HDfprintf(rawoutstream, " %s\n",END);
 }

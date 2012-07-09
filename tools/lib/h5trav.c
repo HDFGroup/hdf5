@@ -61,6 +61,13 @@ static void trav_table_addlink(trav_table_t *table,
                         const char *path);
 
 /*-------------------------------------------------------------------------
+ * local variables
+ *-------------------------------------------------------------------------
+ */
+static H5_index_t trav_index_by = H5_INDEX_NAME;
+static H5_iter_order_t trav_index_order = H5_ITER_INC;
+
+/*-------------------------------------------------------------------------
  * "h5trav info" public functions. used in h5diff
  *-------------------------------------------------------------------------
  */
@@ -255,12 +262,12 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
         /* Check for iteration of links vs. visiting all links recursively */
         if(recurse) {
             /* Visit all links in group, recursively */
-            if(H5Lvisit_by_name(file_id, grp_name, H5_INDEX_NAME, H5_ITER_INC, traverse_cb, &udata, H5P_DEFAULT) < 0)
+            if(H5Lvisit_by_name(file_id, grp_name, trav_index_by, trav_index_order, traverse_cb, &udata, H5P_DEFAULT) < 0)
                 return -1;
         } /* end if */
         else {
             /* Iterate over links in group */
-            if(H5Literate_by_name(file_id, grp_name, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
+            if(H5Literate_by_name(file_id, grp_name, trav_index_by, trav_index_order, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
                 return -1;
         } /* end else */
 
@@ -948,8 +955,11 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
  */
 
 int
-h5trav_print(hid_t fid)
+h5trav_print(hid_t fid, H5_index_t print_index_by, H5_iter_order_t print_index_order)
 {
+    trav_index_by = print_index_by;
+    trav_index_order = print_index_order;
+
     trav_print_udata_t print_udata;     /* User data for traversal */
     trav_visitor_t print_visitor;       /* Visitor structure for printing objects */
 

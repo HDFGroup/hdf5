@@ -1471,6 +1471,8 @@
 ./tools/testfiles/tall-2A.ddl
 ./tools/testfiles/tall-2B.ddl
 ./tools/testfiles/tcontents.ddl
+./tools/testfiles/tordercontents1.ddl
+./tools/testfiles/tordercontents2.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tchunked.ddl
 ./tools/testfiles/tcompact.ddl
