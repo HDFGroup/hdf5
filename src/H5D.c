@@ -86,6 +86,10 @@ DESCRIPTION
 static herr_t
 H5D__init_pub_interface(void)
 {
+    FUNC_ENTER_STATIC_NOERR
+
+    FUNC_LEAVE_NOAPI(H5D_init())
+#if 0
     herr_t          ret_value                = SUCCEED;   /* Return value */
     FUNC_ENTER_STATIC
 
@@ -97,6 +101,7 @@ H5D__init_pub_interface(void)
     ret_value = H5D_init();
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+#endif
 } /* H5D__init_pub_interface() */
 
 
@@ -197,7 +202,6 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-
     vol_plugin->nrefs ++;
 
 done:

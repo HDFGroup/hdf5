@@ -743,7 +743,7 @@ H5T_init_interface(void)
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type2(H5I_DATATYPE, (size_t)H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, 
-                          (H5I_free_t)H5T_close, (H5I_free2_t)H5T_close_datatype)<H5I_FILE)
+                          (H5I_free_t)H5T_close, (H5I_free2_t)H5T_close_datatype)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Make certain there aren't too many classes of datatypes defined */
@@ -1717,14 +1717,6 @@ H5Tclose(hid_t type_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
-#if 0
-    /* if this is a named datatype, go through the VOL layer */
-    if(NULL != H5I_get_aux(type_id)) {
-        if(H5VL_datatype_close(type_id, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to free datatype")
-    }
-    else {
-#endif
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

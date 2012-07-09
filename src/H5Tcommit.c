@@ -134,6 +134,8 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Check arguments */
+    if (H5Tcommitted(type_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
@@ -164,7 +166,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
-    /* get the file object */
+    /* get the object from the loc_id */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
     /* get the plugin pointer */
@@ -304,6 +306,10 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
+
+    /* check args */
+    if (H5Tcommitted(type_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed")
 
     /* Get correct property list */
     if(H5P_DEFAULT == tcpl_id)
@@ -491,7 +497,6 @@ done:
 htri_t
 H5Tcommitted(hid_t type_id)
 {
-    H5T_t       *dt;
     H5T_t	*type;          /* Datatype to query */
     htri_t      ret_value;      /* Return value */
 
@@ -502,13 +507,8 @@ H5Tcommitted(hid_t type_id)
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-    if (NULL == type->vol_obj)
-        dt = type;
-    else
-        dt = (H5T_t *)type->vol_obj;
-
     /* Set return value */
-    ret_value = H5T_committed(dt);
+    ret_value = H5T_committed(type);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -530,11 +530,18 @@ done:
 htri_t
 H5T_committed(const H5T_t *type)
 {
+    const H5T_t *dt;
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type);
 
-    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN == type->shared->state || H5T_STATE_NAMED == type->shared->state)
+    if (NULL == type->vol_obj)
+        dt = type;
+    else
+        dt = (const H5T_t *)type->vol_obj;
+
+    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state)
 } /* end H5T_committed() */
 
 
@@ -923,7 +930,7 @@ H5T_update_shared(H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 void *
-H5T_get_named_type(H5T_t *dt)
+H5T_get_named_type(const H5T_t *dt)
 {
     void *ret_value = NULL;    /* Return value */
 

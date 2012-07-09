@@ -145,7 +145,7 @@ H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hb
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
 
     /* Copy the dataset's datatype */
-    if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
+    if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
                 
     H5T_set_vol_object(type, (void *)dt);

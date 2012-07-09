@@ -578,6 +578,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 
         for(cur = type_ptr->id_list[i]; cur; cur = next) {
             hbool_t    delete_node;            /* Flag to indicate node should be removed from linked list */
+            herr_t     result1 = SUCCEED, result2 = SUCCEED;
 
             /*
              * Do nothing to the object if the reference count is larger than
@@ -590,9 +591,11 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 
             /* Check for a 'free' function and call it, if it exists */
             /* (Casting away const OK -QAK) */
-            if((cur->aux_ptr && type_ptr->free_aux && (type_ptr->free_aux)((void *)cur->obj_ptr, (void *)cur->aux_ptr) < 0) ||
-               (type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0)) {
-                //if(type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0) {
+            if(cur->aux_ptr && type_ptr->free_aux)
+                result1 = (type_ptr->free_aux)((void *)cur->obj_ptr, (void *)cur->aux_ptr);
+            if(type_ptr->free_func) 
+                result2 = (type_ptr->free_func)((void *)cur->obj_ptr);
+            if(result1 < 0 || result2 < 0) {
                 if(force) {
 #ifdef H5I_DEBUG
                     if(H5DEBUG(I)) {
@@ -1344,7 +1347,8 @@ H5I_dec_ref(hid_t id)
      */
     if(1 == id_ptr->count) {
         /* (Casting away const OK -QAK) */
-        if((!id_ptr->aux_ptr || !type_ptr->free_aux || (type_ptr->free_aux)((void *)id_ptr->obj_ptr, (void *)id_ptr->aux_ptr) >= 0) &&
+        if((!type_ptr->free_aux || !id_ptr->aux_ptr || 
+            (type_ptr->free_aux)((void *)id_ptr->obj_ptr, (void *)id_ptr->aux_ptr) >= 0) &&
            (!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0)) {
             H5I_remove(id);
             ret_value = 0;
@@ -2180,20 +2184,9 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "ixz", id, name, size);
 
-    /* add a workaround for named datatypes for now */
-    if(H5I_TYPE(id) == H5I_DATATYPE) {
-        H5T_t *type = NULL, *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5VL_get_object(id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
-        if(H5G_loc_real((void *)dt, H5I_DATATYPE, &loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-    }
-    else {
-        /* Get object location */
-        if(H5G_loc(id, &loc) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
-    }
+    /* Get object location */
+    if(H5G_loc(id, &loc) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
     /* Call internal group routine to retrieve object's name */
     if((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
@@ -2428,7 +2421,6 @@ H5I_register_type2(H5I_type_t type_id, size_t hash_size, unsigned reserved,
         type_ptr->nextid = reserved;
         type_ptr->free_func = free_func;
         type_ptr->free_aux = free_aux;
-
         type_ptr->id_list = (H5I_id_info_t **)H5MM_calloc(hash_size * sizeof(H5I_id_info_t *));
         if(NULL == type_ptr->id_list)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
@@ -2563,7 +2555,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_aux
  *
- * Purpose:     increment the ref count on the high level ID given the low level ID
+ * Purpose:     register an Auxilary object and a free func with an existing ID
  *
  * Return:      Success: postive
  *              Failure: FAIL
@@ -2576,7 +2568,7 @@ done:
 herr_t
 H5I_register_aux(hid_t id, void *aux_ptr, H5I_free2_t free_func)
 {
-    H5I_id_type_t   *type_ptr;            /*ptr to the type*/
+    H5I_id_type_t   *type_ptr = NULL;     /*ptr to the type*/
     H5I_id_info_t   *id_ptr = NULL;       /*ptr to the id*/
     H5I_type_t       type;
     herr_t           ret_value = SUCCEED; /*return value*/
@@ -2586,11 +2578,11 @@ H5I_register_aux(hid_t id, void *aux_ptr, H5I_free2_t free_func)
     /* Check arguments */
     type = H5I_TYPE(id);
     if (type <= H5I_BADID || type >= H5I_next_type)
-        HGOTO_DONE(NULL);
+        HGOTO_DONE(FAIL);
 
     type_ptr = H5I_id_type_list_g[type];
     if (!type_ptr || type_ptr->count <= 0)
-        HGOTO_DONE(NULL);
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid type")
 
     type_ptr->free_aux = free_func;
 
@@ -2598,6 +2590,7 @@ H5I_register_aux(hid_t id, void *aux_ptr, H5I_free2_t free_func)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "Invalid ID")
 
     id_ptr->aux_ptr = aux_ptr;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register_aux() */
@@ -2621,9 +2614,9 @@ void *
 H5I_get_aux(hid_t id)
 {
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
-    void *		ret_value = NULL;	/*return value		*/
+    void                *ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(NULL)
 
     if(NULL != (id_ptr = H5I_find_id(id))) {
         ret_value = (void *)id_ptr->aux_ptr;
@@ -2656,7 +2649,6 @@ H5I_get_id(void *object, H5I_type_t type)
     FUNC_ENTER_NOAPI(FAIL)
 
     type_ptr = H5I_id_type_list_g[type];
-
     if(type_ptr == NULL || type_ptr->count <= 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 

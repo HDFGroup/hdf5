@@ -511,12 +511,15 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 		break;
 
 	    case H5I_DATATYPE:
-                if(H5T_is_named((H5T_t*)obj_ptr)==TRUE)
-                    oloc = H5T_oloc((H5T_t*)obj_ptr);
-                else
-                    oloc = NULL;
+                {
+                    H5T_t *type;
+                    /* Get the actual datatype object that should be the vol_obj */
+                    if(NULL == (type = (H5T_t *)H5T_get_named_type((H5T_t*)obj_ptr)))
+                        oloc = NULL;
+                    else
+                        oloc = H5T_oloc(type);
 		break;
-
+                }
 	    case H5I_UNINIT:
 	    case H5I_BADID:
 	    case H5I_FILE:

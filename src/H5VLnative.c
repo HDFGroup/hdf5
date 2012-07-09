@@ -1004,7 +1004,7 @@ H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char 
     /* Copy the datatype - the copied one will be the type that is
        committed, and attached to original datatype above the VOL
        layer*/
-    if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
+    if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
 
     if(NULL != name) { /* H5Tcommit */

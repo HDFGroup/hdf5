@@ -779,7 +779,7 @@ H5A_get_type(H5A_t *attr)
            two level IDs, where the VOL object is a copy of the
            returned datatype */
         /* Copy the dataset's datatype */
-        if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
+        if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
                 
         H5T_set_vol_object(type, (void *)dt);

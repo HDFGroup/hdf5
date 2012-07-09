@@ -162,6 +162,11 @@ H5D__init_interface(void)
 
     FUNC_ENTER_STATIC
 
+    /* Initialize the atom group for the dataset IDs */
+    if(H5I_register_type2(H5I_DATASET, (size_t)H5I_DATASETID_HASHSIZE, H5D_RESERVED_ATOMS, 
+                          NULL, (H5I_free2_t)H5D_close_dataset)<H5I_FILE)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
     /* Reset the "default dataset" information */
     HDmemset(&H5D_def_dset, 0, sizeof(H5D_shared_t));
 
@@ -906,7 +911,7 @@ H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id)
 {
-    const H5T_t         *type, *dt;                  /* Datatype for dataset */
+    const H5T_t         *type, *dt;             /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
     H5P_genplist_t 	*dc_plist = NULL;       /* New Property list */
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
@@ -926,6 +931,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Get the dataset's datatype */
     if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+
     /* Get the actual datatype object if this is a named datatype */
     if(NULL == (type = (const H5T_t *)H5T_get_named_type(dt)))
         type = dt;
@@ -2708,7 +2714,7 @@ H5D_get_type(H5D_t *dset)
            returned datatype */
 
         /* Copy the dataset's datatype */
-        if(NULL == (type = H5T_copy(dt, H5T_COPY_REOPEN)))
+        if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
                 
         H5T_set_vol_object(type, (void *)dt);
