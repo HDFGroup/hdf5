@@ -7966,7 +7966,7 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     dset2_t dset2[10];
 
     typedef struct {
-            int a[4];
+            int a[5];
             float b[5][6];
             dset1_t c;
     } dset3_t;
@@ -7975,7 +7975,7 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     enumtype dset4[] = {RED, GREEN, BLUE, GREEN, WHITE, BLUE};
     dset1_t dset5[10];
 
-    int i;
+    int i, j, k;
     unsigned ndims;
     hsize_t dim[2];
 
@@ -7987,11 +7987,15 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
         dset1[i].b = (float)(i*i);
 
         dset2[i].a = i;
-        dset2[i].b = (float)(i+ i*0.1);
+        dset2[i].b = (float)(i+i*0.1);
         dset2[i].c = GREEN;
 
-        dset3[i].a[0] = i;
-        dset3[i].b[0][0] = (float)(i*1.0);
+        for(j = 0; j < 5; j++) {
+            dset3[i].a[j] = i*j;
+            for(k = 0; k < 6; k++) {
+                dset3[i].b[j][k] = (float)(i*j*k*1.0);
+            }
+        }
         dset3[i].c.a = i;
         dset3[i].c.b = (float)(i*1.0);
     }
@@ -8062,7 +8066,7 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
 
     type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
 
-    ndims = 1; dim[0] = 4;
+    ndims = 1; dim[0] = 5;
     array_dt = H5Tarray_create2(H5T_STD_I32BE, ndims, dim);
     H5Tinsert(type2, "int_name", HOFFSET(dset3_t, a), array_dt);
     H5Tclose(array_dt);
