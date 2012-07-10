@@ -500,14 +500,8 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
-    /* Build the vol plugin struct */
-    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    vol_plugin->nrefs = 1;
-
     /* create a new file or truncate an existing file through the VOL */
-    if(NULL == (file = H5VL_file_create(vol_plugin, filename, flags, fcpl_id, fapl_id, H5_REQUEST_NULL)))
+    if(NULL == (file = H5VL_file_create(&vol_plugin, filename, flags, fcpl_id, fapl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
@@ -586,14 +580,8 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
-    /* Build the vol plugin struct */
-    if(NULL == (vol_plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    vol_plugin->nrefs = 1;
-
     /* Open the file through the VOL layer */
-    if(NULL == (file = H5VL_file_open(vol_plugin, filename, flags, fapl_id, H5_REQUEST_NULL)))
+    if(NULL == (file = H5VL_file_open(&vol_plugin, filename, flags, fapl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file with the VOL information as the auxilary struct*/
@@ -744,15 +732,6 @@ H5F_close_file(void *file, H5VL_t *vol_plugin)
     /* Close the file through the VOL*/
     if((ret_value = H5VL_file_close(file, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        if (NULL != vol_plugin->container_name)
-            H5MM_xfree(vol_plugin->container_name);
-        if (NULL != vol_plugin)
-            H5MM_free(vol_plugin);
-    }
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_close_file() */

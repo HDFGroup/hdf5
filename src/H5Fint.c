@@ -1270,7 +1270,7 @@ H5F_close(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
+    //HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */

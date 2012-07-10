@@ -270,7 +270,6 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -369,7 +368,6 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -434,7 +432,6 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -511,7 +508,6 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -597,7 +593,6 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -1906,14 +1901,6 @@ H5A_close_attr(void *attr, H5VL_t *vol_plugin)
     /* Close the attr through the VOL*/
     if((ret_value = H5VL_attr_close(attr, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to close attribute")
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        if (NULL != vol_plugin->container_name)
-            H5MM_xfree(vol_plugin->container_name);
-        if (NULL != vol_plugin)
-            H5MM_free(vol_plugin);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -313,7 +313,6 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
     /* get the file object */
     if(NULL == (obj = (void *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-
     /* get the plugin pointer */
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
@@ -325,7 +324,6 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
     /* Get an atom for the group */
     if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && grp)
@@ -414,7 +412,6 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     /* Get an atom for the group */
     if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && grp)
@@ -482,7 +479,6 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     /* Get an atom for the group */
     if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && grp)
@@ -776,14 +772,6 @@ H5G_close_group(void *grp, H5VL_t *vol_plugin)
     /* Close the group through the VOL*/
     if((ret_value = H5VL_group_close(grp, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        if (NULL != vol_plugin->container_name)
-            H5MM_xfree(vol_plugin->container_name);
-        if (NULL != vol_plugin)
-            H5MM_free(vol_plugin);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

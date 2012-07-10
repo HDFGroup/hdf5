@@ -72,8 +72,8 @@ H5_DLL void *H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t 
 H5_DLL ssize_t H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t req);
 H5_DLL herr_t H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t req);
 
-H5_DLL void *H5VL_file_create(H5VL_t *vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
-H5_DLL void *H5VL_file_open(H5VL_t *vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t req);
+H5_DLL void *H5VL_file_create(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
+H5_DLL void *H5VL_file_open(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 H5_DLL herr_t H5VL_file_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5F_scope_t scope, hid_t req);
 H5_DLL herr_t H5VL_file_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t req, ...);
 H5_DLL herr_t H5VL_file_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, hid_t req, ...);

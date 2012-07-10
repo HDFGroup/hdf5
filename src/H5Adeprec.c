@@ -187,7 +187,6 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -255,7 +254,6 @@ H5Aopen_name(hid_t loc_id, const char *name)
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)
@@ -325,7 +323,6 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     /* Get an atom for the attribute */
     if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && attr)

@@ -189,7 +189,6 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && dset)
@@ -251,7 +250,6 @@ H5Dopen1(hid_t loc_id, const char *name)
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && dset)

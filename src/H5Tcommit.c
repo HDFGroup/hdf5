@@ -186,7 +186,6 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     /* attach VOL information to the ID */
     if (H5I_register_aux(type_id, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -351,7 +350,6 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     /* attach VOL information to the ID */
     if (H5I_register_aux(type_id, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -988,7 +986,6 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
     /* Get an atom for the datatype with the VOL information as the auxilary struct*/
     if((ret_value = H5I_register2(H5I_DATATYPE, dt, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1021,14 +1018,6 @@ H5T_close_datatype(void *type, H5VL_t *vol_plugin)
     if (NULL != dt->vol_obj)
         if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatypeibute")
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        if (NULL != vol_plugin->container_name)
-            H5MM_xfree(vol_plugin->container_name);
-        if (NULL != vol_plugin)
-            H5MM_free(vol_plugin);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

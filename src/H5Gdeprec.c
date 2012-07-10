@@ -269,7 +269,6 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     /* Get an atom for the group */
     if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if(tmp_gcpl > 0 && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
@@ -334,7 +333,6 @@ H5Gopen1(hid_t loc_id, const char *name)
     /* Get an atom for the group */
     if((ret_value = H5I_register2(H5I_GROUP, grp, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && grp)

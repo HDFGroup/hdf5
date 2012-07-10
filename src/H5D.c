@@ -202,7 +202,6 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && dset)
@@ -303,7 +302,6 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && dset)
@@ -371,7 +369,6 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
     /* Get an atom for the dataset */
     if((ret_value = H5I_register2(H5I_DATASET, dset, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-    vol_plugin->nrefs ++;
 
 done:
     if (ret_value < 0 && dset)
@@ -1057,14 +1054,6 @@ H5D_close_dataset(void *dset, H5VL_t *vol_plugin)
     /* Close the dataset through the VOL*/
     if((ret_value = H5VL_dataset_close(dset, vol_plugin, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset")
-
-    vol_plugin->nrefs --;
-    if (0 == vol_plugin->nrefs) {
-        if (NULL != vol_plugin->container_name)
-            H5MM_xfree(vol_plugin->container_name);
-        if (NULL != vol_plugin)
-            H5MM_free(vol_plugin);
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

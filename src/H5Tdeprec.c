@@ -167,7 +167,6 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     /* attach VOL information to the ID */
     if (H5I_register_aux(type_id, vol_plugin, (H5I_free2_t)H5T_close_datatype) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
-    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_API(ret_value)

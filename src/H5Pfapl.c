@@ -2210,19 +2210,24 @@ H5P_set_vol(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get the current vol information */
-    if(H5P_get(plist, H5F_ACS_VOL_NAME, &old_vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol class")
-    if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &old_vol_info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        /* Get the current vol information */
+        if(H5P_get(plist, H5F_ACS_VOL_NAME, &old_vol_cls) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol class")
+        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &old_vol_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol info")
 
-    /* Close the vol for the property list */
-    if(H5VL_fapl_close(old_vol_cls, old_vol_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset vol")
+        /* Close the vol for the property list */
+        if(H5VL_fapl_close(old_vol_cls, old_vol_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset vol")
 
-    /* Set the vol for the property list */
-    if(H5VL_fapl_open(plist, vol_cls, vol_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
+        /* Set the vol for the property list */
+        if(H5VL_fapl_open(plist, vol_cls, vol_info)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set vol")
+    }
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_vol() */
@@ -2266,6 +2271,83 @@ H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_vol() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_get_vol_info
+ *
+ * Purpose:	Returns a pointer directly to the file vol-specific
+ *		information of a file access property list.
+ *
+ * Return:	Success:	Ptr to *uncopied* vol specific data
+ *				structure if any.
+ *
+ *		Failure:	NULL. Null is also returned if the vol has
+ *				not registered any vol-specific properties
+ *				although no error is pushed on the stack in
+ *				this case.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              July, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5P_get_vol_info(H5P_genplist_t *plist)
+{
+    void	*ret_value=NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Get the current vol info */
+    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+        if(H5P_get(plist, H5F_ACS_VOL_INFO_NAME, &ret_value) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,NULL,"can't get vol info");
+    } else {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_get_vol_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_vol_info
+ *
+ * Purpose:	Returns a pointer directly to the file vol-specific
+ *		information of a file access property list.
+ *
+ * Return:	Success:	Ptr to *uncopied* vol specific data
+ *				structure if any.
+ *
+ *		Failure:	NULL. Null is also returned if the vol has
+ *				not registered any vol-specific properties
+ *				although no error is pushed on the stack in
+ *				this case.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              July 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5Pget_vol_info(hid_t plist_id)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    void	*ret_value;     /* Return value */
+
+    FUNC_ENTER_API(NULL)
+
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
+
+    if(NULL == (ret_value = H5P_get_vol_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_info() */
 
 
 /*-------------------------------------------------------------------------

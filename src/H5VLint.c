@@ -426,6 +426,7 @@ H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, co
     if(NULL == (ret_value = (vol_plugin->cls->attr_cls.create) (obj, loc_params, name, acpl_id, aapl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
+    vol_plugin->nrefs ++;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_create() */
@@ -459,6 +460,7 @@ H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, cons
     if(NULL == (ret_value = (vol_plugin->cls->attr_cls.open) (obj, loc_params, name, aapl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "attribute open failed")
 
+    vol_plugin->nrefs ++;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_open() */
@@ -637,6 +639,15 @@ H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t req)
     }
     else if((ret_value = (vol_plugin->cls->attr_cls.close)(attr, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        if (NULL != vol_plugin->container_name)
+            H5MM_xfree(vol_plugin->container_name);
+        if (NULL != vol_plugin)
+            H5MM_free(vol_plugin);
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_attr_close() */
@@ -672,6 +683,7 @@ H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin
     if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.commit) 
         (obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "commit failed")
+    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -717,6 +729,8 @@ H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, tapl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+    vol_plugin->nrefs ++;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_open() */
@@ -745,10 +759,10 @@ H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size
 
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->datatype_cls.get_binary)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "no datatype open callback");
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "no datatype get_binary callback");
     /* call the corresponding VOL open callback */
     if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, req)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "open failed")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "get binary failed")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get_binary() */
@@ -781,6 +795,14 @@ H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t req)
     /* call the corresponding VOL close callback */
     if((ret_value = (vol_plugin->cls->datatype_cls.close)(dt, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        if (NULL != vol_plugin->container_name)
+            H5MM_xfree(vol_plugin->container_name);
+        if (NULL != vol_plugin)
+            H5MM_free(vol_plugin);
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -815,6 +837,7 @@ H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
     /* call the corresponding VOL create callback */
     if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.create)(obj, loc_params, name, dcpl_id, dapl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
+    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -856,6 +879,8 @@ H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
         /* call the corresponding VOL open callback */
         if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.open)(obj, loc_params, name, dapl_id, req)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+        vol_plugin->nrefs ++;
+
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1045,6 +1070,14 @@ H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t req)
         if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, req)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
     }
+
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        if (NULL != vol_plugin->container_name)
+            H5MM_xfree(vol_plugin->container_name);
+        if (NULL != vol_plugin)
+            H5MM_free(vol_plugin);
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_close() */
@@ -1065,11 +1098,12 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_create(H5VL_t *vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, 
+H5VL_file_create(H5VL_t **plugin, const char *name, unsigned flags, hid_t fcpl_id, 
                  hid_t fapl_id, hid_t req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
     H5VL_class_t       *vol_cls;               /* VOL class attached to fapl_id */
+    H5VL_t             *vol_plugin = NULL;     /* the public VOL struct */
     void	       *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1087,7 +1121,13 @@ H5VL_file_create(H5VL_t *vol_plugin, const char *name, unsigned flags, hid_t fcp
     if(NULL == (ret_value = (vol_cls->file_cls.create)(name, flags, fcpl_id, fapl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
 
+    /* Build the vol plugin struct */
+    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    vol_plugin = *plugin;
     vol_plugin->cls = vol_cls;
+    vol_plugin->nrefs = 1;
     if((vol_plugin->container_name = H5MM_xstrdup(name)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed")
 
@@ -1111,10 +1151,11 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(H5VL_t *vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t req)
+H5VL_file_open(H5VL_t **plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t req)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
     H5VL_class_t       *vol_cls;               /* VOL class attached to fapl_id */
+    H5VL_t             *vol_plugin = NULL;     /* the public VOL struct */
     void	       *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1132,7 +1173,13 @@ H5VL_file_open(H5VL_t *vol_plugin, const char *name, unsigned flags, hid_t fapl_
     if(NULL == (ret_value = (vol_cls->file_cls.open)(name, flags, fapl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
 
+    /* Build the vol plugin struct */
+    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    vol_plugin = *plugin;
     vol_plugin->cls = vol_cls;
+    vol_plugin->nrefs = 1;
     if((vol_plugin->container_name = H5MM_xstrdup(name)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed")
 
@@ -1324,6 +1371,13 @@ H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t req)
     if((ret_value = (vol_plugin->cls->file_cls.close)(file, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
 
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        if (NULL != vol_plugin->container_name)
+            H5MM_xfree(vol_plugin->container_name);
+        if (NULL != vol_plugin)
+            H5MM_free(vol_plugin);
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_close() */
@@ -1357,6 +1411,7 @@ H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
     /* call the corresponding VOL create callback */
     if(NULL == (ret_value = (vol_plugin->cls->group_cls.create)(obj, loc_params, name, gcpl_id, gapl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
+    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1398,6 +1453,7 @@ H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, con
         /* call the corresponding VOL open callback */
         if(NULL == (ret_value = (vol_plugin->cls->group_cls.open)(obj, loc_params, name, gapl_id, req)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+        vol_plugin->nrefs ++;
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1472,6 +1528,15 @@ H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t req)
         if((ret_value = (vol_plugin->cls->group_cls.close)(grp, req)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
    }
+
+    vol_plugin->nrefs --;
+    if (0 == vol_plugin->nrefs) {
+        if (NULL != vol_plugin->container_name)
+            H5MM_xfree(vol_plugin->container_name);
+        if (NULL != vol_plugin)
+            H5MM_free(vol_plugin);
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_close() */
@@ -1665,10 +1730,10 @@ H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_ty
     /* check if the corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->object_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `object open' method")
-
     /* call the corresponding VOL open callback */
     if(NULL == (ret_value = (vol_plugin->cls->object_cls.open)(obj, params, opened_type, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
+    vol_plugin->nrefs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1916,4 +1981,3 @@ H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, h
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_close() */
-
