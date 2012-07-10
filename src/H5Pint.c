@@ -357,9 +357,11 @@ H5P_init_interface(void)
     /*
      * Initialize the Generic Property class & object groups.
      */
-    if(H5I_register_type(H5I_GENPROP_CLS, (size_t)H5I_GENPROPCLS_HASHSIZE, 0, (H5I_free_t)H5P_close_class) < 0)
+    if(H5I_register_type(H5I_GENPROP_CLS, (size_t)H5I_GENPROPCLS_HASHSIZE, 0, 
+                          (H5I_free_t)H5P_close_class, NULL) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
-    if(H5I_register_type(H5I_GENPROP_LST, (size_t)H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close) < 0)
+    if(H5I_register_type(H5I_GENPROP_LST, (size_t)H5I_GENPROPOBJ_HASHSIZE, 0, 
+                          (H5I_free_t)H5P_close, NULL) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
     /* Repeatedly pass over the list of property list classes for the library,

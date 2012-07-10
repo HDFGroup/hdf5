@@ -76,7 +76,7 @@ H5F__init_pub_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type2(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, 
+    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, 
                           NULL, (H5I_free2_t)H5F_close_file)<H5I_FILE)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 

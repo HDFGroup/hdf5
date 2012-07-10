@@ -188,7 +188,7 @@ H5G_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the group IDs */
-    if(H5I_register_type2(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS, 
                           NULL, (H5I_free2_t)H5G_close_group) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
 

@@ -53,8 +53,8 @@
 #define H5I_ERRSTK_HASHSIZE		64
 
 /* Private Functions in H5I.c */
-H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func);
-H5_DLL H5I_type_t H5I_register_type2(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func, H5I_free2_t free_aux);
+H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, 
+                                     H5I_free_t free_func, H5I_free2_t free_aux);
 H5_DLL int H5I_nmembers(H5I_type_t type);
 H5_DLL herr_t H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref);
 H5_DLL int H5I_destroy_type(H5I_type_t type);

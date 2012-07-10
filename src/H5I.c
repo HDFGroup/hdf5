@@ -243,7 +243,7 @@ H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
     H5TRACE3("It", "zIux", hash_size, reserved, free_func);
 
     /* Call H5I_register_type with a value of 0 to get a new type */
-    ret_value = H5I_register_type((H5I_type_t)0, hash_size, reserved, free_func);
+    ret_value = H5I_register_type((H5I_type_t)0, hash_size, reserved, free_func, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -276,7 +276,7 @@ done:
  */
 H5I_type_t
 H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved,
-    H5I_free_t free_func)
+                   H5I_free_t free_func, H5I_free2_t free_aux)
 {
     H5I_id_type_t	*type_ptr = NULL;		/*ptr to the atomic type*/
     H5I_type_t ret_value = H5I_BADID;                   /* type ID to return */
@@ -342,7 +342,7 @@ H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved,
         type_ptr->ids = 0;
         type_ptr->nextid = reserved;
         type_ptr->free_func = free_func;
-        type_ptr->free_aux = NULL;
+        type_ptr->free_aux = free_aux;
         type_ptr->id_list = (H5I_id_info_t **)H5MM_calloc(hash_size * sizeof(H5I_id_info_t *));
         if(NULL == type_ptr->id_list)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
@@ -899,6 +899,118 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_register() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5I_register2
+ *
+ * Purpose:	This routine does the same as H5I_register, and additionally 
+ *              attaches an auxilary structure to the id
+ *
+ * Return:	Success:	New object id.
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5I_register2(H5I_type_t type, const void *object, const void *aux_object, hbool_t app_ref)
+{
+    H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
+    H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
+    hid_t		new_id = FAIL;		/*new ID			*/
+    unsigned		hash_loc;	/*new item's hash table location*/
+    hid_t		next_id;	/*next ID to check		*/
+    H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
+    unsigned		i;		/*counter			*/
+    hid_t		ret_value = FAIL; /*return value		*/
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments */
+    if(type <= H5I_BADID || type >= H5I_next_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+    type_ptr = H5I_id_type_list_g[type];
+    if(NULL == type_ptr || type_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
+    if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
+        HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Create the struct & it's ID */
+    new_id = H5I_MAKE(type, type_ptr->nextid);
+    id_ptr->id = new_id;
+    id_ptr->count = 1; /*initial reference count*/
+    id_ptr->app_count = !!app_ref;
+    id_ptr->obj_ptr = object;
+    id_ptr->aux_ptr = aux_object;
+    id_ptr->next = NULL;
+
+    /* hash bucket already full, prepend to front of chain */
+    hash_loc = type_ptr->nextid % (unsigned)type_ptr->hash_size;
+    if(type_ptr->id_list[hash_loc] != NULL)
+	id_ptr->next = type_ptr->id_list[hash_loc];
+
+    /* Insert into the type */
+    type_ptr->id_list[hash_loc] = id_ptr;
+    type_ptr->ids++;
+    type_ptr->nextid++;
+
+    /*
+     * This next section of code checks for the 'nextid' getting too large and
+     * wrapping around, thus necessitating checking for duplicate IDs being
+     * handed out.
+     */
+    if(type_ptr->nextid > (unsigned)ID_MASK) {
+	type_ptr->wrapped = 1;
+	type_ptr->nextid = type_ptr->reserved;
+    } /* end if */
+
+    /*
+     * If we've wrapped around then we need to check for duplicate id's being
+     * handed out.
+     */
+    if(type_ptr->wrapped) {
+	/*
+	 * Make sure we check all available ID's.  If we're about at the end
+	 * of the range then wrap around and check the beginning values.  If
+	 * we check all possible values and didn't find any free ones *then*
+	 * we can fail.
+	 */
+	for(i = type_ptr->reserved; i < ID_MASK; i++) {
+	    /* Handle end of range by wrapping to beginning */
+	    if(type_ptr->nextid > (unsigned)ID_MASK)
+		type_ptr->nextid = type_ptr->reserved;
+
+	    /* new ID to check for */
+	    next_id = H5I_MAKE(type, type_ptr->nextid);
+	    hash_loc = (unsigned)H5I_LOC(type_ptr->nextid, type_ptr->hash_size);
+	    curr_id = type_ptr->id_list[hash_loc];
+	    if(curr_id == NULL)
+                break; /* Ha! this is not likely... */
+
+	    while(curr_id) {
+		if(curr_id->id == next_id)
+                    break;
+		curr_id = curr_id->next;
+	    } /* end while */
+	    if(!curr_id)
+                break; /* must not have found a match */
+	    type_ptr->nextid++;
+	} /* end for */
+
+	if(i >= (unsigned)ID_MASK)
+	    /* All the IDs are gone! */
+            HGOTO_ERROR(H5E_ATOM, H5E_NOIDS, FAIL, "no IDs available in type")
+    } /* end if */
+
+    /* Set return value */
+    ret_value = new_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_register2() */
 
 
 /*-------------------------------------------------------------------------
@@ -2326,231 +2438,6 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_file_id() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5I_register_type2
- *
- * Purpose:	Creates a new type of ID's to give out.  A specific number
- *		(RESERVED) of type entries may be reserved to enable "constant"
- *		values to be handed out which are valid IDs in the type, but
- *		which do not map to any data structures and are not allocated
- *		dynamically later. TYPE_ID is the H5I_type_t value of the type
- *		to be initialized.  If this value is zero, a new type is created.
- *		If this value is one of the library types, that type is
- *		initialized or its reference count is incremented (if it is already
- *		initialized).  HASH_SIZE is the minimum hash table size to
- *		use for the type. FREE_FUNC is called with an object pointer
- *		when the object is removed from the type.
- *
- * Return:	Success:	Type ID of the new type
- *		Failure:	H5I_BADID
- *
- * Programmers:	Nathaniel Furrer
- *		James Laird
- *		Friday, April 30, 2004
- *
- *-------------------------------------------------------------------------
- */
-H5I_type_t
-H5I_register_type2(H5I_type_t type_id, size_t hash_size, unsigned reserved,
-                   H5I_free_t free_func, H5I_free2_t free_aux)
-{
-    H5I_id_type_t	*type_ptr = NULL;		/*ptr to the atomic type*/
-    H5I_type_t ret_value = H5I_BADID;                   /* type ID to return */
-
-    FUNC_ENTER_NOAPI(H5I_BADID)
-
-    /* Check that type_id is either a library type or zero */
-    if(type_id < 0 || type_id >= H5I_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_BADID, "invalid type ID")
-
-    if(type_id == 0) {	/* Generate a new H5I_type_t value */
-        /* Increment the number of types*/
-        if(H5I_next_type < MAX_NUM_TYPES) {
-            ret_value = H5I_next_type;
-            H5_INC_ENUM(H5I_type_t, H5I_next_type);
-        }
-        else {
-            hbool_t done;       /* Indicate that search was successful */
-            int i;              /* Local index variable */
-
-            /* Look for a free type to give out */
-            done = FALSE;
-            for(i = H5I_NTYPES; i < MAX_NUM_TYPES && done == FALSE; i++) {
-                if(NULL == H5I_id_type_list_g[i]) {
-                    /* Found a free type ID */
-                    ret_value = (H5I_type_t)i;
-                    done = TRUE;
-                } /* end if */
-            } /* end for */
-
-            /* Verify that we found a type to give out */
-            if(done == FALSE)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "Maximum number of ID types exceeded.")
-        } /* end else */
-    } /* end if */
-    else	/* type_id is a library type; use this value. */
-        ret_value = type_id;
-
-    /* Initialize the type */
-
-    /* Check arguments */
-#ifdef HASH_SIZE_POWER_2
-    if(!POWER_OF_TWO(hash_size) || hash_size == 1)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_BADID, "invalid hash size")
-#endif /* HASH_SIZE_POWER_2 */
-
-    if(NULL == H5I_id_type_list_g[ret_value]) {
-        /* Allocate the type information for new type */
-        if(NULL == (type_ptr = (H5I_id_type_t *)H5MM_calloc(sizeof(H5I_id_type_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
-        H5I_id_type_list_g[ret_value] = type_ptr;
-    } /* end if */
-    else {
-        /* Get the pointer to the existing type */
-        type_ptr = H5I_id_type_list_g[ret_value];
-    } /* end else */
-
-    if(type_ptr->count == 0) {
-        /* Initialize the ID type structure for new types */
-        type_ptr->hash_size = hash_size;
-        type_ptr->reserved = reserved;
-        type_ptr->wrapped = 0;
-        type_ptr->ids = 0;
-        type_ptr->nextid = reserved;
-        type_ptr->free_func = free_func;
-        type_ptr->free_aux = free_aux;
-        type_ptr->id_list = (H5I_id_info_t **)H5MM_calloc(hash_size * sizeof(H5I_id_info_t *));
-        if(NULL == type_ptr->id_list)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
-    } /* end if */
-
-    /* Increment the count of the times this type has been initialized */
-    type_ptr->count++;
-
-done:
-    if(ret_value == H5I_BADID) {	/* Clean up on error */
-        if(type_ptr != NULL) {
-            H5MM_xfree(type_ptr->id_list);
-            H5MM_xfree(type_ptr);
-        } /* end if */
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_register_type() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5I_register2
- *
- * Purpose:	This routine does the same as H5I_register, and additionally 
- *              attaches an auxilary structure to the id
- *
- * Return:	Success:	New object id.
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5I_register2(H5I_type_t type, const void *object, const void *aux_object, hbool_t app_ref)
-{
-    H5I_id_type_t	*type_ptr;	/*ptr to the type		*/
-    H5I_id_info_t	*id_ptr;	/*ptr to the new ID information */
-    hid_t		new_id = FAIL;		/*new ID			*/
-    unsigned		hash_loc;	/*new item's hash table location*/
-    hid_t		next_id;	/*next ID to check		*/
-    H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
-    unsigned		i;		/*counter			*/
-    hid_t		ret_value = FAIL; /*return value		*/
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check arguments */
-    if(type <= H5I_BADID || type >= H5I_next_type)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
-    type_ptr = H5I_id_type_list_g[type];
-    if(NULL == type_ptr || type_ptr->count <= 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
-    if(NULL == (id_ptr = H5FL_MALLOC(H5I_id_info_t)))
-        HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    /* Create the struct & it's ID */
-    new_id = H5I_MAKE(type, type_ptr->nextid);
-    id_ptr->id = new_id;
-    id_ptr->count = 1; /*initial reference count*/
-    id_ptr->app_count = !!app_ref;
-    id_ptr->obj_ptr = object;
-    id_ptr->aux_ptr = aux_object;
-    id_ptr->next = NULL;
-
-    /* hash bucket already full, prepend to front of chain */
-    hash_loc = type_ptr->nextid % (unsigned)type_ptr->hash_size;
-    if(type_ptr->id_list[hash_loc] != NULL)
-	id_ptr->next = type_ptr->id_list[hash_loc];
-
-    /* Insert into the type */
-    type_ptr->id_list[hash_loc] = id_ptr;
-    type_ptr->ids++;
-    type_ptr->nextid++;
-
-    /*
-     * This next section of code checks for the 'nextid' getting too large and
-     * wrapping around, thus necessitating checking for duplicate IDs being
-     * handed out.
-     */
-    if(type_ptr->nextid > (unsigned)ID_MASK) {
-	type_ptr->wrapped = 1;
-	type_ptr->nextid = type_ptr->reserved;
-    } /* end if */
-
-    /*
-     * If we've wrapped around then we need to check for duplicate id's being
-     * handed out.
-     */
-    if(type_ptr->wrapped) {
-	/*
-	 * Make sure we check all available ID's.  If we're about at the end
-	 * of the range then wrap around and check the beginning values.  If
-	 * we check all possible values and didn't find any free ones *then*
-	 * we can fail.
-	 */
-	for(i = type_ptr->reserved; i < ID_MASK; i++) {
-	    /* Handle end of range by wrapping to beginning */
-	    if(type_ptr->nextid > (unsigned)ID_MASK)
-		type_ptr->nextid = type_ptr->reserved;
-
-	    /* new ID to check for */
-	    next_id = H5I_MAKE(type, type_ptr->nextid);
-	    hash_loc = (unsigned)H5I_LOC(type_ptr->nextid, type_ptr->hash_size);
-	    curr_id = type_ptr->id_list[hash_loc];
-	    if(curr_id == NULL)
-                break; /* Ha! this is not likely... */
-
-	    while(curr_id) {
-		if(curr_id->id == next_id)
-                    break;
-		curr_id = curr_id->next;
-	    } /* end while */
-	    if(!curr_id)
-                break; /* must not have found a match */
-	    type_ptr->nextid++;
-	} /* end for */
-
-	if(i >= (unsigned)ID_MASK)
-	    /* All the IDs are gone! */
-            HGOTO_ERROR(H5E_ATOM, H5E_NOIDS, FAIL, "no IDs available in type")
-    } /* end if */
-
-    /* Set return value */
-    ret_value = new_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_register2() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5I_register_aux

@@ -153,7 +153,8 @@ H5FD_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5I_register_type(H5I_VFL, (size_t)H5I_VFL_HASHSIZE, 0, (H5I_free_t)H5FD_free_cls)<H5I_FILE)
+    if(H5I_register_type(H5I_VFL, (size_t)H5I_VFL_HASHSIZE, 0, 
+                          (H5I_free_t)H5FD_free_cls, NULL)<H5I_FILE)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Reset the file serial numbers */

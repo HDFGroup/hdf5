@@ -140,7 +140,7 @@ H5A_init_interface(void)
     /*
      * Create attribute ID type.
      */
-    if(H5I_register_type2(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, 
+    if(H5I_register_type(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, 
                           NULL, (H5I_free2_t)H5A_close_attr) < H5I_FILE)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 

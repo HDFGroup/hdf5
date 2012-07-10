@@ -78,7 +78,8 @@ H5S_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
-    if(H5I_register_type(H5I_DATASPACE, (size_t)H5I_DATASPACEID_HASHSIZE, H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close) < 0)
+    if(H5I_register_type(H5I_DATASPACE, (size_t)H5I_DATASPACEID_HASHSIZE, H5S_RESERVED_ATOMS, 
+                          (H5I_free_t)H5S_close, NULL) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 #ifdef H5_HAVE_PARALLEL

@@ -98,7 +98,8 @@ H5VL_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* register VOL ID type */
-    if(H5I_register_type(H5I_VOL, (size_t)H5I_VOL_HASHSIZE, 0, (H5I_free_t)H5VL_free_cls)<H5I_FILE)
+        if(H5I_register_type(H5I_VOL, (size_t)H5I_VOL_HASHSIZE, 0, 
+                              (H5I_free_t)H5VL_free_cls, NULL)<H5I_FILE)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
