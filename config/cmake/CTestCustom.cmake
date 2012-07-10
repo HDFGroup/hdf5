@@ -52,7 +52,7 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
-    H5IMPORT-clear-objects
+    #H5IMPORT-clear-objects
     H5IMPORT-ASCII_I32-clear-objects
     H5IMPORT-ASCII_I16-clear-objects
     H5IMPORT-ASCII_I8-clear-objects
