@@ -163,6 +163,7 @@ $SRC_H5DUMP_TESTFILES/tvldtypes4.h5
 $SRC_H5DUMP_TESTFILES/tvldtypes5.h5
 $SRC_H5DUMP_TESTFILES/tvlstr.h5
 $SRC_H5DUMP_TESTFILES/tvms.h5
+$SRC_H5DUMP_TESTFILES/twidedisplay.ddl
 "
 
 LIST_OTHER_TEST_FILES="
@@ -575,6 +576,9 @@ IMPORTTEST()
 COPY_TESTFILES_TO_TESTDIR
 
 #TOOLTEST h5dump-help.txt -h
+
+# test for maximum display datasets
+TOOLTEST twidedisplay.ddl -w0 --enable-error-stack packedbits.h5
 
 # test for signed/unsigned datasets
 TOOLTEST packedbits.ddl --enable-error-stack packedbits.h5

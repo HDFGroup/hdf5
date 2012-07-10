@@ -1517,6 +1517,8 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
+./tools/testfiles/twidedisplay.ddl
+
 # h5dump packed bits validation
 ./tools/testfiles/tnofilename-with-packed-bits.ddl
 ./tools/testfiles/tpbitsLengthPositive.ddl

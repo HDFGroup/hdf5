@@ -177,6 +177,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/twidedisplay.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
   )
@@ -972,6 +973,9 @@ IF (BUILD_TESTING)
   ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   ADD_HELP_TEST(help 0 -h)
+
+  # test for maximum display datasets
+  ADD_H5_TEST (twidedisplay 0 -w0 --enable-error-stack packedbits.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
