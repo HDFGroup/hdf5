@@ -37,11 +37,9 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     hl_test-clear-objects
     hl_fortran_test-clear-objects
     ######### tools/h5copy #########
-    H5COPY-clearall-objects
     H5COPY-clear-refs
     H5COPY-clear-ext-links
     H5COPY-clear-misc
-    H5COPY-clear-samefile
     ######### tools/h5diff #########
     H5DIFF-clearall-objects
     ######### tools/h5dump #########
@@ -52,7 +50,6 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
-    #H5IMPORT-clear-objects
     H5IMPORT-ASCII_I32-clear-objects
     H5IMPORT-ASCII_I16-clear-objects
     H5IMPORT-ASCII_I8-clear-objects
