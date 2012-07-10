@@ -58,12 +58,8 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLnative.h"         /* Native VOL plugin			*/
 
-/* The driver identification number, initialized at runtime */
-static hid_t H5VL_NATIVE_g = 0;
-
 /* Prototypes */
 static H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
-static herr_t H5VL_native_term(void);
 
 /* Atrribute callbacks */
 static void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
@@ -134,8 +130,8 @@ static herr_t H5VL_native_object_close(void *obj, H5VL_loc_params_t loc_params, 
 
 static H5VL_class_t H5VL_native_g = {
     "native",					/* name */
-    NULL,                           /* initialize */
-    H5VL_native_term,                           /* terminate */
+    NULL,                                       /* initialize */
+    NULL,                                       /* terminate */
     {                                           /* attribute_cls */
         H5VL_native_attr_create,                /* create */
         H5VL_native_attr_open,                  /* open */
@@ -244,30 +240,6 @@ H5VL_native_init(void)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_init() */
-
-
-/*---------------------------------------------------------------------------
- * Function:	H5VL_native_term
- *
- * Purpose:	Shut down the VOL plugin
- *
- * Returns:     Non-negative on success or negative on failure
- *
- * Programmer:  Mohamad Chaarawi
- *              January, 2012
- *
- *---------------------------------------------------------------------------
- */
-static herr_t
-H5VL_native_term(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Reset VOL ID */
-    H5VL_NATIVE_g = 0;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5VL_native_term() */
 
 
 /*---------------------------------------------------------------------------

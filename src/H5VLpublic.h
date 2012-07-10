@@ -218,7 +218,7 @@ typedef struct H5VL_datatype_class_t {
     void  *(*open)  (void *obj, H5VL_loc_params_t loc_params, const char * name, hid_t tapl_id, hid_t req);
     ssize_t (*get_binary) (void *obj, unsigned char *buf, size_t size, hid_t req);
     herr_t (*close) (void *dt, hid_t req);
-}H5VL_datatype_class_t;
+} H5VL_datatype_class_t;
 
 /* H5D routines */
 typedef struct H5VL_dataset_class_t {
