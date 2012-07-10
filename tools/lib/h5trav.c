@@ -957,11 +957,11 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
 int
 h5trav_print(hid_t fid, H5_index_t print_index_by, H5_iter_order_t print_index_order)
 {
-    trav_index_by = print_index_by;
-    trav_index_order = print_index_order;
-
     trav_print_udata_t print_udata;     /* User data for traversal */
     trav_visitor_t print_visitor;       /* Visitor structure for printing objects */
+
+    trav_index_by = print_index_by;
+    trav_index_order = print_index_order;
 
     /* Init user data for printing */
     print_udata.fid = fid;
