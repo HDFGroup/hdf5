@@ -3616,11 +3616,7 @@ H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_
                 size_t      size       = va_arg (arguments, size_t);
                 H5R_type_t  ref_type   = va_arg (arguments, H5R_type_t);
                 void        *ref       = va_arg (arguments, void *);
-                //H5F_t       *file;        /* File object */
 
-                /* Get the file pointer from the entry 
-                file = loc.oloc->file;
-                */
                 /* Get name */
                 if((*ret = H5R_get_name(&loc, H5P_DEFAULT, H5AC_dxpl_id, ref_type, ref, name, size)) < 0)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")

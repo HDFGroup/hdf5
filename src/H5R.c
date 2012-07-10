@@ -889,12 +889,12 @@ H5R_get_name(H5G_loc_t *loc, hid_t lapl_id, hid_t dxpl_id, H5R_type_t ref_type,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    HDassert(f);
     HDassert(_ref);
     HDassert(name);
 
     /* Get the file pointer from the entry */
     f = loc->oloc->file;
+    HDassert(f);
 
     /* Initialize the object location */
     H5O_loc_reset(&oloc);

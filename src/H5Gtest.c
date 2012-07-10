@@ -538,12 +538,18 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
             break;
 
         case H5I_DATATYPE:
-            /* Avoid non-named datatypes */
-            if(!H5T_is_named((H5T_t *)obj_ptr))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
+                {
+                    H5T_t *type = NULL;
 
-            obj_path = H5T_nameof((H5T_t *)obj_ptr);
-            break;
+                    /* Get the actual datatype object that should be the vol_obj */
+                    if(NULL == (type = (H5T_t *)H5T_get_named_type((H5T_t*)obj_ptr)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
+                    /* Avoid non-named datatypes */
+                    if(!H5T_is_named(type))
+                        HGOTO_DONE(SUCCEED)     /* Do not exit search over IDs */
+                    obj_path = H5T_nameof(type);
+                    break;
+                }
 
         case H5I_UNINIT:
         case H5I_BADID:

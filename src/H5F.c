@@ -514,7 +514,10 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
-    ((H5F_t *)file)->file_id = ret_value;
+    /* MSC (need to change) - 
+     * If this was done through the native plugin, store the ID created in the H5F_t struct */
+    if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
+        ((H5F_t *)file)->file_id = ret_value;
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -597,7 +600,10 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
-    ((H5F_t *)file)->file_id = ret_value;
+    /* MSC (need to change) - 
+     * If this was done through the native plugin, store the ID created in the H5F_t struct */
+    if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
+        ((H5F_t *)file)->file_id = ret_value;
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
@@ -804,7 +810,10 @@ H5Freopen(hid_t file_id)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     vol_plugin->nrefs ++;
 
-    ((H5F_t *)file)->file_id = ret_value;
+    /* MSC (need to change) - 
+     * If this was done through the native plugin, store the ID created in the H5F_t struct */
+    if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
+        ((H5F_t *)file)->file_id = ret_value;
 
 done:
     FUNC_LEAVE_API(ret_value)
