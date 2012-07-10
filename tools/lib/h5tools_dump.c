@@ -2337,7 +2337,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level++;
         for (i = 0; i < nmembers; i++) {
             mname = H5Tget_member_name(type, i);
-            if((mtype = H5Tget_member_type(type, i))>=0) {
+            if((mtype = H5Tget_member_type(type, i)) >= 0) {
                 ctx->need_prefix = TRUE;
                 h5tools_simple_prefix(stream, info, ctx, 0, 0);
 
@@ -2374,7 +2374,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
     case H5T_ENUM:
         if((super = H5Tget_super(type)) < 0)
-            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_super failed");
 
         h5tools_str_append(buffer, "H5T_ENUM %s", h5tools_dump_header_format->enumblockbegin);
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
@@ -2406,7 +2406,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
     case H5T_VLEN:
         if((super = H5Tget_super(type)) < 0)
-            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_super failed");
 
         h5tools_str_append(buffer, "H5T_VLEN %s ", h5tools_dump_header_format->vlenblockbegin);
 
