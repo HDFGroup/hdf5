@@ -69,6 +69,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr-2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr-3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr-4_be.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrregR.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbin1.ddl
@@ -82,6 +83,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tboot2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tchar1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tchunked.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdattrintsize.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-3.ddl
@@ -133,6 +136,7 @@ IF (BUILD_TESTING)
       #${HDF5_TOOLS_SRC_DIR}/testfiles/tstarfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-1.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcmpddt.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnbit.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnullspace.ddl
@@ -146,6 +150,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr4.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tordercontents1.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tordercontents2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tperror.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/treference.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ddl
@@ -258,10 +264,13 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr2.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr4_be.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbigdims.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinary.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tchar.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdattrintsize.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5
@@ -304,6 +313,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tmulti-s.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcmpddt.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnullspace.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.h5
@@ -748,6 +758,8 @@ IF (BUILD_TESTING)
           tattr-3.out.err
           tattr-4_be.out
           tattr-4_be.out.err
+          tattrintsize.out
+          tattrintsize.out.err
           tattrreg.out
           tattrreg.out.err
           tattrregR.out
@@ -764,6 +776,10 @@ IF (BUILD_TESTING)
           tchar1.out.err
           tchunked.out
           tchunked.out.err
+          tcmpdattrintsize.out
+          tcmpdattrintsize.out.err
+          tcmpdintsize.out
+          tcmpdintsize.out.err
           tcomp-1.out
           tcomp-1.out.err
           tcomp-2.out
@@ -866,6 +882,8 @@ IF (BUILD_TESTING)
           tnamed_dtype_attr.out.err
           tnestcomp-1.out
           tnestcomp-1.out.err
+          tnestedcmpddt.out
+          tnestedcmpddt.out.err
           tnbit.out
           tnbit.out.err
           tno-subset.out
@@ -892,6 +910,10 @@ IF (BUILD_TESTING)
           torderattr3.out.err
           torderattr4.out
           torderattr4.out.err
+          tordercontents1.out
+          tordercontents1.out.err
+          tordercontents2.out
+          tordercontents2.out.err
           tperror.out
           tperror.out.err
           treference.out
@@ -953,6 +975,12 @@ IF (BUILD_TESTING)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
+  # test for compound signed/unsigned datasets
+  ADD_H5_TEST (tcmpdintsize 0 --enable-error-stack tcmpdintsize.h5)
+  # test for signed/unsigned attributes
+  ADD_H5_TEST (tattrintsize 0 --enable-error-stack tattrintsize.h5)
+  # test for compound signed/unsigned attributes
+  ADD_H5_TEST (tcmpdattrintsize 0 --enable-error-stack tcmpdattrintsize.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
@@ -1004,6 +1032,7 @@ IF (BUILD_TESTING)
 
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
+  ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
   # test for options
   # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
@@ -1096,6 +1125,8 @@ IF (BUILD_TESTING)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
+  ADD_H5_TEST (tordercontents1 0 --enable-error-stack -n --sort_by=name --sort_order=ascending tfcontents1.h5)
+  ADD_H5_TEST (tordercontents2 0 --enable-error-stack -n --sort_by=name --sort_order=descending tfcontents1.h5)
 
   # tests for storage layout
   # compact

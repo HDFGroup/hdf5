@@ -101,6 +101,7 @@
 #define FILE69  "tattrintsize.h5"
 #define FILE70  "tcmpdintsize.h5"
 #define FILE71  "tcmpdattrintsize.h5"
+#define FILE72  "tnestedcmpddt.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -7946,6 +7947,151 @@ static void gent_compound_attr_intsizes(void) {
     HDassert(status >= 0);
 }
 
+static void gent_nested_compound_dt(void) {       /* test nested data type */
+    hid_t fid, group, dataset, space, type, create_plist, type1, type2;
+    hid_t array_dt, enum_dt;
+    enumtype val;
+
+    typedef struct {
+            int a;
+            float b;
+    } dset1_t;
+    dset1_t dset1[10];
+
+    typedef struct {
+            int a;
+            float b;
+            enumtype c;
+    } dset2_t;
+    dset2_t dset2[10];
+
+    typedef struct {
+            int a[4];
+            float b[5][6];
+            dset1_t c;
+    } dset3_t;
+    dset3_t dset3[10];
+
+    enumtype dset4[] = {RED, GREEN, BLUE, GREEN, WHITE, BLUE};
+    dset1_t dset5[10];
+
+    int i;
+    unsigned ndims;
+    hsize_t dim[2];
+
+    hsize_t sdim, maxdim;
+
+    sdim = 10;
+    for(i = 0; i < (int)sdim; i++) {
+        dset1[i].a = i;
+        dset1[i].b = (float)(i*i);
+
+        dset2[i].a = i;
+        dset2[i].b = (float)(i+ i*0.1);
+        dset2[i].c = GREEN;
+
+        dset3[i].a[0] = i;
+        dset3[i].b[0][0] = (float)(i*1.0);
+        dset3[i].c.a = i;
+        dset3[i].c.b = (float)(i*1.0);
+    }
+
+    fid = H5Fcreate(FILE72, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    create_plist = H5Pcreate(H5P_DATASET_CREATE);
+
+    sdim = 2;
+    H5Pset_chunk(create_plist, 1, &sdim);
+
+
+    sdim = 6;
+    maxdim = H5S_UNLIMITED;
+
+    space = H5Screate_simple(1, &sdim, &maxdim);
+
+    type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
+    H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
+    H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+
+    dataset = H5Dcreate2(fid, "/dset1", type, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+
+    H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+
+    H5Tclose(type);
+    H5Dclose(dataset);
+
+    /* Create the shared enumerated datatype. */
+    enum_dt = H5Tenum_create (H5T_NATIVE_INT);
+    val = (enumtype) RED;
+    H5Tenum_insert (enum_dt, "Red", &val);
+    val = (enumtype) GREEN;
+    H5Tenum_insert (enum_dt, "Green", &val);
+    val = (enumtype) BLUE;
+    H5Tenum_insert (enum_dt, "Blue", &val);
+    val = (enumtype) WHITE;
+    H5Tenum_insert (enum_dt, "White", &val);
+    val = (enumtype) BLACK;
+    H5Tenum_insert (enum_dt, "Black", &val);
+    H5Tcommit2(fid, "enumtype", enum_dt,  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset2[0]));
+
+    H5Tinsert(type2, "a_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
+    H5Tinsert(type2, "b_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT);
+    H5Tinsert(type2, "c_name", HOFFSET(dset2_t, c), enum_dt);
+
+    dataset = H5Dcreate2(fid, "/dset2", type2, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+
+    H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+
+    H5Tclose(type2);
+
+    dataset = H5Dcreate2(fid, "/dset4", enum_dt, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+    H5Dwrite(dataset, enum_dt, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset4);
+
+    H5Tclose(enum_dt);
+    H5Dclose(dataset);
+
+    /* shared data type 1 */
+    type1 = H5Tcreate(H5T_COMPOUND, sizeof(dset1_t));
+    H5Tinsert(type1, "int_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
+    H5Tinsert(type1, "float_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+    H5Tcommit2(fid, "type1", type1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    group = H5Gcreate2(fid, "/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
+
+    ndims = 1; dim[0] = 4;
+    array_dt = H5Tarray_create2(H5T_STD_I32BE, ndims, dim);
+    H5Tinsert(type2, "int_name", HOFFSET(dset3_t, a), array_dt);
+    H5Tclose(array_dt);
+
+    ndims = 2; dim[0] = 5; dim[1] = 6;
+    array_dt = H5Tarray_create2(H5T_IEEE_F32BE, ndims, dim);
+    H5Tinsert(type2, "float_name", HOFFSET(dset3_t, b), array_dt);
+    H5Tclose(array_dt);
+
+    H5Tinsert (type2, "cmpd_name", HOFFSET (dset3_t, c), type1);
+
+    dataset = H5Dcreate2(group, "dset3", type2, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+
+    H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
+
+    dataset = H5Dcreate2(fid, "/dset5", type1, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
+    H5Dwrite(dataset, type1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
+
+    H5Tclose(type1);
+    H5Tclose(type2);
+    H5Sclose(space);
+    H5Dclose(dataset);
+    H5Gclose(group);
+
+    H5Pclose(create_plist);
+
+    H5Fclose(fid);
+
+}
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -8027,6 +8173,8 @@ int main(void)
     gent_charsets();
     gent_compound_intsizes();
     gent_compound_attr_intsizes();
+
+    gent_nested_compound_dt();
 
     return 0;
 }
