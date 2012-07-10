@@ -2181,6 +2181,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             case H5T_CSET_RESERVED_14:
             case H5T_CSET_RESERVED_15:
                 h5tools_str_append(buffer, "H5T_CSET_UNKNOWN;");
+                break;
             case H5T_CSET_ERROR:
                 h5tools_str_append(buffer, "H5T_CSET_ERROR;");
                 break;
