@@ -1525,6 +1525,7 @@
 ./tools/h5dump/errfiles/tall-2A.err
 ./tools/h5dump/errfiles/tall-2B.err
 ./tools/h5dump/errfiles/tarray1_big.err
+./tools/h5dump/errfiles/tattr-3.err
 ./tools/h5dump/errfiles/tattrregR.err
 ./tools/h5dump/errfiles/tcomp-3.err
 ./tools/h5dump/errfiles/tdataregR.err
