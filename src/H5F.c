@@ -779,7 +779,6 @@ H5Freopen(hid_t file_id)
     /* Get an atom for the file with the VOL information as the auxilary struct*/
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-    vol_plugin->nrefs ++;
 
 done:
     FUNC_LEAVE_API(ret_value)

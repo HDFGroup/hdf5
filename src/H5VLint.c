@@ -822,6 +822,7 @@ H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size
     /* call the corresponding VOL open callback */
     if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "get binary failed")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get_binary() */
@@ -1398,6 +1399,11 @@ H5VL_file_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional
     if((ret_value = (vol_plugin->cls->file_cls.optional)(file, optional_type, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "optional failed")
     va_end (arguments);
+
+    /* if the get_type is a named datatype, attach the vol info to it */
+    if(H5VL_FILE_REOPEN == optional_type) {
+        vol_plugin->nrefs ++;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

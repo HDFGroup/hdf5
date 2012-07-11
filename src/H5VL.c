@@ -708,7 +708,7 @@ H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_datatype_get_binary(obj, vol_plugin, buf, size, req)))
+    if((ret_value = H5VL_datatype_get_binary(obj, vol_plugin, buf, size, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to encode datatype")
 
 done:
