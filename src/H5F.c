@@ -508,10 +508,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
-    /* MSC (need to change) - 
-     * If this was done through the native plugin, store the ID created in the H5F_t struct */
-    if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
-        ((H5F_t *)file)->file_id = ret_value;
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -588,10 +584,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
-    /* MSC (need to change) - 
-     * If this was done through the native plugin, store the ID created in the H5F_t struct */
-    if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
-        ((H5F_t *)file)->file_id = ret_value;
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
@@ -788,11 +780,6 @@ H5Freopen(hid_t file_id)
     if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     vol_plugin->nrefs ++;
-
-    /* MSC (need to change) - 
-     * If this was done through the native plugin, store the ID created in the H5F_t struct */
-    if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
-        ((H5F_t *)file)->file_id = ret_value;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1444,32 +1431,17 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 
     HDassert(file);
 
-    /* MSC - Will need to switch to that later */
-#if 1
     if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
         /* resurrect the ID - Register an ID with the native plugin */
         if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        file->id_exists = TRUE;
     }
     else {
         /* Increment ref count on existing ID */
         if(H5I_inc_ref(ret_value, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     }
-    file->file_id = ret_value;
-#endif
-#if 0
-    if(file->file_id == -1) {
-        /* resurrect the ID */
-        if((file->file_id = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
-    } else {
-        /* Increment reference count on atom. */
-        if(H5I_inc_ref(file->file_id, app_ref) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-    } /* end else */
-    ret_value = file->file_id;
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

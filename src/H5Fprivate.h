@@ -257,7 +257,7 @@ typedef struct {
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
-#define H5F_FILE_ID(F)          ((F)->file_id)
+#define H5F_FILE_ID(F)          ((F)->id_exists)//file_id)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
@@ -299,7 +299,7 @@ typedef struct {
 #define H5F_NOPEN_OBJS(F)       (H5F_get_nopen_objs(F))
 #define H5F_INCR_NOPEN_OBJS(F)  (H5F_incr_nopen_objs(F))
 #define H5F_DECR_NOPEN_OBJS(F)  (H5F_decr_nopen_objs(F))
-#define H5F_FILE_ID(F)          (H5F_get_file_id(F))
+#define H5F_FILE_ID(F)          (H5F_file_id_exists(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_NMOUNTS(F)          (H5F_get_nmounts(F))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
@@ -546,7 +546,7 @@ H5_DLL hbool_t H5F_same_shared(const H5F_t *f1, const H5F_t *f2);
 H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
-H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
+H5_DLL hbool_t H5F_file_id_exists(const H5F_t *f);
 H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);

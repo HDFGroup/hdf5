@@ -1802,7 +1802,7 @@ H5O_copy_search_comm_dt(H5F_t *file_src, H5O_t *oh_src,
     HDassert(oh_src);
     HDassert(oloc_dst);
     HDassert(oloc_dst->file);
-    HDassert(H5F_FILE_ID(oloc_dst->file) >= 0);
+    HDassert(H5F_FILE_ID(oloc_dst->file));
     HDassert(cpy_info);
 
     /* Allocate key */

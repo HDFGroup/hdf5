@@ -599,7 +599,7 @@ H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_obj
     HDassert(nopen_objs);
 
     /* If this file is still open, increment number of file IDs open */
-    if(f->file_id > 0)
+    if(f->id_exists)
         *nopen_files += 1;
 
     /* Increment number of open objects in file

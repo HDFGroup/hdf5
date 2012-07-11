@@ -263,15 +263,15 @@ H5F_get_nopen_objs(const H5F_t *f)
  *
  *-------------------------------------------------------------------------
  */
-hid_t
-H5F_get_file_id(const H5F_t *f)
+hbool_t
+H5F_file_id_exists(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
 
-    FUNC_LEAVE_NOAPI(f->file_id)
+    FUNC_LEAVE_NOAPI(f->id_exists)
 } /* end H5F_get_file_id() */
 
 

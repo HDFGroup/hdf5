@@ -1597,16 +1597,8 @@ H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t f
     /* Create the file */ 
     if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
-#if 0
-    /* Get an atom for the file */
-    if((file_id = H5I_register(H5I_FILE_PRIVATE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
-    /* store a pointer to the VOL class in the file structure */
-    new_file->vol_cls = &H5VL_native_g;
-    new_file->file_id = file_id;
-    if(file_id < 0 && new_file && H5F_try_close(new_file) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-#endif
+
+    new_file->id_exists = TRUE;
     ret_value = (void *)new_file;
 
 done:
@@ -1641,16 +1633,8 @@ H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNU
     /* Open the file */ 
     if(NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-#if 0
-    /* Get an atom for the file */
-    if((file_id = H5I_register(H5I_FILE_PRIVATE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
-    /* store a pointer to the VOL class in the file structure */
-    new_file->vol_cls = &H5VL_native_g;
-    new_file->file_id = file_id;
-    if(file_id < 0 && new_file && H5F_try_close(new_file) < 0)
-        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-#endif
+
+    new_file->id_exists = TRUE;
     ret_value = (void *)new_file;
 
 done:
@@ -1845,23 +1829,7 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_l
                 if(NULL == (f = H5VL_native_get_file(obj, type))) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
                 }
-#if 0
-                hbool_t    app_ref = va_arg (arguments, hbool_t);
-                H5F_t     *file = NULL;
-                hid_t      file_id;
-                H5G_loc_t  loc;       /* Location of object */
-
-                if(H5G_loc_real(obj, type, &loc) < 0) {
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-                }
-                /* Get the file ID for the object */
-                if((file_id = H5F_get_id(loc.oloc->file, app_ref)) < 0)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
-
-                /* return the file object */
-                if(NULL == (file = (H5F_t *)H5I_object(file_id)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-#endif
+                f->id_exists = TRUE;
                 *ret = (void*)f;
                 break;
             }
@@ -2137,6 +2105,8 @@ H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t U
                 if(NULL == (new_file = H5F_reopen(f)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
                 new_file->vol_cls = &H5VL_native_g;
+                new_file->id_exists = TRUE;
+
                 *ret = (void *)new_file;
                 break;
             }
@@ -2209,14 +2179,6 @@ H5VL_native_file_close(void *file, hid_t UNUSED req)
     /* close the file */
     if(H5F_close(f) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
-#if 0
-    /*
-     * Decrement reference count on atom.  When it reaches zero the file will
-     * be closed.
-     */
-    if(H5I_dec_app_ref(f->file_id) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -1642,7 +1642,7 @@ H5O_close(H5O_loc_t *loc)
 
 #ifdef H5O_DEBUG
     if(H5DEBUG(O)) {
-	if(/*H5F_FILE_ID(loc->file)< 0 &&*/ 1 == H5F_NREFS(loc->file))
+	if(H5F_FILE_ID(loc->file) && 1 == H5F_NREFS(loc->file))
 	    HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n",
 		      loc->addr,
 		      (unsigned long)H5F_NOPEN_OBJS(loc->file));

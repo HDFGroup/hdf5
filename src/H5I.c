@@ -2375,12 +2375,8 @@ H5Iget_file_id(hid_t obj_id)
             if(H5I_inc_ref(ret_value, TRUE) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
         }
-        /* incrememnt the ref count on the VOL plugin for the new ID */
+        /* increment the ref count on the VOL plugin for the new ID */
         vol_plugin->nrefs ++;
-        /* MSC (need to change) - 
-         * If this was done through the native plugin, store the ID created in the H5F_t struct */
-        if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
-            ((H5F_t *)file)->file_id = ret_value;
     }
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")

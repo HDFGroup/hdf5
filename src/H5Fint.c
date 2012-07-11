@@ -645,7 +645,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
-    f->file_id = -1;
+    f->id_exists = FALSE;
 
     if(shared) {
         HDassert(lf == NULL);
@@ -1270,7 +1270,7 @@ H5F_close(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
+    HDassert(f->id_exists);  /* This routine should only be called when a file ID's ref count drops to zero */
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */
@@ -1291,7 +1291,7 @@ H5F_close(H5F_t *f)
     } /* end if */
 
     /* Reset the file ID for this file */
-    f->file_id = -1;
+    f->id_exists = FALSE;
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f) < 0)
@@ -1504,15 +1504,6 @@ H5F_reopen(H5F_t *f)
     ret_value->open_name = H5MM_xstrdup(f->open_name);
     ret_value->actual_name = H5MM_xstrdup(f->actual_name);
 
-    /*
-    if((ret_value->file_id = H5I_register(H5I_FILE_PRIVATE, ret_value, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to atomize file handle")
-
-done:
-    if(ret_value->file_id < 0 && ret_value)
-        if(H5F_dest(ret_value, H5AC_dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
-    */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_reopen() */
