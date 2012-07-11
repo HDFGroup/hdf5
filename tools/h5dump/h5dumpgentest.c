@@ -8014,8 +8014,8 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     space = H5Screate_simple(1, &sdim, &maxdim);
 
     type = H5Tcreate (H5T_COMPOUND, sizeof(dset1[0]));
-    H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
-    H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+    H5Tinsert(type, "a_name", HOFFSET(dset1_t, a), H5T_STD_I32LE);
+    H5Tinsert(type, "b_name", HOFFSET(dset1_t, b), H5T_IEEE_F32LE);
 
     dataset = H5Dcreate2(fid, "/dset1", type, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
 
@@ -8058,8 +8058,8 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
 
     /* shared data type 1 */
     type1 = H5Tcreate(H5T_COMPOUND, sizeof(dset1_t));
-    H5Tinsert(type1, "int_name", HOFFSET(dset1_t, a), H5T_STD_I32BE);
-    H5Tinsert(type1, "float_name", HOFFSET(dset1_t, b), H5T_IEEE_F32BE);
+    H5Tinsert(type1, "int_name", HOFFSET(dset1_t, a), H5T_STD_I32LE);
+    H5Tinsert(type1, "float_name", HOFFSET(dset1_t, b), H5T_IEEE_F32LE);
     H5Tcommit2(fid, "type1", type1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     group = H5Gcreate2(fid, "/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -8067,12 +8067,12 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset3_t));
 
     ndims = 1; dim[0] = 5;
-    array_dt = H5Tarray_create2(H5T_STD_I32BE, ndims, dim);
+    array_dt = H5Tarray_create2(H5T_STD_I32LE, ndims, dim);
     H5Tinsert(type2, "int_name", HOFFSET(dset3_t, a), array_dt);
     H5Tclose(array_dt);
 
     ndims = 2; dim[0] = 5; dim[1] = 6;
-    array_dt = H5Tarray_create2(H5T_IEEE_F32BE, ndims, dim);
+    array_dt = H5Tarray_create2(H5T_IEEE_F32LE, ndims, dim);
     H5Tinsert(type2, "float_name", HOFFSET(dset3_t, b), array_dt);
     H5Tclose(array_dt);
 
@@ -8083,7 +8083,7 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset3);
 
     dataset = H5Dcreate2(fid, "/dset5", type1, space, H5P_DEFAULT, create_plist, H5P_DEFAULT);
-    H5Dwrite(dataset, type1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
+    H5Dwrite(dataset, type1, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
 
     H5Tclose(type1);
     H5Tclose(type2);
