@@ -275,7 +275,6 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed */
     struct H5F_t        *parent;        /* Parent file that this file is mounted to */
     unsigned            nmounts;        /* Number of children mounted to this file */
-    struct H5VL_class_t *vol_cls;         /* class of the VOL plugin */
 };
 
 

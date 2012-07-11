@@ -130,7 +130,6 @@
 /* Definition for VOL plugin */
 #define H5F_ACS_VOL_SIZE                sizeof(void *)
 #define H5F_ACS_VOL_DEF                 H5VL_NATIVE
-
 /* Definition for vol info */
 #define H5F_ACS_VOL_INFO_SIZE              sizeof(void*)
 #define H5F_ACS_VOL_INFO_DEF               NULL
@@ -238,7 +237,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     hbool_t want_posix_fd = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
     unsigned efc_size = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
     H5VL_class_t *vol_cls = H5F_ACS_VOL_DEF;                    /* Default VOL plugin */
-    void *vol_info = H5F_ACS_VOL_INFO_DEF;                       /* Default VOL plugin */
+    void *vol_info = H5F_ACS_VOL_INFO_DEF;                      /* Default VOL plugin information*/
     H5FD_file_image_info_t file_image_info = H5F_ACS_FILE_IMAGE_INFO_DEF;  /* Default file image info and callbacks */
     herr_t ret_value = SUCCEED;         /* Return value */
 

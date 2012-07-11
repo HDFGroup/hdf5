@@ -1072,25 +1072,3 @@ H5F_use_tmp_space(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->use_tmp_space)
 } /* end H5F_use_tmp_space() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_get_vol_cls
- *
- * Return:      vol_cls on success/abort on failure (shouldn't fail)
- *
- * Programmer:  Mohamad Chaarawi
- *              April 2012
- *
- *-------------------------------------------------------------------------
- */
-H5VL_class_t *
-H5F_get_vol_cls(const H5F_t *f)
-{
-    
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->vol_cls)
-} /* end H5F_get_parent() */

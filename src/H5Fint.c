@@ -189,11 +189,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
     }
 
-    /* MSC TODO move this to the upper VOL get routine & set the vol info too*/
-    /* Set the VOL class in the property list */
-    if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &(f->vol_cls)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_access_plist() */
@@ -1134,10 +1129,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     /* Get the file access property list, for future queries */
     if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
-
-    /* Store a pointer to the VOL plugin in the file struct */
-    if(H5P_get(a_plist, H5F_ACS_VOL_NAME, &(file->vol_cls)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin")
 
     /*
      * Decide the file close degree.  If it's the first time to open the

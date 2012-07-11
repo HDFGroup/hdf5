@@ -1721,12 +1721,21 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_l
         /* H5Fget_access_plist */
         case H5VL_FILE_GET_FAPL:
             {
+                H5P_genplist_t *new_plist;              /* New property list */
                 hid_t *plist_id = va_arg (arguments, hid_t *);
 
                 f = (H5F_t *)obj;
                 /* Retrieve the file's access property list */
                 if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+
+                if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+                /* Set the VOL class in the property list - we don't
+                   have a VOL info for the native plugin */
+                if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &H5VL_native_g) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
                 break;
             }
         /* H5Fget_create_plist */
@@ -2104,7 +2113,6 @@ H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t U
                 f = (H5F_t *)obj;
                 if(NULL == (new_file = H5F_reopen(f)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
-                new_file->vol_cls = &H5VL_native_g;
                 new_file->id_exists = TRUE;
 
                 *ret = (void *)new_file;
