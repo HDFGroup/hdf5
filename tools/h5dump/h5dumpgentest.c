@@ -262,7 +262,7 @@ typedef struct s1_t {
 #define STRATEGY  H5F_FILE_SPACE_AGGR_VFD  /* File space handling strategy */
 #define THRESHOLD10   10          /* Free space section threshold */
 
-/* "FILE66" macros */
+/* "FILE66" macros and for FILE69 */
 #define F66_XDIM	    8
 #define F66_DATASETU08        "DU08BITS"
 #define F66_DATASETS08        "DS08BITS"
