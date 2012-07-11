@@ -337,8 +337,11 @@ TOOLTEST tcomp-1.ls 0 -w80 -r -d tcompound.h5
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ls 0 -w80 -r -d tnestedcomp.h5
+
 TOOLTEST tnestcomp-2.ls 0 -w80 -r -d -S tnestedcomp.h5
+
 TOOLTEST tnestcomp-3.ls 0 -w80 -r -d -l tnestedcomp.h5
+
 TOOLTEST tnestcomp-4.ls 0 -w80 -r -d -l -S tnestedcomp.h5
 
 # test for loop detection

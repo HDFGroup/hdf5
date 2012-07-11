@@ -1314,6 +1314,8 @@
 ./tools/testfiles/tnbit.ddl
 ./tools/testfiles/tnestcomp-1.ddl
 ./tools/testfiles/tnestedcomp.h5
+./tools/testfiles/tnestedcmpddt.ddl
+./tools/testfiles/tnestedcmpddt.h5
 ./tools/testfiles/tno-subset.h5
 ./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
@@ -1354,6 +1356,8 @@
 ./tools/testfiles/tall-2A.ddl
 ./tools/testfiles/tall-2B.ddl
 ./tools/testfiles/tcontents.ddl
+./tools/testfiles/tordercontents1.ddl
+./tools/testfiles/tordercontents2.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tchunked.ddl
 ./tools/testfiles/tcompact.ddl
@@ -1396,6 +1400,8 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
+./tools/testfiles/twidedisplay.ddl
+
 # h5dump packed bits validation
 ./tools/testfiles/tnofilename-with-packed-bits.ddl
 ./tools/testfiles/tpbitsLengthPositive.ddl

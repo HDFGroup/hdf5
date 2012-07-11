@@ -131,10 +131,11 @@ IF (BUILD_TESTING)
       tloop-1.ddl
       tmulti.ddl
       tmultifile.ddl
-#      tqmarkfile.ddl
-#      tstarfile.ddl
+      #tqmarkfile.ddl
+      #tstarfile.ddl
       tnamed_dtype_attr.ddl
       tnestcomp-1.ddl
+      tnestedcmpddt.ddl
       tnbit.ddl
       tno-subset.ddl
       tnullspace.ddl
@@ -148,6 +149,8 @@ IF (BUILD_TESTING)
       torderattr2.ddl
       torderattr3.ddl
       torderattr4.ddl
+      tordercontents1.ddl
+      tordercontents2.ddl
       tperror.ddl
       treference.ddl
       tsaf.ddl
@@ -173,6 +176,7 @@ IF (BUILD_TESTING)
       tvldtypes5.ddl
       tvlstr.ddl
       tvms.ddl
+      twidedisplay.ddl
       h5dump-help.txt
       out3.h5import
   )
@@ -308,6 +312,7 @@ IF (BUILD_TESTING)
       tmulti-s.h5
       tnamed_dtype_attr.h5
       tnestedcomp.h5
+      tnestedcmpddt.h5
       tno-subset.h5
       tnullspace.h5
       zerodim.h5
@@ -856,6 +861,8 @@ IF (BUILD_TESTING)
           tnamed_dtype_attr.out.err
           tnestcomp-1.out
           tnestcomp-1.out.err
+          tnestedcmpddt.out
+          tnestedcmpddt.out.err
           tnbit.out
           tnbit.out.err
           tno-subset.out
@@ -882,6 +889,10 @@ IF (BUILD_TESTING)
           torderattr3.out.err
           torderattr4.out
           torderattr4.out.err
+          tordercontents1.out
+          tordercontents1.out.err
+          tordercontents2.out
+          tordercontents2.out.err
           tperror.out
           tperror.out.err
           treference.out
@@ -940,6 +951,9 @@ IF (BUILD_TESTING)
   ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   ADD_HELP_TEST(help 0 -h)
+
+  # test for maximum display datasets
+  ADD_H5_TEST (twidedisplay 0 -w0 --enable-error-stack packedbits.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
@@ -1000,6 +1014,7 @@ IF (BUILD_TESTING)
 
   #test for the nested compound type
   ADD_H5_TEST (tnestcomp-1 0 --enable-error-stack tnestedcomp.h5)
+  ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
   # test for options
   # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
@@ -1091,6 +1106,8 @@ IF (BUILD_TESTING)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
+  ADD_H5_TEST (tordercontents1 0 --enable-error-stack -n --sort_by=name --sort_order=ascending tfcontents1.h5)
+  ADD_H5_TEST (tordercontents2 0 --enable-error-stack -n --sort_by=name --sort_order=descending tfcontents1.h5)
 
   # tests for storage layout
   # compact

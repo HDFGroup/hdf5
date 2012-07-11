@@ -165,21 +165,38 @@ main(void)
 
 #ifndef UNICOS
 
+#ifdef REBUILDTEXTFILES
+ /*-------------------------------------------------------------------------
+  * TOOLTEST txtin8.txt -c $srcdir/testfiles/txtin8.conf -o txtin8.h5
+  *-------------------------------------------------------------------------
+  */
+
+    sp = HDfopen("txtin8.txt", "w");
+    for (k = 0; k < npln; k++)
+    {
+       for (i = 0; i < nrow; i++)
+       {
+           for (j = 0; j < ncol; j++)
+               (void) fprintf(sp, "%10u", b8i3[k][i][j]);
+           (void) fprintf(sp, "\n");
+       }
+    }
+    (void) HDfclose(sp);
+
  /*-------------------------------------------------------------------------
   * TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
   *-------------------------------------------------------------------------
   */
 
-
     sp = HDfopen("txtin16.txt", "w");
     for (k = 0; k < npln; k++)
     {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-                (void) fprintf(sp, "%10u", b16i3[k][i][j]);
-            (void) fprintf(sp, "\n");
-        }
+      for (i = 0; i < nrow; i++)
+      {
+          for (j = 0; j < ncol; j++)
+              (void) fprintf(sp, "%10u", b16i3[k][i][j]);
+          (void) fprintf(sp, "\n");
+      }
     }
     (void) HDfclose(sp);
 
@@ -199,6 +216,7 @@ main(void)
         }
     }
     (void) HDfclose(sp);
+#endif
 
  /*-------------------------------------------------------------------------
   * TOOLTEST binin32.bin -c $srcdir/testfiles/binin32.conf -o binin32.h5

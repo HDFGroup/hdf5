@@ -181,19 +181,19 @@ TOOLTEST $TESTDIR/txtin32.txt -c $TESTDIR/txtin32.conf -o txtin32.h5
 TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
 TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin16.conf -o txtin16.h5
 
-
 TESTING "ASCII I8 - rank 3 - Output I8 LE-Chunked+Extended+Compressed " 
 TOOLTEST $TESTDIR/txtin8.txt -c $TESTDIR/txtin8.conf  -o txtin8.h5
 
-TESTING "ASCII UI32 - rank 3 - Output BE" 
-TOOLTEST $TESTDIR/txtuin32.txt -c $TESTDIR/txtuin32.conf -o txtuin32.h5
 
 TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
 TOOLTEST $TESTDIR/txtuin16.txt -c $TESTDIR/txtuin16.conf -o txtuin16.h5
 
+TESTING "ASCII UI32 - rank 3 - Output BE" 
+TOOLTEST $TESTDIR/txtuin32.txt -c $TESTDIR/txtuin32.conf -o txtuin32.h5
+
+
 TESTING "ASCII F32 - rank 3 - Output LE " 
 TOOLTEST $TESTDIR/txtfp32.txt -c $TESTDIR/txtfp32.conf -o txtfp32.h5
-
 
 TESTING "ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed " 
 TOOLTEST $TESTDIR/txtfp64.txt -c $TESTDIR/txtfp64.conf -o txtfp64.h5
@@ -202,13 +202,11 @@ TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed "
 TOOLTEST binfp64.bin -c $TESTDIR/binfp64.conf -o binfp64.h5
 
 
-TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
-TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5
-
-
 TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
 TOOLTEST binin8.bin -c $TESTDIR/binin8.conf  -o binin8.h5
 
+TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
+TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5
 
 TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED " 
 TOOLTEST binin32.bin -c $TESTDIR/binin32.conf -o binin32.h5
@@ -224,6 +222,7 @@ TOOLTEST binuin32.bin -c $TESTDIR/binuin32.conf -o binuin32.h5
 TESTING "STR" 
 TOOLTEST $TESTDIR/txtstr.txt -c $TESTDIR/txtstr.conf -o txtstr.h5
 
+
 TESTING "BINARY I8 CR LF EOF" 
 TOOLTEST binin8w.bin -c $TESTDIR/binin8w.conf -o binin8w.h5
 
@@ -231,8 +230,7 @@ TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE "
 TOOLTEST $TESTDIR/textpfe64.txt -c $TESTDIR/textpfe.conf -o textpfe.h5
 
 
-
-rm -f  txtin32.txt txtin16.txt txtin8.txt  txtuin32.txt txtuin16.txt *.bin *.h5
+rm -f  txtin32.txt txtin16.txt txtin8.txt txtuin32.txt txtuin16.txt *.bin *.h5
 rm -rf tmp_testfiles
 else
   echo "** h5import or h5importtest not available ***"

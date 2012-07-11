@@ -158,7 +158,7 @@ H5TOOLS_DLL int  h5trav_getindext(const char *obj, const trav_table_t *travt);
  * "h5trav print" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL int h5trav_print(hid_t fid);
+H5TOOLS_DLL int h5trav_print(hid_t fid, H5_index_t print_index_by, H5_iter_order_t print_index_order);
 
 #ifdef __cplusplus
 }
