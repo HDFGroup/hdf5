@@ -108,7 +108,8 @@ H5_DLL herr_t H5VL_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL
 H5_DLL herr_t H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t req);
 
 H5_DLL herr_t H5VL_fapl_open(struct H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info);
-H5_DLL herr_t H5VL_fapl_close(H5VL_class_t *vol_cls, const void *vol_info);
+H5_DLL herr_t H5VL_fapl_copy(H5VL_class_t *vol_cls, const void *vol_info, void **copied_info);
+H5_DLL herr_t H5VL_fapl_close(H5VL_class_t *vol_cls, void *vol_info);
 
 H5_DLL herr_t H5F_close_file(void *file, H5VL_t *vol_plugin);
 H5_DLL herr_t H5A_close_attr(void *attr, H5VL_t *vol_plugin);

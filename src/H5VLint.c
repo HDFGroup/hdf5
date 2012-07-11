@@ -178,27 +178,77 @@ done:
  * Programmer:	Mohamad Chaarawi
  *              January, 2012
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5VL_fapl_open(H5P_genplist_t *plist, H5VL_class_t *vol_cls, const void *vol_info)
 {
-    herr_t ret_value = SUCCEED;     /* Return value */
+    void  *copied_vol_info = NULL;     /* Temporary VOL driver info */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL_fapl_copy(vol_cls, vol_info, &copied_vol_info) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
 
     /* Set the vol properties for the list */
     if(H5P_set(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol ID")
-    /* Set the vol properties for the list */
-    if(H5P_set(plist, H5F_ACS_VOL_INFO_NAME, &vol_info) < 0)
+    if(H5P_set(plist, H5F_ACS_VOL_INFO_NAME, &copied_vol_info) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set vol info")
+    copied_vol_info = NULL;
+
+done:
+    if(ret_value < 0)
+        if(copied_vol_info && H5VL_fapl_close(vol_cls, copied_vol_info) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_fapl_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_fapl_copy
+ *
+ * Purpose:	copies plugin specific info to the fapl
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              July, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_fapl_copy(H5VL_class_t *vol_cls, const void *vol_info, void **copied_info)
+{
+    void *new_info = NULL;
+    herr_t ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Copy old pl, if one exists */
+    if(vol_info) {
+        /* Allow the driver to copy or do it ourselves */
+        if(vol_cls->fapl_copy) {
+            new_info = (vol_cls->fapl_copy)(vol_info);
+            if(NULL == new_info)
+                HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "property list copy failed")
+        } 
+        else if(vol_cls->fapl_size > 0) {
+            if(NULL == (new_info = H5MM_malloc(vol_cls->fapl_size)))
+                HGOTO_ERROR(H5E_VOL, H5E_NOSPACE, FAIL, "property list allocation failed")
+            HDmemcpy(new_info, vol_info, vol_cls->fapl_size);
+        } else
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "no way to copy plugin property list")
+    } /* end if */
+
+    /* Set copied value */
+    *copied_info = new_info;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_fapl_open() */
+} /* end H5VL_fapl_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -217,12 +267,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_fapl_close(H5VL_class_t UNUSED *vol_cls, const void UNUSED *vol_info)
+H5VL_fapl_close(H5VL_class_t *vol_cls, void *vol_info)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(NULL != vol_cls) {
+        /* Allow driver to free or do it ourselves */
+        if(vol_info && vol_cls->fapl_free) {
+            if((vol_cls->fapl_free)(vol_info) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "plugin free request failed")
+        } /* end if */
+        else
+            H5MM_xfree(vol_info);
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_fapl_close() */

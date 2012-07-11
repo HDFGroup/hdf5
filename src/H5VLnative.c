@@ -132,6 +132,9 @@ static H5VL_class_t H5VL_native_g = {
     "native",					/* name */
     NULL,                                       /* initialize */
     NULL,                                       /* terminate */
+    0,                                          /* fapl_size */
+    NULL,                                       /* fapl_copy */
+    NULL,                                       /* fapl_free */
     {                                           /* attribute_cls */
         H5VL_native_attr_create,                /* create */
         H5VL_native_attr_open,                  /* open */

@@ -288,6 +288,9 @@ typedef struct H5VL_class_t {
     const char *name;
     herr_t  (*initialize)(void);
     herr_t  (*terminate)(void);
+    size_t  fapl_size;
+    void *  (*fapl_copy)(const void *info);
+    herr_t  (*fapl_free)(void *info);
     H5VL_attr_class_t          attr_cls;
     H5VL_datatype_class_t      datatype_cls;
     H5VL_dataset_class_t       dataset_cls;
