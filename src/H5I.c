@@ -36,6 +36,7 @@
  */
 
 #define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
+#define H5F_PACKAGE /* MSC - just a temp workaround */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5I_init_interface
@@ -50,6 +51,8 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
+
+#include "H5Fpkg.h"		/* MSC- just a temp workaround FILES*/
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
@@ -2325,16 +2328,62 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Iget_file_id(hid_t id)
+H5Iget_file_id(hid_t obj_id)
 {
-    hid_t ret_value;            /* Return value */
+    H5VL_t     *vol_plugin;
+    void       *obj;
+    void       *file = NULL;
+    H5I_type_t  type;            /* ID type */
+    hid_t       ret_value;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", id);
+    H5TRACE1("i", "i", obj_id);
 
-    if((ret_value = H5I_get_file_id(id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID")
+    /* Get object type */
+    type = H5I_TYPE(obj_id);
 
+    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || 
+       H5I_DATASET == type || H5I_ATTR == type) {
+        /* get the object pointer*/
+        if(NULL == (obj = (void *)H5I_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+        /* If this is a named datatype, get the vol_obj from the H5T_t struct*/
+        if (H5I_DATATYPE == type) {
+            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
+        }
+
+        /* Get the file through the VOL */
+        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5_REQUEST_NULL, type, &file) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
+
+        if (NULL == file)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+
+        /* Check if the ID already exists and procceed accordingly */
+        if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
+            /* resurrect the ID - Register an ID with the native plugin */
+            if((ret_value = H5I_register2(H5I_FILE, file, vol_plugin, TRUE)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        }
+        else {
+            /* Increment ref count on existing ID */
+            if(H5I_inc_ref(ret_value, TRUE) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+        }
+        /* incrememnt the ref count on the VOL plugin for the new ID */
+        vol_plugin->nrefs ++;
+        /* MSC (need to change) - 
+         * If this was done through the native plugin, store the ID created in the H5F_t struct */
+        if((HDstrcmp(vol_plugin->cls->name, "native") == 0))
+            ((H5F_t *)file)->file_id = ret_value;
+    }
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iget_file_id() */
@@ -2361,42 +2410,6 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
     hid_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
-
-#if 0
-    /* Get object type */
-    type = H5I_TYPE(obj_id);
-
-    if(H5I_FILE == type || H5I_DATATYPE == type || H5I_GROUP == type || 
-       H5I_DATASET == type || H5I_ATTR == type) {
-        H5VL_t     *vol_plugin;
-        void       *obj;
-        void       *file = NULL;
-
-        /* get the file object */
-        if(NULL == (obj = (void *)H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-
-        if (H5I_DATATYPE == type) {
-            if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
-        }
-
-        /* Get the file through the VOL */
-        if(H5VL_file_get(obj, vol_plugin, H5VL_OBJECT_GET_FILE, H5_REQUEST_NULL, type, &file) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
-
-        if (NULL == file)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
-
-        if((ret_value = H5F_get_id((H5F_t*)file, TRUE)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file ID")
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")
-#endif
 
     /* Get object type */
     type = H5I_TYPE(obj_id);

@@ -1270,7 +1270,7 @@ H5F_close(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    //HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
+    HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */
@@ -1292,12 +1292,6 @@ H5F_close(H5F_t *f)
 
     /* Reset the file ID for this file */
     f->file_id = -1;
-
-    /*
-    if((file_id = H5I_get_id(f, H5I_FILE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
-    H5I_remove(file_id);
-    */
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f) < 0)
