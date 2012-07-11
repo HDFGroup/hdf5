@@ -55,6 +55,7 @@ SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_ERRORFILES="$srcdir/errfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
@@ -306,10 +307,32 @@ $SRC_H5DUMP_TESTFILES/out3.h5import
 $SRC_H5DUMP_TESTFILES/tbinregR.exp
 "
 
+LIST_ERROR_TEST_FILES="
+${SRC_H5DUMP_ERRORFILES}/filter_fail.err
+${SRC_H5DUMP_ERRORFILES}/tall-1.err
+${SRC_H5DUMP_ERRORFILES}/tall-2A.err
+${SRC_H5DUMP_ERRORFILES}/tall-2B.err
+${SRC_H5DUMP_ERRORFILES}/tarray1_big.err
+${SRC_H5DUMP_ERRORFILES}/tattrregR.err
+${SRC_H5DUMP_ERRORFILES}/tcomp-3.err
+${SRC_H5DUMP_ERRORFILES}/tdataregR.err
+${SRC_H5DUMP_ERRORFILES}/tdset-2.err
+${SRC_H5DUMP_ERRORFILES}/texceedsubblock.err
+${SRC_H5DUMP_ERRORFILES}/texceedsubcount.err
+${SRC_H5DUMP_ERRORFILES}/texceedsubstart.err
+${SRC_H5DUMP_ERRORFILES}/texceedsubstride.err
+${SRC_H5DUMP_ERRORFILES}/textlink.err
+${SRC_H5DUMP_ERRORFILES}/textlinkfar.err
+${SRC_H5DUMP_ERRORFILES}/textlinksrc.err
+${SRC_H5DUMP_ERRORFILES}/tgroup-2.err
+${SRC_H5DUMP_ERRORFILES}/tperror.err
+${SRC_H5DUMP_ERRORFILES}/tslink-D.err
+"
+
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_ERROR_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -500,6 +523,69 @@ TOOLTEST3() {
 
 }
 
+# same as TOOLTEST3 but filters error stack output and compares to an error file
+# Extract file name, line number, version and thread IDs because they may be different
+TOOLTEST4() {
+
+    expect="$TESTDIR/$1"
+    expect_err="$TESTDIR/`basename $1 .ddl`.err"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.oerr"
+    actual_ext="$TESTDIR/`basename $1 .ddl`.ext"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN "$@"
+    ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
+
+    # Extract file name, line number, version and thread IDs because they may be different
+    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+        -e 's/line [0-9]*/line (number)/' \
+        -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+        -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+        -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
+        -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
+     $actual_err > $actual_ext
+    #cat $actual_ext >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     if $CMP $expect_err $actual_ext; then
+      echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.err) differs from actual result (*.oerr)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+    fi
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+   rm -f $actual $actual_err $actual_sav $actual_err_sav
+    fi
+
+}
+
 # Print a "SKIP" message
 SKIP() {
    TESTING $DUMPER $@
@@ -578,7 +664,7 @@ COPY_TESTFILES_TO_TESTDIR
 #TOOLTEST h5dump-help.txt -h
 
 # test for maximum display datasets
-TOOLTEST twidedisplay.ddl -w0 --enable-error-stack packedbits.h5
+TOOLTEST twidedisplay.ddl --enable-error-stack -w0 packedbits.h5
 
 # test for signed/unsigned datasets
 TOOLTEST packedbits.ddl --enable-error-stack packedbits.h5
@@ -591,19 +677,19 @@ TOOLTEST tcmpdattrintsize.ddl --enable-error-stack tcmpdattrintsize.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl --enable-error-stack tgroup.h5
 # test for displaying the selected groups
-TOOLTEST tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
+TOOLTEST4 tgroup-2.ddl --enable-error-stack --group=/g2 --group / -g /y tgroup.h5
 
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ddl --enable-error-stack tdset.h5
 # test for displaying selected datasets
-TOOLTEST3 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
+TOOLTEST4 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 
 # test for displaying attributes
 TOOLTEST tattr-1.ddl --enable-error-stack tattr.h5
 # test for displaying the selected attributes of string type and scalar space
 TOOLTEST tattr-2.ddl --enable-error-stack -a "/\/attr1" --attribute /attr4 --attribute=/attr5 tattr.h5
 # test for header and error messages
-TOOLTEST3 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
+TOOLTEST4 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
 # test for displaying at least 9 attributes on root from a BE machine
 TOOLTEST tattr-4_be.ddl --enable-error-stack tattr4_be.h5
 # test for displaying attributes in shared datatype (also in group and dataset)
@@ -616,7 +702,7 @@ TOOLTEST tudlink-1.ddl --enable-error-stack tudlink.h5
 TOOLTEST tslink-2.ddl --enable-error-stack -l slink2 tslink.h5
 TOOLTEST tudlink-2.ddl --enable-error-stack -l udlink2 tudlink.h5
 # test for displaying dangling soft links
-TOOLTEST3 tslink-D.ddl --enable-error-stack -d /slink1 tslink.h5
+TOOLTEST4 tslink-D.ddl --enable-error-stack -d /slink1 tslink.h5
 
 # tests for hard links
 TOOLTEST thlink-1.ddl --enable-error-stack thlink.h5
@@ -630,8 +716,7 @@ TOOLTEST tcomp-1.ddl --enable-error-stack tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 # test for unamed type 
-# JIRA HDFFV-7936 TOOLTEST tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
-TOOLTEST tcomp-3.ddl -t /#6632 -g /group2 tcompound.h5
+TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
 
@@ -640,8 +725,7 @@ TOOLTEST tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5
 TOOLTEST tnestedcmpddt.ddl --enable-error-stack tnestedcmpddt.h5
 
 # test for options
-# JIRA HDFFV-7936 TOOLTEST tall-1.ddl --enable-error-stack tall.h5
-TOOLTEST tall-1.ddl tall.h5
+TOOLTEST4 tall-1.ddl --enable-error-stack tall.h5
 TOOLTEST tall-2.ddl --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5
 TOOLTEST tall-3.ddl --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
 
@@ -668,8 +752,7 @@ TOOLTEST tvlstr.ddl --enable-error-stack tvlstr.h5
 # test for files with array data
 TOOLTEST tarray1.ddl --enable-error-stack tarray1.h5
 # # added for bug# 2092 - tarray1_big.h
-# JIRA HDFFV-7936 TOOLTEST tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
-TOOLTEST tarray1_big.ddl -R tarray1_big.h5
+TOOLTEST4 tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
 TOOLTEST tarray2.ddl --enable-error-stack tarray2.h5
 TOOLTEST tarray3.ddl --enable-error-stack tarray3.h5
 TOOLTEST tarray4.ddl --enable-error-stack tarray4.h5
@@ -680,7 +763,7 @@ TOOLTEST tarray8.ddl --enable-error-stack tarray8.h5
 
 # test for wildcards in filename (does not work with cmake)
 # inconsistent across platforms TOOLTEST3 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
-TOOLTEST3 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
+TOOLTEST4 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
 TOOLTEST tmultifile.ddl --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5
 
 # test for files with empty data
@@ -698,18 +781,16 @@ TOOLTEST tmulti.ddl --enable-error-stack --filedriver=multi tmulti
 TOOLTEST tlarge_objname.ddl --enable-error-stack -w157 tlarge_objname.h5
 
 # test '-A' to suppress data but print attr's
-# JIRA HDFFV-7936 TOOLTEST tall-2A.ddl --enable-error-stack -A tall.h5
-TOOLTEST tall-2A.ddl -A tall.h5
+TOOLTEST4 tall-2A.ddl --enable-error-stack -A tall.h5
 
 # test '-r' to print attributes in ASCII instead of decimal
-# JIRA HDFFV-7936 TOOLTEST tall-2B.ddl --enable-error-stack -A -r tall.h5
-TOOLTEST tall-2B.ddl -A -r tall.h5
+TOOLTEST4 tall-2B.ddl --enable-error-stack -A -r tall.h5
 
 # test Subsetting
 TOOLTEST tall-4s.ddl --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
 TOOLTEST tall-5s.ddl --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
 TOOLTEST tdset-3s.ddl --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5
-TOOLTEST tno-subset.ddl --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
+TOOLTEST tno-subset.ddl --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
 
 # test printing characters in ASCII instead of decimal
 TOOLTEST tchar1.ddl --enable-error-stack -r tchar.h5
@@ -725,7 +806,7 @@ TOOLTEST tboot2.ddl --enable-error-stack -B tfcontents2.h5
 TOOLTEST file_space.ddl --enable-error-stack -B file_space.h5
 
 # test -p with a non existing dataset
-TOOLTEST3 tperror.ddl --enable-error-stack -p -d bogus tfcontents1.h5
+TOOLTEST4 tperror.ddl --enable-error-stack -p -d bogus tfcontents1.h5
 
 # test for file contents
 TOOLTEST tcontents.ddl --enable-error-stack -n tfcontents1.h5
@@ -881,11 +962,9 @@ fi
 
 # test for dataset region references 
 TOOLTEST tdatareg.ddl --enable-error-stack tdatareg.h5
-# JIRA HDFFV-7936 TOOLTEST tdataregR.ddl --enable-error-stack -R tdatareg.h5
-TOOLTEST tdataregR.ddl -R tdatareg.h5
+TOOLTEST4 tdataregR.ddl --enable-error-stack -R tdatareg.h5
 TOOLTEST tattrreg.ddl --enable-error-stack tattrreg.h5
-# JIRA HDFFV-7936 TOOLTEST tattrregR.ddl --enable-error-stack -R tattrreg.h5
-TOOLTEST tattrregR.ddl -R tattrreg.h5
+TOOLTEST4 tattrregR.ddl --enable-error-stack -R tattrreg.h5
 
 TOOLTEST2   tbinregR.exp --enable-error-stack -d /Dataset1 -s 0 -R -y -o tbinregR.txt    tdatareg.h5
 
@@ -912,17 +991,14 @@ TOOLTEST torderattr4.ddl --enable-error-stack -H --sort_by=creation_order --sort
 TOOLTEST tfpformat.ddl --enable-error-stack -m %.7f tfpformat.h5
 
 # tests for traversal of external links
-# JIRA HDFFV-7936 TOOLTEST textlinksrc.ddl --enable-error-stack textlinksrc.h5
-TOOLTEST textlinksrc.ddl textlinksrc.h5
-# JIRA HDFFV-7936 TOOLTEST textlinkfar.ddl --enable-error-stack textlinkfar.h5
-TOOLTEST textlinkfar.ddl textlinkfar.h5
+TOOLTEST4 textlinksrc.ddl --enable-error-stack textlinksrc.h5
+TOOLTEST4 textlinkfar.ddl --enable-error-stack textlinkfar.h5
 
 # test for dangling external links
-# JIRA HDFFV-7936 TOOLTEST textlink.ddl --enable-error-stack textlink.h5
-TOOLTEST3 textlink.ddl --enable-error-stack textlink.h5
+TOOLTEST4 textlink.ddl --enable-error-stack textlink.h5
 
 # test for error stack display (BZ2048)
-TOOLTEST3 filter_fail.ddl --enable-error-stack filter_fail.h5
+TOOLTEST4 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST tall-6.ddl --enable-error-stack -y -o data -d /g1/g1.1/dset1.1.1 tall.h5

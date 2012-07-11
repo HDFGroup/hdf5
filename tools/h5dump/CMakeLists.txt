@@ -181,71 +181,6 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
   )
-  SET (HDF5_XML_REFERENCE_FILES
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray3.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray6.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray7.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd-2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd-uri.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons-2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons-uri.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns-2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfpformat.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmany.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-amp.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-apos.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-gt.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-lt.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/topaque.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr1.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr3.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr4.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes-at.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring-at.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes3.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes4.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5.xml
-  )
   SET (HDF5_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/charsets.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/file_space.h5
@@ -336,28 +271,26 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.h5
   )
-  SET (HDF5_XML_REFERENCE_TEST_FILES
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmany.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-amp.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-apos.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-gt.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-lt.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/topaque.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes-at.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring-at.h5
+  SET (HDF5_ERROR_REFERENCE_TEST_FILES
+      ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tall-1.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tall-2B.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tarray1_big.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tattrregR.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tcomp-3.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tdataregR.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tdset-2.err
+      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubblock.err
+      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubcount.err
+      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubstart.err
+      ${PROJECT_SOURCE_DIR}/errfiles/texceedsubstride.err
+      ${PROJECT_SOURCE_DIR}/errfiles/textlink.err
+      ${PROJECT_SOURCE_DIR}/errfiles/textlinkfar.err
+      ${PROJECT_SOURCE_DIR}/errfiles/textlinksrc.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tgroup-2.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tperror.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tslink-D.err
   )
 
   # make test dir
@@ -390,9 +323,110 @@ IF (BUILD_TESTING)
     )
   ENDFOREACH (tst_other_file ${HDF5_REFERENCE_FILES})
 
+  FOREACH (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
+    GET_FILENAME_COMPONENT(fname "${tst_error_file}" NAME)
+    SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #MESSAGE (STATUS " Copying ${tst_error_file}")
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5dump
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${tst_error_file} ${dest}
+    )
+  ENDFOREACH (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
+
   #
   # copy XML test files from source dir to test dir
   #
+  SET (HDF5_XML_REFERENCE_TEST_FILES
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset2.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop2.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmany.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-amp.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-apos.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-gt.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-lt.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/topaque.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes-at.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring-at.h5
+  )
+  SET (HDF5_XML_REFERENCE_FILES
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray3.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray6.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray7.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd-2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd-uri.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons-2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons-uri.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns-2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfpformat.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmany.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-amp.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-apos.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-gt.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-lt.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/topaque.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr1.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr3.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr4.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes-at.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring-at.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes3.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes4.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5.xml
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5.xml
+  )
+
   FOREACH (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
     GET_FILENAME_COMPONENT(fname "${tst_xml_h5_file}" NAME)
     SET (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
@@ -498,11 +532,26 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsSignedLongLong16.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tpbitsUnsignedLongLong16.ddl
   )
+  SET (HDF5_ERROR_REFERENCE_PBITS
+      ${PROJECT_SOURCE_DIR}/errfiles/tnofilename-with-packed-bits.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsCharLengthExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsCharOffsetExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsIncomplete.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsIntLengthExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsIntOffsetExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLengthExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLengthPositive.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLongLengthExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsLongOffsetExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsMaxExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsOffsetExceeded.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tpbitsOffsetNegative.err
+  )
 
   FOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
     GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
     SET (ddldest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #MESSAGE (STATUS " Translating ${ddl_pbits}")
+    #MESSAGE (STATUS " Copying ${ddl_pbits}")
     ADD_CUSTOM_COMMAND (
         TARGET     h5dump
         POST_BUILD
@@ -510,6 +559,18 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${ddl_pbits} ${ddldest}
     )
   ENDFOREACH (ddl_pbits ${HDF5_REFERENCE_PBITS})
+
+  FOREACH (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
+    GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
+    SET (ddldest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
+    #MESSAGE (STATUS " Copying ${ddl_pbits}")
+    ADD_CUSTOM_COMMAND (
+        TARGET     h5dump
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different ${ddl_pbits} ${ddldest}
+    )
+  ENDFOREACH (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
   
 ##############################################################################
 ##############################################################################
@@ -530,8 +591,9 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DUMP-clear-h5dump-${testname}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/h5dump-${testname}.out ./testfiles/h5dump-${testname}.out.err
+              -E remove h5dump-${testname}.out h5dump-${testname}.out.err
       )
+      SET_TESTS_PROPERTIES (H5DUMP-clear-h5dump-${testname}-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       ADD_TEST (
           NAME H5DUMP-h5dump-${testname}
           COMMAND "${CMAKE_COMMAND}"
@@ -576,8 +638,9 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DUMP-clear-${resultfile}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
+              -E remove ${resultfile}.out ${resultfile}.out.err
       )
+      SET_TESTS_PROPERTIES (H5DUMP-clear-${resultfile}-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       ADD_TEST (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -621,8 +684,9 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DUMP-clear-${resultfile}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
+              -E remove ${resultfile}.out ${resultfile}.out.err
       )
+      SET_TESTS_PROPERTIES (H5DUMP-clear-${resultfile}-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       ADD_TEST (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -638,6 +702,31 @@ IF (BUILD_TESTING)
       SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-clear-${resultfile}-objects")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_MASK_TEST file)
+
+  MACRO (ADD_H5ERR_MASK_TEST resultfile resultcode)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DUMP-clear-${resultfile}-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.out ${resultfile}.out.err
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-clear-${resultfile}-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      ADD_TEST (
+          NAME H5DUMP-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -D "TEST_MASK_ERROR=true"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-clear-${resultfile}-objects")
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5ERR_MASK_TEST file)
 
   MACRO (ADD_XML_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     IF (${testtype} STREQUAL "SKIP")
@@ -667,8 +756,9 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DUMP-XML-clear-${resultfile}-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
+              -E remove ${resultfile}.out ${resultfile}.out.err
       )
+      SET_TESTS_PROPERTIES (H5DUMP-XML-clear-${resultfile}-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       ADD_TEST (
           NAME H5DUMP-XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -696,7 +786,7 @@ IF (BUILD_TESTING)
 
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                            ###
+###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
 ##############################################################################
 ##############################################################################
 
@@ -966,6 +1056,7 @@ IF (BUILD_TESTING)
           tvms.out
           tvms.out.err
     )
+    SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -975,7 +1066,7 @@ IF (BUILD_TESTING)
   ADD_HELP_TEST(help 0 -h)
 
   # test for maximum display datasets
-  ADD_H5_TEST (twidedisplay 0 -w0 --enable-error-stack packedbits.h5)
+  ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
 
   # test for signed/unsigned datasets
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
@@ -988,21 +1079,19 @@ IF (BUILD_TESTING)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
-  # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tgroup-2 1 --enable-error-stack --group=/g2 --group / -g /y tgroup.h5)
-  # cannot use TEST_MASK_ERROR and --enable-error-stack on this test because group names are similar to version numbers
-  ADD_H5_TEST (tgroup-2 1 --group=/g2 --group / -g /y tgroup.h5)
+  ADD_H5ERR_MASK_TEST (tgroup-2 1 --enable-error-stack --group=/g2 --group / -g /y tgroup.h5)
 
   # test for displaying simple space datasets
   ADD_H5_TEST (tdset-1 0 --enable-error-stack tdset.h5)
   # test for displaying selected datasets
-  ADD_H5_MASK_TEST (tdset-2 1 --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
+  ADD_H5ERR_MASK_TEST (tdset-2 1 --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5)
 
   # test for displaying attributes
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
   ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
   # test for header and error messages
-  ADD_H5_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
+  ADD_H5ERR_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
   ADD_H5_TEST (tnamed_dtype_attr 0 --enable-error-stack tnamed_dtype_attr.h5)
   # test for displaying at least 9 attributes on root from a be machine
@@ -1015,7 +1104,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tslink-2 0 --enable-error-stack -l slink2 tslink.h5)
   ADD_H5_TEST (tudlink-2 0 --enable-error-stack -l udlink2 tudlink.h5)
   # test for displaying dangling soft links
-  ADD_H5_MASK_TEST (tslink-D 0 --enable-error-stack -d /slink1 tslink.h5)
+  ADD_H5ERR_MASK_TEST (tslink-D 0 --enable-error-stack -d /slink1 tslink.h5)
 
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 --enable-error-stack thlink.h5)
@@ -1029,8 +1118,7 @@ IF (BUILD_TESTING)
   # test for named data types
   ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
   # test for unamed type 
-  # JIRA HDFFV-7936 ADD_H5_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
-  ADD_H5_TEST (tcomp-3 0 "-t;/#6632;-g;/group2;tcompound.h5")
+  ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
 
@@ -1039,9 +1127,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tnestedcmpddt 0 --enable-error-stack tnestedcmpddt.h5)
 
   # test for options
-  # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
-  # cannot use TEST_MASK_ERROR and --enable-error-stack on this test because group/dataset names are similar to version numbers
-  ADD_H5_TEST (tall-1 0 tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
   ADD_H5_TEST (tall-2 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
   ADD_H5_TEST (tall-3 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
 
@@ -1068,8 +1154,7 @@ IF (BUILD_TESTING)
   # test for files with array data
   ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)
   # # added for bug# 2092 - tarray1_big.h5
-  # JIRA HDFFV-7936 ADD_H5_TEST (tarray1_big 0 --enable-error-stack -R tarray1_big.h5)
-  ADD_H5_TEST (tarray1_big 0 -R tarray1_big.h5)
+  ADD_H5ERR_MASK_TEST (tarray1_big 0 --enable-error-stack -R tarray1_big.h5)
   ADD_H5_TEST (tarray2 0 --enable-error-stack tarray2.h5)
   ADD_H5_TEST (tarray3 0 --enable-error-stack tarray3.h5)
   ADD_H5_TEST (tarray4 0 --enable-error-stack tarray4.h5)
@@ -1098,13 +1183,10 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tlarge_objname 0 --enable-error-stack -w157 tlarge_objname.h5)
 
   # test '-A' to suppress data but print attr's
-  # JIRA HDFFV-7936 ADD_H5_MASK_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
-  # cannot use TEST_MASK_ERROR and --enable-error-stack on this test because group/dataset names are similar to version numbers
-  ADD_H5_TEST (tall-2A 0 -A tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
 
   # test '-r' to print attributes in ASCII instead of decimal
-  # JIRA HDFFV-7936 ADD_H5_TEST (tall-2B 0 --enable-error-stack -A -r tall.h5)
-  ADD_H5_TEST (tall-2B 0 -A -r tall.h5)
+  ADD_H5ERR_MASK_TEST (tall-2B 0 --enable-error-stack -A -r tall.h5)
 
   # test Subsetting
   ADD_H5_TEST (tall-4s 0 --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5)
@@ -1125,7 +1207,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (file_space 0 --enable-error-stack -B file_space.h5)
 
   # test -p with a non existing dataset
-  ADD_H5_MASK_TEST (tperror 1 --enable-error-stack -p -d bogus tfcontents1.h5)
+  ADD_H5ERR_MASK_TEST (tperror 1 --enable-error-stack -p -d bogus tfcontents1.h5)
 
   # test for file contents
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
@@ -1326,19 +1408,17 @@ IF (BUILD_TESTING)
             out1.h5
             out3.h5
     )
+    SET_TESTS_PROPERTIES (H5DUMP-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-clear-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-clear-objects")
   ENDIF (NOT HDF5_NOCLEANUP)
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5DUMP-clear-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5DUMP-clear-objects")
 
   # test for dataset region references 
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
-  # JIRA HDFFV-7936 ADD_H5_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
-  ADD_H5_TEST (tdataregR 0 -R tdatareg.h5)
-  ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
-  # JIRA HDFFV-7936 ADD_H5_TEST (tattrregR 0 --enable-error-stack -R tattrreg.h5)
-  ADD_H5_TEST (tattrregR 0 -R tattrreg.h5)
+  ADD_H5ERR_MASK_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
+  ADD_H5ERR_MASK_TEST (tattrregR 0 -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 
   # tests for group creation order
@@ -1359,16 +1439,14 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tfpformat 0 --enable-error-stack -m %.7f tfpformat.h5)
 
   # tests for traversal of external links
-  # JIRA HDFFV-7936 ADD_H5_TEST (textlinksrc 0 --enable-error-stack textlinksrc.h5)
-  ADD_H5_TEST (textlinksrc 0 textlinksrc.h5)
-  # JIRA HDFFV-7936 ADD_H5_TEST (textlinkfar 0 --enable-error-stack textlinkfar.h5)
-  ADD_H5_TEST (textlinkfar 0 textlinkfar.h5)
+  ADD_H5ERR_MASK_TEST (textlinksrc 0 --enable-error-stack textlinksrc.h5)
+  ADD_H5ERR_MASK_TEST (textlinkfar 0 --enable-error-stack textlinkfar.h5)
 
   # test for dangling external links
-  ADD_H5_MASK_TEST (textlink 0 --enable-error-stack textlink.h5)
+  ADD_H5ERR_MASK_TEST (textlink 0 --enable-error-stack textlink.h5)
 
   # test for error stack display (BZ2048)
-  ADD_H5_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
+  ADD_H5ERR_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST (tall-6 0 --enable-error-stack -y -o data -d /g1/g1.1/dset1.1.1 tall.h5)
@@ -1487,6 +1565,7 @@ IF (BUILD_TESTING)
           tpbitsUnsignedLongLong16.out
           tpbitsUnsignedLongLong16.out.err
     )
+    SET_TESTS_PROPERTIES (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -1707,6 +1786,7 @@ IF (BUILD_TESTING)
           tvlstr.h5.out
           tvlstr.h5.out.err
     )
+    SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
