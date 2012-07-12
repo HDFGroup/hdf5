@@ -1541,8 +1541,8 @@
 ./tools/h5dump/errfiles/textlinksrc.err
 ./tools/h5dump/errfiles/tgroup-2.err
 ./tools/h5dump/errfiles/tnofilename-with-packed-bits.err
-./tools/h5dump/errfiles/orderlinks1.err
-./tools/h5dump/errfiles/orderlinks2.err
+./tools/h5dump/errfiles/trderlinks1.err
+./tools/h5dump/errfiles/torderlinks2.err
 ./tools/h5dump/errfiles/tpbitsCharLengthExceeded.err
 ./tools/h5dump/errfiles/tpbitsCharOffsetExceeded.err
 ./tools/h5dump/errfiles/tpbitsIncomplete.err
