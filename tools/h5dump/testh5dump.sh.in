@@ -313,6 +313,7 @@ ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2B.err
 ${SRC_H5DUMP_ERRORFILES}/tarray1_big.err
+${SRC_H5DUMP_ERRORFILES}/tattr-3.err
 ${SRC_H5DUMP_ERRORFILES}/tattrregR.err
 ${SRC_H5DUMP_ERRORFILES}/tcomp-3.err
 ${SRC_H5DUMP_ERRORFILES}/tdataregR.err
@@ -326,6 +327,7 @@ ${SRC_H5DUMP_ERRORFILES}/textlinkfar.err
 ${SRC_H5DUMP_ERRORFILES}/textlinksrc.err
 ${SRC_H5DUMP_ERRORFILES}/tgroup-2.err
 ${SRC_H5DUMP_ERRORFILES}/tperror.err
+${SRC_H5DUMP_ERRORFILES}/tqmarkfile.err
 ${SRC_H5DUMP_ERRORFILES}/tslink-D.err
 "
 
