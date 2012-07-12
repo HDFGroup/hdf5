@@ -231,7 +231,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */
-    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin)) < 0)
+    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
 
 done:

@@ -282,7 +282,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     ret_value = attr;
 done:
     if(NULL == ret_value && attr && H5A_close(attr))
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
     FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* H5A_create() */
 
@@ -748,7 +748,6 @@ hid_t
 H5A_get_type(H5A_t *attr)
 {
     H5T_t	*dt = NULL;
-    H5T_t       *type = NULL;
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -778,14 +777,7 @@ H5A_get_type(H5A_t *attr)
         /* If this is a committed datatype, we need to recreate the
            two level IDs, where the VOL object is a copy of the
            returned datatype */
-        /* Copy the dataset's datatype */
-        if(NULL == (type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
-                
-        H5T_set_vol_object(type, (void *)dt);
-
-        /* get an ID for the object */
-        if((ret_value = H5VL_native_register(H5I_DATATYPE, type, TRUE)) < 0)
+        if((ret_value = H5VL_native_register(H5I_DATATYPE, dt, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
     }
     else {
@@ -796,8 +788,6 @@ H5A_get_type(H5A_t *attr)
 done:
     if(ret_value < 0) {
         if(dt && H5T_close(dt) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
-        if(type && H5T_close(type) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
     } /* end if */
 

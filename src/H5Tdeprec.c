@@ -221,7 +221,7 @@ H5Topen1(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
-    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, TRUE, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
 
 done:

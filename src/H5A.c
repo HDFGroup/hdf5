@@ -1508,6 +1508,19 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if((obj_loc_id = H5O_open_by_loc(&obj_loc, lapl_id, H5AC_ind_dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
+    /* get the native object from the ID created by the object header and create 
+       a "VOL object" ID */
+    {
+        void  *temp_obj = NULL;
+        H5I_type_t obj_type;
+        obj_type = H5I_get_type(obj_loc_id);
+        if(NULL == (temp_obj = H5I_remove(obj_loc_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+        /* Get an atom for the datatype */
+        if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+    }
+
     /* Build attribute operator info */
     attr_op.op_type = H5A_ATTR_OP_APP2;
     attr_op.u.app_op2 = op;

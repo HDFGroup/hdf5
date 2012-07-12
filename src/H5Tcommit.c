@@ -628,7 +628,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
-    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, TRUE, H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
 
 done:
@@ -956,7 +956,7 @@ H5T_get_named_type(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
+H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref, hid_t req)
 {
     ssize_t        nalloc;
     unsigned char *buf = NULL;
@@ -984,7 +984,7 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hid_t req)
     H5MM_free(buf);
 
     /* Get an atom for the datatype with the VOL information as the auxilary struct*/
-    if((ret_value = H5I_register2(H5I_DATATYPE, dt, vol_plugin, TRUE)) < 0)
+    if((ret_value = H5I_register2(H5I_DATATYPE, dt, vol_plugin, app_ref)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
 done:
@@ -1017,7 +1017,7 @@ H5T_close_datatype(void *type, H5VL_t *vol_plugin)
     /* Close the datatype through the VOL*/
     if (NULL != dt->vol_obj)
         if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, H5_REQUEST_NULL)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatypeibute")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

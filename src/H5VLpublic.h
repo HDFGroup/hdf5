@@ -382,7 +382,7 @@ H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
 H5_DLL herr_t H5VLunregister(hid_t plugin_id);
 H5_DLL htri_t H5VLis_registered(hid_t id);
 H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
-H5_DLL hid_t H5VLregister_object(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls);
+H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls);
 
 #ifdef __cplusplus
 }

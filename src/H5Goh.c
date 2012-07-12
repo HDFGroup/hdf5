@@ -225,7 +225,7 @@ H5O_group_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hb
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the group */
-    if((ret_value = H5VL_native_register(H5I_GROUP, grp, app_ref)) < 0)
+    if((ret_value = H5I_register(H5I_GROUP, grp, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:

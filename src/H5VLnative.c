@@ -343,6 +343,7 @@ hid_t
 H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
 {
     H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5T_t *dt = NULL;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -355,12 +356,26 @@ H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
     vol_plugin->cls = &H5VL_native_g;
     vol_plugin->nrefs = 1;
 
-    /* Get an atom for the file with the VOL information as the auxilary struct*/
+    /* if this is a named datatype, we need to create the two-fold datatype 
+       to be comaptible with the VOL */
+    if(H5I_DATATYPE == type) {
+        /* Copy the dataset's datatype */
+        if(NULL == (dt = H5T_copy((H5T_t *)obj, H5T_COPY_TRANSIENT)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy datatype")
+
+        H5T_set_vol_object(dt, obj);
+        obj = (void *) dt;
+    }
+
+    /* Get an atom for the object with the VOL information as the auxilary struct*/
     if((ret_value = H5I_register2(type, obj, (void *)vol_plugin, app_ref)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
 done:
+    if(ret_value < 0 && dt && H5T_close(dt) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL_native_register_with_aux */
+} /* H5VL_native_register */
 
 
 /*-------------------------------------------------------------------------

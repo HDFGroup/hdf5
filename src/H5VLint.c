@@ -368,7 +368,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin)
+H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t app_ref)
 {
     hid_t ret_value = FAIL;
 
@@ -377,21 +377,17 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin)
     /* Get an atom for the object and attach VOL information and free function to the ID */
     switch(obj_type) {
         case H5I_GROUP:
-            if((ret_value = H5I_register(obj_type, obj, TRUE)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object")
-            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5G_close_group) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
             break;
 
         case H5I_DATASET:
-            if((ret_value = H5I_register(obj_type, obj, TRUE)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object")
-            if (H5I_register_aux(ret_value, vol_plugin, (H5I_free2_t)H5D_close_dataset) < 0)
-                HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
             break;
 
         case H5I_DATATYPE:
-            if ((ret_value = H5VL_create_datatype(obj, vol_plugin, H5_REQUEST_NULL)) < 0)
+            if ((ret_value = H5VL_create_datatype(obj, vol_plugin, app_ref, H5_REQUEST_NULL)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
             break;
 
@@ -413,7 +409,6 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin)
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "invalid object type")
     } /* end switch */
 
-    vol_plugin->nrefs ++;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_register() */

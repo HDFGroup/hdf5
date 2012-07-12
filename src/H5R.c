@@ -560,14 +560,10 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
     /* Get an atom for the object */
-    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin)) < 0)
+    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
-#if 0
-    /* Create reference */
-    if((ret_value = H5R_dereference(file, oapl_id, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
-#endif
 
 done:
     FUNC_LEAVE_API(ret_value)
