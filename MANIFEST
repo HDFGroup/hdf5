@@ -1475,6 +1475,8 @@
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tordercontents1.ddl
 ./tools/testfiles/tordercontents2.ddl
+./tools/testfiles/torderlinks1.ddl
+./tools/testfiles/torderlinks2.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tchunked.ddl
 ./tools/testfiles/tcompact.ddl
@@ -1539,6 +1541,8 @@
 ./tools/h5dump/errfiles/textlinksrc.err
 ./tools/h5dump/errfiles/tgroup-2.err
 ./tools/h5dump/errfiles/tnofilename-with-packed-bits.err
+./tools/h5dump/errfiles/orderlinks1.err
+./tools/h5dump/errfiles/orderlinks2.err
 ./tools/h5dump/errfiles/tpbitsCharLengthExceeded.err
 ./tools/h5dump/errfiles/tpbitsCharOffsetExceeded.err
 ./tools/h5dump/errfiles/tpbitsIncomplete.err

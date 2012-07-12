@@ -277,6 +277,8 @@ $SRC_H5DUMP_TESTFILES/torderattr3.ddl
 $SRC_H5DUMP_TESTFILES/torderattr4.ddl
 $SRC_H5DUMP_TESTFILES/tordercontents1.ddl
 $SRC_H5DUMP_TESTFILES/tordercontents2.ddl
+$SRC_H5DUMP_TESTFILES/torderlinks1.ddl
+$SRC_H5DUMP_TESTFILES/torderlinks2.ddl
 $SRC_H5DUMP_TESTFILES/tperror.ddl
 $SRC_H5DUMP_TESTFILES/treference.ddl
 $SRC_H5DUMP_TESTFILES/tsaf.ddl
@@ -326,6 +328,8 @@ ${SRC_H5DUMP_ERRORFILES}/textlink.err
 ${SRC_H5DUMP_ERRORFILES}/textlinkfar.err
 ${SRC_H5DUMP_ERRORFILES}/textlinksrc.err
 ${SRC_H5DUMP_ERRORFILES}/tgroup-2.err
+${SRC_H5DUMP_ERRORFILES}/torderlinks1.err
+${SRC_H5DUMP_ERRORFILES}/torderlinks2.err
 ${SRC_H5DUMP_ERRORFILES}/tperror.err
 ${SRC_H5DUMP_ERRORFILES}/tqmarkfile.err
 ${SRC_H5DUMP_ERRORFILES}/tslink-D.err
@@ -988,6 +992,10 @@ TOOLTEST torderattr1.ddl --enable-error-stack -H --sort_by=name --sort_order=asc
 TOOLTEST torderattr2.ddl --enable-error-stack -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.ddl --enable-error-stack -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.ddl --enable-error-stack -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+# tests for link references and order
+TOOLTEST4 torderlinks1.ddl --enable-error-stack --sort_by=name --sort_order=ascending tfcontents1.h5
+TOOLTEST4 torderlinks2.ddl --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5
 
 # tests for floating point user defined printf format
 TOOLTEST tfpformat.ddl --enable-error-stack -m %.7f tfpformat.h5

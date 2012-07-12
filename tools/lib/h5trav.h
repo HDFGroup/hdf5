@@ -131,6 +131,7 @@ extern "C" {
  * "h5trav general" public functions
  *-------------------------------------------------------------------------
  */
+H5TOOLS_DLL void h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order);
 H5TOOLS_DLL int h5trav_visit(hid_t file_id, const char *grp_name, 
     hbool_t visit_start, hbool_t recurse, h5trav_obj_func_t visit_obj, 
     h5trav_lnk_func_t visit_lnk, void *udata);
@@ -158,7 +159,7 @@ H5TOOLS_DLL int  h5trav_getindext(const char *obj, const trav_table_t *travt);
  * "h5trav print" public functions
  *-------------------------------------------------------------------------
  */
-H5TOOLS_DLL int h5trav_print(hid_t fid, H5_index_t print_index_by, H5_iter_order_t print_index_order);
+H5TOOLS_DLL int h5trav_print(hid_t fid);
 
 #ifdef __cplusplus
 }

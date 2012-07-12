@@ -152,6 +152,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordercontents1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordercontents2.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderlinks1.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderlinks2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tperror.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/treference.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ddl
@@ -289,6 +291,8 @@ IF (BUILD_TESTING)
       ${PROJECT_SOURCE_DIR}/errfiles/textlink.err
       ${PROJECT_SOURCE_DIR}/errfiles/textlinkfar.err
       ${PROJECT_SOURCE_DIR}/errfiles/textlinksrc.err
+      ${PROJECT_SOURCE_DIR}/errfiles/torderlinks1.err
+      ${PROJECT_SOURCE_DIR}/errfiles/torderlinks2.err
       ${PROJECT_SOURCE_DIR}/errfiles/tgroup-2.err
       ${PROJECT_SOURCE_DIR}/errfiles/tperror.err
       ${PROJECT_SOURCE_DIR}/errfiles/tslink-D.err
@@ -1436,6 +1440,10 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (torderattr3 0 --enable-error-stack -H --sort_by=creation_order --sort_order=ascending torderattr.h5)
   ADD_H5_TEST (torderattr4 0 --enable-error-stack -H --sort_by=creation_order --sort_order=descending torderattr.h5)
 
+  # tests for link references and order
+  ADD_H5ERR_MASK_TEST (torderlinks1 0 --enable-error-stack --sort_by=name --sort_order=ascending tfcontents1.h5)
+  ADD_H5ERR_MASK_TEST (torderlinks2 0 --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5)
+  
   # tests for floating point user defined printf format
   ADD_H5_TEST (tfpformat 0 --enable-error-stack -m %.7f tfpformat.h5)
 

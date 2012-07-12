@@ -1464,6 +1464,9 @@ main(int argc, const char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
+
     while(opt_ind < argc) {
         fname = HDstrdup(argv[opt_ind++]);
 

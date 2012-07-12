@@ -67,6 +67,23 @@ static void trav_table_addlink(trav_table_t *table,
 static H5_index_t trav_index_by = H5_INDEX_NAME;
 static H5_iter_order_t trav_index_order = H5_ITER_INC;
 
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_set_index
+ *
+ * Purpose: Set indexing properties for the objects & links in the file
+ *
+ * Return: none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order)
+{
+    trav_index_by = print_index_by;
+    trav_index_order = print_index_order;
+}
+
 /*-------------------------------------------------------------------------
  * "h5trav info" public functions. used in h5diff
  *-------------------------------------------------------------------------
@@ -955,13 +972,10 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
  */
 
 int
-h5trav_print(hid_t fid, H5_index_t print_index_by, H5_iter_order_t print_index_order)
+h5trav_print(hid_t fid)
 {
     trav_print_udata_t print_udata;     /* User data for traversal */
     trav_visitor_t print_visitor;       /* Visitor structure for printing objects */
-
-    trav_index_by = print_index_by;
-    trav_index_order = print_index_order;
 
     /* Init user data for printing */
     print_udata.fid = fid;
