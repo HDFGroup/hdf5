@@ -1472,6 +1472,8 @@
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
 ./tools/testfiles/tall-2B.ddl
+./tools/testfiles/tattrcontents1.ddl
+./tools/testfiles/tattrcontents2.ddl
 ./tools/testfiles/tcontents.ddl
 ./tools/testfiles/tordercontents1.ddl
 ./tools/testfiles/tordercontents2.ddl

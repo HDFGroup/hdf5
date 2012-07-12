@@ -71,11 +71,11 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
-    { "contents", no_arg, 'n' },
+    { "contents", optional_arg, 'n' },
     { "properties", no_arg, 'p' },
     { "boot-block", no_arg, 'B' },
     { "boot-bloc", no_arg, 'B' },
@@ -235,6 +235,7 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "  OPTIONS\n");
     HDfprintf(rawoutstream, "     -h, --help           Print a usage message and exit\n");
     HDfprintf(rawoutstream, "     -n, --contents       Print a list of the file contents and exit\n");
+    HDfprintf(rawoutstream, "                          Optional value 1 also prints attributes.\n");
     HDfprintf(rawoutstream, "     -B, --superblock     Print the content of the super block\n");
     HDfprintf(rawoutstream, "     -H, --header         Print the header only; no data is displayed\n");
     HDfprintf(rawoutstream, "     -A, --onlyattr       Print the header and value of attributes\n");
@@ -999,6 +1000,9 @@ parse_start:
         case 'n':
             display_fi = TRUE;
             last_was_dset = FALSE;
+            if ( opt_arg != NULL) {
+                h5trav_set_verbose(HDatoi(opt_arg));
+            }
             break;
         case 'p':
             display_dcpl = TRUE;

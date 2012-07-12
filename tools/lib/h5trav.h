@@ -160,6 +160,7 @@ H5TOOLS_DLL int  h5trav_getindext(const char *obj, const trav_table_t *travt);
  *-------------------------------------------------------------------------
  */
 H5TOOLS_DLL int h5trav_print(hid_t fid);
+H5TOOLS_DLL void h5trav_set_verbose(int print_verbose);
 
 #ifdef __cplusplus
 }

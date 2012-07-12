@@ -69,6 +69,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr-2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr-3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr-4_be.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrcontents1.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrcontents2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrreg.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tattrregR.ddl
@@ -854,6 +856,10 @@ IF (BUILD_TESTING)
           tattr-3.out.err
           tattr-4_be.out
           tattr-4_be.out.err
+          tattrcontents1.out
+          tattrcontents1.out.err
+          tattrcontents2.out
+          tattrcontents2.out.err
           tattrintsize.out
           tattrintsize.out.err
           tattrreg.out
@@ -1010,6 +1016,10 @@ IF (BUILD_TESTING)
           tordercontents1.out.err
           tordercontents2.out
           tordercontents2.out.err
+          torderlinks1.out
+          torderlinks1.out.err
+          torderlinks2.out
+          torderlinks2.out.err
           tperror.out
           tperror.out.err
           treference.out
@@ -1060,6 +1070,8 @@ IF (BUILD_TESTING)
           tvlstr.out.err
           tvms.out
           tvms.out.err
+          twidedisplay.out
+          twidedisplay.out.err
     )
     SET_TESTS_PROPERTIES (H5DUMP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     IF (NOT "${last_test}" STREQUAL "")
@@ -1218,6 +1230,8 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tcontents 0 --enable-error-stack -n tfcontents1.h5)
   ADD_H5_TEST (tordercontents1 0 --enable-error-stack -n --sort_by=name --sort_order=ascending tfcontents1.h5)
   ADD_H5_TEST (tordercontents2 0 --enable-error-stack -n --sort_by=name --sort_order=descending tfcontents1.h5)
+  ADD_H5_TEST (tattrcontents1 0 --enable-error-stack -n 1 --sort_order=ascending tall.h5)
+  ADD_H5_TEST (tattrcontents2 0 --enable-error-stack -n 1 --sort_order=descending tall.h5)
 
   # tests for storage layout
   # compact
