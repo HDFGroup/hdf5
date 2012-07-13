@@ -228,7 +228,7 @@ H5F_get_obj_count_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
     if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5_REQUEST_NULL, 
-                     &obj_count, udata->types) < 0)
+                     udata->types, &obj_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
 
     *(udata->obj_count) += obj_count; 
