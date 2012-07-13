@@ -1775,8 +1775,8 @@ H5VL_native_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_l
         /* H5Fget_obj_count */
         case H5VL_FILE_GET_OBJ_COUNT:
             {
-                ssize_t *ret = va_arg (arguments, ssize_t *);
                 unsigned types = va_arg (arguments, unsigned);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
                 size_t  obj_count = 0;      /* Number of opened objects */
 
                 f = (H5F_t *)obj;

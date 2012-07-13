@@ -36,6 +36,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Aprivate.h"		/* Attributes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -504,7 +505,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req, ...)
+H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -512,8 +513,95 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+
+    switch (get_type) {
+        /* H5Aexists/exists_by_name */
+        case H5VL_ATTR_EXISTS:
+            {
+                H5VL_loc_params_t loc_params  = va_arg (arguments, H5VL_loc_params_t);
+                char    *attr_name      = va_arg (arguments, char *);
+                htri_t	*ret       = va_arg (arguments, htri_t *);
+
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, 
+                                              loc_params, attr_name, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                break;
+            }
+        /* H5Aget_space */
+        case H5VL_ATTR_GET_SPACE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                break;
+            }
+        /* H5Aget_type */
+        case H5VL_ATTR_GET_TYPE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                break;
+            }
+        /* H5Aget_create_plist */
+        case H5VL_ATTR_GET_ACPL:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                break;
+            }
+        /* H5Aget_name */
+        case H5VL_ATTR_GET_NAME:
+            {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                size_t	buf_size = va_arg (arguments, size_t);
+                char    *buf = va_arg (arguments, char *);
+                ssize_t	*ret_val = va_arg (arguments, ssize_t *);
+
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, 
+                                              loc_params, buf_size, buf, ret_val)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                break;
+            }
+        /* H5Aget_info */
+        case H5VL_ATTR_GET_INFO:
+            {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                H5A_info_t   *ainfo = va_arg (arguments, H5A_info_t *);
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type) {
+                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, loc_params, ainfo)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                }
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
+                    char *attr_name = va_arg (arguments, char *);
+
+                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, loc_params, ainfo, attr_name)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                }
+                else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
+                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, loc_params, ainfo)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                }
+                else
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get name of attr")
+
+                break;
+            }
+        case H5VL_ATTR_GET_STORAGE_SIZE:
+            {
+                hsize_t *ret = va_arg (arguments, hsize_t *);
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -886,7 +974,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid_t req, ...)
+H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -894,8 +982,74 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+
+    switch (get_type) {
+        /* H5Dget_space */
+        case H5VL_DATASET_GET_SPACE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+            /* H5Dget_space_statuc */
+        case H5VL_DATASET_GET_SPACE_STATUS:
+            {
+                H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, allocation)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+            /* H5Dget_type */
+        case H5VL_DATASET_GET_TYPE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+            /* H5Dget_create_plist */
+        case H5VL_DATASET_GET_DCPL:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+            /* H5Dget_access_plist */
+        case H5VL_DATASET_GET_DAPL:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+            /* H5Dget_storage_size */
+        case H5VL_DATASET_GET_STORAGE_SIZE:
+            {
+                hsize_t *ret = va_arg (arguments, hsize_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+            /* H5Dget_offset */
+        case H5VL_DATASET_GET_OFFSET:
+            {
+                haddr_t *ret = va_arg (arguments, haddr_t *);
+
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1039,17 +1193,92 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req, ...)
+H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req, va_list arguments)
 {
-    va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+
+    switch (get_type) {
+        /* H5Fget_access_plist */
+        case H5VL_FILE_GET_FAPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, plist_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        /* H5Fget_create_plist */
+        case H5VL_FILE_GET_FCPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, plist_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        /* H5Fget_obj_count */
+        case H5VL_FILE_GET_OBJ_COUNT:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, types, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        /* H5Fget_obj_ids */
+        case H5VL_FILE_GET_OBJ_IDS:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                size_t max_objs = va_arg (arguments, size_t);
+                hid_t *oid_list = va_arg (arguments, hid_t *);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, types, max_objs, 
+                                              oid_list, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        /* H5Fget_intent */
+        case H5VL_FILE_GET_INTENT:
+            {
+                unsigned *ret = va_arg (arguments, unsigned *);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        /* H5Fget_name */
+        case H5VL_FILE_GET_NAME:
+            {
+                H5I_type_t type = va_arg (arguments, H5I_type_t);
+                size_t     size = va_arg (arguments, size_t);
+                char      *name = va_arg (arguments, char *);
+                ssize_t   *ret  = va_arg (arguments, ssize_t *);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, type, size, 
+                                              name, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        /* H5I_get_file_id */
+        case H5VL_OBJECT_GET_FILE:
+            {
+                H5I_type_t type = va_arg (arguments, H5I_type_t);
+                void      **ret = va_arg (arguments, void **);
+
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, type, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
+    } /* end switch */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1070,17 +1299,54 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t req, ...)
+H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t req, va_list arguments)
 {
-    va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+
+    switch (misc_type) {
+        /* H5Fmount */
+        case H5VL_FILE_MOUNT:
+            {
+                H5I_type_t  type       = va_arg (arguments, H5I_type_t);
+                const char *name       = va_arg (arguments, const char *);
+                H5F_t      *child      = va_arg (arguments, H5F_t *);
+                hid_t       plist_id   = va_arg (arguments, hid_t);
+
+                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req, 
+                                               type, name, child, plist_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+
+                break;
+            }
+        /* H5Fmount */
+        case H5VL_FILE_UNMOUNT:
+            {
+                H5I_type_t  type       = va_arg (arguments, H5I_type_t);
+                const char *name       = va_arg (arguments, const char *);
+
+                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req, type, name)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fis_accessible */
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                hid_t fapl_id  = va_arg (arguments, hid_t);
+                const char *name    = va_arg (arguments, const char *);
+                htri_t     *ret     = va_arg (arguments, htri_t *);
+
+                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req, fapl_id, name, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1101,17 +1367,143 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, hid_t req, ...)
+H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, hid_t req, va_list arguments)
 {
-    va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+
+    switch (optional_type) {
+        /* H5Fget_filesize */
+        case H5VL_FILE_GET_SIZE:
+            {
+                hsize_t    *ret = va_arg (arguments, hsize_t *);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_file_image */
+        case H5VL_FILE_GET_FILE_IMAGE:
+            {
+                void       *buf_ptr   = va_arg (arguments, void *);
+                ssize_t    *ret       = va_arg (arguments, ssize_t *);
+                size_t      buf_len   = va_arg (arguments, size_t );
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, 
+                                                   buf_ptr, ret, buf_len)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_freespace */
+        case H5VL_FILE_GET_FREE_SPACE:
+            {
+                hssize_t    *ret = va_arg (arguments, hssize_t *);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        case H5VL_FILE_GET_FREE_SECTIONS:
+            {
+                H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
+                ssize_t         *ret       = va_arg (arguments, ssize_t *);
+                H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
+                size_t          nsects     = va_arg (arguments, size_t);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req,
+                                                   sect_info, ret, type, nsects)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_info2 */
+        case H5VL_FILE_GET_INFO:
+            {
+                H5I_type_t  type   = va_arg (arguments, H5I_type_t);
+                H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, type, finfo)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_mdc_config */
+        case H5VL_FILE_GET_MDC_CONF:
+            {
+                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, config_ptr)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_mdc_hit_rate */
+        case H5VL_FILE_GET_MDC_HR:
+            {
+                double *hit_rate_ptr = va_arg (arguments, double *);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, hit_rate_ptr)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_mdc_size */
+        case H5VL_FILE_GET_MDC_SIZE:
+            {
+                size_t *max_size_ptr        = va_arg (arguments, size_t *);
+                size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
+                size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
+                int    *cur_num_entries_ptr = va_arg (arguments, int *); 
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, max_size_ptr, 
+                                                   min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fget_vfd_handle */
+        case H5VL_FILE_GET_VFD_HANDLE:
+            {
+                void **file_handle = va_arg (arguments, void **);
+                hid_t  fapl        = va_arg (arguments, hid_t);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, file_handle, fapl)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Fclear_elink_file_cache */
+        case H5VL_FILE_CLEAR_ELINK_CACHE:
+            {
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Freopen */
+        case H5VL_FILE_REOPEN:
+            {
+                void   **ret = va_arg (arguments, void **);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        /* H5Freset_mdc_hit_rate_stats */
+        case H5VL_FILE_RESET_MDC_HIT_RATE:
+            {
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        case H5VL_FILE_SET_MDC_CONFIG:
+            {
+                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, config_ptr)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1230,7 +1622,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t req, ...)
+H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1238,8 +1630,30 @@ H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t re
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get group information")
+
+    switch (get_type) {
+        /* H5Gget_create_plist */
+        case H5VL_GROUP_GET_GCPL:
+            {
+                hid_t *new_gcpl_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, req, new_gcpl_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get group information")
+                break;
+            }
+        /* H5Gget_info */
+        case H5VL_GROUP_GET_INFO:
+            {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
+
+                if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, req, loc_params, grp_info)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get group information")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1386,17 +1800,59 @@ done:
  */
 herr_t
 H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, 
-              hid_t req, ...)
+              hid_t req, va_list arguments)
 {
-    va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
+
+    switch (get_type) {
+        /* H5Lexists */
+        case H5VL_LINK_EXISTS:
+            {
+                htri_t     *ret    = va_arg (arguments, htri_t *);
+
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
+                break;
+            }
+        /* H5Lget_info/H5Lget_info_by_idx */
+        case H5VL_LINK_GET_INFO:
+            {
+                H5L_info_t *linfo  = va_arg (arguments, H5L_info_t *);
+
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, linfo)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
+                break;
+            }
+        /* H5Lget_name_by_idx */
+        case H5VL_LINK_GET_NAME:
+            {
+                char       *name   = va_arg (arguments, char *);
+                size_t      size   = va_arg (arguments, size_t);
+                ssize_t    *ret    = va_arg (arguments, ssize_t *);
+
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, 
+                                              name, size, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
+                break;
+            }
+        /* H5Lget_val/H5Lget_val_by_idx */
+        case H5VL_LINK_GET_VAL:
+            {
+                void       *buf    = va_arg (arguments, void *);
+                size_t     size    = va_arg (arguments, size_t);
+
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, buf, size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from link")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1545,17 +2001,87 @@ done:
  */
 herr_t
 H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, 
-               hid_t req, ...)
+               hid_t req, va_list arguments)
 {
-    va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+
+    switch (get_type) {
+        /* H5Oexists_by_name */
+        case H5VL_OBJECT_EXISTS:
+            {
+                htri_t	  *ret      = va_arg (arguments, htri_t *);
+
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
+        case H5VL_OBJECT_GET_INFO:
+            {
+                H5O_info_t  *obj_info = va_arg (arguments, H5O_info_t *);
+
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req, obj_info)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Oget_comment / H5Oget_comment_by_name */
+        case H5VL_OBJECT_GET_COMMENT:
+            {
+                char     *comment =  va_arg (arguments, char *);
+                size_t   bufsize  =  va_arg (arguments, size_t);
+                ssize_t  *ret     =  va_arg (arguments, ssize_t *);
+
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                                                comment, bufsize, ret)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Rget_region */
+        case H5VL_REF_GET_REGION:
+            {
+                hid_t       *ret     =  va_arg (arguments, hid_t *);
+                H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
+                void        *ref     =  va_arg (arguments, void *);
+
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                                                ret, ref_type, ref)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Rget_obj_type2 */
+        case H5VL_REF_GET_TYPE:
+            {
+                H5O_type_t  *obj_type  =  va_arg (arguments, H5O_type_t *);
+                H5R_type_t  ref_type   =  va_arg (arguments, H5R_type_t);
+                void        *ref       =  va_arg (arguments, void *);
+
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                                                obj_type, ref_type, ref)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Rget_name */
+        case H5VL_REF_GET_NAME:
+            {
+                ssize_t     *ret       = va_arg (arguments, ssize_t *);
+                char        *name      = va_arg (arguments, char *);
+                size_t      size       = va_arg (arguments, size_t);
+                H5R_type_t  ref_type   = va_arg (arguments, H5R_type_t);
+                void        *ref       = va_arg (arguments, void *);
+
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                                                ret, name, size, ref_type, ref)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1577,7 +2103,7 @@ done:
  */
 herr_t
 H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, 
-                hid_t req, ...)
+                hid_t req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1585,8 +2111,52 @@ H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req)) < 0)
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+
+    switch (misc_type) {
+        /* H5Arename/rename_by_name */
+        case H5VL_ATTR_RENAME:
+            {
+                const char    *old_name  = va_arg (arguments, const char *);
+                const char    *new_name  = va_arg (arguments, const char *);
+
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req,
+                                                 old_name, new_name)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Oincr_refcount / H5Odecr_refcount */
+        case H5VL_OBJECT_CHANGE_REF_COUNT:
+            {
+                int update_ref  = va_arg (arguments, int);
+
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req, update_ref)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        /* H5Oset_comment */
+        case H5VL_OBJECT_SET_COMMENT:
+            {
+                const char    *comment  = va_arg (arguments, char *);
+
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req, comment)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        case H5VL_REF_CREATE:
+            {
+                void        *ref      = va_arg (arguments, void *);
+                const char  *name     = va_arg (arguments, char *);
+                H5R_type_t  ref_type  = va_arg (arguments, H5R_type_t);
+                hid_t       space_id  = va_arg (arguments, hid_t);
+
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req,
+                                                 ref, name, ref_type, space_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)

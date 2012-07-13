@@ -513,7 +513,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                         oloc = NULL;
                     else
                         oloc = H5T_oloc(type);
-		break;
+                    break;
                 }
 	    case H5I_UNINIT:
 	    case H5I_BADID:
