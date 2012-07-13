@@ -48,6 +48,9 @@ typedef struct {
     hid_t fid;                      /* File ID being traversed */
 } trav_print_udata_t;
 
+/* format for hsize_t */
+#define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
+
 /*-------------------------------------------------------------------------
  * local functions
  *-------------------------------------------------------------------------
@@ -66,6 +69,39 @@ static void trav_table_addlink(trav_table_t *table,
  */
 static H5_index_t trav_index_by = H5_INDEX_NAME;
 static H5_iter_order_t trav_index_order = H5_ITER_INC;
+
+static int trav_verbosity = 0;
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_set_index
+ *
+ * Purpose: Set indexing properties for the objects & links in the file
+ *
+ * Return: none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5trav_set_index(H5_index_t print_index_by, H5_iter_order_t print_index_order)
+{
+    trav_index_by = print_index_by;
+    trav_index_order = print_index_order;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_set_verbose
+ *
+ * Purpose: Set verbosity of file contents 1=>attributes
+ *
+ * Return: none
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5trav_set_verbose(int print_verbose)
+{
+    trav_verbosity = print_verbose;
+}
 
 /*-------------------------------------------------------------------------
  * "h5trav info" public functions. used in h5diff
@@ -828,6 +864,72 @@ void trav_table_free( trav_table_t *table )
     HDfree(table);
 }
 
+static herr_t
+trav_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo, void *op_data)
+{
+    char               *buf;
+
+    buf = (char*)op_data;
+    if((strlen(buf)==1) && (*buf=='/'))
+        printf(" %-10s %s%s", "attribute", buf, attr_name);
+    else
+        printf(" %-10s %s/%s", "attribute", buf, attr_name);
+
+#ifdef H5TRAV_PRINT_SPACE
+    if(trav_verbosity < 2) {
+#endif
+        printf("\n");
+#ifdef H5TRAV_PRINT_SPACE
+    }
+    else {
+        hid_t               attr = -1;
+        hid_t               space = -1;
+        hsize_t             size[H5S_MAX_RANK];
+        int                 ndims;
+        int                 i;
+        H5S_class_t         space_type;
+
+        if((attr = H5Aopen(obj, attr_name, H5P_DEFAULT))) {
+            space = H5Aget_space(attr);
+
+            /* Data space */
+            ndims = H5Sget_simple_extent_dims(space, size, NULL);
+            space_type = H5Sget_simple_extent_type(space);
+            switch(space_type) {
+                case H5S_SCALAR:
+                    /* scalar dataspace */
+                    printf(" scalar\n");
+                    break;
+
+                case H5S_SIMPLE:
+                    /* simple dataspace */
+                    printf(" {");
+                    for (i=0; i<ndims; i++) {
+                        printf("%s" HSIZE_T_FORMAT, i?", ":"", size[i]);
+                    }
+                    printf("}\n");
+                    break;
+
+                case H5S_NULL:
+                    /* null dataspace */
+                    printf(" null\n");
+                    break;
+
+                default:
+                    /* Unknown dataspace type */
+                    printf(" unknown\n");
+                    break;
+            } /* end switch */
+
+            H5Sclose(space);
+            H5Aclose(attr);
+        }
+    }
+#endif
+
+    return(0);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: trav_print_visit_obj
@@ -844,8 +946,9 @@ void trav_table_free( trav_table_t *table )
  */
 static int
 trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
-    const char *already_visited, void UNUSED *udata)
+    const char *already_visited, void *udata)
 {
+    trav_print_udata_t *print_udata = (trav_print_udata_t *)udata;
     /* Print the name of the object */
     /* (no new-line, so that objects that we've encountered before can print
      *  the name of the original object)
@@ -869,9 +972,12 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
     } /* end switch */
 
     /* Check if we've already seen this object */
-    if(NULL == already_visited)
+    if(NULL == already_visited) {
         /* Finish printing line about object */
         printf("\n");
+        if(trav_verbosity > 0)
+            H5Aiterate_by_name(print_udata->fid, path, trav_index_by, trav_index_order, NULL, trav_attr, path, H5P_DEFAULT);
+    }
     else
         /* Print the link's original name */
         printf(" -> %s\n", already_visited);
@@ -955,13 +1061,10 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
  */
 
 int
-h5trav_print(hid_t fid, H5_index_t print_index_by, H5_iter_order_t print_index_order)
+h5trav_print(hid_t fid)
 {
     trav_print_udata_t print_udata;     /* User data for traversal */
     trav_visitor_t print_visitor;       /* Visitor structure for printing objects */
-
-    trav_index_by = print_index_by;
-    trav_index_order = print_index_order;
 
     /* Init user data for printing */
     print_udata.fid = fid;

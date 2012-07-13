@@ -297,7 +297,7 @@ IF (HDF5_TEST_VFD)
     HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON
 IF (WIN32 AND NOT CYGWIN) 
     HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF
-    HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF
+HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF
 
 ---------------- External Library Options ---------------------
 HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building" "NO"
