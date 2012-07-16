@@ -646,7 +646,7 @@ done:
 static herr_t
 H5D__fill_release(H5D_fill_buf_info_t *fb_info)
 {
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(fb_info);
@@ -684,7 +684,7 @@ H5D__fill_release(H5D_fill_buf_info_t *fb_info)
 herr_t
 H5D__fill_term(H5D_fill_buf_info_t *fb_info)
 {
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(fb_info);

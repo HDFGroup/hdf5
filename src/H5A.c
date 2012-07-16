@@ -41,9 +41,6 @@
 /* Local Macros */
 /****************/
 
-/* The number of reserved IDs in dataset ID group */
-#define H5A_RESERVED_ATOMS  0
-
 
 /******************/
 /* Local Typedefs */
@@ -94,6 +91,16 @@ H5FL_DEFINE(H5A_shared_t);
 /* Declare a free list to manage blocks of type conversion data */
 H5FL_BLK_DEFINE(attr_buf);
 
+/* Attribute ID class */
+static const H5I_class_t H5I_ATTR_CLS[1] = {{
+    H5I_ATTR,                   /* ID class value */
+    0,                          /* Class flags */
+    64,                         /* Minimum hash size for class */
+    0,                          /* # of reserved IDs for class */
+    (H5I_free_t)H5A_close       /* Callback routine for closing objects of this class */
+}};
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5A_init
@@ -143,7 +150,7 @@ H5A_init_interface(void)
     /*
      * Create attribute ID type.
      */
-    if(H5I_register_type(H5I_ATTR, (size_t)H5I_ATTRID_HASHSIZE, H5A_RESERVED_ATOMS, (H5I_free_t)H5A_close) < H5I_FILE)
+    if(H5I_register_type(H5I_ATTR_CLS) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:
@@ -172,7 +179,7 @@ H5A_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
 	if((n = H5I_nmembers(H5I_ATTR))>0) {

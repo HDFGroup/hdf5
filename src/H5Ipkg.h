@@ -46,7 +46,7 @@
 #define TYPE_BITS	7
 #define TYPE_MASK	((1<<TYPE_BITS)-1)
 
-#define MAX_NUM_TYPES TYPE_MASK
+#define H5I_MAX_NUM_TYPES TYPE_MASK
 
 /*
  * Number of bits to use for the Atom index in each atom (assumes 8-bit

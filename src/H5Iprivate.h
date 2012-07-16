@@ -28,29 +28,45 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
+/**************************/
+/* Library Private Macros */
+/**************************/
+
 /* Macro to determine if a H5I_type_t is a "library type" */
 #define H5I_IS_LIB_TYPE( type ) (type > 0 && type < H5I_NTYPES)
 
-/* Default sizes of the hash-tables for various atom types */
-#define H5I_ERRSTACK_HASHSIZE		64
-#define H5I_FILEID_HASHSIZE		64
-#define H5I_TEMPID_HASHSIZE		64
-#define H5I_DATATYPEID_HASHSIZE		64
-#define H5I_DATASPACEID_HASHSIZE	64
-#define H5I_DATASETID_HASHSIZE		64
-#define H5I_OID_HASHSIZE		64
-#define H5I_GROUPID_HASHSIZE		64
-#define H5I_ATTRID_HASHSIZE		64
-#define H5I_REFID_HASHSIZE		64
-#define H5I_VFL_HASHSIZE		64
-#define H5I_GENPROPCLS_HASHSIZE		64
-#define H5I_GENPROPOBJ_HASHSIZE		128
-#define H5I_ERRCLS_HASHSIZE		64
-#define H5I_ERRMSG_HASHSIZE		64
-#define H5I_ERRSTK_HASHSIZE		64
+/* Flags for ID class */
+#define H5I_CLASS_IS_APPLICATION        0x01
 
-/* Private Functions in H5I.c */
-H5_DLL H5I_type_t H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved, H5I_free_t free_func);
+
+/****************************/
+/* Library Private Typedefs */
+/****************************/
+
+typedef struct H5I_class_t {
+    H5I_type_t type_id;         /* Class ID for the type */
+    unsigned flags;             /* Class behavior flags */
+    size_t hash_size;           /* Minimum hash table size for the type */
+    unsigned reserved;          /* Number of reserved IDs for this type */
+                                /* [A specific number of type entries may be
+                                 * reserved to enable "constant" values to be
+                                 * handed out which are valid IDs in the type,
+                                 * but which do not map to any data structures
+                                 * and are not allocated dynamically later.]
+                                 */
+    H5I_free_t free_func;       /* Free function for object's of this type */
+} H5I_class_t;
+
+
+/*****************************/
+/* Library-private Variables */
+/*****************************/
+
+
+/***************************************/
+/* Library-private Function Prototypes */
+/***************************************/
+H5_DLL herr_t H5I_register_type(const H5I_class_t *cls);
 H5_DLL int H5I_nmembers(H5I_type_t type);
 H5_DLL herr_t H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref);
 H5_DLL int H5I_destroy_type(H5I_type_t type);

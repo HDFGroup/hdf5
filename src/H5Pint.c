@@ -38,6 +38,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 
+
 /****************/
 /* Local Macros */
 /****************/
@@ -236,6 +237,25 @@ H5FL_DEFINE_STATIC(H5P_genprop_t);
 /* Declare a free list to manage the H5P_genplist_t struct */
 H5FL_DEFINE_STATIC(H5P_genplist_t);
 
+/* Generic Property Class ID class */
+static const H5I_class_t H5I_GENPROPCLS_CLS[1] = {{
+    H5I_GENPROP_CLS,		/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5P_close_class	/* Callback routine for closing objects of this class */
+}};
+
+/* Generic Property List ID class */
+static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
+    H5I_GENPROP_LST,		/* ID class value */
+    0,				/* Class flags */
+    128,			/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5P_close	/* Callback routine for closing objects of this class */
+}};
+
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -357,9 +377,9 @@ H5P_init_interface(void)
     /*
      * Initialize the Generic Property class & object groups.
      */
-    if(H5I_register_type(H5I_GENPROP_CLS, (size_t)H5I_GENPROPCLS_HASHSIZE, 0, (H5I_free_t)H5P_close_class) < 0)
+    if(H5I_register_type(H5I_GENPROPCLS_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
-    if(H5I_register_type(H5I_GENPROP_LST, (size_t)H5I_GENPROPOBJ_HASHSIZE, 0, (H5I_free_t)H5P_close) < 0)
+    if(H5I_register_type(H5I_GENPROPLST_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
     /* Repeatedly pass over the list of property list classes for the library,

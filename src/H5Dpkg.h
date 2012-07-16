@@ -41,9 +41,6 @@
 /* Package Private Macros */
 /**************************/
 
-/* The number of reserved IDs in dataset ID group */
-#define H5D_RESERVED_ATOMS  0
-
 /* Set the minimum object header size to create objects with */
 #define H5D_MINHDR_SIZE 256
 
