@@ -13,12 +13,19 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5R_PACKAGE		/*suppress error about including H5Rpkg   */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5R_init_interface
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Dprivate.h"		/* Datasets				*/
@@ -31,10 +38,46 @@
 #include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
-/* Local macro definitions */
 
-/* Number of reserved IDs in ID group */
-#define H5R_RESERVED_ATOMS  0
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+/* Reference ID class */
+static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
+    H5I_REFERENCE,		/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    NULL,			/* Callback routine for closing objects of this class */
+    NULL                        /* Callback routine for closing auxilary objects of this class */
+}};
+
 
 
 /*-------------------------------------------------------------------------
@@ -83,8 +126,7 @@ H5R_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
-    if(H5I_register_type(H5I_REFERENCE, (size_t)H5I_REFID_HASHSIZE, H5R_RESERVED_ATOMS, 
-                          (H5I_free_t)NULL, NULL) < 0)
+    if(H5I_register_type(H5I_REFERENCE_CLS) < 0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to initialize interface");
 
 done:

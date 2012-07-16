@@ -71,11 +71,11 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
-    { "contents", no_arg, 'n' },
+    { "contents", optional_arg, 'n' },
     { "properties", no_arg, 'p' },
     { "boot-block", no_arg, 'B' },
     { "boot-bloc", no_arg, 'B' },
@@ -235,6 +235,7 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "  OPTIONS\n");
     HDfprintf(rawoutstream, "     -h, --help           Print a usage message and exit\n");
     HDfprintf(rawoutstream, "     -n, --contents       Print a list of the file contents and exit\n");
+    HDfprintf(rawoutstream, "                          Optional value 1 also prints attributes.\n");
     HDfprintf(rawoutstream, "     -B, --superblock     Print the content of the super block\n");
     HDfprintf(rawoutstream, "     -H, --header         Print the header only; no data is displayed\n");
     HDfprintf(rawoutstream, "     -A, --onlyattr       Print the header and value of attributes\n");
@@ -296,10 +297,20 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "        number of dimensions in the dataspace being queried\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values\n");
-    HDfprintf(rawoutstream, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
-    HDfprintf(rawoutstream, "        the file driver flag, the file will be opened with each driver in\n");
-    HDfprintf(rawoutstream, "        turn and in the order specified above until one driver succeeds\n");
-    HDfprintf(rawoutstream, "        in opening the file.\n");
+    HDfprintf(rawoutstream, "      are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
+    HDfprintf(rawoutstream, "      the file driver flag, the file will be opened with each driver in\n");
+    HDfprintf(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
+    HDfprintf(rawoutstream, "      in opening the file.\n");
+    HDfprintf(rawoutstream, "      These are the letters that are appended to the file name(without .h5) when opening\n");
+    HDfprintf(rawoutstream, "      names for the split(m,r) and multi(s,b,r,g,l,o) drivers. They are:\n");
+    HDfprintf(rawoutstream, "         m: All meta data when using the split driver.\n");
+    HDfprintf(rawoutstream, "         s: The userblock, superblock, and driver info block\n");
+    HDfprintf(rawoutstream, "         b: B-tree nodes\n");
+    HDfprintf(rawoutstream, "         r: Dataset raw data\n");
+    HDfprintf(rawoutstream, "         g: Global heap\n");
+    HDfprintf(rawoutstream, "         l: local heap (object names)\n");
+    HDfprintf(rawoutstream, "         o: object headers\n");
+    HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "  F - is a filename.\n");
     HDfprintf(rawoutstream, "  P - is the full path from the root group to the object.\n");
     HDfprintf(rawoutstream, "  N - is an integer greater than 1.\n");
@@ -336,9 +347,13 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
     HDfprintf(rawoutstream, "\n");
-    HDfprintf(rawoutstream, "  5) Dataset foo in files multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "  5) Dataset foo in files file1.h5 file2.h5 file3.h5\n");
     HDfprintf(rawoutstream, "\n");
-    HDfprintf(rawoutstream, "      h5dump -d /foo multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo file1.h5 file2.h5 file3.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo -f split splitfile\n");
     HDfprintf(rawoutstream, "\n");
 }
 
@@ -999,6 +1014,9 @@ parse_start:
         case 'n':
             display_fi = TRUE;
             last_was_dset = FALSE;
+            if ( opt_arg != NULL) {
+                h5trav_set_verbose(HDatoi(opt_arg));
+            }
             break;
         case 'p':
             display_dcpl = TRUE;
@@ -1035,6 +1053,9 @@ parse_start:
             break;
         case 'w':
             h5tools_nCols = HDatoi(opt_arg);
+            if (h5tools_nCols==0) {
+                h5tools_nCols = 65535;
+            }
             last_was_dset = FALSE;
             break;
         case 'a':
@@ -1461,6 +1482,9 @@ main(int argc, const char *argv[])
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
+    /* Initialize indexing options */
+    h5trav_set_index(sort_by, sort_order);
+
     while(opt_ind < argc) {
         fname = HDstrdup(argv[opt_ind++]);
 

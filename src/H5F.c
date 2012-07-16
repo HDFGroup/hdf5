@@ -13,13 +13,19 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5F__init_pub_interface
 
 
-/* Packages needed by this file... */
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
@@ -41,7 +47,6 @@
 /* Local Prototypes */
 /********************/
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -53,6 +58,16 @@
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* File ID class */
+static const H5I_class_t H5I_FILE_CLS[1] = {{
+    H5I_FILE,			/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    NULL,                       /* Callback routine for closing objects of this class */
+    (H5I_free2_t)H5F_close_file /* Callback routine for closing auxilary objects of this class */
+}};
 
 
 /*--------------------------------------------------------------------------
@@ -76,8 +91,7 @@ H5F__init_pub_interface(void)
     /*
      * Initialize the atom group for the file IDs.
      */
-    if(H5I_register_type(H5I_FILE, (size_t)H5I_FILEID_HASHSIZE, 0, 
-                          NULL, (H5I_free2_t)H5F_close_file)<H5I_FILE)
+    if(H5I_register_type(H5I_FILE_CLS) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     ret_value = H5F_init();
@@ -107,10 +121,23 @@ H5F_init(void)
     FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
 
+#if 0
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Initialize the atom group for the file IDs.
+     */
+    if(H5I_register_type(H5I_FILE_CLS) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_init_interface() */
+#endif
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_init() */
-
 
 
 /*-------------------------------------------------------------------------

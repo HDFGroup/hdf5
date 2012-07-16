@@ -5881,7 +5881,7 @@ static void
 H5C_adjust_flush_dependency_rc(H5C_cache_entry_t * cache_entry,
     unsigned old_child_height, unsigned new_child_height)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(cache_entry);
@@ -9274,7 +9274,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
     H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
     unsigned u;                         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Assertions */
     HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
@@ -9433,7 +9433,7 @@ H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag)
 {
     unsigned u;         /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(cache_ptr);
 
