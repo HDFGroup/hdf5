@@ -7369,22 +7369,21 @@ gent_charsets(void)
             const char *utf8_p_;
     } CharSetInfo;
 
+    hid_t charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
+    hid_t ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
+    hid_t utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
+    const char * writeData[] = { "ascii", "utf8", };
+
     sid = H5Screate_simple( 1, dim, NULL );
     fid = H5Fcreate( FILE68, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-
-    hid_t charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
-
-    hid_t ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     status = H5Tset_cset( ascii_dtid, H5T_CSET_ASCII );
     H5Tinsert( charset_dtid, "ascii", HOFFSET(CharSetInfo, ascii_p_ ), ascii_dtid );
 
-    hid_t utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     status = H5Tset_cset( utf8_dtid, H5T_CSET_UTF8 );
     H5Tinsert( charset_dtid, "utf8", HOFFSET( CharSetInfo, utf8_p_ ), utf8_dtid );
 
     did = H5Dcreate2( fid, "CharSets", charset_dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 
-    const char * writeData[] = { "ascii", "utf8", };
     status = H5Dwrite( did, charset_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, writeData );
 
     H5Tclose( charset_dtid );
