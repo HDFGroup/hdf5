@@ -319,6 +319,144 @@ rem Extract file name, line number, version and thread IDs because they may be d
     exit /b
     
 
+rem same as TOOLTEST3 but filters error stack outp and compares external err file
+rem Extract file name, line number, version and thread IDs because they may be different
+:tooltest4
+    set expect=%CD%\..\testfiles\%1
+    set expect_err=%CD%\..\testfiles\%~n1.err
+    set expect_parsed=%CD%\..\testfiles\%~n1.parsed
+    set actual=%CD%\..\testfiles\%~n1.out
+    set actual_err=%CD%\..\testfiles\%~n1.oerr
+    set actual_ext=%CD%\..\testfiles\%~n1.ext
+    
+    rem We define %params% here because Windows `shift` command doesn't affect
+    rem the %* variable.  --SJW 8/23/07
+    set params=%*
+    rem If there is not 2nd parameter, that means we have no filename, which 
+    rem implies that we are on the "tnofilename" test.  Make sure we remove the
+    rem expected output from the params, and add a space.  --SJW 8/27/07
+    if "%2"=="" (
+        set params= 
+    ) else (
+        set params=!params:* =!
+    )
+    
+    rem Run test.
+    (
+        rem We need to replace PERCENT here with "%" for tests that use percents
+        rem Also remove quotes here, because Linux 'echo' command strips them.
+        rem --SJW 8/24/07
+        pushd %CD%\..\testfiles
+        %dumper_bin% !params:PERCENT=%%!
+        popd
+    ) > %actual% 2> %actual_err%
+
+    rem Extract file name, line number, version and thread IDs because they may 
+    rem be different
+    
+    rem Also filter out lines starting with *****, because Windows treats these
+    rem as wildcards, and parses as filenames.  -SJW, 8/16/07
+    type nul > %actual_ext%
+    for /f "delims=" %%a in (%actual_err%) do (
+        set line_tmp=%%a
+        if not "!line_tmp:~0,9!"=="*********" (
+            set line=
+            set last_token=
+            set skip=
+            for %%b in (%%a) do (
+                if not defined skip (
+                    if "!last_token!"=="thread" (
+                        set line=!line! ^(IDs^):
+                        
+                    ) else if "!last_token!"=="some" (
+                        if "%%b"=="thread:" (
+                            set line=!line! thread ^(IDs^):
+                            set skip=yes
+                        ) else (
+                            set line=!line! some %%b
+                        )
+                        
+                    ) else if "!last_token:~0,2!"=="#0" (
+                        set line=!line! ^(file name^)
+                        
+                    ) else if "!last_token!"=="HDF5" (
+                        rem Check if we wrap parenthesis around "version (number)"
+                        set version_token=%%b
+                        if "!version_token:~0,1!"=="(" (
+                            set line=!line! ^(version ^(number^)^)
+                        ) else (
+                            set line=!line! version ^(number^).
+                        )
+                        
+                    ) else if "!last_token!"=="line" (
+                        set line=!line! ^(number^)
+                        
+                    ) else if not "%%b"=="some" (
+                        set line=!line! %%b
+                    )
+                    set last_token=%%b
+                )
+            )
+            echo.!line!>>%actual_ext%
+        )
+    )
+    rem type %actual_ext% >> %actual%
+    
+    rem We parse through our expected output file in a similar way, because
+    rem Windows will parse out commas and other special characters as well.
+    rem    -SJW, 8/16/07
+    type nul > %expect_parsed%
+    for /f "delims=" %%b in (%expect%) do (
+        set line_tmp=%%b
+        if not "!line_tmp:~0,9!"=="*********" (
+            set line=
+            for %%c in (%%b) do (
+                set line=!line! %%c
+            )
+            echo.!line!>>%expect_parsed%
+        )
+    )
+        
+    fc /w %expect_parsed% %actual% > nul
+    if errorlevel 0 (
+        if not exist %expect% (
+            rem Create the expect file if it doesn't yet exist.
+            call :testing CREATED %params%
+            copy /y %actual% %expect% > nul
+        ) else (
+            fc /w %expect% %actual% > nul
+            if !errorlevel! equ 0 (
+                fc /w %expect_err% %actual_ext% > nul
+                if !errorlevel! equ 0 (
+                    call :testing PASSED %params%
+                ) else (
+                    call :testing *FAILED* %params%
+                    echo.    Expected results ^(*.err^) differs from actual results ^(*.oerr^)
+                    set /a nerrors=!nerrors!+1
+                    if "yes"=="%verbose%" fc /w %expect_err% %actual_ext%
+                )
+            ) else (
+                call :testing *FAILED* %params%
+                echo.    Expected results ^(*.ddl^) differs from actual results ^(*.out^)
+                set /a nerrors=!nerrors!+1
+                if "yes"=="%verbose%" fc /w %expect% %actual%
+            )
+        )
+    ) else (
+        call :testing *FAILED* %test_err%
+        echo.    Expected result differs from actual result
+        set /a nerrors=%nerrors%+1
+        if "yes"=="%verbose%" fc /w %expect% %actual%
+    )
+    
+    rem Clean up output file
+    if not defined hdf5_nocleanup (
+        del /f %actual% %actual_err%
+    )
+    
+    exit /b
+    
+
 rem Print a "SKIP" message
 :skip
     call :testing -SKIP- %*
@@ -432,19 +570,19 @@ rem ############################################################################
     rem test for displaying groups
     call :tooltest tgroup-1.ddl --enable-error-stack tgroup.h5
     rem test for displaying the selected groups
-    call :tooltest tgroup-2.ddl --group=/g2 --group / -g /y tgroup.h5
+    call :tooltest4 tgroup-2.ddl --enable-error-stack --group=/g2 --group / -g /y tgroup.h5
 
     rem test for displaying simple space datasets
     call :tooltest tdset-1.ddl --enable-error-stack tdset.h5
     rem test for displaying selected datasets
-    call :tooltest3 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
+    call :tooltest4 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3 tdset.h5
 
     rem test for displaying attributes
     call :tooltest tattr-1.ddl --enable-error-stack tattr.h5
     rem test for displaying the selected attributes of string type and scalar space
-    call :tooltest tattr-2.ddl --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
+    call :tooltest4 tattr-2.ddl --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
     rem test for header and error messages
-    call :tooltest3 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
+    call :tooltest4 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
     rem test for displaying attributes in shared datatype (also in group and dataset)
     call :tooltest tnamed_dtype_attr.ddl --enable-error-stack tnamed_dtype_attr.h5
 
@@ -455,7 +593,7 @@ rem ############################################################################
     call :tooltest tslink-2.ddl --enable-error-stack -l slink2 tslink.h5
     call :tooltest tudlink-2.ddl --enable-error-stack -l udlink2 tudlink.h5
     rem test for displaying dangling soft links
-    call :tooltest3 tslink-D.ddl --enable-error-stack -d /slink1 tslink.h5
+    call :tooltest4 tslink-D.ddl --enable-error-stack -d /slink1 tslink.h5
 
     rem tests for hard links
     call :tooltest thlink-1.ddl --enable-error-stack thlink.h5
@@ -469,7 +607,7 @@ rem ############################################################################
     rem test for named data types
     call :tooltest tcomp-2.ddl --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
     rem test for unamed type 
-    call :tooltest tcomp-3.ddl -t /#6632 -g /group2 tcompound.h5
+    call :tooltest4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
     rem test complicated compound datatype
     call :tooltest tcomp-4.ddl --enable-error-stack tcompound_complex.h5
     
@@ -477,7 +615,7 @@ rem ############################################################################
     call :tooltest tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5
 
     rem test for options
-    call :tooltest tall-1.ddl tall.h5
+    call :tooltest4 tall-1.ddl --enable-error-stack tall.h5
     call :tooltest tall-2.ddl --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5
     call :tooltest tall-3.ddl --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
 
@@ -503,7 +641,7 @@ rem ############################################################################
 
     rem test for files with array data
     call :tooltest tarray1.ddl --enable-error-stack tarray1.h5
-    call :tooltest tarray1_big.ddl -R tarray1_big.h5
+    call :tooltest4 tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
     call :tooltest tarray2.ddl --enable-error-stack tarray2.h5
     call :tooltest tarray3.ddl --enable-error-stack tarray3.h5
     call :tooltest tarray4.ddl --enable-error-stack tarray4.h5
@@ -513,8 +651,8 @@ rem ############################################################################
     call :tooltest tarray8.ddl --enable-error-stack tarray8.h5
 
     rem test for wildcards in filename (does not work with cmake)
-    rem call :tooltest3 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
-    rem call :tooltest3 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
+    rem call :tooltest4 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
+    rem call :tooltest4 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
     call :tooltest tmultifile.ddl --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5
 
     rem test for files with empty data
@@ -535,16 +673,16 @@ rem ############################################################################
     call :tooltest tlarge_objname.ddl --enable-error-stack -w157 tlarge_objname.h5
 
     rem test '-A' to suppress data but print attr's
-    call :tooltest tall-2A.ddl -A tall.h5
+    call :tooltest4 tall-2A.ddl --enable-error-stack -A tall.h5
 
     rem test '-r' to print attributes in ASCII instead of decimal
-    call :tooltest tall-2B.ddl -A -r tall.h5
+    call :tooltest4 tall-2B.ddl --enable-error-stack -A -r tall.h5
 
     rem test Subsetting
     call :tooltest tall-4s.ddl --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
     call :tooltest tall-5s.ddl --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
     call :tooltest tdset-3s.ddl --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5
-    call :tooltest tno-subset.ddl --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
+    call :tooltest4 tno-subset.ddl --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
 
     rem test printing characters in ASCII instead of decimal
     call :tooltest tchar1.ddl --enable-error-stack -r tchar.h5
@@ -556,7 +694,7 @@ rem ############################################################################
     call :tooltest tboot2.ddl --enable-error-stack -B tfcontents2.h5
 
     rem test -p with a non existing dataset
-    call :tooltest3 tperror.ddl --enable-error-stack -p -d bogus tfcontents1.h5
+    call :tooltest4 tperror.ddl --enable-error-stack -p -d bogus tfcontents1.h5
 
     rem test for file contents
     call :tooltest tcontents.ddl --enable-error-stack -n tfcontents1.h5
@@ -721,9 +859,9 @@ rem ############################################################################
 
     rem test for dataset region references 
     call :tooltest tdatareg.ddl --enable-error-stack tdatareg.h5
-    call :tooltest tdataregR.ddl -R tdatareg.h5
+    call :tooltest4 tdataregR.ddl --enable-error-stack -R tdatareg.h5
     call :tooltest tattrreg.ddl --enable-error-stack tattrreg.h5
-    call :tooltest tattrregR.ddl -R tattrreg.h5
+    call :tooltest4 tattrregR.ddl --enable-error-stack -R tattrreg.h5
 
     rem tests for group creation order
     rem "1" tracked, "2" name, root tracked
@@ -749,10 +887,10 @@ rem ############################################################################
     call :tooltest textlinkfar.ddl textlinkfar.h5
 
     rem test for dangling external links
-    rem test output filter issues call :tooltest3 textlink.ddl --enable-error-stack textlink.h5
+    rem test output filter issues call :tooltest4 textlink.ddl --enable-error-stack textlink.h5
 
     rem test for error stack display (BZ2048)
-    rem test output filter issues call :tooltest3 filter_fail.ddl --enable-error-stack filter_fail.h5
+    rem test output filter issues call :tooltest4 filter_fail.ddl --enable-error-stack filter_fail.h5
 
     rem test for -o -y for dataset with attributes
     call :tooltest tall-6.ddl --enable-error-stack -y -o data -d /g1/g1.1/dset1.1.1 tall.h5
