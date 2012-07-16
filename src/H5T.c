@@ -51,233 +51,11 @@
 #include <sys/fpu.h>
 #endif /* H5_HAVE_SYS_FPU_H */
 
-/*
- * Predefined data types. These are initialized at runtime in H5Tinit.c and
- * by H5T_init_interface() in this source file.
- *
- * If more of these are added, the new ones must be added to the list of
- * types to reset in H5T_term_interface().
- */
-hid_t H5T_IEEE_F32BE_g			= FAIL;
-hid_t H5T_IEEE_F32LE_g			= FAIL;
-hid_t H5T_IEEE_F64BE_g			= FAIL;
-hid_t H5T_IEEE_F64LE_g			= FAIL;
 
-hid_t H5T_VAX_F32_g			= FAIL;
-hid_t H5T_VAX_F64_g			= FAIL;
+/****************/
+/* Local Macros */
+/****************/
 
-hid_t H5T_STD_I8BE_g			= FAIL;
-hid_t H5T_STD_I8LE_g			= FAIL;
-hid_t H5T_STD_I16BE_g			= FAIL;
-hid_t H5T_STD_I16LE_g			= FAIL;
-hid_t H5T_STD_I32BE_g			= FAIL;
-hid_t H5T_STD_I32LE_g			= FAIL;
-hid_t H5T_STD_I64BE_g			= FAIL;
-hid_t H5T_STD_I64LE_g			= FAIL;
-hid_t H5T_STD_U8BE_g			= FAIL;
-hid_t H5T_STD_U8LE_g			= FAIL;
-hid_t H5T_STD_U16BE_g			= FAIL;
-hid_t H5T_STD_U16LE_g			= FAIL;
-hid_t H5T_STD_U32BE_g			= FAIL;
-hid_t H5T_STD_U32LE_g			= FAIL;
-hid_t H5T_STD_U64BE_g			= FAIL;
-hid_t H5T_STD_U64LE_g			= FAIL;
-hid_t H5T_STD_B8BE_g			= FAIL;
-hid_t H5T_STD_B8LE_g			= FAIL;
-hid_t H5T_STD_B16BE_g			= FAIL;
-hid_t H5T_STD_B16LE_g			= FAIL;
-hid_t H5T_STD_B32BE_g			= FAIL;
-hid_t H5T_STD_B32LE_g			= FAIL;
-hid_t H5T_STD_B64BE_g			= FAIL;
-hid_t H5T_STD_B64LE_g 			= FAIL;
-hid_t H5T_STD_REF_OBJ_g 		= FAIL;
-hid_t H5T_STD_REF_DSETREG_g 		= FAIL;
-
-hid_t H5T_UNIX_D32BE_g			= FAIL;
-hid_t H5T_UNIX_D32LE_g			= FAIL;
-hid_t H5T_UNIX_D64BE_g			= FAIL;
-hid_t H5T_UNIX_D64LE_g 			= FAIL;
-
-hid_t H5T_C_S1_g			= FAIL;
-
-hid_t H5T_FORTRAN_S1_g			= FAIL;
-
-hid_t H5T_NATIVE_SCHAR_g		= FAIL;
-hid_t H5T_NATIVE_UCHAR_g		= FAIL;
-hid_t H5T_NATIVE_SHORT_g		= FAIL;
-hid_t H5T_NATIVE_USHORT_g		= FAIL;
-hid_t H5T_NATIVE_INT_g			= FAIL;
-hid_t H5T_NATIVE_UINT_g			= FAIL;
-hid_t H5T_NATIVE_LONG_g			= FAIL;
-hid_t H5T_NATIVE_ULONG_g		= FAIL;
-hid_t H5T_NATIVE_LLONG_g		= FAIL;
-hid_t H5T_NATIVE_ULLONG_g		= FAIL;
-hid_t H5T_NATIVE_FLOAT_g		= FAIL;
-hid_t H5T_NATIVE_DOUBLE_g		= FAIL;
-#if H5_SIZEOF_LONG_DOUBLE !=0
-hid_t H5T_NATIVE_LDOUBLE_g		= FAIL;
-#endif
-hid_t H5T_NATIVE_B8_g			= FAIL;
-hid_t H5T_NATIVE_B16_g			= FAIL;
-hid_t H5T_NATIVE_B32_g			= FAIL;
-hid_t H5T_NATIVE_B64_g			= FAIL;
-hid_t H5T_NATIVE_OPAQUE_g		= FAIL;
-hid_t H5T_NATIVE_HADDR_g		= FAIL;
-hid_t H5T_NATIVE_HSIZE_g		= FAIL;
-hid_t H5T_NATIVE_HSSIZE_g		= FAIL;
-hid_t H5T_NATIVE_HERR_g			= FAIL;
-hid_t H5T_NATIVE_HBOOL_g		= FAIL;
-
-hid_t H5T_NATIVE_INT8_g			= FAIL;
-hid_t H5T_NATIVE_UINT8_g		= FAIL;
-hid_t H5T_NATIVE_INT_LEAST8_g		= FAIL;
-hid_t H5T_NATIVE_UINT_LEAST8_g		= FAIL;
-hid_t H5T_NATIVE_INT_FAST8_g		= FAIL;
-hid_t H5T_NATIVE_UINT_FAST8_g		= FAIL;
-
-hid_t H5T_NATIVE_INT16_g		= FAIL;
-hid_t H5T_NATIVE_UINT16_g		= FAIL;
-hid_t H5T_NATIVE_INT_LEAST16_g		= FAIL;
-hid_t H5T_NATIVE_UINT_LEAST16_g		= FAIL;
-hid_t H5T_NATIVE_INT_FAST16_g		= FAIL;
-hid_t H5T_NATIVE_UINT_FAST16_g		= FAIL;
-
-hid_t H5T_NATIVE_INT32_g		= FAIL;
-hid_t H5T_NATIVE_UINT32_g		= FAIL;
-hid_t H5T_NATIVE_INT_LEAST32_g		= FAIL;
-hid_t H5T_NATIVE_UINT_LEAST32_g		= FAIL;
-hid_t H5T_NATIVE_INT_FAST32_g		= FAIL;
-hid_t H5T_NATIVE_UINT_FAST32_g		= FAIL;
-
-hid_t H5T_NATIVE_INT64_g		= FAIL;
-hid_t H5T_NATIVE_UINT64_g		= FAIL;
-hid_t H5T_NATIVE_INT_LEAST64_g		= FAIL;
-hid_t H5T_NATIVE_UINT_LEAST64_g		= FAIL;
-hid_t H5T_NATIVE_INT_FAST64_g		= FAIL;
-hid_t H5T_NATIVE_UINT_FAST64_g		= FAIL;
-
-/*
- * Alignment constraints for native types. These are initialized at run time
- * in H5Tinit.c.  These alignments are mainly for offsets in HDF5 compound
- * datatype or C structures, which are different from the alignments for memory
- * address below this group of variables.
- */
-size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_SHORT_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_USHORT_COMP_ALIGN_g   	= 0;
-size_t H5T_NATIVE_INT_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_UINT_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_LONG_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_ULONG_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_LLONG_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g	        = 0;
-size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g		= 0;
-size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g	        = 0;
-#if H5_SIZEOF_LONG_DOUBLE !=0
-size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g	        = 0;
-#endif
-
-size_t H5T_POINTER_COMP_ALIGN_g	                = 0;
-size_t H5T_HVL_COMP_ALIGN_g	                = 0;
-size_t H5T_HOBJREF_COMP_ALIGN_g	                = 0;
-size_t H5T_HDSETREGREF_COMP_ALIGN_g	        = 0;
-
-/*
- * Alignment constraints for native types. These are initialized at run time
- * in H5Tinit.c
- */
-size_t H5T_NATIVE_SCHAR_ALIGN_g		= 0;
-size_t H5T_NATIVE_UCHAR_ALIGN_g		= 0;
-size_t H5T_NATIVE_SHORT_ALIGN_g		= 0;
-size_t H5T_NATIVE_USHORT_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_ALIGN_g		= 0;
-size_t H5T_NATIVE_UINT_ALIGN_g		= 0;
-size_t H5T_NATIVE_LONG_ALIGN_g		= 0;
-size_t H5T_NATIVE_ULONG_ALIGN_g		= 0;
-size_t H5T_NATIVE_LLONG_ALIGN_g		= 0;
-size_t H5T_NATIVE_ULLONG_ALIGN_g	= 0;
-size_t H5T_NATIVE_FLOAT_ALIGN_g		= 0;
-size_t H5T_NATIVE_DOUBLE_ALIGN_g	= 0;
-#if H5_SIZEOF_LONG_DOUBLE !=0
-size_t H5T_NATIVE_LDOUBLE_ALIGN_g	= 0;
-#endif
-
-/*
- * Alignment constraints for C9x types. These are initialized at run time in
- * H5Tinit.c if the types are provided by the system. Otherwise we set their
- * values to 0 here (no alignment calculated).
- */
-size_t H5T_NATIVE_INT8_ALIGN_g		= 0;
-size_t H5T_NATIVE_UINT8_ALIGN_g		= 0;
-size_t H5T_NATIVE_INT_LEAST8_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_LEAST8_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_FAST8_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_FAST8_ALIGN_g	= 0;
-
-size_t H5T_NATIVE_INT16_ALIGN_g		= 0;
-size_t H5T_NATIVE_UINT16_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_LEAST16_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_LEAST16_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_FAST16_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_FAST16_ALIGN_g	= 0;
-
-size_t H5T_NATIVE_INT32_ALIGN_g		= 0;
-size_t H5T_NATIVE_UINT32_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_LEAST32_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_LEAST32_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_FAST32_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_FAST32_ALIGN_g	= 0;
-
-size_t H5T_NATIVE_INT64_ALIGN_g		= 0;
-size_t H5T_NATIVE_UINT64_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_LEAST64_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_LEAST64_ALIGN_g	= 0;
-size_t H5T_NATIVE_INT_FAST64_ALIGN_g	= 0;
-size_t H5T_NATIVE_UINT_FAST64_ALIGN_g	= 0;
-
-/* Useful floating-point values for conversion routines */
-/* (+/- Inf for all floating-point types) */
-float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0;
-float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0;
-double H5T_NATIVE_DOUBLE_POS_INF_g      = 0.0;
-double H5T_NATIVE_DOUBLE_NEG_INF_g      = 0.0;
-
-
-/*
- * The path database. Each path has a source and destination data type pair
- * which is used as the key by which the `entries' array is sorted.
- */
-static struct {
-    int	npaths;		/*number of paths defined		*/
-    size_t	apaths;		/*number of paths allocated		*/
-    H5T_path_t	**path;		/*sorted array of path pointers		*/
-    int	nsoft;		/*number of soft conversions defined	*/
-    size_t	asoft;		/*number of soft conversions allocated	*/
-    H5T_soft_t	*soft;		/*unsorted array of soft conversions	*/
-} H5T_g;
-
-/* The native endianess of the platform */
-H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
-
-/* Declare the free list for H5T_t's and H5T_shared_t's */
-H5FL_DEFINE(H5T_t);
-H5FL_DEFINE(H5T_shared_t);
-
-/* Declare the free list for H5T_path_t's */
-H5FL_DEFINE(H5T_path_t);
-
-/* Static local functions */
-static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
-                H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
-static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
-        H5T_t *dst, H5T_conv_t func, hid_t dxpl_id, hbool_t api_call);
-static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
-static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
-static H5T_t *H5T_decode(const unsigned char *buf);
-static herr_t H5T_set_size(H5T_t *dt, size_t size);
-
-/* Local macro definitions */
 #define H5T_ENCODE_VERSION      0
 
 /*
@@ -499,6 +277,264 @@ static herr_t H5T_set_size(H5T_t *dt, size_t size);
     if((GLOBAL = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)			      \
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom") \
 }
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
+                H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
+static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
+        H5T_t *dst, H5T_conv_t func, hid_t dxpl_id, hbool_t api_call);
+static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
+static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
+static H5T_t *H5T_decode(const unsigned char *buf);
+static herr_t H5T_set_size(H5T_t *dt, size_t size);
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/* The native endianess of the platform */
+H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*
+ * Predefined data types. These are initialized at runtime in H5Tinit.c and
+ * by H5T_init_interface() in this source file.
+ *
+ * If more of these are added, the new ones must be added to the list of
+ * types to reset in H5T_term_interface().
+ */
+hid_t H5T_IEEE_F32BE_g			= FAIL;
+hid_t H5T_IEEE_F32LE_g			= FAIL;
+hid_t H5T_IEEE_F64BE_g			= FAIL;
+hid_t H5T_IEEE_F64LE_g			= FAIL;
+
+hid_t H5T_VAX_F32_g			= FAIL;
+hid_t H5T_VAX_F64_g			= FAIL;
+
+hid_t H5T_STD_I8BE_g			= FAIL;
+hid_t H5T_STD_I8LE_g			= FAIL;
+hid_t H5T_STD_I16BE_g			= FAIL;
+hid_t H5T_STD_I16LE_g			= FAIL;
+hid_t H5T_STD_I32BE_g			= FAIL;
+hid_t H5T_STD_I32LE_g			= FAIL;
+hid_t H5T_STD_I64BE_g			= FAIL;
+hid_t H5T_STD_I64LE_g			= FAIL;
+hid_t H5T_STD_U8BE_g			= FAIL;
+hid_t H5T_STD_U8LE_g			= FAIL;
+hid_t H5T_STD_U16BE_g			= FAIL;
+hid_t H5T_STD_U16LE_g			= FAIL;
+hid_t H5T_STD_U32BE_g			= FAIL;
+hid_t H5T_STD_U32LE_g			= FAIL;
+hid_t H5T_STD_U64BE_g			= FAIL;
+hid_t H5T_STD_U64LE_g			= FAIL;
+hid_t H5T_STD_B8BE_g			= FAIL;
+hid_t H5T_STD_B8LE_g			= FAIL;
+hid_t H5T_STD_B16BE_g			= FAIL;
+hid_t H5T_STD_B16LE_g			= FAIL;
+hid_t H5T_STD_B32BE_g			= FAIL;
+hid_t H5T_STD_B32LE_g			= FAIL;
+hid_t H5T_STD_B64BE_g			= FAIL;
+hid_t H5T_STD_B64LE_g 			= FAIL;
+hid_t H5T_STD_REF_OBJ_g 		= FAIL;
+hid_t H5T_STD_REF_DSETREG_g 		= FAIL;
+
+hid_t H5T_UNIX_D32BE_g			= FAIL;
+hid_t H5T_UNIX_D32LE_g			= FAIL;
+hid_t H5T_UNIX_D64BE_g			= FAIL;
+hid_t H5T_UNIX_D64LE_g 			= FAIL;
+
+hid_t H5T_C_S1_g			= FAIL;
+
+hid_t H5T_FORTRAN_S1_g			= FAIL;
+
+hid_t H5T_NATIVE_SCHAR_g		= FAIL;
+hid_t H5T_NATIVE_UCHAR_g		= FAIL;
+hid_t H5T_NATIVE_SHORT_g		= FAIL;
+hid_t H5T_NATIVE_USHORT_g		= FAIL;
+hid_t H5T_NATIVE_INT_g			= FAIL;
+hid_t H5T_NATIVE_UINT_g			= FAIL;
+hid_t H5T_NATIVE_LONG_g			= FAIL;
+hid_t H5T_NATIVE_ULONG_g		= FAIL;
+hid_t H5T_NATIVE_LLONG_g		= FAIL;
+hid_t H5T_NATIVE_ULLONG_g		= FAIL;
+hid_t H5T_NATIVE_FLOAT_g		= FAIL;
+hid_t H5T_NATIVE_DOUBLE_g		= FAIL;
+#if H5_SIZEOF_LONG_DOUBLE !=0
+hid_t H5T_NATIVE_LDOUBLE_g		= FAIL;
+#endif
+hid_t H5T_NATIVE_B8_g			= FAIL;
+hid_t H5T_NATIVE_B16_g			= FAIL;
+hid_t H5T_NATIVE_B32_g			= FAIL;
+hid_t H5T_NATIVE_B64_g			= FAIL;
+hid_t H5T_NATIVE_OPAQUE_g		= FAIL;
+hid_t H5T_NATIVE_HADDR_g		= FAIL;
+hid_t H5T_NATIVE_HSIZE_g		= FAIL;
+hid_t H5T_NATIVE_HSSIZE_g		= FAIL;
+hid_t H5T_NATIVE_HERR_g			= FAIL;
+hid_t H5T_NATIVE_HBOOL_g		= FAIL;
+
+hid_t H5T_NATIVE_INT8_g			= FAIL;
+hid_t H5T_NATIVE_UINT8_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST8_g		= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST8_g		= FAIL;
+hid_t H5T_NATIVE_INT_FAST8_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST8_g		= FAIL;
+
+hid_t H5T_NATIVE_INT16_g		= FAIL;
+hid_t H5T_NATIVE_UINT16_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST16_g		= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST16_g		= FAIL;
+hid_t H5T_NATIVE_INT_FAST16_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST16_g		= FAIL;
+
+hid_t H5T_NATIVE_INT32_g		= FAIL;
+hid_t H5T_NATIVE_UINT32_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST32_g		= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST32_g		= FAIL;
+hid_t H5T_NATIVE_INT_FAST32_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST32_g		= FAIL;
+
+hid_t H5T_NATIVE_INT64_g		= FAIL;
+hid_t H5T_NATIVE_UINT64_g		= FAIL;
+hid_t H5T_NATIVE_INT_LEAST64_g		= FAIL;
+hid_t H5T_NATIVE_UINT_LEAST64_g		= FAIL;
+hid_t H5T_NATIVE_INT_FAST64_g		= FAIL;
+hid_t H5T_NATIVE_UINT_FAST64_g		= FAIL;
+
+/*
+ * Alignment constraints for native types. These are initialized at run time
+ * in H5Tinit.c.  These alignments are mainly for offsets in HDF5 compound
+ * datatype or C structures, which are different from the alignments for memory
+ * address below this group of variables.
+ */
+size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_SHORT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_USHORT_COMP_ALIGN_g   	= 0;
+size_t H5T_NATIVE_INT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_LONG_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULONG_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_LLONG_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g	        = 0;
+size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g		= 0;
+size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g	        = 0;
+#if H5_SIZEOF_LONG_DOUBLE !=0
+size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g	        = 0;
+#endif
+
+size_t H5T_POINTER_COMP_ALIGN_g	                = 0;
+size_t H5T_HVL_COMP_ALIGN_g	                = 0;
+size_t H5T_HOBJREF_COMP_ALIGN_g	                = 0;
+size_t H5T_HDSETREGREF_COMP_ALIGN_g	        = 0;
+
+/*
+ * Alignment constraints for native types. These are initialized at run time
+ * in H5Tinit.c
+ */
+size_t H5T_NATIVE_SCHAR_ALIGN_g		= 0;
+size_t H5T_NATIVE_UCHAR_ALIGN_g		= 0;
+size_t H5T_NATIVE_SHORT_ALIGN_g		= 0;
+size_t H5T_NATIVE_USHORT_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT_ALIGN_g		= 0;
+size_t H5T_NATIVE_LONG_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULONG_ALIGN_g		= 0;
+size_t H5T_NATIVE_LLONG_ALIGN_g		= 0;
+size_t H5T_NATIVE_ULLONG_ALIGN_g	= 0;
+size_t H5T_NATIVE_FLOAT_ALIGN_g		= 0;
+size_t H5T_NATIVE_DOUBLE_ALIGN_g	= 0;
+#if H5_SIZEOF_LONG_DOUBLE !=0
+size_t H5T_NATIVE_LDOUBLE_ALIGN_g	= 0;
+#endif
+
+/*
+ * Alignment constraints for C9x types. These are initialized at run time in
+ * H5Tinit.c if the types are provided by the system. Otherwise we set their
+ * values to 0 here (no alignment calculated).
+ */
+size_t H5T_NATIVE_INT8_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT8_ALIGN_g		= 0;
+size_t H5T_NATIVE_INT_LEAST8_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST8_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_FAST8_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST8_ALIGN_g	= 0;
+
+size_t H5T_NATIVE_INT16_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT16_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST16_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST16_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_FAST16_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST16_ALIGN_g	= 0;
+
+size_t H5T_NATIVE_INT32_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT32_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST32_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST32_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_FAST32_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST32_ALIGN_g	= 0;
+
+size_t H5T_NATIVE_INT64_ALIGN_g		= 0;
+size_t H5T_NATIVE_UINT64_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_LEAST64_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_LEAST64_ALIGN_g	= 0;
+size_t H5T_NATIVE_INT_FAST64_ALIGN_g	= 0;
+size_t H5T_NATIVE_UINT_FAST64_ALIGN_g	= 0;
+
+/* Useful floating-point values for conversion routines */
+/* (+/- Inf for all floating-point types) */
+float H5T_NATIVE_FLOAT_POS_INF_g        = 0.0;
+float H5T_NATIVE_FLOAT_NEG_INF_g        = 0.0;
+double H5T_NATIVE_DOUBLE_POS_INF_g      = 0.0;
+double H5T_NATIVE_DOUBLE_NEG_INF_g      = 0.0;
+
+/* Declare the free list for H5T_t's and H5T_shared_t's */
+H5FL_DEFINE(H5T_t);
+H5FL_DEFINE(H5T_shared_t);
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+/*
+ * The path database. Each path has a source and destination data type pair
+ * which is used as the key by which the `entries' array is sorted.
+ */
+static struct {
+    int	npaths;		/*number of paths defined		*/
+    size_t	apaths;		/*number of paths allocated		*/
+    H5T_path_t	**path;		/*sorted array of path pointers		*/
+    int	nsoft;		/*number of soft conversions defined	*/
+    size_t	asoft;		/*number of soft conversions allocated	*/
+    H5T_soft_t	*soft;		/*unsorted array of soft conversions	*/
+} H5T_g;
+
+/* Declare the free list for H5T_path_t's */
+H5FL_DEFINE_STATIC(H5T_path_t);
+
+/* Datatype ID class */
+static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
+    H5I_DATATYPE,		/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    8,				/* # of reserved IDs for class */
+    (H5I_free_t)H5T_close	/* Callback routine for closing objects of this class */
+}};
+
 
 
 /*-------------------------------------------------------------------------
@@ -743,7 +779,7 @@ H5T_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the file IDs */
-    if(H5I_register_type(H5I_DATATYPE, (size_t)H5I_DATATYPEID_HASHSIZE, H5T_RESERVED_ATOMS, (H5I_free_t)H5T_close)<0)
+    if(H5I_register_type(H5I_DATATYPE_CLS) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
     /* Make certain there aren't too many classes of datatypes defined */

@@ -47,8 +47,6 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5D__init_pub_interface(void);
-
 
 /*********************/
 /* Package Variables */

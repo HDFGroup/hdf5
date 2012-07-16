@@ -46,9 +46,6 @@
 /* Other public headers needed by this file */
 #include "H5Spublic.h"		/* Dataspace functions			*/
 
-/* Number of reserved IDs in ID group */
-#define H5T_RESERVED_ATOMS 	8
-
 /* Length of debugging name buffer */
 #define H5T_NAMELEN		32
 

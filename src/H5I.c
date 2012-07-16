@@ -22,7 +22,7 @@
  * DESIGN:	The types are stored in an array of pointers to store each
  *		type in an element. Each "type" node contains a link to a
  *		hash table to manage the IDs in each type.  Allowed types are
- *		values within the range 1 to MAX_NUM_TYPES and are given out
+ *		values within the range 1 to H5I_MAX_NUM_TYPES and are given out
  *		at run-time.  Types used by the library are stored in global
  *		variables defined in H5Ipublic.h.
  *
@@ -98,14 +98,12 @@ typedef struct H5I_id_info_t {
 
 /* ID type structure used */
 typedef struct {
-    unsigned	count;		/*# of times this type has been initialized*/
-    unsigned	reserved;	/*# of IDs to reserve for constant IDs	    */
-    unsigned	wrapped;	/*whether the id count has wrapped around   */
-    size_t	hash_size;	/*sizeof the hash table to store the IDs in */
-    unsigned	ids;		/*current number of IDs held		    */
-    unsigned	nextid;		/*ID to use for the next atom		    */
-    H5I_free_t	free_func;	/*release object method	    		    */
-    H5I_id_info_t **id_list;	/*pointer to an array of ptrs to IDs	    */
+    const H5I_class_t *cls;     /* Pointer to ID class                      */
+    unsigned	count;		/* # of times this type has been initialized*/
+    unsigned	wrapped;	/* Whether the id count has wrapped around  */
+    unsigned	ids;		/* Current number of IDs held		    */
+    unsigned	nextid;		/* ID to use for the next atom		    */
+    H5I_id_info_t **id_list;	/* Pointer to an array of ptrs to IDs	    */
 } H5I_id_type_t;
 
 typedef struct {
@@ -117,7 +115,7 @@ typedef struct {
 /*-------------------- Locally scoped variables -----------------------------*/
 
 /* Array of pointers to atomic types */
-static H5I_id_type_t *H5I_id_type_list_g[MAX_NUM_TYPES];
+static H5I_id_type_t *H5I_id_type_list_g[H5I_MAX_NUM_TYPES];
 
 /* Variable to keep track of the number of types allocated.  Its value is the */
 /* next type ID to be handed out, so it is always one greater than the number */
@@ -129,6 +127,12 @@ static H5I_type_t H5I_next_type = (H5I_type_t) H5I_NTYPES;
 
 /* Declare a free list to manage the H5I_id_info_t struct */
 H5FL_DEFINE_STATIC(H5I_id_info_t);
+
+/* Declare a free list to manage the H5I_id_type_t struct */
+H5FL_DEFINE_STATIC(H5I_id_type_t);
+
+/* Declare a free list to manage the H5I_class_t struct */
+H5FL_DEFINE_STATIC(H5I_class_t);
 
 /*--------------------- Local function prototypes ---------------------------*/
 static H5I_id_info_t *H5I_find_id(hid_t id);
@@ -195,8 +199,11 @@ H5I_term_interface(void)
         if(0 == n) {
             for(type = (H5I_type_t)0; type < H5I_next_type; H5_INC_ENUM(H5I_type_t,type)) {
                 type_ptr = H5I_id_type_list_g[type];
-                H5MM_xfree(type_ptr);
-                H5I_id_type_list_g[type] = NULL;
+                if(type_ptr) {
+                    HDassert(NULL == type_ptr->id_list);
+                    type_ptr = H5FL_FREE(H5I_id_type_t, type_ptr);
+                    H5I_id_type_list_g[type] = NULL;
+                } /* end if */
             } /* end for */
         } /* end if */
 
@@ -232,15 +239,64 @@ H5I_term_interface(void)
 H5I_type_t
 H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
 {
+    H5I_class_t *cls = NULL;    /* New ID class */
+    H5I_type_t new_type;        /* New ID type value */
     H5I_type_t ret_value;       /* Return value */
 
     FUNC_ENTER_API(H5I_BADID)
     H5TRACE3("It", "zIux", hash_size, reserved, free_func);
 
-    /* Call H5I_register_type with a value of 0 to get a new type */
-    ret_value = H5I_register_type((H5I_type_t)0, hash_size, reserved, free_func);
+    /* Generate a new H5I_type_t value */
+
+    /* Increment the number of types*/
+    if(H5I_next_type < H5I_MAX_NUM_TYPES) {
+        new_type = H5I_next_type;
+        H5_INC_ENUM(H5I_type_t, H5I_next_type);
+    } /* end if */
+    else {
+        hbool_t done;       /* Indicate that search was successful */
+        int i;              /* Local index variable */
+
+        /* Look for a free type to give out */
+        done = FALSE;
+        for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES && done == FALSE; i++) {
+            if(NULL == H5I_id_type_list_g[i]) {
+                /* Found a free type ID */
+                new_type = (H5I_type_t)i;
+                done = TRUE;
+            } /* end if */
+        } /* end for */
+
+        /* Verify that we found a type to give out */
+        if(done == FALSE)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "Maximum number of ID types exceeded.")
+    } /* end else */
+
+    /* Allocate new ID class */
+    if(NULL == (cls = H5FL_MALLOC(H5I_class_t)))
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, H5I_BADID, "ID class allocation failed")
+
+    /* Initialize class fields */
+    cls->type_id = new_type;
+    cls->flags = H5I_CLASS_IS_APPLICATION;
+    cls->hash_size = hash_size;
+    cls->reserved = reserved;
+    cls->free_func = free_func;
+
+    /* Register the new ID class */
+    if(H5I_register_type(cls) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, H5I_BADID, "can't initialize ID class")
+
+    /* Set return value */
+    ret_value = new_type;
 
 done:
+    /* Clean up on error */
+    if(ret_value < 0) {
+        if(cls)
+            cls = H5FL_FREE(H5I_class_t, cls);
+    } /* end if */
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister_type() */
 
@@ -248,17 +304,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5I_register_type
  *
- * Purpose:	Creates a new type of ID's to give out.  A specific number
- *		(RESERVED) of type entries may be reserved to enable "constant"
- *		values to be handed out which are valid IDs in the type, but
- *		which do not map to any data structures and are not allocated
- *		dynamically later. TYPE_ID is the H5I_type_t value of the type
- *		to be initialized.  If this value is zero, a new type is created.
- *		If this value is one of the library types, that type is
- *		initialized or its reference count is incremented (if it is already
- *		initialized).  HASH_SIZE is the minimum hash table size to
- *		use for the type. FREE_FUNC is called with an object pointer
- *		when the object is removed from the type.
+ * Purpose:	Creates a new type of ID's to give out.
+ *		The class is initialized or its reference count is incremented
+ *              (if it is already initialized).
  *
  * Return:	Success:	Type ID of the new type
  *		Failure:	H5I_BADID
@@ -269,75 +317,44 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5I_type_t
-H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved,
-    H5I_free_t free_func)
+herr_t
+H5I_register_type(const H5I_class_t *cls)
 {
-    H5I_id_type_t	*type_ptr = NULL;		/*ptr to the atomic type*/
-    H5I_type_t ret_value = H5I_BADID;                   /* type ID to return */
+    H5I_id_type_t *type_ptr = NULL;	/* Ptr to the atomic type*/
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_BADID)
+    FUNC_ENTER_NOAPI(FAIL)
 
-    /* Check that type_id is either a library type or zero */
-    if(type_id < 0 || type_id >= H5I_NTYPES)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_BADID, "invalid type ID")
-
-    if(type_id == 0) {	/* Generate a new H5I_type_t value */
-        /* Increment the number of types*/
-        if(H5I_next_type < MAX_NUM_TYPES) {
-            ret_value = H5I_next_type;
-            H5_INC_ENUM(H5I_type_t, H5I_next_type);
-        }
-        else {
-            hbool_t done;       /* Indicate that search was successful */
-            int i;              /* Local index variable */
-
-            /* Look for a free type to give out */
-            done = FALSE;
-            for(i = H5I_NTYPES; i < MAX_NUM_TYPES && done == FALSE; i++) {
-                if(NULL == H5I_id_type_list_g[i]) {
-                    /* Found a free type ID */
-                    ret_value = (H5I_type_t)i;
-                    done = TRUE;
-                } /* end if */
-            } /* end for */
-
-            /* Verify that we found a type to give out */
-            if(done == FALSE)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "Maximum number of ID types exceeded.")
-        } /* end else */
-    } /* end if */
-    else	/* type_id is a library type; use this value. */
-        ret_value = type_id;
+    /* Sanity check */
+    HDassert(cls);
+    HDassert(cls->type_id > 0 && cls->type_id < H5I_MAX_NUM_TYPES);
 
     /* Initialize the type */
 
     /* Check arguments */
 #ifdef HASH_SIZE_POWER_2
-    if(!POWER_OF_TWO(hash_size) || hash_size == 1)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5I_BADID, "invalid hash size")
+    if(!POWER_OF_TWO(cls->hash_size) || cls->hash_size == 1)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADRANGE, FAIL, "invalid hash size")
 #endif /* HASH_SIZE_POWER_2 */
 
-    if(NULL == H5I_id_type_list_g[ret_value]) {
+    if(NULL == H5I_id_type_list_g[cls->type_id]) {
         /* Allocate the type information for new type */
-        if(NULL == (type_ptr = (H5I_id_type_t *)H5MM_calloc(sizeof(H5I_id_type_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
-        H5I_id_type_list_g[ret_value] = type_ptr;
+        if(NULL == (type_ptr = (H5I_id_type_t *)H5FL_CALLOC(H5I_id_type_t)))
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "ID type allocation failed")
+        H5I_id_type_list_g[cls->type_id] = type_ptr;
     } /* end if */
     else {
         /* Get the pointer to the existing type */
-        type_ptr = H5I_id_type_list_g[ret_value];
+        type_ptr = H5I_id_type_list_g[cls->type_id];
     } /* end else */
 
+    /* Initialize the ID type structure for new types */
     if(type_ptr->count == 0) {
-        /* Initialize the ID type structure for new types */
-        type_ptr->hash_size = hash_size;
-        type_ptr->reserved = reserved;
+        type_ptr->cls = cls;
         type_ptr->wrapped = 0;
         type_ptr->ids = 0;
-        type_ptr->nextid = reserved;
-        type_ptr->free_func = free_func;
-        type_ptr->id_list = (H5I_id_info_t **)H5MM_calloc(hash_size * sizeof(H5I_id_info_t *));
+        type_ptr->nextid = cls->reserved;
+        type_ptr->id_list = (H5I_id_info_t **)H5MM_calloc(cls->hash_size * sizeof(H5I_id_info_t *));
         if(NULL == type_ptr->id_list)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5I_BADID, "memory allocation failed")
     } /* end if */
@@ -346,10 +363,11 @@ H5I_register_type(H5I_type_t type_id, size_t hash_size, unsigned reserved,
     type_ptr->count++;
 
 done:
-    if(ret_value == H5I_BADID) {	/* Clean up on error */
-        if(type_ptr != NULL) {
-            H5MM_xfree(type_ptr->id_list);
-            H5MM_xfree(type_ptr);
+    if(ret_value < 0) {	/* Clean up on error */
+        if(type_ptr) {
+            if(type_ptr->id_list)
+                H5MM_xfree(type_ptr->id_list);
+            (void)H5FL_FREE(H5I_id_type_t, type_ptr);
         } /* end if */
     } /* end if */
 
@@ -566,7 +584,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
      * counts. Ignore the return value from from the free method and remove
      * object from type regardless if FORCE is non-zero.
      */
-    for(i = 0; i < type_ptr->hash_size; i++) {
+    for(i = 0; i < type_ptr->cls->hash_size; i++) {
         H5I_id_info_t *cur;          /* Current node being worked with */
         H5I_id_info_t *next;         /* Next node in list */
 
@@ -584,7 +602,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 
             /* Check for a 'free' function and call it, if it exists */
             /* (Casting away const OK -QAK) */
-            if(type_ptr->free_func && (type_ptr->free_func)((void *)cur->obj_ptr) < 0) {
+            if(type_ptr->cls->free_func && (type_ptr->cls->free_func)((void *)cur->obj_ptr) < 0) {
                 if(force) {
 #ifdef H5I_DEBUG
                     if(H5DEBUG(I)) {
@@ -723,12 +741,17 @@ H5I_destroy_type(H5I_type_t type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* Close/clear/destroy all IDs for this type */
-    H5I_clear_type(type, TRUE, FALSE);
-    H5E_clear_stack(NULL); /*don't care about errors*/
+    H5E_BEGIN_TRY {
+        H5I_clear_type(type, TRUE, FALSE);
+    } H5E_END_TRY       /*don't care about errors*/
 
-    H5MM_xfree(type_ptr->id_list);
+    /* Check if we should release the ID class */
+    if(type_ptr->cls->flags & H5I_CLASS_IS_APPLICATION)
+        type_ptr->cls = H5FL_FREE(H5I_class_t, (void *)type_ptr->cls);
 
-    H5MM_free(type_ptr);
+    type_ptr->id_list = H5MM_xfree(type_ptr->id_list);
+
+    type_ptr = H5FL_FREE(H5I_id_type_t, type_ptr);
     H5I_id_type_list_g[type] = NULL;
 
 done:
@@ -824,7 +847,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     id_ptr->next = NULL;
 
     /* hash bucket already full, prepend to front of chain */
-    hash_loc = type_ptr->nextid % (unsigned)type_ptr->hash_size;
+    hash_loc = type_ptr->nextid % (unsigned)type_ptr->cls->hash_size;
     if(type_ptr->id_list[hash_loc] != NULL)
 	id_ptr->next = type_ptr->id_list[hash_loc];
 
@@ -840,7 +863,7 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
      */
     if(type_ptr->nextid > (unsigned)ID_MASK) {
 	type_ptr->wrapped = 1;
-	type_ptr->nextid = type_ptr->reserved;
+	type_ptr->nextid = type_ptr->cls->reserved;
     } /* end if */
 
     /*
@@ -854,14 +877,14 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 	 * we check all possible values and didn't find any free ones *then*
 	 * we can fail.
 	 */
-	for(i = type_ptr->reserved; i < ID_MASK; i++) {
+	for(i = type_ptr->cls->reserved; i < ID_MASK; i++) {
 	    /* Handle end of range by wrapping to beginning */
 	    if(type_ptr->nextid > (unsigned)ID_MASK)
-		type_ptr->nextid = type_ptr->reserved;
+		type_ptr->nextid = type_ptr->cls->reserved;
 
 	    /* new ID to check for */
 	    next_id = H5I_MAKE(type, type_ptr->nextid);
-	    hash_loc = (unsigned)H5I_LOC(type_ptr->nextid, type_ptr->hash_size);
+	    hash_loc = (unsigned)H5I_LOC(type_ptr->nextid, type_ptr->cls->hash_size);
 	    curr_id = type_ptr->id_list[hash_loc];
 	    if(curr_id == NULL)
                 break; /* Ha! this is not likely... */
@@ -1205,7 +1228,7 @@ H5I_remove(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid type")
 
     /* Get the bucket in which the ID is located */
-    hash_loc = (unsigned)H5I_LOC(id, type_ptr->hash_size);
+    hash_loc = (unsigned)H5I_LOC(id, type_ptr->cls->hash_size);
     curr_id = type_ptr->id_list[hash_loc];
     if(NULL == curr_id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "invalid ID")
@@ -1336,7 +1359,7 @@ H5I_dec_ref(hid_t id)
      */
     if(1 == id_ptr->count) {
         /* (Casting away const OK -QAK) */
-        if(!type_ptr->free_func || (type_ptr->free_func)((void *)id_ptr->obj_ptr) >= 0) {
+        if(!type_ptr->cls->free_func || (type_ptr->cls->free_func)((void *)id_ptr->obj_ptr) >= 0) {
             H5I_remove(id);
             ret_value = 0;
         } /* end if */
@@ -1933,13 +1956,12 @@ H5I_search_cb(void *obj, hid_t id, void *_udata)
     H5I_search_ud_t *udata = (H5I_search_ud_t *)_udata; /* User data for callback */
     int ret_value;     /* Callback return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     ret_value = (*udata->app_cb)(obj, id, udata->app_key);
     if(ret_value > 0)
         udata->ret_obj = obj;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_search_cb() */
 
@@ -2045,7 +2067,7 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
         unsigned u;			/* Counter		*/
 
         /* Start at the beginning of the array */
-        for(u = 0; u < type_ptr->hash_size; u++) {
+        for(u = 0; u < type_ptr->cls->hash_size; u++) {
             H5I_id_info_t	*id_ptr;	/* Ptr to the new ID	*/
 
             id_ptr = type_ptr->id_list[u];
@@ -2110,7 +2132,7 @@ H5I_find_id(hid_t id)
         HGOTO_DONE(NULL);
 
     /* Get the bucket in which the ID is located */
-    hash_loc = (unsigned)H5I_LOC(id, type_ptr->hash_size);
+    hash_loc = (unsigned)H5I_LOC(id, type_ptr->cls->hash_size);
     id_ptr = type_ptr->id_list[hash_loc];
 
     /* Scan the bucket's linked list for a match */
@@ -2297,9 +2319,9 @@ H5I_debug(H5I_type_t type)
 
     /* Header */
     fprintf(stderr, "	 count	   = %u\n", type_ptr->count);
-    fprintf(stderr, "	 reserved  = %u\n", type_ptr->reserved);
+    fprintf(stderr, "	 reserved  = %u\n", type_ptr->cls->reserved);
     fprintf(stderr, "	 wrapped   = %u\n", type_ptr->wrapped);
-    fprintf(stderr, "	 hash_size = %lu\n", (unsigned long)type_ptr->hash_size);
+    fprintf(stderr, "	 hash_size = %lu\n", (unsigned long)type_ptr->cls->hash_size);
     fprintf(stderr, "	 ids	   = %u\n", type_ptr->ids);
     fprintf(stderr, "	 nextid	   = %u\n", type_ptr->nextid);
 

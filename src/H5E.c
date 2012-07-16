@@ -64,9 +64,6 @@
 /* Local Macros */
 /****************/
 
-/* Reserved atoms in for error API IDs */
-#define H5E_RESERVED_ATOMS  0
-
 /* HDF5 error class */
 #define H5E_CLS_NAME         "HDF5"
 #define H5E_CLS_LIB_NAME     "HDF5"
@@ -85,6 +82,18 @@
 /********************/
 /* Local Prototypes */
 /********************/
+/* Static function declarations */
+static H5E_cls_t *H5E_register_class(const char *cls_name, const char *lib_name,
+                                const char *version);
+static herr_t  H5E_unregister_class(H5E_cls_t *cls);
+static ssize_t H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size);
+static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
+static herr_t  H5E_close_msg(H5E_msg_t *err);
+static H5E_msg_t *H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
+static H5E_t  *H5E_get_current_stack(void);
+static herr_t  H5E_set_current_stack(H5E_t *estack);
+static herr_t  H5E_close_stack(H5E_t *err_stack);
+static ssize_t H5E_get_num(const H5E_t *err_stack);
 
 
 /*********************/
@@ -101,20 +110,6 @@
 /* Local Variables */
 /*******************/
 
-
-/* Static function declarations */
-static H5E_cls_t *H5E_register_class(const char *cls_name, const char *lib_name,
-                                const char *version);
-static herr_t  H5E_unregister_class(H5E_cls_t *cls);
-static ssize_t H5E_get_class_name(const H5E_cls_t *cls, char *name, size_t size);
-static int H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
-static herr_t  H5E_close_msg(H5E_msg_t *err);
-static H5E_msg_t *H5E_create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
-static H5E_t  *H5E_get_current_stack(void);
-static herr_t  H5E_set_current_stack(H5E_t *estack);
-static herr_t  H5E_close_stack(H5E_t *err_stack);
-static ssize_t H5E_get_num(const H5E_t *err_stack);
-
 /* Declare a free list to manage the H5E_t struct */
 H5FL_DEFINE_STATIC(H5E_t);
 
@@ -123,6 +118,34 @@ H5FL_DEFINE_STATIC(H5E_cls_t);
 
 /* Declare a free list to manage the H5E_msg_t struct */
 H5FL_DEFINE_STATIC(H5E_msg_t);
+
+/* Error class ID class */
+static const H5I_class_t H5I_ERRCLS_CLS[1] = {{
+    H5I_ERROR_CLASS,		/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5E_unregister_class /* Callback routine for closing objects of this class */
+}};
+
+/* Error message ID class */
+static const H5I_class_t H5I_ERRMSG_CLS[1] = {{
+    H5I_ERROR_MSG,		/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5E_close_msg   /* Callback routine for closing objects of this class */
+}};
+
+/* Error stack ID class */
+static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
+    H5I_ERROR_STACK,		/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5E_close_stack /* Callback routine for closing objects of this class */
+}};
+
 
 
 /*-------------------------------------------------------------------------
@@ -213,18 +236,15 @@ H5E_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the error class IDs */
-    if(H5I_register_type(H5I_ERROR_CLASS, (size_t)H5I_ERRCLS_HASHSIZE, H5E_RESERVED_ATOMS,
-                    (H5I_free_t)H5E_unregister_class) < H5I_FILE)
+    if(H5I_register_type(H5I_ERRCLS_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
     /* Initialize the atom group for the major error IDs */
-    if(H5I_register_type(H5I_ERROR_MSG, (size_t)H5I_ERRMSG_HASHSIZE, H5E_RESERVED_ATOMS,
-                    (H5I_free_t)H5E_close_msg) < H5I_FILE)
+    if(H5I_register_type(H5I_ERRMSG_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
     /* Initialize the atom group for the error stacks */
-    if(H5I_register_type(H5I_ERROR_STACK, (size_t)H5I_ERRSTK_HASHSIZE, H5E_RESERVED_ATOMS,
-                    (H5I_free_t)H5E_close_stack) < H5I_FILE)
+    if(H5I_register_type(H5I_ERRSTK_CLS) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
 #ifndef H5_HAVE_THREADSAFE
