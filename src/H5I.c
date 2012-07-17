@@ -2483,25 +2483,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_register_aux(hid_t id, void *aux_ptr, H5I_free2_t free_func)
+H5I_register_aux(hid_t id, void *aux_ptr)
 {
-    H5I_id_type_t   *type_ptr = NULL;     /*ptr to the type*/
     H5I_id_info_t   *id_ptr = NULL;       /*ptr to the id*/
-    H5I_type_t       type;
     herr_t           ret_value = SUCCEED; /*return value*/
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check arguments */
-    type = H5I_TYPE(id);
-    if (type <= H5I_BADID || type >= H5I_next_type)
-        HGOTO_DONE(FAIL);
-
-    type_ptr = H5I_id_type_list_g[type];
-    if (!type_ptr || type_ptr->count <= 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid type")
-
-    type_ptr->cls->free_aux = free_func;
 
     if(NULL == (id_ptr = H5I_find_id(id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "Invalid ID")

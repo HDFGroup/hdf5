@@ -147,7 +147,7 @@ static H5VL_class_t H5VL_native_g = {
     {                                           /* datatype_cls */
         H5VL_native_datatype_commit,            /* commit */
         H5VL_native_datatype_open,              /* open */
-        H5VL_native_datatype_get_binary,          /* get_size */
+        H5VL_native_datatype_get_binary,        /* get_size */
         H5VL_native_datatype_close              /* close */
     },
     {                                           /* dataset_cls */
@@ -185,8 +185,6 @@ static H5VL_class_t H5VL_native_g = {
         H5VL_native_object_open,                /* open */
         H5VL_native_object_copy,                /* copy */
         H5VL_native_object_visit,               /* visit */
-        //H5VL_native_object_lookup,              /* lookup */
-        //H5VL_native_object_free_loc,            /* free location */
         H5VL_native_object_get,                 /* get */
         H5VL_native_object_misc,                /* misc */
         H5VL_native_object_optional,            /* optional */
@@ -328,9 +326,10 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VL_native_register_with_aux
+ * Function:	H5VL_native_register
  *
- * Purpose:	utility routine to register the native VOL plugin to an ID
+ * Purpose:	utility routine to register and ID with the native VOL plugin 
+ *              as an auxilary object
  *
  * Returns:     Non-negative on success or negative on failure
  *
@@ -343,8 +342,8 @@ hid_t
 H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref)
 {
     H5VL_t  *vol_plugin;        /* VOL plugin information */
-    H5T_t *dt = NULL;
-    hid_t ret_value = FAIL;
+    H5T_t   *dt = NULL;
+    hid_t    ret_value = FAIL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -395,7 +394,7 @@ herr_t
 H5Pset_fapl_native(hid_t fapl_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    herr_t          ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", fapl_id);
