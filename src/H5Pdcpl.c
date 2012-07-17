@@ -1563,8 +1563,8 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/,
     else {
         if(NULL == (buf = H5MM_malloc(H5T_get_size(fill.type))))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
-        if(H5T_path_bkg(tpath))
-            bkg = value;
+        if(H5T_path_bkg(tpath) && NULL == (bkg = H5MM_malloc(H5T_get_size(fill.type))))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for type conversion")
     } /* end else */
     HDmemcpy(buf, fill.buf, H5T_get_size(fill.type));
 
