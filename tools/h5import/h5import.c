@@ -371,11 +371,19 @@ static int processDataFile(char *infile, struct Input *in, hid_t file_id)
         break;
 
     case 5: /*  STR  */
-
-        if (processStrData(strm, in, file_id) == -1) {
-            (void) HDfprintf(stderr, err11, infile);
-            HDfclose(strm);
-            return (-1);
+        if (in->h5dumpInput) {
+            if (processStrHDFData(strm, in, file_id) == -1) {
+                (void) HDfprintf(stderr, err11, infile);
+                HDfclose(strm);
+                return (-1);
+            }
+        }
+        else {
+            if (processStrData(strm, in, file_id) == -1) {
+                (void) HDfprintf(stderr, err11, infile);
+                HDfclose(strm);
+                return (-1);
+            }
         }
 
         break;
@@ -944,6 +952,179 @@ out:
     return (-1);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: processStrData
+ *
+ * Purpose: read an ASCII file with string data and generate an HDF5 dataset
+ *  with a variable length type
+ *
+ * Return: 0, ok, -1 no
+ *
+ *-------------------------------------------------------------------------
+ */
+static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
+{
+    hid_t   group_id;
+    hid_t   dset_id;
+    hid_t   space_id;
+    hid_t   mspace_id;
+    hid_t   type_id;
+    hid_t   handle;
+    char   *str1 = NULL;
+    char   *str2 = NULL;
+    char   *str3 = NULL;
+    char    str[1024] = "";
+    char    c;
+    int     results;
+    int     j;
+    int     nlines = 0;
+    int     line;
+
+    /*-------------------------------------------------------------------------
+     * read file and generate an HDF5 dataset
+     *-------------------------------------------------------------------------
+     */
+#ifdef H5DEBUGIMPORT
+    printf("processStrHDFData DATATYPE STRING\n");
+#endif
+
+    if ((type_id = H5Tcopy(H5T_C_S1)) < 0)
+        goto out;
+
+    if (H5Tset_size(type_id, H5T_VARIABLE) < 0)
+        goto out;
+
+    /* disable error reporting */
+    H5E_BEGIN_TRY
+    {
+        /* create parent groups */
+        if (in->path.count > 1) {
+            j = 0;
+            handle = file_id;
+            while (j < in->path.count - 1) {
+                if ((group_id = H5Gopen2(handle, in->path.group[j], H5P_DEFAULT)) < 0) {
+                    group_id = H5Gcreate2(handle, in->path.group[j++], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                    for (; j < in->path.count - 1; j++)
+                        group_id = H5Gcreate2(group_id, in->path.group[j], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                    handle = group_id;
+                    break;
+                }
+                handle = group_id;
+                j++;
+            }
+        }
+        else {
+            handle = file_id;
+            j = 0;
+        }
+
+        /*enable error reporting */
+    }
+    H5E_END_TRY;
+#ifdef H5DEBUGIMPORT
+    printf("processStrHDFData DATATYPE STRING groups created\n");
+#endif
+
+    if ((space_id = H5Screate_simple(in->rank, in->sizeOfDimension, NULL)) < 0)
+        goto out;
+
+    if ((mspace_id = H5Screate(H5S_SCALAR)) < 0)
+        goto out;
+
+    if ((dset_id = H5Dcreate2(handle, in->path.group[j], type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+
+#ifdef H5DEBUGIMPORT
+    printf("processStrHDFData DATATYPE STRING ready to process strings\n");
+#endif
+    line = 0;
+    j = 0;
+
+    while (fgets(str,sizeof(str),strm)) {
+        str1 = str;
+        str2 = NULL;
+        str3 = NULL;
+#ifdef H5DEBUGIMPORT
+            printf("processStrHDFData DATATYPE STRING[%d]={%s}\n", line, str1);
+#endif
+            /* process string to remove the first and last quote char */
+            str2 = strchr(str1, '"');
+            if (str2 != NULL) {
+#ifdef H5DEBUGIMPORT
+                    printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str2), str2);
+#endif
+                str2++;
+#ifdef H5DEBUGIMPORT
+                    printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str2), str2);
+#endif
+                str3 = strrchr(str2, '"');
+                if (str3 != NULL) {
+#ifdef H5DEBUGIMPORT
+                    printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str3), str3);
+#endif
+                    *str3 = '\0';
+
+#ifdef H5DEBUGIMPORT
+                    printf("processStrHDFData DATATYPE STRING len:%d for {%s}\n", strlen(str2), str2);
+#endif
+
+                    if(strlen(str2) > 0) {
+                        hid_t fspace_id;
+                        hsize_t start[1];
+                        hsize_t count[1] = { 1 };
+
+#ifdef H5DEBUGIMPORT
+                        printf("processStrHDFData DATATYPE STRING[%d] store %s\n", line, str2);
+#endif
+                        if ((fspace_id = H5Dget_space(dset_id)) < 0)
+                            goto out;
+
+                        start[0] = line++;
+
+                        if (H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+                            goto out;
+
+                        if (H5Dwrite(dset_id, type_id, mspace_id, fspace_id, H5P_DEFAULT, &str2) < 0)
+                            goto out;
+
+                        if (H5Sclose(fspace_id) < 0)
+                            goto out;
+                    }
+                }
+            }
+        str[0] = '\0';
+        j++;
+    }
+#ifdef H5DEBUGIMPORT
+    printf("processStrHDFData DATATYPE STRING eof reached\n");
+#endif
+
+    /* close */
+    H5Dclose(dset_id);
+    H5Sclose(space_id);
+    H5Sclose(mspace_id);
+    H5Tclose(type_id);
+
+    return (0);
+
+out:
+#ifdef H5DEBUGIMPORT
+    printf("processStrHDFData DATATYPE STRING error exit\n");
+#endif
+/* disable error reporting */
+H5E_BEGIN_TRY
+{
+    /* close */
+    H5Dclose(dset_id);
+    H5Sclose(space_id);
+    H5Sclose(mspace_id);
+    H5Tclose(type_id);
+}
+H5E_END_TRY;
+
+    return (-1);
+}
+
 static int allocateIntegerStorage(struct Input *in)
 {
     hsize_t     len = 1;
@@ -1075,6 +1256,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
     int         kindex;
     char        temp[255];
     int         ival;
+    int         scanret;
 
     const char *err1 = "Unable to open the configuration file:  %s for reading.\n";
     const char *err2 = "Unknown keyword in configuration file: %s\n";
@@ -1124,285 +1306,888 @@ static int processConfigurationFile(char *infile, struct Input *in)
         return (-1);
     }
 
-    while (fscanf(strm, "%s", key) == 1) {
-        if ((kindex = mapKeywordToIndex(key)) == -1) {
-            (void) HDfprintf(stderr, err2, infile);
-            HDfclose(strm);
-            return (-1);
+    scanret = fscanf(strm, "%s", key);
+    if((scanret == 1) && !HDstrcmp("HDF5", key)) {
+#ifdef H5DEBUGIMPORT
+        int pndx;
+        printf("\nh5dump file\n");
+#endif
+        in->h5dumpInput = 1;
+        scanret = fscanf(strm, "%s", temp); /* filename */
+        scanret = fscanf(strm, "%s", temp); /* start bracket */
+        scanret = fscanf(strm, "%s", key); /* DATASET */
+        while (scanret == 1) {
+            if(!HDstrcmp("DATASET", key)) { /* PATH */
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATASET key\n");
+#endif
+                if (in->configOptionVector[PATH] == 1) {
+                    (void) HDfprintf(stderr, err3a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (fscanf(strm, "%s", temp) != 1) {
+                    (void) HDfprintf(stderr, "%s", err18);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATASET %s found\n", temp);
+#endif
+                if (parsePathInfo(&in->path, temp) == -1) {
+                    (void) HDfprintf(stderr, err3b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[PATH] = 1;
+                scanret = fscanf(strm, "%s", temp); /* start bracket */
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATASET %s found\n", temp);
+#endif
+            } /* if(!HDstrcmp("DATASET", key))  PATH */
+            else if(!HDstrcmp("DATATYPE", key)) { /* INPUT-CLASS */
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATATYPE key\n");
+#endif
+                if (in->configOptionVector[INPUT_CLASS] == 1) {
+                    (void) HDfprintf(stderr, err4a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+
+                if (fscanf(strm, "%s", temp) != 1) {
+                    (void) HDfprintf(stderr, "%s", err18);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATATYPE %s found\n", temp);
+#endif
+                if ((kindex = getInputClassType(in, temp)) == -1) {
+                    (void) HDfprintf(stderr, err4b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATATYPE type %d inputClass\n", in->inputClass);
+#endif
+
+                in->configOptionVector[INPUT_CLASS] = 1;
+
+                /*set default value for output-class */
+                if (in->configOptionVector[OUTPUT_CLASS] == 0) {
+                    if (in->inputClass == 0 || in->inputClass == 4)
+                        in->outputClass = 0;
+                    if (in->inputClass == 1 || in->inputClass == 2
+                            || in->inputClass == 3)
+                        in->outputClass = 1;
+                    if (in->inputClass == 6 || in->inputClass == 7)
+                        in->outputClass = 2;
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATATYPE type %d outputClass\n", in->outputClass);
+#endif
+
+                if(in->inputClass == 5) { /* STRING */
+                    int get_next_prop = 1;
+                    in->outputClass = -1;
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump DATATYPE STRING found\n");
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* start bracket */
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump DATATYPE STRING %s found\n", temp);
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* string properties */
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+                    while (get_next_prop) {
+                        if(!HDstrcmp("STRSIZE", temp)) { /* STRSIZE */
+                            if (fscanf(strm, "%s", temp) != 1) {
+                                (void) HDfprintf(stderr, "%s", err19);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
+#endif
+                            if (HDstrcmp("H5T_VARIABLE;", temp)) {
+                                char *more = temp;
+                                ival = strtoimax(more, &more, 10);
+                                if (getInputSize(in, ival) == -1) {
+                                    (void) HDfprintf(stderr, err5b, infile);
+                                    HDfclose(strm);
+                                    return (-1);
+                                }
+#ifdef H5DEBUGIMPORT
+                                printf("h5dump DATATYPE STRING %d InputSize\n", in->inputSize);
+#endif
+                            }
+                        }
+                        else if(!HDstrcmp("STRPAD", temp)) { /* STRPAD */
+                            if (fscanf(strm, "%s", temp) != 1) { /* STRPAD type */
+                                (void) HDfprintf(stderr, "%s", err18);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATATYPE STRING STRPAD %s found\n", temp);
+#endif
+                        }
+                        else if(!HDstrcmp("CSET", key)) { /* CSET */
+                            if (fscanf(strm, "%s", temp) != 1) { /* CSET type */
+                                (void) HDfprintf(stderr, "%s", err18);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATATYPE STRING CSET %s found\n", temp);
+#endif
+
+                        }
+                        else if(!HDstrcmp("CTYPE", temp)) { /* CTYPE */
+                            if (fscanf(strm, "%s", temp) != 1) { /* CTYPE type */
+                                (void) HDfprintf(stderr, "%s", err18);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATATYPE STRING  CTYPE %s found\n", temp);
+#endif
+                        } /* if(!HDstrcmp("CSET", key)) */
+                        if (fscanf(strm, "%s", temp) != 1) {
+                            (void) HDfprintf(stderr, "%s", err18);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump DATATYPE STRING %s found\n", temp);
+#endif
+                        if(!HDstrcmp("}", temp)) { /* end bracket */
+                            get_next_prop = 0;
+                        }
+                    } /* while (get_next_prop) */
+                } /* if(kindex == 5)  STRING */
+             } /* else if(!HDstrcmp("DATATYPE", key))  INPUT-CLASS */
+            else if(!HDstrcmp("DATASPACE", key)) { /* RANK and DIMENSIONS */
+                hsize_t     temp_dims[MAX_NUM_DIMENSION];
+
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATASPACE key\n");
+#endif
+                if (fscanf(strm, "%s", temp) != 1) {
+                    (void) HDfprintf(stderr, "%s", err18);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if(!HDstrcmp("SCALAR", temp)) { /* SCALAR */
+                    in->rank = 0;
+                } /* if(!HDstrcmp("SCALAR", key)) */
+                else if(!HDstrcmp("NULL", temp)) { /* NULL */
+                    (void) HDfprintf(stderr, err6b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                } /* else if(!HDstrcmp("NULL", key)) */
+                else if(!HDstrcmp("SIMPLE", temp)) { /* SIMPLE */
+                    int icount = 0;
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump DATASPACE SIMPLE found\n");
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* start bracket */
+                        (void) HDfprintf(stderr, err6b, infile);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* start paren */
+                        (void) HDfprintf(stderr, err6b, infile);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                    if(!HDstrcmp("(", temp)) { /* start paren */
+                        int get_next_dim = 1;
+                        int i = 0;
+
+                        if (fscanf(strm, "%s", temp) != 1) { /* Dimension with optional comma */
+                            (void) HDfprintf(stderr, err16c, infile);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                        while (get_next_dim) {
+                            char *more = temp;
+                            temp_dims[icount] = strtoull(more, &more, 10);
+                            if (fscanf(strm, "%s", temp) != 1) { /* Dimension or end paren */
+                                (void) HDfprintf(stderr, err6b, infile);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                            if(!HDstrcmp(")", temp)) { /* end paren */
+                                in->rank = ++icount;
+                                in->configOptionVector[RANK] = 1;
+                                get_next_dim = 0;
+                            }
+                            else { /* Dimension */
+                                icount++;
+                                if (icount > MAX_NUM_DIMENSION) {
+                                    (void) HDfprintf(stderr, "Invalid value for rank.\n");
+                                    HDfclose(strm);
+                                    return (-1);
+                                }
+                            }
+                        } /* while (get_next_dim) */
+
+                        if ((in->sizeOfDimension = (hsize_t *) HDmalloc ((size_t) in->rank * sizeof(hsize_t))) == NULL) {
+                            (void) HDfprintf(stderr, "Unable to allocate dynamic memory.\n");
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump DATASPACE SIMPLE %d rank\n", in->rank);
+#endif
+                        for (i = 0; i < in->rank; i++) {
+                            in->sizeOfDimension[i] = temp_dims[i];
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump DATASPACE SIMPLE dims:", in->rank);
+                        for (pndx = 0; pndx < in->rank; pndx++) {
+                            printf(" %d", in->sizeOfDimension[pndx]);
+                        }
+                        printf("\n");
+#endif
+                        in->configOptionVector[DIM] = 1;
+                    } /* if(!HDstrcmp("(", key))  start paren */
+                    else {
+                        (void) HDfprintf(stderr, err5b, infile);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+                    if (fscanf(strm, "%s", temp) != 1) {
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                    if(!HDstrcmp("/", temp)) { /* / max dims */
+                        if ((in->maxsizeOfDimension = (hsize_t *) HDmalloc ((size_t) in->rank * sizeof(hsize_t))) == NULL) {
+                            (void) HDfprintf(stderr, "Unable to allocate dynamic memory.\n");
+                            return (-1);
+                        }
+                        if (fscanf(strm, "%s", temp) != 1) { /* start paren */
+                            (void) HDfprintf(stderr, err6b, infile);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                        if(!HDstrcmp("(", temp)) { /* start paren */
+                            int get_next_dim = 1;
+                            int i = 0;
+
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATASPACE SIMPLE process max dim values\n");
+#endif
+                            if (fscanf(strm, "%s", temp) != 1) { /* max dim with optional comma */
+                                (void) HDfprintf(stderr, err16c, infile);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                            while (get_next_dim) {
+#ifdef H5DEBUGIMPORT
+                                printf("h5dump DATASPACE SIMPLE get max dim value\n");
+#endif
+                                if(!HDstrcmp("H5S_UNLIMITED", temp) || !HDstrcmp("H5S_UNLIMITED,", temp)) { /* unlimited */
+                                    in->maxsizeOfDimension[i] = H5S_UNLIMITED;
+                                    in->configOptionVector[EXTEND] = 1;
+                                }
+                                else {
+                                    char *more = temp;
+                                    in->maxsizeOfDimension[i] = strtoull(more, &more, 10);
+                                }
+                                if (fscanf(strm, "%s", temp) != 1) { /* max dim or end paren */
+                                    (void) HDfprintf(stderr, err16c, infile);
+                                    HDfclose(strm);
+                                    return (-1);
+                                }
+#ifdef H5DEBUGIMPORT
+                                printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                                if(!HDstrcmp(")", temp)) { /* end paren */
+                                    get_next_dim = 0;
+                                }
+                                else { /* comma */
+                                    i++;
+                                    if (i > MAX_NUM_DIMENSION) {
+                                        (void) HDfprintf(stderr, "Invalid value for rank.\n");
+                                        HDfclose(strm);
+                                        return (-1);
+                                    }
+                                }
+                            } /* while (get_next_dim) */
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump DATASPACE SIMPLE maxdims:", in->rank);
+                            for (pndx = 0; pndx < in->rank; pndx++) {
+                                printf(" %d", in->maxsizeOfDimension[pndx]);
+                            }
+                            printf("\n");
+                            printf("h5dump DATASPACE SIMPLE get max dim finished\n");
+#endif
+                        } /* if(!HDstrcmp("(", key))  start paren */
+                        else {
+                            (void) HDfprintf(stderr, err16c, infile);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+                        scanret = fscanf(strm, "%s", temp); /* end bracket */
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump DATASPACE SIMPLE %s found\n", temp);
+#endif
+                    } /* if(!HDstrcmp("/", key)) max dims separator */
+                } /* else if(!HDstrcmp("SIMPLE", key)) */
+                else {
+                    (void) HDfprintf(stderr, err5b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+            } /* else if(!HDstrcmp("DATASPACE", key))  RANK and DIMENSIONS */
+            else if(!HDstrcmp("STORAGE_LAYOUT", key)) { /* CHUNKED-DIMENSION-SIZES */
+#ifdef H5DEBUGIMPORT
+                printf("h5dump STORAGE_LAYOUT key\n");
+#endif
+                if (fscanf(strm, "%s", temp) != 1) { /* start bracket */
+                    (void) HDfprintf(stderr, err6b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump STORAGE_LAYOUT %s found\n", temp);
+#endif
+                if (fscanf(strm, "%s", temp) != 1) { /* CHUNKED */
+                    (void) HDfprintf(stderr, err6b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump STORAGE_LAYOUT %s found\n", temp);
+#endif
+                if(!HDstrcmp("CHUNKED", temp)) { /* CHUNKED */
+                    if ((in->sizeOfChunk = (hsize_t *) HDmalloc ((size_t) in->rank * sizeof(hsize_t))) == NULL) {
+                        (void) HDfprintf(stderr, "Unable to allocate dynamic memory.\n");
+                        return (-1);
+                    }
+                    if (fscanf(strm, "%s", temp) != 1) { /* start paren */
+                        (void) HDfprintf(stderr, err6b, infile);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+#endif
+                    if(!HDstrcmp("(", temp)) { /* start paren */
+                        int get_next_dim = 1;
+                        int icount = 0;
+
+                        if (fscanf(strm, "%s", temp) != 1) { /* Dimension with optional comma */
+                            (void) HDfprintf(stderr, err16c, infile);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+#endif
+                        while (get_next_dim) {
+                            char *more = temp;
+                            in->sizeOfChunk[icount] = strtoull(more, &more, 10);
+                            if (fscanf(strm, "%s", temp) != 1) { /* Dimension or end paren */
+                                (void) HDfprintf(stderr, err6b, infile);
+                                HDfclose(strm);
+                                return (-1);
+                            }
+#ifdef H5DEBUGIMPORT
+                            printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+#endif
+                            if(!HDstrcmp(")", temp)) { /* end paren */
+                                in->configOptionVector[RANK] = 1;
+                                get_next_dim = 0;
+                            }
+                            else { /* Dimension */
+                                icount++;
+                                if (icount > MAX_NUM_DIMENSION) {
+                                    (void) HDfprintf(stderr, "Invalid value for rank.\n");
+                                    HDfclose(strm);
+                                    return (-1);
+                                }
+                            }
+                        } /* while (get_next_dim) */
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump STORAGE_LAYOUT CHUNKED dims:", in->rank);
+                        for (pndx = 0; pndx < in->rank; pndx++) {
+                            printf(" %d", in->sizeOfChunk[pndx]);
+                        }
+                        printf("\n");
+#endif
+                        in->configOptionVector[DIM] = 1;
+                    } /* if(!HDstrcmp("(", key))  start paren */
+                    else {
+                        (void) HDfprintf(stderr, err5b, infile);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+                    if (fscanf(strm, "%s", temp) != 1) { /* SIZE */
+                        (void) HDfprintf(stderr, err6b, infile);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+#endif
+                    if(!HDstrcmp("SIZE", temp)) { /* SIZE */
+                        if (fscanf(strm, "%d", (&ival)) != 1) {
+                            (void) HDfprintf(stderr, "%s", err19);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
+#endif
+                    }
+                    while (HDstrcmp("}", temp)) {
+                        if (fscanf(strm, "%s", temp) != 1) { /* end bracket */
+                            (void) HDfprintf(stderr, "%s", err18);
+                            HDfclose(strm);
+                            return (-1);
+                        }
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump STORAGE_LAYOUT CHUNKED %s found\n", temp);
+#endif
+                    }
+                    in->configOptionVector[CHUNK] = 1;
+                } /* if(!HDstrcmp("CHUNKED", key))  CHUNKED */
+            } /* else if(!HDstrcmp("STORAGE_LAYOUT", key))  CHUNKED-DIMENSION-SIZES */
+            else if(!HDstrcmp("FILTERS", key)) { /* FILTERS */
+#ifdef H5DEBUGIMPORT
+                printf("h5dump FILTERS key\n");
+#endif
+                if (fscanf(strm, "%s", temp) != 1) { /* start bracket */
+                    (void) HDfprintf(stderr, err6b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump FILTERS %s found\n", temp);
+#endif
+                if (fscanf(strm, "%s", temp) != 1) {
+                    (void) HDfprintf(stderr, err6b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump FILTERS %s found\n", temp);
+#endif
+                if(!HDstrcmp("COMPRESSION", temp)) { /* COMPRESSION */
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump FILTERS COMPRESSION found\n");
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* DEFLATE */
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* bgin bracket */
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
+#endif
+                    if (fscanf(strm, "%s", temp) != 1) { /* LEVEL */
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
+#endif
+                    if (fscanf(strm, "%d", (&ival)) != 1) {
+                        (void) HDfprintf(stderr, "%s", err19);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump FILTERS COMPRESSION LEVEL %d found\n", ival);
+#endif
+                    in->compressionParam = ival;
+                    if (fscanf(strm, "%s", temp) != 1) { /* end bracket */
+                        (void) HDfprintf(stderr, "%s", err18);
+                        HDfclose(strm);
+                        return (-1);
+                    }
+#ifdef H5DEBUGIMPORT
+                    printf("h5dump FILTERS COMPRESSION %s found\n", temp);
+#endif
+                    in->compressionType = 0; /* ONLY GZIP supported */
+                    in->configOptionVector[COMPRESS] = 1;
+                }
+                else if(!HDstrcmp("CONTIGUOUS", temp)) { /* CONTIGUOUS */
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump FILTERS CONTIGUOUS found\n");
+#endif
+                    in->configOptionVector[COMPRESS] = 0;
+                }
+                else if(!HDstrcmp("NONE", temp)) { /* NONE */
+#ifdef H5DEBUGIMPORT
+                        printf("h5dump FILTERS NONE found\n");
+#endif
+                    in->configOptionVector[COMPRESS] = 0;
+                }
+                if (fscanf(strm, "%s", temp) != 1) { /* end bracket */
+                    (void) HDfprintf(stderr, "%s", err18);
+                    HDfclose(strm);
+                    return (-1);
+                }
+#ifdef H5DEBUGIMPORT
+                printf("h5dump FILTERS %s found\n", temp);
+#endif
+            }
+            else if(!HDstrcmp("DATA", key)) { /* FINSHED */
+#ifdef H5DEBUGIMPORT
+                printf("h5dump DATA key\n");
+#endif
+                scanret = 0;
+                break;
+            }
+            scanret = fscanf(strm, "%s", key);
         }
-        switch (kindex) {
-        case 0: /* PATH */
-            if (in->configOptionVector[PATH] == 1) {
-                (void) HDfprintf(stderr, err3a, infile);
+#ifdef H5DEBUGIMPORT
+        printf("h5dump path");
+        for (pndx = 0; pndx < in->path.count; pndx++) {
+            printf(" : %s", in->path.group[pndx]);
+        }
+        printf("\n");
+        printf("h5dump inputClass=%d\n", in->inputClass);
+        printf("h5dump inputSize=%d\n", in->inputSize);
+        printf("h5dump rank=%d\n", in->rank);
+        printf("h5dump outputClass=%d\n", in->outputClass);
+        printf("h5dump outputSize=%d\n", in->outputSize);
+        printf("h5dump outputArchitecture=%d\n", in->outputArchitecture);
+        printf("h5dump outputByteOrder=%d\n", in->outputByteOrder);
+        printf("h5dump compressionType=%d\n", in->compressionType);
+        printf("h5dump compressionParam=%d\n", in->compressionParam);
+        printf("h5dump externFilename=%s\n", in->externFilename);
+        printf("h5dump configOptionVector:\n");
+        for (pndx = 0; pndx < NUM_KEYS; pndx++) {
+            printf("    %s=%d\n", keytable[pndx], in->configOptionVector[pndx]);
+        }
+#endif
+    }
+    else {
+        while (scanret == 1) {
+            if ((kindex = mapKeywordToIndex(key)) == -1) {
+                (void) HDfprintf(stderr, err2, infile);
                 HDfclose(strm);
                 return (-1);
             }
-            if (fscanf(strm, "%s", temp) != 1) {
-                (void) HDfprintf(stderr, "%s", err18);
-                HDfclose(strm);
-                return (-1);
-            }
-            if (parsePathInfo(&in->path, temp) == -1) {
-                (void) HDfprintf(stderr, err3b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[PATH] = 1;
-            break;
+            switch (kindex) {
+            case 0: /* PATH */
+                if (in->configOptionVector[PATH] == 1) {
+                    (void) HDfprintf(stderr, err3a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (fscanf(strm, "%s", temp) != 1) {
+                    (void) HDfprintf(stderr, "%s", err18);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (parsePathInfo(&in->path, temp) == -1) {
+                    (void) HDfprintf(stderr, err3b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[PATH] = 1;
+                break;
 
-        case 1: /* INPUT-CLASS */
-            if (in->configOptionVector[INPUT_CLASS] == 1) {
-                (void) HDfprintf(stderr, err4a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 1: /* INPUT-CLASS */
+                if (in->configOptionVector[INPUT_CLASS] == 1) {
+                    (void) HDfprintf(stderr, err4a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (fscanf(strm, "%s", temp) != 1) {
-                (void) HDfprintf(stderr, "%s", err18);
-                HDfclose(strm);
-                return (-1);
-            }
-            if (getInputClass(in, temp) == -1) {
-                (void) HDfprintf(stderr, err4b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+                if (fscanf(strm, "%s", temp) != 1) {
+                    (void) HDfprintf(stderr, "%s", err18);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (getInputClass(in, temp) == -1) {
+                    (void) HDfprintf(stderr, err4b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            in->configOptionVector[INPUT_CLASS] = 1;
+                in->configOptionVector[INPUT_CLASS] = 1;
 
-            /*set default value for output-class */
-            if (in->configOptionVector[OUTPUT_CLASS] == 0) {
-                if (in->inputClass == 0 || in->inputClass == 4)
-                    in->outputClass = 0;
-                if (in->inputClass == 1 || in->inputClass == 2
-                        || in->inputClass == 3)
-                    in->outputClass = 1;
-                if (in->inputClass == 6 || in->inputClass == 7)
-                    in->outputClass = 2;
-            }
-            break;
+                /*set default value for output-class */
+                if (in->configOptionVector[OUTPUT_CLASS] == 0) {
+                    if (in->inputClass == 0 || in->inputClass == 4)
+                        in->outputClass = 0;
+                    if (in->inputClass == 1 || in->inputClass == 2
+                            || in->inputClass == 3)
+                        in->outputClass = 1;
+                    if (in->inputClass == 6 || in->inputClass == 7)
+                        in->outputClass = 2;
+                }
+                break;
 
-        case 2: /* INPUT-SIZE */
-            if (in->configOptionVector[INPUT_SIZE] == 1) {
-                (void) HDfprintf(stderr, err5a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            if (fscanf(strm, "%d", (&ival)) != 1) {
-                (void) HDfprintf(stderr, "%s", err19);
-                HDfclose(strm);
-                return (-1);
-            }
-            if (getInputSize(in, ival) == -1) {
-                (void) HDfprintf(stderr, err5b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[INPUT_SIZE] = 1;
+            case 2: /* INPUT-SIZE */
+                if (in->configOptionVector[INPUT_SIZE] == 1) {
+                    (void) HDfprintf(stderr, err5a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (fscanf(strm, "%d", (&ival)) != 1) {
+                    (void) HDfprintf(stderr, "%s", err19);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (getInputSize(in, ival) == -1) {
+                    (void) HDfprintf(stderr, err5b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[INPUT_SIZE] = 1;
 
-            /*set default value for output-size */
-            if (in->configOptionVector[OUTPUT_SIZE] == 0)
-                in->outputSize = in->inputSize;
-            break;
+                /*set default value for output-size */
+                if (in->configOptionVector[OUTPUT_SIZE] == 0)
+                    in->outputSize = in->inputSize;
+                break;
 
-        case 3: /* RANK */
-            if (in->configOptionVector[RANK] == 1) {
-                (void) HDfprintf(stderr, err6a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 3: /* RANK */
+                if (in->configOptionVector[RANK] == 1) {
+                    (void) HDfprintf(stderr, err6a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (getRank(in, strm) == -1) {
-                (void) HDfprintf(stderr, err6b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[RANK] = 1;
-            break;
+                if (getRank(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err6b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[RANK] = 1;
+                break;
 
-        case 4: /* DIMENSION-SIZES */
-            if (in->configOptionVector[DIM] == 1) {
-                (void) HDfprintf(stderr, err7a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 4: /* DIMENSION-SIZES */
+                if (in->configOptionVector[DIM] == 1) {
+                    (void) HDfprintf(stderr, err7a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (in->configOptionVector[RANK] == 0) {
-                (void) HDfprintf(stderr, err7b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            if (getDimensionSizes(in, strm) == -1) {
-                (void) HDfprintf(stderr, err7c, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[DIM] = 1;
-            break;
+                if (in->configOptionVector[RANK] == 0) {
+                    (void) HDfprintf(stderr, err7b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (getDimensionSizes(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err7c, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[DIM] = 1;
+                break;
 
-        case 5: /* OUTPUT-CLASS */
-            if (in->configOptionVector[OUTPUT_CLASS] == 1) {
-                (void) HDfprintf(stderr, err8a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 5: /* OUTPUT-CLASS */
+                if (in->configOptionVector[OUTPUT_CLASS] == 1) {
+                    (void) HDfprintf(stderr, err8a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (getOutputClass(in, strm) == -1) {
-                (void) HDfprintf(stderr, err8b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[OUTPUT_CLASS] = 1;
-            break;
+                if (getOutputClass(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err8b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[OUTPUT_CLASS] = 1;
+                break;
 
-        case 6: /* OUTPUT-SIZE */
-            if (in->configOptionVector[OUTPUT_SIZE] == 1) {
-                (void) HDfprintf(stderr, err9a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 6: /* OUTPUT-SIZE */
+                if (in->configOptionVector[OUTPUT_SIZE] == 1) {
+                    (void) HDfprintf(stderr, err9a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (getOutputSize(in, strm) == -1) {
-                (void) HDfprintf(stderr, err9b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[OUTPUT_SIZE] = 1;
-            break;
+                if (getOutputSize(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err9b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[OUTPUT_SIZE] = 1;
+                break;
 
-        case 7: /* OUTPUT-ARCHITECTURE */
-            if (in->configOptionVector[OUTPUT_ARCH] == 1) {
-                (void) HDfprintf(stderr, err10a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 7: /* OUTPUT-ARCHITECTURE */
+                if (in->configOptionVector[OUTPUT_ARCH] == 1) {
+                    (void) HDfprintf(stderr, err10a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (getOutputArchitecture(in, strm) == -1) {
-                (void) HDfprintf(stderr, err10b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[OUTPUT_ARCH] = 1;
-            break;
+                if (getOutputArchitecture(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err10b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[OUTPUT_ARCH] = 1;
+                break;
 
-        case 8: /* OUTPUT-BYTE-ORDER */
-            if (in->configOptionVector[OUTPUT_B_ORDER] == 1) {
-                (void) HDfprintf(stderr, err11a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 8: /* OUTPUT-BYTE-ORDER */
+                if (in->configOptionVector[OUTPUT_B_ORDER] == 1) {
+                    (void) HDfprintf(stderr, err11a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (getOutputByteOrder(in, strm) == -1) {
-                (void) HDfprintf(stderr, err11b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[OUTPUT_B_ORDER] = 1;
-            break;
+                if (getOutputByteOrder(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err11b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[OUTPUT_B_ORDER] = 1;
+                break;
 
-        case 9: /* CHUNKED-DIMENSION-SIZES */
-            if (in->configOptionVector[CHUNK] == 1) {
-                (void) HDfprintf(stderr, err12a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            /* cant appear before dimension sizes have been provided */
-            if (in->configOptionVector[DIM] == 0) {
-                (void) HDfprintf(stderr, err12b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
+            case 9: /* CHUNKED-DIMENSION-SIZES */
+                if (in->configOptionVector[CHUNK] == 1) {
+                    (void) HDfprintf(stderr, err12a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                /* cant appear before dimension sizes have been provided */
+                if (in->configOptionVector[DIM] == 0) {
+                    (void) HDfprintf(stderr, err12b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
 
-            if (getChunkedDimensionSizes(in, strm) == -1) {
-                (void) HDfprintf(stderr, err12c, infile);
-                HDfclose(strm);
-                return (-1);
+                if (getChunkedDimensionSizes(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err12c, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[CHUNK] = 1;
+                break;
+
+            case 10: /* COMPRESSION-TYPE */
+                if (in->configOptionVector[COMPRESS] == 1) {
+                    (void) HDfprintf(stderr, err13a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+
+                if (getCompressionType(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err13b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[COMPRESS] = 1;
+
+                if (in->configOptionVector[COMPRESS_PARAM] == 0) {
+                    if (in->compressionType == 0)
+                        in->compressionParam = 6; /* default value if compressionType is GZIP */
+                }
+                break;
+
+            case 11: /* COMPRESSION-PARAM */
+                if (in->configOptionVector[COMPRESS_PARAM] == 1) {
+                    (void) HDfprintf(stderr, err14a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+
+                if (getCompressionParameter(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err14b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+
+                in->configOptionVector[COMPRESS_PARAM] = 1;
+
+                if (in->configOptionVector[COMPRESS] == 0)
+                    in->compressionType = 0;
+
+                break;
+
+            case 12: /* EXTERNAL-STORAGE */
+                if (in->configOptionVector[EXTERNALSTORE] == 1) {
+                    (void) HDfprintf(stderr, err15a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+
+                if (getExternalFilename(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err15b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[EXTERNALSTORE] = 1;
+                break;
+
+            case 13: /* MAXIMUM-DIMENSIONS */
+                if (in->configOptionVector[EXTEND] == 1) {
+                    (void) HDfprintf(stderr, err16a, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                /* cant appear before dimension sizes have been provided */
+                if (in->configOptionVector[DIM] == 0) {
+                    (void) HDfprintf(stderr, err16b, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                if (getMaximumDimensionSizes(in, strm) == -1) {
+                    (void) HDfprintf(stderr, err16c, infile);
+                    HDfclose(strm);
+                    return (-1);
+                }
+                in->configOptionVector[EXTEND] = 1;
+                break;
+
+            default:
+                break;
             }
-            in->configOptionVector[CHUNK] = 1;
-            break;
-
-        case 10: /* COMPRESSION-TYPE */
-            if (in->configOptionVector[COMPRESS] == 1) {
-                (void) HDfprintf(stderr, err13a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-
-            if (getCompressionType(in, strm) == -1) {
-                (void) HDfprintf(stderr, err13b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[COMPRESS] = 1;
-
-            if (in->configOptionVector[COMPRESS_PARAM] == 0) {
-                if (in->compressionType == 0)
-                    in->compressionParam = 6; /* default value if compressionType is GZIP */
-            }
-            break;
-
-        case 11: /* COMPRESSION-PARAM */
-            if (in->configOptionVector[COMPRESS_PARAM] == 1) {
-                (void) HDfprintf(stderr, err14a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-
-            if (getCompressionParameter(in, strm) == -1) {
-                (void) HDfprintf(stderr, err14b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-
-            in->configOptionVector[COMPRESS_PARAM] = 1;
-
-            if (in->configOptionVector[COMPRESS] == 0)
-                in->compressionType = 0;
-
-            break;
-
-        case 12: /* EXTERNAL-STORAGE */
-            if (in->configOptionVector[EXTERNALSTORE] == 1) {
-                (void) HDfprintf(stderr, err15a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-
-            if (getExternalFilename(in, strm) == -1) {
-                (void) HDfprintf(stderr, err15b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[EXTERNALSTORE] = 1;
-            break;
-
-        case 13: /* MAXIMUM-DIMENSIONS */
-            if (in->configOptionVector[EXTEND] == 1) {
-                (void) HDfprintf(stderr, err16a, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            /* cant appear before dimension sizes have been provided */
-            if (in->configOptionVector[DIM] == 0) {
-                (void) HDfprintf(stderr, err16b, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            if (getMaximumDimensionSizes(in, strm) == -1) {
-                (void) HDfprintf(stderr, err16c, infile);
-                HDfclose(strm);
-                return (-1);
-            }
-            in->configOptionVector[EXTEND] = 1;
-            break;
-
-        default:
-            break;
+            scanret = fscanf(strm, "%s", key);
         }
     }
+
     /*
-     check if keywords obtained are valid
-     if yes, return 0 else error
+         check if keywords obtained are valid
+         if yes, return 0 else error
      */
 
     if (validateConfigurationParameters(in) == -1) {
@@ -1410,7 +2195,6 @@ static int processConfigurationFile(char *infile, struct Input *in)
         HDfclose(strm);
         return (-1);
     }
-
     HDfclose(strm);
     return (0);
 }
@@ -1491,7 +2275,7 @@ static int mapKeywordToIndex(char *key)
 
 static int parsePathInfo(struct path_info *path, char *temp)
 {
-    const char  delimiter[] = "/";
+    const char  delimiter[] = "/\"";
     char       *token;
     int         i = 0;
     const char *err1 = "Path string larger than MAX_PATH_NAME_LENGTH.\n";
@@ -1619,6 +2403,720 @@ static int getInputClass(struct Input *in, char * temp)
         (void) HDfprintf(stderr, "%s", err1);
         return (-1);
     }
+
+    in->inputClass = kindex;
+    return (0);
+}
+
+static int getInputClassType(struct Input *in, char * buffer)
+{
+    int         kindex = -1;
+    const char *err1 = "Invalid value for input class.\n";
+    const char *err2 = "Invalid value for output architecture.\n";
+    const char *err3 = "Invalid value for output byte-order.\n";
+
+    if (!HDstrcmp(buffer, "H5T_STD_I8BE")) {
+        in->inputSize = 8;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I8LE")) {
+        in->inputSize = 8;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I16BE")) {
+        in->inputSize = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I16LE")) {
+        in->inputSize = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I32BE")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I32LE")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I64BE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_I64LE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U8BE")) {
+        in->inputSize = 8;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U8LE")) {
+        in->inputSize = 8;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U16BE")) {
+        in->inputSize = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U16LE")) {
+        in->inputSize = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U32BE")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U32LE")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U64BE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_U64LE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_SCHAR")) {
+        in->inputSize = 8;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_UCHAR")) {
+        in->inputSize = 8;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_SHORT")) {
+        in->inputSize = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_USHORT")) {
+        in->inputSize = 16;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_INT")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_UINT")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_LONG")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_ULONG")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_LLONG")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 4;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_ULLONG")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 7;
+    }
+    else if (!HDstrcmp(buffer, "H5T_IEEE_F32BE")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_IEEE_F32LE")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_IEEE_F64BE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_IEEE_F64LE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("IEEE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_VAX_F32")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_VAX_F64")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_FLOAT")) {
+        in->inputSize = 32;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 3;
+    }
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_DOUBLE")) {
+        in->inputSize = 64;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 3;
+    }
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    else if (!HDstrcmp(buffer, "H5T_NATIVE_LDOUBLE")) {
+        in->inputSize = H5_SIZEOF_LONG_DOUBLE;
+        in->configOptionVector[INPUT_SIZE] = 1;
+
+        if ((kindex = OutputArchStrToInt("NATIVE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        kindex = 3;
+    }
+#endif
+    else if(!HDstrcmp(buffer, "H5T_TIME: not yet implemented")) {
+        kindex = -1;
+    }
+    else if(!HDstrcmp(buffer, "H5T_STRING")) {
+        kindex = 5;
+    }
+    /*    case H5T_BITFIELD: */
+    else if (!HDstrcmp(buffer, "H5T_STD_B8BE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B8LE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B16BE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B16LE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B32BE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B32LE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B64BE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("BE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    else if (!HDstrcmp(buffer, "H5T_STD_B64LE")) {
+
+        if ((kindex = OutputArchStrToInt("STD")) == -1) {
+            (void) HDfprintf(stderr, "%s", err2);
+            return (-1);
+        }
+        in->outputArchitecture = kindex;
+
+        if ((kindex = OutputByteOrderStrToInt("LE")) == -1) {
+            (void) HDfprintf(stderr, "%s", err3);
+            return (-1);
+        }
+        in->outputByteOrder = kindex;
+
+        kindex = -1;
+    }
+    /*    case H5T_OPAQUE: */
+    else if(!HDstrcmp(buffer, "H5T_OPAQUE")) {
+        kindex = -1;
+    }
+    /*    case H5T_COMPOUND: */
+    else if(!HDstrcmp(buffer, "H5T_COMPOUND")) {
+        kindex = -1;
+    }
+    /*    case H5T_REFERENCE: */
+    else if(!HDstrcmp(buffer, "H5T_REFERENCE")) {
+        kindex = -1;
+    }
+    /*    case H5T_ENUM: */
+    else if(!HDstrcmp(buffer, "H5T_ENUM")) {
+        kindex = -1;
+    }
+    /*    case H5T_VLEN: */
+    else if(!HDstrcmp(buffer, "H5T_VLEN")) {
+        kindex = -1;
+    }
+    /*    case H5T_ARRAY: */
+    else if(!HDstrcmp(buffer, "H5T_ARRAY")) {
+        kindex = -1;
+    }
+
+    if (kindex == -1) {
+        (void) HDfprintf(stderr, "%s", err1);
+        return (-1);
+    }
+
+    /*set default value for output-size */
+    if (in->configOptionVector[OUTPUT_SIZE] == 0)
+        in->outputSize = in->inputSize;
+#ifdef H5DEBUGIMPORT
+    printf("h5dump DATATYPE STRING %d inputSize\n", in->inputSize);
+    printf("h5dump DATATYPE STRING %d outputSize\n", in->outputSize);
+#endif
 
     in->inputClass = kindex;
     return (0);
@@ -1910,6 +3408,7 @@ void setDefaultValues(struct Input *in, int count)
     char    temp[255];
     char    num[255];
 
+    in->h5dumpInput = 0;
     in->inputClass = 3; /* FP */
     in->inputSize = 32;
     in->outputClass = 1; /* FP */
@@ -2348,6 +3847,9 @@ static int process(struct Options *opt)
             /*create data type */
             intype = createInputDataType(in);
             outtype = createOutputDataType(in);
+#ifdef H5DEBUGIMPORT
+            printf("process intype %d outtype %d\n", intype, outtype);
+#endif
 
             /* create property list */
             proplist = H5Pcreate(H5P_DATASET_CREATE);
@@ -2498,7 +4000,7 @@ void help(char *name)
     (void) HDfprintf(stdout,
             "\t  The user can specify output type and storage properties in \n");
     (void) HDfprintf(stdout,
-            "\t  the configuration file. The user is requited to specify the \n");
+            "\t  the configuration file. The user is required to specify the \n");
     (void) HDfprintf(stdout,
             "\t  path of the dataset. If the groups in the path leading to \n");
     (void) HDfprintf(stdout,
@@ -2511,7 +4013,7 @@ void help(char *name)
     (void) HDfprintf(stdout,
             "\t  provide the class and size of output data to be written to \n");
     (void) HDfprintf(stdout,
-            "\t  the dataset and may optionally specify the output-architecure,\n");
+            "\t  the dataset and may optionally specify the output-architecture,\n");
     (void) HDfprintf(stdout,
             "\t  and the output-byte-order. If output-architecture is not \n");
     (void) HDfprintf(stdout,
@@ -2596,7 +4098,11 @@ void help(char *name)
     (void) HDfprintf(stdout,
             "\t  The configuration file is an ASCII text file and must be \n");
     (void) HDfprintf(stdout,
-            "\t  organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
+            "\t  the ddl formatted file (without data values) produced by h5dump \n");
+    (void) HDfprintf(stdout,
+            "\t  when used with the options '-o outfilename -b' of a single dataset (-d) \n");
+    (void) HDfprintf(stdout,
+            "\t  OR organized as \"CONFIG-KEYWORD VALUE\" pairs, one pair on each \n");
     (void) HDfprintf(stdout, "\t  line.\n\n");
     (void) HDfprintf(stdout,
             "\t   The configuration file may have the following keywords each \n");
@@ -2612,7 +4118,7 @@ void help(char *name)
     (void) HDfprintf(stdout, "\t  Optional KEYWORDS:\n");
     (void) HDfprintf(stdout, "\t    OUTPUT-ARCHITECTURE\n");
     (void) HDfprintf(stdout, "\t    OUTPUT-BYTE-ORDER\n");
-    (void) HDfprintf(stdout, "\t      CHUNKED-DIMENSION-SIZES\n");
+    (void) HDfprintf(stdout, "\t    CHUNKED-DIMENSION-SIZES\n");
     (void) HDfprintf(stdout, "\t    COMPRESSION-TYPE\n");
     (void) HDfprintf(stdout, "\t    COMPRESSION-PARAM\n");
     (void) HDfprintf(stdout, "\t    EXTERNAL-STORAGE\n");
@@ -2622,7 +4128,7 @@ void help(char *name)
     (void) HDfprintf(stdout, "\t      Strings separated by spaces to represent\n");
     (void) HDfprintf(stdout, "\t      the path of the data-set. If the groups in\n");
     (void) HDfprintf(stdout,
-            "\t      the path do no exist, they will be created. \n");
+            "\t      the path do not exist, they will be created. \n");
     (void) HDfprintf(stdout, "\t      For example,\n");
     (void) HDfprintf(stdout, "\t        PATH grp1/grp2/dataset1\n");
     (void) HDfprintf(stdout, "\t        PATH: keyword\n");
