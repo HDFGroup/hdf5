@@ -249,7 +249,7 @@ IF (BUILD_TESTING)
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=d${testfile}.dff"
               -D "TEST_EXPECT=0"
-              -D "TEST_REFERENCE=d${testfile}.txt"
+              -D "TEST_REFERENCE=testfiles/d${testfile}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DIFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
