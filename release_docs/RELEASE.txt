@@ -702,6 +702,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of
+	  testh5diff.sh to better report when there is an error in the file
+	  copying. HDFFV-8105 (AKC -2012/07/22)
         - h5diff: Fixed not to check and display dangling link status without 
           --follow-symlinks option. This also improved performance when 
           comparing lots of external links without the --follow-symlinks
