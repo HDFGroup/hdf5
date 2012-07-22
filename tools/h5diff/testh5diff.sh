@@ -318,11 +318,9 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-            if [ -a $tstfile ]; then
-                $CP -f $tstfile $TESTDIR
-            else
+	    $CP -f $tstfile $TESTDIR
+            if [ $? -ne 0 ]; then
                 echo "Error: FAILED to copy $tstfile ."
-                echo "       $tstfile doesn't exist!"
                 
                 # Comment out this to CREATE expected file
                 exit $EXIT_FAILURE
