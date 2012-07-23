@@ -1023,10 +1023,26 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_close_datatype() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_set_vol_object
+ *
+ * Purpose:	Set the vol_object in the H5T_t struct. 
+ *              Called from outside the H5T package
+ *
+ * Return:	Succeed
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2012
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5T_set_vol_object(H5T_t *type, void *vol_obj)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
     type->vol_obj = vol_obj;
+
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5T_set_vol_object() */

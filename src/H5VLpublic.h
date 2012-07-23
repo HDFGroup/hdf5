@@ -312,6 +312,10 @@ struct H5VL_t {
     int                 nrefs;          /* number of references by objects using this struct */
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* ATTRIBUTE OBJECT ROUTINES */
 H5_DLL void *H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
 H5_DLL void *H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t aapl_id, hid_t req);
@@ -372,10 +376,6 @@ H5_DLL herr_t H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vo
 H5_DLL herr_t H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
 H5_DLL herr_t H5VLobject_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t optional_type, hid_t req, va_list arguments);
 H5_DLL herr_t H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t req);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* Function prototypes */
 H5_DLL hid_t H5VLregister(const H5VL_class_t *cls);
