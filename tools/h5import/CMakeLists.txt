@@ -249,6 +249,7 @@ IF (BUILD_TESTING)
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=d${testfile}.dff"
               -D "TEST_EXPECT=0"
+              -D "TEST_FILTER=(^(Warning)[^\n]*)"
               -D "TEST_REFERENCE=testfiles/d${testfile}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )

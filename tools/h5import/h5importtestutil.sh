@@ -202,6 +202,28 @@ else
 fi
 }
 
+# Same as TOOLTEST3 except for h5diff uses report mode without warnings
+# Use h5dump output as input to h5import for strings
+# Use h5diff to verify results
+TOOLTEST4()
+{
+err=0
+$RUNSERIAL ../h5dump/h5dump -p -d $1 -o d$2.bin -y --width=1 tmp_testfiles/$2 > d$2.dmp
+$RUNSERIAL ./h5import d$2.bin -c d$2.dmp -o d$2 > d$2.imp
+$RUNSERIAL ../h5diff/h5diff -r d$2 tmp_testfiles/$2 $1 $1 > log2
+$CP -f $SRC_H5IMPORT_TESTFILES/d$2.txt log1
+
+
+cmp -s log1 log2 || err=1
+rm -f log1 log2
+if [ $err -eq 1 ]; then
+nerrors="` expr $nerrors + 1 `";
+  echo "*FAILED*"
+else
+  echo " PASSED"
+fi
+}
+
 echo "" 
 echo "=============================="
 echo "H5IMPORT tests started"
@@ -284,7 +306,7 @@ TOOLTEST2 "/int/buin/32-bit" binuin32.h5
 TESTING "STR" 
 TOOLTEST $TESTDIR/txtstr.txt -c $TESTDIR/txtstr.conf -o txtstr.h5
 TESTING "H5DUMP-STR" 
-TOOLTEST3 "/mytext/data" txtstr.h5
+TOOLTEST43 "/mytext/data" txtstr.h5
 
 
 TESTING "BINARY I8 CR LF EOF" 
