@@ -2290,7 +2290,7 @@
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/FindHDF5.cmake
+./config/cmake/FindHDF5.cmake.in
 ./config/cmake/FindMPI.cmake
 ./config/cmake/hdf5-config.cmake.build.in
 ./config/cmake/hdf5-config.cmake.install.in
