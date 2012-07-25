@@ -374,8 +374,8 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* create the ref through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_REF_CREATE, H5_REQUEST_NULL, 
-                        ref, name, ref_type, space_id) < 0)
+    if(ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_REF_CREATE, H5_REQUEST_NULL, 
+                                    ref, name, ref_type, space_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
