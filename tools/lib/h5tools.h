@@ -560,8 +560,7 @@ H5TOOLS_DLL void    h5tools_simple_prefix(FILE *stream, const h5tool_format_t *i
 H5TOOLS_DLL void    h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx, hsize_t elmtno, hsize_t *ptdata, int secnum);
 
-H5TOOLS_DLL int     do_bin_output(FILE *stream, FILE *err_stream, hid_t container, hsize_t nelmts, hid_t tid, void *_mem);
-H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem);
+H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t nelmts);
 H5TOOLS_DLL int     render_bin_output_region_data_blocks(hid_t region_id, FILE *stream,
                             hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata);
 H5TOOLS_DLL hbool_t render_bin_output_region_blocks(hid_t region_space, hid_t region_id,

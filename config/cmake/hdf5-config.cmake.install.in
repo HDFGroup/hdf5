@@ -58,16 +58,16 @@ SET (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 # Don't include targets if this file is being picked up by another
 # project which has already built hdf5 as a subproject
 #-----------------------------------------------------------------------------
-IF (NOT TARGET "hdf5")
+IF (NOT TARGET "@HDF5_PACKAGE@")
   IF (HDF5_ENABLE_Z_LIB_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "zlib")
-    INCLUDE (${SELF_DIR}/../ZLIB/ZLIB-targets.cmake)
+    INCLUDE (${SELF_DIR}/../ZLIB/ZLIB@HDF_PACKAGE_EXT@-targets.cmake)
   ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "zlib")
   IF (HDF5_ENABLE_SZIP_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "szip")
-    INCLUDE (${SELF_DIR}/../SZIP/SZIP-targets.cmake)
+    INCLUDE (${SELF_DIR}/../SZIP/SZIP@HDF_PACKAGE_EXT@-targets.cmake)
   ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "szip")
-  INCLUDE (${SELF_DIR}/hdf5-targets.cmake)
+  INCLUDE (${SELF_DIR}/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
   SET (HDF5_LIBRARIES "@HDF5_LIBRARIES_TO_EXPORT@")
-ENDIF (NOT TARGET "hdf5")
+ENDIF (NOT TARGET "@HDF5_PACKAGE@")
 
 #-----------------------------------------------------------------------------
 # Unfinished
