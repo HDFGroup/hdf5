@@ -378,6 +378,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an error that could occur when calling H5Ocopy within an
+            H5Literate callback (and possibly other situations).
+            (NAF - 2012/7/25 - HDFFV-5853)
       - Fixed an error that would occur when copying an object with attribute
             creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
       - Fixed a bug in H5Ocopy(): When copying an opened object, call the

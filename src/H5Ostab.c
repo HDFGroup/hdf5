@@ -336,7 +336,7 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
 
     /* Create components of symbol table message */
     if(H5G__stab_create_components(file_dst, stab_dst, size_hint, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create symbol table components")
+	HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTINIT, NULL, "can't create symbol table components")
 
     /* Reset metadata tag */
     H5_END_TAG(NULL);
