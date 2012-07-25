@@ -55,6 +55,7 @@ SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_ERRORFILES="$srcdir/errfiles"
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
@@ -134,10 +135,26 @@ $SRC_H5DUMP_TESTFILES/tpbitsSignedLongLong16.ddl
 $SRC_H5DUMP_TESTFILES/tpbitsUnsignedLongLong16.ddl
 "
 
+LIST_ERROR_TEST_FILES="
+${SRC_H5DUMP_ERRORFILES}/tnofilename-with-packed-bits.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsCharLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsCharOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsIncomplete.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsIntLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsIntOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsLengthPositive.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsLongLengthExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsLongOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsMaxExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsOffsetExceeded.err
+${SRC_H5DUMP_ERRORFILES}/tpbitsOffsetNegative.err
+"
+
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_ERROR_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -314,6 +331,69 @@ TOOLTEST3() {
      cp $actual $expect
     elif $CMP $expect $actual; then
      echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+   rm -f $actual $actual_err $actual_sav $actual_err_sav
+    fi
+
+}
+
+# same as TOOLTEST3 but filters error stack output and compares to an error file
+# Extract file name, line number, version and thread IDs because they may be different
+TOOLTEST4() {
+
+    expect="$TESTDIR/$1"
+    expect_err="$TESTDIR/`basename $1 .ddl`.err"
+    actual="$TESTDIR/`basename $1 .ddl`.out"
+    actual_err="$TESTDIR/`basename $1 .ddl`.oerr"
+    actual_ext="$TESTDIR/`basename $1 .ddl`.ext"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN "$@"
+    ) >$actual 2>$actual_err
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
+
+    # Extract file name, line number, version and thread IDs because they may be different
+    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+        -e 's/line [0-9]*/line (number)/' \
+        -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+        -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+        -e 's/H5Eget_auto[1-2]*/H5Eget_auto(1 or 2)/' \
+        -e 's/H5Eset_auto[1-2]*/H5Eset_auto(1 or 2)/' \
+     $actual_err > $actual_ext
+    #cat $actual_ext >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     if $CMP $expect_err $actual_ext; then
+      echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.err) differs from actual result (*.oerr)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $expect_err $actual_ext |sed 's/^/    /'
+    fi
     else
      echo "*FAILED*"
      echo "    Expected result (*.ddl) differs from actual result (*.out)"

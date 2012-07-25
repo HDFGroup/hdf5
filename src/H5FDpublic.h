@@ -133,7 +133,7 @@ typedef enum H5F_mem_t	H5FD_mem_t;
     H5FD_MEM_SUPER,			/*super*/			      \
     H5FD_MEM_SUPER,			/*btree*/			      \
     H5FD_MEM_DRAW,			/*draw*/			      \
-    H5FD_MEM_SUPER,			/*gheap*/			      \
+    H5FD_MEM_DRAW,			/*gheap*/			      \
     H5FD_MEM_SUPER,			/*lheap*/			      \
     H5FD_MEM_SUPER			/*ohdr*/			      \
 }

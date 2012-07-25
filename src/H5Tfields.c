@@ -168,7 +168,7 @@ H5Tget_member_name(hid_t type_id, unsigned membno)
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
-    if((ret_value = H5T_get_member_name(dt, membno))==NULL)
+    if(NULL == (ret_value = H5T__get_member_name(dt, membno)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name")
 
 done:
@@ -177,7 +177,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_get_member_name
+ * Function:	H5T__get_member_name
  *
  * Purpose:	Private function for H5Tget_member_name.  Returns the name
  *              of a member of a compound or enumeration datatype. Members
@@ -196,11 +196,11 @@ done:
  *-------------------------------------------------------------------------
  */
 char *
-H5T_get_member_name(H5T_t const *dt, unsigned membno)
+H5T__get_member_name(H5T_t const *dt, unsigned membno)
 {
     char	*ret_value;
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     assert(dt);
 
@@ -283,7 +283,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_sort_value
+ * Function:	H5T__sort_value
  *
  * Purpose:	Sorts the members of a compound datatype by their offsets;
  *		sorts the members of an enum type by their values. This even
@@ -299,7 +299,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_value(const H5T_t *dt, int *map)
+H5T__sort_value(const H5T_t *dt, int *map)
 {
     unsigned	nmembs;                 /* Number of members for datatype */
     size_t	size;
@@ -308,7 +308,7 @@ H5T_sort_value(const H5T_t *dt, int *map)
     unsigned	i, j;                   /* Local index variables */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dt);
@@ -383,11 +383,11 @@ H5T_sort_value(const H5T_t *dt, int *map)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_sort_value() */
+} /* end H5T__sort_value() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_sort_name
+ * Function:	H5T__sort_name
  *
  * Purpose:	Sorts members of a compound or enumeration datatype by their
  *		names. This even works for locked datatypes since it doesn't
@@ -405,7 +405,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_sort_name(const H5T_t *dt, int *map)
+H5T__sort_name(const H5T_t *dt, int *map)
 {
     unsigned	i, j, nmembs;
     size_t	size;
@@ -413,7 +413,7 @@ H5T_sort_name(const H5T_t *dt, int *map)
     uint8_t	tbuf[32];
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     assert(dt);

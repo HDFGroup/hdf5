@@ -31,6 +31,13 @@ SET (H5_DEP_EXECUTABLES
     h5mkgrp
 )
 
+#-----------------------------------------------------------------------------
+# Generate the h5cc file containing settings needed to compile programs
+#-----------------------------------------------------------------------------
+#IF (NOT WIN32)
+#  CONFIGURE_FILE (${HDF5_TOOLS_MISC_SOURCE_DIR}/h5cc.in ${HDF5_BINARY_DIR}/h5cc @ONLY)
+#ENDIF (NOT WIN32)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###

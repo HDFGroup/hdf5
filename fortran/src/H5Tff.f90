@@ -2050,17 +2050,19 @@ CONTAINS
 !  h5tcreate_f
 !
 ! PURPOSE
-!  Creates a new dataype
+!  Creates a new datatype.
 !
 ! INPUTS
-!  class 	 - datatype class, possible values are:
-!                    H5T_COMPOUND_F
-!                    H5T_ENUM_F
-!                    H5T_OPAQUE_F
-!  size 	 - datattype size
+!  class   - Datatype class can be one of:
+!             H5T_COMPOUND_F
+!             H5T_ENUM_F
+!             H5T_OPAQUE_F
+!             H5T_STRING_F
+!
+!  size    - Size of the datatype.
 ! OUTPUTS
-!  type_id 	 - datatype identifier
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  type_id - Datatype identifier.
+!  hdferr  - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  Elena Pourmal
@@ -2072,29 +2074,26 @@ CONTAINS
 !  port).  March 7, 2001
 ! SOURCE
   SUBROUTINE h5tcreate_f(class, size, type_id, hdferr)
-            IMPLICIT NONE
-            INTEGER, INTENT(IN) :: class ! Datatype class can be one of
-                                         ! H5T_COMPOUND_F
-                                         ! H5T_ENUM_F
-                                         ! H5T_OPAQUE_F
-            INTEGER(SIZE_T), INTENT(IN) :: size ! Size of the datatype
-            INTEGER(HID_T), INTENT(OUT) :: type_id ! Datatype identifier
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+    IMPLICIT NONE
+    INTEGER        , INTENT(IN)  :: class
+    INTEGER(SIZE_T), INTENT(IN)  :: size
+    INTEGER(HID_T) , INTENT(OUT) :: type_id
+    INTEGER        , INTENT(OUT) :: hdferr
 !*****
-            INTERFACE
-              INTEGER FUNCTION h5tcreate_c(class, size, type_id)
-              USE H5GLOBAL
-              !DEC$IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TCREATE_C'::h5tcreate_c
-              !DEC$ENDIF
-              INTEGER, INTENT(IN) :: class
-              INTEGER(SIZE_T), INTENT(IN) :: size
-              INTEGER(HID_T), INTENT(OUT) :: type_id
-              END FUNCTION h5tcreate_c
-            END INTERFACE
+    INTERFACE
+       INTEGER FUNCTION h5tcreate_c(class, size, type_id)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5TCREATE_C'::h5tcreate_c
+         !DEC$ENDIF
+         INTEGER, INTENT(IN) :: class
+         INTEGER(SIZE_T), INTENT(IN) :: size
+         INTEGER(HID_T), INTENT(OUT) :: type_id
+       END FUNCTION h5tcreate_c
+    END INTERFACE
 
-           hdferr = h5tcreate_c(class, size, type_id)
-          END SUBROUTINE h5tcreate_f
+    hdferr = h5tcreate_c(class, size, type_id)
+  END SUBROUTINE h5tcreate_f
 
 !
 !****s* H5T/h5tinsert_f

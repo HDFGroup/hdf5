@@ -42,19 +42,19 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static size_t H5D_gather_file(const H5D_io_info_t *io_info,
-    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
-    void *buf);
-static herr_t H5D_scatter_file(const H5D_io_info_t *io_info,
+static herr_t H5D__scatter_file(const H5D_io_info_t *io_info,
     const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
     const void *buf);
-static size_t H5D_gather_mem(const void *_buf,
+static size_t H5D__gather_file(const H5D_io_info_t *io_info,
+    const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
+    void *buf);
+static size_t H5D__gather_mem(const void *_buf,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
-static herr_t H5D_compound_opt_read(size_t nelmts, const H5S_t *mem_space,
+static herr_t H5D__compound_opt_read(size_t nelmts, const H5S_t *mem_space,
     H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache,
     const H5D_type_info_t *type_info, void *user_buf/*out*/);
-static herr_t H5D_compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info);
+static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info);
 
 
 /*********************/
@@ -75,7 +75,7 @@ H5FL_SEQ_EXTERN(hsize_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_scatter_file
+ * Function:	H5D__scatter_file
  *
  * Purpose:	Scatters dataset elements from the type conversion buffer BUF
  *		to the file F where the data points are arranged according to
@@ -91,7 +91,7 @@ H5FL_SEQ_EXTERN(hsize_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_scatter_file(const H5D_io_info_t *_io_info,
+H5D__scatter_file(const H5D_io_info_t *_io_info,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const void *_buf)
 {
@@ -108,7 +108,7 @@ H5D_scatter_file(const H5D_io_info_t *_io_info,
     size_t  nelem;                 /* Number of elements used in sequences */
     herr_t  ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(_io_info);
@@ -165,11 +165,11 @@ done:
         off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_scatter_file() */
+} /* H5D__scatter_file() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_gather_file
+ * Function:	H5D__gather_file
  *
  * Purpose:	Gathers data points from file F and accumulates them in the
  *		type conversion buffer BUF.  The LAYOUT argument describes
@@ -190,7 +190,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5D_gather_file(const H5D_io_info_t *_io_info,
+H5D__gather_file(const H5D_io_info_t *_io_info,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     void *_buf/*out*/)
 {
@@ -207,7 +207,7 @@ H5D_gather_file(const H5D_io_info_t *_io_info,
     size_t nelem;               /* Number of elements used in sequences */
     size_t ret_value = nelmts;  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(_io_info);
@@ -266,11 +266,11 @@ done:
         off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_gather_file() */
+} /* H5D__gather_file() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_scatter_mem
+ * Function:	H5D__scatter_mem
  *
  * Purpose:	Scatters NELMTS data points from the scatter buffer
  *		TSCAT_BUF to the application buffer BUF.  Each element is
@@ -285,7 +285,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_scatter_mem (const void *_tscat_buf, const H5S_t *space,
+H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
     H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
     void *_buf/*out*/)
 {
@@ -301,7 +301,7 @@ H5D_scatter_mem (const void *_tscat_buf, const H5S_t *space,
     size_t nelem;               /* Number of elements used in sequences */
     herr_t ret_value = SUCCEED;   /* Number of elements scattered */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(tscat_buf);
@@ -351,11 +351,11 @@ done:
         off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5D_scatter_mem() */
+}   /* H5D__scatter_mem() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_gather_mem
+ * Function:	H5D__gather_mem
  *
  * Purpose:	Gathers dataset elements from application memory BUF and
  *		copies them into the gather buffer TGATH_BUF.
@@ -372,7 +372,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5D_gather_mem(const void *_buf, const H5S_t *space,
+H5D__gather_mem(const void *_buf, const H5S_t *space,
     H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
     void *_tgath_buf/*out*/)
 {
@@ -388,7 +388,7 @@ H5D_gather_mem(const void *_buf, const H5S_t *space,
     size_t nelem;               /* Number of elements used in sequences */
     size_t ret_value = nelmts;    /* Number of elements gathered */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(buf);
@@ -438,11 +438,11 @@ done:
         off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5D_gather_mem() */
+}   /* H5D__gather_mem() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_scatgath_read
+ * Function:	H5D__scatgath_read
  *
  * Purpose:	Perform scatter/gather ead from a contiguous [piece of a] dataset.
  *
@@ -454,7 +454,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space)
 {
     const H5D_dxpl_cache_t *dxpl_cache = io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
@@ -469,7 +469,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     size_t	smine_nelmts;		/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(io_info);
@@ -510,7 +510,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
 	/*
          * Gather data
          */
-        n = H5D_gather_file(io_info, file_space, &file_iter, smine_nelmts,
+        n = H5D__gather_file(io_info, file_space, &file_iter, smine_nelmts,
                 type_info->tconv_buf/*out*/);
 	if(n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
@@ -520,13 +520,13 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
          * bypass the rest of steps.
          */
         if(type_info->cmpd_subset && H5T_SUBSET_FALSE != type_info->cmpd_subset->subset) {
-            if(H5D_compound_opt_read(smine_nelmts, mem_space, &mem_iter, dxpl_cache,
+            if(H5D__compound_opt_read(smine_nelmts, mem_space, &mem_iter, dxpl_cache,
                     type_info, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
             if(H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D_gather_mem(buf, mem_space, &bkg_iter, smine_nelmts,
+                n = H5D__gather_mem(buf, mem_space, &bkg_iter, smine_nelmts,
                         dxpl_cache, type_info->bkg_buf/*out*/);
                 if(n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
@@ -548,7 +548,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
             /*
              * Scatter the data into memory.
              */
-            if(H5D_scatter_mem(type_info->tconv_buf, mem_space, &mem_iter,
+            if(H5D__scatter_mem(type_info->tconv_buf, mem_space, &mem_iter,
                     smine_nelmts, dxpl_cache, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end else */
@@ -570,11 +570,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_scatgath_read() */
+} /* end H5D__scatgath_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_scatgath_write
+ * Function:	H5D__scatgath_write
  *
  * Purpose:	Perform scatter/gather write to a contiguous [piece of a] dataset.
  *
@@ -586,7 +586,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space)
 {
     const H5D_dxpl_cache_t *dxpl_cache = io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
@@ -601,7 +601,7 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     size_t	smine_nelmts;		/*elements per strip	*/
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(io_info);
@@ -638,7 +638,7 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          * buffer. Also gather data from the file into the background buffer
          * if necessary.
          */
-        n = H5D_gather_mem(buf, mem_space, &mem_iter, smine_nelmts,
+        n = H5D__gather_mem(buf, mem_space, &mem_iter, smine_nelmts,
                 dxpl_cache, type_info->tconv_buf/*out*/);
         if(n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
@@ -650,13 +650,13 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          * function H5T_conv_struct_opt to protect the background data.
          */
         if(type_info->cmpd_subset && H5T_SUBSET_DST == type_info->cmpd_subset->subset
-            && type_info->dst_type_size == type_info->cmpd_subset->copy_size) {
-            if(H5D_compound_opt_write(smine_nelmts, type_info) < 0)
+                && type_info->dst_type_size == type_info->cmpd_subset->copy_size) {
+            if(H5D__compound_opt_write(smine_nelmts, type_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
             if(H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D_gather_file(io_info, file_space, &bkg_iter, smine_nelmts,
+                n = H5D__gather_file(io_info, file_space, &bkg_iter, smine_nelmts,
                         type_info->bkg_buf/*out*/);
                 if(n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
@@ -680,7 +680,7 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         /*
          * Scatter the data out to the file.
          */
-        if(H5D_scatter_file(io_info, file_space, &file_iter, smine_nelmts,
+        if(H5D__scatter_file(io_info, file_space, &file_iter, smine_nelmts,
                 type_info->tconv_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
     } /* end for */
@@ -701,11 +701,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_scatgath_write() */
+} /* end H5D__scatgath_write() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_compound_opt_read
+ * Function:	H5D__compound_opt_read
  *
  * Purpose:	A special optimization case when the source and
  *              destination members are a subset of each other, and
@@ -737,7 +737,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
+H5D__compound_opt_read(size_t nelmts, const H5S_t *space,
     H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache,
     const H5D_type_info_t *type_info, void *user_buf/*out*/)
 {
@@ -750,7 +750,7 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
     size_t     src_stride, dst_stride, copy_size;
     herr_t     ret_value = SUCCEED;	       /*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(nelmts > 0);
@@ -832,11 +832,11 @@ done:
         off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_compound_opt_read() */
+} /* end H5D__compound_opt_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_compound_opt_write
+ * Function:	H5D__compound_opt_write
  *
  * Purpose:	A special optimization case when the source and
  *              destination members are a subset of each other, and
@@ -869,13 +869,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
+H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
 {
     uint8_t    *xsbuf, *xdbuf;                  /* Source & destination pointers into dataset buffer */
     size_t     src_stride, dst_stride;          /* Strides through source & destination datatypes */
     size_t     i;                               /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(nelmts > 0);
@@ -897,5 +897,5 @@ H5D_compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_compound_opt_write() */
+} /* end H5D__compound_opt_write() */
 

@@ -2351,7 +2351,7 @@ static int test_dangle_links(const char *fname1, const char *fname2)
         goto out;
     }
 
-    status = H5Lcreate_external("no_file1.h5", "no_obj", fid1, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_external("no_file.h5", "no_obj", fid1, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname1);
@@ -2384,7 +2384,7 @@ static int test_dangle_links(const char *fname1, const char *fname2)
         goto out;
     }
 
-    status = H5Lcreate_external("no_file2.h5", "no_obj", fid2, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_external("no_file.h5", "no_obj", fid2, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s> H5Lcreate_external failed.\n", fname2);

@@ -96,6 +96,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layouto.h5
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout2.h5
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout3.h5
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_named_dtypes.h5
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nbit.h5
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_objs.h5
@@ -322,10 +323,12 @@ IF (BUILD_TESTING)
           -E remove 
          ./testfiles/h5repack_filters.h5.out
          ./testfiles/h5repack_filters.h5.out.err
-         ./testfiles/h5repack_layout2.h5-v.out
-         ./testfiles/h5repack_layout2.h5-v.out.err
          ./testfiles/h5repack_layout.h5-v.out
          ./testfiles/h5repack_layout.h5-v.out.err
+         ./testfiles/h5repack_layout2.h5-v.out
+         ./testfiles/h5repack_layout2.h5-v.out.err
+         ./testfiles/h5repack_layout3.h5-v.out
+         ./testfiles/h5repack_layout3.h5-v.out.err
          ./testfiles/out.tfamily%05d.h5
          ./testfiles/out.h5diff_attr1.h5
          ./testfiles/out.h5repack_attr.h5
@@ -336,9 +339,10 @@ IF (BUILD_TESTING)
          ./testfiles/out.h5repack_filters.h5
          ./testfiles/out.h5repack_fletcher.h5
          ./testfiles/out.h5repack_hlink.h5
-         ./testfiles/out.h5repack_layout2.h5
          ./testfiles/out.h5repack_layout.h5
          ./testfiles/out.h5repack_layouto.h5
+         ./testfiles/out.h5repack_layout2.h5
+         ./testfiles/out.h5repack_layout3.h5
          ./testfiles/out.h5repack_named_dtypes.h5
          ./testfiles/out.h5repack_nbit.h5
          ./testfiles/out.h5repack_objs.h5
@@ -369,9 +373,10 @@ IF (BUILD_TESTING)
          h5repack_fletcher_out.h5
          h5repack_hlink.h5
          h5repack_hlink_out.h5
-         h5repack_layout2.h5
          h5repack_layout.h5
          h5repack_layout_out.h5
+         h5repack_layout2.h5
+         h5repack_layout3.h5
          h5repack_named_dtypes.h5
          h5repack_named_dtypes_out.h5
          h5repack_nbit.h5
@@ -776,6 +781,24 @@ IF (BUILD_TESTING)
 
   ADD_H5_TEST (contig_small_fixed_compa "TEST" ${FILE18} -l chunked_small_fixed:COMPA)
   ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fixed COMPACT)
+
+#--------------------------------------------------------------------------- 
+# Test file contains chunked datasets (need multiple dsets) with 
+# unlimited max dims.   (HDFFV-7933)
+# Use first dset to test.
+#---------------------------------------------------------------------------
+# chunk to chunk - specify chunk dim bigger than any current dim
+ADD_H5_TEST (chunk2chunk "TEST" h5repack_layout3.h5 -l chunk_unlimit1:CHUNK=100x300)
+ADD_H5_VERIFY_TEST (chunk2chunk "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CHUNK)
+
+# chunk to contiguous 
+ADD_H5_TEST (chunk2conti "TEST" h5repack_layout3.h5 -l chunk_unlimit1:CONTI)
+ADD_H5_VERIFY_TEST (chunk2conti "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CONTI)
+
+# chunk to compact - convert big dataset (should be > 64k) for this purpose, 
+# should remain as original layout (chunk)
+ADD_H5_TEST (chunk2compa "TEST" h5repack_layout3.h5 -l chunk_unlimit1:COMPA)
+ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CHUNK)
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will

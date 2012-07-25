@@ -121,7 +121,12 @@
 #define H5D_XFER_XFORM_DEL          H5P_dxfr_xform_del
 #define H5D_XFER_XFORM_COPY         H5P_dxfr_xform_copy
 #define H5D_XFER_XFORM_CLOSE        H5P_dxfr_xform_close
-
+/* Definitions for memory MPI type property */
+#define H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
+#define H5FD_MPI_XFER_MEM_MPI_TYPE_DEF         MPI_DATATYPE_NULL
+/* Definitions for file MPI type property */
+#define H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
+#define H5FD_MPI_XFER_FILE_MPI_TYPE_DEF        MPI_DATATYPE_NULL
 
 /******************/
 /* Local Typedefs */
@@ -210,6 +215,8 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     unsigned def_mpio_chunk_opt_ratio = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
     H5D_mpio_actual_chunk_opt_mode_t def_mpio_actual_chunk_opt_mode = H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_DEF;
     H5D_mpio_actual_io_mode_t def_mpio_actual_io_mode = H5D_MPIO_ACTUAL_IO_MODE_DEF;
+    MPI_Datatype btype = H5FD_MPI_XFER_MEM_MPI_TYPE_DEF;  /* Default value for MPI buffer type */
+    MPI_Datatype ftype = H5FD_MPI_XFER_FILE_MPI_TYPE_DEF; /* Default value for MPI file type */
 #endif /* H5_HAVE_PARALLEL */
     H5Z_EDC_t enable_edc = H5D_XFER_EDC_DEF;            /* Default value for EDC property */
     H5Z_cb_t filter_cb = H5D_XFER_FILTER_CB_DEF;        /* Default value for filter callback */
@@ -291,6 +298,17 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     /* Register the actual io mode property. */
     if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the MPI memory type property */
+    if(H5P_register_real(pclass, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE, 
+                         &btype, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the MPI file type property */
+    if(H5P_register_real(pclass, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE, 
+                         &ftype, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 #endif /* H5_HAVE_PARALLEL */
 
     /* Register the EDC property */

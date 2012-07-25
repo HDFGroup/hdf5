@@ -35,7 +35,7 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	*/
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5A_init_deprec_interface
+#define H5_INTERFACE_INIT_FUNC	H5A__init_deprec_interface
 
 
 /***********/
@@ -87,9 +87,9 @@
 
 /*--------------------------------------------------------------------------
 NAME
-   H5A_init_deprec_interface -- Initialize interface-specific information
+   H5A__init_deprec_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5A_init_deprec_interface()
+    herr_t H5A__init_deprec_interface()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -98,12 +98,12 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5A_init_deprec_interface(void)
+H5A__init_deprec_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(H5A_init())
-} /* H5A_init_deprec_interface() */
+} /* H5A__init_deprec_interface() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 

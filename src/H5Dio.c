@@ -50,27 +50,27 @@
 /********************/
 
 /* Internal I/O routines */
-static herr_t H5D_read(H5D_t *dataset, hid_t mem_type_id,
+static herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
     void *buf/*out*/);
-static herr_t H5D_write(H5D_t *dataset, hid_t mem_type_id,
+static herr_t H5D__write(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
     const void *buf);
 
 /* Setup/teardown routines */
-static herr_t H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
+static herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, const H5D_type_info_t *type_info, H5D_storage_t *store,
     H5D_io_info_t *io_info);
-static herr_t H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
+static herr_t H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, hid_t mem_type_id, hbool_t do_write,
     H5D_type_info_t *type_info);
 #ifdef H5_HAVE_PARALLEL
-static herr_t H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
+static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
     hid_t dxpl_id, const H5S_t *file_space, const H5S_t *mem_space,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm);
-static herr_t H5D_ioinfo_term(H5D_io_info_t *io_info);
+static herr_t H5D__ioinfo_term(H5D_io_info_t *io_info);
 #endif /* H5_HAVE_PARALLEL */
-static herr_t H5D_typeinfo_term(const H5D_type_info_t *type_info);
+static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 
 
 /*********************/
@@ -170,7 +170,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* read raw data */
-    if(H5D_read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
+    if(H5D__read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -262,7 +262,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* write raw data */
-    if(H5D_write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+    if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
@@ -271,7 +271,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_read
+ * Function:	H5D__read
  *
  * Purpose:	Reads (part of) a DATASET into application memory BUF. See
  *		H5Dread() for complete details.
@@ -284,7 +284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
+H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
     H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
@@ -315,7 +315,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dataset->oloc.addr, FAIL)
+    FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -329,11 +329,11 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
 
     /* Fill the DXPL cache values for later use */
-    if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Set up datatype info for operation */
-    if(H5D_typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
@@ -412,7 +412,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             HGOTO_DONE(SUCCEED)
 
         /* Go fill the user's selection with the dataset's fill value */
-        if(H5D_fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, type_info.mem_type, mem_space, dxpl_id) < 0)
+        if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, type_info.mem_type, mem_space, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
         else
             HGOTO_DONE(SUCCEED)
@@ -421,7 +421,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Set up I/O operation */
     io_info.op_type = H5D_IO_OP_READ;
     io_info.u.rbuf = buf;
-    if(H5D_ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
 #ifdef H5_HAVE_PARALLEL
     io_info_init = TRUE;
@@ -441,7 +441,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    if(H5D_ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -456,11 +456,11 @@ done:
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
     if(io_info_init)
-        if(H5D_ioinfo_term(&io_info) < 0)
+        if(H5D__ioinfo_term(&io_info) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
     /* Shut down datatype info for operation */
-    if(type_info_init && H5D_typeinfo_term(&type_info) < 0)
+    if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     /* discard projected mem space if it was created */
@@ -469,11 +469,11 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5D_read() */
+} /* end H5D__read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_write
+ * Function:	H5D__write
  *
  * Purpose:	Writes (part of) a DATASET to a file from application memory
  *		BUF. See H5Dwrite() for complete details.
@@ -486,7 +486,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
+H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
     H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
@@ -517,7 +517,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, dataset->oloc.addr, FAIL)
+    FUNC_ENTER_STATIC_TAG(dxpl_id, dataset->oloc.addr, FAIL)
 
     /* check args */
     HDassert(dataset && dataset->oloc.file);
@@ -535,11 +535,11 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Fill the DXPL cache values for later use */
-    if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Set up datatype info for operation */
-    if(H5D_typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
+    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
@@ -644,14 +644,14 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
 
  	/* Allocate storage */
-        if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
+        if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
 
     /* Set up I/O operation */
     io_info.op_type = H5D_IO_OP_WRITE;
     io_info.u.wbuf = buf;
-    if(H5D_ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
 #ifdef H5_HAVE_PARALLEL
     io_info_init = TRUE;
@@ -665,7 +665,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    if(H5D_ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
@@ -697,11 +697,11 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
-    if(io_info_init && H5D_ioinfo_term(&io_info) < 0)
+    if(io_info_init && H5D__ioinfo_term(&io_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
     /* Shut down datatype info for operation */
-    if(type_info_init && H5D_typeinfo_term(&type_info) < 0)
+    if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     /* discard projected mem space if it was created */
@@ -710,11 +710,11 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5D_write() */
+} /* end H5D__write() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_ioinfo_init
+ * Function:	H5D__ioinfo_init
  *
  * Purpose:	Routine for determining correct I/O operations for
  *              each I/O action.
@@ -727,10 +727,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
+H5D__ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const H5D_type_info_t *type_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(dset);
@@ -758,15 +758,15 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
          * If there is no data transform or type conversion then read directly into
          *  the application's buffer.  This saves at least one mem-to-mem copy.
          */
-        io_info->io_ops.single_read = H5D_select_read;
-        io_info->io_ops.single_write = H5D_select_write;
+        io_info->io_ops.single_read = H5D__select_read;
+        io_info->io_ops.single_write = H5D__select_write;
     } /* end if */
     else {
         /*
          * This is the general case (type conversion, usually).
          */
-        io_info->io_ops.single_read = H5D_scatgath_read;
-        io_info->io_ops.single_write = H5D_scatgath_write;
+        io_info->io_ops.single_read = H5D__scatgath_read;
+        io_info->io_ops.single_write = H5D__scatgath_write;
     } /* end else */
 
 #ifdef H5_HAVE_PARALLEL
@@ -775,11 +775,11 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
 #endif /* H5_HAVE_PARALLEL */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_ioinfo_init() */
+} /* end H5D__ioinfo_init() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_typeinfo_init
+ * Function:	H5D__typeinfo_init
  *
  * Purpose:	Routine for determining correct datatype information for
  *              each I/O action.
@@ -792,7 +792,7 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
+H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     hid_t dxpl_id, hid_t mem_type_id, hbool_t do_write,
     H5D_type_info_t *type_info)
 {
@@ -800,7 +800,7 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     const H5T_t	*dst_type;              /* Destination datatype */
     herr_t ret_value = SUCCEED;	        /* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(type_info);
@@ -931,12 +931,12 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_typeinfo_init() */
+} /* end H5D__typeinfo_init() */
 
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_ioinfo_adjust
+ * Function:	H5D__ioinfo_adjust
  *
  * Purpose:	Adjust operation's I/O info for any parallel I/O
  *
@@ -948,7 +948,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
+H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     const H5S_t *file_space, const H5S_t *mem_space,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm)
 {
@@ -957,7 +957,7 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     H5D_mpio_actual_io_mode_t actual_io_mode; /* performed io mode */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(dset);
@@ -997,7 +997,7 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve MPI communicator")
 
         /* Check if we can set direct MPI-IO read/write functions */
-        if((opt = H5D_mpio_opt_possible(io_info, file_space, mem_space, type_info, fm)) < 0)
+        if((opt = H5D__mpio_opt_possible(io_info, file_space, mem_space, type_info, fm)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "invalid check for direct IO dataspace ")
 
         /* Check if we can use the optimized parallel I/O routines */
@@ -1005,8 +1005,8 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             /* Override the I/O op pointers to the MPI-specific routines */
             io_info->io_ops.multi_read = dset->shared->layout.ops->par_read;
             io_info->io_ops.multi_write = dset->shared->layout.ops->par_write;
-            io_info->io_ops.single_read = H5D_mpio_select_read;
-            io_info->io_ops.single_write = H5D_mpio_select_write;
+            io_info->io_ops.single_read = H5D__mpio_select_read;
+            io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
             /* If we won't be doing collective I/O, but the user asked for
@@ -1024,11 +1024,11 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_ioinfo_adjust() */
+} /* end H5D__ioinfo_adjust() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_ioinfo_term
+ * Function:	H5D__ioinfo_term
  *
  * Purpose:	Common logic for terminating an I/O info object
  *              (Only used for restoring MPI transfer mode currently)
@@ -1041,11 +1041,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_ioinfo_term(H5D_io_info_t *io_info)
+H5D__ioinfo_term(H5D_io_info_t *io_info)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check if we used the MPI VFD for the I/O */
     if(io_info->using_mpi_vfd) {
@@ -1078,13 +1078,13 @@ H5D_ioinfo_term(H5D_io_info_t *io_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_ioinfo_term() */
+} /* end H5D__ioinfo_term() */
 
 #endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_typeinfo_term
+ * Function:	H5D__typeinfo_term
  *
  * Purpose:	Common logic for terminating a type info object
  *
@@ -1096,9 +1096,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_typeinfo_term(const H5D_type_info_t *type_info)
+H5D__typeinfo_term(const H5D_type_info_t *type_info)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check for releasing datatype conversion & background buffers */
     if(type_info->tconv_buf_allocated) {
@@ -1111,5 +1111,5 @@ H5D_typeinfo_term(const H5D_type_info_t *type_info)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_typeinfo_term() */
+} /* end H5D__typeinfo_term() */
 

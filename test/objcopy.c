@@ -1567,7 +1567,7 @@ compare_idx_type(hid_t fapl, hid_t did, H5D_chunk_index_t new_type, H5D_chunk_in
     H5F_libver_t low;           /* File format low bound */
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(did, &idx_type) < 0) 
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
 	FAIL_STACK_ERROR
 
     /* Check if we are using the latest version of the format */

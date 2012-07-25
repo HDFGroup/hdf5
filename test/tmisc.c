@@ -3460,14 +3460,14 @@ test_misc20(void)
     CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the layout version */
-    ret = H5D_layout_version_test(did,&version);
-    CHECK(ret, FAIL, "H5D_layout_version_test");
-    VERIFY(version, 3, "H5D_layout_version_test");
+    ret = H5D__layout_version_test(did,&version);
+    CHECK(ret, FAIL, "H5D__layout_version_test");
+    VERIFY(version, 3, "H5D__layout_version_test");
 
     /* Get the layout contiguous storage size */
-    ret = H5D_layout_contig_size_test(did,&contig_size);
-    CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, (MISC20_SPACE_DIM0 * MISC20_SPACE_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5D_layout_contig_size_test");
+    ret = H5D__layout_contig_size_test(did,&contig_size);
+    CHECK(ret, FAIL, "H5D__layout_contig_size_test");
+    VERIFY(contig_size, (MISC20_SPACE_DIM0 * MISC20_SPACE_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5D__layout_contig_size_test");
 
     /* Close datasset */
     ret = H5Dclose(did);
@@ -3478,14 +3478,14 @@ test_misc20(void)
     CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the layout version */
-    ret = H5D_layout_version_test(did,&version);
-    CHECK(ret, FAIL, "H5D_layout_version_test");
-    VERIFY(version, 3, "H5D_layout_version_test");
+    ret = H5D__layout_version_test(did,&version);
+    CHECK(ret, FAIL, "H5D__layout_version_test");
+    VERIFY(version, 3, "H5D__layout_version_test");
 
     /* Get the layout contiguous storage size */
-    ret = H5D_layout_contig_size_test(did,&contig_size);
-    CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, (MISC20_SPACE2_DIM0 * MISC20_SPACE2_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5D_layout_contig_size_test");
+    ret = H5D__layout_contig_size_test(did,&contig_size);
+    CHECK(ret, FAIL, "H5D__layout_contig_size_test");
+    VERIFY(contig_size, (MISC20_SPACE2_DIM0 * MISC20_SPACE2_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5D__layout_contig_size_test");
 
     /* Close datasset */
     ret = H5Dclose(did);
@@ -3508,14 +3508,14 @@ test_misc20(void)
     CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the layout version */
-    ret = H5D_layout_version_test(did,&version);
-    CHECK(ret, FAIL, "H5D_layout_version_test");
-    VERIFY(version, 2, "H5D_layout_version_test");
+    ret = H5D__layout_version_test(did,&version);
+    CHECK(ret, FAIL, "H5D__layout_version_test");
+    VERIFY(version, 2, "H5D__layout_version_test");
 
     /* Get the layout contiguous storage size */
-    ret = H5D_layout_contig_size_test(did,&contig_size);
-    CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, (MISC20_SPACE_DIM0 * MISC20_SPACE_DIM1 * H5Tget_size(H5T_STD_I32LE)), "H5D_layout_contig_size_test");
+    ret = H5D__layout_contig_size_test(did,&contig_size);
+    CHECK(ret, FAIL, "H5D__layout_contig_size_test");
+    VERIFY(contig_size, (MISC20_SPACE_DIM0 * MISC20_SPACE_DIM1 * H5Tget_size(H5T_STD_I32LE)), "H5D__layout_contig_size_test");
 
     /* Close datasset */
     ret = H5Dclose(did);
@@ -4963,10 +4963,10 @@ test_misc28(void)
     CHECK(did, FAIL, "H5Dcreate2");
 
     /* Verify that the chunk cache is empty */
-    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
-    CHECK(ret, FAIL, "H5D_current_cache_size_test");
-    VERIFY(nbytes_used, (size_t) 0, "H5D_current_cache_size_test");
-    VERIFY(nused, 0, "H5D_current_cache_size_test");
+    ret = H5D__current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D__current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) 0, "H5D__current_cache_size_test");
+    VERIFY(nused, 0, "H5D__current_cache_size_test");
 
     /* Initialize write buffer */
     for(i=0; i<MISC28_SIZE; i++)
@@ -4984,10 +4984,10 @@ test_misc28(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Verify that all 10 chunks written have been cached */
-    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
-    CHECK(ret, FAIL, "H5D_current_cache_size_test");
-    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
-    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+    ret = H5D__current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D__current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D__current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D__current_cache_size_test");
 
     /* Initialize write buffer */
     for(i=0; i<MISC28_SIZE; i++)
@@ -5003,10 +5003,10 @@ test_misc28(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Verify that the size of the cache remains at 10 */
-    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
-    CHECK(ret, FAIL, "H5D_current_cache_size_test");
-    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
-    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+    ret = H5D__current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D__current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D__current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D__current_cache_size_test");
 
     /* Close dataset */
     ret = H5Dclose(did);
@@ -5018,10 +5018,10 @@ test_misc28(void)
     CHECK(did, FAIL, "H5Dopen2");
 
     /* Verify that the chunk cache is empty */
-    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
-    CHECK(ret, FAIL, "H5D_current_cache_size_test");
-    VERIFY(nbytes_used, (size_t) 0, "H5D_current_cache_size_test");
-    VERIFY(nused, 0, "H5D_current_cache_size_test");
+    ret = H5D__current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D__current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) 0, "H5D__current_cache_size_test");
+    VERIFY(nused, 0, "H5D__current_cache_size_test");
 
     /* Select hyperslabe for reading */
     start[1] = 0;
@@ -5037,10 +5037,10 @@ test_misc28(void)
         VERIFY(buf[i], i, "H5Dread");
 
     /* Verify that all 10 chunks read have been cached */
-    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
-    CHECK(ret, FAIL, "H5D_current_cache_size_test");
-    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
-    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+    ret = H5D__current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D__current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D__current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D__current_cache_size_test");
 
     /* Select new hyperslab */
     start[1] = 1;
@@ -5056,10 +5056,10 @@ test_misc28(void)
         VERIFY(buf[i], MISC28_SIZE - 1 - i, "H5Dread");
 
     /* Verify that the size of the cache remains at 10 */
-    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
-    CHECK(ret, FAIL, "H5D_current_cache_size_test");
-    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
-    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+    ret = H5D__current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D__current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D__current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D__current_cache_size_test");
 
     /* Close dataset */
     ret = H5Dclose(did);

@@ -100,8 +100,6 @@
 /* Local Macros */
 /****************/
 
-#define H5G_RESERVED_ATOMS	0
-
 
 /******************/
 /* Local Typedefs */
@@ -131,6 +129,15 @@
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* Group ID class */
+static const H5I_class_t H5I_GROUP_CLS[1] = {{
+    H5I_GROUP,			/* ID class value */
+    0,				/* Class flags */
+    64,				/* Minimum hash size for class */
+    0,				/* # of reserved IDs for class */
+    (H5I_free_t)H5G_close	/* Callback routine for closing objects of this class */
+}};
 
 
 
@@ -187,7 +194,7 @@ H5G_init_interface(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Initialize the atom group for the group IDs */
-    if(H5I_register_type(H5I_GROUP, (size_t)H5I_GROUPID_HASHSIZE, H5G_RESERVED_ATOMS, (H5I_free_t)H5G_close) < 0)
+    if(H5I_register_type(H5I_GROUP_CLS) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
 done:

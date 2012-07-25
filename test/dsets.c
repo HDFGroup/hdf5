@@ -6779,7 +6779,7 @@ test_zero_dims(hid_t file)
     if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d, &idx_type) < 0) FAIL_STACK_ERROR
+    if(H5D__layout_idx_type_test(d, &idx_type) < 0) FAIL_STACK_ERROR
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -6829,7 +6829,7 @@ test_zero_dims(hid_t file)
     if((d2 = H5Dcreate2(file, ZERODIM_DATASET2, H5T_NATIVE_INT, s2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d2, &idx_type) < 0) FAIL_STACK_ERROR
+    if(H5D__layout_idx_type_test(d2, &idx_type) < 0) FAIL_STACK_ERROR
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -6948,8 +6948,8 @@ test_missing_chunk(hid_t file)
     if((did2 = H5Dcreate2(file, MISSING_CHUNK_DATASET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Get the chunk index types */
-    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
-    if(H5D_layout_idx_type_test(did2, &idx_type2) < 0) TEST_ERROR;
+    if(H5D__layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+    if(H5D__layout_idx_type_test(did2, &idx_type2) < 0) TEST_ERROR;
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -7149,7 +7149,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+    if(H5D__layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -7211,7 +7211,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     if((d = H5Dcreate2(file, dname, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+    if(H5D__layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -7311,7 +7311,7 @@ test_random_chunks_real(const char *testname, hbool_t early_alloc, hid_t fapl)
     if((d = H5Dcreate2(file, dname, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Get the chunk index type */
-    if(H5D_layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
+    if(H5D__layout_idx_type_test(d, &idx_type) < 0) TEST_ERROR;
 
     /* Verify index type */
     if(low == H5F_LIBVER_LATEST) {
@@ -8080,8 +8080,8 @@ test_big_chunks_bypass_cache(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the chunk index types for 1-D and 2-d datasets */
-    if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
-    if(H5D_layout_idx_type_test(t_dsid, &t_idx_type) < 0) FAIL_STACK_ERROR
+    if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+    if(H5D__layout_idx_type_test(t_dsid, &t_idx_type) < 0) FAIL_STACK_ERROR
 
     /* Chunk index type expected depends on whether we are using the latest version of the format */
     if(low == H5F_LIBVER_LATEST) {
@@ -8392,7 +8392,7 @@ test_chunk_fast(hid_t fapl)
                             FAIL_STACK_ERROR
 
                         /* Get the chunk index type */
-                        if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+                        if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
                         /* Chunk index type expected depends on whether we are using the latest version of the format */
                         if(low == H5F_LIBVER_LATEST) {
@@ -8501,7 +8501,7 @@ test_chunk_fast(hid_t fapl)
                         if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
                         /* Get the chunk index type */
-                        if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+                        if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
                         /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
                         if(low == H5F_LIBVER_LATEST) {
@@ -9000,8 +9000,8 @@ test_chunk_expand(hid_t fapl)
                     FAIL_STACK_ERROR
 
                 /* Get the chunk index type */
-                if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
-                if(H5D_layout_idx_type_test(dsid2, &idx_type2) < 0) FAIL_STACK_ERROR
+                if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+                if(H5D__layout_idx_type_test(dsid2, &idx_type2) < 0) FAIL_STACK_ERROR
 
                 /* Chunk index type expected depends on whether we are using the latest version of the format */
                 if(low == H5F_LIBVER_LATEST) {
@@ -9164,8 +9164,8 @@ test_chunk_expand(hid_t fapl)
                 if((dsid2 = H5Dopen2(fid, "dset2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
                 /* Get the chunk index type for the two datasets */
-                if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
-                if(H5D_layout_idx_type_test(dsid2, &idx_type2) < 0) FAIL_STACK_ERROR
+                if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+                if(H5D__layout_idx_type_test(dsid2, &idx_type2) < 0) FAIL_STACK_ERROR
 
                 /* Chunk index type expected depends on whether we are using the latest version of the format */
                 if(low == H5F_LIBVER_LATEST) {
@@ -9436,7 +9436,7 @@ test_fixed_array(hid_t fapl)
 		FAIL_PUTS_ERROR("    Creating Chunked Dataset with maximum dimensions.")
 
 	    /* Get the chunk index type */
-	    if(H5D_layout_idx_type_test(dsid_max, &idx_type) < 0) FAIL_STACK_ERROR
+	    if(H5D__layout_idx_type_test(dsid_max, &idx_type) < 0) FAIL_STACK_ERROR
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
@@ -9474,7 +9474,7 @@ test_fixed_array(hid_t fapl)
 		FAIL_PUTS_ERROR("    Creating Chunked Dataset.")
 
 	    /* Get the chunk index type */
-	    if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+	    if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
@@ -9510,7 +9510,7 @@ test_fixed_array(hid_t fapl)
 		FAIL_PUTS_ERROR("    Creating Big Chunked Dataset.")
 
 	    /* Get the chunk index type */
-	    if(H5D_layout_idx_type_test(dsid_big, &idx_type) < 0) FAIL_STACK_ERROR
+	    if(H5D__layout_idx_type_test(dsid_big, &idx_type) < 0) FAIL_STACK_ERROR
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
@@ -9712,7 +9712,7 @@ test_idx_compatible(void)
 	    TEST_ERROR
 
 	/* Get the chunk index type */
-	if(H5D_layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+	if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
 
 	/* Verify index type */
 	if(idx_type != H5D_CHUNK_IDX_BTREE) 
@@ -9725,7 +9725,7 @@ test_idx_compatible(void)
 	    TEST_ERROR
 
 	/* Get the chunk index type */
-	if(H5D_layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+	if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
 
 	/* Verify index type */
 	if(idx_type != H5D_CHUNK_IDX_BTREE) 

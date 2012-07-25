@@ -5850,7 +5850,7 @@ static void
 H5C_adjust_flush_dependency_rc(H5C_cache_entry_t * cache_entry,
     unsigned old_child_height, unsigned new_child_height)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(cache_entry);
@@ -9278,7 +9278,7 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag, hbool_t mark_clean)
     int u;                          /* Iterator */
     H5C_cache_entry_t *entry_ptr = NULL; /* entry pointer */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Assertions */
     HDassert(cache_ptr != NULL);
@@ -9481,7 +9481,7 @@ H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag)
     unsigned u;         /* Local index variable */
     H5C_cache_entry_t *entry_ptr = NULL; /* entry pointer */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Iterate through entries, retagging those with the src_tag tag */
     for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {

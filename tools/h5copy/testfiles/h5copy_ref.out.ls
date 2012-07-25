@@ -21,7 +21,7 @@ Opened "./testfiles/h5copy_ref.out.h5" with sec2 driver.
     Storage:   <details removed for portability>
     Type:      object reference
 /COPY/Dset_REGREF        Dataset {2/2}
-    Location:  1:9400
+    Location:  1:5304
     Links:     1
     Storage:   <details removed for portability>
     Type:      dataset region reference

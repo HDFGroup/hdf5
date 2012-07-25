@@ -217,6 +217,9 @@
 /* Define to 1 if you have the `sz' library (-lsz). */
 #undef HAVE_LIBSZ
 
+/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
+#undef HAVE_LIBWS2_32
+
 /* Define to 1 if you have the `z' library (-lz). */
 #undef HAVE_LIBZ
 
@@ -405,8 +408,8 @@
 /* Define if your system has window style path name. */
 #undef HAVE_WINDOW_PATH
 
-/* Define to 1 if you have the <winsock.h> header file. */
-#undef HAVE_WINSOCK_H
+/* Define to 1 if you have the <winsock2.h> header file. */
+#undef HAVE_WINSOCK2_H
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #undef HAVE_ZLIB_H

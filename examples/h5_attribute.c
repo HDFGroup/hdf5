@@ -66,7 +66,6 @@ main (void)
    unsigned i, j;              /* Counters */
    char    string_out[80];     /* Buffer to read string attribute back */
    int     point_out;          /* Buffer to read scalar attribute back */
-   int     num_attr;           /* Number of attributes */
 
    /*
     * Data initialization.

@@ -1781,7 +1781,6 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     hsize_t             nelmts = 1;
     int                 ndims;
     int                 i;
-    int                 depth;
     int                 status = -1;
     int                 stdindent = COL;    /* should be 3 */
     void               *buf = NULL;

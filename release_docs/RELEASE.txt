@@ -1,4 +1,4 @@
-HDF5 version 1.9.113-FA_a5 currently under development
+HDF5 version 1.9.124-FA_a5 currently under development
 ================================================================================
 
 
@@ -693,9 +693,26 @@ Bug Fixes since HDF5-1.8.0 release
         (ADB - 2011/08/15)
       - perf_serial test added to Windows projects and check batch file. 
         (ADB - 2009/06/11)
+    Fortran
+    --------
+      - Fixed a typo in return value of the nh5dread_f_c function ( was 1
+        instead of 0 on success); fixed the return value to make it consistent
+        with other Fortran functions; cleaned the code from debug statements.
+        (EIP - 2012/06/23)
 
     Tools
     -----
+        - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of
+	  testh5diff.sh to better report when there is an error in the file
+	  copying. HDFFV-8105 (AKC -2012/07/22)
+        - h5diff: Fixed not to check and display dangling link status without 
+          --follow-symlinks option. This also improved performance when 
+          comparing lots of external links without the --follow-symlinks
+          option.  HDFFV-7998 (JKM 2012/04/26)
+        - h5unjam: Fixed sefgault when used -V (show version) option.
+          HDFFV-8001 (JKM 2012/04/19)
+        - h5repack: Fixed a failure when change the chunk size of a specified
+          chunked dataset with unlimited max dims. HDFFV-7993 (JKM 2012/04/11)
         - h5diff: Fixed failure for comparing same named object with different
           object types in comparing groups. Prior to the fix, h5diff resulted
           in error. After the fix, h5diff detects such case as non-comparable
@@ -1121,6 +1138,13 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The data conversion test dt_arith.c has failures (segmentation fault) from
+  "long double" to other datatypes during hard conversion when the library
+  is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
+  with optimization (-O3, -O2, and -O1).  Some newer versions of GCC do not 
+  have this problem.  Users should disable optimization or try newer version
+  of GCC. (Issue 8017. SLU - 2012/6/12)
+
 * The data conversion test dt_arith.c fails in "long double" to integer
   conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
   is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal

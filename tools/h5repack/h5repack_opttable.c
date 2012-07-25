@@ -388,11 +388,22 @@ pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table )
 {
     unsigned int i;
+    const char tbl_path[MAX_NC_NAME];
+
 
     for ( i = 0; i < table->nelems; i++)
     {
+        /* make full path (start with "/") to compare correctly  */
+        if (HDstrncmp(table->objs[i].path, "/", 1))
+        {
+            HDstrcpy(tbl_path, "/");
+            HDstrcat(tbl_path, table->objs[i].path);
+        }
+        else
+            HDstrcpy(tbl_path, table->objs[i].path);
+
         /* found it */
-        if (HDstrcmp(table->objs[i].path,path)==0)
+        if (HDstrcmp(tbl_path, path)==0)
         {
             return (&table->objs[i]);
         }

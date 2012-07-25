@@ -1,0 +1,45 @@
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Rdereference2(): unable to dereference object
+    major: References
+    minor: Unable to initialize object
+  #001: (file name) line (number) in H5R_dereference(): Unable to read dataset region information
+    major: References
+    minor: Read failed
+  #002: (file name) line (number) in H5HG_read(): unable to protect global heap
+    major: Heap
+    minor: Unable to protect metadata
+  #003: (file name) line (number) in H5HG_protect(): unable to protect global heap
+    major: Heap
+    minor: Unable to protect metadata
+  #004: (file name) line (number) in H5AC_protect(): H5C_protect() failed.
+    major: Object cache
+    minor: Unable to protect metadata
+  #005: (file name) line (number) in H5C_protect(): incorrect cache entry type
+    major: Object cache
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
+  #000: (file name) line (number) in H5Rdereference2(): unable to dereference object
+    major: References
+    minor: Unable to initialize object
+  #001: (file name) line (number) in H5R_dereference(): Unable to read dataset region information
+    major: References
+    minor: Read failed
+  #002: (file name) line (number) in H5HG_read(): unable to protect global heap
+    major: Heap
+    minor: Unable to protect metadata
+  #003: (file name) line (number) in H5HG_protect(): unable to protect global heap
+    major: Heap
+    minor: Unable to protect metadata
+  #004: (file name) line (number) in H5AC_protect(): H5C_protect() failed.
+    major: Object cache
+    minor: Unable to protect metadata
+  #005: (file name) line (number) in H5C_protect(): incorrect cache entry type
+    major: Object cache
+    minor: Inappropriate type
+H5tools-DIAG: Error detected in HDF5:tools (version (number)) thread (IDs):
+  #000: (file name) line (number) in h5tools_dump_simple_data(): H5Rdereference failed
+    major: Failure in tools library
+    minor: error in function
+  #001: (file name) line (number) in h5tools_dump_simple_data(): H5Rdereference failed
+    major: Failure in tools library
+    minor: error in function

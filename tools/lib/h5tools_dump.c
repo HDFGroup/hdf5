@@ -262,7 +262,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
 {
-    HERR_INIT(int, SUCCEED)
+    int            ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
     unsigned char *mem = (unsigned char*) _mem;
     hsize_t        i;         /*element counter  */
     size_t         size;      /*size of each datum  */
@@ -391,7 +391,6 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
         h5tools_str_close(&buffer);
     }/* else bin */
 
-CATCH
     return ret_value;
 }
 
@@ -782,7 +781,7 @@ h5tools_print_region_data_points(hid_t region_space, hid_t region_id,
     hsize_t  curr_pos = 0;
     hsize_t  total_size[H5S_MAX_RANK];
     size_t   jndx;
-    int      indx;
+    unsigned indx;
     int      type_size;
     int      ret_value = SUCCEED;
     unsigned int region_flags; /* buffer extent flags */
@@ -2186,6 +2185,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
             case H5T_CSET_RESERVED_14:
             case H5T_CSET_RESERVED_15:
                 h5tools_str_append(buffer, "H5T_CSET_UNKNOWN;");
+                break;
             case H5T_CSET_ERROR:
                 h5tools_str_append(buffer, "H5T_CSET_ERROR;");
                 break;
@@ -2341,7 +2341,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         ctx->indent_level++;
         for (i = 0; i < nmembers; i++) {
             mname = H5Tget_member_name(type, i);
-            if((mtype = H5Tget_member_type(type, i))>=0) {
+            if((mtype = H5Tget_member_type(type, i)) >= 0) {
                 ctx->need_prefix = TRUE;
                 h5tools_simple_prefix(stream, info, ctx, 0, 0);
 
@@ -2378,7 +2378,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
     case H5T_ENUM:
         if((super = H5Tget_super(type)) < 0)
-            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_super failed");
 
         h5tools_str_append(buffer, "H5T_ENUM %s", h5tools_dump_header_format->enumblockbegin);
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
@@ -2410,7 +2410,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
     case H5T_VLEN:
         if((super = H5Tget_super(type)) < 0)
-            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_nmembers failed");
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_super failed");
 
         h5tools_str_append(buffer, "H5T_VLEN %s ", h5tools_dump_header_format->vlenblockbegin);
 
@@ -2898,7 +2898,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     hsize_t          size;           /* size of external file   */
     hsize_t          storage_size;
     hsize_t       curr_pos = 0;        /* total data element position   */
-    haddr_t          ioffset;
     h5tools_str_t buffer;          /* string into which to render   */
 
     /* setup */
@@ -2908,7 +2907,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
 
     storage_size = H5Dget_storage_size(obj_id);
     nfilters = H5Pget_nfilters(dcpl_id);
-    ioffset = H5Dget_offset(obj_id);
     HDstrcpy(f_name,"\0");
 
     /*-------------------------------------------------------------------------
@@ -3091,6 +3089,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
         }
         else {
+            haddr_t          ioffset;
+
             ctx->indent_level++;
 
             ctx->need_prefix = TRUE;
@@ -3111,6 +3111,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
             
             h5tools_str_reset(&buffer);
+            ioffset = H5Dget_offset(obj_id);
             h5tools_str_append(&buffer,"OFFSET "H5_PRINTF_HADDR_FMT, ioffset);
             h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 

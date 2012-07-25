@@ -28,6 +28,7 @@
 #define MAX_VAR_DIMS 32               /* max per variable dimensions */
 #define FORMAT_OBJ      " %-27s %s\n"   /* obj type, name */
 #define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
+#define MAX_COMPACT_DSIZE  64512  /* max data size for compact layout. -1k for header size */
 
 /*-------------------------------------------------------------------------
  * data structures for command line options

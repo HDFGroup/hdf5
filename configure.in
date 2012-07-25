@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.113-FA_a5], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.124-FA_a5], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -251,6 +251,7 @@ dnl	CPU
 dnl
 dnl If the `OS' ends with a version number then remove it. For instance,
 dnl `freebsd3.1' would become `freebsd'
+
 case $host_os in
   aix*)
     host_os_novers=aix

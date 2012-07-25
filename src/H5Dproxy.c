@@ -70,14 +70,14 @@
 /********************/
 
 /* Local routines */
-static herr_t H5D_chunk_proxy_destroy(H5D_chunk_proxy_t *proxy);
+static herr_t H5D__chunk_proxy_destroy(H5D_chunk_proxy_t *proxy);
 
 /* Metadata cache (H5AC) callbacks */
-static H5D_chunk_proxy_t *H5D_cache_proxy_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
-static herr_t H5D_cache_proxy_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5D_chunk_proxy_t *proxy, unsigned UNUSED * flags_ptr);
-static herr_t H5D_cache_proxy_dest(H5F_t *f, H5D_chunk_proxy_t *proxy);
-static herr_t H5D_cache_proxy_clear(H5F_t *f, H5D_chunk_proxy_t *proxy, hbool_t destroy);
-static herr_t H5D_cache_proxy_size(const H5F_t *f, const H5D_chunk_proxy_t *proxy, size_t *size_ptr);
+static H5D_chunk_proxy_t *H5D__cache_proxy_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static herr_t H5D__cache_proxy_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5D_chunk_proxy_t *proxy, unsigned UNUSED * flags_ptr);
+static herr_t H5D__cache_proxy_dest(H5F_t *f, H5D_chunk_proxy_t *proxy);
+static herr_t H5D__cache_proxy_clear(H5F_t *f, H5D_chunk_proxy_t *proxy, hbool_t destroy);
+static herr_t H5D__cache_proxy_size(const H5F_t *f, const H5D_chunk_proxy_t *proxy, size_t *size_ptr);
 
 
 /*********************/
@@ -87,12 +87,12 @@ static herr_t H5D_cache_proxy_size(const H5F_t *f, const H5D_chunk_proxy_t *prox
 /* H5D chunk proxy inherits cache-like properties from H5AC */
 const H5AC_class_t H5AC_CHUNK_PROXY[1] = {{
     H5AC_CHUNK_PROXY_ID,
-    (H5AC_load_func_t)H5D_cache_proxy_load,
-    (H5AC_flush_func_t)H5D_cache_proxy_flush,
-    (H5AC_dest_func_t)H5D_cache_proxy_dest,
-    (H5AC_clear_func_t)H5D_cache_proxy_clear,
+    (H5AC_load_func_t)H5D__cache_proxy_load,
+    (H5AC_flush_func_t)H5D__cache_proxy_flush,
+    (H5AC_dest_func_t)H5D__cache_proxy_dest,
+    (H5AC_clear_func_t)H5D__cache_proxy_clear,
     (H5AC_notify_func_t)NULL,
-    (H5AC_size_func_t)H5D_cache_proxy_size,
+    (H5AC_size_func_t)H5D__cache_proxy_size,
 }};
 
 
@@ -111,7 +111,7 @@ H5FL_DEFINE_STATIC(H5D_chunk_proxy_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_cache_proxy_load
+ * Function:	H5D__cache_proxy_load
  *
  * Purpose:	Loads a chunk proxy from the disk.
  *
@@ -127,24 +127,24 @@ H5FL_DEFINE_STATIC(H5D_chunk_proxy_t);
  *-------------------------------------------------------------------------
  */
 static H5D_chunk_proxy_t *
-H5D_cache_proxy_load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
+H5D__cache_proxy_load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
     const void UNUSED *udata1, void UNUSED *udata2)
 {
     H5D_chunk_proxy_t *ret_value;               /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* This routine should never be invoked! */
-    HDassert(0 && "H5D_cache_proxy_load called!?!");
+    HDassert(0 && "H5D__cache_proxy_load called!?!");
     HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, NULL, "unable to load chunk proxy")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_cache_proxy_load() */
+} /* H5D__cache_proxy_load() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_cache_proxy_flush
+ * Function:	H5D__cache_proxy_flush
  *
  * Purpose:	Proxy for flushing a chunk in chunk cache under control
  *              of the metadata cache.
@@ -158,12 +158,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_cache_proxy_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
+H5D__cache_proxy_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
     H5D_chunk_proxy_t *proxy, unsigned UNUSED * flags_ptr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 #ifdef QAK
 HDfprintf(stderr, "%s: Flushing chunk proxy, addr = %a, destroy = %u\n", FUNC, addr, (unsigned)destroy);
 #endif /* QAK */
@@ -178,14 +178,14 @@ HDfprintf(stderr, "%s: Flushing chunk proxy, addr = %a, destroy = %u\n", FUNC, a
         H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
 
         /* Fill the DXPL cache values for later use */
-        if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
         /* Flush the chunk for the proxy */
         /* (This must be safe from actually performing I/O when the chunk is
          *      clean - QAK, 5/21/2009)
          */
-        if(H5D_chunk_flush_entry(proxy->dset, dxpl_id, dxpl_cache, proxy->ent, FALSE) < 0)
+        if(H5D__chunk_flush_entry(proxy->dset, dxpl_id, dxpl_cache, proxy->ent, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "can't flush chunk via proxy")
 
         /* Mark the chunk proxy as clean now */
@@ -193,16 +193,16 @@ HDfprintf(stderr, "%s: Flushing chunk proxy, addr = %a, destroy = %u\n", FUNC, a
     } /* end if */
 
     if(destroy)
-        if(H5D_cache_proxy_dest(f, proxy) < 0)
+        if(H5D__cache_proxy_dest(f, proxy) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to destroy chunk proxy")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_cache_proxy_flush() */
+} /* H5D__cache_proxy_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_cache_proxy_dest
+ * Function:	H5D__cache_proxy_dest
  *
  * Purpose:	Destroys a chunk proxy in memory.
  *
@@ -215,11 +215,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_cache_proxy_dest(H5F_t UNUSED *f, H5D_chunk_proxy_t *proxy)
+H5D__cache_proxy_dest(H5F_t UNUSED *f, H5D_chunk_proxy_t *proxy)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -227,16 +227,16 @@ H5D_cache_proxy_dest(H5F_t UNUSED *f, H5D_chunk_proxy_t *proxy)
     HDassert(proxy);
 
     /* Free the chunk proxy itself */
-    if(H5D_chunk_proxy_destroy(proxy) < 0)
+    if(H5D__chunk_proxy_destroy(proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to destroy chunk proxy")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_cache_proxy_dest() */
+} /* end H5D__cache_proxy_dest() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_cache_proxy_clear
+ * Function:	H5D__cache_proxy_clear
  *
  * Purpose:	Mark a chunk proxy in memory as non-dirty.
  *
@@ -249,11 +249,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_cache_proxy_clear(H5F_t *f, H5D_chunk_proxy_t *proxy, hbool_t destroy)
+H5D__cache_proxy_clear(H5F_t *f, H5D_chunk_proxy_t *proxy, hbool_t destroy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -264,16 +264,16 @@ H5D_cache_proxy_clear(H5F_t *f, H5D_chunk_proxy_t *proxy, hbool_t destroy)
     proxy->cache_info.is_dirty = FALSE;
 
     if(destroy)
-        if(H5D_cache_proxy_dest(f, proxy) < 0)
+        if(H5D__cache_proxy_dest(f, proxy) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to destroy chunk proxy")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_cache_proxy_clear() */
+} /* end H5D__cache_proxy_clear() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_cache_proxy_size
+ * Function:	H5D__cache_proxy_size
  *
  * Purpose:	Compute the size in bytes of a chunk proxy
  *		on disk, and return it in *size_ptr.  On failure,
@@ -288,10 +288,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_cache_proxy_size(const H5F_t UNUSED *f, const H5D_chunk_proxy_t UNUSED *proxy,
+H5D__cache_proxy_size(const H5F_t UNUSED *f, const H5D_chunk_proxy_t UNUSED *proxy,
     size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(f);
@@ -303,11 +303,11 @@ H5D_cache_proxy_size(const H5F_t UNUSED *f, const H5D_chunk_proxy_t UNUSED *prox
     *size_ptr = 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_cache_proxy_size() */
+} /* H5D__cache_proxy_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_proxy_create
+ * Function:	H5D__chunk_proxy_create
  *
  * Purpose:	Create a proxy for the chunk and insert it into the metadata cache.
  *
@@ -319,7 +319,7 @@ H5D_cache_proxy_size(const H5F_t UNUSED *f, const H5D_chunk_proxy_t UNUSED *prox
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id, H5D_chunk_ud_t *udata,
+H5D__chunk_proxy_create(H5D_t *dset, hid_t dxpl_id, H5D_chunk_ud_t *udata,
     H5D_rdcc_ent_t *ent)
 {
     H5D_chunk_proxy_t *proxy = NULL;    /* Chunk proxy */
@@ -327,7 +327,7 @@ H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id, H5D_chunk_ud_t *udata,
     htri_t supported;                   /* Return value from "support" callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(dset);
     HDassert(ent);
@@ -378,11 +378,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_proxy_create() */
+} /* end H5D__chunk_proxy_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_proxy_remove
+ * Function:	H5D__chunk_proxy_remove
  *
  * Purpose:	Remove a proxy for the chunk from the metadata cache.
  *
@@ -394,14 +394,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_id, H5D_rdcc_ent_t *ent)
+H5D__chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_id, H5D_rdcc_ent_t *ent)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     H5D_chunk_ud_t udata;               /* User-data for chunk */
     H5D_chunk_proxy_t *proxy = NULL;    /* Chunk proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(dset);
     HDassert(ent);
@@ -448,16 +448,16 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     ent->proxy = NULL;
 
     /* Release the chunk proxy object */
-    if(H5D_chunk_proxy_destroy(proxy) < 0)
+    if(H5D__chunk_proxy_destroy(proxy) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to destroy chunk proxy")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_proxy_remove() */
+} /* end H5D__chunk_proxy_remove() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_proxy_mark
+ * Function:	H5D__chunk_proxy_mark
  *
  * Purpose:	Mark a proxy for the chunk in the metadata cache as clean or
  *              dirty.
@@ -484,11 +484,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_mark(H5D_rdcc_ent_t *ent, hbool_t dirty)
+H5D__chunk_proxy_mark(H5D_rdcc_ent_t *ent, hbool_t dirty)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(ent);
 #ifdef QAK
@@ -503,11 +503,11 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a, dirty = %t\n", FUNC, ent->proxy_add
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_proxy_mark() */
+} /* end H5D__chunk_proxy_mark() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_proxy_destroy
+ * Function:	H5D__chunk_proxy_destroy
  *
  * Purpose:	Destroy a chunk proxy object
  *
@@ -519,9 +519,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_proxy_destroy(H5D_chunk_proxy_t *proxy)
+H5D__chunk_proxy_destroy(H5D_chunk_proxy_t *proxy)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(proxy);
 
@@ -531,11 +531,11 @@ H5D_chunk_proxy_destroy(H5D_chunk_proxy_t *proxy)
     proxy = H5FL_FREE(H5D_chunk_proxy_t, proxy);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_chunk_proxy_destroy() */
+} /* end H5D__chunk_proxy_destroy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_chunk_proxy_create_flush_dep
+ * Function:    H5D__chunk_proxy_create_flush_dep
  *
  * Purpose:     Creates a flush dependency between the specified chunk
  *              (child) and parent, if not already present.
@@ -548,11 +548,11 @@ H5D_chunk_proxy_destroy(H5D_chunk_proxy_t *proxy)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent, void *parent)
+H5D__chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent, void *parent)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(ent);
     HDassert(parent);
@@ -567,11 +567,11 @@ H5D_chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent, void *parent)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_proxy_create_flush_dep() */
+} /* end H5D__chunk_proxy_create_flush_dep() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_chunk_proxy_update_flush_dep
+ * Function:    H5D__chunk_proxy_update_flush_dep
  *
  * Purpose:     Updates the flush dependency of the specified chunk from
  *              old_parent to new_parent, if the dependency exists.
@@ -584,12 +584,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent, void *old_parent,
+H5D__chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent, void *old_parent,
     void *new_parent)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(ent);
     HDassert(old_parent);
@@ -608,5 +608,5 @@ H5D_chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent, void *old_parent,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_proxy_update_flush_dep() */
+} /* end H5D__chunk_proxy_update_flush_dep() */
 

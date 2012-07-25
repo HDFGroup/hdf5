@@ -502,7 +502,7 @@ H5D_bt2_crt_flush_dep(void *_record, void *_udata, void *parent)
      * dependencies on.  This should only happen when copying */
     if(udata->rdcc)
         /* Delegate to chunk routine */
-        if(H5D_chunk_create_flush_dep(udata->rdcc, udata->layout, record->offset, parent) < 0)
+        if(H5D__chunk_create_flush_dep(udata->rdcc, udata->layout, record->offset, parent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
 done:
@@ -545,7 +545,7 @@ H5D_bt2_upd_flush_dep(void *_record, void *_udata, void *old_parent,
      * dependencies.  This should only happen when copying */
     if(udata->rdcc)
         /* Delegate to chunk routine */
-        if(H5D_chunk_update_flush_dep(udata->rdcc, udata->layout, record->offset, old_parent, new_parent) < 0)
+        if(H5D__chunk_update_flush_dep(udata->rdcc, udata->layout, record->offset, old_parent, new_parent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
 
 done:
@@ -752,7 +752,7 @@ H5D_bt2_filt_crt_flush_dep(void *_record, void *_udata, void *parent)
      * dependencies on.  This should only happen when copying */
     if(udata->rdcc)
         /* Delegate to chunk routine */
-        if(H5D_chunk_create_flush_dep(udata->rdcc, udata->layout, record->offset, parent) < 0)
+        if(H5D__chunk_create_flush_dep(udata->rdcc, udata->layout, record->offset, parent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
 done:
@@ -795,7 +795,7 @@ H5D_bt2_filt_upd_flush_dep(void *_record, void *_udata, void *old_parent,
      * dependencies.  This should only happen when copying */
     if(udata->rdcc)
         /* Delegate to chunk routine */
-        if(H5D_chunk_update_flush_dep(udata->rdcc, udata->layout, record->offset, old_parent, new_parent) < 0)
+        if(H5D__chunk_update_flush_dep(udata->rdcc, udata->layout, record->offset, old_parent, new_parent) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to update flush dependency")
 
 done:
