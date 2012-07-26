@@ -300,7 +300,7 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     if(attr->shared->version >= H5O_ATTR_VERSION_2) {
         flags = (is_type_shared ? H5O_ATTR_FLAG_TYPE_SHARED : 0 );
         flags |= (is_space_shared ? H5O_ATTR_FLAG_SPACE_SHARED : 0);
-        *p++ = flags;    /* Set flags for attribute */
+        *p++ = (uint8_t)flags;    /* Set flags for attribute */
     } /* end if */
     else
         *p++ = 0; /* Reserved, for version <2 */
@@ -723,7 +723,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
 {
     const H5A_t  *attr = (const H5A_t *)_mesg;
@@ -753,7 +753,7 @@ H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx /*out*/)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx)
 {
     H5A_t  *attr = (H5A_t *)_mesg;

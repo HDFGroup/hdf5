@@ -45,6 +45,13 @@
 /* Local Typedefs */
 /******************/
 
+/* Typedef for property iterator callback */
+typedef struct {
+    H5P_iterate_t iter_func;    /* Iterator callback */
+    hid_t id;                   /* Property list or class ID */
+    void *iter_data;            /* Iterator callback pointer */
+} H5P_iter_ud_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -1045,6 +1052,45 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P__iterate_cb
+ PURPOSE
+    Internal callback routine when iterating over properties in property list
+    or class
+ USAGE
+    int H5P__iterate_cb(prop, udata)
+        H5P_genprop_t *prop;        IN: Pointer to the property
+        void *udata;                IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC
+ DESCRIPTION
+    This routine calls the actual callback routine for the property in the
+property list or class.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5P__iterate_cb(H5P_genprop_t *prop, void *_udata)
+{
+    H5P_iter_ud_t *udata = (H5P_iter_ud_t *)_udata;     /* Pointer to user data */
+    int ret_value = 0;                                  /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(prop);
+    HDassert(udata);
+
+    /* Call the user's callback routine */
+    ret_value = (*udata->iter_func)(udata->id, prop->name, udata->iter_data);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__iterate_cb() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Piterate
  PURPOSE
     Routine to iterate over the properties in a property list or class
@@ -1099,6 +1145,7 @@ iteration, the function's behavior is undefined.
 int
 H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
+    H5P_iter_ud_t udata;    /* User data for internal iterator callback */
     int fake_idx = 0;       /* Index when user doesn't provide one */
     int ret_value;          /* return value */
 
@@ -1111,15 +1158,20 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
     if(iter_func == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration callback");
 
+    /* Set up user data */
+    udata.iter_func = iter_func;
+    udata.id = id;
+    udata.iter_data = iter_data;
+
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
         /* Iterate over a property list */
-        if((ret_value = H5P_iterate_plist(id, (idx ? idx : &fake_idx), iter_func, iter_data)) < 0)
+        if((ret_value = H5P_iterate_plist(id, (idx ? idx : &fake_idx), H5P__iterate_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over list");
     } /* end if */
     else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             /* Iterate over a property class */
-            if((ret_value = H5P_iterate_pclass(id, (idx ? idx : &fake_idx), iter_func, iter_data)) < 0)
+            if((ret_value = H5P_iterate_pclass(id, (idx ? idx : &fake_idx), H5P__iterate_cb, &udata)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over class");
         } /* end if */
         else

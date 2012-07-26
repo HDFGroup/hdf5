@@ -398,7 +398,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	if(0 == i) {
             if(H5F_addr_ne(oh->chunk[i].addr, addr))
                 HDfprintf(stream, "*** WRONG ADDRESS FOR CHUNK #0!\n");
-            chunk_size = oh->chunk[i].size - H5O_SIZEOF_HDR(oh);
+            chunk_size = oh->chunk[i].size - (size_t)H5O_SIZEOF_HDR(oh);
         } /* end if */
         else
             chunk_size = oh->chunk[i].size;
@@ -424,7 +424,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
         unsigned chunkno;                       /* Chunk for message */
 
         /* Accumulate message's size to total */
-	mesg_total += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[i].raw_size;
+	mesg_total += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[i].raw_size;
 
 	/* For version 2 object header, add size of "OCHK" for continuation chunk */
 	if (oh->mesg[i].type->id == H5O_CONT_ID)

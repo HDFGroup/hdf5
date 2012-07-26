@@ -113,7 +113,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -589,7 +589,7 @@ H5S_none_bounds(const H5S_t UNUSED *space, hsize_t UNUSED *start, hsize_t UNUSED
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_none_offset(const H5S_t UNUSED *space, hsize_t UNUSED *offset)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -708,7 +708,7 @@ H5S_none_is_regular(const H5S_t UNUSED *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_none_adjust_u(H5S_t UNUSED *space, const hsize_t UNUSED *offset)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR

@@ -745,7 +745,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
     H5SL_node_t *node, *next_node;      /* Pointers to skip list nodes */
@@ -817,7 +817,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
     herr_t ret_value = SUCCEED;
@@ -873,7 +873,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
-    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_GENERIC);
+    HDassert(type >= H5SL_TYPE_INT && type <= H5SL_TYPE_GENERIC);
 
     /* Allocate skip list structure */
     if(NULL == (new_slist = H5FL_MALLOC(H5SL_t)))
@@ -889,7 +889,7 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
     new_slist->nobjs = 0;
 
     /* Allocate the header node */
-    if(NULL == (header = H5SL_new_node(NULL, NULL, ULONG_MAX)))
+    if(NULL == (header = H5SL_new_node(NULL, NULL, (uint32_t)ULONG_MAX)))
         HGOTO_ERROR(H5E_SLIST ,H5E_NOSPACE, NULL, "can't create new skip list node")
 
     /* Initialize header node's forward pointer */

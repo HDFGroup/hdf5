@@ -55,6 +55,24 @@ typedef struct {
     H5P_genclass_t *new_class;          /* Pointer to class during path traversal */
 } H5P_check_class_t;
 
+/* Typedef for property list iterator callback */
+typedef struct {
+    H5P_iterate_int_t cb_func;  /* Iterator callback */
+    void *udata;                /* Iterator callback pointer */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5SL_t *seen;               /* Skip list to hold names of properties already seen */
+    int *curr_idx_ptr;          /* Pointer to current iteration index */
+    int prev_idx;               /* Previous iteration index */
+} H5P_iter_plist_ud_t;
+
+/* Typedef for property list class iterator callback */
+typedef struct {
+    H5P_iterate_int_t cb_func;  /* Iterator callback */
+    void *udata;                /* Iterator callback pointer */
+    int *curr_idx_ptr;          /* Pointer to current iteration index */
+    int prev_idx;               /* Previous iteration index */
+} H5P_iter_pclass_ud_t;
+
 
 /********************/
 /* Local Prototypes */
@@ -974,17 +992,17 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
     H5P_prp_close_func_t prp_close)
 {
-    H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
+    H5P_genprop_t *prop = NULL;        /* Pointer to new property copied */
     H5P_genprop_t *ret_value;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(name);
-    HDassert((size>0 && value!=NULL) || (size==0));
-    HDassert(type!=H5P_PROP_WITHIN_UNKNOWN);
+    HDassert((size > 0 && value != NULL) || (size == 0));
+    HDassert(type != H5P_PROP_WITHIN_UNKNOWN);
 
     /* Allocate the new property */
-    if(NULL==(prop = H5FL_MALLOC (H5P_genprop_t)))
+    if(NULL == (prop = H5FL_MALLOC(H5P_genprop_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the property initial values */
@@ -994,37 +1012,37 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     prop->type = type;
 
     /* Duplicate value, if it exists */
-    if(value!=NULL) {
-        if(NULL==(prop->value = H5MM_malloc (prop->size)))
+    if(value != NULL) {
+        if(NULL == (prop->value = H5MM_malloc (prop->size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        HDmemcpy(prop->value,value,prop->size);
+        HDmemcpy(prop->value, value, prop->size);
     } /* end if */
     else
-        prop->value=NULL;
+        prop->value = NULL;
 
     /* Set the function pointers */
-    prop->create=prp_create;
-    prop->set=prp_set;
-    prop->get=prp_get;
-    prop->del=prp_delete;
-    prop->copy=prp_copy;
+    prop->create = prp_create;
+    prop->set = prp_set;
+    prop->get = prp_get;
+    prop->del = prp_delete;
+    prop->copy = prp_copy;
     /* Use custom comparison routine if available, otherwise default to memcmp() */
-    if(prp_cmp!=NULL)
-        prop->cmp=prp_cmp;
+    if(prp_cmp != NULL)
+        prop->cmp = prp_cmp;
     else
-        prop->cmp=&memcmp;
-    prop->close=prp_close;
+        prop->cmp = &memcmp;
+    prop->close = prp_close;
 
     /* Set return value */
-    ret_value=prop;
+    ret_value = prop;
 
 done:
     /* Free any resources allocated */
-    if(ret_value==NULL) {
-        if(prop!=NULL) {
-            if(prop->name!=NULL)
+    if(ret_value == NULL) {
+        if(prop != NULL) {
+            if(prop->name != NULL)
                 H5MM_xfree(prop->name);
-            if(prop->value!=NULL)
+            if(prop->value != NULL)
                 H5MM_xfree(prop->value);
             prop = H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
@@ -2335,8 +2353,9 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     /* Check if the property has been deleted */
     if(NULL != H5SL_search(plist->del, name)) {
         char *temp_name = NULL;
+
         /* Remove the property name from the deleted property skip list */
-        if(NULL == (temp_name = H5SL_remove(plist->del, name)))
+        if(NULL == (temp_name = (char *)H5SL_remove(plist->del, name)))
             HGOTO_ERROR(H5E_PLIST,H5E_CANTDELETE,FAIL,"can't remove property from deleted skip list")
 
         /* free the name of the removed property */
@@ -3316,14 +3335,113 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P__iterate_plist_cb
+ PURPOSE
+    Internal callback routine when iterating over properties in property list
+ USAGE
+    int H5P__iterate_plist_cb(item, key, udata)
+        void *item;                 IN: Pointer to the property
+        void *key;                  IN: Pointer to the property's name
+        void *udata;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC
+ DESCRIPTION
+    This routine calls the actual callback routine for the property in the
+property list.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
+{
+    H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
+    char *key = (char *)_key;                           /* Pointer to the property's name */
+    H5P_iter_plist_ud_t *udata = (H5P_iter_plist_ud_t *)_udata;     /* Pointer to user data */
+    int ret_value = 0;                                  /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(item);
+    HDassert(key);
+
+    /* Check if we've found the correctly indexed property */
+    if(*udata->curr_idx_ptr >= udata->prev_idx) {
+        /* Call the callback function */
+        ret_value = (*udata->cb_func)(item, udata->udata);
+        if(ret_value != 0)
+            HGOTO_DONE(ret_value);
+    } /* end if */
+
+    /* Increment the current index */
+    (*udata->curr_idx_ptr)++;
+
+    /* Add property name to "seen" list */
+    if(H5SL_insert(udata->seen, key, key) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into seen skip list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__iterate_plist_cb() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P__iterate_plist_pclass_cb
+ PURPOSE
+    Internal callback routine when iterating over properties in property class
+ USAGE
+    int H5P__iterate_plist_pclass_cb(item, key, udata)
+        void *item;                 IN: Pointer to the property
+        void *key;                  IN: Pointer to the property's name
+        void *udata;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC
+ DESCRIPTION
+    This routine verifies that the property hasn't already been seen or was
+deleted, and then chains to the property list callback.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5P__iterate_plist_pclass_cb(void *_item, void *_key, void *_udata)
+{
+    H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
+    char *key = (char *)_key;                           /* Pointer to the property's name */
+    H5P_iter_plist_ud_t *udata = (H5P_iter_plist_ud_t *)_udata;     /* Pointer to user data */
+    int ret_value = 0;                                  /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(item);
+    HDassert(key);
+
+    /* Only call iterator callback for properties we haven't seen
+     * before and that haven't been deleted.
+     */
+    if(NULL == H5SL_search(udata->seen, key) &&
+            NULL == H5SL_search(udata->plist->del, key))
+        ret_value = H5P__iterate_plist_cb(item, key, udata);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__iterate_plist_pclass_cb() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_iterate_plist
  PURPOSE
     Internal routine to iterate over the properties in a property list
  USAGE
-    herr_t H5P_iterate_plist(plist_id, idx, iter_func, iter_data)
+    int H5P_iterate_plist(plist_id, idx, cb_func, iter_data)
         hid_t plist_id;             IN: ID of property list to iterate over
         int *idx;                   IN/OUT: Index of the property to begin with
-        H5P_iterate_t iter_func;    IN: Function pointer to function to be
+        H5P_iterate_t cb_func;    IN: Function pointer to function to be
                                         called with each property iterated over.
         void *iter_data;            IN/OUT: Pointer to iteration data from user
  RETURNS
@@ -3366,106 +3484,60 @@ iteration, the function's behavior is undefined.
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_int_t cb_func, void *udata)
 {
     H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genplist_t *plist;      /* Property list pointer */
-    H5P_genprop_t *tmp;         /* Temporary pointer to properties */
+    H5P_iter_plist_ud_t udata_int;        /* User data for skip list iterator */
     H5SL_t *seen = NULL;        /* Skip list to hold names of properties already seen */
-    H5SL_node_t *curr_node;     /* Current node in skip list */
     int curr_idx = 0;           /* Current iteration index */
-    int ret_value = FAIL;       /* Return value */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx);
-    HDassert(iter_func);
+    HDassert(cb_func);
 
     /* Get the property list object */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Create the skip list to hold names of properties already seen */
-    if((seen = H5SL_create(H5SL_TYPE_STR, NULL)) == NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTCREATE,FAIL,"can't create skip list for seen properties")
+    if(NULL == (seen = H5SL_create(H5SL_TYPE_STR, NULL)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create skip list for seen properties")
 
-    /* Walk through the changed properties in the list */
-    if(H5SL_count(plist->props) > 0) {
-        curr_node = H5SL_first(plist->props);
-        while(curr_node != NULL) {
-            /* Get pointer to property from node */
-            tmp = (H5P_genprop_t *)H5SL_item(curr_node);
+    /* Set up iterator callback info */
+    udata_int.plist = plist;
+    udata_int.cb_func = cb_func;
+    udata_int.udata = udata;
+    udata_int.seen = seen;
+    udata_int.curr_idx_ptr = &curr_idx;
+    udata_int.prev_idx = *idx;
 
-            /* Check if we've found the correctly indexed property */
-            if(curr_idx>=*idx) {
-                /* Call the callback function */
-                ret_value=(*iter_func)(plist_id,tmp->name,iter_data);
-
-                if(ret_value!=0)
-                    HGOTO_DONE(ret_value);
-            } /* end if */
-
-            /* Increment the current index */
-            curr_idx++;
-
-            /* Add property name to "seen" list */
-            if(H5SL_insert(seen,tmp->name,tmp->name) < 0)
-                HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen skip list")
-
-            /* Get the next property node in the skip list */
-            curr_node=H5SL_next(curr_node);
-        } /* end while */
-    } /* end if */
+    /* Iterate over properties in property list proper */
+    /* (Will be only the non-default (i.e. changed) properties) */
+    ret_value = H5SL_iterate(plist->props, H5P__iterate_plist_cb, &udata_int);
+    if(ret_value != 0)
+        HGOTO_DONE(ret_value);
 
     /* Walk up the class hiearchy */
-    tclass=plist->pclass;
-    while(tclass!=NULL) {
-        if(tclass->nprops>0) {
-            /* Walk through the properties in the class */
-            curr_node=H5SL_first(tclass->props);
-            while(curr_node!=NULL) {
-                /* Get pointer to property from node */
-                tmp = (H5P_genprop_t *)H5SL_item(curr_node);
-
-                /* Only call iterator callback for properties we haven't seen
-                 * before and that haven't been deleted
-                 */
-                if(H5SL_search(seen,tmp->name) == NULL &&
-                        H5SL_search(plist->del,tmp->name) == NULL) {
-
-
-                    /* Check if we've found the correctly indexed property */
-                    if(curr_idx>=*idx) {
-                        /* Call the callback function */
-                        ret_value=(*iter_func)(plist_id,tmp->name,iter_data);
-
-                        if(ret_value!=0)
-                            HGOTO_DONE(ret_value);
-                    } /* end if */
-
-                    /* Increment the current index */
-                    curr_idx++;
-
-                    /* Add property name to "seen" list */
-                    if(H5SL_insert(seen,tmp->name,tmp->name) < 0)
-                        HGOTO_ERROR(H5E_PLIST,H5E_CANTINSERT,FAIL,"can't insert property into seen skip list")
-                } /* end if */
-
-                /* Get the next property node in the skip list */
-                curr_node=H5SL_next(curr_node);
-            } /* end while */
-        } /* end if */
+    tclass = plist->pclass;
+    while(tclass != NULL) {
+        /* Iterate over properties in property list class */
+        ret_value = H5SL_iterate(tclass->props, H5P__iterate_plist_pclass_cb, &udata_int);
+        if(ret_value != 0)
+            HGOTO_DONE(ret_value);
 
         /* Go up to parent class */
-        tclass=tclass->parent;
+        tclass = tclass->parent;
     } /* end while */
 
 done:
     /* Set the index we stopped at */
-    *idx=curr_idx;
+    *idx = curr_idx;
 
     /* Release the skip list of 'seen' properties */
-    if(seen!=NULL)
+    if(seen != NULL)
         H5SL_close(seen);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3474,14 +3546,65 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5P__iterate_pclass_cb
+ PURPOSE
+    Internal callback routine when iterating over properties in property list
+    class
+ USAGE
+    int H5P__iterate_pclass_cb(item, key, udata)
+        void *item;                 IN: Pointer to the property
+        void *key;                  IN: Pointer to the property's name
+        void *udata;            IN/OUT: Pointer to iteration data from user
+ RETURNS
+    Success: Returns the return value of the last call to ITER_FUNC
+ DESCRIPTION
+    This routine calls the actual callback routine for the property in the
+property list class.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+static int
+H5P__iterate_pclass_cb(void *_item, void *_key, void *_udata)
+{
+    H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
+    char *key = (char *)_key;                           /* Pointer to the property's name */
+    H5P_iter_pclass_ud_t *udata = (H5P_iter_pclass_ud_t *)_udata;     /* Pointer to user data */
+    int ret_value = 0;                                  /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(item);
+    HDassert(key);
+
+    /* Check if we've found the correctly indexed property */
+    if(*udata->curr_idx_ptr >= udata->prev_idx) {
+        /* Call the callback function */
+        ret_value = (*udata->cb_func)(item, udata->udata);
+        if(ret_value != 0)
+            HGOTO_DONE(ret_value);
+    } /* end if */
+
+    /* Increment the current index */
+    (*udata->curr_idx_ptr)++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__iterate_pclass_cb() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5P_iterate_pclass
  PURPOSE
     Internal routine to iterate over the properties in a property class
  USAGE
-    herr_t H5P_iterate_pclass(pclass_id, idx, iter_func, iter_data)
+    herr_t H5P_iterate_pclass(pclass_id, idx, cb_func, iter_data)
         hid_t pclass_id;            IN: ID of property class to iterate over
         int *idx;                   IN/OUT: Index of the property to begin with
-        H5P_iterate_t iter_func;    IN: Function pointer to function to be
+        H5P_iterate_t cb_func;    IN: Function pointer to function to be
                                         called with each property iterated over.
         void *iter_data;            IN/OUT: Pointer to iteration data from user
  RETURNS
@@ -3524,49 +3647,36 @@ iteration, the function's behavior is undefined.
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *iter_data)
+H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_int_t cb_func, void *udata)
 {
     H5P_genclass_t *pclass;     /* Property list pointer */
-    H5SL_node_t *curr_node;     /* Current node in skip list */
-    H5P_genprop_t *prop;        /* Temporary property pointer */
-    int curr_idx=0;             /* Current iteration index */
-    int ret_value=FAIL;         /* Return value */
+    H5P_iter_pclass_ud_t udata_int; /* User data for skip list iterator */
+    int curr_idx = 0;           /* Current iteration index */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(idx);
-    HDassert(iter_func);
+    HDassert(cb_func);
 
     /* Get the property list object */
     if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class")
 
-    /* Cycle through the properties and call the callback */
-    curr_idx=0;
-    curr_node=H5SL_first(pclass->props);
-    while(curr_node!=NULL) {
-        if(curr_idx>=*idx) {
-            /* Get the property for the node */
-            prop = (H5P_genprop_t *)H5SL_item(curr_node);
+    /* Set up iterator callback info */
+    udata_int.cb_func = cb_func;
+    udata_int.udata = udata;
+    udata_int.curr_idx_ptr = &curr_idx;
+    udata_int.prev_idx = *idx;
 
-            /* Call the callback function */
-            ret_value=(*iter_func)(pclass_id,prop->name,iter_data);
-
-            /* Check if iteration function succeeded */
-            if(ret_value!=0)
-                HGOTO_DONE(ret_value);
-        } /* end if */
-
-        /* Increment the iteration index */
-        curr_idx++;
-
-        /* Get the next property node in the skip list */
-        curr_node=H5SL_next(curr_node);
-    } /* end while */
+    /* Iterate over properties in property list class proper */
+    ret_value = H5SL_iterate(pclass->props, H5P__iterate_pclass_cb, &udata_int);
+    if(ret_value != 0)
+        HGOTO_DONE(ret_value);
 
 done:
     /* Set the index we stopped at */
-    *idx=curr_idx;
+    *idx = curr_idx;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_iterate_pclass() */
@@ -4108,25 +4218,26 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     /* If not, get the information required to do an H5Pinsert2 with the property into the destination list */
     else {
         /* Get the pointer to the source property */
-        prop=H5P_find_prop_plist(src_plist,name);
+        prop = H5P_find_prop_plist(src_plist, name);
 
         /* Create property object from parameters */
-        if((new_prop=H5P_create_prop(prop->name,prop->size,H5P_PROP_WITHIN_LIST,prop->value,prop->create,prop->set,prop->get,prop->del,prop->copy,prop->cmp,prop->close)) == NULL)
+        if(NULL == (new_prop = H5P_create_prop(prop->name, prop->size, H5P_PROP_WITHIN_LIST, prop->value,
+                prop->create, prop->set, prop->get,
+                prop->del, prop->copy, prop->cmp, prop->close)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property")
 
         /* Call property creation callback, if it exists */
         if(new_prop->create) {
-            if((new_prop->create)(new_prop->name,new_prop->size,new_prop->value) < 0)
+            if((new_prop->create)(new_prop->name, new_prop->size, new_prop->value) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,"Can't initialize property")
         } /* end if */
 
         /* Insert property into property list class */
-        if(H5P_add_prop(dst_plist->props,new_prop) < 0)
+        if(H5P_add_prop(dst_plist->props, new_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL,"Can't insert property into class")
 
         /* Increment property count for class */
         dst_plist->nprops++;
-
     } /* end else */
 
 done:
@@ -4202,7 +4313,8 @@ H5P_copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name)
 
     /* Register the property into the destination */
     orig_dst_pclass = dst_pclass;
-    if(H5P_register(&dst_pclass, name, prop->size, prop->value, prop->create, prop->set, prop->get, prop->del, prop->copy, prop->cmp, prop->close) < 0)
+    if(H5P_register(&dst_pclass, name, prop->size, prop->value, prop->create, prop->set, prop->get,
+            prop->del, prop->copy, prop->cmp, prop->close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property")
 
     /* Check if the property class changed and needs to be substituted in the ID */

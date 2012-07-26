@@ -108,7 +108,7 @@ const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
  *              October 31, 2006
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_strcrt_reg_prop(H5P_genclass_t *pclass)
 {
     H5T_cset_t char_encoding = H5P_STRCRT_CHAR_ENCODING_DEF;  /* Default character set encoding */
