@@ -1899,18 +1899,6 @@ static herr_t    H5_INTERFACE_INIT_FUNC(void);
     H5_PUSH_FUNC                                                              \
     {
 
-/* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
- * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_PACKAGE_TAG(dxpl_id, tag, err) {                           \
-    haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
-                                                                              \
-    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
-    H5_PUSH_FUNC                                                              \
-    {
-
 /* Use this macro for all "normal" staticly-scoped functions */
 #define FUNC_ENTER_STATIC {                                                   \
     FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
@@ -1920,18 +1908,6 @@ static herr_t    H5_INTERFACE_INIT_FUNC(void);
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_STATIC_NOERR {                                             \
     FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(FUNC));                                 \
-    H5_PUSH_FUNC                                                              \
-    {
-
-/* Use the following macro as replacement for the FUNC_ENTER_STATIC
- * macro when the function needs to set up a metadata tag. */
-#define FUNC_ENTER_STATIC_TAG(dxpl_id, tag, err) {                            \
-    haddr_t prev_tag = HADDR_UNDEF;                                           \
-    hid_t tag_dxpl_id = dxpl_id;                                              \
-                                                                              \
-    FUNC_ENTER_COMMON(H5_IS_PKG(FUNC));                                       \
-    if(H5AC_tag(tag_dxpl_id, tag, &prev_tag) < 0)                             \
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
     H5_PUSH_FUNC                                                              \
     {
 
