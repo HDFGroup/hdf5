@@ -206,7 +206,7 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
 
     /* The flags for the link indices */
     index_flags = linfo->track_corder ? H5O_LINFO_TRACK_CORDER : 0;
-    index_flags |= linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0;
+    index_flags = (uint8_t)(index_flags | (linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0));
     *p++ = index_flags;
 
     /* Max. link creation order value for the group, if tracked */
@@ -296,10 +296,10 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     /* Set return value */
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
-                + (linfo->track_corder ? 8 : 0) /* Curr. max. creation order value */
-                + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
-                + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
-                + (linfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
+                + (linfo->track_corder ? (size_t)8 : 0) /* Curr. max. creation order value */
+                + (size_t)H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
+                + (size_t)H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
+                + (linfo->index_corder ? (size_t)H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_size() */

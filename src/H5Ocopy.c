@@ -342,7 +342,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     void                   *cpy_udata = NULL;       /* User data for passing to message callbacks */
     uint64_t               dst_oh_size;             /* Total size of the destination OH */
     size_t                 dst_oh_null;             /* Size of the null message to add to destination OH */
-    unsigned               dst_oh_gap;              /* Size of the gap in chunk #0 of destination OH */
+    size_t                 dst_oh_gap;              /* Size of the gap in chunk #0 of destination OH */
     uint8_t                *current_pos;            /* Current position in destination image */
     size_t                 msghdr_size;
     herr_t                 ret_value = SUCCEED;
@@ -629,14 +629,14 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Compute space for messages. */
     dst_oh_size = 0;
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
-        dst_oh_size += H5O_SIZEOF_MSGHDR_OH(oh_dst);
+        dst_oh_size += (uint64_t)H5O_SIZEOF_MSGHDR_OH(oh_dst);
         dst_oh_size += oh_dst->mesg[mesgno].raw_size;
     } /* end for */
 
     /* Check if we need to determine correct value for chunk #0 size bits */
     if(oh_dst->version > H5O_VERSION_1) {
         /* Reset destination object header's "chunk 0 size" flags */
-        oh_dst->flags &= ~H5O_HDR_CHUNK0_SIZE;
+        oh_dst->flags = (uint8_t)(oh_dst->flags & ~H5O_HDR_CHUNK0_SIZE);
 
         /* Determine correct value for chunk #0 size bits */
         if(dst_oh_size > 4294967295)
@@ -745,7 +745,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Check if we need to add a NULL message to this header */
     if(dst_oh_null > 0) {
-        unsigned null_idx;              /* Index of new NULL message */
+        size_t null_idx;                /* Index of new NULL message */
 
         /* Make sure we have enough space for new NULL message */
         if(oh_dst->nmesgs + 1 > oh_dst->alloc_nmesgs)
@@ -1413,7 +1413,7 @@ H5O_copy_free_comm_dt_cb(void *item, void *_key, void UNUSED *op_data)
     haddr_t     *addr = (haddr_t *)item;
     H5O_copy_search_comm_dt_key_t *key = (H5O_copy_search_comm_dt_key_t *)_key;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(addr);
     HDassert(key);
@@ -1449,7 +1449,7 @@ H5O_copy_comm_dt_cmp(const void *_key1, const void *_key2)
     const H5O_copy_search_comm_dt_key_t *key2 = (const H5O_copy_search_comm_dt_key_t *)_key2;
     int ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check fileno.  It is unlikely to be different so check if they are equal
      * first so only one comparison needs to be made. */

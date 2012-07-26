@@ -138,6 +138,8 @@ typedef struct H5P_libclass_t {
     void *close_data;                   /* Pointer to user data to pass along to close callback */
 } H5P_libclass_t;
 
+/* Property list/class iterator callback function pointer */
+typedef int (*H5P_iterate_int_t)(H5P_genprop_t *prop, void *udata);
 
 /*****************************/
 /* Package Private Variables */
@@ -176,9 +178,9 @@ H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
 H5_DLL herr_t H5P_get_nprops_plist(const H5P_genplist_t *plist, size_t *nprops);
 H5_DLL int H5P_cmp_class(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
 H5_DLL int H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2);
-H5_DLL int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func,
+H5_DLL int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_int_t iter_func,
     void *iter_data);
-H5_DLL int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func,
+H5_DLL int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_int_t iter_func,
     void *iter_data);
 H5_DLL herr_t H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name);
 H5_DLL herr_t H5P_copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name);

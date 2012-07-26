@@ -227,7 +227,7 @@ H5O_stab_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value=2 * H5F_SIZEOF_ADDR(f);
+    ret_value = (size_t)(2 * H5F_SIZEOF_ADDR(f));
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

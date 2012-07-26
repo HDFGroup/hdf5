@@ -1350,7 +1350,7 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
 {
     int	ret_value = 0;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(flags);
@@ -1361,7 +1361,6 @@ H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/)
     else
         *flags=0;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_query() */
 
@@ -1387,7 +1386,7 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
 {
     int ret_value = 0;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(driver);
     HDassert(flags);
@@ -1398,7 +1397,6 @@ H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/)
     else 
         *flags = 0;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_driver_query() */
 
