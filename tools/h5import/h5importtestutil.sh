@@ -16,6 +16,9 @@
 # HDF Utilities Test script
 # Usage: h5importtestutil.sh [machine-type]
 
+# Determine which filters are available
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
 TESTNAME=h5import
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -139,6 +142,12 @@ COPY_TESTFILES_TO_TESTDIR()
 TESTING() {
    SPACES="                                                               "
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a "SKIP" message
+SKIP() {
+   TESTING $TESTNAME $@
+    echo  " -SKIP-"
 }
 
 TOOLTEST()
@@ -273,13 +282,21 @@ TOOLTEST $TESTDIR/txtfp64.txt -c $TESTDIR/txtfp64.conf -o txtfp64.h5
 TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
 TOOLTEST binfp64.bin -c $TESTDIR/binfp64.conf -o binfp64.h5
 TESTING "H5DUMP-BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
-TOOLTEST2 "/fp/bin/64-bit" binfp64.h5
+if test $USE_FILTER_DEFLATE != "yes"; then
+ SKIP "/fp/bin/64-bit" binfp64.h5
+else
+ TOOLTEST2 "/fp/bin/64-bit" binfp64.h5
+fi
 
 
 TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
 TOOLTEST binin8.bin -c $TESTDIR/binin8.conf -o binin8.h5
 TESTING "H5DUMP-BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
-TOOLTEST2 "/int/bin/8-bit" binin8.h5
+if test $USE_FILTER_DEFLATE != "yes"; then
+ SKIP "/int/bin/8-bit" binin8.h5
+else
+ TOOLTEST2 "/int/bin/8-bit" binin8.h5
+fi
 
 TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
 TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5

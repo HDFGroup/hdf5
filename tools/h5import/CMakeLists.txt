@@ -263,6 +263,19 @@ IF (BUILD_TESTING)
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_DUMPTEST testname datasetname testfile)
 
+  MACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
+      ADD_TEST (
+          NAME H5IMPORT-DUMP-${testname}-SKIPPED
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
+
+  # --------------------------------------------------------------------
+  # Determine if filter is available for h5diff
+  # --------------------------------------------------------------------
+  SET (USE_FILTER_DEFLATE H5_HAVE_FILTER_DEFLATE)
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                            ###
@@ -314,11 +327,19 @@ IF (BUILD_TESTING)
 
   # ----- TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
   ADD_H5_TEST (BINARY_F64 binfp64.bin testfiles/binfp64.conf binfp64.h5)
-  ADD_H5_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
+  IF (NOT USE_FILTER_DEFLATE)
+    ADD_H5_SKIP_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
+  ELSE (NOT USE_FILTER_DEFLATE)
+    ADD_H5_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
+  ENDIF (NOT USE_FILTER_DEFLATE)
 
   # ----- TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
   ADD_H5_TEST (BINARY_I8 binin8.bin testfiles/binin8.conf binin8.h5)
-  ADD_H5_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
+  IF (NOT USE_FILTER_DEFLATE)
+    ADD_H5_SKIP_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
+  ELSE (NOT USE_FILTER_DEFLATE)
+    ADD_H5_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
+  ENDIF (NOT USE_FILTER_DEFLATE)
 
   # ----- TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
   ADD_H5_TEST (BINARY_I16 binin16.bin testfiles/binin16.conf binin16.h5)
