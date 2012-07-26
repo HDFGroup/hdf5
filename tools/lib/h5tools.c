@@ -1371,7 +1371,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 pad = H5Tget_strpad(tid);
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
-                    mem = _mem + block_index * size;
+                    mem = ((unsigned char*)_mem) + block_index * size;
 
                     if (H5Tis_variable_str(tid)) {
                         s = *(char**) mem;
@@ -1399,7 +1399,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 nmembs = H5Tget_nmembers(tid);
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
-                    mem = _mem + block_index * size;
+                    mem = ((unsigned char*)_mem) + block_index * size;
                     for (j = 0; j < nmembs; j++) {
                         offset = H5Tget_member_offset(tid, j);
                         memb   = H5Tget_member_type(tid, j);
@@ -1432,7 +1432,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 }
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
-                    mem = _mem + block_index * size;
+                    mem = ((unsigned char*)_mem) + block_index * size;
                     /* dump the array element */
                     if (render_bin_output(stream, container, memb, mem, nelmts) < 0)
                         H5E_THROW(FAIL, H5E_tools_min_id_g, "render_bin_output failed");
@@ -1450,7 +1450,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 memb = H5Tget_super(tid);
 
                 for (block_index = 0; block_index < block_nelmts; block_index++) {
-                    mem = _mem + block_index * size;
+                    mem = ((unsigned char*)_mem) + block_index * size;
                     /* Get the number of sequence elements */
                     nelmts = ((hvl_t *) mem)->len;
 
@@ -1470,7 +1470,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         H5S_sel_type region_type;
 
                         for (block_index = 0; block_index < block_nelmts; block_index++) {
-                            mem = _mem + block_index * size;
+                            mem = ((unsigned char*)_mem) + block_index * size;
                             region_id = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, mem);
                             if (region_id >= 0) {
                                 region_space = H5Rget_region(container, H5R_DATASET_REGION, mem);
@@ -1494,7 +1494,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
         default:
             for (block_index = 0; block_index < block_nelmts; block_index++) {
-                mem = _mem + block_index * size;
+                mem = ((unsigned char*)_mem) + block_index * size;
                 if (size != HDfwrite(mem, sizeof(char), size, stream))
                     H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
             }
