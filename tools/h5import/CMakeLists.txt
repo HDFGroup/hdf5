@@ -264,11 +264,10 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_H5_DUMPTEST testname datasetname testfile)
 
   MACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
-      ADD_TEST (
-          NAME H5IMPORT-DUMP-${testname}-SKIPPED
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
-      )
-    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    ADD_TEST (
+        NAME H5IMPORT-DUMP-${testname}-SKIPPED
+        COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
+    )
   ENDMACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
 
   # --------------------------------------------------------------------
