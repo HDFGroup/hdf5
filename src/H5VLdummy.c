@@ -60,6 +60,7 @@ static herr_t H5VL_dummy_file_close(hid_t fid, hid_t req);
 static hid_t  H5VL_dummy_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
 
 H5VL_class_t H5VL_dummy_g = {
+    DUMMY,
     "dummy",					/* name */
     NULL,
     H5VL_dummy_term,                           /*terminate */

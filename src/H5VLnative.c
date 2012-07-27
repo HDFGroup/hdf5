@@ -129,6 +129,7 @@ static herr_t H5VL_native_object_optional(void *obj, H5VL_loc_params_t loc_param
 static herr_t H5VL_native_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t req);
 
 static H5VL_class_t H5VL_native_g = {
+    NATIVE,
     "native",					/* name */
     NULL,                                       /* initialize */
     NULL,                                       /* terminate */
