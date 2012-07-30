@@ -129,9 +129,9 @@ H5O_shmesg_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
     HDassert(mesg);
 
     /* Store version, table address, and number of indexes */
-    *p++ = mesg->version;
+    *p++ = (uint8_t)mesg->version;
     H5F_addr_encode(f, &p, mesg->addr);
-    *p++ = mesg->nindexes;
+    *p++ = (uint8_t)mesg->nindexes;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_shmesg_encode() */
@@ -201,9 +201,9 @@ H5O_shmesg_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED
     /* Sanity check */
     HDassert(f);
 
-    ret_value = 1 +                     /* Version number        */
+    ret_value = (size_t)(1 +                     /* Version number        */
 		H5F_SIZEOF_ADDR(f) +    /* Table address */
-		1;                      /* Number of indexes */
+		1);                      /* Number of indexes */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shmesg_size() */

@@ -2291,7 +2291,8 @@ func_init_failed:                    \
     /* Close Function */                  \
 }
 
-/* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient) */
+/* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
+ * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
 #define H5_BEGIN_TAG(dxpl, tag, err) {                                           \
     haddr_t prv_tag = HADDR_UNDEF;                                               \
     hid_t my_dxpl_id = dxpl;                                                     \

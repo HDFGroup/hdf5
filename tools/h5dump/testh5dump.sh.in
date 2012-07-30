@@ -953,6 +953,9 @@ TOOLTEST   tbin1.ddl --enable-error-stack -d integer -o out1.bin -b LE    tbinar
 TOOLTEST   tbin1.ddl --enable-error-stack -d integer -o out1.bin  -b      tbinary.h5
 IMPORTTEST out1.bin -c out3.h5import -o out1.h5
 DIFFTEST   tbinary.h5 out1.h5 /integer /integer
+# Same but use h5dump as input to h5import
+IMPORTTEST out1.bin -c tbin1.ddl -o out1D.h5
+DIFFTEST   tbinary.h5 out1D.h5 /integer /integer
 
 TOOLTEST   tbin2.ddl --enable-error-stack -b BE -d float  -o out2.bin      tbinary.h5
 
@@ -960,6 +963,9 @@ TOOLTEST   tbin2.ddl --enable-error-stack -b BE -d float  -o out2.bin      tbina
 TOOLTEST   tbin3.ddl --enable-error-stack -d integer -o out3.bin -b NATIVE tbinary.h5
 IMPORTTEST out3.bin -c out3.h5import -o out3.h5
 DIFFTEST   tbinary.h5 out3.h5 /integer /integer
+# Same but use h5dump as input to h5import
+IMPORTTEST out3.bin -c tbin3.ddl -o out3D.h5
+DIFFTEST   tbinary.h5 out3D.h5 /integer /integer
 
 TOOLTEST   tbin4.ddl --enable-error-stack -d double  -b FILE -o out4.bin    tbinary.h5
    

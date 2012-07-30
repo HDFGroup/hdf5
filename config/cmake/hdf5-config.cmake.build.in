@@ -42,6 +42,12 @@ IF (HDF5_BUILD_TOOLS)
   SET (HDF5_INCLUDE_DIR_TOOLS ${HDF5_INCLUDE_DIR} )
 ENDIF (HDF5_BUILD_TOOLS)
 
+IF (HDF5_BUILD_SHARED_LIBS)
+  SET (H5_BUILT_AS_DYNAMIC_LIB 1 )
+ELSE (HDF5_BUILD_SHARED_LIBS)
+  SET (H5_BUILT_AS_STATIC_LIB 1 )
+ENDIF (HDF5_BUILD_SHARED_LIBS)
+
 #-----------------------------------------------------------------------------
 # Version Strings
 #-----------------------------------------------------------------------------
@@ -53,7 +59,7 @@ SET (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
 # Don't include targets if this file is being picked up by another
 # project which has already build hdf5 as a subproject
 #-----------------------------------------------------------------------------
-IF (NOT TARGET "hdf5")
-  INCLUDE (${SELF_DIR}/hdf5-targets.cmake)
+IF (NOT TARGET "@HDF5_PACKAGE@")
+  INCLUDE (${SELF_DIR}/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
   SET (HDF5_LIBRARIES "@HDF5_LIBRARIES_TO_EXPORT@")
-ENDIF (NOT TARGET "hdf5")
+ENDIF (NOT TARGET "@HDF5_PACKAGE@")

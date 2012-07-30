@@ -217,7 +217,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
     HDassert(_ref);
     HDassert(loc);
     HDassert(name);
-    HDassert(ref_type > H5R_BADTYPE || ref_type < H5R_MAXTYPE);
+    HDassert(ref_type > H5R_BADTYPE && ref_type < H5R_MAXTYPE);
 
     /* Set up object location to fill in */
     obj_loc.oloc = &oloc;
@@ -272,7 +272,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "Invalid amount of space for serializing selection")
 
             /* Increase buffer size to allow for the dataset OID */
-            buf_size += sizeof(haddr_t);
+            buf_size += (hssize_t)sizeof(haddr_t);
 
             /* Allocate the space to store the serialized information */
             H5_CHECK_OVERFLOW(buf_size, hssize_t, size_t);
@@ -418,7 +418,7 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(_ref);
-    HDassert(ref_type > H5R_BADTYPE || ref_type < H5R_MAXTYPE);
+    HDassert(ref_type > H5R_BADTYPE && ref_type < H5R_MAXTYPE);
     HDassert(file);
 
     /* Initialize the object location */
@@ -525,6 +525,8 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
             } /* end case */
             break;
 
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
         default:
             HGOTO_ERROR(H5E_REFERENCE, H5E_BADTYPE, FAIL, "can't identify type of object referenced")
      } /* end switch */
@@ -880,7 +882,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-ssize_t
+static ssize_t
 H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
     const void *_ref, char *name, size_t size)
 {

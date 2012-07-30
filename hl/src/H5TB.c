@@ -1298,6 +1298,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
     hid_t    tid=-1;
     hid_t    sid=-1;
     hid_t    m_sid=-1;
+    hid_t    mem_type_id=-1;
     hsize_t  count[1];
     hsize_t  offset[1];
     hsize_t  mem_size[1];
@@ -1364,6 +1365,10 @@ herr_t H5TBdelete_record( hid_t loc_id,
         if ((sid = H5Dget_space( did )) < 0)
             goto out;
 
+	/* create the memory data type. */
+	if ((mem_type_id=H5TB_create_type( loc_id, dset_name, src_size, src_offset, src_sizes, tid)) < 0)
+	    goto out;
+
         /* define a hyperslab in the dataset of the size of the records */
         offset[0] = start;
         count[0]  = read_nrecords;
@@ -1375,12 +1380,14 @@ herr_t H5TBdelete_record( hid_t loc_id,
         if ((m_sid = H5Screate_simple( 1, mem_size, NULL )) < 0)
             goto out;
 
-        if (H5Dwrite( did, tid, m_sid, sid, H5P_DEFAULT, tmp_buf ) < 0)
+        if (H5Dwrite( did, mem_type_id, m_sid, sid, H5P_DEFAULT, tmp_buf ) < 0)
             goto out;
 
         /* close */
         if (H5Sclose( m_sid ) < 0)
             goto out;
+	if (H5Tclose( mem_type_id ) < 0)
+	    goto out;
         if (H5Sclose( sid ) < 0)
             goto out;
         if (H5Tclose( tid ) < 0)
@@ -1416,6 +1423,7 @@ out:
         free( tmp_buf );
     H5E_BEGIN_TRY
     {
+        H5Tclose(mem_type_id);
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);

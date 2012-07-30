@@ -112,7 +112,7 @@ static const H5S_sel_iter_class_t H5S_sel_iter_all[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5S_all_iter_init (H5S_sel_iter_t *iter, const H5S_t *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -445,7 +445,7 @@ H5S_all_copy(H5S_t *dst, const H5S_t UNUSED *src, hbool_t UNUSED share_selection
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t
+static htri_t
 H5S_all_is_valid (const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -475,7 +475,7 @@ H5S_all_is_valid (const H5S_t UNUSED *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-hssize_t
+static hssize_t
 H5S_all_serial_size (const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -509,7 +509,7 @@ H5S_all_serial_size (const H5S_t UNUSED *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_serialize (const H5S_t *space, uint8_t *buf)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -545,7 +545,7 @@ H5S_all_serialize (const H5S_t *space, uint8_t *buf)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_deserialize(H5S_t *space, const uint8_t UNUSED *buf)
 {
     herr_t ret_value;   /* return value */
@@ -588,7 +588,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
     unsigned rank;                  /* Dataspace rank */
@@ -633,7 +633,7 @@ H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_offset(const H5S_t UNUSED *space, hsize_t *offset)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -666,7 +666,7 @@ H5S_all_offset(const H5S_t UNUSED *space, hsize_t *offset)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t
+static htri_t
 H5S_all_is_contiguous(const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -695,7 +695,7 @@ H5S_all_is_contiguous(const H5S_t UNUSED *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t
+static htri_t
 H5S_all_is_single(const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -725,7 +725,7 @@ H5S_all_is_single(const H5S_t UNUSED *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-htri_t
+static htri_t
 H5S_all_is_regular(const H5S_t UNUSED *space)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -755,7 +755,7 @@ H5S_all_is_regular(const H5S_t UNUSED *space)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_adjust_u(H5S_t UNUSED *space, const hsize_t UNUSED *offset)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -945,7 +945,7 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5S_all_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_iter_t *iter,
     size_t UNUSED maxseq, size_t maxelem, size_t *nseq, size_t *nelem,
     hsize_t *off, size_t *len)
