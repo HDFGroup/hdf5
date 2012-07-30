@@ -271,6 +271,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5PSIdirect_write
+ *
+ * Purpose:     Temporary name for the DECTRIS project.  It writes an entire
+ *              chunk to the file directly.	
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		30 July 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, size_t *offset, size_t buf_size,
+	 const void *buf)
+{
+    H5D_t		   *dset = NULL;
+    herr_t                  ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == dset->oloc.file)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    if(!buf)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+    /* write raw data */
+    if(H5D__direct_write(dset, dxpl_id, offset, buf_size, buf) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5PSIdirect_write() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__read
  *
  * Purpose:	Reads (part of) a DATASET into application memory BUF. See

@@ -234,6 +234,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FILE_ID(F)          ((F)->file_id)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
+#define H5F_DRIVER(F)           ((F)->shared->lf)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
@@ -276,6 +277,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_FILE_ID(F)          (H5F_get_file_id(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_NMOUNTS(F)          (H5F_get_nmounts(F))
+#define H5F_DRIVER(F)           (H5F_get_driver(F))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
@@ -547,6 +549,7 @@ H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 
 /* Functions that retrieve values from VFD layer */
+H5_DLL H5FD_t* H5F_get_driver(const H5F_t *f);
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);

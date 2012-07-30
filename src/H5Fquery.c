@@ -919,6 +919,35 @@ H5F_get_driver_id(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_driver
+ *
+ * Purpose:	Quick and dirty routine to retrieve the file's 'driver' structure 
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	'driver' structure on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Raymond Lu
+ *		30 July 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5FD_t *
+H5F_get_driver(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
+
+    FUNC_LEAVE_NOAPI(f->shared->lf)
+} /* end H5F_get_driver() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_fileno
  *
  * Purpose:	Quick and dirty routine to retrieve the file's 'fileno' value
