@@ -1411,14 +1411,6 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
                 options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
                 busyTasks--;
             } /* end if */
-            else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
-            {
-                MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-                nfound += nFoundbyWorker.nfound;
-                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-                busyTasks--;
-                havePrintToken = 1;
-            } /* end else-if */
             else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
             {
                 MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);

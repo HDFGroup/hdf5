@@ -705,6 +705,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - ph5diff: Fixed intermittent hang issue on a certain operation in 
+          parallel mode. It was detected by daily test for comparing 
+          non-comparable objects, but it could have occurred in other 
+          operations depend on machine condition.  HDFFV-8003 (JKM 2012/08/01)
         - h5diff: Fixed test failure for "make check" due to failure of 
           copying test files when performed in HDF5 source tree. Also applied
           to other tools.
