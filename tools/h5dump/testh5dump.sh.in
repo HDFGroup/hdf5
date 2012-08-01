@@ -40,6 +40,9 @@ H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 nerrors=0
 verbose=yes
@@ -351,17 +354,24 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-            if [ -a $tstfile ]; then
-                $CP -f $tstfile $TESTDIR
-            else
-                echo "Error: FAILED to copy $tstfile"
-                echo "       $tstfile doesn't exist!"
-                exit $EXIT_FAILURE
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
 }
-
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
