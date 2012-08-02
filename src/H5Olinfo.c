@@ -206,7 +206,7 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
 
     /* The flags for the link indices */
     index_flags = linfo->track_corder ? H5O_LINFO_TRACK_CORDER : 0;
-    index_flags |= linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0;
+    index_flags = (uint8_t)(index_flags | (linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0));
     *p++ = index_flags;
 
     /* Max. link creation order value for the group, if tracked */
@@ -296,10 +296,10 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     /* Set return value */
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
-                + (linfo->track_corder ? 8 : 0) /* Curr. max. creation order value */
-                + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
-                + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
-                + (linfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
+                + (linfo->track_corder ? (size_t)8 : 0) /* Curr. max. creation order value */
+                + (size_t)H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
+                + (size_t)H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
+                + (linfo->index_corder ? (size_t)H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_size() */
@@ -474,7 +474,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */
     if(H5G__dense_insert(udata->dst_oloc->file, udata->dxpl_id, udata->dst_linfo, &dst_lnk) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
 
     /* Reset metadata tag in dxpl_id */
     H5_END_TAG(FAIL);

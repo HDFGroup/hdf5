@@ -1367,7 +1367,7 @@ H5G__node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr
         if(H5G__stab_insert_real(udata->dst_file, udata->dst_stab, name, &lnk,
                 obj_type, (obj_type == H5O_TYPE_GROUP ? &gcrt_info : NULL),
                 dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
+            HGOTO_ERROR_TAG(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
 
         /* Reset metadata tag */
         H5_END_TAG(H5_ITER_ERROR);

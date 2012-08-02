@@ -105,7 +105,7 @@ H5O_fsinfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
     if(NULL == (fsinfo = H5FL_CALLOC(H5O_fsinfo_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    fsinfo->strategy = *p++;	/* file space strategy */
+    fsinfo->strategy = (H5F_file_space_type_t)*p++;	/* file space strategy */
     H5F_DECODE_LENGTH(f, p, fsinfo->threshold);	/* free space section size threshold */
 
     /* Addresses of free space managers: only exist for H5F_FILE_SPACE_ALL_PERSIST */
@@ -231,10 +231,10 @@ H5O_fsinfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg
 
     /* Addresses of free-space managers exist only for H5F_FILE_SPACE_ALL_PERSIST type */
     if(H5F_FILE_SPACE_ALL_PERSIST == fsinfo->strategy)
-	fs_addr_size = (H5FD_MEM_NTYPES - 1) * H5F_SIZEOF_ADDR(f);
+	fs_addr_size = (H5FD_MEM_NTYPES - 1) * (size_t)H5F_SIZEOF_ADDR(f);
 
     ret_value = 2                       /* Version & strategy */
-		+ H5F_SIZEOF_SIZE(f)	/* Threshold */
+		+ (size_t)H5F_SIZEOF_SIZE(f)	/* Threshold */
                 + fs_addr_size;		/* Addresses of free-space managers */
 
     FUNC_LEAVE_NOAPI(ret_value)

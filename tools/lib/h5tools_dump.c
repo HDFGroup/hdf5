@@ -282,7 +282,9 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 
     /* binary dump */
     if (bin_output) {
-        do_bin_output(rawdatastream, rawoutstream, container, nelmts, type, _mem);
+        if (render_bin_output(rawdatastream, container, type, _mem, nelmts) < 0) {
+            HDfprintf(rawoutstream,"\nError in writing binary stream\n");
+        }
     } /* end if */
     else {
         /* setup */

@@ -184,7 +184,7 @@ H5O_ginfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
 
     /* The flags for the group info */
     flags = ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0;
-    flags |= ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0;
+    flags = (unsigned char)(flags | (ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0));
     *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
@@ -273,12 +273,12 @@ H5O_ginfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void 
     ret_value = 1 +                     /* Version */
                 1 +                     /* Flags */
                 (ginfo->store_link_phase_change ? (
-                    2 +                 /* "Max compact" links */
-                    2                   /* "Min dense" links */
+            (size_t)(2 +                 /* "Max compact" links */
+                    2)                   /* "Min dense" links */
                 ) : 0) +                /* "Min dense" links */
                 (ginfo->store_est_entry_info ? (
-                    2 +                 /* Estimated # of entries in group */
-                    2                   /* Estimated length of name of entry in group */
+            (size_t)(2 +                 /* Estimated # of entries in group */
+                    2)                   /* Estimated length of name of entry in group */
                 ) : 0);
 
     FUNC_LEAVE_NOAPI(ret_value)

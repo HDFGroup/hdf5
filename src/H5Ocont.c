@@ -179,8 +179,8 @@ H5O_cont_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value = H5F_SIZEOF_ADDR(f) +    /* Continuation header address */
-                H5F_SIZEOF_SIZE(f);     /* Continuation header length */
+    ret_value = (size_t)(H5F_SIZEOF_ADDR(f) +    /* Continuation header address */
+                H5F_SIZEOF_SIZE(f));     /* Continuation header length */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cont_size() */

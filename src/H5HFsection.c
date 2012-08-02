@@ -651,9 +651,7 @@ herr_t
 H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect, haddr_t *dblock_addr, size_t *dblock_size)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /*
      * Check arguments.
@@ -678,8 +676,7 @@ H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
         *dblock_size =  hdr->man_dtable.row_block_size[sect->u.single.par_entry / hdr->man_dtable.cparam.width];
     } /* end else */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_sect_single_dblock_info() */
 
 

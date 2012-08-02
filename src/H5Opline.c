@@ -250,7 +250,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     HDassert(mesg);
 
     /* Message header */
-    *p++ = pline->version;
+    *p++ = (uint8_t)pline->version;
     *p++ = (uint8_t)(pline->nused);
     if(pline->version == H5O_PLINE_VERSION_1) {
         *p++ = 0;	/*reserved 1*/
@@ -467,7 +467,7 @@ H5O_pline_size(const H5F_t UNUSED *f, const void *mesg)
 		((pline->version == H5O_PLINE_VERSION_1 || pline->filter[i].id >= H5Z_FILTER_RESERVED) ? 2 : 0) +				/*name length			*/
 		2 +				/*flags				*/
 		2 +				/*number of client data values	*/
-		(pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_len) : name_len);	/*length of the filter name	*/
+		(pline->version == H5O_PLINE_VERSION_1 ? (size_t)H5O_ALIGN_OLD(name_len) : name_len);	/*length of the filter name	*/
 
 	ret_value += pline->filter[i].cd_nelmts * 4;
         if(pline->version == H5O_PLINE_VERSION_1)

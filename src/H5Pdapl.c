@@ -33,12 +33,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"      /* Generic Functions */
-#include "H5Dprivate.h"     /* Datasets	*/
-#include "H5Eprivate.h"     /* Error handling */
+#include "H5private.h"		/* Generic Functions */
+#include "H5Dprivate.h"		/* Datasets */
+#include "H5Eprivate.h"		/* Error handling */
 #include "H5Fprivate.h"		/* Files */
-#include "H5Iprivate.h"     /* IDs */
-#include "H5Ppkg.h"         /* Property lists */
+#include "H5Iprivate.h"		/* IDs */
+#include "H5Ppkg.h"		/* Property lists */
 
 
 /****************/
@@ -72,7 +72,7 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_dacc_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
@@ -85,7 +85,7 @@ const H5P_libclass_t H5P_CLS_DACC[1] = {{
     &H5P_CLS_LINK_ACCESS_g,	/* Parent class ID              */
     &H5P_CLS_DATASET_ACCESS_g,	/* Pointer to class ID          */
     &H5P_LST_DATASET_ACCESS_g,	/* Pointer to default property list ID */
-    H5P_dacc_reg_prop,		/* Default property registration routine */
+    H5P__dacc_reg_prop,		/* Default property registration routine */
     NULL,		         /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,		         /* Class copy callback          */
@@ -107,7 +107,7 @@ const H5P_libclass_t H5P_CLS_DACC[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_dacc_reg_prop
+ * Function:    H5P__dacc_reg_prop
  *
  * Purpose:     Register the dataset access property list class's
  *              properties
@@ -119,14 +119,14 @@ const H5P_libclass_t H5P_CLS_DACC[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_dacc_reg_prop(H5P_genclass_t *pclass)
+H5P__dacc_reg_prop(H5P_genclass_t *pclass)
 {
     size_t rdcc_nslots = H5D_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
     size_t rdcc_nbytes = H5D_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5D_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Register the size of raw data chunk cache (elements) */
     if(H5P_register_real(pclass, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5D_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -142,7 +142,7 @@ H5P_dacc_reg_prop(H5P_genclass_t *pclass)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_dacc_reg_prop() */
+} /* end H5P__dacc_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
@@ -186,24 +186,24 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
 
     /* Check arguments.  Note that we allow negative values - they are
      * considered to "unset" the property. */
-    if (rdcc_w0 > 1.0)
+    if(rdcc_w0 > 1.0)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive, or H5D_CHUNK_CACHE_W0_DEFAULT");
 
     /* Get the plist structure */
-    if (NULL == (plist = H5P_object_verify(dapl_id,H5P_DATASET_ACCESS)))
+    if(NULL == (plist = H5P_object_verify(dapl_id,H5P_DATASET_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
-    if (H5P_set(plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc_nslots) < 0)
+    if(H5P_set(plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc_nslots) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache number of chunks");
-    if (H5P_set(plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
+    if(H5P_set(plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache byte size");
-    if (H5P_set(plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
+    if(H5P_set(plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks");
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_chunk_cache() */
 
 
 /*-------------------------------------------------------------------------

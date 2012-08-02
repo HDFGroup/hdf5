@@ -626,6 +626,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
 
                 case H5T_ORDER_ERROR:
                 case H5T_ORDER_VAX:
+                case H5T_ORDER_MIXED:
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
@@ -696,6 +697,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     HDassert(dt->shared->version >= H5O_DTYPE_VERSION_3);
                     break;
 
+                case H5T_ORDER_MIXED:
                 case H5T_ORDER_ERROR:
                 case H5T_ORDER_NONE:
                 default:
@@ -764,7 +766,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "normalization scheme is not supported in file format yet")
             } /* end switch */
 
-            flags |= (dt->shared->u.atomic.u.f.sign << 8) & 0xff00;
+            flags = (unsigned)(flags | ((dt->shared->u.atomic.u.f.sign << 8) & 0xff00));
             UINT16ENCODE(*pp, dt->shared->u.atomic.offset);
             UINT16ENCODE(*pp, dt->shared->u.atomic.prec);
             HDassert(dt->shared->u.atomic.u.f.epos <= 255);
@@ -787,8 +789,9 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     flags |= 0x01;
                     break;
 
-                case H5T_ORDER_ERROR:
                 case H5T_ORDER_VAX:
+                case H5T_ORDER_MIXED:
+                case H5T_ORDER_ERROR:
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
@@ -806,8 +809,8 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
             HDassert(dt->shared->u.atomic.lsb_pad == H5T_PAD_ZERO);
             HDassert(dt->shared->u.atomic.msb_pad == H5T_PAD_ZERO);
 
-            flags |= (dt->shared->u.atomic.u.s.pad & 0x0f);
-            flags |= (dt->shared->u.atomic.u.s.cset & 0x0f) << 4;
+            flags = (unsigned)(flags | (dt->shared->u.atomic.u.s.pad & 0x0f));
+            flags = (unsigned)(flags | ((((unsigned)dt->shared->u.atomic.u.s.cset) & 0x0f) << 4));
             break;
 
         case H5T_BITFIELD:
@@ -822,8 +825,9 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     flags |= 0x01;
                     break;
 
-                case H5T_ORDER_ERROR:
                 case H5T_ORDER_VAX:
+                case H5T_ORDER_MIXED:
+                case H5T_ORDER_ERROR:
                 case H5T_ORDER_NONE:
                 default:
                     HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "byte order is not supported in file format yet")
@@ -874,7 +878,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
 
                 z = HDstrlen(dt->shared->u.opaque.tag);
                 aligned = (z + 7) & (H5T_OPAQUE_TAG_MAX - 8);
-                flags |= aligned;
+                flags = (unsigned)(flags | aligned);
                 HDmemcpy(*pp, dt->shared->u.opaque.tag, MIN(z,aligned));
                 for(n = MIN(z, aligned); n < aligned; n++)
                     (*pp)[n] = 0;
@@ -918,7 +922,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                     /* Member offset */
                     /* (starting with version 3 of the datatype message, use the minimum # of bytes required) */
                     if(dt->shared->version >= H5O_DTYPE_VERSION_3)
-                        UINT32ENCODE_VAR(*pp, dt->shared->u.compnd.memb[i].offset, offset_nbytes)
+                        UINT32ENCODE_VAR(*pp, (uint32_t)dt->shared->u.compnd.memb[i].offset, offset_nbytes)
                     else
                         UINT32ENCODE(*pp, dt->shared->u.compnd.memb[i].offset)
 
@@ -1000,8 +1004,8 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
 
             flags |= (dt->shared->u.vlen.type & 0x0f);
             if(dt->shared->u.vlen.type == H5T_VLEN_STRING) {
-                flags |= (dt->shared->u.vlen.pad   & 0x0f) << 4;
-                flags |= ((unsigned)dt->shared->u.vlen.cset  & 0x0f) << 8;
+                flags = (unsigned)(flags | (((unsigned)dt->shared->u.vlen.pad   & 0x0f) << 4));
+                flags = (unsigned)(flags | (((unsigned)dt->shared->u.vlen.cset  & 0x0f) << 8));
             } /* end if */
 
             /* Encode base type of VL information */
@@ -1599,7 +1603,7 @@ H5O_dtype_shared_post_copy_upd(const H5O_loc_t UNUSED *src_oloc,
 {
     H5T_t       *dt_dst = (H5T_t *)mesg_dst;    /* Destination datatype */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(dt_dst->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
         HDassert(H5T_committed(dt_dst));
@@ -1975,6 +1979,10 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 
             case H5T_ORDER_NONE:
                 s = "none";
+                break;
+
+            case H5T_ORDER_MIXED:
+                s = "mixed";
                 break;
 
             case H5T_ORDER_ERROR:

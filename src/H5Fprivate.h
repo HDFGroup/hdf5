@@ -82,10 +82,10 @@ typedef struct {
    *(p) = (uint8_t)(((i) >> 24) & 0xff); (p)++;				      \
 }
 
-/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* Encode an unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
-#  define UINT32ENCODE_VAR(p, n, l) {					      \
-   uint32_t _n = (n);							      \
+#  define ENCODE_VAR(p, typ, n, l) {					      \
+   typ _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
 									      \
@@ -93,6 +93,10 @@ typedef struct {
       *_p++ = (uint8_t)(_n & 0xff);					      \
    (p) = (uint8_t*)(p) + l;						      \
 }
+
+/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT32ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint32_t, n, l)
 
 #  define INT64ENCODE(p, n) {						      \
    int64_t _n = (n);							      \
@@ -120,15 +124,7 @@ typedef struct {
 
 /* Encode a 64-bit unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
-#  define UINT64ENCODE_VAR(p, n, l) {					      \
-   uint64_t _n = (n);							      \
-   size_t _i;								      \
-   uint8_t *_p = (uint8_t*)(p);						      \
-									      \
-   for(_i = 0; _i < l; _i++, _n >>= 8)					      \
-      *_p++ = (uint8_t)(_n & 0xff);					      \
-   (p) = (uint8_t*)(p) + l;						      \
-}
+#  define UINT64ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint64_t, n, l)
 
 /* DECODE converts little endian bytes pointed by p to integer values and store
  * it in i.  For signed values, need to do sign-extension when converting
@@ -164,12 +160,9 @@ typedef struct {
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;			      \
 }
 
-/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* Decode a variable-sized buffer */
 /* (Assumes that the high bits of the integer will be zero) */
-/* (Note: this is exactly the same code as the 64-bit variable-length decoder
- *      and bugs/improvements should be make in both places - QAK)
- */
-#  define UINT32DECODE_VAR(p, n, l) {					      \
+#  define DECODE_VAR(p, n, l) {						      \
    size_t _i;								      \
 									      \
    n = 0;								      \
@@ -178,6 +171,10 @@ typedef struct {
       n = (n << 8) | *(--p);						      \
    (p) += l;								      \
 }
+
+/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* (Assumes that the high bits of the integer will be zero) */
+#  define UINT32DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
@@ -203,18 +200,7 @@ typedef struct {
 
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
-/* (Note: this is exactly the same code as the 32-bit variable-length decoder
- *      and bugs/improvements should be make in both places - QAK)
- */
-#  define UINT64DECODE_VAR(p, n, l) {					      \
-   size_t _i;								      \
-									      \
-   n = 0;								      \
-   (p) += l;								      \
-   for (_i = 0; _i < l; _i++)						      \
-      n = (n << 8) | *(--p);						      \
-   (p) += l;								      \
-}
+#  define UINT64DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 /* Address-related macros */
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \

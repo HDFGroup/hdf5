@@ -53,18 +53,18 @@ SET (_HDF5_PATHS
     $ENV{HOME}/.local
     $ENV{HDF5_ROOT}
     $ENV{HDF5_ROOT_DIR_HINT}
-    /usr/lib/hdf5
-    /usr/share/hdf5
-    /usr/local/hdf5
-    /usr/local/hdf5/share
+    /usr/lib/@HDF5_PACKAGE@
+    /usr/share/@HDF5_PACKAGE@
+    /usr/local/@HDF5_PACKAGE@
+    /usr/local/@HDF5_PACKAGE@/share
 )
 
-FIND_PATH (HDF5_ROOT_DIR "hdf5-config.cmake"
+FIND_PATH (HDF5_ROOT_DIR "@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-config.cmake"
     HINTS ${_HDF5_HINTS}
     PATHS ${_HDF5_PATHS}
     PATH_SUFFIXES
-        lib/cmake/hdf5
-        share/cmake/hdf5
+        lib/cmake/@HDF5_PACKAGE@
+        share/cmake/@HDF5_PACKAGE@
 )
 
 FIND_PATH (HDF5_INCLUDE_DIRS "H5public.h"
@@ -81,5 +81,5 @@ SET ( HDF5_INCLUDE_DIR "${HDF5_INCLUDE_DIRS}" )
 
 IF (HDF5_INCLUDE_DIR)
   SET (HDF5_FOUND "YES")
-  INCLUDE (${HDF5_ROOT_DIR}/hdf5-config.cmake)
+  INCLUDE (${HDF5_ROOT_DIR}/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-config.cmake)
 ENDIF (HDF5_INCLUDE_DIR)
