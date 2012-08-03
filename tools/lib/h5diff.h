@@ -19,6 +19,23 @@
 #include "hdf5.h"
 #include "h5trav.h"
 
+/*
+ * Debug printf macros. The prefix allows output filtering by test scripts.
+ */
+#ifdef H5DIFF_DEBUG
+#define h5difftrace(x) HDfprintf(stderr, "h5diff debug: " x)
+#define h5diffdebug2(x1, x2) HDfprintf(stderr, "h5diff debug: " x1, x2)
+#define h5diffdebug3(x1, x2, x3) HDfprintf(stderr, "h5diff debug: " x1, x2, x3)
+#define h5diffdebug4(x1, x2, x3, x4) HDfprintf(stderr, "h5diff debug: " x1, x2, x3, x4)
+#define h5diffdebug5(x1, x2, x3, x4, x5) HDfprintf(stderr, "h5diff debug: " x1, x2, x3, x4, x5)
+#else
+#define h5difftrace(x)
+#define h5diffdebug2(x1, x2)
+#define h5diffdebug3(x1, x2, x3)
+#define h5diffdebug4(x1, x2, x3, x4)
+#define h5diffdebug5(x1, x2, x3, x4, x5)
+#endif
+
 #define MAX_FILENAME 1024
 
 /*-------------------------------------------------------------------------
@@ -118,15 +135,6 @@ hsize_t diff_datasetid( hid_t dset1_id,
                         const char *obj2_name,
                         diff_opt_t *options);
 
-hsize_t diff_compare( hid_t file1_id,
-                      const char *file1_name,
-                      const char *obj1_name,
-                      trav_info_t *info1,
-                      hid_t file2_id,
-                      const char *file2_name,
-                      const char *obj2_name,
-                      trav_info_t *info2,
-                      diff_opt_t *options );
 
 hsize_t diff_match( hid_t file1_id, const char *grp1, trav_info_t *info1,
                     hid_t file2_id, const char *grp2, trav_info_t *info2,
