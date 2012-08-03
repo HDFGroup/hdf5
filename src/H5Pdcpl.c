@@ -128,6 +128,7 @@ static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, s
 /* Dataset creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_DCRT[1] = {{
     "dataset create",		/* Class name for debugging     */
+    H5P_TYPE_DATASET_CREATE,    /* Class type                   */
     &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_DATASET_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_DATASET_CREATE_g,	/* Pointer to default property list ID */

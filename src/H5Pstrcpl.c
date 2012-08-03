@@ -73,6 +73,7 @@ static herr_t H5P_strcrt_reg_prop(H5P_genclass_t *pclass);
 /* String creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
     "string create",		/* Class name for debugging     */
+    H5P_TYPE_STRING_CREATE,     /* Class type                   */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_STRING_CREATE_g,	/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */

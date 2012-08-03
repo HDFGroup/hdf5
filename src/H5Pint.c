@@ -132,6 +132,7 @@ hid_t H5P_LST_LINK_ACCESS_g         = FAIL;
 /* Root property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ROOT[1] = {{
     "root",			/* Class name for debugging     */
+    H5P_TYPE_ROOT,              /* Class type                   */
     NULL,			/* Parent class ID              */
     &H5P_CLS_ROOT_g,		/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
@@ -148,6 +149,7 @@ const H5P_libclass_t H5P_CLS_ROOT[1] = {{
 /* (move to proper source code file when used for real) */
 const H5P_libclass_t H5P_CLS_GACC[1] = {{
     "group access",		/* Class name for debugging     */
+    H5P_TYPE_GROUP_ACCESS,      /* Class type                   */
     &H5P_CLS_LINK_ACCESS_g,	/* Parent class ID              */
     &H5P_CLS_GROUP_ACCESS_g,	/* Pointer to class ID          */
     &H5P_LST_GROUP_ACCESS_g,	/* Pointer to default property list ID */
@@ -164,6 +166,7 @@ const H5P_libclass_t H5P_CLS_GACC[1] = {{
 /* (move to proper source code file when used for real) */
 const H5P_libclass_t H5P_CLS_TCRT[1] = {{
     "datatype create",		/* Class name for debugging     */
+    H5P_TYPE_DATATYPE_CREATE,   /* Class type                   */
     &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_DATATYPE_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_DATATYPE_CREATE_g,	/* Pointer to default property list ID */
@@ -180,6 +183,7 @@ const H5P_libclass_t H5P_CLS_TCRT[1] = {{
 /* (move to proper source code file when used for real) */
 const H5P_libclass_t H5P_CLS_TACC[1] = {{
     "datatype access",		/* Class name for debugging     */
+    H5P_TYPE_DATATYPE_ACCESS,   /* Class type                   */
     &H5P_CLS_LINK_ACCESS_g,	/* Parent class ID              */
     &H5P_CLS_DATATYPE_ACCESS_g,	/* Pointer to class ID          */
     &H5P_LST_DATATYPE_ACCESS_g,	/* Pointer to default property list ID */
@@ -433,7 +437,7 @@ H5P_init_interface(void)
                 } /* end if */
 
                 /* Allocate the new class */
-                if(NULL == (new_pclass = H5P_create_class(par_pclass, lib_class->name, 1, lib_class->create_func, lib_class->create_data, lib_class->copy_func, lib_class->copy_data, lib_class->close_func, lib_class->close_data)))
+                if(NULL == (new_pclass = H5P_create_class(par_pclass, lib_class->name, lib_class->type, lib_class->create_func, lib_class->create_data, lib_class->copy_func, lib_class->copy_data, lib_class->close_func, lib_class->close_data)))
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "class initialization failed")
 
                 /* Call routine to register properties for class */
@@ -599,11 +603,11 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
      */
 
     /* Create the new property list class */
-    if(NULL==(new_pclass=H5P_create_class(pclass->parent, pclass->name, 0, pclass->create_func, pclass->create_data, pclass->copy_func, pclass->copy_data, pclass->close_func, pclass->close_data)))
+    if(NULL == (new_pclass = H5P_create_class(pclass->parent, pclass->name, pclass->type, pclass->create_func, pclass->create_data, pclass->copy_func, pclass->copy_data, pclass->close_func, pclass->close_data)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, NULL, "unable to create property list class")
 
     /* Copy the properties registered for this class */
-    if(pclass->nprops>0) {
+    if(pclass->nprops > 0) {
         H5SL_node_t *curr_node;   /* Current node in skip list */
 
         /* Walk through the properties in the old class */
@@ -1092,7 +1096,7 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_find_prop_plist
+    H5P__find_prop_plist
  PURPOSE
     Internal routine to check for a property in a property list's skip list
  USAGE
@@ -1108,12 +1112,12 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5P_genprop_t *
-H5P_find_prop_plist(H5P_genplist_t *plist, const char *name)
+H5P_genprop_t *
+H5P__find_prop_plist(H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(plist);
     HDassert(name);
@@ -1147,7 +1151,7 @@ H5P_find_prop_plist(H5P_genplist_t *plist, const char *name)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5P_find_prop_plist() */
+}   /* H5P__find_prop_plist() */
 
 
 /*--------------------------------------------------------------------------
@@ -1448,11 +1452,11 @@ H5P_open_class_path_cb(void *_obj, hid_t UNUSED id, void *_key)
  PURPOSE
     Internal routine to create a new property list class.
  USAGE
-    H5P_genclass_t H5P_create_class(par_class, name, internal,
+    H5P_genclass_t H5P_create_class(par_class, name, type,
                 cls_create, create_data, cls_close, close_data)
         H5P_genclass_t *par_class;  IN: Pointer to parent class
         const char *name;       IN: Name of class we are creating
-        hbool_t internal;       IN: Whether this is an internal class or not
+        H5P_plist_type_t type;  IN: Type of class we are creating
         H5P_cls_create_func_t;  IN: The callback function to call when each
                                     property list in this class is created.
         void *create_data;      IN: Pointer to user data to pass along to class
@@ -1476,7 +1480,7 @@ H5P_open_class_path_cb(void *_obj, hid_t UNUSED id, void *_key)
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5P_genclass_t *
-H5P_create_class(H5P_genclass_t *par_class, const char *name, hbool_t internal,
+H5P_create_class(H5P_genclass_t *par_class, const char *name, H5P_plist_type_t type,
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data)
@@ -1489,7 +1493,7 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, hbool_t internal,
     HDassert(name);
     /* Allow internal classes to break some rules */
     /* (This allows the root of the tree to be created with this routine -QAK) */
-    if(!internal)
+    if(type == H5P_TYPE_USER)
         HDassert(par_class);
 
     /* Allocate room for the class */
@@ -1500,11 +1504,11 @@ H5P_create_class(H5P_genclass_t *par_class, const char *name, hbool_t internal,
     pclass->parent = par_class;
     if(NULL == (pclass->name = H5MM_xstrdup(name)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, NULL, "propery list class name allocation failed")
+    pclass->type = type;
     pclass->nprops = 0;     /* Classes are created without properties initially */
     pclass->plists = 0;     /* No properties lists of this class yet */
     pclass->classes = 0;    /* No classes derived from this class yet */
     pclass->ref_count = 1;  /* This is the first reference to the new class */
-    pclass->internal = internal;
     pclass->deleted = FALSE;    /* Not deleted yet... :-) */
     pclass->revision = H5P_GET_NEXT_REV;        /* Get a revision number for the class */
 
@@ -2141,7 +2145,7 @@ H5P_register(H5P_genclass_t **ppclass, const char *name, size_t size,
      */
     if(pclass->plists > 0 || pclass->classes > 0) {
         if(NULL == (new_class = H5P_create_class(pclass->parent, pclass->name,
-                pclass->internal, pclass->create_func, pclass->create_data,
+                pclass->type, pclass->create_func, pclass->create_data,
                 pclass->copy_func, pclass->copy_data,
                 pclass->close_func, pclass->close_data)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy class")
@@ -2711,11 +2715,11 @@ H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
     HDassert(size);
 
     /* Find property */
-    if((prop=H5P_find_prop_plist(plist,name)) == NULL)
+    if(NULL == (prop = H5P__find_prop_plist(plist, name)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist")
 
     /* Get property size */
-    *size=prop->size;
+    *size = prop->size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3032,9 +3036,9 @@ H5P_cmp_class(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
     if(pclass1->ref_count < pclass2->ref_count) HGOTO_DONE(-1);
     if(pclass1->ref_count > pclass2->ref_count) HGOTO_DONE(1);
 
-    /* Check whether they are internal or not */
-    if(pclass1->internal < pclass2->internal) HGOTO_DONE(-1);
-    if(pclass1->internal > pclass2->internal) HGOTO_DONE(1);
+    /* Check the property list types */
+    if(pclass1->type < pclass2->type) HGOTO_DONE(-1);
+    if(pclass1->type > pclass2->type) HGOTO_DONE(1);
 
     /* Check whether they are deleted or not */
     if(pclass1->deleted < pclass2->deleted) HGOTO_DONE(-1);
@@ -3438,8 +3442,11 @@ H5P__iterate_plist_pclass_cb(void *_item, void *_key, void *_udata)
  PURPOSE
     Internal routine to iterate over the properties in a property list
  USAGE
-    int H5P_iterate_plist(plist_id, idx, cb_func, iter_data)
-        hid_t plist_id;             IN: ID of property list to iterate over
+    int H5P_iterate_plist(plist, iter_all_prop, idx, cb_func, iter_data)
+        const H5P_genplist_t *plist; IN: Property list to iterate over
+        hbool_t iter_all_prop;      IN: Whether to iterate over all properties
+                                        (TRUE), or just non-default (i.e. changed)
+                                        properties (FALSE).
         int *idx;                   IN/OUT: Index of the property to begin with
         H5P_iterate_t cb_func;    IN: Function pointer to function to be
                                         called with each property iterated over.
@@ -3484,10 +3491,10 @@ iteration, the function's behavior is undefined.
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_int_t cb_func, void *udata)
+H5P_iterate_plist(const H5P_genplist_t *plist, hbool_t iter_all_prop, int *idx,
+    H5P_iterate_int_t cb_func, void *udata)
 {
     H5P_genclass_t *tclass;     /* Temporary class pointer */
-    H5P_genplist_t *plist;      /* Property list pointer */
     H5P_iter_plist_ud_t udata_int;        /* User data for skip list iterator */
     H5SL_t *seen = NULL;        /* Skip list to hold names of properties already seen */
     int curr_idx = 0;           /* Current iteration index */
@@ -3495,12 +3502,10 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_int_t cb_func, void *uda
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
+    HDassert(plist);
     HDassert(idx);
     HDassert(cb_func);
-
-    /* Get the property list object */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Create the skip list to hold names of properties already seen */
     if(NULL == (seen = H5SL_create(H5SL_TYPE_STR, NULL)))
@@ -3520,17 +3525,20 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_int_t cb_func, void *uda
     if(ret_value != 0)
         HGOTO_DONE(ret_value);
 
-    /* Walk up the class hiearchy */
-    tclass = plist->pclass;
-    while(tclass != NULL) {
-        /* Iterate over properties in property list class */
-        ret_value = H5SL_iterate(tclass->props, H5P__iterate_plist_pclass_cb, &udata_int);
-        if(ret_value != 0)
-            HGOTO_DONE(ret_value);
+    /* Check for iterating over all properties, or just non-default ones */
+    if(iter_all_prop) {
+        /* Walk up the class hiearchy */
+        tclass = plist->pclass;
+        while(tclass != NULL) {
+            /* Iterate over properties in property list class */
+            ret_value = H5SL_iterate(tclass->props, H5P__iterate_plist_pclass_cb, &udata_int);
+            if(ret_value != 0)
+                HGOTO_DONE(ret_value);
 
-        /* Go up to parent class */
-        tclass = tclass->parent;
-    } /* end while */
+            /* Go up to parent class */
+            tclass = tclass->parent;
+        } /* end while */
+    } /* end if */
 
 done:
     /* Set the index we stopped at */
@@ -3601,8 +3609,8 @@ done:
  PURPOSE
     Internal routine to iterate over the properties in a property class
  USAGE
-    herr_t H5P_iterate_pclass(pclass_id, idx, cb_func, iter_data)
-        hid_t pclass_id;            IN: ID of property class to iterate over
+    herr_t H5P_iterate_pclass(pclass, idx, cb_func, iter_data)
+        const H5P_genpclass_t *pclass; IN: Property list class to iterate over
         int *idx;                   IN/OUT: Index of the property to begin with
         H5P_iterate_t cb_func;    IN: Function pointer to function to be
                                         called with each property iterated over.
@@ -3647,21 +3655,19 @@ iteration, the function's behavior is undefined.
  REVISION LOG
 --------------------------------------------------------------------------*/
 int
-H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_int_t cb_func, void *udata)
+H5P_iterate_pclass(const H5P_genclass_t *pclass, int *idx,
+    H5P_iterate_int_t cb_func, void *udata)
 {
-    H5P_genclass_t *pclass;     /* Property list pointer */
     H5P_iter_pclass_ud_t udata_int; /* User data for skip list iterator */
     int curr_idx = 0;           /* Current iteration index */
     int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
+    HDassert(pclass);
     HDassert(idx);
     HDassert(cb_func);
-
-    /* Get the property list object */
-    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class")
 
     /* Set up iterator callback info */
     udata_int.cb_func = cb_func;
@@ -4190,13 +4196,13 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist")
 
     /* If the property exists in the destination alread */
-    if(H5P_find_prop_plist(dst_plist,name)!=NULL) {
+    if(NULL != H5P__find_prop_plist(dst_plist, name)) {
         /* Delete the property from the destination list, calling the 'close' callback if necessary */
         if(H5P_remove(dst_id,dst_plist,name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property")
 
         /* Get the pointer to the source property */
-        prop=H5P_find_prop_plist(src_plist,name);
+        prop = H5P__find_prop_plist(src_plist, name);
 
         /* Make a copy of the source property */
         if((new_prop=H5P_dup_prop(prop,H5P_PROP_WITHIN_LIST)) == NULL)
@@ -4218,7 +4224,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     /* If not, get the information required to do an H5Pinsert2 with the property into the destination list */
     else {
         /* Get the pointer to the source property */
-        prop = H5P_find_prop_plist(src_plist, name);
+        prop = H5P__find_prop_plist(src_plist, name);
 
         /* Create property object from parameters */
         if(NULL == (new_prop = H5P_create_prop(prop->name, prop->size, H5P_PROP_WITHIN_LIST, prop->value,

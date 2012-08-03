@@ -106,6 +106,7 @@ static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
 /* File creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_FCRT[1] = {{
     "file create",		/* Class name for debugging     */
+    H5P_TYPE_FILE_CREATE,       /* Class type                   */
     &H5P_CLS_GROUP_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_FILE_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_FILE_CREATE_g,	/* Pointer to default property list ID */
