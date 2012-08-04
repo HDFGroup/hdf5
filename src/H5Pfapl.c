@@ -168,6 +168,7 @@ static herr_t H5P_file_image_info_close(const char *name, size_t size, void *val
 /* File access property list class library initialization object */
 const H5P_libclass_t H5P_CLS_FACC[1] = {{
     "file access",		/* Class name for debugging     */
+    H5P_TYPE_FILE_ACCESS,       /* Class type                   */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_FILE_ACCESS_g,	/* Pointer to class ID          */
     &H5P_LST_FILE_ACCESS_g,	/* Pointer to default property list ID */
