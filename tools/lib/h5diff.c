@@ -1567,11 +1567,11 @@ hsize_t diff(hid_t file1_id,
     hsize_t nfound = 0;
     h5trav_type_t object_type;
 
-    h5difftrace("diff start\n");
-
     /* to get link info */
     h5tool_link_info_t linkinfo1;
     h5tool_link_info_t linkinfo2;
+
+    h5difftrace("diff start\n");
 
     /*init link info struct */
     HDmemset(&linkinfo1,0,sizeof(h5tool_link_info_t));
