@@ -297,10 +297,20 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "        number of dimensions in the dataspace being queried\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values\n");
-    HDfprintf(rawoutstream, "        are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
-    HDfprintf(rawoutstream, "        the file driver flag, the file will be opened with each driver in\n");
-    HDfprintf(rawoutstream, "        turn and in the order specified above until one driver succeeds\n");
-    HDfprintf(rawoutstream, "        in opening the file.\n");
+    HDfprintf(rawoutstream, "      are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
+    HDfprintf(rawoutstream, "      the file driver flag, the file will be opened with each driver in\n");
+    HDfprintf(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
+    HDfprintf(rawoutstream, "      in opening the file.\n");
+    HDfprintf(rawoutstream, "      These are the letters that are appended to the file name(without .h5) when opening\n");
+    HDfprintf(rawoutstream, "      names for the split(m,r) and multi(s,b,r,g,l,o) drivers. They are:\n");
+    HDfprintf(rawoutstream, "         m: All meta data when using the split driver.\n");
+    HDfprintf(rawoutstream, "         s: The userblock, superblock, and driver info block\n");
+    HDfprintf(rawoutstream, "         b: B-tree nodes\n");
+    HDfprintf(rawoutstream, "         r: Dataset raw data\n");
+    HDfprintf(rawoutstream, "         g: Global heap\n");
+    HDfprintf(rawoutstream, "         l: local heap (object names)\n");
+    HDfprintf(rawoutstream, "         o: object headers\n");
+    HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "  F - is a filename.\n");
     HDfprintf(rawoutstream, "  P - is the full path from the root group to the object.\n");
     HDfprintf(rawoutstream, "  N - is an integer greater than 1.\n");
@@ -337,9 +347,13 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "      h5dump -d /dset -M 0,1,4,3 quux.h5\n");
     HDfprintf(rawoutstream, "\n");
-    HDfprintf(rawoutstream, "  5) Dataset foo in files multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "  5) Dataset foo in files file1.h5 file2.h5 file3.h5\n");
     HDfprintf(rawoutstream, "\n");
-    HDfprintf(rawoutstream, "      h5dump -d /foo multi1.h5 multi2.h5 multi3.h5\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo file1.h5 file2.h5 file3.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "  6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5\n");
+    HDfprintf(rawoutstream, "\n");
+    HDfprintf(rawoutstream, "      h5dump -d /foo -f split splitfile\n");
     HDfprintf(rawoutstream, "\n");
 }
 
