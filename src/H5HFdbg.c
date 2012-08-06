@@ -80,7 +80,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream,
+static herr_t H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream,
     int indent, int fwidth);
 
 
@@ -113,7 +113,7 @@ static herr_t H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_dtable_debug(H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
+H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

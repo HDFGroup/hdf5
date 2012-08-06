@@ -279,7 +279,7 @@ H5T__get_array_ndims(const H5T_t *dt)
     HDassert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the number of dimensions */
-    FUNC_LEAVE_NOAPI(dt->shared->u.array.ndims)
+    FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
 }   /* end H5T__get_array_ndims */
 
 
@@ -337,9 +337,8 @@ int
 H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
 {
     unsigned u;         /* Local index variable */
-    int	ret_value;	/* return value			*/
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(dt);
     HDassert(dt->shared->type == H5T_ARRAY);
@@ -350,10 +349,7 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
             dims[u] = dt->shared->u.array.dim[u];
 
     /* Pass along the array rank as the return value */
-    ret_value = dt->shared->u.array.ndims;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
 }   /* end H5T__get_array_dims */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS

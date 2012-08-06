@@ -47,8 +47,8 @@
 
 /* ======== Data transfer properties ======== */
 /* Definitions for maximum temp buffer size property */
-#define H5D_XFER_MAX_TEMP_BUF_SIZE       sizeof(size_t)
-#define H5D_XFER_MAX_TEMP_BUF_DEF  H5D_TEMP_BUF_SIZE
+#define H5D_XFER_MAX_TEMP_BUF_SIZE      sizeof(size_t)
+#define H5D_XFER_MAX_TEMP_BUF_DEF       H5D_TEMP_BUF_SIZE
 /* Definitions for type conversion buffer property */
 #define H5D_XFER_TCONV_BUF_SIZE       sizeof(void *)
 #define H5D_XFER_TCONV_BUF_DEF      NULL
@@ -88,6 +88,8 @@
  */
 #define H5D_XFER_HYPER_VECTOR_SIZE_SIZE       sizeof(size_t)
 #define H5D_XFER_HYPER_VECTOR_SIZE_DEF        H5D_IO_VECTOR_SIZE
+
+#ifdef H5_HAVE_PARALLEL
 /* Definitions for I/O transfer mode property */
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
@@ -106,6 +108,14 @@
 /* Definitions for chunk io mode property. */
 #define H5D_MPIO_ACTUAL_IO_MODE_SIZE    sizeof(H5D_mpio_actual_io_mode_t)
 #define H5D_MPIO_ACTUAL_IO_MODE_DEF     H5D_MPIO_NO_COLLECTIVE
+/* Definitions for memory MPI type property */
+#define H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
+#define H5FD_MPI_XFER_MEM_MPI_TYPE_DEF         MPI_DATATYPE_NULL
+/* Definitions for file MPI type property */
+#define H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
+#define H5FD_MPI_XFER_FILE_MPI_TYPE_DEF        MPI_DATATYPE_NULL
+#endif /* H5_HAVE_PARALLEL */
+
 /* Definitions for EDC property */
 #define H5D_XFER_EDC_SIZE           sizeof(H5Z_EDC_t)
 #define H5D_XFER_EDC_DEF            H5Z_ENABLE_EDC
@@ -121,12 +131,6 @@
 #define H5D_XFER_XFORM_DEL          H5P_dxfr_xform_del
 #define H5D_XFER_XFORM_COPY         H5P_dxfr_xform_copy
 #define H5D_XFER_XFORM_CLOSE        H5P_dxfr_xform_close
-/* Definitions for memory MPI type property */
-#define H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
-#define H5FD_MPI_XFER_MEM_MPI_TYPE_DEF         MPI_DATATYPE_NULL
-/* Definitions for file MPI type property */
-#define H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE       sizeof(MPI_Datatype)
-#define H5FD_MPI_XFER_FILE_MPI_TYPE_DEF        MPI_DATATYPE_NULL
 
 /******************/
 /* Local Typedefs */
@@ -161,6 +165,7 @@ static herr_t H5P_dxfr_xform_close(const char* name, size_t size, void* value);
 /* Data transfer property list class library initialization object */
 const H5P_libclass_t H5P_CLS_DXFR[1] = {{
     "data transfer",		/* Class name for debugging     */
+    H5P_TYPE_DATASET_XFER,      /* Class type                   */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_DATASET_XFER_g,	/* Pointer to class ID          */
     &H5P_LST_DATASET_XFER_g,	/* Pointer to default property list ID */
@@ -722,8 +727,6 @@ done:
  * Programmer:	Robb Matzke
  *              Monday, March 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -736,7 +739,7 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
     H5TRACE4("e", "iz*x*x", plist_id, size, tconv, bkg);
 
     /* Check arguments */
-    if (size<=0)
+    if(size == 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buffer size must not be zero")
 
     /* Get the plist structure */
@@ -744,16 +747,16 @@ H5Pset_buffer(hid_t plist_id, size_t size, void *tconv, void *bkg)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Update property list */
-    if(H5P_set(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size)<0)
+    if(H5P_set(plist, H5D_XFER_MAX_TEMP_BUF_NAME, &size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer buffer size")
-    if(H5P_set(plist, H5D_XFER_TCONV_BUF_NAME, &tconv)<0)
+    if(H5P_set(plist, H5D_XFER_TCONV_BUF_NAME, &tconv) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set transfer type conversion buffer")
-    if(H5P_set(plist, H5D_XFER_BKGR_BUF_NAME, &bkg)<0)
+    if(H5P_set(plist, H5D_XFER_BKGR_BUF_NAME, &bkg) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Can't set background type conversion buffer")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_buffer() */
 
 
 /*-------------------------------------------------------------------------
@@ -767,8 +770,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Monday, March 16, 1998
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

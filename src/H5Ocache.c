@@ -658,7 +658,7 @@ H5O_size(const H5F_t UNUSED *f, const H5O_t *oh, size_t *size_ptr)
 
     /* Report the object header's prefix+first chunk length */
     if(oh->chunk0_size)
-       *size_ptr = H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
+       *size_ptr = (size_t)H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
     else
        *size_ptr = oh->chunk[0].size;
 
@@ -983,7 +983,7 @@ H5O_cache_chk_size(const H5F_t UNUSED *f, const H5O_chunk_proxy_t *chk_proxy, si
 static herr_t
 H5O_add_cont_msg(H5O_cont_msgs_t *cont_msg_info, const H5O_cont_t *cont)
 {
-    unsigned contno;            /* Continuation message index */
+    size_t contno;              /* Continuation message index */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1034,7 +1034,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
 {
     const uint8_t *p;           /* Pointer into buffer to decode */
     uint8_t *eom_ptr;           /* Pointer to end of messages for a chunk */
-    unsigned curmesg;           /* Current message being decoded in object header */
+    size_t curmesg;             /* Current message being decoded in object header */
     unsigned merged_null_msgs = 0;  /* Number of null messages merged together */
     unsigned chunkno;           /* Current chunk's index */
 #ifndef NDEBUG
@@ -1104,7 +1104,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
     nullcnt = 0;
 #endif /* NDEBUG */
     while(p < eom_ptr) {
-        unsigned mesgno;        /* Current message to operate on */
+        size_t mesgno;          /* Current message to operate on */
         size_t mesg_size;       /* Size of message read in */
         unsigned id;            /* ID (type) of current message */
         uint8_t	flags;          /* Flags for current message */
@@ -1166,7 +1166,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
 
             /* Combine adjacent null messages */
             mesgno = oh->nmesgs - 1;
-            oh->mesg[mesgno].raw_size += H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
+            oh->mesg[mesgno].raw_size += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
             oh->mesg[mesgno].dirty = TRUE;
             merged_null_msgs++;
             udata->merged_null_msgs++;

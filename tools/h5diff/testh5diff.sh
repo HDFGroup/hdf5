@@ -41,6 +41,9 @@ H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 nerrors=0
 verbose=yes
@@ -320,12 +323,20 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-	    $CP -f $tstfile $TESTDIR
-            if [ $? -ne 0 ]; then
-                echo "Error: FAILED to copy $tstfile ."
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
                 
-                # Comment out this to CREATE expected file
-                exit $EXIT_FAILURE
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
@@ -827,14 +838,7 @@ TOOLTEST h5diff_221.txt -c non_comparables1.h5 non_comparables2.h5 /g2
 
 # entire file
 # All the comparables should display differences.
-if test -n "$pmode"; then
-    # parallel mode: 
-    # skip due to ph5diff hangs on koala (linux64-LE) and ember intermittently.
-    # (HDFFV-8003 - TBD)
-    SKIP -c non_comparables1.h5 non_comparables2.h5
-else
-    TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
-fi    
+TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
 
 # non-comparable test for common objects (same name) with different object types
 # (HDFFV-7644)

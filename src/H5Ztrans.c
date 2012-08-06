@@ -537,7 +537,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 H5Z_xform_destroy_parse_tree(H5Z_node *tree)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -567,7 +567,7 @@ H5Z_xform_destroy_parse_tree(H5Z_node *tree)
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5Z_xform_parse(const char *expression, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_token tok;
@@ -1251,7 +1251,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5Z_xform_copy_tree(H5Z_node* tree, H5Z_datval_ptrs* dat_val_pointers, H5Z_datval_ptrs* new_dat_val_pointers)
 {
     H5Z_node* ret_value=NULL;
@@ -1386,7 +1386,7 @@ H5Z_op_is_numbs2(H5Z_node* _tree)
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 H5Z_xform_reduce_tree(H5Z_node* tree)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1516,7 +1516,7 @@ H5Z_xform_create(const char *expr)
      * we don't need to allocate any space since no array will have to be
      * stored */
     if(count > 0)
-	if(NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val = (void *)H5MM_calloc(count * sizeof(void *))))
+	if(NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val = (void **)H5MM_calloc(count * sizeof(void *))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for pointers in transform array")
 
     /* Initialize the num_ptrs field, which will be used to keep track of the number of copies
@@ -1651,7 +1651,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 		count++;
 
 	if(count > 0)
-	    if(NULL == (new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void *)H5MM_calloc(count * sizeof(void *))))
+	    if(NULL == (new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void **)H5MM_calloc(count * sizeof(void *))))
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for pointers in transform array")
 
 	/* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right amount */

@@ -734,7 +734,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t
 H5T_init_interface(void)
 {
     H5T_t       *native_schar=NULL;     /* Datatype structure for native signed char */
@@ -3155,7 +3155,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
+H5T_copy(H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t	*new_dt = NULL, *tmp = NULL;
     H5T_shared_t    *reopened_fo = NULL;
@@ -3840,8 +3840,10 @@ H5T_set_size(H5T_t *dt, size_t size)
             case H5T_ENUM:
             case H5T_VLEN:
             case H5T_ARRAY:
-                assert("can't happen" && 0);
             case H5T_REFERENCE:
+                assert("can't happen" && 0);
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
                 assert("invalid type" && 0);
             default:
                 assert("not implemented yet" && 0);
@@ -4296,6 +4298,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                             /*void */
                             break;
 
+                        case H5R_BADTYPE:
+                        case H5R_MAXTYPE:
+                            assert("invalid type" && 0);
                         default:
                             assert("not implemented yet" && 0);
                     }
@@ -5147,7 +5152,7 @@ H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 } /* end for */
 
                 /* Apply the accumulated size change to the datatype */
-                dt->shared->size += accum_change;
+                dt->shared->size = (size_t)(dt->shared->size + accum_change);
                 break;
 
             case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL sequence */

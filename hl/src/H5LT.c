@@ -3024,8 +3024,11 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
         return -1;
 
     /* Get the attribute */
-    if ( H5LT_get_attribute_disk( obj_id, attr_name, data ) < 0 )
-        return -1;
+    if ( H5LT_get_attribute_disk( obj_id, attr_name, data ) < 0 ) 
+    {
+      H5Oclose(obj_id); 
+      return -1;
+    }
 
     /* Close the object */
     if(H5Oclose(obj_id) < 0)
@@ -3458,6 +3461,8 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id,
     return 0;
 
 out:
+    if(obj_id > 0)
+        H5Oclose(obj_id);
     if(attr_id > 0)
         H5Aclose(attr_id);
     return -1;

@@ -16,11 +16,17 @@
 # HDF Utilities Test script
 # Usage: h5importtestutil.sh [machine-type]
 
+# Determine which filters are available
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
 TESTNAME=h5import
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 # initialize errors variable
 nerrors=0
@@ -125,12 +131,20 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-            if [ -a $tstfile ]; then
-                $CP -f $tstfile $TESTDIR
-            else
-                echo "Error: FAILED to copy $tstfile"
-                echo "       $tstfile doesn't exist!"
-                exit $EXIT_FAILURE
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
@@ -139,6 +153,12 @@ COPY_TESTFILES_TO_TESTDIR()
 TESTING() {
    SPACES="                                                               "
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a "SKIP" message
+SKIP() {
+   TESTING $TESTNAME $@
+    echo  " -SKIP-"
 }
 
 TOOLTEST()
@@ -273,13 +293,21 @@ TOOLTEST $TESTDIR/txtfp64.txt -c $TESTDIR/txtfp64.conf -o txtfp64.h5
 TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
 TOOLTEST binfp64.bin -c $TESTDIR/binfp64.conf -o binfp64.h5
 TESTING "H5DUMP-BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
-TOOLTEST2 "/fp/bin/64-bit" binfp64.h5
+if test $USE_FILTER_DEFLATE != "yes"; then
+ SKIP "/fp/bin/64-bit" binfp64.h5
+else
+ TOOLTEST2 "/fp/bin/64-bit" binfp64.h5
+fi
 
 
 TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
 TOOLTEST binin8.bin -c $TESTDIR/binin8.conf -o binin8.h5
 TESTING "H5DUMP-BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
-TOOLTEST2 "/int/bin/8-bit" binin8.h5
+if test $USE_FILTER_DEFLATE != "yes"; then
+ SKIP "/int/bin/8-bit" binin8.h5
+else
+ TOOLTEST2 "/int/bin/8-bit" binin8.h5
+fi
 
 TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
 TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5

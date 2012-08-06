@@ -196,7 +196,7 @@ H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
 
     /* The flags for the attribute indices */
     flags = ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
-    flags |= ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0;
+    flags = (unsigned char)(flags | (ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0));
     *p++ = flags;
 
     /* Max. creation order value for the object */
@@ -284,12 +284,12 @@ H5O_ainfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value = 1                       /* Version */
+    ret_value = (size_t)(1                       /* Version */
                 + 1                     /* Index flags */
                 + (ainfo->track_corder ? 2 : 0) /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" attributes */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of attributes */
-                + (ainfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of attributes */
+                + (ainfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0));   /* Address of v2 B-tree for indexing creation order values of attributes */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_size() */
@@ -436,7 +436,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         /*!FIXME Must pass something for the parent, once we have a way to
          * depend on an object being copied (ohdr proxy?) -NAF */
         if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst, NULL) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
+            HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
 
         /* Reset metadata tag */
         H5_END_TAG(NULL);

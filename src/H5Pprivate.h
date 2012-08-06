@@ -42,6 +42,27 @@
 typedef struct H5P_genplist_t H5P_genplist_t;
 typedef struct H5P_genclass_t H5P_genclass_t;
 
+typedef enum H5P_plist_type_t {
+    H5P_TYPE_USER              = 0,
+    H5P_TYPE_ROOT              = 1,
+    H5P_TYPE_OBJECT_CREATE     = 2,
+    H5P_TYPE_FILE_CREATE       = 3,
+    H5P_TYPE_FILE_ACCESS       = 4,
+    H5P_TYPE_DATASET_CREATE    = 5,
+    H5P_TYPE_DATASET_ACCESS    = 6,
+    H5P_TYPE_DATASET_XFER      = 7,
+    H5P_TYPE_FILE_MOUNT        = 8,
+    H5P_TYPE_GROUP_CREATE      = 9,
+    H5P_TYPE_GROUP_ACCESS      = 10,
+    H5P_TYPE_DATATYPE_CREATE   = 11,
+    H5P_TYPE_DATATYPE_ACCESS   = 12,
+    H5P_TYPE_STRING_CREATE     = 13,
+    H5P_TYPE_ATTRIBUTE_CREATE  = 14,
+    H5P_TYPE_OBJECT_COPY       = 15,
+    H5P_TYPE_LINK_CREATE       = 16,
+    H5P_TYPE_LINK_ACCESS       = 17,
+    H5P_TYPE_MAX_TYPE
+} H5P_plist_type_t;
 
 /*****************************/
 /* Library Private Variables */

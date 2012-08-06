@@ -53,6 +53,7 @@
 #define H5L_ACS_ELINK_PREFIX_DEF         NULL /*default is no prefix */
 #define H5L_ACS_ELINK_PREFIX_DEL         H5P_lacc_elink_pref_del
 #define H5L_ACS_ELINK_PREFIX_COPY        H5P_lacc_elink_pref_copy
+#define H5L_ACS_ELINK_PREFIX_CMP         H5P_lacc_elink_pref_cmp
 #define H5L_ACS_ELINK_PREFIX_CLOSE       H5P_lacc_elink_pref_close
 
 /* Definitions for setting fapl of external link access */
@@ -69,6 +70,7 @@
 /* Definitions for callback function for external link traversal */
 #define H5L_ACS_ELINK_CB_SIZE           sizeof(H5L_elink_cb_t)
 #define H5L_ACS_ELINK_CB_DEF            {NULL,NULL}
+
 
 /******************/
 /* Local Typedefs */
@@ -90,8 +92,8 @@ static herr_t H5P_lacc_reg_prop(H5P_genclass_t *pclass);
 /* Property list callbacks */
 static herr_t H5P_lacc_elink_pref_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_pref_copy(const char* name, size_t size, void* value);
+static int H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P_lacc_elink_pref_close(const char* name, size_t size, void* value);
-
 static herr_t H5P_lacc_elink_fapl_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_fapl_copy(const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_fapl_close(const char* name, size_t size, void* value);
@@ -104,6 +106,7 @@ static herr_t H5P_lacc_elink_fapl_close(const char* name, size_t size, void* val
 /* Dataset creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_LACC[1] = {{
     "link access",		/* Class name for debugging     */
+    H5P_TYPE_LINK_ACCESS,       /* Class type                   */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_LINK_ACCESS_g,	/* Pointer to class ID          */
     &H5P_LST_LINK_ACCESS_g,	/* Pointer to default property list ID */
@@ -162,7 +165,7 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for external link prefix */
-    if(H5P_register_real(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE, &elink_prefix, NULL, NULL, NULL, H5L_ACS_ELINK_PREFIX_DEL, H5L_ACS_ELINK_PREFIX_COPY, NULL, H5L_ACS_ELINK_PREFIX_CLOSE) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_ELINK_PREFIX_NAME, H5L_ACS_ELINK_PREFIX_SIZE, &elink_prefix, NULL, NULL, NULL, H5L_ACS_ELINK_PREFIX_DEL, H5L_ACS_ELINK_PREFIX_COPY, H5L_ACS_ELINK_PREFIX_CMP, H5L_ACS_ELINK_PREFIX_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register fapl for link access */
@@ -340,6 +343,41 @@ H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *valu
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_lacc_elink_pref_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_lacc_elink_pref_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the elink prefix
+ *                 property in the dataset creation property list is
+ *                 compared.
+ *
+ * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 Thursday, November 3, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_t UNUSED size)
+{
+    const char *pref1 = *(const char **)value1;
+    const char *pref2 = *(const char **)value2;
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(NULL == pref1 && NULL != pref2)
+        HGOTO_DONE(1);
+    if(NULL != pref1 && NULL == pref2)
+        HGOTO_DONE(-1);
+    if(NULL != pref1 && NULL != pref2)
+        ret_value = HDstrcmp(pref1, pref2);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_lacc_elink_pref_cmp() */
 
 
 /*-------------------------------------------------------------------------
@@ -815,3 +853,4 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_elink_cb() */
 
+
