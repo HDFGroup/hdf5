@@ -427,8 +427,9 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow")
     HDassert(H5P_DEFAULT != fapl_id);
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist);
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    if(NULL == (fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -443,6 +444,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     /* If the file image exists and this is an open, make sure the file doesn't exist */
     HDassert(((file_image_info.buffer != NULL) && (file_image_info.size > 0)) ||
              ((file_image_info.buffer == NULL) && (file_image_info.size == 0)));
+    HDmemset(&sb, 0, sizeof(sb));
     if((file_image_info.buffer != NULL) && !(H5F_ACC_CREAT & flags)) {
         if(HDopen(name, o_flags, 0666) >= 0)
             HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file already exists")
@@ -462,7 +464,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
      * store is off is when  the backing_store flag is off and H5F_ACC_CREAT is
      * on. */
     else if(fa->backing_store || !(H5F_ACC_CREAT & flags)) {
-        if(fa && (fd = HDopen(name, o_flags, 0666)) < 0)
+        if((fd = HDopen(name, o_flags, 0666)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
         if(HDfstat(fd, &sb) < 0)
             HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
@@ -479,7 +481,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
      * default value. But if the file access property list was zero then use
      * the default value instead.
      */
-    file->increment = (fa && fa->increment>0) ?  fa->increment : H5FD_CORE_INCREMENT;
+    file->increment = (fa->increment>0) ?  fa->increment : H5FD_CORE_INCREMENT;
 
     /* If save data in backing store. */
     file->backing_store = fa->backing_store;

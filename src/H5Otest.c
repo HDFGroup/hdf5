@@ -516,7 +516,7 @@ H5O_expunge_chunks_test(const H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Safety check */
     nchunks = oh->nchunks;
-    HDassert(nchunks < NELMTS(chk_addr));
+    HDassert(0 < nchunks && nchunks < NELMTS(chk_addr));
 
     /* Iterate over all the chunks, saving the chunk addresses */
     for(u = 0; u < oh->nchunks; u++)

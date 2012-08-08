@@ -2784,7 +2784,7 @@ H5S_hyper_offset(const H5S_t *space, hsize_t *offset)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(space);
+    HDassert(space && space->extent.rank>0);
     HDassert(offset);
 
     /* Start at linear offset 0 */

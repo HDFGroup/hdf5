@@ -245,6 +245,7 @@ H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
      */
     HDassert(f);
     HDassert(f->shared);
+    HDassert(type != H5FD_MEM_NOLIST);
     HDassert(H5F_addr_defined(f->shared->fs_addr[type]));
     HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
@@ -292,6 +293,7 @@ H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
      */
     HDassert(f);
     HDassert(f->shared);
+    HDassert(type != H5FD_MEM_NOLIST);
     HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
     HDassert(f->shared->fs_state[type] == H5F_FS_STATE_CLOSED);
 
@@ -342,6 +344,7 @@ H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
      */
     HDassert(f);
     HDassert(f->shared);
+    HDassert(type != H5FD_MEM_NOLIST);
 
     /* Check if the free space manager exists already */
     if(H5F_addr_defined(f->shared->fs_addr[type])) {
@@ -384,6 +387,7 @@ H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
      */
     HDassert(f);
     HDassert(f->shared);
+    HDassert(type != H5FD_MEM_NOLIST);
     HDassert(f->shared->fs_man[type]);
     HDassert(f->shared->fs_state[type] != H5F_FS_STATE_CLOSED);
 

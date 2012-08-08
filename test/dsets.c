@@ -999,8 +999,8 @@ test_conv_buffer(hid_t fid)
     herr_t       status = -1;
     int          j, k, l;
 
-    CmpField     *cf;
-    CmpFieldR    *cfrR;
+    CmpField     *cf = NULL;
+    CmpFieldR    *cfrR = NULL;
 
     hid_t       dataset = -1; /* dataset ID             */
     hid_t       space   = -1; /* data space ID          */
@@ -1014,7 +1014,7 @@ test_conv_buffer(hid_t fid)
 
     TESTING("data type conversion buffer size");
 
-    cf = (CmpField *)HDcalloc((size_t)1, sizeof(CmpField));
+    if ((cf = (CmpField *)HDcalloc((size_t)1, sizeof(CmpField))) == 0) goto error;
 
     /* Populate the data members */
     for(j = 0; j < DIM1; j++)
@@ -1063,7 +1063,7 @@ test_conv_buffer(hid_t fid)
   if(H5Tinsert(ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5) < 0) goto error;
 
   /* Read should succeed since library will set conversion buffer big enough */
-  cfrR = (CmpFieldR *)HDcalloc((size_t)1, sizeof(CmpFieldR));
+  if ((cfrR = (CmpFieldR *)HDcalloc((size_t)1, sizeof(CmpFieldR))) == 0) goto error;
   if(H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfrR) < 0) goto error;
 
   /* Read should fail since conversion buffer isn't big enough */
@@ -1100,10 +1100,8 @@ test_conv_buffer(hid_t fid)
   if(H5Tclose(arr_type5) < 0) goto error;
   if(H5Dclose(dataset) < 0) goto error;
 
-  if(cf)
-    HDfree(cf);
-  if(cfrR)
-    HDfree(cfrR);
+  HDfree(cf);
+  HDfree(cfrR);
   puts(" PASSED");
   return(0);
 
