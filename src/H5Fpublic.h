@@ -48,6 +48,7 @@
 #define H5F_ACC_EXCL	(H5CHECK 0x0004u)	/*fail if file already exists*/
 #define H5F_ACC_DEBUG	(H5CHECK 0x0008u)	/*print debug info	     */
 #define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files  */
+#define H5F_ACC_SYNC	(H5CHECK 0x0020u)	/*no filesystem caching      */
 
 /* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
  * parent file. */

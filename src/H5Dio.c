@@ -28,6 +28,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Sprivate.h"		/* Dataspace			  	*/
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -284,10 +285,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, size_t *offset, size_t buf_size,
-	 const void *buf)
+H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offset, 
+         size_t data_size, const void *buf)
 {
     H5D_t		   *dset = NULL;
+    int                     ndims;
+    hsize_t                *dims;
+    int                     i;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -297,6 +301,9 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, size_t *offset, size_t buf_size,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(NULL == dset->oloc.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if(H5D_CHUNKED != dset->shared->layout.type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -308,8 +315,26 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, size_t *offset, size_t buf_size,
     if(!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
+    ndims = (int)H5S_GET_EXTENT_NDIMS(dset->shared->space);
+    dims = (hsize_t *)HDmalloc(ndims*sizeof(hsize_t));
+
+    if(H5S_get_simple_extent_dims(dset->shared->space, dims, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
+
+    /* Make sure the offset doesn't exceed the dataset's dimensions */
+    for(i=0; i<ndims; i++)
+        if(offset[i] > dims[i])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
+
+    /* Make sure the offset fall right on a chunk's boundary */
+    for(i=0; i<ndims; i++)
+        if(offset[i] % dset->shared->layout.u.chunk.dim[i])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
+   
+    HDfree(dims);
+
     /* write raw data */
-    if(H5D__direct_write(dset, dxpl_id, offset, buf_size, buf) < 0)
+    if(H5D__chunk_direct_write(dset, dxpl_id, filters, offset, data_size, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:

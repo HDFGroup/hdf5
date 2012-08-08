@@ -55,6 +55,7 @@ main (void)
     int         check[NX][NY];
     int         i, j, n;
 
+    unsigned    filter_mask = 0;
     int         direct_buf[CHUNK_NX][CHUNK_NY];
     int         check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t     offset[3] = {0, 0, 0};
@@ -159,12 +160,14 @@ main (void)
      * dataset, using the direct writing function.     */ 
     for(i=0; i<NX/CHUNK_NX; i++) {
         for(j=0; j<NY/CHUNK_NY; j++) {
-            status = H5PSIdirect_write(dataset, dxpl, offset, z_dst_nbytes, outbuf);
+            status = H5PSIdirect_write(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
             offset[1] += CHUNK_NY;
         }
         offset[0] += CHUNK_NX;
         offset[1] = 0;
     }
+
+    free(outbuf);
 
     if(H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -197,12 +200,82 @@ main (void)
     for(i = 0; i < CHUNK_NX; i++) {
         for(j = 0; j < CHUNK_NY; j++) {
             if(direct_buf[i][j] != check_chunk[i][j]) {
-                printf("    Read different values than written.");
+                printf("    1. Read different values than written.");
                 printf("    At index %d,%d\n", i, j);
                 printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                goto error;
             }
         }
     }
+
+    /* Reinitialize different data for one chunk */
+    for(i = 0; i < CHUNK_NX; i++)
+        for(j = 0; j < CHUNK_NY; j++)
+	    direct_buf[i][j] = i + j;
+
+    /* Allocate output (compressed) buffer */
+    outbuf = malloc(z_dst_nbytes);
+    z_dst = (Bytef *)outbuf;
+
+    /* Perform compression from the source to the destination buffer */
+    ret = compress2(z_dst, &z_dst_nbytes, z_src, z_src_nbytes, aggression);
+
+    /* Check for various zlib errors */
+    if(Z_BUF_ERROR == ret) {
+        fprintf(stderr, "overflow");
+        TEST_ERROR;
+    } else if(Z_MEM_ERROR == ret) {
+	fprintf(stderr, "deflate memory error");
+        TEST_ERROR;
+    } else if(Z_OK != ret) {
+	fprintf(stderr, "other deflate error");
+        TEST_ERROR;
+    }
+
+    /* Rewrite the compressed chunk data repeatedly to cover all the chunks in the 
+     * dataset, using the direct writing function.     */ 
+    offset[0] = offset[1] = 0;
+    for(i=0; i<NX/CHUNK_NX; i++) {
+        for(j=0; j<NY/CHUNK_NY; j++) {
+            status = H5PSIdirect_write(dataset, dxpl, filter_mask, offset, z_dst_nbytes, outbuf);
+            offset[1] += CHUNK_NY;
+        }
+        offset[0] += CHUNK_NX;
+        offset[1] = 0;
+    }
+
+    free(outbuf);
+
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0) 
+        TEST_ERROR;
+
+    /* Reopen the file and dataset */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if((dataset = H5Dopen(file, DATASETNAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Read the chunk back */
+    if((status = H5Dread(dataset, H5T_NATIVE_INT, mem_space, dataspace, H5P_DEFAULT, check_chunk)) < 0)
+        TEST_ERROR;
+
+    /* Check that the values read are the same as the values written */
+    for(i = 0; i < CHUNK_NX; i++) {
+        for(j = 0; j < CHUNK_NY; j++) {
+            if(direct_buf[i][j] != check_chunk[i][j]) {
+                printf("    2. Read different values than written.");
+                printf("    At index %d,%d\n", i, j);
+                printf("    direct_buf=%d, check_chunk=%d\n", direct_buf[i][j], check_chunk[i][j]); 
+                goto error;
+            }
+        }
+    }
+
+
 
     /*
      * Close/release resources.
@@ -214,8 +287,6 @@ main (void)
     H5Pclose(dxpl);
     H5Fclose(file);
     
-    free(outbuf);
-
     h5_cleanup(FILENAME, fapl);
     PASSED();
     return 0;
