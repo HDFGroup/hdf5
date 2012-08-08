@@ -782,14 +782,33 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_XML_H5_TEST file)
 
   # --------------------------------------------------------------------
-  # Determine which filters are available
+  # See which filters are usable (and skip tests for filters we
+  # don't have).  Do this by searching H5pubconf.h to see which
+  # filters are defined.
   # --------------------------------------------------------------------
-  SET (USE_FILTER_SZIP H5_HAVE_FILTER_SZIP)
-  SET (USE_FILTER_DEFLATE H5_HAVE_FILTER_DEFLATE)
-  SET (USE_FILTER_SHUFFLE H5_HAVE_FILTER_SHUFFLE)
-  SET (USE_FILTER_FLETCHER32 H5_HAVE_FILTER_FLETCHER32)
-  SET (USE_FILTER_NBIT H5_HAVE_FILTER_NBIT)
-  SET (USE_FILTER_SCALEOFFSET H5_HAVE_FILTER_SCALEOFFSET)
+  IF (H5_HAVE_FILTER_DEFLATE)
+    SET (USE_FILTER_DEFLATE "true")
+  ENDIF (H5_HAVE_FILTER_DEFLATE)
+
+  IF (H5_HAVE_FILTER_SZIP)
+    SET (USE_FILTER_SZIP "true")
+  ENDIF (H5_HAVE_FILTER_SZIP)
+
+  IF (H5_HAVE_FILTER_SHUFFLE)
+    SET (USE_FILTER_SHUFFLE "true")
+  ENDIF (H5_HAVE_FILTER_SHUFFLE)
+
+  IF (H5_HAVE_FILTER_FLETCHER32)
+    SET (USE_FILTER_FLETCHER32 "true")
+  ENDIF (H5_HAVE_FILTER_FLETCHER32)
+
+  IF (H5_HAVE_FILTER_NBIT)
+    SET (USE_FILTER_NBIT "true")
+  ENDIF (H5_HAVE_FILTER_NBIT)
+
+  IF (H5_HAVE_FILTER_SCALEOFFSET)
+    SET (USE_FILTER_SCALEOFFSET "true")
+  ENDIF (H5_HAVE_FILTER_SCALEOFFSET)
 
 ##############################################################################
 ##############################################################################
