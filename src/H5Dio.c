@@ -290,7 +290,7 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offse
 {
     H5D_t		   *dset = NULL;
     int                     ndims;
-    hsize_t                *dims;
+    hsize_t                *dims = NULL;
     int                     i;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
@@ -316,7 +316,8 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offse
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
 
     ndims = (int)H5S_GET_EXTENT_NDIMS(dset->shared->space);
-    dims = (hsize_t *)HDmalloc(ndims*sizeof(hsize_t));
+    if(NULL == (dims = (hsize_t *)H5MM_malloc(ndims*sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for dimensions")
 
     if(H5S_get_simple_extent_dims(dset->shared->space, dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
@@ -331,13 +332,14 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offse
         if(offset[i] % dset->shared->layout.u.chunk.dim[i])
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
    
-    HDfree(dims);
-
     /* write raw data */
     if(H5D__chunk_direct_write(dset, dxpl_id, filters, offset, data_size, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
+    if(dims)
+        H5MM_free(dims);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5PSIdirect_write() */
 

@@ -167,7 +167,8 @@ main (void)
         offset[1] = 0;
     }
 
-    free(outbuf);
+    if(outbuf)
+        free(outbuf);
 
     if(H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -244,7 +245,8 @@ main (void)
         offset[1] = 0;
     }
 
-    free(outbuf);
+    if(outbuf)
+        free(outbuf);
 
     if(H5Dclose(dataset) < 0)
         TEST_ERROR;
@@ -300,5 +302,9 @@ error:
         H5Pclose(dxpl);
         H5Fclose(file);
     } H5E_END_TRY;
+
+    if(outbuf)
+        free(outbuf);
+
     return 1;
 }

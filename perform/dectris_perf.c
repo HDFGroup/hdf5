@@ -18,14 +18,17 @@
  *
  */
 
-#include "h5test.h"
+#include "hdf5.h"
+#include "H5private.h"
 #include <zlib.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
  
 const char *FILENAME[] = {
     "dectris_perf",
@@ -33,16 +36,28 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define DIRECT_DSET        "direct_dset"
-#define COMPRESSED_DSET       "compressed_dset"
-#define NO_COMPRESS_DSET   "no_compress_dset"
+/*
+ * Print the current location on the standard output stream.
+ */
+#define FUNC __func__
+#define AT()     printf ("   at %s:%d in %s()...\n",        \
+        __FILE__, __LINE__, FUNC);
+#define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
+#define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
+#define TESTING(WHAT)  {printf("Testing %-62s",WHAT); fflush(stdout);}
+#define PASSED()  {puts(" PASSED");fflush(stdout);}
+
+#define DIRECT_UNCOMPRESSED_DSET        "direct_uncompressed_dset"
+#define DIRECT_COMPRESSED_DSET        "direct_compressed_dset"
+#define REG_COMPRESSED_DSET       "reg_compressed_dset"
+#define REG_NO_COMPRESS_DSET   "reg_no_compress_dset"
 #define RANK         3
 #define NX     100
-#define NY     100
-#define NZ     25
+#define NY     1000
+#define NZ     250
 #define CHUNK_NX     1 
-#define CHUNK_NY     100
-#define CHUNK_NZ     25
+#define CHUNK_NY     1000
+#define CHUNK_NZ     250
 
 #define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
 char        filename[1024];
@@ -92,6 +107,9 @@ int create_file(hid_t fapl_id)
     int         ret;
     int         i, j, n;
 
+    int flag;
+    int unix_file;
+
     unsigned int *p;
     size_t      buf_size = CHUNK_NY*CHUNK_NZ*sizeof(unsigned int);
 
@@ -127,7 +145,14 @@ int create_file(hid_t fapl_id)
      * Create a new dataset within the file using cparms
      * creation properties.
      */
-    if((dataset = H5Dcreate2(file, NO_COMPRESS_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, DIRECT_UNCOMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+			cparms, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR;
+
+    if((dataset = H5Dcreate2(file, REG_NO_COMPRESS_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
 			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -138,7 +163,7 @@ int create_file(hid_t fapl_id)
     if(H5Pset_deflate( cparms, aggression) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dcreate2(file, DIRECT_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, DIRECT_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
 			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -146,7 +171,7 @@ int create_file(hid_t fapl_id)
         TEST_ERROR;
 
 
-    if((dataset = H5Dcreate2(file, COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+    if((dataset = H5Dcreate2(file, REG_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
 			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -161,6 +186,19 @@ int create_file(hid_t fapl_id)
 
     if(H5Pclose(cparms) < 0)
         TEST_ERROR;
+
+    /* create a unix file*/
+    flag = O_CREAT|O_TRUNC|O_WRONLY;
+
+    if ((unix_file=open(FILENAME[1],flag,S_IRWXU))== -1)
+        TEST_ERROR;
+
+    if (close(unix_file) < 0)
+    {
+        printf(" unable to close the file\n");
+        TEST_ERROR;
+    }
+
 
     /* Initialize data for chunks */
     for(i = 0; i < NX; i++) {
@@ -209,11 +247,12 @@ error:
 }
 
 /*--------------------------------------------------
- *  Benchmark the performance of the new function
+ *  Benchmark the performance of the new function 
+ *  with precompressed data.
  *--------------------------------------------------
  */
 int
-test_direct_write(hid_t fapl_id)
+test_direct_write_uncompressed_data(hid_t fapl_id)
 {
     hid_t       file;                          /* handles */
     hid_t       dataspace, dataset;
@@ -226,7 +265,7 @@ test_direct_write(hid_t fapl_id)
 
     struct timeval timeval_start;    
     
-    TESTING("H5PSIdirect_write for DECTRIS project");
+    TESTING("H5PSIdirect_write for uncompressed data");
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         TEST_ERROR;
@@ -238,7 +277,72 @@ test_direct_write(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, DIRECT_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen(file, DIRECT_UNCOMPRESSED_DSET, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+
+    /* Write the compressed chunk data repeatedly to cover all the chunks in the 
+     * dataset, using the direct writing function.     */ 
+    for(i=0; i<NX; i++) {
+        status = H5PSIdirect_write(dataset, dxpl, filter_mask, offset, CHUNK_NY*CHUNK_NZ*sizeof(unsigned int), direct_buf[i]);
+        (offset[0])++;
+    }
+
+    /*
+     * Close/release resources.
+     */
+    H5Dclose(dataset);
+    H5Pclose(dxpl);
+    H5Fclose(file);
+
+    /* Report the performance */ 
+    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));    
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dataset);
+        H5Pclose(dxpl);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*--------------------------------------------------
+ *  Benchmark the performance of the new function 
+ *  with precompressed data.
+ *--------------------------------------------------
+ */
+int
+test_direct_write_compressed_data(hid_t fapl_id)
+{
+    hid_t       file;                          /* handles */
+    hid_t       dataspace, dataset;
+    hid_t       dxpl;
+    herr_t      status;
+    int         i;
+
+    unsigned    filter_mask = 0;
+    hsize_t     offset[RANK+1] = {0, 0, 0, 0};
+
+    struct timeval timeval_start;    
+    
+    TESTING("H5PSIdirect_write for pre-compressed data");
+
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        TEST_ERROR;
+
+    /* Start the timer */
+    gettimeofday(&timeval_start,NULL);
+
+    /* Reopen the file and dataset */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if((dataset = H5Dopen(file, DIRECT_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
 
@@ -309,7 +413,7 @@ test_compressed_write(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, COMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen(file, REG_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if((dataspace = H5Dget_space(dataset)) < 0)
@@ -397,7 +501,7 @@ test_no_compress_write(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen(file, REG_NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if((dataspace = H5Dget_space(dataset)) < 0)
@@ -463,12 +567,12 @@ test_unix_write(void)
     TESTING("Write compressed data to a Unix file");
 
     /* create file*/
-    flag = O_CREAT|O_TRUNC|O_WRONLY|O_SYNC;
+    flag = O_WRONLY|O_SYNC;
 
     /* Start the timer */
     gettimeofday(&timeval_start,NULL);
 
-    if ((file=open(FILENAME[1],flag,S_IRWXU))== -1)
+    if ((file=open(FILENAME[1],flag))== -1)
         TEST_ERROR;
 
     /* Write the compressed chunk data repeatedly to cover all the chunks in the 
@@ -520,7 +624,8 @@ main (void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     create_file(fapl);
-    test_direct_write(fapl);
+    test_direct_write_uncompressed_data(fapl);
+    test_direct_write_compressed_data(fapl);
     test_no_compress_write(fapl);
     test_compressed_write(fapl);
     test_unix_write();
