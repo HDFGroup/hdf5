@@ -291,6 +291,7 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offse
     H5D_t		   *dset = NULL;
     int                     ndims;
     hsize_t                *dims = NULL;
+    hsize_t                *internal_offset = NULL;
     int                     i;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
@@ -319,21 +320,29 @@ H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offse
     if(NULL == (dims = (hsize_t *)H5MM_malloc(ndims*sizeof(hsize_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for dimensions")
 
+    if(NULL == (internal_offset = (hsize_t *)H5MM_malloc((ndims+1)*sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for offset")
+
     if(H5S_get_simple_extent_dims(dset->shared->space, dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
 
-    /* Make sure the offset doesn't exceed the dataset's dimensions */
-    for(i=0; i<ndims; i++)
+    for(i=0; i<ndims; i++) {
+        /* Make sure the offset doesn't exceed the dataset's dimensions */
         if(offset[i] > dims[i])
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
 
-    /* Make sure the offset fall right on a chunk's boundary */
-    for(i=0; i<ndims; i++)
+        /* Make sure the offset fall right on a chunk's boundary */
         if(offset[i] % dset->shared->layout.u.chunk.dim[i])
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
+
+        internal_offset[i] = offset[i]; 
+    }
    
+    /* The library's chunking code requires the offset terminates with a zero */ 
+    internal_offset[ndims] = 0;
+
     /* write raw data */
-    if(H5D__chunk_direct_write(dset, dxpl_id, filters, offset, data_size, buf) < 0)
+    if(H5D__chunk_direct_write(dset, dxpl_id, filters, internal_offset, data_size, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:

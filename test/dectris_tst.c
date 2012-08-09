@@ -58,7 +58,7 @@ main (void)
     unsigned    filter_mask = 0;
     int         direct_buf[CHUNK_NX][CHUNK_NY];
     int         check_chunk[CHUNK_NX][CHUNK_NY];
-    hsize_t     offset[3] = {0, 0, 0};
+    hsize_t     offset[2] = {0, 0};
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
 
     const Bytef *z_src = (const Bytef*)(direct_buf);

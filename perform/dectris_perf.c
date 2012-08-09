@@ -261,7 +261,7 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     int         i;
 
     unsigned    filter_mask = 0;
-    hsize_t     offset[RANK+1] = {0, 0, 0, 0};
+    hsize_t     offset[RANK] = {0, 0, 0};
 
     struct timeval timeval_start;    
     
@@ -326,7 +326,7 @@ test_direct_write_compressed_data(hid_t fapl_id)
     int         i;
 
     unsigned    filter_mask = 0;
-    hsize_t     offset[RANK+1] = {0, 0, 0, 0};
+    hsize_t     offset[RANK] = {0, 0, 0};
 
     struct timeval timeval_start;    
     
