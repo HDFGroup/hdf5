@@ -3088,8 +3088,12 @@ dataset_atomicity(void)
 
     dim0 = 64; dim1 = 32;
     filename = GetTestParameters();
+    if (facc_type != FACC_MPIO) {
+	printf("Atomicity tests will not work without the MPIO VFD\n");
+        return;
+    }
     if(VERBOSE_MED)
-	printf("Independent write test on file %s\n", filename);
+	printf("atomic writes to file %s\n", filename);
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
