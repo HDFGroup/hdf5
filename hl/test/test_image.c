@@ -514,6 +514,7 @@ static int test_generate(void)
     char     *srcdir = getenv("srcdir"); /* the source directory */
     char     data_file[512]="";          /* buffer to hold name of existing data file */
     int      i;
+    int      retval = FAIL;
 
     /* create a file using default properties */
     if ((fid=H5Fcreate(FILE3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
@@ -686,15 +687,17 @@ static int test_generate(void)
     if (H5Fclose(fid)<0)
         goto out;
 
-    return 0;
+    /* Indicate success */
+    retval = 0;
 
     /* error zone, gracefully close */
 out:
+    HDfree(data);
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
     H5_FAILED();
-    return FAIL;
+    return retval;
 }
 
 

@@ -136,7 +136,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
 {
     H5HG_heap_t	*heap = NULL;
     uint8_t	*p = NULL;
-    haddr_t	addr;
+    haddr_t	addr = HADDR_UNDEF;
     size_t	n;
     haddr_t	ret_value = HADDR_UNDEF;        /* Return value */
 

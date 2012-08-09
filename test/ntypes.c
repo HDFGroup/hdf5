@@ -1776,6 +1776,7 @@ test_vl_dtype(hid_t file)
             } /* end for */
 
             HDfree(tmp);
+            tmp = NULL;
         } /* end for */
     } /* end for */
 

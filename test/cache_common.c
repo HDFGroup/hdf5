@@ -1879,7 +1879,7 @@ verify_entry_status(H5C_t * cache_ptr,
 		    int num_entries,
 		    struct expected_entry_status expected[])
 {
-    static char    msg[128];
+    static char    msg[256];
     hbool_t        in_cache = FALSE; /* will set to TRUE if necessary */
     int            i;
     test_entry_t * entry_ptr;

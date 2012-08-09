@@ -3798,7 +3798,9 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     /*
      * Determine the chunks which need to be filled or removed
      */
-    for(op_dim=0; op_dim<space_ndims; op_dim++) {
+    HDmemset(min_mod_chunk_off, 0, sizeof(min_mod_chunk_off));
+    HDmemset(max_mod_chunk_off, 0, sizeof(max_mod_chunk_off));
+    for(op_dim = 0; op_dim < space_ndims; op_dim++) {
         /* Calculate the largest offset of chunks that might need to be
          * modified in this dimension */
         max_mod_chunk_off[op_dim] = chunk_dim[op_dim] * ((old_dim[op_dim] - 1)

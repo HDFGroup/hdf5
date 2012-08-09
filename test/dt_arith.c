@@ -1105,9 +1105,9 @@ test_derived_flt(void)
     }
 
     fails_this_test = 0;
-    if(buf) free(buf);
-    if(saved_buf) free(saved_buf);
-    if(aligned) free(aligned);
+    free(buf);
+    free(saved_buf);
+    free(aligned);
     buf = NULL;
     saved_buf = NULL;
     aligned = NULL;
