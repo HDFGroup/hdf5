@@ -16,11 +16,17 @@
 # HDF Utilities Test script
 # Usage: h5importtestutil.sh [machine-type]
 
+# Determine which filters are available
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
 TESTNAME=h5import
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 # initialize errors variable
 nerrors=0
@@ -94,11 +100,21 @@ $SRC_H5IMPORT_TESTFILES/textpfe.conf
 $SRC_H5IMPORT_TESTFILES/txtstr.conf
 $SRC_H5IMPORT_TESTFILES/txtfp32.txt
 $SRC_H5IMPORT_TESTFILES/txtfp64.txt
+$SRC_H5IMPORT_TESTFILES/txtuin16.txt
 $SRC_H5IMPORT_TESTFILES/txtuin32.txt
+$SRC_H5IMPORT_TESTFILES/txtin8.txt
 $SRC_H5IMPORT_TESTFILES/txtin16.txt
 $SRC_H5IMPORT_TESTFILES/txtin32.txt
 $SRC_H5IMPORT_TESTFILES/textpfe64.txt
 $SRC_H5IMPORT_TESTFILES/txtstr.txt
+$SRC_H5IMPORT_TESTFILES/dbinfp64.h5.txt
+$SRC_H5IMPORT_TESTFILES/dbinin8.h5.txt
+$SRC_H5IMPORT_TESTFILES/dbinin8w.h5.txt
+$SRC_H5IMPORT_TESTFILES/dbinin16.h5.txt
+$SRC_H5IMPORT_TESTFILES/dbinin32.h5.txt
+$SRC_H5IMPORT_TESTFILES/dbinuin16.h5.txt
+$SRC_H5IMPORT_TESTFILES/dbinuin32.h5.txt
+$SRC_H5IMPORT_TESTFILES/dtxtstr.h5.txt
 "
 
 #
@@ -115,12 +131,20 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-            if [ -a $tstfile ]; then
-                $CP -f $tstfile $TESTDIR
-            else
-                echo "Error: FAILED to copy $tstfile"
-                echo "       $tstfile doesn't exist!"
-                exit $EXIT_FAILURE
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
@@ -129,6 +153,12 @@ COPY_TESTFILES_TO_TESTDIR()
 TESTING() {
    SPACES="                                                               "
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Print a "SKIP" message
+SKIP() {
+   TESTING $TESTNAME $@
+    echo  " -SKIP-"
 }
 
 TOOLTEST()
@@ -143,6 +173,69 @@ cd ..
 
 cmp -s tmp_testfiles/log1 log2 || err=1
 rm -f log2 tmp_testfiles/log1
+if [ $err -eq 1 ]; then
+nerrors="` expr $nerrors + 1 `";
+  echo "*FAILED*"
+else
+  echo " PASSED"
+fi
+}
+
+# Use h5dump output as input to h5import for binary numbers
+# Use h5diff to verify results
+TOOLTEST2()
+{
+err=0
+$RUNSERIAL ../h5dump/h5dump -p -d $1 -o d$2.bin -b tmp_testfiles/$2 > d$2.dmp
+$RUNSERIAL ./h5import d$2.bin -c d$2.dmp -o d$2 > d$2.imp
+$RUNSERIAL ../h5diff/h5diff -v d$2 tmp_testfiles/$2 $1 $1 > log2
+$CP -f $SRC_H5IMPORT_TESTFILES/d$2.txt log1
+
+cmp -s log1 log2 || err=1
+rm -f log1 log2
+if [ $err -eq 1 ]; then
+nerrors="` expr $nerrors + 1 `";
+  echo "*FAILED*"
+else
+  echo " PASSED"
+fi
+}
+
+# Same as TOOLTEST2 except for strings
+# Use h5dump output as input to h5import for strings
+# Use h5diff to verify results
+TOOLTEST3()
+{
+err=0
+$RUNSERIAL ../h5dump/h5dump -p -d $1 -o d$2.bin -y --width=1 tmp_testfiles/$2 > d$2.dmp
+$RUNSERIAL ./h5import d$2.bin -c d$2.dmp -o d$2 > d$2.imp
+$RUNSERIAL ../h5diff/h5diff -v d$2 tmp_testfiles/$2 $1 $1 > log2
+$CP -f $SRC_H5IMPORT_TESTFILES/d$2.txt log1
+
+cmp -s log1 log2 || err=1
+rm -f log1 log2
+if [ $err -eq 1 ]; then
+nerrors="` expr $nerrors + 1 `";
+  echo "*FAILED*"
+else
+  echo " PASSED"
+fi
+}
+
+# Same as TOOLTEST3 except for h5diff uses report mode without warnings
+# Use h5dump output as input to h5import for strings
+# Use h5diff to verify results
+TOOLTEST4()
+{
+err=0
+$RUNSERIAL ../h5dump/h5dump -p -d $1 -o d$2.bin -y --width=1 tmp_testfiles/$2 > d$2.dmp
+$RUNSERIAL ./h5import d$2.bin -c d$2.dmp -o d$2 > d$2.imp
+$RUNSERIAL ../h5diff/h5diff -r d$2 tmp_testfiles/$2 $1 $1 > log2
+$CP -f $SRC_H5IMPORT_TESTFILES/d$2.txt log1
+
+
+cmp -s log1 log2 || err=1
+rm -f log1 log2
 if [ $err -eq 1 ]; then
 nerrors="` expr $nerrors + 1 `";
   echo "*FAILED*"
@@ -174,63 +267,86 @@ $RUNSERIAL ./h5importtest
 ################################################
 
 TESTING "ASCII I32 rank 3 - Output BE " ;
-TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin32.conf -o txtin32.h5
+TOOLTEST $TESTDIR/txtin32.txt -c $TESTDIR/txtin32.conf -o txtin32.h5
 
 TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
 TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin16.conf -o txtin16.h5
 
-
 TESTING "ASCII I8 - rank 3 - Output I8 LE-Chunked+Extended+Compressed " 
-TOOLTEST $TESTDIR/txtin16.txt -c $TESTDIR/txtin8.conf  -o txtin8.h5
+TOOLTEST $TESTDIR/txtin8.txt -c $TESTDIR/txtin8.conf  -o txtin8.h5
+
+
+TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
+TOOLTEST $TESTDIR/txtuin16.txt -c $TESTDIR/txtuin16.conf -o txtuin16.h5
 
 TESTING "ASCII UI32 - rank 3 - Output BE" 
 TOOLTEST $TESTDIR/txtuin32.txt -c $TESTDIR/txtuin32.conf -o txtuin32.h5
 
-TESTING "ASCII UI16 - rank 2 - Output LE+Chunked+Compressed " 
-TOOLTEST $TESTDIR/txtuin32.txt -c $TESTDIR/txtuin16.conf -o txtuin16.h5
 
 TESTING "ASCII F32 - rank 3 - Output LE " 
 TOOLTEST $TESTDIR/txtfp32.txt -c $TESTDIR/txtfp32.conf -o txtfp32.h5
 
-
 TESTING "ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed " 
 TOOLTEST $TESTDIR/txtfp64.txt -c $TESTDIR/txtfp64.conf -o txtfp64.h5
 
+
 TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
 TOOLTEST binfp64.bin -c $TESTDIR/binfp64.conf -o binfp64.h5
-
-
-TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
-TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5
+TESTING "H5DUMP-BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
+if test $USE_FILTER_DEFLATE != "yes"; then
+ SKIP "/fp/bin/64-bit" binfp64.h5
+else
+ TOOLTEST2 "/fp/bin/64-bit" binfp64.h5
+fi
 
 
 TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
-TOOLTEST binin8.bin -c $TESTDIR/binin8.conf  -o binin8.h5
+TOOLTEST binin8.bin -c $TESTDIR/binin8.conf -o binin8.h5
+TESTING "H5DUMP-BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
+if test $USE_FILTER_DEFLATE != "yes"; then
+ SKIP "/int/bin/8-bit" binin8.h5
+else
+ TOOLTEST2 "/int/bin/8-bit" binin8.h5
+fi
 
+TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
+TOOLTEST binin16.bin -c $TESTDIR/binin16.conf -o binin16.h5
+TESTING "H5DUMP-BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
+TOOLTEST2 "/int/bin/16-bit" binin16.h5
 
 TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED " 
 TOOLTEST binin32.bin -c $TESTDIR/binin32.conf -o binin32.h5
+TESTING "H5DUMP-BINARY I32 - rank 3 - Output BE + CHUNKED " 
+TOOLTEST2 "/int/bin/32-bit" binin32.h5
 
 
 TESTING "BINARY UI16 - rank 3 - Output byte BE + CHUNKED " 
 TOOLTEST binuin16.bin -c $TESTDIR/binuin16.conf -o binuin16.h5
+TESTING "H5DUMP-BINARY UI16 - rank 3 - Output byte BE + CHUNKED " 
+TOOLTEST2 "/int/buin/16-bit" binuin16.h5
 
 TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
 TOOLTEST binuin32.bin -c $TESTDIR/binuin32.conf -o binuin32.h5
+TESTING "H5DUMP-BINARY UI32 - rank 3 - Output LE + CHUNKED " 
+TOOLTEST2 "/int/buin/32-bit" binuin32.h5
 
 
 TESTING "STR" 
 TOOLTEST $TESTDIR/txtstr.txt -c $TESTDIR/txtstr.conf -o txtstr.h5
+TESTING "H5DUMP-STR" 
+TOOLTEST43 "/mytext/data" txtstr.h5
+
 
 TESTING "BINARY I8 CR LF EOF" 
 TOOLTEST binin8w.bin -c $TESTDIR/binin8w.conf -o binin8w.h5
+TESTING "H5DUMP-BINARY I8 CR LF EOF" 
+TOOLTEST2 "/dataset0" binin8w.h5
 
 TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
 TOOLTEST $TESTDIR/textpfe64.txt -c $TESTDIR/textpfe.conf -o textpfe.h5
 
 
-
-rm -f  txtin32.txt txtin16.txt *.bin *.h5
+rm -f  txtin32.txt txtin16.txt txtin8.txt txtuin32.txt txtuin16.txt *.bin *.dmp *.imp *.h5
 rm -rf tmp_testfiles
 else
   echo "** h5import or h5importtest not available ***"

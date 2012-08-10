@@ -1,15 +1,17 @@
 ************************************************************************
-* Build and Install HDF5 Examples with CMake                           *
+* Build and Install HDF5 Applications with CMake                           *
 ************************************************************************
 
 Notes: This short instruction is written for users who want to quickly build 
-       HDF5 Examples from the HDF5 source code package using the CMake tools.
+       HDF5 Applications from the HDF5 Examples package using the CMake tools.
+       Users can adapt these instructions for their own applicaltions, see the 
+       "Minimum Project Files" section.
        
        More information about using CMake can be found at the KitWare site, 
        www.cmake.org.
          
        CMake uses the command line, however the visual CMake tool is 
-       recommended for the configuration step. The steps are similiar for
+       available for the configuration step. The steps are similiar for
        all the operating systems supported by CMake.
        
        NOTES:
@@ -24,7 +26,7 @@ Notes: This short instruction is written for users who want to quickly build
             Please send us any comments on how CMake support can be improved on 
             any system. Visit the KitWare site for more information about CMake.
             
-         3. Build and test results can be submitted to our CDash server at:
+         3. HDF5 library build and test results can be submitted to our CDash server at:
             cdash.hdfgroup.uiuc.edu. 
             Please read the HDF and CDash document at:
             www.hdfgroup.org/CDash/HowToSubmit. 
@@ -35,21 +37,23 @@ Notes: This short instruction is written for users who want to quickly build
 ========================================================================                          
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8.x product requires CMake version 2.8.6.                     
+      web site. The HDF5 1.8.x product requires CMake version 2.8.6 (minimum).                     
                                                                          
-   2. You have installed the HDF5 library built with CMake. If you are
-      using a Windows platform, you can obtain a pre-built Windows binary
-      from The HDF Group's website at www.hdfgroup.org.
+   2. You have installed the HDF5 library built with CMake, by executing the
+      HDF Install Utility (The *.exe file in the binary package for Windows). 
+      If you are using a Windows platform, you can obtain a pre-built Windows 
+      binary from The HDF Group's website at www.hdfgroup.org.
 
    3. On Windows with Visual Studio, if you have installed the static HDF5
       library, you will need to add the HDF5\lib folder to the library
       search list. See the "Using Static Libraries with Visual Studio" section.
  
    4. Set the environment variable HDF5_ROOT to the installed location of HDF5.
-      On Windows HDF5_ROOT=C:\Program Files\HDF Group\HDF5\hdf5-1.8.7
+      On Windows HDF5_ROOT=C:\Program Files\HDF Group\HDF5\hdf5-1.8.x
+      (Note there are no quote characters used on windows)
                                                                          
 ========================================================================
-          Building HDF5 Examples with CMake
+          Building HDF5 Applications with CMake
 ========================================================================
 
    1. Run CMake
@@ -113,10 +117,10 @@ Notes: This short instruction is written for users who want to quickly build
       
            cmake -G "Visual Studio 9 2008" -DBUILD_TESTING:BOOL=ON -DUSE_SHARED_LIBS:BOOL=ON ..
 
-   3. Build HDF5 examples
+   3. Build HDF5 Applications
    
-      On Windows, you can build HDF5 using either the Visual Studio Environment 
-      or the command line. The command line is used on linux, Unix, and Mac.
+      On Windows, you can build HDF5 applications using either the Visual Studio Environment 
+      or the command line. The command line is normally used on linux, Unix, and Mac.
 
       To build from the command line, navigate to your build directory and
       execute the following;
@@ -131,7 +135,7 @@ Notes: This short instruction is written for users who want to quickly build
            file in your build directory. Be sure to select either Debug or 
            Release and build the solution.
              
-   4. Test HDF5 Examples.
+   4. Test HDF5 Applications.
 
       To test the build, navigate to your build directory and execute;
       
@@ -174,6 +178,23 @@ Notes: This short instruction is written for users who want to quickly build
       8.4 If using Fortran libraries, you will also need to setup the path
           for the Intel Fortran compiler.
 
+                                                                         
+========================================================================
+          Minimum C Project Files for CMake
+========================================================================
+
+   9. Create a CMakeLists.txt file at the source root.
+..........................................................................
+cmake_minimum_required (VERSION 2.8.6)
+PROJECT (HDF5MyApp C CXX)
+
+FIND_PACKAGE (HDF5 REQURIED)
+INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRS})
+SET (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
+
+ADD_EXECUTABLE (hdf_example ${PROJECT_SOURCE_DIR}/hdf_example.c)
+TARGET_LINK_LIBRARIES (hdf_example ${LINK_LIBS})
+..........................................................................
 
 ************************************************************************
 

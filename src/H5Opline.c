@@ -61,6 +61,7 @@ static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #undef H5O_SHARED_COPY_FILE_REAL
 #define H5O_SHARED_POST_COPY_FILE	H5O_pline_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
+#undef  H5O_SHARED_POST_COPY_FILE_UPD
 #define H5O_SHARED_DEBUG		H5O_pline_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_pline_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
@@ -249,7 +250,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     HDassert(mesg);
 
     /* Message header */
-    *p++ = pline->version;
+    *p++ = (uint8_t)pline->version;
     *p++ = (uint8_t)(pline->nused);
     if(pline->version == H5O_PLINE_VERSION_1) {
         *p++ = 0;	/*reserved 1*/
@@ -466,7 +467,7 @@ H5O_pline_size(const H5F_t UNUSED *f, const void *mesg)
 		((pline->version == H5O_PLINE_VERSION_1 || pline->filter[i].id >= H5Z_FILTER_RESERVED) ? 2 : 0) +				/*name length			*/
 		2 +				/*flags				*/
 		2 +				/*number of client data values	*/
-		(pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_len) : name_len);	/*length of the filter name	*/
+		(pline->version == H5O_PLINE_VERSION_1 ? (size_t)H5O_ALIGN_OLD(name_len) : name_len);	/*length of the filter name	*/
 
 	ret_value += pline->filter[i].cd_nelmts * 4;
         if(pline->version == H5O_PLINE_VERSION_1)

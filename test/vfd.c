@@ -1148,11 +1148,10 @@ test_multi_compat(void)
 {
     hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
     hid_t       access_fapl = -1;
-    char        filename[1024], newname[1024], tmp[1024];
+    char        newname[1024];
     char        filename_s[1024], newname_s[1024];
     char        filename_r[1024], newname_r[1024];
     int         *fhandle2=NULL, *fhandle=NULL;
-    hsize_t     file_size;
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];

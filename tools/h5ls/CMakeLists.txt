@@ -98,6 +98,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup-3.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop-1.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmultifile.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-2.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-3.ls
@@ -354,6 +355,11 @@ IF (BUILD_TESTING)
   # when used file with no dangling links - expected exit code 0
   ADD_H5_TEST (thlinks-nodangle-1 0 -w80 --follow-symlinks --no-dangling-links thlink.h5)
 
+# test for wildcards in filename (does not work with cmake)
+#  ADD_H5_TEST (tstarfile 0 -w80 t*link.h5)
+#  ADD_H5_TEST (tqmarkfile 0 -w80 t?link.h5)
+  ADD_H5_TEST (tmultifile 0 -w80 thlink.h5 tslink.h5)
+
   # tests for hard links
   ADD_H5_TEST (thlink-1 0 -w80 thlink.h5)
 
@@ -427,11 +433,14 @@ ENDIF (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+
+INSTALL_PROGRAM_PDB (h5ls ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+
 INSTALL (
     TARGETS
         h5ls
     RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}/tools
+        ${HDF5_INSTALL_BIN_DIR}
     COMPONENT
         toolsapplications
 )

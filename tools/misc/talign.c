@@ -148,28 +148,31 @@ out:
         result = 1;
         mname = H5Tget_member_name(fix, 0);
         printf("%14s (%2d) %6s = %s\n",
-            mname, (int)H5Tget_member_offset(fix,0),
+            mname ? mname : "(null)", (int)H5Tget_member_offset(fix,0),
             string5, (char *)(data + H5Tget_member_offset(fix, 0)));
-        free(mname);
+        if(mname)
+            free(mname);
 
         fptr = (float *)(data + H5Tget_member_offset(fix, 1));
         mname = H5Tget_member_name(fix, 1);
         printf("Data comparison:\n"
             "%14s (%2d) %6f = %f\n"
             "                    %6f = %f\n",
-            mname, (int)H5Tget_member_offset(fix,1),
+            mname ? mname : "(null)", (int)H5Tget_member_offset(fix,1),
             fok[0], fptr[0],
             fok[1], fptr[1]);
-        free(mname);
+        if(mname)
+            free(mname);
 
         fptr = (float *)(data + H5Tget_member_offset(fix, 2));
         mname = H5Tget_member_name(fix, 2);
         printf("%14s (%2d) %6f = %f\n"
             "                    %6f = %6f\n",
-            mname, (int)H5Tget_member_offset(fix,2),
+            mname ? mname : "(null)", (int)H5Tget_member_offset(fix,2),
             fnok[0], fptr[0],
             fnok[1], fptr[1]);
-        free(mname);
+        if(mname)
+            free(mname);
 
         fptr = (float *)(data + H5Tget_member_offset(fix, 1));
         printf("\n"

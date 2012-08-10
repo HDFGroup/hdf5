@@ -1,7 +1,8 @@
-usage: h5dump [OPTIONS] file
+usage: h5dump [OPTIONS] files
   OPTIONS
      -h, --help           Print a usage message and exit
      -n, --contents       Print a list of the file contents and exit
+                          Optional value 1 also prints attributes.
      -B, --superblock     Print the content of the super block
      -H, --header         Print the header only; no data is displayed
      -A, --onlyattr       Print the header and value of attributes
@@ -10,6 +11,9 @@ usage: h5dump [OPTIONS] file
      -e, --escape         Escape non printing characters
      -V, --version        Print version number and exit
      -a P, --attribute=P  Print the specified attribute
+                          If an attribute name contains a slash (/), escape the
+                          slash with a preceding backslash (\).
+                          (See example section below.)
      -d P, --dataset=P    Print the specified dataset
      -y, --noindex        Do not print array indices with the data
      -p, --properties     Print dataset filters, storage layout and fill value
@@ -58,10 +62,20 @@ usage: h5dump [OPTIONS] file
         number of dimensions in the dataspace being queried
 
   D - is the file driver to use in opening the file. Acceptable values
-        are "sec2", "family", "split", "multi", "direct", and "stream". Without
-        the file driver flag, the file will be opened with each driver in
-        turn and in the order specified above until one driver succeeds
-        in opening the file.
+      are "sec2", "family", "split", "multi", "direct", and "stream". Without
+      the file driver flag, the file will be opened with each driver in
+      turn and in the order specified above until one driver succeeds
+      in opening the file.
+      These are the letters that are appended to the file name(without .h5) when opening
+      names for the split(m,r) and multi(s,b,r,g,l,o) drivers. They are:
+         m: All meta data when using the split driver.
+         s: The userblock, superblock, and driver info block
+         b: B-tree nodes
+         r: Dataset raw data
+         g: Global heap
+         l: local heap (object names)
+         o: object headers
+
   F - is a filename.
   P - is the full path from the root group to the object.
   N - is an integer greater than 1.
@@ -81,6 +95,10 @@ usage: h5dump [OPTIONS] file
 
       h5dump -a /bar_none/foo quux.h5
 
+     Attribute "high/low" of the group /bar_none in the file quux.h5
+
+      h5dump -a "/bar_none/high\/low" quux.h5
+
   2) Selecting a subset from dataset /foo in file quux.h5
 
       h5dump -d /foo -s "0,1" -S "1,1" -c "2,3" -k "2,2" quux.h5
@@ -93,5 +111,13 @@ usage: h5dump [OPTIONS] file
   4) Display two packed bits (bits 0-1 and bits 4-6) in the dataset /dset
 
       h5dump -d /dset -M 0,1,4,3 quux.h5
+
+  5) Dataset foo in files file1.h5 file2.h5 file3.h5
+
+      h5dump -d /foo file1.h5 file2.h5 file3.h5
+
+  6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5
+
+      h5dump -d /foo -f split splitfile
 
 h5dump error: Packed Bit length value(0) must be positive.

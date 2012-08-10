@@ -63,6 +63,7 @@ static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *s
 #undef H5O_SHARED_COPY_FILE_REAL
 #define H5O_SHARED_POST_COPY_FILE	H5O_fill_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
+#undef  H5O_SHARED_POST_COPY_FILE_UPD
 #define H5O_SHARED_DEBUG		H5O_fill_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_fill_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
@@ -95,6 +96,7 @@ static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *s
 #undef H5O_SHARED_POST_COPY_FILE
 #define H5O_SHARED_POST_COPY_FILE	H5O_fill_new_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
+#undef  H5O_SHARED_POST_COPY_FILE_UPD
 #undef H5O_SHARED_DEBUG
 #define H5O_SHARED_DEBUG		H5O_fill_new_shared_debug
 #undef H5O_SHARED_DEBUG_REAL
@@ -395,11 +397,11 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
 
         /* Encode space allocation time */
         HDassert(fill->alloc_time == (H5O_FILL_MASK_ALLOC_TIME & fill->alloc_time));
-        flags |= (H5O_FILL_MASK_ALLOC_TIME & fill->alloc_time) << H5O_FILL_SHIFT_ALLOC_TIME;
+        flags = (uint8_t)(flags | ((H5O_FILL_MASK_ALLOC_TIME & fill->alloc_time) << H5O_FILL_SHIFT_ALLOC_TIME));
 
         /* Encode fill value writing time */
         HDassert(fill->fill_time == (H5O_FILL_MASK_FILL_TIME & fill->fill_time));
-        flags |= (H5O_FILL_MASK_FILL_TIME & fill->fill_time) << H5O_FILL_SHIFT_FILL_TIME;
+        flags = (uint8_t)(flags | ((H5O_FILL_MASK_FILL_TIME & fill->fill_time) << H5O_FILL_SHIFT_FILL_TIME));
 
         /* Check if we need to encode a fill value size */
         if(fill->size < 0) {
@@ -831,10 +833,11 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_fill, FILE *s
             fprintf(stream,"Incremental\n");
             break;
 
+        case H5D_ALLOC_TIME_DEFAULT:
+        case H5D_ALLOC_TIME_ERROR:
         default:
             fprintf(stream,"Unknown!\n");
             break;
-
     } /* end switch */
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
     switch(fill->fill_time) {
@@ -850,6 +853,7 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_fill, FILE *s
             fprintf(stream,"If Set\n");
             break;
 
+        case H5D_FILL_TIME_ERROR:
         default:
             fprintf(stream,"Unknown!\n");
             break;
@@ -870,6 +874,7 @@ H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_fill, FILE *s
             fprintf(stream,"User Defined\n");
             break;
 
+        case H5D_FILL_VALUE_ERROR:
         default:
             fprintf(stream,"Unknown!\n");
             break;

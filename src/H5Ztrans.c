@@ -94,6 +94,8 @@ static H5Z_node *H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_poi
 static H5Z_node *H5Z_parse_factor(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers);
 static H5Z_node *H5Z_new_node(H5Z_token_type type);
 static void H5Z_do_op(H5Z_node* tree);
+static hbool_t H5Z_op_is_numbs(H5Z_node* _tree);
+static hbool_t H5Z_op_is_numbs2(H5Z_node* _tree);
 static hid_t H5Z_xform_find_type(const H5T_t* type);
 static herr_t H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_type, H5Z_result* res);
 static void H5Z_xform_destroy_parse_tree(H5Z_node *tree);
@@ -105,41 +107,57 @@ static void H5Z_XFORM_DEBUG(H5Z_node *tree);
 static void H5Z_print(H5Z_node *tree, FILE *stream);
 #endif  /* H5Z_XFORM_DEBUG */
 
-
+/* PGCC (11.8-0) has trouble with the command *p++ = *p OP tree_val. It increments P first before 
+ * doing the operation.  So I break down the command into two lines:
+ *     *p = *p OP tree_val; p++;
+ * Actually, the behavior of *p++ = *p OP tree_val is undefined. (SLU - 2012/3/19) 
+ */
 #define H5Z_XFORM_DO_OP1(RESL,RESR,TYPE,OP,SIZE)                            \
 {   								  	    \
-    if( (((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type != H5Z_XFORM_SYMBOL)) || (((RESR).type == H5Z_XFORM_SYMBOL) && ((RESL).type != H5Z_XFORM_SYMBOL))) \
+    size_t u;                                                               \
+                                                                            \
+    if(((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type != H5Z_XFORM_SYMBOL)) \
     {   								    \
-	size_t u;                                                           \
 	TYPE* p;                                                            \
 	double tree_val;                                                    \
 		                                                            \
-	if((RESL).type == H5Z_XFORM_SYMBOL)                                 \
-	{                                                                   \
-	    tree_val = ((RESR).type==H5Z_XFORM_INTEGER ? (double)(RESR).value.int_val : (RESR).value.float_val); \
-	    p = (TYPE*)(RESL).value.dat_val;                                \
-	}                                                                   \
-	else                                                                \
-	{                                                                   \
-	    tree_val = ((RESL).type==H5Z_XFORM_INTEGER ? (double)(RESL).value.int_val : (RESL).value.float_val); \
-	    p = (TYPE*)(RESR).value.dat_val;                                \
-	}                                                                   \
+	tree_val = ((RESR).type==H5Z_XFORM_INTEGER ? (double)(RESR).value.int_val : (RESR).value.float_val); \
+	p = (TYPE*)(RESL).value.dat_val;                                    \
+                                                                            \
+	for(u=0; u<(SIZE); u++) {                                           \
+	    *p = *p OP tree_val;                                            \
+            p++;                                                            \
+        }                                                                   \
+    }									    \
+    else if(((RESR).type == H5Z_XFORM_SYMBOL) && ((RESL).type != H5Z_XFORM_SYMBOL)) \
+    {   								    \
+	TYPE* p;                                                            \
+	double tree_val;                                                    \
 		                                                            \
-	for(u=0; u<(SIZE); u++)                                             \
-	    *p++ OP tree_val;                                               \
-    }										\
+        /* The case that the left operand is nothing, like -x or +x */      \
+	if((RESL).type == H5Z_XFORM_ERROR)                                  \
+            tree_val = 0;                                                   \
+	else                                                                \
+	    tree_val = ((RESL).type==H5Z_XFORM_INTEGER ? (double)(RESL).value.int_val : (RESL).value.float_val); \
+                                                                            \
+	p = (TYPE*)(RESR).value.dat_val;                                    \
+	for(u=0; u<(SIZE); u++) {                                           \
+	    *p = tree_val OP *p;                                            \
+            p++;                                                            \
+        }                                                                   \
+    }									    \
     else if( ((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type==H5Z_XFORM_SYMBOL))  \
     {										\
-	size_t u;                                                           	\
 	TYPE* pl = (TYPE*)(RESL).value.dat_val;                             	\
 	TYPE* pr = (TYPE*)(RESR).value.dat_val;                             	\
 										\
-	for(u=0; u<(SIZE); u++)                                             	\
-	    *pl++ OP *pr++;                                                 	\
+	for(u=0; u<(SIZE); u++) {                                            	\
+	    *pl = *pl OP *pr;                                           	\
+            pl++; pr++;                                                         \
+        }                                                                       \
     }										\
     else									\
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")	\
-										\
 }
 
 /* Due to the undefined nature of embedding macros/conditionals within macros, we employ
@@ -277,7 +295,47 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     H5V_array_fill(array, &val, sizeof(TYPE), (SIZE));                                             \
 }
 
-
+/* The difference of this macro from H5Z_XFORM_DO_OP3 is that it handles the operations when the left operand is empty, like -x or +x.  
+ * The reason that it's seperated from H5Z_XFORM_DO_OP3 is because compilers don't accept operations like *x or /x.  So in H5Z_do_op, 
+ * these two macros are called in different ways. (SLU 2012/3/20) 
+ */
+#define H5Z_XFORM_DO_OP6(OP)                                                                                                                    \
+{                                                                                                                                               \
+        if(!tree->lchild && (tree->rchild->type==H5Z_XFORM_INTEGER))                                                                            \
+        {																	\
+            tree->type = H5Z_XFORM_INTEGER;													\
+            tree->value.int_val = OP tree->rchild->value.int_val;							                        \
+            H5MM_xfree(tree->rchild);														\
+            tree->rchild = NULL;														\
+        }	                                                                                                                                \
+        else if(!tree->lchild && (tree->rchild->type==H5Z_XFORM_FLOAT))                                                                         \
+        {																	\
+            tree->type = H5Z_XFORM_FLOAT;													\
+            tree->value.float_val = OP tree->rchild->value.float_val;							                        \
+            H5MM_xfree(tree->rchild);														\
+            tree->rchild = NULL;														\
+        }	                                                                                                                                \
+        else if((tree->lchild->type == H5Z_XFORM_INTEGER) && (tree->rchild->type==H5Z_XFORM_INTEGER))                                           \
+        {																	\
+            tree->type = H5Z_XFORM_INTEGER;													\
+            tree->value.int_val = tree->lchild->value.int_val OP tree->rchild->value.int_val;							\
+            H5MM_xfree(tree->lchild);														\
+            H5MM_xfree(tree->rchild);														\
+            tree->lchild = NULL;														\
+            tree->rchild = NULL;														\
+        }																	\
+	else if( ( (tree->lchild->type == H5Z_XFORM_FLOAT) || (tree->lchild->type == H5Z_XFORM_INTEGER)) && 					\
+	            ( (tree->rchild->type == H5Z_XFORM_FLOAT) || (tree->rchild->type == H5Z_XFORM_INTEGER)))					\
+	{																	\
+	    tree->type = H5Z_XFORM_FLOAT;													\
+            tree->value.float_val = ((tree->lchild->type == H5Z_XFORM_FLOAT) ? tree->lchild->value.float_val : (double)tree->lchild->value.int_val) OP 	\
+				    ((tree->rchild->type == H5Z_XFORM_FLOAT) ? tree->rchild->value.float_val : (double)tree->rchild->value.int_val);	\
+            H5MM_xfree(tree->lchild);														\
+            H5MM_xfree(tree->rchild);														\
+            tree->lchild = NULL;														\
+            tree->rchild = NULL;														\
+        }																	\
+}
 
 /*
  *  Programmer: Bill Wendling <wendling@ncsa.uiuc.edu>
@@ -479,7 +537,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 H5Z_xform_destroy_parse_tree(H5Z_node *tree)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -509,7 +567,7 @@ H5Z_xform_destroy_parse_tree(H5Z_node *tree)
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5Z_xform_parse(const char *expression, H5Z_datval_ptrs* dat_val_pointers)
 {
     H5Z_token tok;
@@ -1027,6 +1085,9 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
     /* check args */
     HDassert(tree);
 
+    HDmemset(&resl, 0, sizeof(H5Z_result));
+    HDmemset(&resr, 0, sizeof(H5Z_result));
+
     if (tree->type == H5Z_XFORM_INTEGER) {
 	res->type = H5Z_XFORM_INTEGER;
 	res->value.int_val = tree->value.int_val;
@@ -1044,7 +1105,7 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 	res->value.dat_val = *((void**)(tree->value.dat_val));
     } /* end if */
     else {
-	if(H5Z_xform_eval_full(tree->lchild, array_size, array_type, &resl) < 0)
+	if(tree->lchild && H5Z_xform_eval_full(tree->lchild, array_size, array_type, &resl) < 0)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
 	if(H5Z_xform_eval_full(tree->rchild, array_size, array_type, &resr) < 0)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
@@ -1059,19 +1120,19 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 
 	switch (tree->type) {
 	    case H5Z_XFORM_PLUS:
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, +=, array_size)
+	 	H5Z_XFORM_TYPE_OP(resl, resr, array_type, +, array_size)
 		break;
 
 	    case H5Z_XFORM_MINUS:
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, -=, array_size)
+	 	H5Z_XFORM_TYPE_OP(resl, resr, array_type, -, array_size)
 		break;
 
 	    case H5Z_XFORM_MULT:
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, *=, array_size)
+		H5Z_XFORM_TYPE_OP(resl, resr, array_type, *, array_size)
 		break;
 
 	    case H5Z_XFORM_DIVIDE:
-		H5Z_XFORM_TYPE_OP(resl, resr, array_type, /=, array_size)
+	 	H5Z_XFORM_TYPE_OP(resl, resr, array_type, /, array_size)
 		break;
 
 	    default:
@@ -1190,7 +1251,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5Z_xform_copy_tree(H5Z_node* tree, H5Z_datval_ptrs* dat_val_pointers, H5Z_datval_ptrs* new_dat_val_pointers)
 {
     H5Z_node* ret_value=NULL;
@@ -1257,6 +1318,63 @@ H5Z_xform_copy_tree(H5Z_node* tree, H5Z_datval_ptrs* dat_val_pointers, H5Z_datva
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Z_op_is_numbs
+ * Purpose:     Internal function to facilitate the condition check in 
+ *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
+ * Return:      TRUE or FALSE
+ * Programmer:  Raymond Lu
+ *              15 March 2012
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+H5Z_op_is_numbs(H5Z_node* _tree)
+{
+    hbool_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(_tree);
+
+    if(((_tree->lchild->type == H5Z_XFORM_INTEGER) || (_tree->lchild->type == H5Z_XFORM_FLOAT)) && ((_tree->rchild->type == H5Z_XFORM_INTEGER) || (_tree->rchild->type == H5Z_XFORM_FLOAT)))
+      ret_value = TRUE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_op_is_numbs2
+ * Purpose:     Internal function to facilitate the condition check in 
+ *              H5Z_xform_reduce_tree to reduce the bulkiness of the code.
+ *              The difference from H5Z_op_is_numbs is that the left child
+ *              can be empty, like -x or +x.
+ * Return:      TRUE or FALSE
+ * Programmer:  Raymond Lu
+ *              15 March 2012
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+H5Z_op_is_numbs2(H5Z_node* _tree)
+{
+    hbool_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    assert(_tree);
+
+    if((!_tree->lchild && ((_tree->rchild->type == H5Z_XFORM_INTEGER) || (_tree->rchild->type == H5Z_XFORM_FLOAT))) ||
+       ((_tree->lchild && ((_tree->lchild->type == H5Z_XFORM_INTEGER) || (_tree->lchild->type == H5Z_XFORM_FLOAT))) && (_tree->rchild && ((_tree->rchild->type == H5Z_XFORM_INTEGER) || (_tree->rchild->type == H5Z_XFORM_FLOAT)))))
+      ret_value = TRUE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Z_xform_reduce_tree
  * Purpose:     Simplifies parse tree passed in by performing any obvious
  *              and trivial arithemtic calculations.
@@ -1268,28 +1386,43 @@ H5Z_xform_copy_tree(H5Z_node* tree, H5Z_datval_ptrs* dat_val_pointers, H5Z_datva
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 H5Z_xform_reduce_tree(H5Z_node* tree)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(tree) {
-        if((tree->type == H5Z_XFORM_PLUS) || (tree->type == H5Z_XFORM_DIVIDE) ||(tree->type == H5Z_XFORM_MULT) ||(tree->type == H5Z_XFORM_MINUS))
+        if((tree->type == H5Z_XFORM_DIVIDE) || (tree->type == H5Z_XFORM_MULT))
         {
-            if(((tree->lchild->type == H5Z_XFORM_INTEGER) || (tree->lchild->type == H5Z_XFORM_FLOAT)) && ((tree->rchild->type == H5Z_XFORM_INTEGER) || (tree->rchild->type == H5Z_XFORM_FLOAT)))
+            if(H5Z_op_is_numbs(tree))
                 H5Z_do_op(tree);
             else
             {
                 H5Z_xform_reduce_tree(tree->lchild);
-                if(((tree->lchild->type == H5Z_XFORM_INTEGER) || (tree->lchild->type == H5Z_XFORM_FLOAT)) && ((tree->rchild->type == H5Z_XFORM_INTEGER) || (tree->rchild->type == H5Z_XFORM_FLOAT)))
+                if(H5Z_op_is_numbs(tree))
                     H5Z_do_op(tree);
                 else {
                     H5Z_xform_reduce_tree(tree->rchild);
-                    if(((tree->lchild->type == H5Z_XFORM_INTEGER) || (tree->lchild->type == H5Z_XFORM_FLOAT)) && ((tree->rchild->type == H5Z_XFORM_INTEGER) || (tree->rchild->type == H5Z_XFORM_FLOAT)))
+                    if(H5Z_op_is_numbs(tree))
+                        H5Z_do_op(tree);
+                }
+            }
+        } else if((tree->type == H5Z_XFORM_PLUS) || (tree->type == H5Z_XFORM_MINUS)) {
+            if(H5Z_op_is_numbs2(tree))
+                H5Z_do_op(tree);
+            else
+            {
+                H5Z_xform_reduce_tree(tree->lchild);
+                if(H5Z_op_is_numbs2(tree))
+                    H5Z_do_op(tree);
+                else {
+                    H5Z_xform_reduce_tree(tree->rchild);
+                    if(H5Z_op_is_numbs2(tree))
                         H5Z_do_op(tree);
                 }
             }
         }
+
     }
 
     FUNC_LEAVE_NOAPI_VOID;
@@ -1307,7 +1440,11 @@ H5Z_xform_reduce_tree(H5Z_node* tree)
  * Programmer:  Leon Arber
  *              April 1, 2004.
  * Modifications:
-*
+ *              Raymond Lu
+ *              15 March 2012
+ *              I added a new macro H5Z_XFORM_DO_OP6 to handle the special
+ *              operations like -x or +x when the left operand is empty.
+ *
  *-------------------------------------------------------------------------
  */
 static void
@@ -1320,9 +1457,9 @@ H5Z_do_op(H5Z_node* tree)
     else if(tree->type == H5Z_XFORM_MULT)
 	H5Z_XFORM_DO_OP3(*)
     else if(tree->type == H5Z_XFORM_PLUS)
-	H5Z_XFORM_DO_OP3(+)
+	H5Z_XFORM_DO_OP6(+)
     else if(tree->type == H5Z_XFORM_MINUS)
-	H5Z_XFORM_DO_OP3(-)
+	H5Z_XFORM_DO_OP6(-)
 
     FUNC_LEAVE_NOAPI_VOID;
 }
@@ -1379,7 +1516,7 @@ H5Z_xform_create(const char *expr)
      * we don't need to allocate any space since no array will have to be
      * stored */
     if(count > 0)
-	if(NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val = (void *)H5MM_calloc(count * sizeof(void *))))
+	if(NULL == (data_xform_prop->dat_val_pointers->ptr_dat_val = (void **)H5MM_calloc(count * sizeof(void *))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for pointers in transform array")
 
     /* Initialize the num_ptrs field, which will be used to keep track of the number of copies
@@ -1514,7 +1651,7 @@ H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop)
 		count++;
 
 	if(count > 0)
-	    if(NULL == (new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void *)H5MM_calloc(count * sizeof(void *))))
+	    if(NULL == (new_data_xform_prop->dat_val_pointers->ptr_dat_val = (void **)H5MM_calloc(count * sizeof(void *))))
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory for pointers in transform array")
 
 	/* Zero out num_pointers prior to H5Z_xform_cop_tree call; that call will increment it to the right amount */

@@ -1793,15 +1793,17 @@ accum_printf(void)
         printf("=====================================================\n");
     } else {
         printf("=====================================================\n");
-        printf(" accumulator allocated size == %lu\n", (unsigned long)accum->alloc_size);
-        printf(" accumulated data size      == %lu\n", (unsigned long)accum->size);
-        printf(" accumulator dirty?         == %d\n", accum->dirty);
+        printf(" accumulator allocated size == %zu\n", accum->alloc_size);
+        printf(" accumulated data size      == %zu\n", accum->size);
+        HDfprintf(stdout, " accumulator dirty?         == %t\n", accum->dirty);
         printf("=====================================================\n");
-        printf(" start of accumulated data, loc = %llu\n", accum->loc);
-        if (accum->dirty) printf(" start of dirty region, loc = %llu\n", accum->loc + accum->dirty_off);
-        if (accum->dirty) printf(" end of dirty region,   loc = %llu\n", accum->loc + accum->dirty_off + accum->dirty_len);
-        printf(" end of accumulated data,   loc = %llu\n", accum->loc + accum->size);
-        printf(" end of accumulator allocation,   loc = %llu\n", accum->loc + accum->alloc_size);
+        HDfprintf(stdout, " start of accumulated data, loc = %a\n", accum->loc);
+        if(accum->dirty) {
+            HDfprintf(stdout, " start of dirty region, loc = %a\n", (haddr_t)(accum->loc + accum->dirty_off));
+            HDfprintf(stdout, " end of dirty region,   loc = %a\n", (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
+        } /* end if */
+        HDfprintf(stdout, " end of accumulated data,   loc = %a\n", (haddr_t)(accum->loc + accum->size));
+        HDfprintf(stdout, " end of accumulator allocation,   loc = %a\n", (haddr_t)(accum->loc + accum->alloc_size));
         printf("=====================================================\n");
     }
     printf("\n\n");

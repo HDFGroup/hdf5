@@ -135,9 +135,6 @@ typedef struct {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
-    hid_t dxpl_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
-    hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data);
 static htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr,
     const char* name_to_open);
 
@@ -437,8 +434,10 @@ H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
         if(NULL == (udata->attr = H5A_copy(NULL, (H5A_t *)mesg->native)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy attribute")
 
-        /* Assign [somewhat arbitrary] creation order value, for older versions of the format */
-        if(oh->version == H5O_VERSION_1)
+        /* Assign [somewhat arbitrary] creation order value, for older versions
+         * of the format or if creation order is not tracked */
+        if(oh->version == H5O_VERSION_1
+                || !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
             udata->attr->shared->crt_idx = sequence;
 
         /* Stop iterating */
@@ -704,18 +703,23 @@ H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_t
         HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
 
     /* Count all opened attributes */
-    num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, FALSE);
+    if(H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, FALSE, &num_open_attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't count opened attributes")
 
     /* Find out whether the attribute has been opened */
     if(num_open_attr) {
+        size_t check_num_attr;  /* Number of open attribute IDs */
         size_t u;          /* Local index variable */
 
         /* Allocate space for the attribute ID list */
         if(NULL == (attr_id_list = (hid_t *)H5MM_malloc(num_open_attr * sizeof(hid_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "unable to allocate memory for attribute ID list")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "unable to allocate memory for attribute ID list")
 
         /* Retrieve the IDs of all opened attributes */
-        H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list, FALSE);
+        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list, FALSE, &check_num_attr) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get IDs of opened attributes")
+	if(check_num_attr != num_open_attr)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "open attribute count mismatch")
 
         /* Iterate over the attributes */
         for(u = 0; u < num_open_attr; u++) {
@@ -1260,7 +1264,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
     hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)

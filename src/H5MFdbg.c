@@ -99,9 +99,9 @@ typedef struct {
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_sects_debug_cb(const H5FS_section_info_t *_sect, void *_udata)
+H5MF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 {
-    const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;       /* Section to dump info */
+    H5MF_free_section_t *sect = (H5MF_free_section_t *)_sect;       /* Section to dump info */
     H5MF_debug_iter_ud_t *udata = (H5MF_debug_iter_ud_t *)_udata;         /* User data for callbacks */
     herr_t      ret_value = SUCCEED;    /* Return value */
 

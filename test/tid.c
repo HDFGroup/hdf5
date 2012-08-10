@@ -451,11 +451,11 @@ out:
 
 	/* Test boundary cases with lots of types */
 
-/* Type IDs range from H5I_NTYPES to MAX_NUM_TYPES.  The system will assign */
-/* IDs in sequential order until MAX_NUM_TYPES IDs have been given out, at which */
+/* Type IDs range from H5I_NTYPES to H5I_MAX_NUM_TYPES.  The system will assign */
+/* IDs in sequential order until H5I_MAX_NUM_TYPES IDs have been given out, at which */
 /* point it will search for type IDs that were allocated but have since been */
 /* deleted. */
-/* This test will allocate IDs up to MAX_NUM_TYPES, ensure that IDs wrap around */
+/* This test will allocate IDs up to H5I_MAX_NUM_TYPES, ensure that IDs wrap around */
 /* to low values successfully, ensure that an error is thrown when all possible */
 /* type IDs are taken, then ensure that deleting types frees up their IDs. */
 /* Note that this test depends on the implementation of IDs, so may break */
@@ -463,7 +463,7 @@ out:
 /* Also note that if someone else registered a user-defined type and forgot to */
 /* destroy it, this test will mysteriously fail (because it will expect there to */
 /* be one more "free" type ID than there is). */
-/* H5I_NTYPES is defined in h5public.h, MAX_NUM_TYPES is defined in h5pkg.h */
+/* H5I_NTYPES is defined in h5public.h, H5I_MAX_NUM_TYPES is defined in h5pkg.h */
 static int test_id_type_list(void)
 {
 	H5I_type_t startType;	/* The first type ID we were assigned in this test */
@@ -477,14 +477,14 @@ static int test_id_type_list(void)
 		goto out;
 
 	/* Sanity check */
-	if(startType >= MAX_NUM_TYPES || startType < H5I_NTYPES)
+	if(startType >= H5I_MAX_NUM_TYPES || startType < H5I_NTYPES)
 	{
 		/* Error condition, throw an error */
 		CHECK(1, 1, "H5Iregister_type");
 		goto out;
 	}
-	/* Create types up to MAX_NUM_TYPES */
-	for(i = startType + 1; i < MAX_NUM_TYPES; i++)
+	/* Create types up to H5I_MAX_NUM_TYPES */
+	for(i = startType + 1; i < H5I_MAX_NUM_TYPES; i++)
 	{
 		currentType = H5Iregister_type((size_t)8, 0, (H5I_free_t) free );
 		CHECK(currentType, H5I_BADID, "H5Iregister_type");
@@ -519,7 +519,7 @@ static int test_id_type_list(void)
 		goto out;
 
 	/* Cleanup.  Destroy all types. */
-	for(i = H5I_NTYPES; i < MAX_NUM_TYPES; i++)
+	for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES; i++)
 		H5Idestroy_type((H5I_type_t) i);
 
 	return 0;
@@ -527,7 +527,7 @@ static int test_id_type_list(void)
 out:
     /* Cleanup.  For simplicity, just destroy all types and ignore errors. */
 	H5E_BEGIN_TRY
-		for(i = H5I_NTYPES; i < MAX_NUM_TYPES; i++)
+		for(i = H5I_NTYPES; i < H5I_MAX_NUM_TYPES; i++)
 			H5Idestroy_type((H5I_type_t) i);
 	H5E_END_TRY
 	return -1;

@@ -46,10 +46,11 @@ static herr_t H5O_linfo_free(void *_mesg);
 static herr_t H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
 static void *H5O_linfo_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-    void *udata, hid_t dxpl_id);
-static herr_t H5O_linfo_post_copy_file(const H5O_loc_t *parent_src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
-    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
+static herr_t H5O_linfo_post_copy_file(const H5O_loc_t *parent_src_oloc,
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
+    unsigned *mesg_flags, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_linfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -205,7 +206,7 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
 
     /* The flags for the link indices */
     index_flags = linfo->track_corder ? H5O_LINFO_TRACK_CORDER : 0;
-    index_flags |= linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0;
+    index_flags = (uint8_t)(index_flags | (linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0));
     *p++ = index_flags;
 
     /* Max. link creation order value for the group, if tracked */
@@ -295,10 +296,10 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     /* Set return value */
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
-                + (linfo->track_corder ? 8 : 0) /* Curr. max. creation order value */
-                + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
-                + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
-                + (linfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
+                + (linfo->track_corder ? (size_t)8 : 0) /* Curr. max. creation order value */
+                + (size_t)H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
+                + (size_t)H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
+                + (linfo->index_corder ? (size_t)H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_size() */
@@ -379,8 +380,8 @@ done:
  */
 static void *
 H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void *_udata,
-    hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5O_linfo_t          *linfo_src = (H5O_linfo_t *) native_src;
     H5O_linfo_t          *linfo_dst = NULL;
@@ -473,7 +474,7 @@ H5O_linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */
     if(H5G__dense_insert(udata->dst_oloc->file, udata->dxpl_id, udata->dst_linfo, &dst_lnk) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert destination link")
 
     /* Reset metadata tag in dxpl_id */
     H5_END_TAG(FAIL);
@@ -501,7 +502,8 @@ done:
  */
 static herr_t
 H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+    H5O_loc_t *dst_oloc, void *mesg_dst, unsigned UNUSED *mesg_flags,
+    hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     const H5O_linfo_t   *linfo_src = (const H5O_linfo_t *)mesg_src;
     H5O_linfo_t         *linfo_dst = (H5O_linfo_t *)mesg_dst;

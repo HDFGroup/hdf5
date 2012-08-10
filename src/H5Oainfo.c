@@ -46,11 +46,11 @@ static herr_t H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 static herr_t H5O_ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata,
-    hid_t dxpl_id);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc,
-    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id,
-    H5O_copy_t *cpy_info);
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst,
+    unsigned *mesg_flags, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_ainfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -196,7 +196,7 @@ H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
 
     /* The flags for the attribute indices */
     flags = ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
-    flags |= ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0;
+    flags = (unsigned char)(flags | (ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0));
     *p++ = flags;
 
     /* Max. creation order value for the object */
@@ -284,12 +284,12 @@ H5O_ainfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set return value */
-    ret_value = 1                       /* Version */
+    ret_value = (size_t)(1                       /* Version */
                 + 1                     /* Index flags */
                 + (ainfo->track_corder ? 2 : 0) /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" attributes */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of attributes */
-                + (ainfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of attributes */
+                + (ainfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0));   /* Address of v2 B-tree for indexing creation order values of attributes */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_size() */
@@ -403,7 +403,8 @@ H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  */
 static void *
 H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;
@@ -427,12 +428,12 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
         /* copy dense attribute */
-        
+
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);
 
         if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
+            HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
 
         /* Reset metadata tag */
         H5_END_TAG(NULL);
@@ -468,7 +469,8 @@ done:
  */
 static herr_t
 H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
-    H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+    H5O_loc_t *dst_oloc, void *mesg_dst, unsigned UNUSED *mesg_flags,
+    hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     const H5O_ainfo_t *ainfo_src = (const H5O_ainfo_t *)mesg_src;
     herr_t ret_value = SUCCEED;   /* Return value */

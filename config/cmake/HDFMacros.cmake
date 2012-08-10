@@ -35,29 +35,60 @@ ENDMACRO (IDE_SOURCE_PROPERTIES)
 
 #-------------------------------------------------------------------------------
 MACRO (TARGET_NAMING target libtype)
-  IF (WIN32 AND NOT MINGW)
+  IF (WIN32)
     IF (${libtype} MATCHES "SHARED")
       SET_TARGET_PROPERTIES (${target} PROPERTIES OUTPUT_NAME "${target}dll")
     ENDIF (${libtype} MATCHES "SHARED")
-  ENDIF (WIN32 AND NOT MINGW)
+  ENDIF (WIN32)
 ENDMACRO (TARGET_NAMING)
+
+#-------------------------------------------------------------------------------
+MACRO (INSTALL_TARGET_PDB target targetdestination targetcomponent)
+  IF (WIN32 AND MSVC)
+    GET_TARGET_PROPERTY (target_name ${target} RELWITHDEBINFO_OUTPUT_NAME)
+    INSTALL (
+      FILES
+          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${target_name}.pdb
+      DESTINATION
+          ${targetdestination}
+      CONFIGURATIONS RelWithDebInfo
+      COMPONENT ${targetcomponent}
+  )
+  ENDIF (WIN32 AND MSVC)
+ENDMACRO (INSTALL_TARGET_PDB)
+
+#-------------------------------------------------------------------------------
+MACRO (INSTALL_PROGRAM_PDB target targetdestination targetcomponent)
+  IF (WIN32 AND MSVC)
+    GET_TARGET_PROPERTY (target_name ${target} RELWITHDEBINFO_OUTPUT_NAME)
+    GET_TARGET_PROPERTY (target_prefix h5dump PREFIX)
+    INSTALL (
+      FILES
+          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${target_prefix}${target_name}.pdb
+      DESTINATION
+          ${targetdestination}
+      CONFIGURATIONS RelWithDebInfo
+      COMPONENT ${targetcomponent}
+  )
+  ENDIF (WIN32 AND MSVC)
+ENDMACRO (INSTALL_PROGRAM_PDB)
 
 #-------------------------------------------------------------------------------
 MACRO (HDF_SET_LIB_OPTIONS libtarget libname libtype)
   # message (STATUS "${libname} libtype: ${libtype}")
   IF (${libtype} MATCHES "SHARED")
-    IF (WIN32 AND NOT MINGW)
+    IF (WIN32)
       SET (LIB_RELEASE_NAME "${libname}")
       SET (LIB_DEBUG_NAME "${libname}_D")
-    ELSE (WIN32 AND NOT MINGW)
+    ELSE (WIN32)
       SET (LIB_RELEASE_NAME "${libname}")
       SET (LIB_DEBUG_NAME "${libname}_debug")
-    ENDIF (WIN32 AND NOT MINGW)
+    ENDIF (WIN32)
   ELSE (${libtype} MATCHES "SHARED")
-    IF (WIN32 AND NOT MINGW)
+    IF (WIN32)
       SET (LIB_RELEASE_NAME "lib${libname}")
       SET (LIB_DEBUG_NAME "lib${libname}_D")
-    ELSE (WIN32 AND NOT MINGW)
+    ELSE (WIN32)
       # if the generator supports configuration types or if the CMAKE_BUILD_TYPE has a value
       IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         SET (LIB_RELEASE_NAME "${libname}")
@@ -66,7 +97,7 @@ MACRO (HDF_SET_LIB_OPTIONS libtarget libname libtype)
         SET (LIB_RELEASE_NAME "lib${libname}")
         SET (LIB_DEBUG_NAME "lib${libname}_debug")
       ENDIF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-    ENDIF (WIN32 AND NOT MINGW)
+    ENDIF (WIN32)
   ENDIF (${libtype} MATCHES "SHARED")
   
   SET_TARGET_PROPERTIES (${libtarget}

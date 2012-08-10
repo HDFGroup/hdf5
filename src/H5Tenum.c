@@ -91,7 +91,7 @@ H5Tenum_create(hid_t parent_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer data type")
 
     /* Build new type */
-    if((dt=H5T_enum_create(parent))==NULL)
+    if(NULL == (dt = H5T__enum_create(parent)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot create enum type")
     /* Atomize the type */
     if ((ret_value=H5I_register(H5I_DATATYPE, dt, TRUE))<0)
@@ -103,7 +103,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_enum_create
+ * Function:	H5T__enum_create
  *
  * Purpose:	Private function for H5Tenum_create.  Create a new
  *              enumeration data type based on the specified
@@ -121,16 +121,16 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_enum_create(const H5T_t *parent)
+H5T__enum_create(const H5T_t *parent)
 {
     H5T_t	*ret_value;		/*new enumeration data type	*/
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_PACKAGE
 
     assert(parent);
 
     /* Build new type */
-    if(NULL == (ret_value = H5T_alloc()))
+    if(NULL == (ret_value = H5T__alloc()))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     ret_value->shared->type = H5T_ENUM;
     ret_value->shared->parent = H5T_copy(parent, H5T_COPY_ALL);
@@ -183,7 +183,7 @@ H5Tenum_insert(hid_t type, const char *name, const void *value)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no value specified")
 
     /* Do work */
-    if (H5T_enum_insert(dt, name, value)<0)
+    if(H5T__enum_insert(dt, name, value) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to insert new enumeration member")
 
 done:
@@ -192,7 +192,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_enum_insert
+ * Function:	H5T__enum_insert
  *
  * Purpose:	Insert a new member having a NAME and VALUE into an
  *		enumeration data TYPE.  The NAME and VALUE must both be
@@ -211,14 +211,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_enum_insert(const H5T_t *dt, const char *name, const void *value)
+H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 {
     unsigned	i;
     char	**names=NULL;
     uint8_t	*values=NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     assert(dt);
     assert(name && *name);
@@ -292,7 +292,7 @@ H5Tget_member_value(hid_t type, unsigned membno, void *value/*out*/)
     if (!value)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null value buffer")
 
-    if (H5T_get_member_value(dt, membno, value)<0)
+    if(H5T__get_member_value(dt, membno, value) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get member value")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -300,9 +300,9 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_get_member_value
+ * Function:	H5T__get_member_value
  *
- * Purpose:	Private function for H5T_get_member_value.  Return the
+ * Purpose:	Private function for H5T__get_member_value.  Return the
  *              value for an enumeration data type member.
  *
  * Return:	Success:	non-negative with the member value copied
@@ -318,19 +318,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
+H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value/*out*/)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE_NOERR
 
     assert(dt);
     assert(value);
 
     HDmemcpy(value, dt->shared->u.enumer.value + membno*dt->shared->size, dt->shared->size);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -439,7 +436,7 @@ H5T_enum_nameof(const H5T_t *dt, const void *value, char *name/*out*/, size_t si
      * and search on the copied datatype to protect the original order. */
     if(NULL == (copied_dt = H5T_copy(dt, H5T_COPY_ALL)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy data type")
-    if(H5T_sort_value(copied_dt, NULL) < 0)
+    if(H5T__sort_value(copied_dt, NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOMPARE, NULL, "value sort failed")
 
     lt = 0;
@@ -578,7 +575,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value/*out*/)
      * and search on the copied datatype to protect the original order. */
     if (NULL==(copied_dt=H5T_copy(dt, H5T_COPY_ALL)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
-    if(H5T_sort_name(copied_dt, NULL)<0)
+    if(H5T__sort_name(copied_dt, NULL) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
 
     lt = 0;

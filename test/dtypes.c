@@ -1127,10 +1127,8 @@ test_compound_5(void)
     }
 
     /* Free memory buffers */
-    if(buf)
-        HDfree(buf);
-    if(bkg)
-        HDfree(bkg);
+    HDfree(buf);
+    HDfree(bkg);
     return retval;
 }
 
@@ -3964,6 +3962,9 @@ test_str_create(void)
     if((query_size = H5Tget_size(fixed_str2)) == 0) goto error;
     if(query_size != str_size) goto error;
 
+    if(H5Tclose(fixed_str1) < 0) goto error;
+    if(H5Tclose(fixed_str2) < 0) goto error;
+
     /* Create variable-length string in two ways and make sure they are the same */
     if((vlen_str1 = mkstr((size_t)H5T_VARIABLE, H5T_STR_NULLTERM)) < 0) goto error;
 
@@ -3978,6 +3979,8 @@ test_str_create(void)
     if((is_vl_str = H5Tis_variable_str(vlen_str2)) < 0) goto error;
     if(!is_vl_str) goto error; 
 
+    if(H5Tclose(vlen_str1) < 0) goto error;
+    if(H5Tclose(vlen_str2) < 0) goto error;
 
     PASSED();
     return 0;
@@ -4693,11 +4696,12 @@ test_bitfield_funcs(void)
 {
     hid_t		type=-1, ntype=-1, super=-1;
     int                 size;
-    char*               tag;
+    char*               tag=0;
     H5T_pad_t           inpad;
     H5T_cset_t          cset;
     H5T_str_t           strpad;
     herr_t              ret;
+    int                 retval=-1;
 
     TESTING("some type functions for bitfield");
 
@@ -4781,16 +4785,18 @@ test_bitfield_funcs(void)
         goto error;
     } /* end if */
 
-    H5Tclose(type);
-    H5Tclose(ntype);
-    PASSED();
-    reset_hdf5();
-    return 0;
+    retval = 0;
 
  error:
+
+    if (retval == -1) retval = 1;
+
+    HDfree(tag);
+    H5Tclose(ntype);
     H5Tclose(type);
+    if (retval == 0) PASSED();
     reset_hdf5();
-    return 1;
+    return retval;
 }
 
 
@@ -7044,11 +7050,13 @@ error:
  */
 int test_utf_ascii_conv(void)
 {
-    hid_t fid;
-    hid_t did;
-    hid_t utf8_vtid, ascii_vtid;
-    hid_t utf8_tid, ascii_tid;
-    hid_t sid;
+    hid_t fid = -1;
+    hid_t did = -1;
+    hid_t utf8_vtid = -1;
+    hid_t ascii_vtid = -1;
+    hid_t utf8_tid = -1;
+    hid_t ascii_tid = -1;
+    hid_t sid = -1;
     const char *utf8_w = "foo!";
     char *ascii_r = NULL;
     const char *ascii_w = "bar!";

@@ -54,7 +54,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/run-c-ex.sh.in $(srcdir)/testh5cc.sh.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
@@ -382,6 +382,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
 
 INSTALL_SCRIPT_FILES = run-c-ex.sh
 INSTALL_TOP_SCRIPT_FILES = run-all-ex.sh
+INSTALL_TOP_FILES = README
 
 # The external link examples demonstrate how to use paths; they need
 # directories to be created to do this.
@@ -674,7 +675,7 @@ install-data-local:
 uninstall-local:
 	@$(MAKE) $(AM_MAKEFLAGS) uninstall-examples
 
-install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
+install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) 
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
 	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);    \
@@ -684,6 +685,12 @@ install-examples: $(EXAMPLEDIR) $(INSTALL_FILES)
 	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \
 	  if test $$f != X; then                                             \
 	    (set -x; $(INSTALL) $$f $(EXAMPLEDIR)/. || exit 1);\
+	  fi;                                                                \
+	done
+	@for f in X $(INSTALL_TOP_FILES); do                       \
+	  if test $$f != X; then                                             \
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLETOPDIR)/. || exit 1); \
+            chmod a-x $(EXAMPLETOPDIR)/$$f;\
 	  fi;                                                                \
 	done
 	@for f in X $(INSTALL_TOP_SCRIPT_FILES); do                       \
@@ -698,6 +705,9 @@ uninstall-examples:
         fi
 	@if test -n "$(INSTALL_SCRIPT_FILES)" -a -d $(EXAMPLEDIR); then           \
 	  set -x; cd $(EXAMPLEDIR) && $(RM) $(INSTALL_SCRIPT_FILES);              \
+        fi
+	@if test -n "$(INSTALL_TOP_FILES)" -a -d $(EXAMPLETOPDIR); then    \
+	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_FILES);       \
         fi
 	@if test -n "$(INSTALL_TOP_SCRIPT_FILES)" -a -d $(EXAMPLETOPDIR); then    \
 	  set -x; cd $(EXAMPLETOPDIR) && $(RM) $(INSTALL_TOP_SCRIPT_FILES);       \

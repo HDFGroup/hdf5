@@ -140,7 +140,7 @@ H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
     unsigned    my_idx = 0;     /* Final index value */
     int         cmp = -1;       /* Key comparison value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     hi = nrec;
     while(lo < hi && cmp) {

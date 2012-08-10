@@ -43,6 +43,8 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 #define DATASETNAME2	"Data2"
 #define DATASETNAME3	"Data3"
 #define DATASETNAME4	"Data4"
+#define DATASETNAME5	"Data5"
+#define DATASETNAME6	"Data6"
 
 /* Hyperslab layout styles */
 #define BYROW           1       /* divide into slabs of rows */
@@ -225,6 +227,7 @@ void independent_group_read(void);
 void test_fapl_mpio_dup(void);
 void test_fapl_mpiposix_dup(void);
 void test_split_comm_access(void);
+void dataset_atomicity(void);
 void test_avoid_truncation(void);
 void dataset_writeInd(void);
 void dataset_writeAll(void);
@@ -267,6 +270,7 @@ void lower_dim_size_comp_test(void);
 void link_chunk_collective_io_test(void);
 void contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type);
 void checker_board_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type);
+void file_image_daisy_chain_test(void);
 #ifdef H5_HAVE_FILTER_DEFLATE
 void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */

@@ -342,14 +342,14 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 #else /* H5_HAVE_PARALLEL */
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
-    assert(H5P_LST_DATASET_XFER_g!=(-1));
+    HDassert(H5P_LST_DATASET_XFER_g!=(-1));
 
-    H5AC_dxpl_id=H5P_DATASET_XFER_DEFAULT;
-    H5AC_noblock_dxpl_id=H5P_DATASET_XFER_DEFAULT;
-    H5AC_ind_dxpl_id=H5P_DATASET_XFER_DEFAULT;
+    H5AC_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    H5AC_noblock_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    H5AC_ind_dxpl_id = H5P_DATASET_XFER_DEFAULT;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 #endif /* H5_HAVE_PARALLEL */
@@ -376,7 +376,7 @@ H5AC_term_interface(void)
 {
     int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (H5_interface_initialize_g) {
 #ifdef H5_HAVE_PARALLEL

@@ -36,6 +36,13 @@ SET (H5_DEP_EXECUTABLES
     h5extend
 )
 
+#-----------------------------------------------------------------------------
+# Generate the h5cc file containing settings needed to compile programs
+#-----------------------------------------------------------------------------
+#IF (NOT WIN32)
+#  CONFIGURE_FILE (${HDF5_TOOLS_MISC_SOURCE_DIR}/h5cc.in ${HDF5_BINARY_DIR}/h5cc @ONLY)
+#ENDIF (NOT WIN32)
+
 ##############################################################################
 ##############################################################################
 ###           T E S T I N G                                                ###
@@ -322,11 +329,16 @@ ENDIF (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+
+INSTALL_PROGRAM_PDB (h5debug ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+INSTALL_PROGRAM_PDB (h5repart ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+INSTALL_PROGRAM_PDB (h5mkgrp ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+
 INSTALL (
     TARGETS
         h5debug h5repart h5mkgrp h5extend
     RUNTIME DESTINATION
-        ${HDF5_INSTALL_BIN_DIR}/tools
+        ${HDF5_INSTALL_BIN_DIR}
     COMPONENT
         toolsapplications
 )

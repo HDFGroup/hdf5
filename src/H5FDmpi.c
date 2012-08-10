@@ -56,12 +56,15 @@ char H5FD_mpi_native_g[] = "native";
 int
 H5FD_mpi_get_rank(const H5FD_t *file)
 {
-    const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
+    const H5FD_class_mpi_t *cls;
+
     int	ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file && cls);
+    assert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    assert(cls);
     assert(cls->get_rank);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
@@ -92,12 +95,14 @@ done:
 int
 H5FD_mpi_get_size(const H5FD_t *file)
 {
-    const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
+    const H5FD_class_mpi_t *cls;
     int	ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file && cls);
+    assert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    assert(cls);
     assert(cls->get_size);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
@@ -128,12 +133,14 @@ done:
 MPI_Comm
 H5FD_mpi_get_comm(const H5FD_t *file)
 {
-    const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
+    const H5FD_class_mpi_t *cls;
     MPI_Comm	ret_value;
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    assert(file && cls);
+    assert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    assert(cls);
     assert(cls->get_comm);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
@@ -466,7 +473,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
+H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype *btype, MPI_Datatype *ftype)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -478,56 +485,15 @@ H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype btype, MPI_Datatype ftype)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list")
 
     /* Set buffer MPI type */
-    if(H5P_insert(plist,H5FD_MPI_XFER_MEM_MPI_TYPE_NAME,H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE,&btype,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
+    if(H5P_set(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, btype) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
-    /* Set file MPI type */
-    if(H5P_insert(plist,H5FD_MPI_XFER_FILE_MPI_TYPE_NAME,H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE,&ftype,NULL,NULL,NULL,NULL,NULL,NULL)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
+    /* Set File MPI type */
+    if(H5P_set(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, ftype) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_mpi_setup_collective() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_mpi_teardown_collective
- *
- * Purpose:	Remove the temporary MPI-I/O properties from dxpl.
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Monday, June 17, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_mpi_teardown_collective(hid_t dxpl_id)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataset transfer list")
-
-    /* Remove buffer MPI type */
-    if(H5P_remove(dxpl_id,plist,H5FD_MPI_XFER_MEM_MPI_TYPE_NAME)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property")
-
-    /* Remove file MPI type */
-    if(H5P_remove(dxpl_id,plist,H5FD_MPI_XFER_FILE_MPI_TYPE_NAME)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "can't remove MPI-I/O property")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpi_teardown_collective() */
-
 #endif /* H5_HAVE_PARALLEL */
-

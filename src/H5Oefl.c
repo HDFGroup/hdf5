@@ -36,8 +36,8 @@ static void *H5O_efl_copy(const void *_mesg, void *_dest);
 static size_t H5O_efl_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_efl_reset(void *_mesg);
 static void *H5O_efl_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
-    void *udata, hid_t dxpl_id);
+    H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_efl_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			    int indent, int fwidth);
 
@@ -230,7 +230,7 @@ H5O_efl_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *
 	 */
 	HDassert(mesg->slot[u].name_offset);
 	H5F_ENCODE_LENGTH(f, p, mesg->slot[u].name_offset);
-	H5F_ENCODE_LENGTH(f, p, mesg->slot[u].offset);
+	H5F_ENCODE_LENGTH(f, p, (hsize_t)mesg->slot[u].offset);
 	H5F_ENCODE_LENGTH(f, p, mesg->slot[u].size);
     } /* end for */
 
@@ -351,13 +351,13 @@ H5O_efl_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     HDassert(f);
     HDassert(mesg);
 
-    ret_value = H5F_SIZEOF_ADDR(f) +			/*heap address	*/
+    ret_value = (size_t)H5F_SIZEOF_ADDR(f) +			/*heap address	*/
 		2 +					/*slots allocated*/
 		2 +					/*num slots used*/
 		4 +					/*reserved	*/
-		mesg->nused * (H5F_SIZEOF_SIZE(f) +	/*name offset	*/
-			       H5F_SIZEOF_SIZE(f) +	/*file offset	*/
-			       H5F_SIZEOF_SIZE(f));	/*file size	*/
+		mesg->nused * ((size_t)H5F_SIZEOF_SIZE(f) +	/*name offset	*/
+			       (size_t)H5F_SIZEOF_SIZE(f) +	/*file offset	*/
+			       (size_t)H5F_SIZEOF_SIZE(f));	/*file size	*/
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_efl_size() */
@@ -455,8 +455,8 @@ done:
  */
 static void *
 H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
-    hbool_t UNUSED *recompute_size, H5O_copy_t UNUSED *cpy_info,
-    void UNUSED *_udata, hid_t dxpl_id)
+    hbool_t UNUSED *recompute_size, unsigned UNUSED *mesg_flags,
+    H5O_copy_t UNUSED *cpy_info, void UNUSED *_udata, hid_t dxpl_id)
 {
     H5O_efl_t   *efl_src = (H5O_efl_t *) mesg_src;
     H5O_efl_t   *efl_dst = NULL;

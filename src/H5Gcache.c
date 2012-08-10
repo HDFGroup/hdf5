@@ -302,7 +302,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5G_node_dest(H5F_t *f, H5G_node_t *sym)
 {
     herr_t ret_value = SUCCEED;         /* Return value */

@@ -79,12 +79,12 @@ typedef struct {
 /********************/
 
 static herr_t H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-static const H5O_obj_class_t *H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id);
 static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
 static herr_t H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
 static herr_t H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr);
+static const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
 
 /*********************/
@@ -1259,7 +1259,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* Cache object header */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh = NULL;
 
     /* Reset metadata tag in dxpl_id */
@@ -1718,7 +1718,7 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
         while(curr_msg < cont_msg_info.nmsgs) {
             H5O_chunk_proxy_t *chk_proxy;       /* Proxy for chunk, to bring it into memory */
 #ifndef NDEBUG
-            unsigned chkcnt = oh->nchunks;      /* Count of chunks (for sanity checking) */
+            size_t chkcnt = oh->nchunks;      /* Count of chunks (for sanity checking) */
 #endif /* NDEBUG */
 
             /* Bring the chunk into the cache */
@@ -2008,15 +2008,15 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 
         /* Check version, to determine how to store time information */
         if(oh->version == H5O_VERSION_1) {
-            int	idx;                    /* Index of modification time message to update */
+            size_t	idx;                    /* Index of modification time message to update */
 
             /* Look for existing message */
-            for(idx = 0; idx < (int)oh->nmesgs; idx++)
+            for(idx = 0; idx < oh->nmesgs; idx++)
                 if(H5O_MSG_MTIME == oh->mesg[idx].type || H5O_MSG_MTIME_NEW == oh->mesg[idx].type)
                     break;
 
             /* Create a new message, if necessary */
-            if(idx == (int)oh->nmesgs) {
+            if(idx == oh->nmesgs) {
                 unsigned mesg_flags = 0;        /* Flags for message in object header */
 
                 /* If we would have to create a new message, but we aren't 'forcing' it, get out now */
@@ -2024,7 +2024,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
                     HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
                 /* Allocate space for the modification time message */
-                if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)) < 0)
+                if(H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now, &idx) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
 
                 /* Set the message's flags if appropriate */
@@ -2131,7 +2131,7 @@ done:
 herr_t
 H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
 {
-    int	idx;                        /* Local index variable */
+    size_t	idx;                /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2140,7 +2140,7 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
     HDassert(oh);
 
     /* Look for existing message */
-    for(idx = 0; idx < (int)oh->nmesgs; idx++)
+    for(idx = 0; idx < oh->nmesgs; idx++)
 	if(H5O_MSG_BOGUS == oh->mesg[idx].type)
             break;
 
@@ -2156,7 +2156,7 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
         bogus->u = H5O_BOGUS_VALUE;
 
         /* Allocate space in the object header for bogus message */
-	if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus)) < 0)
+	if(H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus, &idx) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
 
         /* Point to "bogus" information (take it over) */
@@ -2365,7 +2365,7 @@ H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type)
  *
  *-------------------------------------------------------------------------
  */
-static const H5O_obj_class_t *
+const H5O_obj_class_t *
 H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;                     /* Object header for location */
@@ -2402,7 +2402,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-const H5O_obj_class_t *
+static const H5O_obj_class_t *
 H5O_obj_class_real(H5O_t *oh)
 {
     size_t	i;                      /* Local index variable */
@@ -2716,8 +2716,8 @@ H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
     hdr->version = oh->version;
 
     /* Set the number of messages & chunks */
-    hdr->nmesgs = oh->nmesgs;
-    hdr->nchunks = oh->nchunks;
+    H5_ASSIGN_OVERFLOW(hdr->nmesgs, oh->nmesgs, size_t, unsigned);
+    H5_ASSIGN_OVERFLOW(hdr->nchunks, oh->nchunks, size_t, unsigned);
 
     /* Set the status flags */
     hdr->flags = oh->flags;

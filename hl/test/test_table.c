@@ -114,6 +114,27 @@ typedef struct particle3_t
     int    lati;
 } particle3_t;
 
+/*-------------------------------------------------------------------------
+ * a particle, used in the delete field test differing memory layout
+ *-------------------------------------------------------------------------
+ */
+
+/*  Push current alignment rule forcing 4-byte alignment boundary 
+ *  to the internal stack ...
+ */
+#pragma pack(push,4)
+    typedef struct particle4_t {
+        uint32_t   state;
+        double     posx;
+        double     posy;
+        float      atx[3];
+        float      aty[3];
+        float      rro[2];
+    } particle4_t;
+/* 
+ * ... and restore original alignment rules from stack
+ */
+#pragma pack(pop)
 
 
 /*-------------------------------------------------------------------------
@@ -350,6 +371,34 @@ static int test_table(hid_t fid, int do_write)
         sizeof( rbuf3[0].temperature),
         sizeof( rbuf3[0].lati)};
 
+    /*-------------------------------------------------------------------------
+    * initialize table parameters
+    * size and the offsets of struct members in memory
+    * these are used for the delete field test with differing memory layout
+    *-------------------------------------------------------------------------
+    */
+
+    /* Calculate the size and the offsets of our struct members in memory */
+    size_t tbl_size = sizeof(particle4_t);
+    size_t tbl_offset[NFIELDS+1] = { HOFFSET(particle4_t, state),
+                                   HOFFSET(particle4_t, posx),
+                                   HOFFSET(particle4_t, posy),
+                                   HOFFSET(particle4_t, atx),
+                                   HOFFSET(particle4_t, aty),
+                                   HOFFSET(particle4_t, rro)
+                                 };
+
+    /* Define an array of Particles */
+    particle4_t  p_data[NRECORDS] = {
+        {12112, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12113, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12114, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12115, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12116, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12117, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12118, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}},
+        {12119, 1.4, 2.5, {1,2,3},{4,5,6}, {99,100}}
+    };
 
     /*-------------------------------------------------------------------------
     * initialize table parameters
@@ -376,10 +425,23 @@ static int test_table(hid_t fid, int do_write)
         sizeof( rbuf[0].temperature),
         sizeof( rbuf[0].lati)
     };
+
+    const char *field_names4[NFIELDS+1] = 
+      { "F1", "F2", "F3", "F4", "F5", "F6"};
+    hid_t       field_type4[NFIELDS+1];
+    particle4_t fill_data[1] = { {9999999, -9999999, 999999, {999,999,999},{999,999,999}, {999,999}} };
+
+    hsize_t    nfields_out;
+    hsize_t    nrecords_out;
+    hid_t      arry3_32f;
+    hid_t      arry2_32f;
+    hsize_t    dims;
+
     const char *field_names[NFIELDS]  =
-    { "Name","Longitude","Pressure","Temperature","Latitude" };
+      { "Name","Longitude","Pressure","Temperature","Latitude" };
     hid_t field_type[NFIELDS];
     hid_t string_type = H5Tcopy( H5T_C_S1 );
+
     H5Tset_size( string_type, 16 );
     field_type[0] = string_type;
     field_type[1] = H5T_NATIVE_LONG;
@@ -818,6 +880,59 @@ static int test_table(hid_t fid, int do_write)
             goto out;
 
         PASSED();
+    }
+
+    /*------------------------------------------------------------------------
+     * Functions tested:
+     *
+     * H5TBdelete_record -- With differing memory layout from machine memory 
+     *                      layout. HDFFV-8055
+     *
+     *-------------------------------------------------------------------------
+     */
+    if (do_write)
+    {
+        TESTING2("deleting records (differing memory layout)");
+
+	dims = 3;
+	arry3_32f = H5Tarray_create2(H5T_NATIVE_FLOAT,  1, &dims); 
+
+	dims = 2;
+	arry2_32f = H5Tarray_create2(H5T_NATIVE_FLOAT,  1, &dims); 
+
+	/* Initialize the field field_type */
+	field_type4[0] = H5T_NATIVE_UINT32;
+	field_type4[1] = H5T_NATIVE_DOUBLE;
+	field_type4[2] = H5T_NATIVE_DOUBLE;
+	field_type4[3] = arry3_32f;
+	field_type4[4] = arry3_32f;
+	field_type4[5] = arry2_32f;
+
+	/* Make the table */
+	if (H5TBmake_table("Table Title",fid,"table",NFIELDS+1,(hsize_t)NRECORDS,
+                          tbl_size, field_names4, tbl_offset, field_type4,
+                          chunk_size, fill_data, compress, p_data)<0)
+	  goto out;
+	/* Delete records */
+	start    = 3;
+	nrecords = 3;
+	if (H5TBdelete_record(fid, "table", start, nrecords)<0)
+	  goto out;;
+	/* Get table info */
+	if (H5TBget_table_info(fid,"table", &nfields_out, &nrecords_out)<0)
+	  goto out;
+	/* check */
+	if( (int)nfields_out != (int)NFIELDS+1)
+	  goto out;
+      
+	if( (int)nrecords_out != (int)NRECORDS-3)
+	  goto out;
+    
+	/* close type */
+	H5Tclose(arry3_32f);
+	H5Tclose(arry2_32f);
+
+	PASSED();
     }
 
     /*-------------------------------------------------------------------------

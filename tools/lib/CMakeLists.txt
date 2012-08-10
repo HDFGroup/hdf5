@@ -40,6 +40,7 @@ H5_SET_LIB_OPTIONS (
     HDF5_TOOLS_LIB_NAME_RELEASE
   HDF5_TOOLS_LIB_NAME_DEBUG
 )
+#SET_TARGET_PROPERTIES (hdf5_tools PROPERTIES COMPILE_DEFINITIONS H5DIFF_DEBUG)
 SET_TARGET_PROPERTIES (hdf5_tools PROPERTIES FOLDER libraries/tools)
 
 ##############################################################################
@@ -79,6 +80,9 @@ ENDIF (APPLE)
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 IF (HDF5_EXPORTED_TARGETS)
+
+  INSTALL_TARGET_PDB (${HDF5_TOOLS_LIB_TARGET} ${HDF5_INSTALL_LIB_DIR} toolslibraries)
+  
   INSTALL (
       TARGETS
           ${HDF5_TOOLS_LIB_TARGET}

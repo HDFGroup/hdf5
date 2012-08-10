@@ -33532,6 +33532,7 @@ check_notify_cb(void)
 
     reset_entries();
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
+    if ( !file_ptr ) CACHE_ERROR("setup_cache returned NULL")
     cache_ptr = file_ptr->shared->cache;
     base_addr = entries[entry_type];
 
@@ -33675,8 +33676,7 @@ check_notify_cb(void)
     } /* end for */
 
 done:
-    if(file_ptr)
-        takedown_cache(file_ptr, FALSE, FALSE);
+    takedown_cache(file_ptr, FALSE, FALSE);
 
     if ( pass )
         PASSED()

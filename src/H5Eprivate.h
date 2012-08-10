@@ -69,12 +69,33 @@ typedef struct H5E_t H5E_t;
 }
 
 /*
+ * HGOTO_ERROR_TAG macro, used like HGOTO_ERROR between H5_BEGIN_TAG and
+ * H5_END_TAG statements.  Resets the metadata tag before leaving the function.
+ */
+#define HGOTO_ERROR_TAG(maj, min, ret_val, ...) {                              \
+   if(H5AC_tag(my_dxpl_id, prv_tag, NULL) < 0)                                 \
+      HERROR(H5E_CACHE, H5E_CANTTAG, "unable to apply metadata tag");          \
+   HCOMMON_ERROR(maj, min, __VA_ARGS__);                                       \
+   HGOTO_DONE(ret_val)                                                         \
+}
+
+/*
  * HGOTO_DONE macro, used to facilitate normal return between a FUNC_ENTER()
  * and a FUNC_LEAVE() within a function body. The argument is the return
  * value which is assigned to the `ret_value' variable.	 Control branches to
  * the `done' label.
  */
 #define HGOTO_DONE(ret_val) {ret_value = ret_val; goto done;}
+
+/*
+ * HGOTO_DONE_TAG macro, used like HGOTO_DONE between H5_BEGIN_TAG and
+ * H5_END_TAG statements.  Resets the metadata tag before leaving the function.
+ */
+#define HGOTO_DONE_TAG(ret_val, err) {                                         \
+   if(H5AC_tag(my_dxpl_id, prv_tag, NULL) < 0)                                 \
+      HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, err, "unable to apply metadata tag") \
+   HGOTO_DONE(ret_val)                                                         \
+}
 
 /*
  * Macros handling system error messages as described in C standard.

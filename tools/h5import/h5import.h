@@ -44,20 +44,20 @@
 #define MAX_NUM_DIMENSION  32
 #define BASE_10 10
 
-#define CHUNK            0
-#define COMPRESS         1
-#define EXTEND           2
-#define EXTERNALSTORE    3
+#define PATH             0
+#define INPUT_CLASS      1
+#define INPUT_SIZE       2
+#define RANK             3
 #define DIM              4
-#define RANK             5
-#define PATH             6
-#define INPUT_CLASS      7
-#define INPUT_SIZE       8
-#define OUTPUT_CLASS     9
-#define OUTPUT_SIZE     10
-#define OUTPUT_ARCH     11
-#define OUTPUT_B_ORDER  12
-#define COMPRESS_PARAM  13
+#define OUTPUT_CLASS     5
+#define OUTPUT_SIZE      6
+#define OUTPUT_ARCH      7
+#define OUTPUT_B_ORDER   8
+#define CHUNK            9
+#define COMPRESS         10
+#define COMPRESS_PARAM   11
+#define EXTERNALSTORE    12
+#define EXTEND           13
 
 /* data types */
 #define H5DT_INT8      signed char
@@ -80,6 +80,7 @@ struct path_info
 
 struct Input
 {
+    int h5dumpInput;
     struct path_info path;
     int inputClass;
     int inputSize;
@@ -198,6 +199,7 @@ static int  parsePathInfo(struct path_info *path, char *strm);
 static int  parseDimensions(struct Input *in, char *strm);
 static int  getInputSize(struct Input *in, int ival);
 static int  getInputClass(struct Input *in, char * strm);
+static int  getInputClassType(struct Input *in, char * strm);
 static int  InputClassStrToInt(char *temp);
 static int  getRank(struct Input *in, FILE *strm);
 static int  getDimensionSizes(struct Input *in, FILE *strm);
@@ -225,6 +227,7 @@ static int  readUIntegerData(FILE *strm, struct Input *in);
 static int  allocateUIntegerStorage(struct Input *in);
 static int  validateConfigurationParameters(struct Input *in);
 static int  processStrData(FILE *strm, struct Input *in, hid_t file_id);
+static int  processStrHDFData(FILE *strm, struct Input *in, hid_t file_id);
 
 #endif  /* H5IMPORT_H__ */
 

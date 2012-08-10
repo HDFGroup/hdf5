@@ -42,7 +42,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap
+           freespace mf farray earray btree2 fheap file_image
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
@@ -63,7 +63,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_
 BUILD_ALL_PROGS=gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
-    gen_sizes_lheap gen_eoamessage
+    gen_sizes_lheap gen_file_image
 
 if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
@@ -108,11 +108,11 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
     copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
-    sys_file1 tfile[1-5].h5 th5s[1-3].h5 lheap.h5 trunc.h5 fheap.h5 ohdr.h5 \
+    sys_file1 tfile[1-6].h5 th5s[1-4].h5 lheap.h5 trunc.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
-    stdio.h5 sec2.h5 dtypes[0-9].h5 dt_arith[1-2].h5 tattr.h5        \
+    stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
     trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 flush.h5         \
@@ -125,8 +125,10 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
     objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5 efc[0-5].h5 log_vfd_out.log new_multi_file_v16-r.h5    \
-    new_multi_file_v16-s.h5
+    earray.h5 efc[0-5].h5 log_vfd_out.log                            \
+    new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
+    split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
+    file_image_core_test.h5.copy
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

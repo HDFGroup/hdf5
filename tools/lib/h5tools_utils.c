@@ -852,6 +852,8 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
 
         /* set target obj type to return */
         link_info->trg_type = trg_oinfo.type;
+        link_info->objno = trg_oinfo.addr;
+        link_info->fileno = trg_oinfo.fileno;
     } /* end if */
     else
         link_info->trg_type = H5O_TYPE_UNKNOWN;

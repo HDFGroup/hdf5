@@ -70,10 +70,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
    *(p) = (uint8_t)(((i) >> 24) & 0xff); (p)++;				      \
 }
 
-/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* Encode an unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
-#  define UINT32ENCODE_VAR(p, n, l) {					      \
-   uint32_t _n = (n);							      \
+#  define ENCODE_VAR(p, typ, n, l) {					      \
+   typ _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
 									      \
@@ -81,6 +81,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
       *_p++ = (uint8_t)(_n & 0xff);					      \
    (p) = (uint8_t*)(p) + l;						      \
 }
+
+/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT32ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint32_t, n, l)
 
 #  define INT64ENCODE(p, n) {						      \
    int64_t _n = (n);							      \
@@ -108,15 +112,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* Encode a 64-bit unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
-#  define UINT64ENCODE_VAR(p, n, l) {					      \
-   uint64_t _n = (n);							      \
-   size_t _i;								      \
-   uint8_t *_p = (uint8_t*)(p);						      \
-									      \
-   for(_i = 0; _i < l; _i++, _n >>= 8)					      \
-      *_p++ = (uint8_t)(_n & 0xff);					      \
-   (p) = (uint8_t*)(p) + l;						      \
-}
+#  define UINT64ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint64_t, n, l)
 
 /* DECODE converts little endian bytes pointed by p to integer values and store
  * it in i.  For signed values, need to do sign-extension when converting
@@ -152,12 +148,9 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;			      \
 }
 
-/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* Decode a variable-sized buffer */
 /* (Assumes that the high bits of the integer will be zero) */
-/* (Note: this is exactly the same code as the 64-bit variable-length decoder
- *      and bugs/improvements should be make in both places - QAK)
- */
-#  define UINT32DECODE_VAR(p, n, l) {					      \
+#  define DECODE_VAR(p, n, l) {						      \
    size_t _i;								      \
 									      \
    n = 0;								      \
@@ -166,6 +159,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
       n = (n << 8) | *(--p);						      \
    (p) += l;								      \
 }
+
+/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* (Assumes that the high bits of the integer will be zero) */
+#  define UINT32DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
@@ -191,18 +188,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
-/* (Note: this is exactly the same code as the 32-bit variable-length decoder
- *      and bugs/improvements should be make in both places - QAK)
- */
-#  define UINT64DECODE_VAR(p, n, l) {					      \
-   size_t _i;								      \
-									      \
-   n = 0;								      \
-   (p) += l;								      \
-   for (_i = 0; _i < l; _i++)						      \
-      n = (n << 8) | *(--p);						      \
-   (p) += l;								      \
-}
+#  define UINT64DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 /* Address-related macros */
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \
@@ -420,6 +406,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_ACS_LATEST_FORMAT_NAME              "latest_format" /* 'Use latest format version' flag */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
+#define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */
@@ -531,8 +518,8 @@ H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
-H5_DLL size_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref);
-H5_DLL size_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);
+H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL herr_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);

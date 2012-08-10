@@ -33,6 +33,9 @@ STAT_BIN=`pwd`/$STAT    # The path of the tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 nerrors=0
 verbose=yes
@@ -77,6 +80,7 @@ $SRC_H5STAT_TESTFILES/h5stat_newgrat.h5
 LIST_OTHER_TEST_FILES="
 $SRC_H5STAT_TESTFILES/h5stat_help1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_help2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_notexist.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters-file.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters-F.ddl
@@ -105,12 +109,20 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-            if [ -a $tstfile ]; then
-                $CP -f $tstfile $TESTDIR
-            else
-                echo "Error: FAILED to copy $tstfile"
-                echo "       $tstfile doesn't exist!"
-                exit $EXIT_FAILURE
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
@@ -189,6 +201,8 @@ COPY_TESTFILES_TO_TESTDIR
 # Test for help flag
 TOOLTEST h5stat_help1.ddl -h
 TOOLTEST h5stat_help2.ddl --help
+# Test when h5stat a file that does not exist
+TOOLTEST h5stat_notexist.ddl notexist.h5
 
 # Test file with groups, compressed datasets, user-applied fileters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4

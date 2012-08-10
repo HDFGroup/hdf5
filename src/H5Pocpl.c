@@ -87,6 +87,7 @@ static int H5P_ocrt_pipeline_cmp(const void *value1, const void *value2, size_t 
 /* Object creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_OCRT[1] = {{
     "object create",		/* Class name for debugging     */
+    H5P_TYPE_OBJECT_CREATE,     /* Class type                   */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_OBJECT_CREATE_g,	/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
@@ -137,15 +138,15 @@ H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register max. compact attribute storage property */
     if(H5P_register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE, &attr_max_compact, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register min. dense attribute storage property */
     if(H5P_register_real(pclass, H5O_CRT_ATTR_MIN_DENSE_NAME, H5O_CRT_ATTR_MIN_DENSE_SIZE, &attr_min_dense, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register object header flags property */
     if(H5P_register_real(pclass, H5O_CRT_OHDR_FLAGS_NAME, H5O_CRT_OHDR_FLAGS_SIZE, &ohdr_flags, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the pipeline property */
     if(H5P_register_real(pclass, H5O_CRT_PIPELINE_NAME, H5O_CRT_PIPELINE_SIZE, &pline, NULL, NULL, NULL, NULL, NULL, H5O_CRT_PIPELINE_CMP, NULL) < 0)
@@ -379,8 +380,8 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
     ohdr_flags &= (uint8_t)~(H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED);
 
     /* Update with new attribute creation order flags */
-    ohdr_flags |= (uint8_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? H5O_HDR_ATTR_CRT_ORDER_TRACKED : 0);
-    ohdr_flags |= (uint8_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? H5O_HDR_ATTR_CRT_ORDER_INDEXED : 0);
+    ohdr_flags = (uint8_t)(ohdr_flags | ((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? H5O_HDR_ATTR_CRT_ORDER_TRACKED : 0));
+    ohdr_flags = (uint8_t)(ohdr_flags | ((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? H5O_HDR_ATTR_CRT_ORDER_INDEXED : 0));
 
     /* Set object header flags */
     if(H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -486,7 +487,7 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
     ohdr_flags &= (uint8_t)~H5O_HDR_STORE_TIMES;
 
     /* Update with new time tracking flag */
-    ohdr_flags |= (uint8_t)(track_times ? H5O_HDR_STORE_TIMES : 0);
+    ohdr_flags = (uint8_t)(ohdr_flags | (track_times ? H5O_HDR_STORE_TIMES : 0));
 
     /* Set object header flags */
     if(H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -1343,7 +1344,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
  *
  *-------------------------------------------------------------------------
  */
-int
+static int
 H5P_ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED size)
 {
     const H5O_pline_t *pline1 = (const H5O_pline_t *)_pline1,     /* Create local aliases for values */

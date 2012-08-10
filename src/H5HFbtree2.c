@@ -352,7 +352,7 @@ HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %Hu}\n", "H5HF_huge_bt2_indir_found",
 herr_t
 H5HF_huge_bt2_indir_remove(const void *nrecord, void *_udata)
 {
-    H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
+    H5HF_huge_remove_ud_t *udata = (H5HF_huge_remove_ud_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -570,7 +570,7 @@ HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu, %Hu}\n", "H5HF_huge_bt2_filt
 herr_t
 H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *_udata)
 {
-    H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
+    H5HF_huge_remove_ud_t *udata = (H5HF_huge_remove_ud_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -759,7 +759,7 @@ H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED
 herr_t
 H5HF_huge_bt2_dir_remove(const void *nrecord, void *_udata)
 {
-    H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
+    H5HF_huge_remove_ud_t *udata = (H5HF_huge_remove_ud_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -984,7 +984,7 @@ HDfprintf(stderr, "%s: nrecord = {%a, %Hu, %x, %Hu}\n", "H5HF_huge_bt2_filt_dir_
 herr_t
 H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *_udata)
 {
-    H5HF_huge_remove_ud1_t *udata = (H5HF_huge_remove_ud1_t *)_udata;   /* User callback data */
+    H5HF_huge_remove_ud_t *udata = (H5HF_huge_remove_ud_t *)_udata;   /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

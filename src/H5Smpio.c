@@ -583,6 +583,7 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span,
                 blocklen = tmp_blocklen;
                 if(NULL == (tmp_inner_type = (MPI_Datatype *)H5MM_realloc(inner_type, alloc_count * sizeof(MPI_Datatype))))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate array of inner MPI datatypes")
+                inner_type = tmp_inner_type;
             } /* end if */
 
             /* Displacement should be in byte and should have dimension information */

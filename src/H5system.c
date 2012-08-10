@@ -639,7 +639,7 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 }
 
-#ifdef H5_HAVE_WINSOCK_H
+#ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")
 #endif
 
@@ -650,12 +650,12 @@ char*
 Wgetlogin()
 {
 
-#ifdef H5_HAVE_WINSOCK_H
+#ifdef H5_HAVE_WINSOCK2_H
     long bufferCount = WloginBuffer_count;
     if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
         return (Wlogin_buffer);
     else
-#endif /* H5_HAVE_WINSOCK_H */
+#endif /* H5_HAVE_WINSOCK2_H */
         return NULL;
 }
 

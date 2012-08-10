@@ -42,7 +42,7 @@
             int _err_num = 0; \
             char _msg[80]; \
             H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, &_err_num); \
-            H5Eget_msg(_err_num, NULL, _msg, 80); \
+            H5Eget_msg(_err_num, NULL, _msg, (size_t)80); \
             error_msg("%s %s -- %s\n", #_fun, "failed", _msg); \
             goto error; \
         } \
@@ -132,23 +132,23 @@ int copy_objects(const char* fnamein,
             goto out;
         }
 
-  if(!options->fs_strategy)
-  {
-     if(H5Pget_file_space(fcpl_in, &options->fs_strategy, NULL) < 0)
-     {
-    error_msg("failed to retrieve file space strategy\n");
-    goto out;
-     }
-  }
+        if(!options->fs_strategy)
+        {
+            if(H5Pget_file_space(fcpl_in, &options->fs_strategy, NULL) < 0)
+            {
+                error_msg("failed to retrieve file space strategy\n");
+                goto out;
+            }
+        }
 
-  if(!options->fs_threshold)
-  {
-     if(H5Pget_file_space(fcpl_in, NULL, &options->fs_threshold) < 0)
-     {
-    error_msg("failed to retrieve file space threshold\n");
-    goto out;
-     }
-  }
+        if(!options->fs_threshold)
+        {
+            if(H5Pget_file_space(fcpl_in, NULL, &options->fs_threshold) < 0)
+            {
+                error_msg("failed to retrieve file space threshold\n");
+                goto out;
+            }
+        }
 
         if(H5Pclose(fcpl_in) < 0)
         {
@@ -254,134 +254,112 @@ int copy_objects(const char* fnamein,
             } /* end if */
         } /* end if */
     } /* end if */
-
-
-
-
 #if defined (H5REPACK_DEBUG_USER_BLOCK)
-    print_user_block(fnamein,fidin);
+    print_user_block(fnamein, fidin);
 #endif
-
 
     /*-------------------------------------------------------------------------
     * set the new user userblock options in the FCPL (before H5Fcreate )
     *-------------------------------------------------------------------------
     */
-
     if ( options->ublock_size > 0 )
     {
         /* either use the FCPL already created or create a new one */
-        if(fcpl != H5P_DEFAULT)
+        if(fcpl == H5P_DEFAULT)
         {
-            /* set user block size */
-            if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
-            {
-                error_msg("failed to set userblock size\n");
-                goto out;
-            }
-
-        }
-
-        else
-        {
-
             /* create a file creation property list */
             if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
             {
                 error_msg("fail to create a file creation property list\n");
                 goto out;
             }
-
-            /* set user block size */
-            if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
-            {
-                error_msg("failed to set userblock size\n");
-                goto out;
-            }
-
         }
 
-
-
+        /* set user block size */
+        if(H5Pset_userblock(fcpl, options->ublock_size) < 0)
+        {
+            error_msg("failed to set userblock size\n");
+            goto out;
+        }
     }
-
 
     /*-------------------------------------------------------------------------
     * set alignment options
     *-------------------------------------------------------------------------
     */
-
-
     if (  options->alignment > 0 )
     {
         /* either use the FAPL already created or create a new one */
-        if (fapl != H5P_DEFAULT)
+        if (fapl == H5P_DEFAULT)
         {
-
-            if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
-            {
-                error_msg("failed to set alignment\n");
-                goto out;
-            }
-
-        }
-
-        else
-        {
-
             /* create a file access property list */
             if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
             {
                 error_msg("Could not create file access property list\n");
                 goto out;
             }
-
-            if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
-            {
-                error_msg("failed to set alignment\n");
-                goto out;
-            }
-
         }
 
+        if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
+        {
+            error_msg("failed to set alignment\n");
+            goto out;
+        }
     }
+
+    /*-------------------------------------------------------------------------
+    * set metadata block size option
+    *-------------------------------------------------------------------------
+    */
+    if ( options->meta_block_size > 0 )
+    {
+        /* either use the FAPL already created or create a new one */
+        if (fapl == H5P_DEFAULT)
+        {
+            /* create a file access property list */
+            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            {
+                error_msg("Could not create file access property list\n");
+                goto out;
+            }
+        }
+
+        if (H5Pset_meta_block_size(fapl, options->meta_block_size) < 0)
+        {
+            error_msg("failed to set metadata block size\n");
+            goto out;
+        }
+    }
+
+    /*-------------------------------------------------------------------------
+    * set free-space strategy options
+    *-------------------------------------------------------------------------
+    */
 
     /* either use the FCPL already created or create a new one */
-    if(fcpl != H5P_DEFAULT)
+    if(fcpl == H5P_DEFAULT)
     {
-  /* set file space strategy and free space threshold */
-  if(H5Pset_file_space(fcpl, options->fs_strategy, options->fs_threshold) < 0)
-  {
-      error_msg("failed to set file space strategy & threshold\n");
-      goto out;
-  }
+        /* create a file creation property list */
+        if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        {
+            error_msg("fail to create a file creation property list\n");
+            goto out;
+        }
     }
-    else
-    {
-  /* create a file creation property list */
-  if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-  {
-      error_msg("fail to create a file creation property list\n");
-      goto out;
-  }
 
-  /* set file space strategy and free space threshold */
-  if(H5Pset_file_space(fcpl, options->fs_strategy, options->fs_threshold) < 0)
-  {
-      error_msg("failed to set file space strategy & threshold \n");
-      goto out;
-  }
+    /* set file space strategy and free space threshold */
+    if(H5Pset_file_space(fcpl, options->fs_strategy, options->fs_threshold) < 0)
+    {
+        error_msg("failed to set file space strategy & threshold \n");
+        goto out;
     }
 
     /*-------------------------------------------------------------------------
     * create the output file
     *-------------------------------------------------------------------------
     */
-
-
     if(options->verbose)
         printf("Making file <%s>...\n",fnameout);
-
 
     if((fidout = H5Fcreate(fnameout,H5F_ACC_TRUNC, fcpl, fapl)) < 0)
     {
@@ -800,6 +778,8 @@ int do_copy_objects(hid_t fidin,
     unsigned u;
     int      is_ref=0;
     htri_t   is_named;
+    hbool_t  limit_maxdims;
+    hsize_t size_dset;
 
 
     /*-------------------------------------------------------------------------
@@ -816,8 +796,10 @@ int do_copy_objects(hid_t fidin,
 
     for ( i = 0; i < travt->nobjs; i++)
     {
-
+        /* init variables per obj */
         buf = NULL;
+        limit_maxdims = FALSE;
+
         switch ( travt->objs[i].type )
         {
 
@@ -992,6 +974,9 @@ int do_copy_objects(hid_t fidin,
                 if((msize = H5Tget_size(wtype_id)) == 0)
                     goto error;
 
+                /* size of current dset */
+                size_dset = nelmts * msize;
+
                 /*-------------------------------------------------------------------------
                 * check if the dataset creation property list has filters that
                 * are not registered in the current configuration
@@ -1021,7 +1006,7 @@ int do_copy_objects(hid_t fidin,
                          */
                         if (options->layout_g != H5D_COMPACT)
                         {
-                            if ( nelmts*msize < options->min_comp )
+                            if ( size_dset < options->min_comp )
                                 apply_s=0;
                         }
 
@@ -1038,9 +1023,38 @@ int do_copy_objects(hid_t fidin,
                                 goto error;
                         }
 
-                        /* unset the unlimimted dimensions, which cannot be applied to layout other than chunked. */ 
-                        if (options->layout_g != H5D_CHUNKED) {
-                             H5Sset_extent_simple( f_space_id, rank, dims, NULL );
+                        /*------------------------------------------------- 
+                         * Unset the unlimited max dims if convert to other
+                         * than chunk layouts, because unlimited max dims
+                         * only can be applied to chunk layout. 
+                         * Also perform only for targeted dataset
+                         * Also check for size limit to convert to compact
+                         *-------------------------------------------------*/
+                        if (options->layout_g != H5D_CHUNKED) 
+                        {
+                            /* any dataset is specified */
+                            if (options->op_tbl->nelems > 0)
+                            {
+                                /* if current obj match specified obj */
+                                if (options_get_object (travt->objs[i].name, options->op_tbl))
+                                    limit_maxdims = TRUE;
+                            }
+                            else /* no dataset is specified */
+                            {
+                                limit_maxdims = TRUE;
+                            }
+                        
+                            /* if convert to COMPACT */
+                            if (options->layout_g == H5D_COMPACT)
+                            {
+                                /* should be smaller than 64K */
+                                if ( size_dset > MAX_COMPACT_DSIZE )
+                                    limit_maxdims = FALSE;
+                            }
+                        
+                            /* unset unlimited max dims */
+                            if (limit_maxdims)
+                                H5Sset_extent_simple( f_space_id, rank, dims, NULL );
                         }
 
                         /*-------------------------------------------------------------------------
@@ -1527,7 +1541,7 @@ static void print_dataset_info(hid_t dcpl_id,
         printf(FORMAT_OBJ,"dset",objname );
     else
     {
-        char str[255], temp[20];
+        char str[255], temp[28];
         HDstrcpy(str,"dset     ");
         HDstrcat(str,strfilter);
         sprintf(temp,"  (%.3f:1)",ratio);
