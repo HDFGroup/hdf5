@@ -89,12 +89,12 @@ typedef struct H5FD_mpiposix_t {
     MPI_Comm  comm;    /*communicator        */
     int         mpi_rank;       /* This process's rank                  */
     int         mpi_size;       /* Total number of processes            */
-    haddr_t  eof;    /*end-of-file marker      */
-    haddr_t  eoa;    /*end-of-address marker      */
-    haddr_t  last_eoa;  /* Last known end-of-address marker  */
-    haddr_t  pos;    /* Current file I/O position          */
-    int    op;    /* Last file I/O operation    */
-    hsize_t  naccess;  /* Number of (write) accesses to file   */
+    haddr_t	eof;		/*end-of-file marker			*/
+    haddr_t	eoa;		/*end-of-address marker			*/
+    haddr_t	last_eoa;	/* Last known end-of-address marker	*/
+    haddr_t	pos;		/* Current file I/O position	        */
+    int		op;		/* Last file I/O operation		*/
+    hsize_t	naccess;	/* Number of (write) accesses to file   */
 #ifdef H5_HAVE_GPFS
     size_t      blksize;        /* Block size of file system            */
 #endif
@@ -230,13 +230,13 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_set_eoa,       /*set_eoa    */
     H5FD_mpiposix_get_eof,      /*get_eof    */
     H5FD_mpiposix_get_handle,                   /*get_handle            */
-    H5FD_mpiposix_read,        /*read      */
-    H5FD_mpiposix_write,      /*write      */
+    H5FD_mpiposix_read,				/*read			*/
+    H5FD_mpiposix_write,			/*write			*/
     NULL,          /*flush      */
-    H5FD_mpiposix_truncate,      /*truncate    */
+    H5FD_mpiposix_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    H5FD_FLMAP_SINGLE         /*fl_map    */
+    H5FD_FLMAP_SINGLE 				/*fl_map		*/
     },  /* End of superclass information */
     H5FD_mpiposix_mpi_rank,                     /*get_rank              */
     H5FD_mpiposix_mpi_size,                     /*get_size              */
