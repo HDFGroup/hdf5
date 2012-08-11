@@ -338,74 +338,74 @@ done:
  *
  * Purpose:     Apply the supplied candidate list.
  *
- *              We used to do this by simply having each process write 
- *              every mpi_size-th entry in the candidate list, starting 
- *              at index mpi_rank, and mark all the others clean.  
+ *		We used to do this by simply having each process write 
+ *		every mpi_size-th entry in the candidate list, starting 
+ *		at index mpi_rank, and mark all the others clean.  
  *
- *              However, this can cause unnecessary contention in a file 
- *              system by increasing the number of processes writing to 
- *              adjacent locations in the HDF5 file.
+ *		However, this can cause unnecessary contention in a file 
+ *		system by increasing the number of processes writing to 
+ *		adjacent locations in the HDF5 file.
  *
- *              To attempt to minimize this, we now arange matters such 
- *              that each process writes n adjacent entries in the 
- *              candidate list, and marks all others clean.  We must do
- *              this in such a fashion as to guarantee that each entry 
- *              on the candidate list is written by exactly one process, 
- *              and marked clean by all others.  
+ *		To attempt to minimize this, we now arange matters such 
+ *		that each process writes n adjacent entries in the 
+ *		candidate list, and marks all others clean.  We must do
+ *		this in such a fashion as to guarantee that each entry 
+ *		on the candidate list is written by exactly one process, 
+ *		and marked clean by all others.  
  *
- *              To do this, first construct a table mapping mpi_rank
- *              to the index of the first entry in the candidate list to
- *              be written by the process of that mpi_rank, and then use
- *              the table to control which entries are written and which
- *              are marked as clean as a function of the mpi_rank.
+ *		To do this, first construct a table mapping mpi_rank
+ *		to the index of the first entry in the candidate list to
+ *		be written by the process of that mpi_rank, and then use
+ *		the table to control which entries are written and which
+ *		are marked as clean as a function of the mpi_rank.
  *
- *              Note that the table must be identical on all processes, as
- *              all see the same candidate list, mpi_size, and mpi_rank --
- *              the inputs used to construct the table.  
+ *		Note that the table must be identical on all processes, as
+ *		all see the same candidate list, mpi_size, and mpi_rank --
+ *		the inputs used to construct the table.  
  *
- *              We construct the table as follows.  Let:
+ *		We construct the table as follows.  Let:
  *
- *                      n = num_candidates / mpi_size;
+ *			n = num_candidates / mpi_size;
  *
- *                      m = num_candidates % mpi_size;
+ *			m = num_candidates % mpi_size;
  *
- *              Now allocate an array of integers of length mpi_size + 1, 
- *              and call this array candidate_assignment_table. 
+ *		Now allocate an array of integers of length mpi_size + 1, 
+ *		and call this array candidate_assignment_table. 
  *
- *              Conceptually, if the number of candidates is a multiple
- *              of the mpi_size, we simply pass through the candidate list
- *              and assign n entries to each process to flush, with the 
- *              index of the first entry to flush in the location in 
- *              the candidate_assignment_table indicated by the mpi_rank
- *              of the process.  
+ *		Conceptually, if the number of candidates is a multiple
+ *		of the mpi_size, we simply pass through the candidate list
+ *		and assign n entries to each process to flush, with the 
+ *		index of the first entry to flush in the location in 
+ *		the candidate_assignment_table indicated by the mpi_rank
+ *		of the process.  
  *
- *              In the more common case in which the candidate list isn't 
- *              isn't a multiple of the mpi_size, we pretend it is, and 
- *              give num_candidates % mpi_size processes one extra entry
- *              each to make things work out.
+ *		In the more common case in which the candidate list isn't 
+ *		isn't a multiple of the mpi_size, we pretend it is, and 
+ *		give num_candidates % mpi_size processes one extra entry
+ *		each to make things work out.
  *
- *              Once the table is constructed, we determine the first and
- *              last entry this process is to flush as follows:
+ *		Once the table is constructed, we determine the first and
+ *		last entry this process is to flush as follows:
  *
- *              first_entry_to_flush = candidate_assignment_table[mpi_rank]
+ *	 	first_entry_to_flush = candidate_assignment_table[mpi_rank]
  *
- *              last_entry_to_flush = 
- *                      candidate_assignment_table[mpi_rank + 1] - 1;
- *              
- *              With these values determined, we simply scan through the 
- *              candidate list, marking all entries in the range 
- *              [first_entry_to_flush, last_entry_to_flush] for flush,
- *              and all others to be cleaned.
+ *		last_entry_to_flush = 
+ *			candidate_assignment_table[mpi_rank + 1] - 1;
+ *		
+ *		With these values determined, we simply scan through the 
+ *		candidate list, marking all entries in the range 
+ *		[first_entry_to_flush, last_entry_to_flush] for flush,
+ *		and all others to be cleaned.
  *
- *              Finally, we scan the LRU from tail to head, flushing 
- *              or marking clean the candidate entries as indicated.
- *              If necessary, we scan the pinned list as well.
+ *		Finally, we scan the LRU from tail to head, flushing 
+ *		or marking clean the candidate entries as indicated.
+ *		If necessary, we scan the pinned list as well.
  *
- *              Note that this function will fail if any protected or 
- *              clean entries appear on the candidate list.
+ *		Note that this function will fail if any protected or 
+ *		clean entries appear on the candidate list.
  *
- *              This function is used in managing sync points, and 
- *              shouldn't be used elsewhere.
+ *		This function is used in managing sync points, and 
+ *		shouldn't be used elsewhere.
  *
  * Return:      Success:        SUCCEED
  *
@@ -413,16 +413,6 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/17/10
- *
- * Modifications:
- *
- *              Heavily reworked to have each process flush a group of 
- *              adjacent entries.
- *                                              JRM -- 4/15/10
- *
- *              Reworked to account for flush_me_last and flush_me_collectively
- *              cache entry flags now potentially present on candidates.
- *                                              MAM -- 4/26/11
  *
  *-------------------------------------------------------------------------
  */
@@ -438,36 +428,36 @@ H5C_apply_candidate_list(H5F_t * f,
                          int mpi_rank,
                          int mpi_size)
 {
-    hbool_t first_flush = FALSE;
-    int i;
-    int m;
-    int n;
-    int first_entry_to_flush;
-    int last_entry_to_flush;
-    int entries_to_clear = 0;
-    int entries_to_flush = 0;
-    int entries_to_flush_or_clear_last = 0;
-    int entries_to_flush_collectively = 0;
-    int entries_cleared = 0;
-    int entries_flushed = 0;
-    int entries_delayed = 0;
-    int entries_flushed_or_cleared_last = 0;
-    int entries_flushed_collectively = 0;
-    int entries_examined = 0;
-    int initial_list_len;
-    int * candidate_assignment_table = NULL;
-    haddr_t addr;
-    H5C_cache_entry_t * clear_ptr = NULL;
-    H5C_cache_entry_t * entry_ptr = NULL;
-    H5C_cache_entry_t * flush_ptr = NULL;
+    hbool_t             first_flush = FALSE;
+    int                 i;
+    int			m;
+    int			n;
+    int			first_entry_to_flush;
+    int			last_entry_to_flush;
+    int			entries_to_clear = 0;
+    int			entries_to_flush = 0;
+    int			entries_to_flush_or_clear_last = 0;
+    int			entries_to_flush_collectively = 0;
+    int			entries_cleared = 0;
+    int			entries_flushed = 0;
+    int			entries_delayed = 0;
+    int			entries_flushed_or_cleared_last = 0;
+    int			entries_flushed_collectively = 0;
+    int			entries_examined = 0;
+    int			initial_list_len;
+    int               * candidate_assignment_table = NULL;
+    haddr_t		addr;
+    H5C_cache_entry_t *	clear_ptr = NULL;
+    H5C_cache_entry_t *	entry_ptr = NULL;
+    H5C_cache_entry_t *	flush_ptr = NULL;
     H5C_cache_entry_t * delayed_ptr = NULL;
 #if H5C_DO_SANITY_CHECKS
-    haddr_t last_addr;
+    haddr_t		last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    char tbl_buf[1024];
+    char		tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
-    herr_t ret_value = SUCCEED;      /* Return value */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -641,11 +631,10 @@ H5C_apply_candidate_list(H5F_t * f,
 
     /* Examine each entry in the LRU list */
     while((entry_ptr != NULL) && (entries_examined <= initial_list_len) &&
-          ((entries_cleared + entries_flushed) < num_candidates)) {
+            ((entries_cleared + entries_flushed) < num_candidates)) {
 
         /* If this process needs to clear this entry. */
-        if (entry_ptr->clear_on_unprotect) {
-
+        if(entry_ptr->clear_on_unprotect) {
             entry_ptr->clear_on_unprotect = FALSE;
             clear_ptr = entry_ptr;
             entry_ptr = entry_ptr->prev;
@@ -689,7 +678,7 @@ H5C_apply_candidate_list(H5F_t * f,
                                       &first_flush,
                                       TRUE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry.")
-        } /* end else */
+        } /* end else-if */
 
         /* Otherwise, no action to be taken on this entry. Grab the next. */
         else {
@@ -782,7 +771,7 @@ H5C_apply_candidate_list(H5F_t * f,
                                           &first_flush,
                                           TRUE) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
-            } /* end else */
+            } /* end else-if */
 
             /* Else, if this process needs to independently flush this entry. */
             else if (entry_ptr->flush_immediately) {
@@ -805,7 +794,7 @@ H5C_apply_candidate_list(H5F_t * f,
                                           &first_flush,
                                           TRUE) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry.")
-            } /* end else */
+            } /* end else-if */
         } /* end if */
 
         /* Otherwise, this entry is not marked for flush or clear. Grab the next. */
@@ -863,10 +852,10 @@ H5C_apply_candidate_list(H5F_t * f,
      * Finished flushing everything.                                          *
      * ====================================================================== */
 
-       HDassert((entries_flushed == entries_to_flush));
-       HDassert((entries_cleared == entries_to_clear));
-       HDassert((entries_flushed_or_cleared_last == entries_to_flush_or_clear_last));
-       HDassert((entries_flushed_collectively == entries_to_flush_collectively));
+    HDassert((entries_flushed == entries_to_flush));
+    HDassert((entries_cleared == entries_to_clear));
+    HDassert((entries_flushed_or_cleared_last == entries_to_flush_or_clear_last));
+    HDassert((entries_flushed_collectively == entries_to_flush_collectively));
     
     if((entries_flushed != entries_to_flush) || 
        (entries_cleared != entries_to_clear) ||
@@ -1010,11 +999,6 @@ done:
  * Programmer:  John Mainzer
  *              3/17/10
  *
- * Modifications:
- *
- *              Modified construction of min_clean candidate lists to
- *              exclude flush_me_last tagged entries, since they cannot
- *              be flushed prior to other dirty entries. MAM - 2012/01/09
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
@@ -2709,11 +2693,11 @@ H5C_insert_entry(H5F_t *             f,
     }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    set_flush_marker    = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
-    insert_pinned       = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
-    flush_last          = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
+    set_flush_marker   = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
+    insert_pinned      = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
+    flush_last         = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
 #ifdef H5_HAVE_PARALLEL
-    flush_collectively  = ( (flags & H5C__FLUSH_COLLECTIVELY_FLAG) != 0 );
+    flush_collectively = ( (flags & H5C__FLUSH_COLLECTIVELY_FLAG) != 0 );
 #endif
 
     entry_ptr = (H5C_cache_entry_t *)thing;
@@ -2759,7 +2743,7 @@ H5C_insert_entry(H5F_t *             f,
 #ifdef H5_HAVE_PARALLEL
     entry_ptr->flush_me_collectively = flush_collectively;
 #endif
-    
+
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
 
@@ -7849,7 +7833,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
                     HDassert( next_entry_ptr->in_slist );
                 } else {
                     next_entry_ptr = NULL;
-                }
+	        }
 
                 /* Note that we now remove nodes from the slist as we flush
                  * the associated entries, instead of leaving them there
@@ -7948,7 +7932,7 @@ H5C_flush_invalidate_cache(H5F_t * f,
                         else if(entry_ptr->flush_dep_height < curr_flush_dep_height)
                             /* This shouldn't happen -- if it does, just scream and die.  */
                             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL,  "dirty entry below current flush dep. height.")
-                    } /* end else */    
+                    } /* end else */
                 } /* end if */
             } /* end while loop scanning skip list */
 
@@ -8833,27 +8817,27 @@ H5C_make_space_in_cache(H5F_t *	f,
 
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
-        if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+	if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
 
-           empty_space = 0;
+	   empty_space = 0;
 
-        } else {
+	} else {
 
-           empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+	   empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
 
-        }
+	}
 
         while ( ( ( (cache_ptr->index_size + space_needed)
                     >
                     cache_ptr->max_cache_size
                   )
-                  ||
-                  (
-                    ( empty_space + cache_ptr->clean_index_size )
-                    <
-                    ( cache_ptr->min_clean_size )
+		  ||
+		  (
+		    ( empty_space + cache_ptr->clean_index_size )
+		    <
+		    ( cache_ptr->min_clean_size )
                   )
-                )
+		)
                 &&
                 ( entries_examined <= (2 * initial_list_len) )
                 &&
@@ -8864,13 +8848,13 @@ H5C_make_space_in_cache(H5F_t *	f,
             HDassert( ! (entry_ptr->is_read_only) );
             HDassert( (entry_ptr->ro_ref_count) == 0 );
 
-            next_ptr = entry_ptr->next;
+	    next_ptr = entry_ptr->next;
             prev_ptr = entry_ptr->prev;
 
-            if ( prev_ptr != NULL ) {
+	    if ( prev_ptr != NULL ) {
 
-                prev_is_dirty = prev_ptr->is_dirty;
-            }
+		prev_is_dirty = prev_ptr->is_dirty;
+	    }
 
             if ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) {
 

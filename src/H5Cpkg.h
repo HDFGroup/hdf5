@@ -1973,7 +1973,7 @@ if ( (cache_ptr)->index_size !=                                             \
     if ( (entry_ptr)->is_dirty ) {                           \
         (cache_ptr)->dirty_index_size += (entry_ptr)->size;  \
     } else {                                                 \
-        (cache_ptr)->clean_index_size += (entry_ptr)->size;  \
+	(cache_ptr)->clean_index_size += (entry_ptr)->size;  \
     }                                                        \
     if ((entry_ptr)->flush_me_last) {                        \
         (cache_ptr)->num_last_entries++;                     \
@@ -2006,7 +2006,7 @@ if ( (cache_ptr)->index_size !=                                             \
     if ( (entry_ptr)->is_dirty ) {                            \
         (cache_ptr)->dirty_index_size -= (entry_ptr)->size;   \
     } else {                                                  \
-        (cache_ptr)->clean_index_size -= (entry_ptr)->size;   \
+	(cache_ptr)->clean_index_size -= (entry_ptr)->size;   \
     }                                                         \
     if ((entry_ptr)->flush_me_last) {                         \
         (cache_ptr)->num_last_entries--;                      \

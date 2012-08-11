@@ -595,7 +595,7 @@ typedef struct H5C_cache_entry_t
     haddr_t			addr;
     size_t			size;
     const H5C_class_t *		type;
-    haddr_t		    tag;
+    haddr_t		        tag;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -604,15 +604,15 @@ typedef struct H5C_cache_entry_t
     hbool_t			is_pinned;
     hbool_t			in_slist;
     hbool_t			flush_marker;
-    hbool_t         flush_me_last;
+    hbool_t                     flush_me_last;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t         flush_me_collectively;
+    hbool_t                     flush_me_collectively;
     hbool_t			clear_on_unprotect;
-    hbool_t		flush_immediately;
+    hbool_t		        flush_immediately;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
-    hbool_t		free_file_space_on_destroy;
+    hbool_t		        free_file_space_on_destroy;
 
     /* fields supporting the 'flush dependency' feature: */
 
@@ -1061,8 +1061,8 @@ typedef struct H5C_auto_size_ctl_t
 #define H5C__READ_ONLY_FLAG			0x0200
 #define H5C__FREE_FILE_SPACE_FLAG		0x0800
 #define H5C__TAKE_OWNERSHIP_FLAG		0x1000
-#define H5C__FLUSH_LAST_FLAG 0x2000
-#define H5C__FLUSH_COLLECTIVELY_FLAG 0x4000
+#define H5C__FLUSH_LAST_FLAG			0x2000
+#define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t * f,

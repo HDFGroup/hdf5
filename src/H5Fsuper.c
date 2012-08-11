@@ -519,7 +519,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set EOA value for superblock")
 
     /* Insert superblock into cache, pinned */
-    if(H5AC_insert_entry(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, H5AC__PIN_ENTRY_FLAG | H5C__FLUSH_LAST_FLAG | H5C__FLUSH_COLLECTIVELY_FLAG) < 0)
+    if(H5AC_insert_entry(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, H5AC__PIN_ENTRY_FLAG | H5AC__FLUSH_LAST_FLAG | H5AC__FLUSH_COLLECTIVELY_FLAG) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "can't add superblock to cache")
     sblock_in_cache = TRUE;
 
@@ -621,21 +621,21 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         } /* end if */
 
         /* Check for non-default free space settings */
-        if(f->shared->fs_strategy != H5F_FILE_SPACE_STRATEGY_DEF ||
+	if(f->shared->fs_strategy != H5F_FILE_SPACE_STRATEGY_DEF ||
                 f->shared->fs_threshold != H5F_FREE_SPACE_THRESHOLD_DEF) {
-            H5FD_mem_t   type;      /* Memory type for iteration */
-            H5O_fsinfo_t fsinfo;    /* Free space manager info message */
+	    H5FD_mem_t   type;         	/* Memory type for iteration */
+            H5O_fsinfo_t fsinfo;	/* Free space manager info message */
 
-            /* Write free-space manager info message to superblock extension object header if needed */
-            fsinfo.strategy = f->shared->fs_strategy;
-            fsinfo.threshold = f->shared->fs_threshold;
-            for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
-                    fsinfo.fs_addr[type-1] = HADDR_UNDEF;
+	    /* Write free-space manager info message to superblock extension object header if needed */
+	    fsinfo.strategy = f->shared->fs_strategy;
+	    fsinfo.threshold = f->shared->fs_threshold;
+	    for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+                fsinfo.fs_addr[type-1] = HADDR_UNDEF;
 
             if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &fsinfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
-        } /* end if */
- 
+	} /* end if */
+
         /* Check if we need to store the 'EOA' value in the superblock extension */
         if (H5F_AVOID_TRUNCATE(f)) {
             haddr_t eoa; /* 'EOA' value */

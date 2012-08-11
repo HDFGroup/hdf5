@@ -120,7 +120,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     H5F_file_t         *shared;             /* shared part of `file'        */
     H5FD_t             *lf;                 /* file driver part of `shared' */
     haddr_t             stored_eof;         /* stored end-of-file address in file  */
-    haddr_t             eof;                /* end of file address           */
+    haddr_t             eof;                /*end of file address           */
     uint8_t             sizeof_addr;        /* Size of offsets in the file (in bytes) */
     uint8_t             sizeof_size;        /* Size of lengths in the file (in bytes) */
     const size_t        fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
@@ -497,7 +497,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
         H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
         H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
-        size_t u; 		/* Local index variable */
+	size_t u; 		/* Local index variable */
         htri_t status;          /* Status for message existing */
 
         /* Sanity check - superblock extension should only be defined for
@@ -518,8 +518,8 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
         } /* end if */
 
         /* Open the superblock extension */
-        if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "unable to open file's superblock extension")
+	if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "unable to open file's superblock extension")
 
         /* Check for the extension having an 'EOA' message */
         if((status = H5O_msg_exists(&ext_loc, H5O_EOA_ID, dxpl_id)) < 0)
@@ -591,7 +591,7 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
                 H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
             } /* end else */
         } /* end if */
-        
+
         /* Read in the shared OH message information if there is any */
         if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read SOHM table information")
@@ -683,7 +683,6 @@ static herr_t
 H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
     H5F_super_t *sblock)
 {
-    herr_t          status;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -742,7 +741,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
             /* Encode the base address */
             H5F_addr_encode(f, &p, sblock->base_addr);
-        
+
             /* Encode the address of global free-space index */
             H5F_addr_encode(f, &p, sblock->ext_addr);
 
@@ -880,7 +879,8 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
         /* Check for newer version of superblock format & superblock extension */
         if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 && H5F_addr_defined(sblock->ext_addr)) {
-            H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
+            H5O_loc_t 	ext_loc;        /* "Object location" for superblock extension */
+            htri_t      status;         /* Status for message existing */
 
             /* Open the superblock extension's object header */
             if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
@@ -916,7 +916,6 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
             /* Check for ignoring the driver info for this file */
             if(!H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
-
                 /* Check for driver info message */
                 H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
                 if(driver_size > 0) {
@@ -943,12 +942,10 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             /* Close the superblock extension object header */
             if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")
-
         } /* end if */
 
         /* Reset the dirty flag.  */
         sblock->cache_info.is_dirty = FALSE;
-
     } /* end if */
 
     if(destroy)
