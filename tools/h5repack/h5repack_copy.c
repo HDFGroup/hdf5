@@ -1541,7 +1541,7 @@ static void print_dataset_info(hid_t dcpl_id,
         printf(FORMAT_OBJ,"dset",objname );
     else
     {
-        char str[255], temp[20];
+        char str[255], temp[28];
         HDstrcpy(str,"dset     ");
         HDstrcat(str,strfilter);
         sprintf(temp,"  (%.3f:1)",ratio);

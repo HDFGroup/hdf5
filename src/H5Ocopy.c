@@ -1066,10 +1066,14 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
     HDassert(oloc_src);
     HDassert(oloc_src->file);
     HDassert(H5F_addr_defined(oloc_src->addr));
     HDassert(oloc_dst->file);
+
+    /* Intialize copy info before errors can be thrown */
+    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
 
     /* Get the copy property list */
     if(NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))
@@ -1088,7 +1092,6 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info")
 
     /* Convert copy flags into copy struct */
-    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
     if((cpy_option & H5O_COPY_SHALLOW_HIERARCHY_FLAG) > 0) {
         cpy_info.copy_shallow = TRUE;
         cpy_info.max_depth = 1;

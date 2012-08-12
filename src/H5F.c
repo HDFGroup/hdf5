@@ -1051,13 +1051,15 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.
          */
-        if((f->shared->flags & H5F_ACC_RDWR) && flush)
+        if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if(H5F_flush(f, dxpl_id, TRUE) < 0)
+                /* Push error, but keep going*/
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
         /* Release the external file cache */
         if(f->shared->efc) {
             if(H5F_efc_destroy(f->shared->efc) < 0)
+                /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache")
             f->shared->efc = NULL;
         } /* end if */
@@ -1075,6 +1077,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                 if(H5MF_close(f, dxpl_id) < 0)
                     /* Push error, but keep going*/
                     HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+
+                /* Flush the file again (if requested), as shutting down the
+                 * free space manager may dirty some data structures again.
+                 */
+                if(flush)
+                    if(H5F_flush(f, dxpl_id, TRUE) < 0)
+                        /* Push error, but keep going*/
+                        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
             } /* end if */
 
             /* Unpin the superblock, since we're about to destroy the cache */

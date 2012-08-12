@@ -740,7 +740,7 @@ check_group_creation_tags(hid_t fcpl, int type)
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
     int verbose = FALSE;     /* verbose file outout */
-    haddr_t root_tag;       /* Root Group Tag */
+    haddr_t root_tag = HADDR_UNDEF;   /* Root Group Tag */
     haddr_t g_tag;          /* Group Tag */
     haddr_t sbe_tag;        /* Sblock Extension Tag */
 
@@ -1249,7 +1249,7 @@ check_group_open_tags(hid_t fcpl, int type)
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
     int verbose = FALSE;     /* verbose file output */
-    haddr_t root_tag;
+    haddr_t root_tag = HADDR_UNDEF;
     haddr_t sbe_tag;
     haddr_t g_tag;
 
@@ -3056,7 +3056,7 @@ check_object_info_tags(hid_t fcpl, int type)
     hid_t fid = -1;          /* File Identifier */
     hid_t gid = -1;          /* Group Identifier */
     int verbose = FALSE;     /* verbose file output */
-    haddr_t root_tag;
+    haddr_t root_tag = HADDR_UNDEF;
     haddr_t sbe_tag;
     haddr_t g_tag;
     H5O_info_t oinfo;                       /* Object info struct */    
@@ -3170,7 +3170,7 @@ check_object_copy_tags(hid_t fcpl, int type)
     hid_t fid = -1;                         /* File Identifier */
     hid_t gid = -1;                         /* Group Identifier */
     int verbose = FALSE;     /* verbose file output */
-    haddr_t root_tag;
+    haddr_t root_tag = HADDR_UNDEF;
     haddr_t sbe_tag;
     haddr_t g_tag;
     haddr_t copy_tag;

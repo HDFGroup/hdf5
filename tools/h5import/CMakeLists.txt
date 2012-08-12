@@ -273,7 +273,9 @@ IF (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Determine if filter is available for h5diff
   # --------------------------------------------------------------------
-  SET (USE_FILTER_DEFLATE H5_HAVE_FILTER_DEFLATE)
+  IF (H5_HAVE_FILTER_DEFLATE)
+    SET (USE_FILTER_DEFLATE "true")
+  ENDIF (H5_HAVE_FILTER_DEFLATE)
 
 ##############################################################################
 ##############################################################################

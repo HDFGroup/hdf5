@@ -264,7 +264,10 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         if(cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ", cls_ptr->cls_name, cls_ptr->lib_name, cls_ptr->lib_vers);
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+            (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
+            (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
+            (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
 
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
@@ -387,7 +390,10 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         if(cls_ptr->lib_vers)
             eprint->cls.lib_vers = cls_ptr->lib_vers;
 
-        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ", cls_ptr->cls_name, cls_ptr->lib_name, cls_ptr->lib_vers);
+        fprintf(stream, "%s-DIAG: Error detected in %s (%s) ",
+            (cls_ptr->cls_name ? cls_ptr->cls_name : "(null)"),
+            (cls_ptr->lib_name ? cls_ptr->lib_name : "(null)"),
+            (cls_ptr->lib_vers ? cls_ptr->lib_vers : "(null)"));
 
         /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_PARALLEL
