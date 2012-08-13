@@ -176,7 +176,7 @@ STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_MINOR[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_MINOR ${_h5public_h_contents})
 STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_RELEASE[ \t]+([0-9]*).*$"
     "\\1" H5_VERS_RELEASE ${_h5public_h_contents})
-STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z._]*)\".*$"
+STRING (REGEX REPLACE ".*#define[ \t]+H5_VERS_SUBRELEASE[ \t]+\"([0-9A-Za-z.]*)\".*$"
     "\\1" H5_VERS_SUBRELEASE ${_h5public_h_contents})
 #MESSAGE (STATUS "VERSION: ${H5_VERS_MAJOR}.${H5_VERS_MINOR}.${H5_VERS_RELEASE}-${H5_VERS_SUBRELEASE}")
 
@@ -1014,20 +1014,6 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
   ELSE (WIN32)
     SET (CPACK_PACKAGING_INSTALL_PREFIX "/usr")
     SET (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
-
-    * A versatile data model that can represent very complex data objects and a wide variety of metadata.
-
-    * A completely portable file format with no limit on the number or size of data objects in the collection.
-
-    * A software library that runs on a range of computational platforms, from laptops to massively parallel systems, and implements a high-level API with C, C++, Fortran 90, and Java interfaces.
-
-    * A rich set of integrated performance features that allow for access time and storage space optimizations.
-
-    * Tools and applications for managing, manipulating, viewing, and analyzing the data in the collection.
-
-The HDF5 data model, file format, API, library, and tools are open and distributed without charge.
-"
-    )
 
     SET (CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
     SET (CPACK_DEBIAN_PACKAGE_MAINTAINER "${HDF5_PACKAGE_BUGREPORT}")
