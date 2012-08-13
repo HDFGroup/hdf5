@@ -487,6 +487,7 @@ HDfprintf(stderr, "%s: Check 1.6, freeing node\n", FUNC);
                     udata.dxpl_id = dxpl_id;
                     udata.alloc_type = alloc_type;
                     udata.allow_sect_absorb = TRUE;
+		    udata.allow_eoa_shrink_only = FALSE; 
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
 HDfprintf(stderr, "%s: Check 1.7, re-adding node, node->sect_info.size = %Hu\n", FUNC, node->sect_info.size);
@@ -692,6 +693,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
     udata.dxpl_id = dxpl_id;
     udata.alloc_type = alloc_type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE; 
 
     /* If size of section freed is larger than threshold, add it to the free space manager */
     if(size >= f->shared->fs_threshold) {
@@ -823,6 +825,11 @@ H5MF_sects_dump(f, dxpl_id, stderr);
  * Programmer:  Quincey Koziol
  *              Monday, October  6, 2003
  *
+ * Modifications:
+ *      Vailin Choi; July 2012
+ *      As the default free-list mapping is changed to H5FD_FLMAP_DICHOTOMY,
+ *      checks are added to account for the last section of each free-space manager
+ *      and the remaining space in the two aggregators are at EOF.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -836,6 +843,8 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     hsize_t tot_fs_size = 0;    /* Amount of all free space managed */
     hsize_t tot_meta_size = 0;  /* Amount of metadata for free space managers */
     H5FD_mem_t type;            /* Memory type for iteration */
+    H5FD_mem_t fs_started[H5FD_MEM_NTYPES]; /* Indicate whether the free-space manager has been started */
+    hbool_t eoa_shrank;		/* Whether an EOA shrink occurs */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -859,14 +868,15 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
 
     /* Iterate over all the free space types that have managers and get each free list's space */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
-	hbool_t fs_started = FALSE;
+
+	fs_started[type] = FALSE;
 
 	/* Check if the free space for the file has been initialized */
         if(!f->shared->fs_man[type] && H5F_addr_defined(f->shared->fs_addr[type])) {
             if(H5MF_alloc_open(f, dxpl_id, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
             HDassert(f->shared->fs_man[type]);
-            fs_started = TRUE;
+            fs_started[type] = TRUE;
         } /* end if */
 
 	/* Check if there's free space of this type */
@@ -884,32 +894,54 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
             tot_fs_size += type_fs_size;
             tot_meta_size += type_meta_size;
 	} /* end if */
+    } /* end for */
 
-	/* Close the free space manager, if we opened it here */
-        if(fs_started)
+    /* Iterate until no more EOA shrink occurs */
+    do {
+	eoa_shrank = FALSE;
+
+	/* Check the last section of each free-space manager */
+	for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+	    haddr_t sect_addr = HADDR_UNDEF;
+	    hsize_t sect_size = 0;
+
+	    if(f->shared->fs_man[type]) {
+		if(H5FS_sect_query_last_sect(f->shared->fs_man[type], &sect_addr, &sect_size) < 0)
+		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query last section on merge list")
+
+		/* Deduct space from previous accumulation if the section is at EOA */
+		if(H5F_addr_eq(sect_addr + sect_size, eoa)) {
+		    eoa = sect_addr;
+		    eoa_shrank = TRUE;
+		    tot_fs_size -= sect_size;
+		} /* end if */
+	    } /* end if */
+	} /* end for */
+
+	/* Check the metadata and raw data aggregators */
+	if(ma_size > 0 && H5F_addr_eq(ma_addr + ma_size, eoa)) {
+	    eoa = ma_addr;
+	    eoa_shrank = TRUE;
+	    ma_size = 0;
+	} /* end if */
+	if(sda_size > 0 && H5F_addr_eq(sda_addr + sda_size, eoa)) {
+	    eoa = sda_addr;
+	    eoa_shrank = TRUE;
+	    sda_size = 0;
+	} /* end if */
+    } while(eoa_shrank);
+
+    /* Close the free-space managers if they were opened earlier in this routine */
+    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+	if(fs_started[type])
             if(H5MF_alloc_close(f, dxpl_id, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space")
     } /* end for */
 
-    /* Check for aggregating metadata allocations */
-    if(ma_size > 0) {
-        /* Add in the reserved space for metadata to the available free space */
-        /* (if it's not at the tail of the file) */
-        if(H5F_addr_ne(ma_addr + ma_size, eoa))
-            tot_fs_size += ma_size;
-    } /* end if */
-
-    /* Check for aggregating small data allocations */
-    if(sda_size > 0) {
-        /* Add in the reserved space for metadata to the available free space */
-        /* (if it's not at the tail of the file) */
-        if(H5F_addr_ne(sda_addr + sda_size, eoa))
-            tot_fs_size += sda_size;
-    } /* end if */
-
     /* Set the value(s) to return */
+    /* (The metadata & small data aggregators count as free space now, since they aren't at EOA) */
     if(tot_space)
-	*tot_space = tot_fs_size;
+	*tot_space = tot_fs_size + ma_size + sda_size;
     if(meta_size)
 	*meta_size = tot_meta_size;
 
@@ -961,6 +993,7 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     udata.dxpl_id = dxpl_id;
     udata.alloc_type = alloc_type;
     udata.allow_sect_absorb = FALSE;    /* Force section to be absorbed into aggregator */
+    udata.allow_eoa_shrink_only = FALSE; 
 
     /* Call the "can shrink" callback for the section */
     if((ret_value = H5MF_sect_simple_can_shrink((const H5FS_section_info_t *)node, &udata)) < 0)
@@ -984,6 +1017,66 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MF_close_shrink_eoa
+ *
+ * Purpose:     Shrink the EOA while closing
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, July 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5MF_close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
+{
+    H5FD_mem_t type;            /* Memory type for iteration */
+    hbool_t eoa_shrank;		/* Whether an EOA shrink occurs */
+    htri_t status;		/* Status value */
+    H5MF_sect_ud_t udata;	/* User data for callback */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Construct user data for callbacks */
+    udata.f = f;
+    udata.dxpl_id = dxpl_id;
+    udata.allow_sect_absorb = FALSE;    
+    udata.allow_eoa_shrink_only = TRUE; 
+
+    /* Iterate until no more EOA shrinking occurs */
+    do {
+	eoa_shrank = FALSE;
+
+	/* Check the last section of each free-space manager */
+	for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+	    if(f->shared->fs_man[type]) {
+		udata.alloc_type = type;
+		if((status = H5FS_sect_try_shrink_eoa(f, dxpl_id, f->shared->fs_man[type], &udata)) < 0)
+		    HGOTO_ERROR(H5E_FSPACE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+		else if(status > 0)
+		    eoa_shrank = TRUE;
+	    } /* end if */
+	} /* end for */
+
+	/* check the two aggregators */
+	if((status = H5MF_aggrs_try_shrink_eoa(f, dxpl_id)) < 0)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+	else if(status > 0)
+	    eoa_shrank = TRUE;
+    } while(eoa_shrank);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_close_shrink_eoa() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5MF_close
  *
  * Purpose:     Close the free space tracker(s) for a file
@@ -993,6 +1086,12 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
  * Programmer:  Quincey Koziol
  *              Tuesday, January 22, 2008
  *
+ * Modifications:
+ *      Vailin Choi; July 2012
+ *      As the default free-list mapping is changed to H5FD_FLMAP_DICHOTOMY,
+ *      modifications are needed to shrink EOA if the last section of each free-space manager
+ *      and the remaining space in the two aggregators are at EOA.
+
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1016,6 +1115,10 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
     /* (for space not at EOF, it may be put into free space managers) */
     if(H5MF_free_aggrs(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
+
+    /* Trying shrinking the EOA for the file */
+    if(H5MF_close_shrink_eoa(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
     /* Making free-space managers persistent for superblock version >= 2 */
     if(f->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2
@@ -1163,6 +1266,11 @@ HDfprintf(stderr, "%s: Before deleting free space manager\n", FUNC);
     /* (in case any free space information re-started them) */
     if(H5MF_free_aggrs(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
+
+    /* Trying shrinking the EOA for the file */
+    /* (in case any free space is now at the EOA) */
+    if(H5MF_close_shrink_eoa(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
 done:
 #ifdef H5MF_ALLOC_DEBUG

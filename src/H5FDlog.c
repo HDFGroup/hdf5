@@ -233,7 +233,7 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-    H5FD_FLMAP_SINGLE 				/*fl_map		*/
+    H5FD_FLMAP_DICHOTOMY			/*fl_map		*/
 };
 
 /* Declare a free list to manage the H5FD_log_t struct */

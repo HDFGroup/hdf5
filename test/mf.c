@@ -127,11 +127,18 @@ static unsigned test_mf_fs_drivers(hid_t fapl);
 
 /*
  * Verify statistics for the free-space manager
+ *
+ *  Modifications:
+ *      Vailin Choi; July 2012
+ *      To ensure "f" and "frsp" are valid pointers 
  */
 static int
 check_stats(const H5F_t *f, const H5FS_t *frsp, frspace_state_t *state)
 {
     H5FS_stat_t frspace_stats;             /* Statistics about the heap */
+
+    HDassert(f);
+    HDassert(frsp);
 
     /* Get statistics for free-space and verify they are correct */
     if(H5FS_stat_info(f, frsp, &frspace_stats) < 0)
@@ -1071,6 +1078,10 @@ error:
  *	The block is allocated from file allocation
  *	Deallocate the block which will be returned to free-space manager
  *	(the space is shrunk and freed since it is at end of file)
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Initialize the new field "allow_eoa_shrink_only" for user data.
  */
 static unsigned
 test_mf_fs_alloc_free(hid_t fapl)
@@ -1136,6 +1147,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space manager */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1222,6 +1234,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space manager */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1306,6 +1319,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space manager */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1421,6 +1435,10 @@ error:
  * 	Try to extend the allocated block by 50 from the free-space_manager:
  *	Fail: section A does not adjoin section B (70+20 != address of section B) even though
  *	      the requested-size (50) equal to size of section B (50)
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Initialize the new field "allow_eoa_shrink_only" for user data.
  */
 static unsigned
 test_mf_fs_extend(hid_t fapl)
@@ -1487,6 +1505,7 @@ test_mf_fs_extend(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space manager */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node1, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1604,6 +1623,7 @@ test_mf_fs_extend(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node1, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1716,6 +1736,7 @@ test_mf_fs_extend(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node1, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1828,6 +1849,7 @@ test_mf_fs_extend(hid_t fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A of size=20 to free-space */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node1, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -1957,6 +1979,10 @@ error:
  *			which will absorb meta_aggr to the section:
  *			  section size + remaining size of aggregator is > aggr->alloc_size,
  *			  section is allowed to absorb an aggregator (allow_sect_absorb is true)
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Initialize the new field "allow_eoa_shrink_only" for user data.
  */
 static unsigned
 test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
@@ -2020,6 +2046,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
         udata.alloc_type = type;
         udata.allow_sect_absorb = TRUE;
+	udata.allow_eoa_shrink_only = FALSE;
 
         /* When adding, meta_aggr is absorbed onto the beginning of the section */
         if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -2092,6 +2119,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
         udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
         udata.alloc_type = type;
         udata.allow_sect_absorb = TRUE;
+        udata.allow_eoa_shrink_only = FALSE;
 
         /* When adding, meta_aggr is absorbed onto the end of the section */
         if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -3133,7 +3161,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
 
         /* sdata_aggr info is reset to 0 */
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-        if (sdata_addr != 0) TEST_ERROR
+        if (sdata_addr != HADDR_UNDEF) TEST_ERROR
         if (sdata_size != 0) TEST_ERROR
 
         /* Verify that meta_aggr's unused space of 1968 is freed to free-space */
@@ -3481,15 +3509,18 @@ error:
  *
  *	Test 2: H5MF_alloc() block A from meta_aggr
  *		H5MF_alloc() block B from sdata_aggr
- *		H5MF_try_shrink() block B should merge it onto the end of meta_aggr
- *			because H5F_FS_MERGE_METADATA|H5F_FS_MERGE_RAWDATA is on for
- *			sec2 driver's FLMAP_SINGLE
+ *		H5MF_try_shrink() block B should merge it back to the end of sdata_aggr
+ *			because sec2 driver is FLMAP_DICHOTOMY by default
  *
  *	Test 3: H5MF_alloc() block A from meta_aggr
  *		H5MF_alloc() block B from meta_aggr
  *		H5MF_alloc() block C from meta_aggr
  *		H5MF_try_shrink() block B should fail since it does not adjoin the
  *			beginning nor the end of meta_aggr
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Changes due to the switch to H5FD_FLMAP_DICHOTOMY
  */
 static unsigned
 test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
@@ -3501,7 +3532,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
     H5FD_mem_t 		type, stype;
     haddr_t		addr1, addr2, addr3, saddr1;
     haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
-    haddr_t 		sdata_addr=HADDR_UNDEF, new_sdata_addr=HADDR_UNDEF;
+    haddr_t 		new_sdata_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, new_ma_size=0;
     hsize_t 		sdata_size=0, new_sdata_size=0;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
@@ -3593,20 +3624,20 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
         stype = H5FD_MEM_DRAW;
         saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), NULL, &sdata_size);
 
         /* should succeed */
         if(H5MF_try_shrink(f, stype, H5P_DATASET_XFER_DEFAULT, saddr1, (hsize_t)TEST_BLOCK_SIZE50) <= 0)
             TEST_ERROR
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
-        if (new_sdata_addr != sdata_addr) TEST_ERROR
-        if (new_sdata_size != sdata_size) TEST_ERROR
+        if (new_sdata_addr != saddr1) TEST_ERROR
+        if (new_sdata_size != sdata_size + TEST_BLOCK_SIZE50) TEST_ERROR
 
         /* meta_aggr info should be updated because the block is absorbed into the meta_aggr */
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         if (new_ma_addr != ma_addr) TEST_ERROR
-        if (new_ma_size != (ma_size+TEST_BLOCK_SIZE50)) TEST_ERROR
+        if (new_ma_size != (ma_size)) TEST_ERROR
 
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
 
@@ -4004,6 +4035,10 @@ error:
  *	Allocate a block of size=40
  *	The free-space manager is unable to fulfill the request
  *	The block is allocated from file allocation and should be aligned
+ *
+ * Modifications:
+ * 	Vailin Choi; July 2012
+ *	Initialize the new field "allow_eoa_shrink_only" for user data.
  */
 static unsigned
 test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
@@ -4063,6 +4098,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space manager */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -4132,6 +4168,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
     udata.alloc_type = type;
     udata.allow_sect_absorb = TRUE;
+    udata.allow_eoa_shrink_only = FALSE;
 
     /* Add section A to free-space manager */
     if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -4221,6 +4258,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
         udata.alloc_type = type;
         udata.allow_sect_absorb = TRUE;
+	udata.allow_eoa_shrink_only = FALSE;
 
         /* Add section A to free-space manager */
         if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
@@ -4602,8 +4640,7 @@ error:
  *		request-size < aggr->alloc_size
  *		fragment size > (aggr->alloc_size - request-size)
  *	Result:
- *		A block of aggr->alloc_size + (fragment size - (aggr->alloc_size - request-size))
- *			is extended from file allocation for the aggregator
+ *		A block of (fragment size  + request-size) is extended from file allocation for the aggregator
  *		The second block of 50 is allocated from the aggregator and should be aligned
  *		Fragment from alignment of aggregator allocation is freed to free-space:[4126, 4066]
  *		There is space of 2018 left in meta_aggr
@@ -4628,12 +4665,14 @@ error:
  *	Result:
  *		A block of meta_aggr->alloc_size is allocated from file allocation for the aggregator
  *		Fragment from alignment of file allocation is freed to free-space:[14336, 2048]
- *		Since this fragment adjoins sdata_aggr and fulfills "absorb" condition,
- *		  the space left in sdata_aggr is absorbed into the fragment and freed to free-space: [12318, 2018]
- *		other_aggr is reset to 0
+ *		other_aggr is [12318, 2018]
  *		The third block of 80 is allocated from the aggregator and should be aligned
  *		There is space of 1968 left in meta_aggr
  *		EOA is at 18432
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Changes due to the switch to H5FD_FLMAP_DICHOTOMY
  */
 static unsigned
 test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
@@ -4644,7 +4683,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     h5_stat_size_t      file_size;              /* File size */
     H5FD_mem_t 		type, stype;
     haddr_t		addr1, addr2, addr3, saddr1;
-    frspace_state_t 	state;
+    frspace_state_t 	state[H5FD_MEM_NTYPES];
     haddr_t 		ma_addr=HADDR_UNDEF, sdata_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, sdata_size=0, mis_align=0;
     hsize_t		alignment=0, tmp=0;
@@ -4697,11 +4736,11 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (addr1 % alignment) TEST_ERROR
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(frspace_state_t));
+        HDmemset(&state, 0, sizeof(frspace_state_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -4721,9 +4760,9 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 50 is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -4754,9 +4793,9 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 30 for sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         /* Verify that the allocated block is aligned */
@@ -4773,12 +4812,13 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
          * For alignment = 1024, alloc_size = 2048:
          * 	fragment for unused space in meta_aggr is freed to free-space
          * For alignment = 4096, alloc_size = 2048:
-         * 	fragment from alignment of file allocation absorbs sdata_aggr's remaining space
+         * 	fragment from alignment of ma_addr is freed
+         *	block 30 is allocated from ma_addr
          */
         mis_align = 0;
         if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr % alignment)))
             mis_align = alignment - tmp;
-        else if ((alignment == TEST_ALIGN4096) && (tmp = (sdata_addr % alignment)))
+        else if ((alignment == TEST_ALIGN4096) && (tmp = ((sdata_addr + sdata_size) % alignment)))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 80 from meta_aggr */
@@ -4789,9 +4829,9 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 80 is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -4800,8 +4840,15 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* Verify total size of free space after all the allocations */
-        if(check_stats(f, f->shared->fs_man[type], &state))
-            TEST_ERROR
+	if(f->shared->fs_man[type]) {
+	    if(check_stats(f, f->shared->fs_man[type], &(state[type])))
+		TEST_ERROR
+	}
+
+	if(f->shared->fs_man[stype]) {
+	    if(check_stats(f, f->shared->fs_man[stype], &(state[stype])))
+		TEST_ERROR
+	}
 
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
         H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
@@ -4961,6 +5008,11 @@ error:
  *		The meta_aggr is updated to point to the new space
  *		The block of 1034 is allocated from the new block and should be aligned
  *		There is space of 1014 left in meta_aggr
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Changes due to the switch to H5FD_FLMAP_DICHOTOMY
+ *
  */
 static unsigned
 test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
@@ -4972,7 +5024,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     H5FD_mem_t 		type, stype;
     haddr_t		addr1, addr2, addr3;
     haddr_t		saddr1, saddr2, saddr3;
-    frspace_state_t 	state;
+    frspace_state_t 	state[H5FD_MEM_NTYPES];
     haddr_t 		ma_addr=HADDR_UNDEF, sdata_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, sdata_size=0, mis_align=0;
     hsize_t		alignment=0, tmp=0;
@@ -5026,11 +5078,11 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (addr1 % alignment) TEST_ERROR
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(frspace_state_t));
+        HDmemset(&state, 0, sizeof(frspace_state_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -5050,9 +5102,9 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 50 is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -5085,9 +5137,9 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 30 for sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5106,9 +5158,9 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 50 for sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5127,9 +5179,9 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 80 for sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5149,9 +5201,9 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 1034 for meta_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         /* calculate unused space in meta_aggr that is freed to free-space after block 1034 */
@@ -5161,9 +5213,9 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for unused space in meta_aggr after block 1034 is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -5172,8 +5224,15 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* Verify total size of free space after all allocations */
-        if(check_stats(f, f->shared->fs_man[type], &state))
-            TEST_ERROR
+	if(f->shared->fs_man[type]) {
+	    if(check_stats(f, f->shared->fs_man[type], &(state[type])))
+		TEST_ERROR
+	}
+
+	if(f->shared->fs_man[stype]) {
+	    if(check_stats(f, f->shared->fs_man[stype], &(state[stype])))
+		TEST_ERROR
+	}
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -5377,8 +5436,10 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (addr3 % alignment) TEST_ERROR
 
         /* Verify total size of free space after all allocations */
-        if(check_stats(f, f->shared->fs_man[type], &state))
-            TEST_ERROR
+	if(f->shared->fs_man[type]) {
+	    if(check_stats(f, f->shared->fs_man[type], &state))
+		TEST_ERROR
+	}
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -5464,6 +5525,10 @@ error:
  *		sdata_aggr is reset to 0
  *		EOA is 14346
  *		meta_aggr and sdata_aggr are all 0
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Changes due to the switch to H5FD_FLMAP_DICHOTOMY
  */
 static unsigned
 test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
@@ -5474,7 +5539,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     h5_stat_size_t      file_size;
     H5FD_mem_t 		type, stype;
     haddr_t		addr1, addr2, saddr1;
-    frspace_state_t 	state;
+    frspace_state_t 	state[H5FD_MEM_NTYPES];
     haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF;
     haddr_t 		sdata_addr=HADDR_UNDEF, new_sdata_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, new_ma_size=0, sdata_size=0, new_sdata_size=0;
@@ -5533,18 +5598,16 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr) TEST_ERROR
 
         /* fragment for alignment of block 30 is freed to free-space */
-        HDmemset(&state, 0, sizeof(frspace_state_t));
+        HDmemset(&state, 0, sizeof(frspace_state_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         /* calculate fragment for alignment of block 30 from sdata_aggr */
         mis_align = 0;
-        if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr + ma_size) % alignment))
-            mis_align = alignment - tmp;
-        else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
+        if ((tmp = (ma_addr + ma_size) % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from sdata_aggr */
@@ -5556,9 +5619,9 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment of alignment for block 30 in sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5566,9 +5629,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* calculate fragment for alignment of block 2058 from meta_aggr */
         mis_align = 0;
-        if ((alignment == TEST_ALIGN1024) && (tmp = (sdata_addr + sdata_size) % alignment))
-            mis_align = alignment - tmp;
-        else if ((alignment == TEST_ALIGN4096) && (tmp = (sdata_addr % alignment)))
+        if ((tmp = (sdata_addr + sdata_size) % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 2058 from meta_aggr */
@@ -5579,27 +5640,30 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 2058 is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         /* Verify total size of free space after all allocations */
-        if(check_stats(f, f->shared->fs_man[type], &state))
-            TEST_ERROR
+	if(f->shared->fs_man[type]) {
+	    if(check_stats(f, f->shared->fs_man[type], &(state[type])))
+		TEST_ERROR
+	}
+
+	if(f->shared->fs_man[stype]) {
+	    if(check_stats(f, f->shared->fs_man[stype], &(state[stype])))
+		TEST_ERROR
+	}
 
         /* nothing is changed in meta_aggr */
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
-        if (alignment == TEST_ALIGN1024 && (new_ma_addr != ma_addr || new_ma_size != ma_size))
-            TEST_ERROR
-        else if (alignment == TEST_ALIGN4096 && (new_ma_addr != 0 || new_ma_size != 0))
+        if (new_ma_addr != ma_addr || new_ma_size != ma_size)
             TEST_ERROR
 
         /* nothing is changed in sdata_aggr */
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
-        if (alignment == TEST_ALIGN1024 && (new_sdata_addr != sdata_addr || new_sdata_size != sdata_size))
-            TEST_ERROR
-        else if (alignment == TEST_ALIGN4096 && ((new_sdata_addr != 0 || new_sdata_size != 0)))
+        if (new_sdata_addr != sdata_addr || new_sdata_size != sdata_size)
             TEST_ERROR
 
         if(H5Fclose(file) < 0)
@@ -5691,21 +5755,16 @@ error:
  *	Result:
  *		A block of sdata_aggr->alloc_size is allocated from file allocation
  *		Fragment from alignment of file allocation is freed to free-space: [6144, 2048]
- *		This fragment adjoins meta_aggr and fulfills "absorb" condition,
- *			the remaining space left in meta_aggr is absorbed into the fragment and
- *			freed to free-space:[4126, 2018]
- *		meta_aggr is reset to 0
  *		The first block of 30 is allocated from the aggregator and should be aligned
  *		There is space of 2018 left in sdata_aggr
- *		EOA is 5120
+ *		EOA is 10240
  *
  *	Allocate second block (50) from sdata_aggr:
- *		(request-size+fragment size) is <= sdata_aggr->size
+ *		(request-size+fragment size) is > sdata_aggr->size
  *		request-size < sdata_aggr->alloc_size
  *		fragment size > (sdata_aggr->alloc_size - request-size)
  *	Result:
- *		A block of sdata_aggr->alloc_size + (fragment size - (sdata_aggr->alloc_size - request-size))
- *			is extended from file allocation for the aggregator
+ *		A block of (fragment size + request-size) is extended from file allocation for the aggregator
  *		The second block of 50 is allocated from sdata_aggr and should be aligned
  *		Fragment from alignment of aggregator allocation is freed to free-space:[8222, 4066]
  *		There is space of 2018 left in sdata_aggr
@@ -5716,8 +5775,7 @@ error:
  *		request-size < sdata_aggr->alloc_size
  *		fragment size > (sdata_aggr->alloc_size - request-size)
  *	Result:
- *		A block of sdata_aggr->alloc_size+(fragment size-(sdata_aggr->alloc_size-request-size))
- *			is extended from file allocation for sdata_aggr
+ *		A block of (fragment size + request-size) is extended from file allocation for sdata_aggr
  *		The third block of 80 is allocated from sdata_aggr and should be aligned
  *		Fragment from alignment of aggregator allocation is freed to free-space:[12338, 4046]
  *		There is space of 2018 left in sdata_aggr
@@ -5734,6 +5792,10 @@ error:
  *		Fragment from alignment of file allocation is freed to free-space:[16464, 4016]
  *		EOA is at 22538
  *		meta_aggr is unchanged
+ *
+ * Modifications:
+ *	Vailin Choi; July 2012
+ *	Changes due to the switch to H5FD_FLMAP_DICHOTOMY
  */
 static unsigned
 test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
@@ -5745,7 +5807,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     H5FD_mem_t 		type, stype;
     haddr_t		addr1, addr2;
     haddr_t		saddr1, saddr2, saddr3;
-    frspace_state_t 	state;
+    frspace_state_t 	state[H5FD_MEM_NTYPES];
     haddr_t 		ma_addr=HADDR_UNDEF, new_ma_addr=HADDR_UNDEF, sdata_addr=HADDR_UNDEF;
     hsize_t 		ma_size=0, new_ma_size=0, sdata_size=0;
     hsize_t		alignment=0, mis_align=0, tmp=0;
@@ -5798,11 +5860,11 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (addr1 % alignment) TEST_ERROR
 
         /* fragment for alignment of block 30 in meta_aggr is freed to free-space */
-        HDmemset(&state, 0, sizeof(frspace_state_t));
+        HDmemset(&state, 0, sizeof(frspace_state_t) * H5FD_MEM_NTYPES);
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -5811,9 +5873,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* calculate fragment for alignment of block 30 in sdata_aggr */
         mis_align = 0;
-        if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr + ma_size) % alignment))
-            mis_align = alignment - tmp;
-        else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
+        if ((tmp = (ma_addr + ma_size) % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from sdata_aggr */
@@ -5825,9 +5885,9 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 30 in sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5846,9 +5906,9 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 50 in sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5867,9 +5927,9 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 80 in sdata_aggr is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[stype].tot_space += mis_align;
+            state[stype].tot_sect_count += 1;
+            state[stype].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
@@ -5889,24 +5949,30 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* fragment for alignment of block 2058 is freed to free-space */
         if (mis_align) {
-            state.tot_space += mis_align;
-            state.tot_sect_count += 1;
-            state.serial_sect_count += 1;
+            state[type].tot_space += mis_align;
+            state[type].tot_sect_count += 1;
+            state[type].serial_sect_count += 1;
         }
 
         H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
         H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
 
-        if (alignment == TEST_ALIGN1024 && (new_ma_addr != ma_addr || new_ma_size != ma_size))
-            TEST_ERROR
-        else if (alignment == TEST_ALIGN4096 && (new_ma_addr != 0 || new_ma_size != 0))
+        if (new_ma_addr != ma_addr && new_ma_size != ma_size)
             TEST_ERROR
 
-        if (sdata_addr != 0 || sdata_size != 0)
+        if (sdata_addr != HADDR_UNDEF || sdata_size != 0)
             TEST_ERROR
 
-        if(check_stats(f, f->shared->fs_man[type], &state))
-            TEST_ERROR
+	if(f->shared->fs_man[type]) {
+	    if(check_stats(f, f->shared->fs_man[type], &(state[type])))
+		TEST_ERROR
+	}
+	
+
+	if(f->shared->fs_man[stype]) {
+	    if(check_stats(f, f->shared->fs_man[stype], &(state[stype])))
+		TEST_ERROR
+	}
 
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -7282,6 +7348,100 @@ error:
     return(1);
 } /* test_filespace_drivers() */
 
+/*
+ * To verify that file space is allocated from the corresponding free-space manager
+ * because H5FD_FLMAP_DICHOTOMY is used as the default free-list mapping.
+ *
+ * (1) Allocate the first block (size 30) of type H5FD_MEM_SUPER
+ * (2) Allocate the second block (size 50) of type H5FD_MEM_SUPER
+ *
+ * (3) Allocate the first block (size 30) of type H5FD_MEM_DRAW
+ *
+ * (4) Free the first block (size 30) of type H5FD_MEM_SUPER
+ *
+ * (5) Allocate the second block (size 30) of type H5FD_MEM_DRAW
+ * (6) Verify that this second block is not the freed block from (3)
+ *
+ * (7) Allocate the second block (size 30) of type H5FD_MEM_DRAW
+ * (8) Free the first block (size 30) of type H5FD_MEM_DRAW
+ *
+ * (9) Allocate the third block (size 30) of type H5FD_MEM_SUPER
+ * (10) Verify that this third block is not freed block from (8)
+ */
+static unsigned
+test_dichotomy(const char *env_h5_drvr, hid_t fapl)
+{
+    hid_t		file = -1;              /* File ID */
+    char		filename[FILENAME_LEN]; /* Filename to use */
+    H5F_t		*f = NULL;              /* Internal file object pointer */
+    H5FD_mem_t 		type, stype;
+    haddr_t		addr1, addr2, addr3, saddr1, saddr2;
+    hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
+
+    TESTING("Allocation from raw or metadata free-space manager");
+
+    /* Skip test when using VFDs that don't use the metadata aggregator */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    if(contig_addr_vfd) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+        /* Create the file to work on */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+
+        /* Allocate the first block of type H5FD_MEM_SUPER */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+
+        /* Allocate the second block of type H5FD_MEM_SUPER */
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+
+        /* Allocate the first block of type H5FD_MEM_DRAW */
+        stype = H5FD_MEM_DRAW;
+        saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+
+	/* Free the first block of type H5FD_MEM_SUPER */
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
+
+        /* Allocate the second block of type H5FD_MEM_DRAW */
+        saddr2 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+
+	/* Verify that saddr1 is not addr1 */
+	if(saddr2 == addr1) TEST_ERROR
+
+	/* Free the first block of type H5FD_MEM_DRAW */
+        H5MF_xfree(f, stype, H5P_DATASET_XFER_DEFAULT, saddr1, (hsize_t)TEST_BLOCK_SIZE30);
+
+        /* Allocate the third block of type H5FD_MEM_SUPER */
+        addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+
+	/* Verify that addr3 is not saddr1 */
+	if(addr3 == saddr1) TEST_ERROR
+
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support metadata aggregator");
+    } /* end else */
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_dichotomy() */
+
 int
 main(void)
 {
@@ -7324,6 +7484,7 @@ main(void)
     nerrors += test_mf_fs_alloc_free(fapl);
     nerrors += test_mf_fs_extend(fapl);
     nerrors += test_mf_fs_absorb(env_h5_drvr, fapl);
+    nerrors += test_dichotomy(env_h5_drvr, new_fapl);
 
     /* interaction with meta/sdata aggregator */
     nerrors += test_mf_aggr_alloc1(env_h5_drvr, fapl);
