@@ -57,6 +57,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5MF_aggr_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    H5F_blk_aggr_t *aggr);
 
 
 /*********************/
@@ -231,15 +233,14 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
                     if(H5F_addr_gt((eoa + size), f->shared->tmp_addr))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
 
+                    /* Release "other" aggregator, if it exists, is at the end of the allocated space,
+                     * has allocated more than one block and the unallocated space is greater than its
+                     * allocation block size.
+                     */
 		    if ((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
-			((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
-
-                            if(H5FD_free(f->shared->lf, dxpl_id, other_alloc_type, f, other_aggr->addr, other_aggr->size) < 0)
+			(other_aggr->tot_size > other_aggr->size) && ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
+                            if(H5MF_aggr_free(f, dxpl_id, other_alloc_type, other_aggr) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
-
-                            other_aggr->addr = 0;
-                            other_aggr->tot_size = 0;
-                            other_aggr->size = 0;
 		    } /* end if */
 
                     /* Allocate space from the VFD (i.e. at the end of the file) */
@@ -275,14 +276,14 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
                     if(H5F_addr_gt((eoa + aggr->alloc_size), f->shared->tmp_addr))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
 
+                    /* Release "other" aggregator, if it exists, is at the end of the allocated space,
+                     * has allocated more than one block and the unallocated space is greater than its
+                     * allocation block size.
+                     */
 		    if((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
-			((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
-
-                            if(H5FD_free(f->shared->lf, dxpl_id, other_alloc_type, f, other_aggr->addr, other_aggr->size) < 0)
+			(other_aggr->tot_size > other_aggr->size) && ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
+                            if(H5MF_aggr_free(f, dxpl_id, other_alloc_type, other_aggr) < 0)
                                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
-                            other_aggr->addr = 0;
-                            other_aggr->tot_size = 0;
-                            other_aggr->size = 0;
 		    } /* end if */
 
                     /* Allocate space from the VFD (i.e. at the end of the file) */
@@ -633,8 +634,10 @@ H5MF_aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr, haddr_t *addr,
 
     /* Check if this aggregator is active */
     if(f->shared->feature_flags & aggr->feature_flag) {
-        *addr = aggr->addr;
-        *size = aggr->size;
+	if(addr)
+            *addr = aggr->addr;
+        if(size)
+            *size = aggr->size;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -765,4 +768,132 @@ H5MF_free_aggrs(H5F_t *f, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_free_aggrs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_aggr_can_shrink_eoa
+ *
+ * Purpose:     Check if the remaining space in the aggregator is at EOA
+ *
+ * Return:      Success:        non-negative (TRUE/FALSE)
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5MF_aggr_can_shrink_eoa(H5F_t *f, H5FD_mem_t type, H5F_blk_aggr_t *aggr)
+{
+    haddr_t eoa = HADDR_UNDEF;      	/* EOA for the file */
+    htri_t ret_value = FALSE;   	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(aggr);
+    HDassert(aggr->feature_flag == H5FD_FEAT_AGGREGATE_METADATA || aggr->feature_flag == H5FD_FEAT_AGGREGATE_SMALLDATA);
+
+    /* Get the EOA for the file */
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "Unable to get eoa")
+
+    /* Check if the aggregator is at EOA */
+    if(aggr->size > 0 && H5F_addr_defined(aggr->addr))
+	ret_value = H5F_addr_eq(eoa, aggr->addr + aggr->size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5MF_aggr_can_shrink_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_aggr_free
+ *
+ * Purpose:     Free the aggregator's space in the file.
+ *
+ * Note:        Does _not_ put the space on a free list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5MF_aggr_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, H5F_blk_aggr_t *aggr)
+{
+    herr_t ret_value = SUCCEED;   	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared->lf);
+    HDassert(aggr);
+    HDassert(H5F_addr_defined(aggr->addr));
+    HDassert(aggr->size > 0);
+    HDassert(H5F_INTENT(f) & H5F_ACC_RDWR);
+    HDassert(aggr->feature_flag == H5FD_FEAT_AGGREGATE_METADATA || aggr->feature_flag == H5FD_FEAT_AGGREGATE_SMALLDATA);
+    HDassert(f->shared->feature_flags & aggr->feature_flag);
+
+    /* Free the remaining space at EOA in the aggregator */
+    if(H5FD_free(f->shared->lf, dxpl_id, type, f, aggr->addr, aggr->size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free aggregation block")
+
+    /* Reset the aggregator */
+    aggr->tot_size = 0;
+    aggr->addr = HADDR_UNDEF;
+    aggr->size = 0;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5MF_aggr_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_aggrs_try_shrink_eoa
+ *
+ * Purpose:     Check the metadata & small block aggregators to see if
+ *		EOA shrink is possible; if so, shrink each aggregator
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5MF_aggrs_try_shrink_eoa(H5F_t *f, hid_t dxpl_id)
+{
+    htri_t ma_status;        /* Whether the metadata aggregator can shrink the EOA */
+    htri_t sda_status;       /* Whether the small data aggregator can shrink the EOA */
+    htri_t ret_value;        /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(f->shared);
+
+    if((ma_status = H5MF_aggr_can_shrink_eoa(f, H5FD_MEM_DEFAULT, &(f->shared->meta_aggr))) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query metadata aggregator stats")
+    if(ma_status > 0)
+	if(H5MF_aggr_free(f, dxpl_id, H5FD_MEM_DEFAULT, &(f->shared->meta_aggr)) < 0)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+
+    if((sda_status = H5MF_aggr_can_shrink_eoa(f, H5FD_MEM_DRAW, &(f->shared->sdata_aggr))) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query small data aggregator stats")
+    if(sda_status > 0)
+	if(H5MF_aggr_free(f, dxpl_id, H5FD_MEM_DRAW, &(f->shared->sdata_aggr)) < 0)
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
+
+    ret_value = (ma_status || sda_status);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_aggrs_try_shrink_eoa() */
 
