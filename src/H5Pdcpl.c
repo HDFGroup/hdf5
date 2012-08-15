@@ -996,7 +996,7 @@ H5Pset_chunk_opts(hid_t plist_id, unsigned options)
      *  the default layout structs have been initialized yet or not.  *ick* -QAK
      */
     if(!H5P_dcrt_def_layout_init_g)
-        if(H5P_init_def_layout() < 0)
+        if(H5P__init_def_layout() < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't initialize default layout info")
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
@@ -1059,7 +1059,7 @@ H5Pget_chunk_opts(hid_t plist_id, unsigned *options)
      *  the default layout structs have been initialized yet or not.  *ick* -QAK
      */
     if(!H5P_dcrt_def_layout_init_g)
-        if(H5P_init_def_layout() < 0)
+        if(H5P__init_def_layout() < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't initialize default layout info")
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
