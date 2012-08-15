@@ -82,18 +82,11 @@ typedef struct H5FD_family_fapl_t {
     hid_t	memb_fapl_id;	/*file access property list of each memb*/
 } H5FD_family_fapl_t;
 
-/* Driver specific data transfer properties */
-typedef struct H5FD_family_dxpl_t {
-    hid_t	memb_dxpl_id;	/*data xfer property list of each memb	*/
-} H5FD_family_dxpl_t;
-
 /* Callback prototypes */
 static herr_t H5FD_family_term(void);
 static void *H5FD_family_fapl_get(H5FD_t *_file);
 static void *H5FD_family_fapl_copy(const void *_old_fa);
 static herr_t H5FD_family_fapl_free(void *_fa);
-static void *H5FD_family_dxpl_copy(const void *_old_dx);
-static herr_t H5FD_family_dxpl_free(void *_dx);
 static hsize_t H5FD_family_sb_size(H5FD_t *_file);
 static herr_t H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
 		     unsigned char *buf/*out*/);
@@ -128,9 +121,9 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_fapl_get,			/*fapl_get		*/
     H5FD_family_fapl_copy,			/*fapl_copy		*/
     H5FD_family_fapl_free,			/*fapl_free		*/
-    sizeof(H5FD_family_dxpl_t),			/*dxpl_size		*/
-    H5FD_family_dxpl_copy,			/*dxpl_copy		*/
-    H5FD_family_dxpl_free,			/*dxpl_free		*/
+    0,						/*dxpl_size		*/
+    NULL,					/*dxpl_copy		*/
+    NULL,					/*dxpl_free		*/
     H5FD_family_open,				/*open			*/
     H5FD_family_close,				/*close			*/
     H5FD_family_cmp,				/*cmp			*/
@@ -475,92 +468,6 @@ H5FD_family_fapl_free(void *_fa)
     if(H5I_dec_ref(fa->memb_fapl_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
     H5MM_xfree(fa);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_family_dxpl_copy
- *
- * Purpose:	Copes the family-specific data transfer properties.
- *
- * Return:	Success:	Ptr to new property list
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5FD_family_dxpl_copy(const void *_old_dx)
-{
-    const H5FD_family_dxpl_t *old_dx = (const H5FD_family_dxpl_t*)_old_dx;
-    H5FD_family_dxpl_t *new_dx = NULL;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    void *ret_value;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(NULL == (new_dx = (H5FD_family_dxpl_t *)H5MM_malloc(sizeof(H5FD_family_dxpl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    HDmemcpy(new_dx, old_dx, sizeof(H5FD_family_dxpl_t));
-
-    if(old_dx->memb_dxpl_id == H5P_DATASET_XFER_DEFAULT) {
-        if(H5I_inc_ref(new_dx->memb_dxpl_id, FALSE)<0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
-    } /* end if */
-    else {
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(old_dx->memb_dxpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-        new_dx->memb_dxpl_id = H5P_copy_plist(plist, FALSE);
-    } /* end else */
-
-    /* Set return value */
-    ret_value=new_dx;
-
-done:
-    if(ret_value==NULL) {
-        if(new_dx!=NULL)
-            H5MM_xfree(new_dx);
-    } /* end if */
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_family_dxpl_free
- *
- * Purpose:	Frees the family-specific data transfer properties.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_family_dxpl_free(void *_dx)
-{
-    H5FD_family_dxpl_t	*dx = (H5FD_family_dxpl_t*)_dx;
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    if(H5I_dec_ref(dx->memb_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
-    H5MM_xfree(dx);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1239,7 +1146,6 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned char	*buf = (unsigned char*)_buf;
-    hid_t		memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     haddr_t		sub;
     size_t		req;
     hsize_t             tempreq;
@@ -1255,13 +1161,6 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
      */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_DATASET_XFER_DEFAULT != dxpl_id && H5FD_FAMILY == H5P_get_driver(plist)) {
-        H5FD_family_dxpl_t *dx = (H5FD_family_dxpl_t *)H5P_get_driver_info(plist);
-
-        HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
-        assert(dx);
-        memb_dxpl_id = dx->memb_dxpl_id;
-    } /* end if */
 
     /* Read from each member */
     while(size > 0) {
@@ -1279,7 +1178,7 @@ H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 
         assert(u<file->nmembs);
 
-        if (H5FDread(file->memb[u], type, memb_dxpl_id, sub, req, buf)<0)
+        if (H5FDread(file->memb[u], type, dxpl_id, sub, req, buf)<0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "member file read failed")
 
         addr += req;
@@ -1316,7 +1215,6 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     const unsigned char	*buf = (const unsigned char*)_buf;
-    hid_t		memb_dxpl_id = H5P_DATASET_XFER_DEFAULT;
     haddr_t		sub;
     size_t		req;
     hsize_t             tempreq;
@@ -1332,13 +1230,6 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
      */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if(H5P_DATASET_XFER_DEFAULT != dxpl_id && H5FD_FAMILY == H5P_get_driver(plist)) {
-        H5FD_family_dxpl_t *dx = (H5FD_family_dxpl_t *)H5P_get_driver_info(plist);
-
-        HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
-        HDassert(dx);
-        memb_dxpl_id = dx->memb_dxpl_id;
-    } /* end if */
 
     /* Write to each member */
     while (size>0) {
@@ -1356,7 +1247,7 @@ H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
 
         assert(u<file->nmembs);
 
-        if (H5FDwrite(file->memb[u], type, memb_dxpl_id, sub, req, buf)<0)
+        if (H5FDwrite(file->memb[u], type, dxpl_id, sub, req, buf)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "member file write failed")
 
         addr += req;

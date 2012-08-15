@@ -544,47 +544,40 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, June  9, 1998
  *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic
- *		property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
-		  hsize_t *alignment/*out*/)
+    hsize_t *alignment/*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, threshold, alignment);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if (threshold)
+    if(threshold)
         if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, threshold) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold");
-    if (alignment)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold")
+    if(alignment)
         if(H5P_get(plist, H5F_ACS_ALIGN_NAME, alignment) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_alignment() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5P_set_driver
  *
- * Purpose:	Set the file driver (DRIVER_ID) for a file access or data
- *		transfer property list (PLIST_ID) and supply an optional
+ * Purpose:	Set the file driver (DRIVER_ID) for a file access 
+ *		property list (PLIST_ID) and supply an optional
  *		struct containing the driver-specific properites
  *		(DRIVER_INFO).  The driver properties will be copied into the
  *		property list and the reference count on the driver will be
@@ -592,18 +585,10 @@ done:
  *		still use the property list.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August  3, 1999
- *
- * Modifications:
- *
- * 		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic
- *		property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -612,7 +597,7 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
 {
     hid_t driver_id;            /* VFL driver ID */
     void *driver_info;          /* VFL driver info */
-    herr_t ret_value = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -627,29 +612,15 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info")
 
         /* Close the driver for the property list */
-        if(H5FD_fapl_close(driver_id, driver_info)<0)
+        if(H5FD_fapl_close(driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
 
         /* Set the driver for the property list */
-        if(H5FD_fapl_open(plist, new_driver_id, new_driver_info)<0)
+        if(H5FD_fapl_open(plist, new_driver_id, new_driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } else if(TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER)) {
-        /* Get the current driver information */
-        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
-        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info")
-
-        /* Close the driver for the property list */
-        if(H5FD_dxpl_close(driver_id, driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
-
-        /* Set the driver for the property list */
-        if(H5FD_dxpl_open(plist, new_driver_id, new_driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list")
-    }
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -659,8 +630,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_driver
  *
- * Purpose:	Set the file driver (DRIVER_ID) for a file access or data
- *		transfer property list (PLIST_ID) and supply an optional
+ * Purpose:	Set the file driver (DRIVER_ID) for a file access 
+ *		property list (PLIST_ID) and supply an optional
  *		struct containing the driver-specific properites
  *		(DRIVER_INFO).  The driver properties will be copied into the
  *		property list and the reference count on the driver will be
@@ -668,18 +639,10 @@ done:
  *		still use the property list.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Tuesday, August  3, 1999
- *
- * Modifications:
- *
- * 		Raymond Lu
- * 		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic
- *		property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -711,7 +674,7 @@ done:
  * Function:	H5P_get_driver
  *
  * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
- *		be a file access property list or data transfer propert list.
+ *		be a file access property list.
  *
  * Return:	Success:	A low-level driver ID which is the same ID
  *				used when the driver was set for the property
@@ -722,55 +685,37 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
- *
- * Modifications:
- *		Robb Matzke, 1999-08-03
- *		Rewritten to use the virtual file layer.
- *
- * 		Robb Matzke, 1999-08-05
- *		If the driver ID is H5FD_VFD_DEFAULT then substitute the
- *              current value of H5FD_SEC2.
- *
- * 		Quincey Koziol 2000-11-28
- *		Added internal function..
- *
- *		Raymond Lu, 2001-10-23
- *		Changed the file access list design to the new generic
- *		property list.
  *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5P_get_driver(H5P_genplist_t *plist)
 {
-    hid_t	ret_value=FAIL;         /* Return value */
+    hid_t ret_value = FAIL;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the current driver ID */
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &ret_value) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
-    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
-        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &ret_value)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "Can't retrieve VFL driver ID");
-    } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
-    }
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
-    if (H5FD_VFD_DEFAULT==ret_value)
+    if(H5FD_VFD_DEFAULT == ret_value)
         ret_value = H5_DEFAULT_VFD;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5P_get_driver() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_driver
  *
  * Purpose:	Return the ID of the low-level file driver.  PLIST_ID should
- *		be a file access property list or data transfer propert list.
+ *		be a file access property list.
  *
  * Return:	Success:	A low-level driver ID which is the same ID
  *				used when the driver was set for the property
@@ -782,16 +727,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, February 26, 1998
  *
- * Modifications:
- *		Robb Matzke, 1999-08-03
- *		Rewritten to use the virtual file layer.
- *
- * 		Robb Matzke, 1999-08-05
- *		If the driver ID is H5FD_VFD_DEFAULT then substitute the current value of
- *		H5FD_SEC2.
- *
- * 		Quincey Koziol 2000-11-28
- *		Added internal function..
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -806,7 +741,9 @@ H5Pget_driver(hid_t plist_id)
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-    ret_value = H5P_get_driver(plist);
+    /* Get the driver */
+    if((ret_value = H5P_get_driver(plist)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -817,7 +754,7 @@ done:
  * Function:	H5P_get_driver_info
  *
  * Purpose:	Returns a pointer directly to the file driver-specific
- *		information of a file access or data transfer property list.
+ *		information of a file access.
  *
  * Return:	Success:	Ptr to *uncopied* driver specific data
  *				structure if any.
@@ -830,32 +767,22 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic
- *		property list.
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5P_get_driver_info(H5P_genplist_t *plist)
 {
-    void	*ret_value=NULL;
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the current driver info */
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &ret_value) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,NULL,"can't get driver info");
-    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
-        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &ret_value)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, NULL, "Can't retrieve VFL driver ID");
-    } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access or data transfer property list");
-    }
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -866,7 +793,7 @@ done:
  * Function:	H5Pget_driver_info
  *
  * Purpose:	Returns a pointer directly to the file driver-specific
- *		information of a file access or data transfer property list.
+ *		information of a file access.
  *
  * Return:	Success:	Ptr to *uncopied* driver specific data
  *				structure if any.
@@ -879,26 +806,20 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
- *		Raymond Lu
- *		Tuesday, Oct 23, 2001
- *		Changed the file access list design to the new generic
- *		property list.
- *
  *-------------------------------------------------------------------------
  */
 void *
 H5Pget_driver_info(hid_t plist_id)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    void	*ret_value;     /* Return value */
+    void *ret_value;            /* Return value */
 
     FUNC_ENTER_API(NULL)
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
+    /* Get the driver info */
     if(NULL == (ret_value = H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
@@ -915,13 +836,10 @@ done:
  *              to retrieve VFD file handle.
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
 */
@@ -929,23 +847,24 @@ herr_t
 H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", fapl_id, offset);
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    /* Set values */
-    if((ret_value=H5P_set_family_offset(plist, offset)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set value */
+    if((ret_value = H5P_set_family_offset(plist, offset)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_family_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -955,33 +874,30 @@ done:
  *              H5Pset_family_offset
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
 {
-    herr_t      ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
          if(H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
-              HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set offset for family file");
-    } else {
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
-    }
+              HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
+    } /* end if */
+    else
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5P_set_family_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -992,13 +908,10 @@ done:
  *              to retrieve VFD file handle.
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1006,23 +919,24 @@ herr_t
 H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", fapl_id, offset);
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    /* Set values */
-    if((ret_value=H5P_get_family_offset(plist, offset)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value */
+    if((ret_value = H5P_get_family_offset(plist, offset)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_family_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1032,33 +946,30 @@ done:
  *              H5Pget_family_offset
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
 {
-    herr_t      ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set offset for family file");
-    } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
-    }
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5P_get_family_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1069,13 +980,10 @@ done:
  *              to retrieve VFD file handle.
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1090,16 +998,17 @@ H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    /* Set values */
-    if((ret_value=H5P_set_multi_type(plist, type)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set value */
+    if((ret_value = H5P_set_multi_type(plist, type)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_multi_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -1109,33 +1018,30 @@ done:
  *              H5Pset_multi_type.
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
 {
-    herr_t      ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
          if(H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't set type for multi driver");
-    } else {
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
-    }
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type for multi driver")
+    } /* end if */
+    else
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5P_set_multi_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -1146,13 +1052,10 @@ done:
  *              to retrieve VFD file handle.
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1160,23 +1063,24 @@ herr_t
 H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
 {
     H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;      /* return value */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Mt", fapl_id, type);
 
     /* Get the plist structure */
     if(H5P_DEFAULT == fapl_id)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list");
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    /* Set values */
-    if((ret_value=H5P_get_multi_type(plist, type)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value */
+    if((ret_value = H5P_get_multi_type(plist, type)) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_multi_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -1186,33 +1090,30 @@ done:
  *              H5Pget_multi_type.
  *
  * Return:      Success:        Non-negative value.
- *
  *              Failure:        Negative value.
  *
  * Programmer:  Raymond Lu
  *              Sep 17, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
 {
-    herr_t      ret_value = SUCCEED;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
          if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL,"can't get type for multi driver");
-    } else {
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
-    }
+             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get type for multi driver")
+    } /* end if */
+    else
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5P_get_multi_type() */
 
 
 /*-------------------------------------------------------------------------

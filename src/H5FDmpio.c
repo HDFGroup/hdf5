@@ -449,27 +449,23 @@ done:
  *			Use collective I/O access.
  *
  * Return:	Success:	Non-negative
- *
  * 		Failure:	Negative
  *
  * Programmer:	Albert Cheng
  *		April 2, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDt", dxpl_id, xfer_mode);
 
-    if(dxpl_id==H5P_DEFAULT)
+    if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
@@ -479,15 +475,12 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode")
 
     /* Set the transfer mode */
-    if (H5P_set(plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
+    if(H5P_set(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-
-    /* Initialize driver-specific properties */
-    ret_value= H5P_set_driver(plist, H5FD_MPIO, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_dxpl_mpio() */
 
 
 /*-------------------------------------------------------------------------
@@ -505,63 +498,54 @@ done:
  * Programmer:	Albert Cheng
  *		April 2, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", dxpl_id, xfer_mode);
 
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
-    if(H5FD_MPIO != H5P_get_driver(plist))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
     /* Get the transfer mode */
-    if (xfer_mode)
-        if (H5P_get(plist,H5D_XFER_IO_XFER_MODE_NAME,xfer_mode)<0)
+    if(xfer_mode)
+        if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, xfer_mode) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_dxpl_mpio() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_mpio_collective_opt
-
-Purpose:
-	To set a flag to choose linked chunk IO or multi-chunk IO without
-        involving decision-making inside HDF5
-
-Description:
-        The library will do linked chunk IO or multi-chunk IO without
-        involving communications for decision-making process.
-        The library won't behave as it asks for only when we find
-        that the low-level MPI-IO package doesn't support this.
-
-Parameters:
-        hid_t dxpl_id	      		in: Data transfer property list identifier
-	H5FD_mpio_chunk_opt_t   	in: The optimization flag for linked chunk IO
-                                            or multi-chunk IO.
-
-
-Returns:
-Returns a non-negative value if successful. Otherwise returns a negative value.
-*
+ *
+ * Purpose:	To set a flag to choose linked chunk I/O or multi-chunk I/O
+ *		without involving decision-making inside HDF5
+ *
+ * Note:	The library will do linked chunk I/O or multi-chunk I/O without
+ *		involving communications for decision-making process.
+ *		The library won't behave as it asks for only when we find
+ *		that the low-level MPI-IO package doesn't support this.
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Kent Yang
+ *		? ?, ?
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mode)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDc", dxpl_id, opt_mode);
@@ -577,9 +561,6 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     if(H5P_set(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, &opt_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
-    /* Initialize driver-specific properties */
-    ret_value = H5P_set_driver(plist, H5FD_MPIO, NULL);
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_mpio_collective_opt() */
@@ -587,33 +568,28 @@ done:
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_mpio_chunk_opt
-
-Purpose:
-	To set a flag to choose linked chunk IO or multi-chunk IO without
-        involving decision-making inside HDF5
-
-Description:
-        The library will do linked chunk IO or multi-chunk IO without
-        involving communications for decision-making process.
-        The library won't behave as it asks for only when we find
-        that the low-level MPI-IO package doesn't support this.
-
-Parameters:
-        hid_t dxpl_id	      		in: Data transfer property list identifier
-	H5FD_mpio_chunk_opt_t   	in: The optimization flag for linked chunk IO
-                                            or multi-chunk IO.
-
-
-Returns:
-Returns a non-negative value if successful. Otherwise returns a negative value.
-*
+ *
+ * Purpose:	To set a flag to choose linked chunk I/O or multi-chunk I/O
+ *		without involving decision-making inside HDF5
+ *
+ * Note:	The library will do linked chunk I/O or multi-chunk I/O without
+ *		involving communications for decision-making process.
+ *		The library won't behave as it asks for only when we find
+ *		that the low-level MPI-IO package doesn't support this.
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Kent Yang
+ *		? ?, ?
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iDh", dxpl_id, opt_mode);
@@ -626,41 +602,36 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
-    if (H5P_set(plist,H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME,&opt_mode)<0)
+    if(H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, &opt_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-
-    /* Initialize driver-specific properties */
-    ret_value= H5P_set_driver(plist, H5FD_MPIO, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_dxpl_mpio_chunk_opt() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_mpio_chunk_opt_num
-
-Purpose:
-	To set a threshold for doing linked chunk IO
-
-Description:
-        If the number is greater than the threshold set by the user,
-        the library will do linked chunk IO; otherwise, IO will be done for every chunk.
-
-Parameters:
-        hid_t dxpl_id	      		in: Data transfer property list identifier
-	unsigned num_proc_per_chunk	in: the threshold of the average number of chunks selected by each process
-
-Returns:
-Returns a non-negative value if successful. Otherwise returns a negative value.
-*
+ *
+ * Purpose:	To set a threshold for doing linked chunk IO
+ *
+ * Note:	If the number is greater than the threshold set by the user,
+ *		the library will do linked chunk I/O; otherwise, I/O will be
+ *		done for every chunk.
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Kent Yang
+ *		? ?, ?
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", dxpl_id, num_chunk_per_proc);
@@ -673,41 +644,39 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
-    if (H5P_set(plist,H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME,&num_chunk_per_proc)<0)
+    if(H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME, &num_chunk_per_proc) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-
-    /* Initialize driver-specific properties */
-    ret_value= H5P_set_driver(plist, H5FD_MPIO, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_dxpl_mpio_chunk_opt_num() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_mpio_chunk_opt_ratio
-
-Purpose:
-	To set a threshold for doing collective IO for each chunk
-Description:
-	The library will calculate the percentage of the number of process holding selections at each chunk. If that percentage of number of process in the individual chunk is greater than the threshold set by the user, the library will do collective chunk IO for this chunk; otherwise, independent IO will be done for this chunk.
-Parameters:
-	hid_t dxpl_id
-		in: Data transfer property list identifier
-	unsigned percent_num_proc_per_chunk
-		in: the threshold of the percentage of the number of process holding selections per chunk
-Returns:
-Returns a non-negative value if successful. Otherwise returns a negative value.
-
-
-*
+ *
+ * Purpose:	To set a threshold for doing collective I/O for each chunk
+ *
+ * Note:	The library will calculate the percentage of the number of
+ *		process holding selections at each chunk. If that percentage
+ *		of number of process in the individual chunk is greater than
+ *		the threshold set by the user, the library will do collective
+ *		chunk I/O for this chunk; otherwise, independent I/O will be
+ *		done for this chunk.
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Kent Yang
+ *		? ?, ?
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_chunk)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", dxpl_id, percent_num_proc_per_chunk);
@@ -720,15 +689,12 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
-    if (H5P_set(plist,H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME,&percent_num_proc_per_chunk)<0)
+    if(H5P_set(plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME, &percent_num_proc_per_chunk) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
-
-    /* Initialize driver-specific properties */
-    ret_value= H5P_set_driver(plist, H5FD_MPIO, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_dxpl_mpio_chunk_opt_ratio() */
 
 
 /*-------------------------------------------------------------------------
@@ -745,10 +711,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, August 13, 1999
  *
- * Modifications:
- * 		Albert Cheng, 2003-04-17
- * 		Duplicate the communicator and Info object so that the new
- * 		property list is insulated from the old one.
  *-------------------------------------------------------------------------
  */
 static void *
@@ -789,8 +751,6 @@ done:
  *
  * Programmer:	Albert Cheng
  *              Jan  8, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
