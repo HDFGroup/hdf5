@@ -202,6 +202,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_56.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_57.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_58.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_59.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_500.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_501.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_502.txt
@@ -702,6 +703,8 @@ IF (BUILD_TESTING)
           h5diff_57.out.err
           h5diff_58.out
           h5diff_58.out.err
+          h5diff_59.out
+          h5diff_59.out.err
           h5diff_500.out
           h5diff_500.out.err
           h5diff_501.out
@@ -959,6 +962,10 @@ ADD_H5_TEST (h5diff_57 0 -v ${FILE4} ${FILE4} dset7a dset7b)
 
 # 5.8 (region reference)
 ADD_H5_TEST (h5diff_58 1 -v ${FILE7} ${FILE8} refreg)
+
+# test for both dset and attr with same type but with different size 
+# ( HDDFV-7942 )
+ADD_H5_TEST (h5diff_59 0 -v ${FILE4} ${FILE4} dset11a dset11b)
 
 # ##############################################################################
 # # Error messages

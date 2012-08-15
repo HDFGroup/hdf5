@@ -180,6 +180,7 @@ hsize_t diff_attr(hid_t loc1_id,
  *-------------------------------------------------------------------------
  */
 
+/* in h5diff_util.c */
 void        print_found(hsize_t nfound);
 void        print_type(hid_t type);
 const char* diff_basename(const char *name);
@@ -187,6 +188,10 @@ const char* get_type(h5trav_type_t type);
 const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dimensions (int rank, hsize_t *dims);
+herr_t      match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
+                              hid_t *m_tid1, hid_t *m_tid2, 
+                              size_t *m_size1, size_t  *m_size2);
+/* in h5diff.c */
 int         print_objname(diff_opt_t *options, hsize_t nfound);
 void        do_print_objname (const char *OBJ, const char *path1, const char *path2, diff_opt_t * opts);
 void        do_print_attrname (const char *attr, const char *path1, const char *path2);

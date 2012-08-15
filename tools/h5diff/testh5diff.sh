@@ -234,6 +234,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_55.txt
 $SRC_H5DIFF_TESTFILES/h5diff_56.txt
 $SRC_H5DIFF_TESTFILES/h5diff_57.txt
 $SRC_H5DIFF_TESTFILES/h5diff_58.txt
+$SRC_H5DIFF_TESTFILES/h5diff_59.txt
 $SRC_H5DIFF_TESTFILES/h5diff_500.txt
 $SRC_H5DIFF_TESTFILES/h5diff_501.txt
 $SRC_H5DIFF_TESTFILES/h5diff_502.txt
@@ -625,6 +626,10 @@ TOOLTEST h5diff_57.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b
 
 # 5.8 (region reference)
 TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
+
+# test for both dset and attr with same type but with different size 
+# ( HDDFV-7942 )
+TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
 
 # ##############################################################################
 # # Error messages

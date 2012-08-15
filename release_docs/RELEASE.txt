@@ -705,6 +705,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed the incorrect result when comparing attribute data 
+          values and the data type has same class but different size.
+          HDFFV-7942  (JKM 08/15/2012)
         - ph5diff: Fixed intermittent hang issue on a certain operation in 
           parallel mode. It was detected by daily test for comparing 
           non-comparable objects, but it could have occurred in other 

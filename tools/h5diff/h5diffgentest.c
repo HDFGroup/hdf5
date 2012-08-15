@@ -759,6 +759,7 @@ int test_datatypes(const char *fname)
 {
 
     hid_t   fid1;
+    hid_t   dset;
     hsize_t dims[2]={3,2};
     herr_t  status;
     char    buf1a[3][2] = {{1,1},{1,1},{1,1}};
@@ -789,6 +790,9 @@ int test_datatypes(const char *fname)
 
     unsigned int    buf10a[3][2] = {{UIMAX,1},{1,1},{1,1}};
     unsigned int    buf10b[3][2] = {{UIMAX-1,1},{3,4},{5,6}};
+
+    unsigned short     buf11a[3][2] = {{204,205},{2,3},{1,1}};
+    unsigned int     buf11b[3][2] = {{204,205},{2,3},{1,1}};
 
 
     /*-------------------------------------------------------------------------
@@ -880,6 +884,19 @@ int test_datatypes(const char *fname)
     write_dset(fid1,2,dims,"dset10a",H5T_NATIVE_UINT,buf10a);
     write_dset(fid1,2,dims,"dset10b",H5T_NATIVE_UINT,buf10b);
 
+    /*-------------------------------------------------------------------------
+    * Same type class, different size
+    *-------------------------------------------------------------------------
+    */
+    write_dset(fid1,2,dims,"dset11a",H5T_STD_U16LE,buf11a);
+    dset=H5Dopen (fid1, "dset11a", H5P_DEFAULT);
+    write_attr(dset,2,dims,"attr",H5T_STD_U16LE,buf11a);
+    H5Dclose (dset);
+
+    write_dset(fid1,2,dims,"dset11b",H5T_STD_U32LE,buf11b);
+    dset=H5Dopen (fid1, "dset11b", H5P_DEFAULT);
+    write_attr(dset,2,dims,"attr",H5T_STD_U32LE,buf11b);
+    H5Dclose (dset);
 
     /*-------------------------------------------------------------------------
     * Close
