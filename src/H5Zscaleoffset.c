@@ -45,7 +45,7 @@ static htri_t H5Z_can_apply_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t spac
 static enum H5Z_scaleoffset_t H5Z_scaleoffset_get_type(unsigned dtype_class,
     unsigned dtype_size, unsigned dtype_sign);
 static herr_t H5Z_scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist,
-    const H5T_t *type, enum H5Z_scaleoffset_t scale_type, unsigned cd_values[],
+    H5T_t *type, enum H5Z_scaleoffset_t scale_type, unsigned cd_values[],
     int need_convert, hid_t dxpl_id);
 static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
@@ -804,7 +804,7 @@ done:
  */
 static herr_t
 H5Z_scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist,
-    const H5T_t *type, enum H5Z_scaleoffset_t scale_type,
+    H5T_t *type, enum H5Z_scaleoffset_t scale_type,
     unsigned cd_values[], int need_convert, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;          /* Return value */
@@ -861,7 +861,7 @@ static herr_t
 H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
     H5P_genplist_t *dcpl_plist;     /* Property list pointer */
-    const H5T_t	*type;              /* Datatype */
+    H5T_t	*type;              /* Datatype */
     const H5S_t	*ds;                /* Dataspace */
     unsigned flags;                 /* Filter flags */
     size_t cd_nelmts = H5Z_SCALEOFFSET_USER_NPARMS;  /* Number of filter parameters */
