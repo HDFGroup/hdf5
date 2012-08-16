@@ -889,12 +889,12 @@ int test_datatypes(const char *fname)
     *-------------------------------------------------------------------------
     */
     write_dset(fid1,2,dims,"dset11a",H5T_STD_U16LE,buf11a);
-    dset=H5Dopen (fid1, "dset11a", H5P_DEFAULT);
+    dset=H5Dopen2 (fid1, "dset11a", H5P_DEFAULT);
     write_attr(dset,2,dims,"attr",H5T_STD_U16LE,buf11a);
     H5Dclose (dset);
 
     write_dset(fid1,2,dims,"dset11b",H5T_STD_U32LE,buf11b);
-    dset=H5Dopen (fid1, "dset11b", H5P_DEFAULT);
+    dset=H5Dopen2 (fid1, "dset11b", H5P_DEFAULT);
     write_attr(dset,2,dims,"attr",H5T_STD_U32LE,buf11b);
     H5Dclose (dset);
 
