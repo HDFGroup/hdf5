@@ -780,7 +780,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
     H5Eclear2(H5E_DEFAULT);
 
     /* Name and version number */
-    strncpy(name, "NCSAmulti", (size_t)8);
+    strncpy(name, H5FD_DRIVER_ID_MULTI, (size_t)8);
     name[8] = '\0';
 
     assert(7==H5FD_MEM_NTYPES);
@@ -865,7 +865,7 @@ H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
     H5Eclear2(H5E_DEFAULT);
 
     /* Make sure the name/version number is correct */
-    if (strcmp(name, "NCSAmult"))
+    if (strcmp(name, H5FD_DRIVER_ID_MULTI))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "invalid multi superblock", -1)
 
     /* Set default values */
@@ -1004,7 +1004,7 @@ H5FD_multi_sb_verify(H5FD_t *_file, const char *sb_driver_id)
     static const char *func = "H5FD_multi_sb_verify";
     
     /* Check that the superblock was written by the multi driver */
-    if(strncmp(sb_driver_id, "NCSAmult", (size_t)8) == 0) {
+    if(strncmp(sb_driver_id, H5FD_DRIVER_ID_MULTI, (size_t)8) == 0) {
         return 1;
     }
 

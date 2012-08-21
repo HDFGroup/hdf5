@@ -23,6 +23,7 @@
 #define H5FDmulti_H
 
 #define H5FD_MULTI	(H5FD_multi_init())
+#define H5FD_DRIVER_ID_MULTI "NCSAmult"
 
 #ifdef __cplusplus
 extern "C" {

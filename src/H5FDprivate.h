@@ -39,7 +39,6 @@
 /* Length of filename buffer */
 #define H5FD_MAX_FILENAME_LEN      1024
 
-
 /****************************/
 /* Library Private Typedefs */
 /****************************/

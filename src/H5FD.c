@@ -443,12 +443,10 @@ H5FD_get_class(hid_t id)
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
         if(TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
-            //if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
             if((driver_id = H5P_get_driver(plist)) < 0 )
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
             ret_value = H5FD_get_class(driver_id);
         } else if(TRUE == H5P_isa_class(id, H5P_DATASET_XFER)) {
-            //if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
             if((driver_id = H5P_get_driver(plist)) < 0 )
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
             ret_value = H5FD_get_class(driver_id);
@@ -1100,7 +1098,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
     /* Get the VFD to open the file with */
-    //if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
     if((driver_id = H5P_get_driver(plist)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
 

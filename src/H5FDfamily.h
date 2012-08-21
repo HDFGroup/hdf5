@@ -23,6 +23,7 @@
 #define H5FDfamily_H
 
 #define H5FD_FAMILY	(H5FD_family_init())
+#define H5FD_DRIVER_ID_FAMILY "NCSAfami"
 
 #ifdef __cplusplus
 extern "C" {

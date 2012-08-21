@@ -235,6 +235,12 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      */
 #define H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS 0x00000800
 
+/*
+ * Define the internal 8 character identifier stored in the superblock for
+ * files created by drivers that modify the file structure.
+ */
+#define H5FD_DRIVER_ID_FAMILY "NCSAfami"
+#define H5FD_DRIVER_ID_MULTI  "NCSAmulti"
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;

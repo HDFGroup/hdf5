@@ -246,15 +246,19 @@ H5Pset_fapl_null(hid_t fapl_id, hid_t inner_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     if(H5P_DEFAULT == inner_fapl_id)
-        inner_fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else
+        fa.inner_fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else {
         if(TRUE != H5P_isa_class(inner_fapl_id, H5P_FILE_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
 
-    /*
-     * Initialize driver specific information.
-     */
-    fa.inner_fapl_id = inner_fapl_id;
+        /* Make a copy of the inner fapl */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(inner_fapl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access list")
+
+        fa.inner_fapl_id = H5P_copy_plist(plist, TRUE);
+    }
+
+    /* init driver info */
 
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
@@ -557,7 +561,7 @@ H5FD_null_sb_size(H5FD_t *_file)
     H5FD_null_t *file = (H5FD_null_t*)_file;
     hsize_t     ret_value = 0; /*size of header*/
 
-    FUNC_ENTER_NOAPI(UFAIL)
+    FUNC_ENTER_NOAPI(0)
 
     HDassert(file);
 
@@ -752,7 +756,7 @@ done:
          } /* end if */
 
         if(H5I_dec_ref(file->inner_fapl_id) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close driver ID")
+            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, NULL, "can't close inner driver ID")
         H5MM_xfree(file);
     } /* end if */
 
@@ -850,14 +854,16 @@ static herr_t
 H5FD_null_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
     const H5FD_null_t *file = (const H5FD_null_t*)_file;
+    herr_t ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Query the inner driver */
     if(flags && file)
-        H5FDquery(file->inner_file, flags);
+        ret_value = H5FDquery(file->inner_file, flags);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_null_query() */
 
 
@@ -887,6 +893,9 @@ H5FD_null_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
 
     /* Delegate to the underlying driver */
     ret_value = H5FD_get_fs_type_map(file->inner_file, type_map);
+    if(ret_value < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "inner driver get type map failed")
+
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -898,8 +907,8 @@ done:
  *
  * Purpose:     Allocate file memory in the inner driver.
  *
- * Return:  Success:    Non-negative
- *          Failure:    Negative
+ * Return:      Success:    The format address of the new file memory.
+ *              Failure:    The undefined address HADDR_UNDEF
  *
  * Programmer:  Jacob Gruber
  *              Thursday, January 5, 2012
@@ -911,9 +920,9 @@ H5FD_null_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
     const H5FD_null_t *file = (const H5FD_null_t*)_file;
     hid_t inner_dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    herr_t ret_value;
+    haddr_t ret_value;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(HADDR_UNDEF)
 
     HDassert(file);
 
@@ -925,7 +934,7 @@ H5FD_null_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
         H5FD_null_dxpl_t *dx;       /* Null-specific info */
 
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data xfer property list")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data xfer property list")
 
         dx = (H5FD_null_dxpl_t *)H5P_get_driver_info(plist);
 
@@ -936,7 +945,8 @@ H5FD_null_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     /* Delegate to the inner file */
     ret_value = H5FDalloc(file->inner_file, type, inner_dxpl_id, size);
-
+    if(ret_value == HADDR_UNDEF)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate inner file memory")
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_null_alloc() */
@@ -985,6 +995,8 @@ H5FD_null_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsiz
 
     /* Delegate to the inner file */
     ret_value = H5FDfree(file->inner_file, type, inner_dxpl_id, addr, size);
+    if(ret_value < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "inner file deallocation request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1020,6 +1032,8 @@ H5FD_null_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 
     /* Delegate to the inner file */
     ret_value = H5FD_get_eoa(file->inner_file, type);
+    if(ret_value == HADDR_UNDEF)
+         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "inner file get eoa request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1053,7 +1067,9 @@ H5FD_null_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 
     /* Delegate to the inner file */
     ret_value = H5FD_set_eoa(file->inner_file, type, abs_eoa);
-
+    if(ret_value < 0)
+         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "inner file set eoa request failed")
+    
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_null_set_eof() */
@@ -1086,7 +1102,9 @@ H5FD_null_get_eof(const H5FD_t *_file)
 
     /* Delegate to the inner file */
     ret_value = H5FD_get_eof(file->inner_file);
-
+    if(ret_value == HADDR_UNDEF)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "inner file get eof request failed")
+   
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_null_get_eof() */
@@ -1118,7 +1136,9 @@ H5FD_null_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 
     /* Delegate to the inner file */
     ret_value = H5FD_get_vfd_handle(file->inner_file, file->inner_fapl_id, file_handle);
-
+    if(ret_value < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for inner file driver")
+        
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_null_get_handle() */

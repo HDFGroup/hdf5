@@ -42,7 +42,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
-#include "H5FDfamily.h"         /* Family file driver 			*/
+#include "H5FDfamily.h"     /* Family file driver 			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
@@ -625,7 +625,7 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Name and version number */
-    HDstrncpy(name, "NCSAfami", (size_t)9);
+    HDstrncpy(name, H5FD_DRIVER_ID_FAMILY, (size_t)9);
     name[8] = '\0';
 
     /* Store member file size.  Use the member file size from the property here.
@@ -724,7 +724,7 @@ H5FD_family_sb_verify(H5FD_t UNUSED *_file, const char *sb_driver_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check if the suerblock was written by a family driver. */
-    if(HDstrncmp(sb_driver_id, "NCSAfami", (size_t)8) == 0) {
+    if(HDstrncmp(sb_driver_id, H5FD_DRIVER_ID_FAMILY, (size_t)8) == 0) {
         ret_value = TRUE;
     }
     
