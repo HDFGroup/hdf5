@@ -354,6 +354,31 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
     info->paths[idx].objno = HADDR_UNDEF;
 } /* end trav_info_add() */
 
+
+/*-------------------------------------------------------------------------
+ * Function: trav_fileinfo_add
+ *
+ * Purpose: Add a file addr & fileno to info struct
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
+{
+    H5O_info_t oinfo;
+    size_t idx = info->nused - 1;
+
+    if ( info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
+      H5Oget_info_by_name(loc_id, info->paths[idx].path, &oinfo, H5P_DEFAULT);
+    else
+      H5Oget_info(loc_id, &oinfo);
+
+    info->paths[idx].objno = oinfo.addr;
+    info->paths[idx].fileno = oinfo.fileno;
+} /* end trav_fileinfo_add() */
+
 
 /*-------------------------------------------------------------------------
  * Function: trav_info_visit_obj

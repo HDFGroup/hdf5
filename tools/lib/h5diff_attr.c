@@ -405,6 +405,14 @@ hsize_t diff_attr(hid_t loc1_id,
             continue;
         }
 
+       /*-----------------------------------------------------------------
+        * "upgrade" the smaller memory size
+        *------------------------------------------------------------------
+        */
+        if (FAIL == match_up_memsize (ftype1_id, ftype2_id,
+                                      &mtype1_id, &mtype2_id, 
+                                      &msize1, &msize2))
+            goto error;
 
         /*---------------------------------------------------------------------
         * read

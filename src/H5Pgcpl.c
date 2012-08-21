@@ -68,6 +68,7 @@ static herr_t H5P_gcrt_reg_prop(H5P_genclass_t *pclass);
 /* Group creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_GCRT[1] = {{
     "group create",		/* Class name for debugging     */
+    H5P_TYPE_GROUP_CREATE,      /* Class type                   */
     &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_GROUP_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_GROUP_CREATE_g,	/* Pointer to default property list ID */

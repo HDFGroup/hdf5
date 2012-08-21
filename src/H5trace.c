@@ -212,6 +212,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 	if('[' == *type) {
 	    if('a' == type[1]) {
 		asize_idx = (int)HDstrtol(type + 2, &rest, 10);
+                HDassert(0 <= asize_idx && asize_idx < (int) NELMTS(asize));
 		HDassert(']'==*rest);
 		type = rest + 1;
 	    } else {

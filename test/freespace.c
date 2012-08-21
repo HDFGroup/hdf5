@@ -1522,8 +1522,10 @@ test_fs_sect_merge(hid_t fapl)
     /* Free the section node(s) */
     if(TEST_sect_free((H5FS_section_info_t *)sect_node1) < 0)
 	TEST_ERROR
+    sect_node1 = NULL;
     if(TEST_sect_free((H5FS_section_info_t *)sect_node2) < 0)
 	TEST_ERROR
+    sect_node2 = NULL;
 
     /* Close the free space manager */
     if(H5FS_close(f, H5P_DATASET_XFER_DEFAULT, frsp) < 0)

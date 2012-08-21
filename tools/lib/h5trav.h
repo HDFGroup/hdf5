@@ -177,6 +177,8 @@ H5TOOLS_DLL void trav_info_free(trav_info_t *info);
 
 H5TOOLS_DLL void trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type);
 
+H5TOOLS_DLL void trav_fileinfo_add(trav_info_t *info, hid_t loc_id);
+
 /*-------------------------------------------------------------------------
  * table private functions
  *-------------------------------------------------------------------------

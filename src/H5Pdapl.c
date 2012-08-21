@@ -82,15 +82,16 @@ static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
 /* Dataset access property list class library initialization object */
 const H5P_libclass_t H5P_CLS_DACC[1] = {{
     "dataset access",		/* Class name for debugging     */
+    H5P_TYPE_DATASET_ACCESS,    /* Class type                   */
     &H5P_CLS_LINK_ACCESS_g,	/* Parent class ID              */
     &H5P_CLS_DATASET_ACCESS_g,	/* Pointer to class ID          */
     &H5P_LST_DATASET_ACCESS_g,	/* Pointer to default property list ID */
     H5P__dacc_reg_prop,		/* Default property registration routine */
-    NULL,		         /* Class creation callback      */
+    NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
-    NULL,		         /* Class copy callback          */
+    NULL,		        /* Class copy callback          */
     NULL,		        /* Class copy callback info     */
-    NULL,		         /* Class close callback         */
+    NULL,		        /* Class close callback         */
     NULL 		        /* Class close callback info    */
 }};
 
@@ -271,3 +272,4 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
 done:
     FUNC_LEAVE_API(ret_value)
 }
+

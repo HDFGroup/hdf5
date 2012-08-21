@@ -282,6 +282,16 @@
  *                 don't use this at present, I hope that this will allow
  *                 some optimizations when I get to it.
  *
+ * num_last_entries: The number of entries in the cache that can only be
+ *                   flushed after all other entries in the cache have
+ *                   been flushed. At this time, this will only ever be
+ *                   one entry (the superblock), and the code has been
+ *                   protected with HDasserts to enforce this. This restraint
+ *                   can certainly be relaxed in the future if the need for
+ *                   multiple entries being flushed last arises, though
+ *                   explicit tests for that case should be added when said
+ *                   HDasserts are removed.
+ *
  * With the addition of the fractal heap, the cache must now deal with
  * the case in which entries may be dirtied, moved, or have their sizes
  * changed during a flush.  To allow sanity checks in this situation, the
@@ -878,6 +888,7 @@ struct H5C_t
     int32_t                     slist_len;
     size_t                      slist_size;
     H5SL_t *                    slist_ptr;
+    int32_t                     num_last_entries;
 #if H5C_DO_SANITY_CHECKS
     int64_t			slist_len_increase;
     int64_t			slist_size_increase;
@@ -1964,6 +1975,10 @@ if ( (cache_ptr)->index_size !=                                             \
     } else {                                                 \
 	(cache_ptr)->clean_index_size += (entry_ptr)->size;  \
     }                                                        \
+    if ((entry_ptr)->flush_me_last) {                        \
+        (cache_ptr)->num_last_entries++;                     \
+        HDassert((cache_ptr)->num_last_entries == 1);        \
+    }                                                        \
     H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)            \
 }
 
@@ -1992,6 +2007,10 @@ if ( (cache_ptr)->index_size !=                                             \
         (cache_ptr)->dirty_index_size -= (entry_ptr)->size;   \
     } else {                                                  \
 	(cache_ptr)->clean_index_size -= (entry_ptr)->size;   \
+    }                                                         \
+    if ((entry_ptr)->flush_me_last) {                         \
+        (cache_ptr)->num_last_entries--;                      \
+        HDassert((cache_ptr)->num_last_entries == 0);         \
     }                                                         \
     H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)              \
 }

@@ -74,6 +74,10 @@
 #define END_MEMBERS	}}
 
 
+#define H5FD_MULTI_DXPL_PROP_NAME       "H5FD_MULTI_DXPL"
+#define H5FD_MULTI_DXPL_PROP_SIZE       sizeof(H5FD_multi_dxpl_t)
+
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_MULTI_g = 0;
 
@@ -126,8 +130,6 @@ static herr_t H5FD_multi_sb_decode(H5FD_t *file, const char *name,
 static void *H5FD_multi_fapl_get(H5FD_t *file);
 static void *H5FD_multi_fapl_copy(const void *_old_fa);
 static herr_t H5FD_multi_fapl_free(void *_fa);
-static void *H5FD_multi_dxpl_copy(const void *_old_dx);
-static herr_t H5FD_multi_dxpl_free(void *_dx);
 static H5FD_t *H5FD_multi_open(const char *name, unsigned flags,
 			       hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_multi_close(H5FD_t *_file);
@@ -161,9 +163,9 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_fapl_get,			/*fapl_get		*/
     H5FD_multi_fapl_copy,			/*fapl_copy		*/
     H5FD_multi_fapl_free,			/*fapl_free		*/
-    sizeof(H5FD_multi_dxpl_t),			/*dxpl_size		*/
-    H5FD_multi_dxpl_copy,			/*dxpl_copy		*/
-    H5FD_multi_dxpl_free,			/*dxpl_free		*/
+    0,						/*dxpl_size		*/
+    NULL,					/*dxpl_copy		*/
+    NULL,					/*dxpl_free		*/
     H5FD_multi_open,				/*open			*/
     H5FD_multi_close,				/*close			*/
     H5FD_multi_cmp,				/*cmp			*/
@@ -590,6 +592,127 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_dxpl_copy_cb
+ *
+ * Purpose:	Multi VFD DXPL property 'copy' callback
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_dxpl_copy_cb(const char *name, size_t size, void *_dx)
+{
+    H5FD_multi_dxpl_t *dx = (H5FD_multi_dxpl_t *)_dx;
+    static const char *func = "H5FD_multi_dxpl_copy_cb";  /* Function Name for error reporting */
+
+    /* Shut compiler up */
+    name = name;
+
+    /* Sanity check */
+    assert(size == sizeof(H5FD_multi_dxpl_t));
+
+    ALL_MEMBERS(mt) {
+        if(dx->memb_dxpl[mt] >= 0)
+            if(H5Iinc_ref(dx->memb_dxpl[mt]) < 0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINC, "can't increment ref. count for multi VFD property", -1)
+    } END_MEMBERS;
+
+    return 0;
+} /* end H5FD_multi_dxpl_copy_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_dxpl_cmp_cb
+ *
+ * Purpose:	Multi VFD DXPL property 'compare' callback
+ *
+ * Return:	Success:	same as memcmp()
+ *		Failure:	<can't fail>
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_multi_dxpl_cmp_cb(const void *_dx1, const void *_dx2, size_t size)
+{
+    const H5FD_multi_dxpl_t *dx1 = (const H5FD_multi_dxpl_t *)_dx1;
+    const H5FD_multi_dxpl_t *dx2 = (const H5FD_multi_dxpl_t *)_dx2;
+    int cmp_status;
+
+    /* Sanity check */
+    assert(size == sizeof(H5FD_multi_dxpl_t));
+
+    ALL_MEMBERS(mt) {
+        if(dx1->memb_dxpl[mt] >= 0) {
+            if(dx2->memb_dxpl[mt] >= 0) {
+                cmp_status = H5Pequal(dx1->memb_dxpl[mt], dx2->memb_dxpl[mt]);
+                if(cmp_status != 0)
+                    return(cmp_status);
+            } /* end if */
+            else
+                return(1);
+        } /* end if */
+        else {
+            if(dx2->memb_dxpl[mt] >= 0)
+                return(-1);
+            else
+                if(dx1->memb_dxpl[mt] > dx2->memb_dxpl[mt])
+                    return(1);
+                else if(dx1->memb_dxpl[mt] < dx2->memb_dxpl[mt])
+                    return(-1);
+                else
+                    continue;
+        } /* end else */
+    } END_MEMBERS;
+
+    return 0;
+} /* end H5FD_multi_dxpl_cmp_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_dxpl_cls_cb
+ *
+ * Purpose:	Multi VFD DXPL property 'close' callback
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_dxpl_cls_cb(const char *name, size_t size, void *_dx)
+{
+    H5FD_multi_dxpl_t *dx = (H5FD_multi_dxpl_t *)_dx;
+    static const char *func = "H5FD_multi_dxpl_cls_cb";  /* Function Name for error reporting */
+
+    /* Shut compiler up */
+    name = name;
+
+    /* Sanity check */
+    assert(size == sizeof(H5FD_multi_dxpl_t));
+
+    ALL_MEMBERS(mt) {
+        if(dx->memb_dxpl[mt] >= 0)
+            if(H5Idec_ref(dx->memb_dxpl[mt]) < 0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTDEC, "can't increment ref. count for multi VFD property", -1)
+    } END_MEMBERS;
+
+    return 0;
+} /* end H5FD_multi_dxpl_cls_cb() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_dxpl_multi
  *
  * Purpose:	Set the data transfer property list DXPL_ID to use the multi
@@ -613,7 +736,8 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
 {
     H5FD_multi_dxpl_t	dx;
     H5FD_mem_t		mt;
-    static const char *func="H5FDset_dxpl_multi";  /* Function Name for error reporting */
+    htri_t              prop_exists;            /* Whether the multi VFD DXPL property already exists */
+    static const char *func = "H5FDset_dxpl_multi";  /* Function Name for error reporting */
 
     /*NO TRACE*/
 
@@ -621,26 +745,56 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
     H5Eclear2(H5E_DEFAULT);
 
     /* Check arguments */
-    if (TRUE!=H5Pisa_class(dxpl_id,  H5P_DATASET_XFER))
+    if(TRUE != H5Pisa_class(dxpl_id,  H5P_DATASET_XFER))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1)
-    if (!memb_dxpl)
+    if(!memb_dxpl)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid pointer", -1)
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-        if (memb_dxpl[mt]!=H5P_DEFAULT && TRUE!=H5Pisa_class(memb_dxpl[mt], H5P_DATASET_XFER))
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+        if(memb_dxpl[mt] != H5P_DEFAULT && TRUE != H5Pisa_class(memb_dxpl[mt], H5P_DATASET_XFER))
             H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a data transfer property list", -1)
-    }
+    } /* end for */
 
-    /* Initialize the data transfer property list */
-    memcpy(dx.memb_dxpl, memb_dxpl, H5FD_MEM_NTYPES*sizeof(hid_t));
+    /* Check for existence of multi VFD DXPL property in DXPL */
+    if((prop_exists = H5Pexist(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME)) < 0)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't check for multi VFD property", -1)
 
-    /* Convert "generic" default property lists into default dataset transfer property lists */
-    for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-        if (dx.memb_dxpl[mt]==H5P_DEFAULT)
-            dx.memb_dxpl[mt]=H5P_DATASET_XFER_DEFAULT;
-    }
+    /* Copy the DXPLs to internal property, converting "generic" default
+     * property lists into default dataset transfer property lists */
+    for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+        if(memb_dxpl[mt] == H5P_DEFAULT)
+            dx.memb_dxpl[mt] = H5P_DATASET_XFER_DEFAULT;
+        else {
+            if((dx.memb_dxpl[mt] = H5Pcopy(memb_dxpl[mt])) < 0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTCOPY, "can't copy dataset transfer property list", -1)
+        } /* end else */
+    } /* end for */
 
-    return H5Pset_driver(dxpl_id, H5FD_MULTI, &dx);
-}
+    /* Clear previous property, if it exists */
+    if(prop_exists) {
+        H5FD_multi_dxpl_t	old_dx;
+
+        /* Get the old DXPL value */
+        if(H5Pget(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME, &old_dx) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get previous property value", -1)
+
+        ALL_MEMBERS(mt) {
+            if(old_dx.memb_dxpl[mt] >= 0)
+                if(H5Pclose(old_dx.memb_dxpl[mt]) < 0)
+                    H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTCLOSEOBJ, "can't close property list", -1)
+        } END_MEMBERS;
+
+        /* Set the new value */
+        if(H5Pset(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME, &dx) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get previous property value", -1)
+    } /* end if */
+    else {
+        /* Insert multi VFD DXPL property into property list */
+        if(H5Pinsert2(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME, H5FD_MULTI_DXPL_PROP_SIZE, &dx, NULL, NULL, NULL, H5FD_multi_dxpl_copy_cb, H5FD_multi_dxpl_cmp_cb, H5FD_multi_dxpl_cls_cb) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTINSERT, "can't insert multi VFD DXPL property", -1)
+    } /* end else */
+
+    return 0;
+} /* end H5Pset_dxpl_multi() */
 
 
 /*-------------------------------------------------------------------------
@@ -663,33 +817,42 @@ H5Pset_dxpl_multi(hid_t dxpl_id, const hid_t *memb_dxpl)
 herr_t
 H5Pget_dxpl_multi(hid_t dxpl_id, hid_t *memb_dxpl/*out*/)
 {
-    H5FD_multi_dxpl_t	*dx;
+    H5FD_multi_dxpl_t	dx;
     H5FD_mem_t		mt;
-    static const char *func="H5FDget_dxpl_multi";  /* Function Name for error reporting */
+    htri_t              prop_exists;            /* Whether the multi VFD DXPL property already exists */
+    static const char *func = "H5FDget_dxpl_multi";  /* Function Name for error reporting */
 
     /*NO TRACE*/
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-    if (TRUE!=H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
+    /* Argument checking */
+    if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1)
-    if (H5FD_MULTI!=H5Pget_driver(dxpl_id))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
-    if(NULL == (dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id)))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
-    if (memb_dxpl) {
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    if (dx->memb_dxpl[mt]>=0)
-		memb_dxpl[mt] = H5Pcopy(dx->memb_dxpl[mt]);
+    if(memb_dxpl) {
+        /* Check for existence of multi VFD DXPL property in DXPL */
+        if((prop_exists = H5Pexist(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME)) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't check for multi VFD property", -1)
+        if(!prop_exists)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "multi VFD DXPL property not set", -1)
+
+        /* Get the DXPL value */
+        if(H5Pget(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME, &dx) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get property value", -1)
+
+        /* Deep copy the multi VFD DXPL value */
+	for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+	    if(dx.memb_dxpl[mt] >= 0)
+		memb_dxpl[mt] = H5Pcopy(dx.memb_dxpl[mt]);
 	    else
-		memb_dxpl[mt] = dx->memb_dxpl[mt]; /*default or bad ID */
-	}
-    }
+		memb_dxpl[mt] = dx.memb_dxpl[mt]; /*default or bad ID */
+	} /* end for */
+    } /* end if */
 
     return 0;
-}
+} /* end H5Pget_dxpl_multi() */
 
 
 /*-------------------------------------------------------------------------
@@ -1101,90 +1264,6 @@ H5FD_multi_fapl_free(void *_fa)
     } END_MEMBERS;
     free(fa);
 
-    return 0;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_multi_dxpl_copy
- *
- * Purpose:	Copes the multi-specific data transfer properties.
- *
- * Return:	Success:	Ptr to new property list
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5FD_multi_dxpl_copy(const void *_old_dx)
-{
-    const H5FD_multi_dxpl_t *old_dx = (const H5FD_multi_dxpl_t*)_old_dx;
-    H5FD_multi_dxpl_t *new_dx = (H5FD_multi_dxpl_t *)malloc(sizeof(H5FD_multi_dxpl_t));
-    int nerrors = 0;
-    static const char *func="H5FD_multi_dxpl_copy";  /* Function Name for error reporting */
-
-    assert(new_dx);
-
-    /* Clear the error stack */
-    H5Eclear2(H5E_DEFAULT);
-
-    memcpy(new_dx, old_dx, sizeof(H5FD_multi_dxpl_t));
-    ALL_MEMBERS(mt) {
-	if (old_dx->memb_dxpl[mt]>=0) {
-	    new_dx->memb_dxpl[mt] = H5Pcopy(old_dx->memb_dxpl[mt]);
-	    if (new_dx->memb_dxpl[mt]<0) nerrors++;
-	}
-    } END_MEMBERS;
-
-    if (nerrors) {
-        ALL_MEMBERS(mt) {
-            (void)H5Pclose(new_dx->memb_dxpl[mt]);
-        } END_MEMBERS;
-        free(new_dx);
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
-    }
-    return new_dx;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_multi_dxpl_free
- *
- * Purpose:	Frees the multi-specific data transfer properties.
- *
- * Return:	Success:	0
- *
- *		Failure:	-1
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_multi_dxpl_free(void *_dx)
-{
-    H5FD_multi_dxpl_t	*dx = (H5FD_multi_dxpl_t*)_dx;
-    static const char *func="H5FD_multi_dxpl_free";  /* Function Name for error reporting */
-
-    /* Clear the error stack */
-    H5Eclear2(H5E_DEFAULT);
-
-    ALL_MEMBERS(mt) {
-        if (dx->memb_dxpl[mt]>=0)
-            if(H5Pclose(dx->memb_dxpl[mt])<0)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
-    } END_MEMBERS;
-
-    free(dx);
     return 0;
 }
 
@@ -1823,25 +1902,33 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-		 void *_buf/*out*/)
+H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
+    size_t size, void *_buf/*out*/)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
-    H5FD_multi_dxpl_t	*dx=NULL;
-    H5FD_mem_t		mt, mmt, hi=H5FD_MEM_DEFAULT;
-    haddr_t		start_addr=0;
+    H5FD_multi_dxpl_t	dx;
+    htri_t              prop_exists = FALSE;    /* Whether the multi VFD DXPL property already exists */
+    H5FD_mem_t		mt, mmt, hi = H5FD_MEM_DEFAULT;
+    haddr_t		start_addr = 0;
+    static const char  *func = "H5FD_multi_read";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     /* Get the data transfer properties */
-    if(H5P_FILE_ACCESS_DEFAULT != dxpl_id && H5FD_MULTI == H5Pget_driver(dxpl_id))
-	dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id);
+    if(H5P_FILE_ACCESS_DEFAULT != dxpl_id) {
+        /* Check for existence of multi VFD DXPL property in DXPL */
+        if((prop_exists = H5Pexist(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME)) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't check for multi VFD property", -1)
+
+        /* Get the DXPL value, if it exists */
+        if(prop_exists)
+            if(H5Pget(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME, &dx) < 0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get property value", -1)
+    } /* end if */
 
     /* Find the file to which this address belongs */
     for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
@@ -1850,18 +1937,19 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
             mmt = mt;
 	assert(mmt > 0 && mmt < H5FD_MEM_NTYPES);
 
-	if (file->fa.memb_addr[mmt]>addr) continue;
-	if (file->fa.memb_addr[mmt]>=start_addr) {
+	if(file->fa.memb_addr[mmt] > addr)
+            continue;
+	if(file->fa.memb_addr[mmt] >= start_addr) {
 	    start_addr = file->fa.memb_addr[mmt];
 	    hi = mmt;
-	}
-    }
-    assert(hi>0);
+	} /* end if */
+    } /* end for */
+    assert(hi > 0);
 
     /* Read from that member */
-    return H5FDread(file->memb[hi], type, dx?dx->memb_dxpl[hi]:H5P_DEFAULT,
-		    addr-start_addr, size, _buf);
-}
+    return H5FDread(file->memb[hi], type, (prop_exists ? dx.memb_dxpl[hi] : H5P_DEFAULT),
+            addr - start_addr, size, _buf);
+} /* end H5FD_multi_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -1878,45 +1966,54 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-		  const void *_buf)
+H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
+    size_t size, const void *_buf)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
-    H5FD_multi_dxpl_t	*dx=NULL;
-    H5FD_mem_t		mt, mmt, hi=H5FD_MEM_DEFAULT;
-    haddr_t		start_addr=0;
+    H5FD_multi_dxpl_t	dx;
+    htri_t              prop_exists = FALSE;    /* Whether the multi VFD DXPL property already exists */
+    H5FD_mem_t		mt, mmt, hi = H5FD_MEM_DEFAULT;
+    haddr_t		start_addr = 0;
+    static const char  *func = "H5FD_multi_read";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
     /* Get the data transfer properties */
-    if(H5P_FILE_ACCESS_DEFAULT != dxpl_id && H5FD_MULTI == H5Pget_driver(dxpl_id))
-	dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id);
+    if(H5P_FILE_ACCESS_DEFAULT != dxpl_id) {
+        /* Check for existence of multi VFD DXPL property in DXPL */
+        if((prop_exists = H5Pexist(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME)) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't check for multi VFD property", -1)
+
+        /* Get the DXPL value, if it exists */
+        if(prop_exists)
+            if(H5Pget(dxpl_id, H5FD_MULTI_DXPL_PROP_NAME, &dx) < 0)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_CANTGET, "can't get property value", -1)
+    } /* end if */
 
     /* Find the file to which this address belongs */
     for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
 	mmt = file->fa.memb_map[mt];
 	if(H5FD_MEM_DEFAULT == mmt)
             mmt = mt;
-	assert(mmt>0 && mmt<H5FD_MEM_NTYPES);
+	assert(mmt > 0 && mmt<H5FD_MEM_NTYPES);
 
-	if (file->fa.memb_addr[mmt]>addr) continue;
-	if (file->fa.memb_addr[mmt]>=start_addr) {
+	if(file->fa.memb_addr[mmt] > addr)
+            continue;
+	if(file->fa.memb_addr[mmt] >= start_addr) {
 	    start_addr = file->fa.memb_addr[mmt];
 	    hi = mmt;
-	}
-    }
-    assert(hi>0);
+	} /* end if */
+    } /* end for */
+    assert(hi > 0);
 
     /* Write to that member */
-    return H5FDwrite(file->memb[hi], type, dx?dx->memb_dxpl[hi]:H5P_DEFAULT,
-		     addr-start_addr, size, _buf);
-}
+    return H5FDwrite(file->memb[hi], type, (prop_exists ? dx.memb_dxpl[hi] : H5P_DEFAULT),
+            addr - start_addr, size, _buf);
+} /* end H5FD_multi_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -1930,8 +2027,6 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

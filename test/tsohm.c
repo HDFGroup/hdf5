@@ -2463,11 +2463,11 @@ static void test_sohm_size2(int close_reopen)
      * this happens because it's hard to predict exactly how much space this
      * will take.
      */
-     if((mult_index_med.attrs2 - mult_index_med.attrs1) !=
-            (list_index_med.attrs2 - list_index_med.attrs1))
+     if((mult_index_med.attrs2 - mult_index_med.attrs1) >
+            (list_index_med.attrs2 - list_index_med.attrs1) * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
-     if((mult_index_btree.attrs2 - mult_index_btree.attrs1) !=
-            (btree_index.attrs2 - btree_index.attrs1))
+     if((mult_index_btree.attrs2 - mult_index_btree.attrs1) >
+            (btree_index.attrs2 - btree_index.attrs1) * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
 
     /* The final file size for both of the multiple index files should be

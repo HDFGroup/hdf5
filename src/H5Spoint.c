@@ -643,7 +643,7 @@ H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t UNUSED share_selection)
     } /* end while */
 
 done:
-    if(ret_value < 0) {
+    if(ret_value < 0 && dst->select.sel_info.pnt_lst) {
         /* Traverse the (incomplete?) dst list, freeing all memory */
         curr = dst->select.sel_info.pnt_lst->head;
         while(curr) {

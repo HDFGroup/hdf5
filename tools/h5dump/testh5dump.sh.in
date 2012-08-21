@@ -15,14 +15,6 @@
 #
 # Tests for the h5dump tool
 
-# Determine which filters are available
-USE_FILTER_SZIP="@USE_FILTER_SZIP@"
-USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
-USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
-USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
-USE_FILTER_NBIT="@USE_FILTER_NBIT@"
-USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
-
 TESTNAME=h5dump
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -881,54 +873,19 @@ TOOLTEST texceedsubblock.ddl --enable-error-stack -d 1d -k 1,3 taindices.h5
 
 # tests for filters
 # SZIP
-option="--enable-error-stack -H -p -d szip tfilters.h5"
-if test $USE_FILTER_SZIP != "yes"; then
- SKIP $option
-else
-TOOLTEST tszip.ddl $option
-fi
+TOOLTEST tszip.ddl --enable-error-stack -H -p -d szip tfilters.h5
 # deflate
-option="--enable-error-stack -H -p -d deflate tfilters.h5"
-if test $USE_FILTER_DEFLATE != "yes"; then
- SKIP $option
-else
- TOOLTEST tdeflate.ddl $option
-fi
+TOOLTEST tdeflate.ddl --enable-error-stack -H -p -d deflate tfilters.h5
 # shuffle
-option="--enable-error-stack -H -p -d shuffle tfilters.h5"
-if test $USE_FILTER_SHUFFLE != "yes"; then
- SKIP $option
-else
- TOOLTEST tshuffle.ddl $option
-fi
+TOOLTEST tshuffle.ddl --enable-error-stack -H -p -d shuffle tfilters.h5
 # fletcher32
-option="--enable-error-stack -H -p -d fletcher32  tfilters.h5"
-if test $USE_FILTER_FLETCHER32 != "yes"; then
- SKIP $option
-else
- TOOLTEST tfletcher32.ddl $option
-fi
+TOOLTEST tfletcher32.ddl --enable-error-stack -H -p -d fletcher32  tfilters.h5
 # nbit
-option="--enable-error-stack -H -p -d nbit  tfilters.h5"
-if test $USE_FILTER_NBIT != "yes"; then
- SKIP $option
-else
- TOOLTEST tnbit.ddl $option
-fi
+TOOLTEST tnbit.ddl --enable-error-stack -H -p -d nbit  tfilters.h5
 # scaleoffset
-option="--enable-error-stack -H -p -d scaleoffset  tfilters.h5"
-if test $USE_FILTER_SCALEOFFSET != "yes"; then
- SKIP $option
-else
- TOOLTEST tscaleoffset.ddl $option
-fi
+TOOLTEST tscaleoffset.ddl --enable-error-stack -H -p -d scaleoffset  tfilters.h5
 # all
-option="--enable-error-stack -H -p -d all  tfilters.h5"
-if test $USE_FILTER_FLETCHER32 != "yes" -o  $USE_FILTER_SZIP != "yes" -o  $USE_FILTER_DEFLATE != "yes" -o  $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_NBIT != "yes" -o  $USE_FILTER_SCALEOFFSET != "yes"; then
- SKIP $option
-else
- TOOLTEST tallfilters.ddl $option
-fi
+TOOLTEST tallfilters.ddl --enable-error-stack -H -p -d all  tfilters.h5
 # user defined
 TOOLTEST tuserfilter.ddl --enable-error-stack -H  -p -d myfilter  tfilters.h5
 
