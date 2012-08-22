@@ -145,12 +145,6 @@
 /* Local Prototypes */
 /********************/
 
-/* General routines */
-static herr_t H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset);
-static herr_t H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset);
-static herr_t H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type);
-static herr_t H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type);
-
 /* Property class callbacks */
 static herr_t H5P_facc_reg_prop(H5P_genclass_t *pclass);
 static herr_t H5P_facc_create(hid_t fapl_id, void *copy_data);
@@ -234,88 +228,88 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the initial metadata cache resize configuration */
     if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &mdc_initCacheCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache (elements) */
     if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
     if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the preemption for reading chunks */
     if(H5P_register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the threshold for alignment */
     if(H5P_register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the alignment */
     if(H5P_register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &alignment, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum metadata allocation block size */
     if(H5P_register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the maximum sieve buffer size */
     if(H5P_register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum "small data" allocation block size */
     if(H5P_register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &sdata_block_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the garbage collection reference */
     if(H5P_register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver ID */
     if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_ID_NAME, H5F_ACS_FILE_DRV_ID_SIZE, &driver_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver info */
     if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_INFO_NAME, H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file close degree */
     if(H5P_register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &close_degree, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the offset of family driver info */
     if(H5P_register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE, &family_offset, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of new family file size. It's used by h5repart only. */
     if(H5P_register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE, &family_newsize, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether convert family to sec2 driver. It's used by h5repart only. */
     if(H5P_register_real(pclass, H5F_ACS_FAMILY_TO_SEC2_NAME, H5F_ACS_FAMILY_TO_SEC2_SIZE, &family_to_sec2, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data type of multi driver info */
     if(H5P_register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &mem_type, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'use the latest version of the format' flag */
     if(H5P_register_real(pclass, H5F_ACS_LATEST_FORMAT_NAME, H5F_ACS_LATEST_FORMAT_SIZE, &latest_format, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to retrieve the file descriptor from the core VFD */
     /* (used internally to the library only) */
     if(H5P_register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &want_posix_fd, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the external file cache size */
     if(H5P_register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &efc_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the initial file image info */
     if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &file_image_info, NULL, NULL, NULL, H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -856,48 +850,15 @@ H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
     if(H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if((ret_value = H5P_set_family_offset(plist, offset)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set family offset")
+    if(H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_family_offset() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P_set_family_offset
- *
- * Purpose:     Set offset for family driver.  Private function for
- *              H5Pset_family_offset
- *
- * Return:      Success:        Non-negative value.
- *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P_set_family_offset(H5P_genplist_t *plist, hsize_t offset)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-         if(H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
-              HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
-    } /* end if */
-    else
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_set_family_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -928,48 +889,17 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
     if(H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if((ret_value = H5P_get_family_offset(plist, offset)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get family offset")
+    if(offset) {
+        if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_family_offset() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P_get_family_offset
- *
- * Purpose:     Get offset for family driver.  Private function for
- *              H5Pget_family_offset
- *
- * Return:      Success:        Non-negative value.
- *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P_get_family_offset(H5P_genplist_t *plist, hsize_t *offset)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_get_family_offset() */
 
 
 /*-------------------------------------------------------------------------
@@ -1000,48 +930,15 @@ H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
     if(H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if((ret_value = H5P_set_multi_type(plist, type)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data type for multi driver")
+     if(H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type for multi driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_multi_type() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P_set_multi_type
- *
- * Purpose:     Set data type for multi file driver.  Private function for
- *              H5Pset_multi_type.
- *
- * Return:      Success:        Non-negative value.
- *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P_set_multi_type(H5P_genplist_t *plist, H5FD_mem_t type)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-         if(H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type for multi driver")
-    } /* end if */
-    else
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_set_multi_type() */
 
 
 /*-------------------------------------------------------------------------
@@ -1072,48 +969,17 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
     if(H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if((ret_value = H5P_get_multi_type(plist, type)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get data type for multi driver")
+    if(type) {
+        if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get type for multi driver")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_multi_type() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P_get_multi_type
- *
- * Purpose:     Get data type for multi file driver.  Private function for
- *              H5Pget_multi_type.
- *
- * Return:      Success:        Non-negative value.
- *              Failure:        Negative value.
- *
- * Programmer:  Raymond Lu
- *              Sep 17, 2002
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P_get_multi_type(H5P_genplist_t *plist, H5FD_mem_t *type)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-         if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
-             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get type for multi driver")
-    } /* end if */
-    else
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_get_multi_type() */
 
 
 /*-------------------------------------------------------------------------
