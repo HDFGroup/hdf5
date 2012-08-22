@@ -61,6 +61,7 @@
 #define H5L_ACS_ELINK_FAPL_DEF         	H5P_DEFAULT
 #define H5L_ACS_ELINK_FAPL_DEL		H5P_lacc_elink_fapl_del
 #define H5L_ACS_ELINK_FAPL_COPY        	H5P_lacc_elink_fapl_copy
+#define H5L_ACS_ELINK_FAPL_CMP        	H5P_lacc_elink_fapl_cmp
 #define H5L_ACS_ELINK_FAPL_CLOSE       	H5P_lacc_elink_fapl_close
 
 /* Definitions for file access flags for external link traversal */
@@ -96,6 +97,7 @@ static int H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_
 static herr_t H5P_lacc_elink_pref_close(const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_fapl_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_fapl_copy(const char* name, size_t size, void* value);
+static int H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P_lacc_elink_fapl_close(const char* name, size_t size, void* value);
 
 
@@ -169,7 +171,7 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register fapl for link access */
-    if(H5P_register_real(pclass, H5L_ACS_ELINK_FAPL_NAME, H5L_ACS_ELINK_FAPL_SIZE, &def_fapl_id, NULL, NULL, NULL, H5L_ACS_ELINK_FAPL_DEL, H5L_ACS_ELINK_FAPL_COPY, NULL, H5L_ACS_ELINK_FAPL_CLOSE) < 0)
+    if(H5P_register_real(pclass, H5L_ACS_ELINK_FAPL_NAME, H5L_ACS_ELINK_FAPL_SIZE, &def_fapl_id, NULL, NULL, NULL, H5L_ACS_ELINK_FAPL_DEL, H5L_ACS_ELINK_FAPL_COPY, H5L_ACS_ELINK_FAPL_CMP, H5L_ACS_ELINK_FAPL_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for external link file access flags */
@@ -258,6 +260,49 @@ H5P_lacc_elink_fapl_copy(const char UNUSED *name, size_t UNUSED size, void *valu
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_lacc_elink_fapl_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P_lacc_elink_fapl_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the elink FAPL
+ *                 property in the link access property list is
+ *                 compared.
+ *
+ * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t UNUSED size)
+{
+    const hid_t *fapl1 = (const hid_t *)value1;
+    const hid_t *fapl2 = (const hid_t *)value2;
+    H5P_genplist_t *obj1, *obj2;          /* Property lists to compare */
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check for comparison with default value */
+    if(*fapl1 == 0 && *fapl2 > 0) HGOTO_DONE(1);
+    if(*fapl1 > 0 && *fapl2 == 0) HGOTO_DONE(-1);
+
+    /* Get the property list objects */
+    obj1 = (H5P_genplist_t *)H5I_object(*fapl1);
+    obj2 = (H5P_genplist_t *)H5I_object(*fapl2);
+
+    /* Check for NULL property lists */
+    if(obj1 == NULL && obj2 != NULL) HGOTO_DONE(1);
+    if(obj1 != NULL && obj2 == NULL) HGOTO_DONE(-1);
+    if(obj1 && obj2)
+        ret_value = H5P_cmp_plist(obj1, obj2);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_lacc_elink_fapl_cmp() */
 
 
 /*--------------------------------------------------------------------------
@@ -362,8 +407,8 @@ H5P_lacc_elink_pref_copy(const char UNUSED *name, size_t UNUSED size, void *valu
 static int
 H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_t UNUSED size)
 {
-    const char *pref1 = *(const char **)value1;
-    const char *pref2 = *(const char **)value2;
+    const char *pref1 = *(const char * const *)value1;
+    const char *pref2 = *(const char * const *)value2;
     int ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
