@@ -14,10 +14,7 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
+srcdir=@srcdir@
 
 TESTNAME=ph5diff
 EXIT_SUCCESS=0

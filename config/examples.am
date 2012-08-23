@@ -44,8 +44,7 @@
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXAMPLE_PROG = $(TEST_PROG_PARA) $(TEST_PROG)
-EXTRA_PROG = $(EXAMPLE_PROG)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES=*.raw *.meta *.o

@@ -25,7 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 
 # These are our main targets, the tools
 
-TEST_SCRIPT=$(srcdir)/h52giftest.sh
+TEST_SCRIPT=h52giftest.sh
 check_SCRIPTS=$(TEST_SCRIPT)
 
 bin_PROGRAMS=gif2h5 h52gif

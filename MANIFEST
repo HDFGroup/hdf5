@@ -37,7 +37,7 @@
 ./aclocal.m4
 ./acsite.m4
 ./configure
-./configure.in
+./configure.ac
 
 ./bin/COPYING
 ./bin/buildhdf5
@@ -1129,7 +1129,7 @@
 ./tools/h5import/h5import.h
 ./tools/h5import/h5import.c
 ./tools/h5import/h5importtest.c
-./tools/h5import/h5importtestutil.sh
+./tools/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
 ./tools/h5import/testfiles/binfp64.conf
@@ -1190,8 +1190,8 @@
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/ph5diff_main.c
 ./tools/h5diff/h5diffgentest.c
-./tools/h5diff/testh5diff.sh
-./tools/h5diff/testph5diff.sh
+./tools/h5diff/testh5diff.sh.in
+./tools/h5diff/testph5diff.sh.in
 
 # h5repack sources
 ./tools/h5repack/Makefile.am
@@ -1216,7 +1216,7 @@
 ./tools/h5ls/testh5ls.sh.in
 
 # h5copy sources
-./tools/h5copy/testh5copy.sh
+./tools/h5copy/testh5copy.sh.in
 ./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
 ./tools/h5copy/h5copygentest.c
@@ -1257,7 +1257,7 @@
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/repart_test.c
-./tools/misc/testh5mkgrp.sh
+./tools/misc/testh5mkgrp.sh.in
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/talign.c
 ./tools/misc/testfiles/h5mkgrp_help.txt
@@ -2181,7 +2181,7 @@
 ./hl/tools/gif2h5/hdfgifwr.c
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
-./hl/tools/gif2h5/h52giftest.sh
+./hl/tools/gif2h5/h52giftest.sh.in
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 

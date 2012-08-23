@@ -25,7 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 #test script and program
 TEST_PROG=h5repart_gentest talign
-TEST_SCRIPT=testh5repart.sh $(srcdir)/testh5mkgrp.sh
+TEST_SCRIPT=testh5repart.sh testh5mkgrp.sh
 
 check_PROGRAMS=$(TEST_PROG) repart_test
 check_SCRIPTS=$(TEST_SCRIPT)

@@ -20,6 +20,8 @@
 #  Added $FILEN variables for file names
 #   
 
+srcdir=@srcdir@
+
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
@@ -53,15 +55,10 @@ H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-#
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
 # source dirs
 SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"

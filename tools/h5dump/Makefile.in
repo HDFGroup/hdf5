@@ -75,10 +75,10 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1) binread$(EXEEXT)
 bin_PROGRAMS = h5dump$(EXEEXT)
-TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
+TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
 subdir = tools/h5dump
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
@@ -156,7 +156,7 @@ am__tty_colors_dummy = \
   am__color_tests=no
 am__tty_colors = $(am__tty_colors_dummy)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = /home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
 
@@ -174,12 +174,9 @@ AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AS = @AS@
-
-# Set the paths for AFS installs of autotools for Linux machines
-# Ideally, these tools should never be needed during the build.
-AUTOCONF = /home1/packages/autoconf/autoconf-2.60/bin/autoconf
-AUTOHEADER = /home1/packages/autoconf/autoconf-2.60/bin/autoheader
-AUTOMAKE = /home1/packages/automake/automake-1.9.6/bin/automake-1.9
+AUTOCONF = @AUTOCONF@
+AUTOHEADER = @AUTOHEADER@
+AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BYTESEX = @BYTESEX@
 CC = @CC@
@@ -471,6 +468,10 @@ LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
+chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+TEST_EXTENSIONS = .sh
+SH_LOG_COMPILER = $(SHELL)
+AM_SH_LOG_FLAGS = 
 TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
 TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
 TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
@@ -860,7 +861,7 @@ help:
 # build files in this directory.
 build-lib: $(LIB)
 build-progs: $(LIB) $(PROGS)
-build-tests: $(LIB) $(PROGS) $(TESTS)
+build-tests: $(LIB) $(PROGS) $(chk_TESTS)
 
 # General rule for recursive building targets.
 # BUILT_SOURCES contain targets that need to be built before anything else
@@ -886,7 +887,7 @@ check-clean ::
 # Tell Automake to build tests when the user types `make all' (this is
 # not its default behavior).  Also build EXTRA_LIB and EXTRA_PROG since
 # Automake won't build them automatically, either.
-all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(TESTS)
+all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
 
 # make install-doc doesn't do anything outside of doc directory, but
 # Makefiles should recognize it.
@@ -910,7 +911,7 @@ check-install: installcheck
 # Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
 # The timestamps give a rough idea how much time the tests use.
 #
-# Note that targets in TESTS (defined above) will be built when the user
+# Note that targets in chk_TESTS (defined above) will be built when the user
 # types 'make tests' or 'make check', but only programs in TEST_PROG,
 # TEST_PROG_PARA, or TEST_SCRIPT will actually be executed.
 check-TESTS: test
@@ -920,7 +921,7 @@ test _test:
 	@$(MAKE) build-check-p
 
 # Actual execution of check-s.
-build-check-s: $(LIB) $(PROGS) $(TESTS)
+build-check-s: $(LIB) $(PROGS) $(chk_TESTS)
 	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
 	   echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
 	fi
@@ -1010,7 +1011,7 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	fi
 
 # Actual execution of check-p.
-build-check-p: $(LIB) $(PROGS) $(TESTS)
+build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
 	@if test -n "$(TEST_PROG_PARA)$(TEST_SCRIPT_PARA)"; then      \
 	   echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
 	fi
@@ -1040,7 +1041,7 @@ build-check-p: $(LIB) $(PROGS) $(TESTS)
 	fi
 
 # Run test with different Virtual File Driver
-check-vfd: $(LIB) $(PROGS) $(TESTS)
+check-vfd: $(LIB) $(PROGS) $(chk_TESTS)
 	@for vfd in $(VFD_LIST) dummy; do                                     \
 	    if test $$vfd != dummy; then                                      \
 	        echo "============================";                          \

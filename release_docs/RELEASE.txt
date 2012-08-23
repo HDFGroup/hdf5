@@ -39,6 +39,10 @@ New Features
 
     Configuration:
     -------------
+    - Updated to latest autotools and changed all hard *.sh scripts to
+      configure managed *.sh.in files. Removed overloading of autotools
+      TESTS variable by examples and tests. Renamed configure.in to
+      configure.ac. (ADB - 2012/08/23 - HDFFV-8129)
     - Added code to display the version information of XL fortran and C++
       in the summary of configure. (AKC - 2012/02/28 - HDFFV-7793)
     - Configure now generates Makefiles that build in "silent make mode"

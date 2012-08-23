@@ -27,6 +27,8 @@
 # Programmer: Albert Cheng
 #	      Sep 18, 2009
 
+srcdir=@srcdir@
+
 # Determine the configure options of the hdf5 library and executables.
 
 Shared_Lib=@enable_shared@

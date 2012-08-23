@@ -25,7 +25,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 TEST_PROG=h5importtest
-TEST_SCRIPT=$(srcdir)/h5importtestutil.sh
+TEST_SCRIPT=h5importtestutil.sh
 
 check_PROGRAMS=$(TEST_PROG)
 check_SCRIPT=h5importtestutil.sh

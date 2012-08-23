@@ -29,7 +29,7 @@
 #    Added test 400 - 425  (links with --follow-symlinks option)
 #    Added test 450 - 459  (dangling links)
 
-
+srcdir=@srcdir@
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0

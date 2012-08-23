@@ -15,12 +15,9 @@
 #
 # Test for external link with environment variable: HDF5_EXT_PREFIX
 
-nerrors=0
+srcdir=@srcdir@
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
+nerrors=0
 
 ##############################################################################
 ##############################################################################
@@ -35,6 +32,7 @@ TEST_BIN=`pwd`/$TEST_NAME 	# The path of the test binary
 ENVCMD="env HDF5_EXT_PREFIX=.:tmp" 	# The environment variable & value
 #
 # Run the test
+echo "$ENVCMD $RUNSERIAL $TEST_BIN"
 $ENVCMD $RUNSERIAL $TEST_BIN
 exitcode=$?
 if [ $exitcode -eq 0 ]; then

@@ -25,11 +25,6 @@ TEST_APP_BIN=`pwd`/$TEST_APP    # The path of the tool binary
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
