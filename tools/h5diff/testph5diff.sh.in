@@ -20,7 +20,7 @@ TESTNAME=ph5diff
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
-TOOL=${srcdir}/testh5diff.sh
+TOOL=testh5diff.sh
 
 nerrors=0
 
