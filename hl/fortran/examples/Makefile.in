@@ -417,7 +417,7 @@ EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
+CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

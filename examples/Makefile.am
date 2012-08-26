@@ -22,7 +22,7 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  TEST_PROG_PARA = ph5example
+  EXAMPLE_PROG_PARA = ph5example
 endif
 
 # Example programs.

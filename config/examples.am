@@ -49,7 +49,7 @@ EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 # We need to tell automake what to clean
 MOSTLYCLEANFILES=*.raw *.meta *.o
 CHECK_CLEANFILES+=*.h5
-CLEANFILES=$(TEST_PROG) $(TEST_PROG_PARA)
+CLEANFILES=$(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):

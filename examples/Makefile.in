@@ -388,7 +388,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = ph5example
+@BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -427,7 +427,7 @@ EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(TEST_PROG) $(TEST_PROG_PARA)
+CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
