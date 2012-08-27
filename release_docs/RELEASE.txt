@@ -114,7 +114,9 @@ Bug Fixes since HDF5-1.8.9
     -----
     - h5diff: Fixed the incorrect result when comparing attribute data 
       values and the data type has same class but different size.
-      HDFFV-7942  (JKM 08/15/2012)
+      HDFFV-7942  (JKM 2012/08/15)
+    - h5dump: Replace single element fwrite with block writes.
+      HDFFV-1208 (ADB 2012/08/13)
     - h5diff: Fixed test failure for "make check" due to failure of 
       copying test files when performed in HDF5 source tree. Also applied
       to other tools.  HDFFV-8107 (JKM 2012/08/01)
@@ -124,7 +126,17 @@ Bug Fixes since HDF5-1.8.9
       operations depend on machine condition.  HDFFV-8003 (JKM 2012/08/01)
     - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of testh5diff.sh
       to better report when there is an error in the file copying.
-      HDFFV-8105 (AKC -2012/07/22)
+      HDFFV-8105 (AKC 2012/07/22)
+    - h5import: Allow use of h5dump output as input files to h5import.
+      HDFFV-721 (ADB 2012/07/19)
+    - h5dump: Fix sort by name display to maintain correct parent / child
+      releationships between ascending / descending order.
+      HDFFV-8095 (ADB 2012/07/12)
+    - h5dump: Fix display by creation order when using option -n (print contents).
+      HDFFV-5942 (ADB 2012/07/09)
+    - h5dump: Allow H5T_CSET_UTF8 to be displayed in h5dump output. Use 
+      technique like in h5ls (matches library options).
+      HDFFV-7999 (ADB 2012/05/23)
     - h5diff: Fixed not to check and display dangling link status without 
       --follow-symlinks option. This also improved performance when 
       comparing lots of external links without the --follow-symlinks
@@ -205,14 +217,6 @@ The following platforms and compilers have been tested for this release.
                                   Sun Fortran 95 8.4 SunOS_sparc Patch 128231-06
                                   Sun C++ 5.10 SunOS_sparc 128228-11
 
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
-
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-                                  Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
-
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
@@ -233,21 +237,21 @@ The following platforms and compilers have been tested for this release.
                                   gcc (GCC) 4.4.4 20100630 (Red Hat 4.4.4-10)
                                   GNU Fortran (GCC) 4.4.4 20100630 (Red Hat 4.4.4-10)
 
-    Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
+    Debian6.0.5 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
 
-    Debian6.0.3 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
+    Debian6.0.5 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
 
-    Fedora16 3.2.9-2.fc16.i6866 #1 SMP i686 i686 i386 GNU/Linux
-                                  gcc (GCC) 4.6.2 20111027 (Red Hat 4.6.2-1)
-                                  GNU Fortran (GCC) 4.6.2 20111027 (Red Hat 4.6.2-1)
+    Fedora17 3.5.2-1.fc17.i6866 #1 SMP i686 i686 i386 GNU/Linux
+                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
 
-    Fedora16 3.2.9-2.fc16.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.6.2 20111027 (Red Hat 4.6.2-1)
-                                  GNU Fortran (GCC) 4.6.2 20111027 (Red Hat 4.6.2-1)
+    Fedora17 3.5.2-1.fc17.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
 
     SUSE 12.1 3.1.9-1.4-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
                                   gcc (SUSE Linux) 4.6.2
@@ -257,13 +261,13 @@ The following platforms and compilers have been tested for this release.
                                   gcc (SUSE Linux) 4.6.2
                                   GNU Fortran (SUSE Linux) 4.6.2 
 
-    Ubuntu 11.10 3.0.0-16-generic #29-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
-                                  GNU Fortran (Ubuntu/Linaro 4.6.4-9ubuntu3) 4.6.1
+    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
 
-    Ubuntu 11.10 3.0.0-16-generic #29-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
-                                  GNU Fortran (Ubuntu/Linaro 4.6.1-9ubuntu3) 4.6.1
+    Ubuntu 11.10 3.2.0-29-generic #46-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
     
     OpenVMS Alpha 8.3             HP C V7.3-009
                                   HP Fortran V8.2-104679-48H9K
@@ -286,8 +290,6 @@ Platform                                 C        F90    F90      C++   zlib  SZ
                                          parallel        parallel
 Solaris2.10 32-bit                         n        y      n        y     y     y
 Solaris2.10 64-bit                         n        y      n        y     y     y
-Windows XP                                 n        y      n        y     y     y
-Windows XP x64                             n        y      n        y     y     y
 Windows 7                                  y        y      n        y     y     y
 Windows 7     x64                          y        y      n        y     y     y
 OpenVMS Alpha                              n        y      n        y     y     n
@@ -309,8 +311,6 @@ Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe     
 Solaris2.10 32-bit                         y       y         y         y        
 Solaris2.10 64-bit                         y       y         y         y        
-Windows XP                                 y       y         y         n        
-Windows XP x64                             y       y         y         n        
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
 OpenVMS Alpha                              n       n         n         n
