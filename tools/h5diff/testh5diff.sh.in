@@ -51,11 +51,6 @@ h5haveexitcode=yes	    # default is yes
 pmode=			    # default to run h5diff tests
 mydomainname=`domainname 2>/dev/null`
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
 # source dirs
 SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
