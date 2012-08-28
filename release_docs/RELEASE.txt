@@ -1061,22 +1061,14 @@ Platforms Tested
                                   Sun Fortran 95 8.4 SunOS_sparc Patch
 128231-06
                                   Sun C++ 5.10 SunOS_sparc 128228-11
- 
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
-          
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
-
-    Windows 7                     Visual Studio 2010
-
-    Windows 7 x64                 Visual Studio 2010
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -1099,10 +1091,8 @@ Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-Windows XP                         n        y(3)   n(3)     y     y     y
-Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        y(3)   n(3)     y     y     y
-Windows Vista x64                  n        y(3)   n(3)     y     y     y
+Windows 7                          y        y      n        y     y     y
+Windows 7 x64                      y        y      n        y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 8.2 32- and 64-bit         n        x      n        x     y     y
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y

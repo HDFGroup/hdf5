@@ -922,7 +922,7 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Fortran libraries are not currently supported on Mac. Disable them.
-dnl this is overridable with '--enable-unsupported'.
+dnl (this is overridable with --enable-unsupported).
 dnl
 AC_SUBST([H5_FORTRAN_SHARED])
 H5_FORTRAN_SHARED="no"
