@@ -44,13 +44,12 @@
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXAMPLE_PROG = $(TEST_PROG_PARA) $(TEST_PROG)
-EXTRA_PROG = $(EXAMPLE_PROG)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES=*.raw *.meta *.o
 CHECK_CLEANFILES+=*.h5
-CLEANFILES=$(TEST_PROG) $(TEST_PROG_PARA)
+CLEANFILES=$(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):
@@ -68,8 +67,8 @@ uninstall-local:
 install-examples: $(EXAMPLEDIR) $(INSTALL_FILES) 
 	@for f in X $(INSTALL_FILES); do                                     \
 	  if test $$f != X; then                                             \
-	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
-            chmod a-x $(EXAMPLEDIR)/$$f;\
+	    (set -x; $(INSTALL) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);    \
+            chmod a-x $(EXAMPLEDIR)/$$f;                                     \
 	  fi;                                                                \
 	done
 	@for f in X $(INSTALL_SCRIPT_FILES); do                                   \

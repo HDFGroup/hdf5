@@ -60,6 +60,10 @@ New Features
     
     Library
     -------
+    - Updated to latest autotools and changed all hard *.sh scripts to
+      configure managed *.sh.in files. Removed overloading of autotools
+      TESTS variable by examples and tests. Renamed configure.in to
+      configure.ac. (ADB - 2012/08/23 - HDFFV-8129)
     - The data sieve buffer size was for all the datasets in the file.  It
       could waste memory if any dataset size is smaller than the sieve buffer
       size.  Now the library picks the smaller one between the dataset size

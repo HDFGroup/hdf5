@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* src/H5config.h.  Generated from H5config.h.in by configure.  */
-/* src/H5config.h.in.  Generated from configure.in by autoheader.  */
+/* src/H5config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define if building universal (internal helper macro) */
 /* #undef H5_AC_APPLE_UNIVERSAL_BUILD */

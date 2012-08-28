@@ -22,7 +22,7 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  TEST_PROG_PARA =
+  EXAMPLE_PROG_PARA =
 endif
 
 # Example directory
@@ -34,7 +34,7 @@ EXAMPLETOPDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples/hl
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
-TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
+EXAMPLE_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
             ex_image1 ex_image2 \
             ex_table_01 ex_table_02 ex_table_03 ex_table_04 \
             ex_table_05 ex_table_06 ex_table_07 ex_table_08 \

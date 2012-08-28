@@ -33,6 +33,8 @@ AUTOMAKE_VERSION="automake (GNU automake) 1.12.3"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
 ACLOCAL_VERSION="aclocal (GNU automake) 1.12.3"
 LIBTOOL_VERSION="(GNU libtool) 2.4.2"
+M4_VERSION="m4 (GNU M4) 1.4.16"
+
 #
 # When upgrading automake's version, don't forget to also update its
 # helper utilities, especially depcomp.
@@ -54,6 +56,9 @@ if test -z ${ACLOCAL}; then
 fi
 if test -z ${LIBTOOL}; then
   LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.4.2/bin/libtool
+fi
+if test -z ${M4}; then
+  M4=/mnt/hdf/packages/m4/m4-1.4.16/bin/m4
 fi
 
 # Check version numbers of all autotools against the "correct" versions
@@ -82,14 +87,17 @@ if test -z "${LT_VERS}"; then
    echo "${LIBTOOL} version is not ${LIBTOOL_VERSION}"
    exit 1
 fi
-
-# Use the latest version of M4
-PATH=/mnt/hdf/packages/m4/m4-1.4.16/bin:/mnt/hdf/packages/m4/m4-1.4.16/share:$PATH
+M4_VERS=`${M4} --version 2>&1 | grep "${M4_VERSION}"`
+if test -z "${M4_VERS}"; then
+   echo "${M4} version is not ${M4_VERSION}"
+   exit 1
+fi
 
 # Make sure that the tools are in the path.
 AUTOCONF_DIR=`dirname ${AUTOCONF}`
 LIBTOOL_DIR=`dirname ${LIBTOOL}`
-PATH=${AUTOCONF_DIR}:$PATH
+M4_DIR=`dirname ${M4}`
+PATH=${AUTOCONF_DIR}:${M4_DIR}:$PATH
 
 # Run autoconf/automake commands in order
   echo ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal

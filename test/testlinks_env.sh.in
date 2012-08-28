@@ -15,12 +15,9 @@
 #
 # Test for external link with environment variable: HDF5_EXT_PREFIX
 
-nerrors=0
+srcdir=@srcdir@
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
+nerrors=0
 
 ##############################################################################
 ##############################################################################

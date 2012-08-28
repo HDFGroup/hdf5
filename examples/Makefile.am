@@ -22,14 +22,14 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  TEST_PROG_PARA = ph5example
+  EXAMPLE_PROG_PARA = ph5example
 endif
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
-TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
+EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
            h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg
 TEST_SCRIPT=testh5cc.sh

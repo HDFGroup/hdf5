@@ -29,7 +29,7 @@
 #    Added test 400 - 425  (links with --follow-symlinks option)
 #    Added test 450 - 459  (dangling links)
 
-
+srcdir=@srcdir@
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -50,11 +50,6 @@ verbose=yes
 h5haveexitcode=yes	    # default is yes
 pmode=			    # default to run h5diff tests
 mydomainname=`domainname 2>/dev/null`
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 # source dirs
 SRC_TOOLS="$srcdir/.."

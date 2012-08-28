@@ -93,7 +93,7 @@ DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	bin/missing bin/mkinstalldirs
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -178,7 +178,7 @@ distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
 distcleancheck_listfiles = find . -type f -print
-ACLOCAL = /home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMTAR = @AMTAR@
 
@@ -196,12 +196,9 @@ AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
 AS = @AS@
-
-# Set the paths for AFS installs of autotools for Linux machines
-# Ideally, these tools should never be needed during the build.
-AUTOCONF = /home1/packages/autoconf/autoconf-2.60/bin/autoconf
-AUTOHEADER = /home1/packages/autoconf/autoconf-2.60/bin/autoheader
-AUTOMAKE = /home1/packages/automake/automake-1.9.6/bin/automake-1.9
+AUTOCONF = @AUTOCONF@
+AUTOHEADER = @AUTOHEADER@
+AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BYTESEX = @BYTESEX@
 CC = @CC@
