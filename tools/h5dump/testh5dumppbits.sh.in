@@ -78,6 +78,9 @@ test -d $TESTDIR || mkdir $TESTDIR
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
 $SRC_H5DUMP_TESTFILES/packedbits.h5
+$SRC_H5DUMP_TESTFILES/tarray1.h5
+$SRC_H5DUMP_TESTFILES/packedbits.h5
+$SRC_H5DUMP_TESTFILES/tcompound.h5
 "
 
 LIST_OTHER_TEST_FILES="
