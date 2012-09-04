@@ -57,7 +57,7 @@ SH_COPYRIGHT=/tmp/h5chkright_SH.$$	# SHELL style copyright
 SH_COPYRIGHT2=/tmp/h5chkright_SH2.$$	# SHELL style copyright, 2nd style.
 WINBAT_COPYRIGHT=/tmp/h5chkright_WINBAT.$$	# Windows Batch file Copyright notice
 VMSCMD_COPYRIGHT=/tmp/h5chkright_VMSCMD.$$	# VMS command file Copyright notice
-CONFIGURE_IN_COPYRIGHT=/tmp/h5chkright_CONFIGURE_IN.$$	# configure.in file Copyright notice
+CONFIGURE_AC_COPYRIGHT=/tmp/h5chkright_CONFIGURE_AC.$$	# configure.ac file Copyright notice
 
 tmpfixfile=/tmp/h5chkright_fix.$$	# Temporary fixed copy of file
 
@@ -207,8 +207,8 @@ EOF
 @REM access to either file, you may request a copy from help@hdfgroup.org.
 EOF
 
-    # configure.in file Copyright notice
-    cat > ${CONFIGURE_IN_COPYRIGHT} << \EOF
+    # configure.ac file Copyright notice
+    cat > ${CONFIGURE_AC_COPYRIGHT} << \EOF
 dnl Copyright by The HDF Group.
 dnl Copyright by the Board of Trustees of the University of Illinois.
 dnl All rights reserved.
@@ -635,10 +635,10 @@ VMSCMD_FILE()
 
 # Check Configure.in type files
 #
-CONFIGURE_IN_FILE()
+CONFIGURE_AC_FILE()
 {
     f=$1
-    case `MATCH_COPYRIGHT $CONFIGURE_IN_COPYRIGHT $f` in
+    case `MATCH_COPYRIGHT $CONFIGURE_AC_COPYRIGHT $f` in
     PASSED)
 	PASSED $f
 	return
@@ -646,9 +646,9 @@ CONFIGURE_IN_FILE()
     FAILED)
 	# show the difference
 	FAILED $f
-	$DIFF ${EXTRACTEDFILE} ${CONFIGURE_IN_COPYRIGHT}
+	$DIFF ${EXTRACTEDFILE} ${CONFIGURE_AC_COPYRIGHT}
 	if [ -n "$FIXIT" ]; then
-	    FIX_COPYRIGHT $CONFIGURE_IN_COPYRIGHT $f
+	    FIX_COPYRIGHT $CONFIGURE_AC_COPYRIGHT $f
 	fi
 	;;
     esac
@@ -681,8 +681,8 @@ GUESS_File_Type()
 	# Put this after C_SOURCE which may have #define and such lines.
 	echo SHELL_FILE
     elif grep '^dnl' < $tmpfile > /dev/null; then
-	# Some lines start with a "dnl".  It may be a configure.in type file.
-	echo CONFIGURE_IN_FILE
+	# Some lines start with a "dnl".  It may be a configure.ac type file.
+	echo CONFIGURE_AC_FILE
     elif grep -i '^<html>' < $tmpfile > /dev/null || \
 	 grep '^<!--' < $tmpfile > /dev/null ; then
 	# Some lines start with a "<html>" or having an html comment tag.
@@ -827,8 +827,8 @@ while read file; do
 	*Makefile | *Makefile.in | *Makefile.am | Makefile.dist )
 	    MAKE_FILE ${file}
 	    ;;
-	configure.in )
-	    CONFIGURE_IN_FILE ${file}
+	configure.ac )
+	    CONFIGURE_AC_FILE ${file}
 	    ;;
 	*.bat | *.BAT )
 	    # Windows Batch files

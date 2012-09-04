@@ -15,6 +15,8 @@
 #
 # Tests for the h5dump tool with packed bits type files
 
+srcdir=@srcdir@
+
 # Determine which filters are available
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
@@ -47,10 +49,6 @@ AWK='awk'
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 # source dirs
 SRC_TOOLS="$srcdir/../"
 
@@ -80,6 +78,8 @@ test -d $TESTDIR || mkdir $TESTDIR
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
 $SRC_H5DUMP_TESTFILES/packedbits.h5
+$SRC_H5DUMP_TESTFILES/tarray1.h5
+$SRC_H5DUMP_TESTFILES/tcompound.h5
 "
 
 LIST_OTHER_TEST_FILES="

@@ -16,6 +16,8 @@
 # HDF Utilities Test script
 # Usage: h5importtestutil.sh [machine-type]
 
+srcdir=@srcdir@
+
 # Determine which filters are available
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 
@@ -30,11 +32,6 @@ AWK='awk'
 
 # initialize errors variable
 nerrors=0
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 # source dirs
 SRC_TOOLS="$srcdir/.."

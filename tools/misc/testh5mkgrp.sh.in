@@ -19,6 +19,8 @@
 # Tuesday, February 13, 2007
 #
 
+srcdir=@srcdir@
+
 TESTNAME=h5mkgrp
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -37,10 +39,6 @@ OUTDIR=../testfiles
 CMP='cmp -s'
 DIFF='diff -c'
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
 test -d $OUTDIR || mkdir $OUTDIR
 
 # Print a line-line message left justified in a field of 70 characters
