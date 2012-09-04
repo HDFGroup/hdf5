@@ -102,6 +102,9 @@
 /* Definitions for chunk io mode property. */
 #define H5D_MPIO_ACTUAL_IO_MODE_SIZE    sizeof(H5D_mpio_actual_io_mode_t)
 #define H5D_MPIO_ACTUAL_IO_MODE_DEF     H5D_MPIO_NO_COLLECTIVE
+/* Definitions for cause of broken collective io property */
+#define H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE   sizeof(H5D_mpio_no_collective_cause_t)
+#define H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF   H5D_MPIO_COLLECTIVE 
 /* Definitions for memory MPI type property */
 #define H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
 #define H5FD_MPI_XFER_MEM_MPI_TYPE_DEF         MPI_DATATYPE_NULL
@@ -211,6 +214,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     unsigned def_mpio_chunk_opt_ratio = H5D_XFER_MPIO_CHUNK_OPT_RATIO_DEF;
     H5D_mpio_actual_chunk_opt_mode_t def_mpio_actual_chunk_opt_mode = H5D_MPIO_ACTUAL_CHUNK_OPT_MODE_DEF;
     H5D_mpio_actual_io_mode_t def_mpio_actual_io_mode = H5D_MPIO_ACTUAL_IO_MODE_DEF;
+    H5D_mpio_no_collective_cause_t def_mpio_no_collective_cause = H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF; 
     MPI_Datatype btype = H5FD_MPI_XFER_MEM_MPI_TYPE_DEF;  /* Default value for MPI buffer type */
     MPI_Datatype ftype = H5FD_MPI_XFER_FILE_MPI_TYPE_DEF; /* Default value for MPI file type */
 #endif /* H5_HAVE_PARALLEL */
@@ -285,6 +289,14 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the actual I/O mode property. */
     if(H5P_register_real(pclass, H5D_MPIO_ACTUAL_IO_MODE_NAME, H5D_MPIO_ACTUAL_IO_MODE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the local cause of broken collective I/O */
+    if(H5P_register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the global cause of broken collective I/O */
+    if(H5P_register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the MPI memory type property */
@@ -1360,5 +1372,44 @@ H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpio_actual_io_mode() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mpio_no_collective_cause
+ *
+ * Purpose:	Retrieves cause for the broke collective I/O
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim
+ *              Aug 3, 2012
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_mpio_no_collective_cause(hid_t plist_id, H5D_mpio_no_collective_cause_t *local_no_collective_cause, H5D_mpio_no_collective_cause_t *global_no_collective_cause)
+{
+    H5P_genplist_t     *plist;
+    herr_t ret_value = SUCCEED;   /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*Dn*Dn", plist_id, local_no_collective_cause,
+             global_no_collective_cause);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Return values */
+    if(local_no_collective_cause)
+        if(H5P_get(plist, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, local_no_collective_cause) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get local value")
+    if(global_no_collective_cause)
+        if(H5P_get(plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, global_no_collective_cause) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get global value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_mpio_no_collective_cause() */
+
+
 #endif /* H5_HAVE_PARALLEL */
 

@@ -167,6 +167,9 @@ New Features
 
     Parallel Library:
     -----------------
+    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
+      why the collective I/O was broken during read/write IO access. 
+      (JKM - 2012/08/30 HDFFV-8143)
     - Special Collective IO (IO when some processes do not contribute to the
       IO) and Complex Derived Datatype MPI functionalities are no longer
       conditionally enabled in the library by configure. They are always

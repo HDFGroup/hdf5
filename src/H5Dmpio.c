@@ -156,10 +156,12 @@ static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info,
 htri_t
 H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     const H5S_t *mem_space, const H5D_type_info_t *type_info,
-    const H5D_chunk_map_t *fm)
+    const H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
 {
-    int local_opinion = TRUE;   /* This process's idea of whether to perform collective I/O or not */
-    int consensus;              /* Consensus opinion of all processes */
+    /* variables to set cause of broken collective I/O */
+    int local_cause = 0;
+    int global_cause = 0;
+
     int mpi_code;               /* MPI error code */
     htri_t ret_value = TRUE;
 
@@ -171,50 +173,53 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     HDassert(file_space);
     HDassert(type_info);
 
+
     /* For independent I/O, get out quickly and don't try to form consensus */
-    if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_INDEPENDENT)
+    if(io_info->dxpl_cache->xfer_mode == H5FD_MPIO_INDEPENDENT) {
+        local_cause = H5D_MPIO_SET_INDEPENDENT;
+        global_cause = H5D_MPIO_SET_INDEPENDENT;
         HGOTO_DONE(FALSE);
-
-    /* Don't allow collective operations if datatype conversions need to happen */
-    if(!type_info->is_conv_noop) {
-        local_opinion = FALSE;
-        goto broadcast;
-    } /* end if */
-
-    /* Don't allow collective operations if data transform operations should occur */
-    if(!type_info->is_xform_noop) {
-        local_opinion = FALSE;
-        goto broadcast;
-    } /* end if */
+    }
 
     /* Optimized MPI types flag must be set and it must be collective IO */
     /* (Don't allow parallel I/O for the MPI-posix driver, since it doesn't do real collective I/O) */
     if(!(H5S_mpi_opt_types_g && io_info->dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE
             && !IS_H5FD_MPIPOSIX(io_info->dset->oloc.file))) {
-        local_opinion = FALSE;
-        goto broadcast;
+        local_cause |= H5D_MPIO_SET_MPIPOSIX;
+    } /* end if */
+
+    /* Don't allow collective operations if datatype conversions need to happen */
+    if(!type_info->is_conv_noop) {
+        local_cause |= H5D_MPIO_DATATYPE_CONVERSION;
+    } /* end if */
+
+    /* Don't allow collective operations if data transform operations should occur */
+    if(!type_info->is_xform_noop) {
+        local_cause |= H5D_MPIO_DATA_TRANSFORMS;
     } /* end if */
 
     /* Check whether these are both simple or scalar dataspaces */
     if(!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(mem_space))
             && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space)))) {
-        local_opinion = FALSE;
-        goto broadcast;
+        local_cause |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
     } /* end if */
 
     /* Can't currently handle point selections */
     if(H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(mem_space)
             || H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(file_space)) {
-        local_opinion = FALSE;
-        goto broadcast;
+        local_cause |= H5D_MPIO_POINT_SELECTIONS;
     } /* end if */
 
     /* Dataset storage must be contiguous or chunked */
     if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
             io_info->dset->shared->layout.type == H5D_CHUNKED)) {
-        local_opinion = FALSE;
-        goto broadcast;
+        local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
     } /* end if */
+
+    /* check if external-file storage is used */
+    if (io_info->dset->shared->dcpl_cache.efl.nused > 0) {
+        local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    }
 
     /* The handling of memory space is different for chunking and contiguous
      *  storage.  For contiguous storage, mem_space and file_space won't change
@@ -226,21 +231,28 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
     /* Don't allow collective operations if filters need to be applied */
     if(io_info->dset->shared->layout.type == H5D_CHUNKED) {
         if(io_info->dset->shared->dcpl_cache.pline.nused > 0) {
-            local_opinion = FALSE;
-            goto broadcast;
+            local_cause |= H5D_MPIO_FILTERS;
         } /* end if */
     } /* end if */
 
-broadcast:
     /* Form consensus opinion among all processes about whether to perform
      * collective I/O
      */
-    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_opinion, &consensus, 1, MPI_INT, MPI_LAND, io_info->comm)))
+    if(MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 1, MPI_INT, MPI_BOR, io_info->comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
 
-    ret_value = consensus > 0 ? TRUE : FALSE;
+    ret_value = global_cause > 0 ? FALSE : TRUE;
+
 
 done:
+    /* Write the local value of no-collective-cause to the DXPL. */
+    if(H5P_set(dx_plist, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, &local_cause) < 0)
+       HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set local no collective cause property")
+
+    /* Write the global value of no-collective-cause to the DXPL. */
+    if(H5P_set(dx_plist, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, &global_cause) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set global no collective cause property")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__mpio_opt_possible() */
 
