@@ -19,6 +19,8 @@
 # Programmer: Albert Cheng
 #	      Sep 28, 2009
 
+srcdir=@srcdir@
+
 # Variables filled in by the configure process.
 # Determine the configure options of the hdf5 library and executables.
 Shared_Lib=@enable_shared@
@@ -214,11 +216,6 @@ H5_HAVE_EMBEDDED_LIBINFO=`grep '#define H5_HAVE_EMBEDDED_LIBINFO ' ../src/H5pubc
 h5libsettings=../src/libhdf5.settings 
 
 PURPOSE
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 # Figure out library version numbers from the header file.
 h5versmajor=`grep '#define H5_VERS_MAJOR' $srcdir/../src/H5public.h | cut -f2` 

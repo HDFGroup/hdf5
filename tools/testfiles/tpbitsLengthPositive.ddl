@@ -1,22 +1,22 @@
 usage: h5dump [OPTIONS] files
   OPTIONS
-     -h, --help           Print a usage message and exit
-     -n, --contents       Print a list of the file contents and exit
+     -h,   --help         Print a usage message and exit
+     -n,   --contents     Print a list of the file contents and exit
                           Optional value 1 also prints attributes.
-     -B, --superblock     Print the content of the super block
-     -H, --header         Print the header only; no data is displayed
-     -A, --onlyattr       Print the header and value of attributes
-     -i, --object-ids     Print the object ids
-     -r, --string         Print 1-byte integer datasets as ASCII
-     -e, --escape         Escape non printing characters
-     -V, --version        Print version number and exit
+     -B,   --superblock   Print the content of the super block
+     -H,   --header       Print the header only; no data is displayed
+     -A,   --onlyattr     Print the header and value of attributes
+     -i,   --object-ids   Print the object ids
+     -r,   --string       Print 1-byte integer datasets as ASCII
+     -e,   --escape       Escape non printing characters
+     -V,   --version      Print version number and exit
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
                           slash with a preceding backslash (\).
                           (See example section below.)
      -d P, --dataset=P    Print the specified dataset
-     -y, --noindex        Do not print array indices with the data
-     -p, --properties     Print dataset filters, storage layout and fill value
+     -y,   --noindex      Do not print array indices with the data
+     -p,   --properties   Print dataset filters, storage layout and fill value
      -f D, --filedriver=D Specify which driver to open the file with
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link
@@ -35,17 +35,17 @@ usage: h5dump [OPTIONS] files
                           separated by commas. Offset is the beginning bit in
                           the data value and length is the number of bits of
                           the mask.
-     -R, --region         Print dataset pointed by region references
-     -x, --xml            Output in XML using Schema
-     -u, --use-dtd        Output in XML using DTD
+     -R,   --region       Print dataset pointed by region references
+     -x,   --xml          Output in XML using Schema
+     -u,   --use-dtd      Output in XML using DTD
      -D U, --xml-dtd=U    Use the DTD or schema at U
-     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML
+     -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"
                           E.g., to dump a file called `-f', use h5dump -- -f
      --enable-error-stack Prints messages from the HDF5 error stack as they
                           occur.
      --no-compact-subset  Disable compact form of subsetting and allow the use
-                          of "[" in datset names.
+                          of "[" in dataset names.
 
  Subsetting is available by using the following options with a dataset
  attribute. Subsetting is done by selecting a hyperslab from the data.
@@ -59,7 +59,8 @@ usage: h5dump [OPTIONS] files
       -c COUNT,  --count=COUNT    Number of blocks to include in selection
       -k BLOCK,  --block=BLOCK    Size of block in hyperslab
   START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the
-        number of dimensions in the dataspace being queried
+      number of dimensions in the dataspace being queried
+      (Alternate compact form of subsetting is described in the Reference Manual)
 
   D - is the file driver to use in opening the file. Acceptable values
       are "sec2", "family", "split", "multi", "direct", and "stream". Without

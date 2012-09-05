@@ -506,22 +506,16 @@ int main(int argc, char **argv)
             "test actual io mode proprerty",
             PARATESTFILE);
 
+    AddTest("nocolcause", no_collective_cause_tests, NULL,
+            "test cause for broken collective io",
+            PARATESTFILE);
+
     if((mpi_size < 2) && MAINPROCESS) {
         printf("File Image Ops daisy chain test needs at least 2 processes.\n");
         printf("File Image Ops daisy chain test will be skipped \n");
     }
     AddTest((mpi_size < 2)? "-fiodc" : "fiodc", file_image_daisy_chain_test, NULL,
             "file image ops daisy chain", NULL);
-
-    /* Display testing information */
-    TestInfo(argv[0]);
-
-    /* setup file access property list */
-    fapl = H5Pcreate (H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
-
-    /* Parse command line arguments */
-    TestParseCmdLine(argc, argv);
 
     if((mpi_size < 2)&& MAINPROCESS ) {
 	printf("Atomicity tests need at least 2 processes to participate\n");
@@ -534,6 +528,16 @@ int main(int argc, char **argv)
         AddTest("atomicity", dataset_atomicity, NULL,
                 "dataset atomic updates", PARATESTFILE);
     }
+
+    /* Display testing information */
+    TestInfo(argv[0]);
+
+    /* setup file access property list */
+    fapl = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(fapl, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    /* Parse command line arguments */
+    TestParseCmdLine(argc, argv);
 
     if (facc_type == FACC_MPIPOSIX && MAINPROCESS){
 	printf("===================================\n"

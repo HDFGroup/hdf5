@@ -2398,7 +2398,10 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id,
     HDassert(sect->u.indirect.span_size > 0);
 
     /* Reset reference count for indirect section */
+    /* (Also reset the direct & indirect row pointers */
     sect->u.indirect.rc = 0;
+    sect->u.indirect.dir_rows = NULL;
+    sect->u.indirect.indir_ents = NULL;
 
     /* Set up direct block information, if necessary */
     if(start_row < hdr->man_dtable.max_direct_rows) {
@@ -2424,7 +2427,6 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id,
         /* No rows of direct blocks covered, reset direct row information */
         dir_nrows = 0;
         sect->u.indirect.dir_nrows = 0;
-        sect->u.indirect.dir_rows = NULL;
     } /* end else */
 
     /* Set up indirect block information, if necessary */
@@ -2459,7 +2461,6 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id,
     else {
         /* No indirect block entries covered, reset indirect row information */
         sect->u.indirect.indir_nents = 0;
-        sect->u.indirect.indir_ents = NULL;
     } /* end else */
 
     /* Set up initial row information */
@@ -2598,6 +2599,13 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id,
             (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
 
 done:
+    if(ret_value < 0) {
+        if(sect->u.indirect.indir_ents)
+            H5MM_xfree(sect->u.indirect.indir_ents);
+        if(sect->u.indirect.dir_rows)
+            H5MM_xfree(sect->u.indirect.dir_rows);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_sect_indirect_init_rows() */
 

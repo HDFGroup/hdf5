@@ -23,7 +23,7 @@ include $(top_srcdir)/config/commence.am
 
 # Compile parallel fortran examples only if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
-   TEST_PROG_PARA=ph5example
+   EXAMPLE_PROG_PARA=ph5example
 endif
 
 # These are the programs that 'make all' or 'make tests' will build and
@@ -32,7 +32,7 @@ endif
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
 
-TEST_PROG=dsetexample fileexample rwdsetexample attrexample groupexample \
+EXAMPLE_PROG=dsetexample fileexample rwdsetexample attrexample groupexample \
      grpsexample grpdsetexample hyperslab selectele grpit refobjexample  \
      refregexample mountexample compound
 
@@ -46,7 +46,7 @@ INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 
 # Add attention tests for Fortran 2003 features
 if FORTRAN_2003_CONDITIONAL_F
-  TEST_PROG +=  rwdset_fortran2003 nested_derived_type \
+  EXAMPLE_PROG +=  rwdset_fortran2003 nested_derived_type \
       compound_fortran2003 compound_complex_fortran2003
   INSTALL_FILES +=  rwdset_fortran2003.f90 nested_derived_type.f90 \
       compound_fortran2003.f90 compound_complex_fortran2003.f90

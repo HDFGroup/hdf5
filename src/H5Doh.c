@@ -446,7 +446,7 @@ done:
 static herr_t
 H5O__dset_flush(H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
-    H5D_t       *dset;                  /* Dataset opened */
+    H5D_t       *dset = NULL;          /* Dataset opened */
     H5O_type_t 	obj_type;              /* Type of object at location */
     herr_t      ret_value = SUCCEED;    /* Return value */
 

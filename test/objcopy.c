@@ -10343,7 +10343,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     hid_t did = -1;                             /* Dataset ID */
     hid_t exp_did = -1;                          /* Dataset ID */
     hid_t tid_short = -1; 			/* Datatype ID */
-    hid_t exp_tid;				/* Expected datatype ID */
+    hid_t exp_tid = -1;				/* Expected datatype ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
     unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */

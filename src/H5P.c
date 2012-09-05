@@ -118,7 +118,7 @@ H5P_init_pub_interface(void)
 hid_t
 H5Pcopy(hid_t id)
 {
-    void *obj;                 /* Property object to copy */
+    void *obj;                  /* Property object to copy */
     hid_t ret_value=FALSE;      /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -224,7 +224,7 @@ H5Pcreate_class(hid_t parent, const char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class")
 
     /* Create the new property list class */
-    if(NULL == (pclass = H5P_create_class(par_class, name, FALSE, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
+    if(NULL == (pclass = H5P_create_class(par_class, name, H5P_TYPE_USER, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class")
 
     /* Get an atom for the class */
@@ -1147,6 +1147,7 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_iter_ud_t udata;    /* User data for internal iterator callback */
     int fake_idx = 0;       /* Index when user doesn't provide one */
+    void *obj;              /* Property object to copy */
     int ret_value;          /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1155,6 +1156,8 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
     /* Check arguments. */
     if(H5I_GENPROP_LST != H5I_get_type(id) && H5I_GENPROP_CLS != H5I_get_type(id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property object");
+    if(NULL == (obj = H5I_object(id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
     if(iter_func == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration callback");
 
@@ -1165,13 +1168,13 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
         /* Iterate over a property list */
-        if((ret_value = H5P_iterate_plist(id, (idx ? idx : &fake_idx), H5P__iterate_cb, &udata)) < 0)
+        if((ret_value = H5P_iterate_plist((H5P_genplist_t *)obj, TRUE, (idx ? idx : &fake_idx), H5P__iterate_cb, &udata)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over list");
     } /* end if */
     else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
             /* Iterate over a property class */
-            if((ret_value = H5P_iterate_pclass(id, (idx ? idx : &fake_idx), H5P__iterate_cb, &udata)) < 0)
+            if((ret_value = H5P_iterate_pclass((H5P_genclass_t *)obj, (idx ? idx : &fake_idx), H5P__iterate_cb, &udata)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over class");
         } /* end if */
         else

@@ -153,6 +153,12 @@ H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
     if(NULL == (sblock = H5FL_CALLOC(H5F_super_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* The superblock must be flushed last (and collectively in parallel) */
+    sblock->cache_info.flush_me_last = TRUE;
+#ifdef H5_HAVE_PARALLEL
+    sblock->cache_info.flush_me_collectively = TRUE;
+#endif
+
     /* Read fixed-size portion of the superblock */
     p = sbuf;
     H5_CHECK_OVERFLOW(fixed_size, size_t, haddr_t);
@@ -638,6 +644,15 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
     HDassert(f);
     HDassert(H5F_addr_eq(addr, 0));
     HDassert(sblock);
+    
+    /* Assert that the superblock is marked as being flushed last (and 
+       collectively in parallel) */
+    /* (We'll rely on the cache to make sure it actually *is* flushed
+       last (and collectively in parallel), but this check doesn't hurt) */
+    HDassert(sblock->cache_info.flush_me_last);    
+#ifdef H5_HAVE_PARALLEL
+    HDassert(sblock->cache_info.flush_me_collectively);
+#endif
 
     if(sblock->cache_info.is_dirty) {
         uint8_t         buf[H5F_MAX_SUPERBLOCK_SIZE + H5F_MAX_DRVINFOBLOCK_SIZE];  /* Superblock & driver info blockencoding buffer */
@@ -677,10 +692,15 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                 *p++ = 0;   /*reserved */
             } /* end if */
 
+            /* Encode the base address */
             H5F_addr_encode(f, &p, sblock->base_addr);
+
+            /* Encode the address of global free-space index */
             H5F_addr_encode(f, &p, sblock->ext_addr);
             rel_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER);
             H5F_addr_encode(f, &p, (rel_eoa + sblock->base_addr));
+
+            /* Encode the driver informaton block address */
             H5F_addr_encode(f, &p, sblock->driver_addr);
 
             /* Encode the root group object entry, including the cached stab info */
@@ -731,9 +751,12 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
             *p++ = sblock->status_flags;
 
-            /* Base, superblock extension & end of file addresses */
+            /* Encode the base address */
             H5F_addr_encode(f, &p, sblock->base_addr);
+
+            /* Encode the address of the superblock extension */
             H5F_addr_encode(f, &p, sblock->ext_addr);
+
             rel_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER);
             H5F_addr_encode(f, &p, (rel_eoa + sblock->base_addr));
 
@@ -767,13 +790,18 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
         /* Check for newer version of superblock format & superblock extension */
         if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 && H5F_addr_defined(sblock->ext_addr)) {
+            H5O_loc_t 	ext_loc;        /* "Object location" for superblock extension */
+
+            /* Open the superblock extension's object header */
+            if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
+
             /* Check for ignoring the driver info for this file */
             if(!H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
                 /* Check for driver info message */
                 H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
                 if(driver_size > 0) {
                     H5O_drvinfo_t drvinfo;      /* Driver info */
-                    H5O_loc_t 	ext_loc; 	/* "Object location" for superblock extension */
                     uint8_t dbuf[H5F_MAX_DRVINFOBLOCK_SIZE];  /* Driver info block encoding buffer */
 
                     /* Sanity check */
@@ -783,21 +811,19 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                     if(H5FD_sb_encode(f->shared->lf, drvinfo.name, dbuf) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
 
-                    /* Open the superblock extension's object header */
-                    if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
-
                     /* Write driver info information to the superblock extension */
                     drvinfo.len = driver_size;
                     drvinfo.buf = dbuf;
                     if(H5O_msg_write(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &drvinfo, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
 
-                    /* Close the superblock extension object header */
-                    if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")
                 } /* end if */
+
             } /* end if */
+
+            /* Close the superblock extension object header */
+            if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")
         } /* end if */
 
         /* Reset the dirty flag.  */

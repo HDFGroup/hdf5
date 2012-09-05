@@ -153,6 +153,19 @@ typedef enum H5D_mpio_actual_io_mode_t {
     H5D_MPIO_CONTIGUOUS_COLLECTIVE = 0x4
 } H5D_mpio_actual_io_mode_t; 
 
+/* Broken collective IO property */
+typedef enum H5D_mpio_no_collective_cause_t {
+    H5D_MPIO_COLLECTIVE = 0x00,
+    H5D_MPIO_SET_INDEPENDENT = 0x01,
+    H5D_MPIO_DATATYPE_CONVERSION = 0x02,
+    H5D_MPIO_DATA_TRANSFORMS = 0x04,
+    H5D_MPIO_SET_MPIPOSIX = 0x08,
+    H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES = 0x10,
+    H5D_MPIO_POINT_SELECTIONS = 0x20,
+    H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET = 0x40,
+    H5D_MPIO_FILTERS = 0x80
+} H5D_mpio_no_collective_cause_t;
+
 /********************/
 /* Public Variables */
 /********************/
@@ -399,6 +412,7 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
 H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
+H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, H5D_mpio_no_collective_cause_t *local_no_collective_cause, H5D_mpio_no_collective_cause_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Link creation property list (LCPL) routines */

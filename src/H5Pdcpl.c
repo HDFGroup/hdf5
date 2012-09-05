@@ -76,7 +76,7 @@
 /* Definitions for storage layout property */
 #define H5D_CRT_LAYOUT_SIZE        sizeof(H5O_layout_t)
 #define H5D_CRT_LAYOUT_DEF         H5D_DEF_LAYOUT_CONTIG
-#define H5D_CRT_LAYOUT_CMP     H5P__dcrt_layout_cmp
+#define H5D_CRT_LAYOUT_CMP         H5P__dcrt_layout_cmp
 /* Definitions for fill value.  size=0 means fill value will be 0 as
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
@@ -128,6 +128,7 @@ static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, s
 /* Dataset creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_DCRT[1] = {{
     "dataset create",		/* Class name for debugging     */
+    H5P_TYPE_DATASET_CREATE,    /* Class type                   */
     &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_DATASET_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_DATASET_CREATE_g,	/* Pointer to default property list ID */
@@ -186,11 +187,11 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the storage layout property */
     if(H5P_register_real(pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &layout, NULL, NULL, NULL, NULL, NULL, H5D_CRT_LAYOUT_CMP, NULL) < 0)
-       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the fill value property */
     if(H5P_register_real(pclass, H5D_CRT_FILL_VALUE_NAME, H5D_CRT_FILL_VALUE_SIZE, &fill, NULL, NULL, NULL, NULL, NULL, H5D_CRT_FILL_VALUE_CMP, NULL) < 0)
-       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space allocation time state property */
     if(H5P_register_real(pclass, H5D_CRT_ALLOC_TIME_STATE_NAME, H5D_CRT_ALLOC_TIME_STATE_SIZE, &alloc_time_state, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -1508,7 +1509,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value/*out*/,
+H5P_get_fill_value(H5P_genplist_t *plist, H5T_t *type, void *value/*out*/,
     hid_t dxpl_id)
 {
     H5O_fill_t          fill;                   /* Fill value to retrieve */

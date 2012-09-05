@@ -445,8 +445,10 @@ HDfprintf(stderr, "%s: Relinquishing section info ownership\n", FUNC);
 HDfprintf(stderr, "%s: Freeing section info on disk, old_sect_addr = %a, old_alloc_sect_size = %Hu\n", FUNC, old_sect_addr, old_alloc_sect_size);
 #endif /* H5FS_SINFO_DEBUG */
             /* Release space for section info in file */
-            if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, old_sect_addr, old_alloc_sect_size) < 0)
-                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
+            if(!H5F_IS_TMP_ADDR(f, old_sect_addr)) {
+                if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, old_sect_addr, old_alloc_sect_size) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space sections")
+            } /* end if */
         } /* end if */
     } /* end if */
 
@@ -2374,4 +2376,115 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_sect_assert() */
 #endif /* H5FS_DEBUG_ASSERT */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_sect_try_shrink_eoa
+ *
+ * Purpose:	To shrink the last section on the merge list if the section
+ *		is at EOF.
+ *
+ * Return:      Success:        non-negative (TRUE/FALSE)
+ *              Failure:        negative
+ *
+ * Programmer:	Vailin Choi
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FS_sect_try_shrink_eoa(const H5F_t *f, hid_t dxpl_id, const H5FS_t *fspace, void *op_data)
+{
+    hbool_t sinfo_valid = FALSE;        /* Whether the section info is valid */
+    hbool_t section_removed = FALSE;    /* Whether a section was removed */
+    htri_t ret_value = FALSE;          	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments. */
+    HDassert(fspace);
+
+    if(H5FS_sinfo_lock(f, dxpl_id, fspace, H5AC_WRITE) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't get section info")
+    sinfo_valid = TRUE;
+
+    if(fspace->sinfo && fspace->sinfo->merge_list) {
+        H5SL_node_t *last_node;         	/* Last node in merge list */
+
+        /* Check for last node in the merge list */
+        if(NULL != (last_node = H5SL_last(fspace->sinfo->merge_list))) {
+            H5FS_section_info_t *tmp_sect;  	/* Temporary free space section */
+            H5FS_section_class_t *tmp_sect_cls;	/* Temporary section's class */
+
+            /* Get the pointer to the last section, from the last node */
+            tmp_sect = (H5FS_section_info_t *)H5SL_item(last_node);
+            HDassert(tmp_sect);
+	    tmp_sect_cls = &fspace->sect_cls[tmp_sect->type];
+	    if(tmp_sect_cls->can_shrink) {
+                /* Check if the section can be shrunk away */
+		if((ret_value = (*tmp_sect_cls->can_shrink)(tmp_sect, op_data)) < 0)
+		    HGOTO_ERROR(H5E_FSPACE, H5E_CANTSHRINK, FAIL, "can't check for shrinking container")
+		if(ret_value > 0) {
+		    HDassert(tmp_sect_cls->shrink);
+
+                    /* Remove section from free space manager */
+		    if(H5FS_sect_remove_real(fspace, tmp_sect) < 0)
+			HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't remove section from internal data structures")
+                    section_removed = TRUE;
+
+                    /* Shrink away section */
+		    if((*tmp_sect_cls->shrink)(&tmp_sect, op_data) < 0)
+			HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't shrink free space container")
+		} /* end if */
+	    } /* end if */
+	} /* end if */
+    } /* end if */
+
+done:
+    /* Release the section info */
+    if(sinfo_valid && H5FS_sinfo_unlock(f, dxpl_id, fspace, section_removed) < 0)
+        HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FS_sect_try_shrink_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FS_sect_query_last_sect
+ *
+ * Purpose:	Retrieve info about the last section on the merge list
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Vailin Choi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_sect_query_last_sect(const H5FS_t *fspace, haddr_t *sect_addr, hsize_t *sect_size)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments. */
+    HDassert(fspace);
+
+    if(fspace->sinfo && fspace->sinfo->merge_list) {
+        H5SL_node_t *last_node;             /* Last node in merge list */
+
+        /* Check for last node in the merge list */
+        if(NULL != (last_node = H5SL_last(fspace->sinfo->merge_list))) {
+            H5FS_section_info_t *tmp_sect;      /* Temporary free space section */
+
+            /* Get the pointer to the last section, from the last node */
+            tmp_sect = (H5FS_section_info_t *)H5SL_item(last_node);
+            HDassert(tmp_sect);
+	    if(sect_addr)
+                *sect_addr = tmp_sect->addr;
+	    if(sect_size)
+                *sect_size = tmp_sect->size;
+	} /* end if */
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5FS_sect_query_last_sect() */
 

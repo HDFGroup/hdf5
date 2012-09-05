@@ -735,6 +735,8 @@ h5_set_info_object(void)
 
         valp = envp = next = HDstrdup(envp);
 
+        if (!valp) return 0;
+
         /* create an INFO object if not created yet */
         if (h5_io_info_g == MPI_INFO_NULL)
             MPI_Info_create(&h5_io_info_g);
@@ -760,6 +762,8 @@ h5_set_info_object(void)
             /* pass up any beginning whitespaces */
             while (*namep && (*namep == ' ' || *namep == '\t'))
                 namep++;
+
+            if (!*namep) continue; /* was all white space, so move to next k/v pair */
 
             /* eat up any ending white spaces */
             endp = &namep[strlen(namep) - 1];

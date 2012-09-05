@@ -330,20 +330,21 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  * PURPOSE
  *  Initialize Fortran flags
  * INPUTS
- *  h5d_flags      - H5D inteface flags
- *  h5e_flags      - H5E inteface flags
- *  h5e_hid_flags  - H5E inteface flags of type hid_t
- *  h5f_flags      - H5F interface flags
- *  h5fd_flags     - H5FD interface flags
- *  h5fd_hid_flags - H5FD interface flags of type hid_t
- *  h5g_flags      - H5G interface flags
- *  h5i_flags      - H5I interface flags
- *  h5p_flags      - H5P interface flags
- *  h5p_flags_int  - H5P interface flags of type integer
- *  h5r_flags      - H5R interface flags
- *  h5s_flags      - H5S interface flags
- *  h5t_flags      - H5T interface flags
- *  h5z_flags      - H5Z interface flags
+ *  h5d_flags       - H5D inteface flags
+ *  h5e_flags       - H5E inteface flags
+ *  h5e_hid_flags   - H5E inteface flags of type hid_t
+ *  h5f_flags       - H5F interface flags
+ *  h5fd_flags      - H5FD interface flags
+ *  h5fd_hid_flags  - H5FD interface flags of type hid_t
+ *  h5g_flags       - H5G interface flags
+ *  h5i_flags       - H5I interface flags
+ *  h5p_flags       - H5P interface flags
+ *  h5p_flags_int   - H5P interface flags of type integer
+ *  h5r_flags       - H5R interface flags
+ *  h5s_flags       - H5S interface flags
+ *  h5s_hsize_flags - H5S interface flags of type hsize_t
+ *  h5t_flags       - H5T interface flags
+ *  h5z_flags       - H5Z interface flags
  * OUTPUTS
  *  None
  * RETURNS
@@ -368,7 +369,7 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int
                  int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                  int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
                  hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
-                 int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags)
+		 hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags)
 /******/
 {
     int ret_value = -1;
@@ -579,31 +580,29 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int
 /*
  *  H5S flags
  */
-
-
       h5s_flags[0] = (int_f)H5S_SCALAR;
       h5s_flags[1] = (int_f)H5S_SIMPLE;
       h5s_flags[2] = (int_f)H5S_NULL;
       h5s_flags[3] = (int_f)H5S_SELECT_SET;
       h5s_flags[4] = (int_f)H5S_SELECT_OR;
-      h5s_flags[5] = (int_f)H5S_UNLIMITED;
-      h5s_flags[6] = (int_f)H5S_ALL;
+      h5s_flags[5] = (int_f)H5S_ALL;
 
-      h5s_flags[7] = (int_f)H5S_SELECT_NOOP;
-      h5s_flags[8] = (int_f)H5S_SELECT_AND;
-      h5s_flags[9] = (int_f)H5S_SELECT_XOR;
-      h5s_flags[10] = (int_f)H5S_SELECT_NOTB;
-      h5s_flags[11] = (int_f)H5S_SELECT_NOTA;
-      h5s_flags[12] = (int_f)H5S_SELECT_APPEND;
-      h5s_flags[13] = (int_f)H5S_SELECT_PREPEND;
-      h5s_flags[14] = (int_f)H5S_SELECT_INVALID;
+      h5s_flags[6] = (int_f)H5S_SELECT_NOOP;
+      h5s_flags[7] = (int_f)H5S_SELECT_AND;
+      h5s_flags[8] = (int_f)H5S_SELECT_XOR;
+      h5s_flags[9] = (int_f)H5S_SELECT_NOTB;
+      h5s_flags[10] = (int_f)H5S_SELECT_NOTA;
+      h5s_flags[11] = (int_f)H5S_SELECT_APPEND;
+      h5s_flags[12] = (int_f)H5S_SELECT_PREPEND;
+      h5s_flags[13] = (int_f)H5S_SELECT_INVALID;
 
+      h5s_flags[14] = (int_f)H5S_SEL_ERROR;
+      h5s_flags[15] = (int_f)H5S_SEL_NONE;
+      h5s_flags[16] = (int_f)H5S_SEL_POINTS;
+      h5s_flags[17] = (int_f)H5S_SEL_HYPERSLABS;
+      h5s_flags[18] = (int_f)H5S_SEL_ALL;
 
-      h5s_flags[15] = (int_f)H5S_SEL_ERROR;
-      h5s_flags[16] = (int_f)H5S_SEL_NONE;
-      h5s_flags[17] = (int_f)H5S_SEL_POINTS;
-      h5s_flags[18] = (int_f)H5S_SEL_HYPERSLABS;
-      h5s_flags[19] = (int_f)H5S_SEL_ALL;
+      h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
 
 /*
  *  H5T flags

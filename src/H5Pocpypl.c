@@ -91,6 +91,7 @@ static int H5P_ocpy_merge_comm_dt_list_cmp(const void *value1, const void *value
 /* Object copy property list class library initialization object */
 const H5P_libclass_t H5P_CLS_OCPY[1] = {{
     "object copy",		/* Class name for debugging     */
+    H5P_TYPE_OBJECT_COPY,       /* Class type                   */
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_OBJECT_COPY_g,	/* Pointer to class ID          */
     &H5P_LST_OBJECT_COPY_g,	/* Pointer to default property list ID */
@@ -141,15 +142,15 @@ H5P_ocpy_reg_prop(H5P_genclass_t *pclass)
 
     /* Register copy options property */
     if(H5P_register_real(pclass, H5O_CPY_OPTION_NAME, H5O_CPY_OPTION_SIZE, &ocpy_option, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register merge named dtype list property */
     if(H5P_register_real(pclass, H5O_CPY_MERGE_COMM_DT_LIST_NAME, H5O_CPY_MERGE_COMM_DT_LIST_SIZE, &merge_comm_dtype_list, NULL, NULL, NULL, NULL, NULL, H5O_CPY_MERGE_COMM_DT_LIST_CMP, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register property for callback when completing the search for a matching named datatype from the named dtype list */
     if(H5P_register_real(pclass, H5O_CPY_MCDT_SEARCH_CB_NAME, H5O_CPY_MCDT_SEARCH_CB_SIZE, &mcdt_cb, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

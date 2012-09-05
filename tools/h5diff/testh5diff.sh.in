@@ -29,7 +29,7 @@
 #    Added test 400 - 425  (links with --follow-symlinks option)
 #    Added test 450 - 459  (dangling links)
 
-
+srcdir=@srcdir@
 
 TESTNAME=h5diff
 EXIT_SUCCESS=0
@@ -41,17 +41,15 @@ H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 nerrors=0
 verbose=yes
 h5haveexitcode=yes	    # default is yes
 pmode=			    # default to run h5diff tests
 mydomainname=`domainname 2>/dev/null`
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 # source dirs
 SRC_TOOLS="$srcdir/.."
@@ -231,6 +229,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_55.txt
 $SRC_H5DIFF_TESTFILES/h5diff_56.txt
 $SRC_H5DIFF_TESTFILES/h5diff_57.txt
 $SRC_H5DIFF_TESTFILES/h5diff_58.txt
+$SRC_H5DIFF_TESTFILES/h5diff_59.txt
 $SRC_H5DIFF_TESTFILES/h5diff_500.txt
 $SRC_H5DIFF_TESTFILES/h5diff_501.txt
 $SRC_H5DIFF_TESTFILES/h5diff_502.txt
@@ -318,12 +317,20 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-	    $CP -f $tstfile $TESTDIR
-            if [ $? -ne 0 ]; then
-                echo "Error: FAILED to copy $tstfile ."
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
                 
-                # Comment out this to CREATE expected file
-                exit $EXIT_FAILURE
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
@@ -615,6 +622,10 @@ TOOLTEST h5diff_57.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b
 # 5.8 (region reference)
 TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
 
+# test for both dset and attr with same type but with different size 
+# ( HDDFV-7942 )
+TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
+
 # ##############################################################################
 # # Error messages
 # ##############################################################################
@@ -825,14 +836,7 @@ TOOLTEST h5diff_221.txt -c non_comparables1.h5 non_comparables2.h5 /g2
 
 # entire file
 # All the comparables should display differences.
-if test -n "$pmode"; then
-    # parallel mode: 
-    # skip due to ph5diff hangs on koala (linux64-LE) and ember intermittently.
-    # (HDFFV-8003 - TBD)
-    SKIP -c non_comparables1.h5 non_comparables2.h5
-else
-    TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
-fi    
+TOOLTEST h5diff_222.txt -c non_comparables1.h5 non_comparables2.h5
 
 # non-comparable test for common objects (same name) with different object types
 # (HDFFV-7644)
