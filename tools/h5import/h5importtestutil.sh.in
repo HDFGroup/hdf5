@@ -331,7 +331,7 @@ TOOLTEST2 "/int/buin/32-bit" binuin32.h5
 TESTING "STR" 
 TOOLTEST $TESTDIR/txtstr.txt -c $TESTDIR/txtstr.conf -o txtstr.h5
 TESTING "H5DUMP-STR" 
-TOOLTEST43 "/mytext/data" txtstr.h5
+TOOLTEST4 "/mytext/data" txtstr.h5
 
 
 TESTING "BINARY I8 CR LF EOF" 
