@@ -105,8 +105,13 @@ MODULE H5GLOBAL
        H5T_STD_U8LE,    &
        H5T_STD_U16BE,   &
        H5T_STD_U16LE,   &
-       H5T_STD_U32BE,   &
-       H5T_STD_U32LE,   &
+       H5T_STD_U32BE
+
+! NOTE: Splitting the line since the Fortran 95 standard limits the number of 
+!       continuation lines to 39; the F03/F08 standard limits the number 
+!       to 255 lines.
+
+  INTEGER(HID_T) H5T_STD_U32LE,   &
        H5T_STD_U64BE,   &
        H5T_STD_U64LE,   &
        H5T_STRING,      &
