@@ -3373,8 +3373,6 @@ test_no_collective_cause_mode(int selection_mode)
     ret = H5Pget_mpio_no_collective_cause (dxpl_write, &no_collective_cause_local_write, &no_collective_cause_global_write);
     VRFY((ret >= 0), "retriving no collective cause succeeded" );
 
-    /* Wait for file to be written */
-    MPI_Barrier(MPI_COMM_WORLD);
 
     /*---------------------
      * Test Read access
@@ -3413,10 +3411,6 @@ test_no_collective_cause_mode(int selection_mode)
     }
 
 
-    /* clean up external file */
-    if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL)
-        HDremove(FILE_EXTERNAL);
-
     /* Release some resources */
     if (sid)
         H5Sclose(sid);
@@ -3437,6 +3431,10 @@ test_no_collective_cause_mode(int selection_mode)
     if (fid)
         H5Fclose(fid);
     HDfree(buffer);
+
+    /* clean up external file */
+    if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL)
+        HDremove(FILE_EXTERNAL);
 
     return;
 }
@@ -3626,8 +3624,6 @@ test_no_collective_cause_mode_filter(int selection_mode)
     if (fid)
         H5Fclose(fid);
 
-    /* Wait for file to be written */
-    MPI_Barrier(MPI_COMM_WORLD);
 
     /*---------------------
      * Test Read access
