@@ -3146,6 +3146,17 @@ test_no_collective_cause_mode(int selection_mode)
     /* set to global value as default */
     int l_facc_type = facc_type;   
 
+    /* Set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    HDassert(mpi_size >= 1);
+
+    mpi_comm = MPI_COMM_WORLD;
+    mpi_info = MPI_INFO_NULL;
+
     /* Create the dataset creation plist */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dcpl >= 0), "dataset creation plist created successfully");
@@ -3193,15 +3204,6 @@ test_no_collective_cause_mode(int selection_mode)
         VRFY((sid >= 0), "H5Screate_simple succeeded");
     }
     
-    /* Set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    
-    HDassert(mpi_size >= 1);
-
-    mpi_comm = MPI_COMM_WORLD;
-    mpi_info = MPI_INFO_NULL;
 
     filename = (const char *)GetTestParameters();
     HDassert(filename != NULL);
@@ -3496,6 +3498,16 @@ test_no_collective_cause_mode_filter(int selection_mode)
     H5Z_filter_t filter_info;
 #endif    
 
+    /* Set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    HDassert(mpi_size >= 1);
+
+    mpi_comm = MPI_COMM_WORLD;
+    mpi_info = MPI_INFO_NULL;
 
     /* Create the dataset creation plist */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
@@ -3523,15 +3535,6 @@ test_no_collective_cause_mode_filter(int selection_mode)
     sid = H5Screate_simple (RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded");
     
-    /* Set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-    
-    HDassert(mpi_size >= 1);
-
-    mpi_comm = MPI_COMM_WORLD;
-    mpi_info = MPI_INFO_NULL;
 
     filename = (const char *)GetTestParameters();
     HDassert(filename != NULL);
