@@ -568,6 +568,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file = NULL; /* File object */
+    haddr_t addr;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -582,6 +583,9 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
+    addr = *((const haddr_t*)_ref);
+    if(!H5F_addr_defined(addr))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "undefined reference pointer")
 
     /* Get the file pointer from the entry */
     file = loc.oloc->file;

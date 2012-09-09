@@ -1069,6 +1069,7 @@ test_reference_obj_deleted(void)
     hid_t		sid1;       /* Dataspace ID			*/
     hobj_ref_t  oref;       /* Object Reference to test */
     H5O_type_t          obj_type;       /* Object type */
+    haddr_t             addr = HADDR_UNDEF; /* test for undefined reference */
     herr_t		ret;		/* Generic return value		*/
 
     /* Create file */
@@ -1125,6 +1126,10 @@ test_reference_obj_deleted(void)
     /* Open the dataset */
     dataset = H5Dopen2(fid1, "/Dataset2", H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Dopen2");
+
+    /* Open undefined reference */
+    dset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &addr);
+    VERIFY(dset2, FAIL, "H5Rdereference2");
 
     /* Read selection from disk */
     HDmemset(&oref, 0, sizeof(hobj_ref_t));
