@@ -138,56 +138,60 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5Tset_precision
+ * Function:	H5Tset_precision
  *
- * Purpose:     Sets the precision of a datatype.  The precision is
- *              the number of significant bits which, unless padding is
- *              present, is 8 times larger than the value returned by
- *              H5Tget_size().
+ * Purpose:	Sets the precision of a datatype.  The precision is
+ *		the number of significant bits which, unless padding is
+ *		present, is 8 times larger than the value returned by
+ *		H5Tget_size().
  *
- *              If the precision is increased then the offset is decreased
- *              and then the size is increased to insure that significant
- *              bits do not "hang over" the edge of the datatype.
+ *		If the precision is increased then the offset is decreased
+ *		and then the size is increased to insure that significant
+ *		bits do not "hang over" the edge of the datatype.
  *
- *              The precision property of strings is read-only.
+ *		The precision property of strings is read-only.
  *
- *              When decreasing the precision of a floating point type, set
- *              the locations and sizes of the sign, mantissa, and exponent
- *              fields first.
+ *		When decreasing the precision of a floating point type, set
+ *		the locations and sizes of the sign, mantissa, and exponent
+ *		fields first.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Wednesday, January  7, 1998
+ * Programmer:	Robb Matzke
+ *		Wednesday, January  7, 1998
+ *
+ * Modifications:
+ * 	Robb Matzke, 22 Dec 1998
+ *	Moved real work to a private function.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Tset_precision(hid_t type_id, size_t prec)
 {
-    H5T_t       *dt = NULL;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5T_t	*dt = NULL;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", type_id, prec);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-    if (H5T_STATE_TRANSIENT != dt->shared->state)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if (H5T_STATE_TRANSIENT!=dt->shared->state)
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is read-only")
     if (prec == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive")
-    if (H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs>0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after members are defined")
-    if (H5T_STRING == dt->shared->type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "precision must be positive")
+    if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after members are defined")
+    if (H5T_STRING==dt->shared->type)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "precision for this type is read-only")
-    if (H5T_COMPOUND == dt->shared->type || H5T_OPAQUE==dt->shared->type)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
+    if (H5T_COMPOUND==dt->shared->type || H5T_OPAQUE==dt->shared->type)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
 
     /* Do the work */
-    if (H5T_set_precision(dt, prec) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision")
+    if (H5T_set_precision(dt, prec)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -195,69 +199,73 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_set_precision
+ * Function:	H5T_set_precision
  *
- * Purpose:     Sets the precision of a datatype.  The precision is
- *              the number of significant bits which, unless padding is
- *              present, is 8 times larger than the value returned by
- *              H5Tget_size().
+ * Purpose:	Sets the precision of a datatype.  The precision is
+ *		the number of significant bits which, unless padding is
+ *		present, is 8 times larger than the value returned by
+ *		H5Tget_size().
  *
- *              If the precision is increased then the offset is decreased
- *              and then the size is increased to insure that significant
- *              bits do not "hang over" the edge of the datatype.
+ *		If the precision is increased then the offset is decreased
+ *		and then the size is increased to insure that significant
+ *		bits do not "hang over" the edge of the datatype.
  *
- *              The precision property of strings is read-only.
+ *		The precision property of strings is read-only.
  *
- *              When decreasing the precision of a floating point type, set
- *              the locations and sizes of the sign, mantissa, and exponent
- *              fields first.
+ *		When decreasing the precision of a floating point type, set
+ *		the locations and sizes of the sign, mantissa, and exponent
+ *		fields first.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Robb Matzke
- *              Wednesday, January  7, 1998
+ * Programmer:	Robb Matzke
+ *		Wednesday, January  7, 1998
+ *
+ * Modifications:
+ * 	Robb Matzke, 22 Dec 1998
+ *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5T_set_precision(const H5T_t *dt, size_t prec)
 {
-    size_t      offset, size;
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    size_t	offset, size;
+    herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     assert(dt);
-    assert(prec > 0);
-    assert(H5T_OPAQUE != dt->shared->type);
-    assert(H5T_COMPOUND != dt->shared->type);
-    assert(H5T_STRING != dt->shared->type);
-    assert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
+    assert(prec>0);
+    assert(H5T_OPAQUE!=dt->shared->type);
+    assert(H5T_COMPOUND!=dt->shared->type);
+    assert(H5T_STRING!=dt->shared->type);
+    assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
-        if (H5T_set_precision(dt->shared->parent, prec) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
+	if (H5T_set_precision(dt->shared->parent, prec)<0)
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
 
         /* Adjust size of datatype appropriately */
-        if(dt->shared->type == H5T_ARRAY)
+        if(dt->shared->type==H5T_ARRAY)
             dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
-        else if(dt->shared->type != H5T_VLEN)
+        else if(dt->shared->type!=H5T_VLEN)
             dt->shared->size = dt->shared->parent->shared->size;
     } else {
         if (H5T_IS_ATOMIC(dt->shared)) {
-            /* Adjust the offset and size */
-            offset = dt->shared->u.atomic.offset;
-            size = dt->shared->size;
-            if (prec > 8*size)
+	    /* Adjust the offset and size */
+	    offset = dt->shared->u.atomic.offset;
+	    size = dt->shared->size;
+	    if (prec > 8*size)
                 offset = 0;
-            else if (offset+prec > 8 * size)
+	    else if (offset+prec > 8 * size)
                 offset = 8 * size - prec;
-            if (prec > 8*size)
+	    if (prec > 8*size)
                 size = (prec+7) / 8;
 
-            /* Check that things are still kosher */
-            switch (dt->shared->type) {
+	    /* Check that things are still kosher */
+	    switch (dt->shared->type) {
                 case H5T_INTEGER:
                 case H5T_TIME:
                 case H5T_BITFIELD:
@@ -277,13 +285,13 @@ H5T_set_precision(const H5T_t *dt, size_t prec)
                     break;
                 default:
                     HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "operation not defined for datatype class")
-            } /* end switch */ /*lint !e788 All appropriate cases are covered */
+	    } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
-            /* Commit */
-            dt->shared->size = size;
+	    /* Commit */
+	    dt->shared->size = size;
             dt->shared->u.atomic.offset = offset;
             dt->shared->u.atomic.prec = prec;
-        } /* end if */
+	} /* end if */
         else
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for specified datatype")
     } /* end else */

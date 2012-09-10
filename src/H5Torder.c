@@ -249,14 +249,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_set_order
+ * Function:	H5T_set_order
  *
- * Purpose:     Private function to set the byte order for a datatype.
+ * Purpose:	Private function to set the byte order for a datatype.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  Raymond Lu
- *              13 August 2010
+ * Programmer:	Raymond Lu
+ *		13 August 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -268,7 +268,7 @@ H5T_set_order(H5T_t *dtype, H5T_order_t order)
     FUNC_ENTER_NOAPI(FAIL)
 
     if(H5T_ENUM == dtype->shared->type && dtype->shared->u.enumer.nmembs > 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after enum members are defined")
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "operation not allowed after enum members are defined")
 
     /* For derived data type, defer to parent */ 
     while(dtype->shared->parent)
@@ -277,7 +277,7 @@ H5T_set_order(H5T_t *dtype, H5T_order_t order)
     /* Check for setting order on inappropriate datatype */
     if(order == H5T_ORDER_NONE && !(H5T_REFERENCE == dtype->shared->type || 
             H5T_OPAQUE == dtype->shared->type || H5T_IS_FIXED_STRING(dtype->shared)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "illegal byte order for type")
+	HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "illegal byte order for type")
 
     /* For atomic data type */
     if(H5T_IS_ATOMIC(dtype->shared))
