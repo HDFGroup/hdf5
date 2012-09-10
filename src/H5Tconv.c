@@ -2699,35 +2699,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__conv_enum
+ * Function:    H5T__conv_enum
  *
- * Purpose:	Converts one type of enumerated data to another.
+ * Purpose:     Converts one type of enumerated data to another.
  *
- * Return:	Success:	Non-negative
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, January  4, 1999
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
-	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
-              void UNUSED *bkg, hid_t UNUSED dxpl_id)
+                size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
+                void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    uint8_t	*buf = (uint8_t*)_buf;	/*cast for pointer arithmetic	*/
-    H5T_t	*src = NULL, *dst = NULL;	/*src and dst datatypes	*/
-    H5T_t	*src_super = NULL, *dst_super = NULL;	/*parent types for src and dst*/
-    uint8_t	*s = NULL, *d = NULL;	/*src and dst BUF pointers	*/
-    int	src_delta, dst_delta;	/*conversion strides		*/
-    int	n;			/*src value cast as native int	*/
-    H5T_enum_struct_t *priv = (H5T_enum_struct_t*)(cdata->priv);
-    H5P_genplist_t      *plist;         /*property list pointer         */
-    H5T_conv_cb_t       cb_struct;      /*conversion callback structure */
-    H5T_conv_ret_t      except_ret;     /*return of callback function   */
-    size_t	i;			/*counters			*/
-    herr_t      ret_value = SUCCEED;    /* Return value                 */
+    uint8_t             *buf = (uint8_t *)_buf; /* cast for ptr arithmetic          */
+    H5T_t               *src = NULL;            /* src and dst datatypes            */
+    H5T_t               *dst = NULL;
+    H5T_t               *src_super = NULL;      /* src and dst parent types         */
+    H5T_t               *dst_super = NULL;
+    uint8_t             *s = NULL;              /* src and dst BUF pointers         */
+    uint8_t             *d = NULL;
+    int                 src_delta, dst_delta;   /* conversion strides               */
+    int                 n;                      /* src value cast as native int     */
+    H5T_enum_struct_t   *priv = (H5T_enum_struct_t*)(cdata->priv);
+    H5P_genplist_t      *plist;                 /* property list pointer            */
+    H5T_conv_cb_t       cb_struct;              /* conversion callback structure    */
+    H5T_conv_ret_t      except_ret;             /* return of callback function      */
+    size_t              i;                      /* counters                         */
+    herr_t              ret_value = SUCCEED;    /* Return value                     */
 
     FUNC_ENTER_PACKAGE
 
@@ -2736,7 +2737,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Determine if this conversion function applies to the conversion
              * path SRC_ID->DST_ID.  If not return failure; otherwise initialize
-             * the `priv' field of `cdata' with information about the underlying
+             * the 'priv' field of 'cdata' with information about the underlying
              * integer conversion.
              */
             if(NULL == (src = (H5T_t *)H5I_object(src_id)) || NULL == (dst = (H5T_t *)H5I_object(dst_id)))
@@ -2776,7 +2777,8 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /* priv->src2dst map was computed for certain sort keys. Make sure those same
              * sort keys are used here during conversion. See H5T_conv_enum_init(). But
              * we actually don't care about the source type's order when doing the O(1)
-             * conversion algorithm, which is turned on by non-zero priv->length */
+             * conversion algorithm, which is turned on by non-zero priv->length
+             */
             H5T__sort_name(dst, NULL);
             if(!priv->length)
                 H5T__sort_value(src, NULL);
@@ -2788,12 +2790,12 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 src_delta = dst_delta = (int)buf_stride;
                 s = d = buf;
             } else if(dst->shared->size <= src->shared->size) {
-                src_delta = (int)src->shared->size; /*overflow shouldn't be possible*/
-                dst_delta = (int)dst->shared->size; /*overflow shouldn't be possible*/
+                src_delta = (int)src->shared->size; /* overflow shouldn't be possible */
+                dst_delta = (int)dst->shared->size; /* overflow shouldn't be possible */
                 s = d = buf;
             } else {
-                src_delta = -(int)src->shared->size; /*overflow shouldn't be possible*/
-                dst_delta = -(int)dst->shared->size; /*overflow shouldn't be possible*/
+                src_delta = -(int)src->shared->size; /* overflow shouldn't be possible */
+                dst_delta = -(int)dst->shared->size; /* overflow shouldn't be possible */
                 s = buf + (nelmts-1) * src->shared->size;
                 d = buf + (nelmts-1) * dst->shared->size;
             }
@@ -2825,7 +2827,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     if(n < 0 || n >= priv->length || priv->src2dst[n] < 0) {
                         /*overflow*/
                         except_ret = H5T_CONV_UNHANDLED;
-                        if(cb_struct.func) { /*If user's exception handler is present, use it*/
+                        if(cb_struct.func) { /* If user's exception handler is present, use it */
                             except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id,
                                     s, d, cb_struct.user_data);
                         }

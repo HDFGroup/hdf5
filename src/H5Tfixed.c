@@ -133,43 +133,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tset_sign
+ * Function:    H5Tset_sign
  *
- * Purpose:	Sets the sign property for an integer.
+ * Purpose:     Sets the sign property for an integer.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works with derived datatypes.
+ * Programmer:  Robb Matzke
+ *              Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Tset_sign(hid_t type_id, H5T_sign_t sign)
 {
-    H5T_t	*dt = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5T_t       *dt = NULL;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iTs", type_id, sign);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer datatype")
-    if (H5T_STATE_TRANSIENT!=dt->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
-    if (sign < H5T_SGN_NONE || sign >= H5T_NSGN)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type")
-    if (H5T_ENUM==dt->shared->type && dt->shared->u.enumer.nmembs>0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
-    while (dt->shared->parent)
+    if(NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an integer datatype")
+    if(H5T_STATE_TRANSIENT != dt->shared->state)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
+    if(sign < H5T_SGN_NONE || sign >= H5T_NSGN)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal sign type")
+    if(H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
+    while(dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
-    if (H5T_INTEGER!=dt->shared->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
+    if(H5T_INTEGER != dt->shared->type)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
 
     /* Commit */
     dt->shared->u.atomic.u.i.sign = sign;

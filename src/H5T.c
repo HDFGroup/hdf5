@@ -1040,13 +1040,13 @@ H5T_init_interface(void)
     fixedpt = native_int;
     floatpt = native_float;
     if (NULL == (compound = H5T__create(H5T_COMPOUND, (size_t)1)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == (enum_type = H5T__create(H5T_ENUM, (size_t)1)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == (vlen = H5T__vlen_create(native_int)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if (NULL == (array = H5T__array_create(native_int, 1, dim)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     status = 0;
 
     status |= H5T_register(H5T_PERS_SOFT, "i_i", fixedpt, fixedpt, H5T__conv_i_i, H5AC_dxpl_id, FALSE);
@@ -1971,31 +1971,22 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_detect_class
+ * Function:    H5T_detect_class
  *
- * Purpose:	Check whether a datatype contains (or is) a certain type of
- *		datatype.
+ * Purpose:     Check whether a datatype contains (or is) a certain type of
+ *              datatype.
  *
- * Return:	TRUE (1) or FALSE (0) on success/Negative on failure
+ * Return:      TRUE (1) or FALSE (0) on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, November 29, 2000
+ * Programmer:  Quincey Koziol
+ *              Wednesday, November 29, 2000
  *
- * Modifications:
- *              Raymond Lu
- *              4 December 2009
- *              Added a flag as a parameter to indicate whether the caller is
- *              H5Tdetect_class.  I also added the check for VL string type
- *              just like the public function.  Because we want to tell users
- *              VL string is a string type but we treat it as a VL type
- *              internally, H5T_detect_class needs to know where the caller
- *              is from.
  *-------------------------------------------------------------------------
  */
 htri_t
 H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
 {
-    unsigned	i;
+    unsigned    i;
     htri_t      ret_value = FALSE;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2148,33 +2139,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tset_size
+ * Function:    H5Tset_size
  *
- * Purpose:	Sets the total size in bytes for a datatype (this operation
- *		is not permitted on reference datatypes).  If the size is
- *		decreased so that the significant bits of the datatype
- *		extend beyond the edge of the new size, then the `offset'
- *		property is decreased toward zero.  If the `offset' becomes
- *		zero and the significant bits of the datatype still hang
- *		over the edge of the new size, then the number of significant
- *		bits is decreased.
+ * Purpose:     Sets the total size in bytes for a datatype (this operation
+ *              is not permitted on reference datatypes).  If the size is
+ *              decreased so that the significant bits of the datatype
+ *              extend beyond the edge of the new size, then the `offset'
+ *              property is decreased toward zero.  If the `offset' becomes
+ *              zero and the significant bits of the datatype still hang
+ *              over the edge of the new size, then the number of significant
+ *              bits is decreased.
  *
- *		Adjusting the size of an H5T_STRING automatically sets the
- *		precision to 8*size.
+ *              Adjusting the size of an H5T_STRING automatically sets the
+ *              precision to 8*size.
  *
- *		All datatypes have a positive size.
+ *              All datatypes have a positive size.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
+ * Programmer:  Robb Matzke
+ *              Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Tset_size(hid_t type_id, size_t size)
 {
-    H5T_t	*dt;                    /* Datatype to modify */
+    H5T_t       *dt;                    /* Datatype to modify */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2182,21 +2173,21 @@ H5Tset_size(hid_t type_id, size_t size)
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(H5T_STATE_TRANSIENT!=dt->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "datatype is read-only")
     if(size <= 0 && size != H5T_VARIABLE)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size must be positive")
     if(size == H5T_VARIABLE && !H5T_IS_STRING(dt->shared))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "only strings may be variable length")
     if(H5T_ENUM == dt->shared->type && dt->shared->u.enumer.nmembs > 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     if(H5T_REFERENCE == dt->shared->type)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for this datatype")
 
     /* Modify the datatype */
     if(H5T_set_size(dt, size) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for datatype")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -3131,27 +3122,6 @@ done:
  * Programmer:	Robb Matzke
  *		Thursday, December  4, 1997
  *
- * Modifications:
- *
- * 	Robb Matzke, 4 Jun 1998
- *	Added the METHOD argument.  If it's H5T_COPY_TRANSIENT then the
- *	result will be an unlocked transient type.  Otherwise if it's
- *	H5T_COPY_ALL then the result is a named type if the original is a
- *	named type, but the result is not opened.  Finally, if it's
- *	H5T_COPY_REOPEN and the original type is a named type then the result
- *	is a named type and the type object header is opened again.  The
- *	H5T_COPY_REOPEN method is used when returning a named type to the
- *	application.
- *
- * 	Robb Matzke, 22 Dec 1998
- *	Now able to copy enumeration data types.
- *
- *      Robb Matzke, 20 May 1999
- *	Now able to copy opaque types.
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 21 Sep 2002
- *      Added a deep copy of the symbol table entry
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -3504,23 +3474,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__free
+ * Function:    H5T__free
  *
- * Purpose:	Frees all memory associated with a datatype, but does not
+ * Purpose:     Frees all memory associated with a datatype, but does not
  *              free the H5T_t or H5T_shared_t structures (which should
  *              be done in H5T_close).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, January  6, 2003
+ * Programmer:  Quincey Koziol
+ *              Monday, January  6, 2003
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T__free(H5T_t *dt)
 {
-    unsigned	i;
+    unsigned    i;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3552,8 +3522,8 @@ H5T__free(H5T_t *dt)
     /*
      * Don't free locked datatypes.
      */
-    if(H5T_STATE_IMMUTABLE==dt->shared->state)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype")
+    if(H5T_STATE_IMMUTABLE == dt->shared->state)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close immutable datatype")
 
     /* Close the datatype */
     switch(dt->shared->type) {
@@ -3583,7 +3553,7 @@ H5T__free(H5T_t *dt)
     /* Close the parent */
     HDassert(dt->shared->parent != dt);
     if(dt->shared->parent && H5T_close(dt->shared->parent) < 0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close parent data type")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3591,28 +3561,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_close
+ * Function:    H5T_close
  *
- * Purpose:	Frees a data type and all associated memory.  If the data
- *		type is locked then nothing happens.
+ * Purpose:     Frees a data type and all associated memory.  If the data
+ *              type is locked then nothing happens.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
- *
- * Modifications:
- *      Robb Matzke, 1999-04-27
- *      This function fails if the datatype state is IMMUTABLE.
- *
- *      Robb Matzke, 1999-05-20
- *      Closes opaque types also.
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added "ID to name" support
- *
- *      Quincey Koziol, 2003-01-06
- *      Moved "guts" of function to H5T__free()
+ * Programmer:  Robb Matzke
+ *              Monday, December  8, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -3671,76 +3628,70 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_set_size
+ * Function:    H5T_set_size
  *
- * Purpose:	Sets the total size in bytes for a data type (this operation
- *		is not permitted on reference data types).  If the size is
- *		decreased so that the significant bits of the data type
- *		extend beyond the edge of the new size, then the `offset'
- *		property is decreased toward zero.  If the `offset' becomes
- *		zero and the significant bits of the data type still hang
- *		over the edge of the new size, then the number of significant
- *		bits is decreased.
+ * Purpose:     Sets the total size in bytes for a data type (this operation
+ *              is not permitted on reference data types).  If the size is
+ *              decreased so that the significant bits of the data type
+ *              extend beyond the edge of the new size, then the 'offset'
+ *              property is decreased toward zero.  If the 'offset' becomes
+ *              zero and the significant bits of the data type still hang
+ *              over the edge of the new size, then the number of significant
+ *              bits is decreased.
  *
- *		Adjusting the size of an H5T_STRING automatically sets the
- *		precision to 8*size.
+ *              Adjusting the size of an H5T_STRING automatically sets the
+ *              precision to 8 * size.
  *
- *		All data types have a positive size.
+ *              All data types have a positive size.
  *
- * Return:	Success:	non-negative
+ * Return:      SUCCEED/FAIL
  *
- *		Failure:	nagative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, December 22, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works with derived data types.
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5T_set_size(H5T_t *dt, size_t size)
 {
-    size_t	prec, offset;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    size_t      prec, offset;
+    herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
-    assert(dt);
-    assert(size!=0);
-    assert(H5T_REFERENCE!=dt->shared->type);
-    assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
+    HDassert(dt);
+    HDassert(size != 0);
+    HDassert(H5T_REFERENCE != dt->shared->type);
+    HDassert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
 
-    if (dt->shared->parent) {
-        if (H5T_set_size(dt->shared->parent, size)<0)
+    if(dt->shared->parent) {
+        if(H5T_set_size(dt->shared->parent, size) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to set size for parent data type");
 
         /* Adjust size of datatype appropriately */
-        if(dt->shared->type==H5T_ARRAY)
+        if(dt->shared->type == H5T_ARRAY)
             dt->shared->size = dt->shared->parent->shared->size * dt->shared->u.array.nelem;
-        else if(dt->shared->type!=H5T_VLEN)
+        else if(dt->shared->type != H5T_VLEN)
             dt->shared->size = dt->shared->parent->shared->size;
     } else {
-        if (H5T_IS_ATOMIC(dt->shared)) {
+        if(H5T_IS_ATOMIC(dt->shared)) {
             offset = dt->shared->u.atomic.offset;
             prec = dt->shared->u.atomic.prec;
 
             /* Decrement the offset and precision if necessary */
-            if (prec > 8*size)
+            if (prec > 8 * size)
                 offset = 0;
             else
-                if (offset+prec > 8*size)
+                if (offset+prec > 8 * size)
                     offset = 8 * size - prec;
-            if (prec > 8*size)
+            if (prec > 8 * size)
                 prec = 8 * size;
         } else {
             prec = offset = 0;
-        }
+        } /* end else */
 
-        switch (dt->shared->type) {
+        switch(dt->shared->type) {
             case H5T_INTEGER:
             case H5T_TIME:
             case H5T_BITFIELD:
@@ -3750,33 +3701,34 @@ H5T_set_size(H5T_t *dt, size_t size)
 
             case H5T_COMPOUND:
                 /* If decreasing size, check the last member isn't being cut. */
-                if(size<dt->shared->size) {
+                if(size < dt->shared->size) {
                     int         num_membs = 0;
-                    unsigned    i, max_index=0;
-                    size_t      memb_offset, max_offset=0;
+                    unsigned    i, max_index = 0;
+                    size_t      memb_offset, max_offset = 0;
                     size_t      max_size;
 
-                    if((num_membs = H5T_get_nmembers(dt))<0)
+                    if((num_membs = H5T_get_nmembers(dt)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get number of members");
 
                     if(num_membs) {
-			for(i=0; i<(unsigned)num_membs; i++) {
-			    memb_offset = H5T_get_member_offset(dt, i);
-			    if(memb_offset > max_offset) {
-			        max_offset = memb_offset;
-				max_index = i;
-			    }
-			}
+                        for(i = 0; i < (unsigned)num_membs; i++) {
+                            memb_offset = H5T_get_member_offset(dt, i);
+                            if(memb_offset > max_offset) {
+                                max_offset = memb_offset;
+                                max_index = i;
+                            } /* end if */
+                        } /* end for */
 
-			max_size = H5T__get_member_size(dt, max_index);
+                        max_size = H5T__get_member_size(dt, max_index);
 
-			if(size<(max_offset+max_size))
-			    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
-                    }
+                        if(size < (max_offset+max_size))
+                            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "size shrinking will cut off last member ");
+                    } /* end if */
 
-                    /* Compound must not have been packed previously */
-                    /* We will check if resizing changed the packed state of
-                     * this type at the end of this function */
+                    /* Compound must not have been packed previously.
+                     * We will check if resizing changed the packed state of
+                     * this type at the end of this function.
+                     */
                     HDassert(!dt->shared->u.compnd.packed);
                 }
 
@@ -3784,29 +3736,30 @@ H5T_set_size(H5T_t *dt, size_t size)
 
             case H5T_STRING:
                 /* Convert string to variable-length datatype */
-                if(size==H5T_VARIABLE) {
-                    H5T_t	*base = NULL;		/* base data type */
+                if(size == H5T_VARIABLE) {
+                    H5T_t       *base = NULL;           /* base data type */
                     H5T_cset_t  tmp_cset;               /* Temp. cset info */
                     H5T_str_t   tmp_strpad;             /* Temp. strpad info */
 
                     /* Get a copy of unsigned char type as the base/parent type */
                     if(NULL == (base = (H5T_t *)H5I_object(H5T_NATIVE_UCHAR)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid base datatype");
-                    dt->shared->parent=H5T_copy(base,H5T_COPY_ALL);
+                    dt->shared->parent = H5T_copy(base,H5T_COPY_ALL);
 
                     /* change this datatype into a VL string */
                     dt->shared->type = H5T_VLEN;
 
                     /*
                      * Force conversions (i.e. memory to memory conversions
-		     * should duplicate data, not point to the same VL strings)
+                     * should duplicate data, not point to the same VL strings)
                      */
                     dt->shared->force_conv = TRUE;
 
-		    /* Before we mess with the info in the union, extract the
-		     * values we need */
-                    tmp_cset=dt->shared->u.atomic.u.s.cset;
-                    tmp_strpad=dt->shared->u.atomic.u.s.pad;
+                    /* Before we mess with the info in the union, extract the
+                     * values we need
+                     */
+                    tmp_cset = dt->shared->u.atomic.u.s.cset;
+                    tmp_strpad = dt->shared->u.atomic.u.s.pad;
 
                     /* This is a string, not a sequence */
                     dt->shared->u.vlen.type = H5T_VLEN_STRING;
@@ -3816,7 +3769,7 @@ H5T_set_size(H5T_t *dt, size_t size)
                     dt->shared->u.vlen.pad  = tmp_strpad;
 
                     /* Set up VL information */
-                    if (H5T_set_loc(dt, NULL, H5T_LOC_MEMORY)<0)
+                    if(H5T_set_loc(dt, NULL, H5T_LOC_MEMORY) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location");
 
                 } else {
@@ -3834,28 +3787,28 @@ H5T_set_size(H5T_t *dt, size_t size)
                         dt->shared->u.atomic.u.f.epos + dt->shared->u.atomic.u.f.esize > prec+offset ||
                         dt->shared->u.atomic.u.f.mpos + dt->shared->u.atomic.u.f.msize > prec+offset) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "adjust sign, mantissa, and exponent fields first");
-                }
+                } /* end if */
                 break;
 
             case H5T_ENUM:
             case H5T_VLEN:
             case H5T_ARRAY:
             case H5T_REFERENCE:
-                assert("can't happen" && 0);
+                HDassert("can't happen" && 0);
             case H5T_NO_CLASS:
             case H5T_NCLASSES:
-                assert("invalid type" && 0);
+                HDassert("invalid type" && 0);
             default:
-                assert("not implemented yet" && 0);
+                HDassert("not implemented yet" && 0);
         }
 
         /* Commit (if we didn't convert this type to a VL string) */
-        if(dt->shared->type!=H5T_VLEN) {
+        if(dt->shared->type != H5T_VLEN) {
             dt->shared->size = size;
             if (H5T_IS_ATOMIC(dt->shared)) {
                 dt->shared->u.atomic.offset = offset;
                 dt->shared->u.atomic.prec = prec;
-            }
+            } /* end if */
         } /* end if */
 
         /* Check if the new compound type is packed */
@@ -3869,20 +3822,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_get_size
+ * Function:    H5T_get_size
  *
- * Purpose:	Determines the total size of a data type in bytes.
+ * Purpose:     Determines the total size of a data type in bytes.
  *
- * Return:	Success:	Size of the data type in bytes.	 The size of
- *				the data type is the size of an instance of
- *				that data type.
+ * Return:      Success:    Size of the data type in bytes.	 The size of
+ *                          the data type is the size of an instance of
+ *                          that data type.
  *
- *		Failure:	0 (valid data types are never zero size)
+ *              Failure:    0 (valid data types are never zero size)
  *
- * Programmer:	Robb Matzke
- *		Tuesday, December  9, 1997
- *
- * Modifications:
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -4079,9 +4030,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
             for (u=0; u<dt1->shared->u.enumer.nmembs-1; u++) {
-                assert(HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
+                HDassert(HDstrcmp(dt1->shared->u.enumer.name[idx1[u]],
                         dt1->shared->u.enumer.name[idx1[u+1]]));
-                assert(HDstrcmp(dt2->shared->u.enumer.name[idx2[u]],
+                HDassert(HDstrcmp(dt2->shared->u.enumer.name[idx2[u]],
                         dt2->shared->u.enumer.name[idx2[u+1]]));
             }
 #endif
@@ -4999,26 +4950,24 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_is_sensible
+ * Function:    H5T_is_sensible
  *
- * Purpose:	Determines if a data type is sensible to store on disk
+ * Purpose:     Determines if a data type is sensible to store on disk
  *              (i.e. not partially initialized)
  *
- * Return:	Success:	TRUE, FALSE
+ * Return:      Success:    TRUE, FALSE
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, June 11, 2002
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              Tuesday, June 11, 2002
  *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5T_is_sensible(const H5T_t *dt)
 {
-    htri_t	ret_value;
+    htri_t  ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -5028,28 +4977,28 @@ H5T_is_sensible(const H5T_t *dt)
         case H5T_COMPOUND:
             /* Only allow compound datatypes with at least one member to be stored on disk */
             if(dt->shared->u.compnd.nmembs > 0)
-                ret_value=TRUE;
+                ret_value = TRUE;
             else
-                ret_value=FALSE;
+                ret_value = FALSE;
             break;
 
         case H5T_ENUM:
             /* Only allow enum datatypes with at least one member to be stored on disk */
             if(dt->shared->u.enumer.nmembs > 0)
-                ret_value=TRUE;
+                ret_value = TRUE;
             else
-                ret_value=FALSE;
+                ret_value = FALSE;
             break;
 
         default:
             /* Assume all other datatype are sensible to store on disk */
-            ret_value=TRUE;
+            ret_value = TRUE;
             break;
     } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T_is_sensible */
 
 
 /*--------------------------------------------------------------------------
@@ -5241,11 +5190,11 @@ done:
  * Purpose:     H5T__visit callback to Upgrade the version of a datatype
  *              (if there's any benefit to doing so)
  *
- * Note:	The behavior below is tightly coupled with the "better"
+ * Note:        The behavior below is tightly coupled with the "better"
  *              encodings for datatype messages in the datatype message
  *              encoding routine.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Thursday, July 19, 2007

@@ -34,9 +34,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Tpkg.h"		/* Datatypes         			*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5Tpkg.h"             /* Datatypes                                */
 
 
 /****************/
@@ -372,26 +372,25 @@ H5T_debug(const H5T_t *dt, FILE *stream)
             fprintf(stream, "\n");
         } /* end else */
     } else if(H5T_ENUM == dt->shared->type) {
-        size_t	base_size;
+        size_t base_size;
 
-	/* Enumeration data type */
-	fprintf(stream, " ");
-	H5T_debug(dt->shared->parent, stream);
-	base_size = dt->shared->parent->shared->size;
-	for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
-            size_t	k;
+        /* Enumeration data type */
+        fprintf(stream, " ");
+        H5T_debug(dt->shared->parent, stream);
+        base_size = dt->shared->parent->shared->size;
+        for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
+            size_t k;
 
-	    fprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
-	    for(k = 0; k < base_size; k++)
-		fprintf(stream, "%02lx",
-			(unsigned long)(dt->shared->u.enumer.value + (i * base_size) + k));
-	} /* end for */
-	fprintf(stream, "\n");
+            fprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
+            for(k = 0; k < base_size; k++)
+                fprintf(stream, "%02lx", (unsigned long)(dt->shared->u.enumer.value + (i * base_size) + k));
+        } /* end for */
+        fprintf(stream, "\n");
     } else if(H5T_OPAQUE == dt->shared->type) {
-	fprintf(stream, ", tag=\"%s\"", dt->shared->u.opaque.tag);
+        fprintf(stream, ", tag=\"%s\"", dt->shared->u.opaque.tag);
     } else {
-	/* Unknown */
-	fprintf(stream, "unknown class %d\n", (int)(dt->shared->type));
+        /* Unknown */
+        fprintf(stream, "unknown class %d\n", (int)(dt->shared->type));
     }
     fprintf(stream, "}");
 

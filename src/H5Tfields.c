@@ -18,17 +18,17 @@
  *      enumerated & compound datatypes in the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#define H5T_PACKAGE         /* suppress error about including H5Tpkg */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_fields_interface
+#define H5_INTERFACE_INIT_FUNC      H5T_init_fields_interface
 
 
-#include "H5private.h"		/*generic functions			  */
-#include "H5Eprivate.h"		/*error handling			  */
-#include "H5Iprivate.h"		/*ID functions		   		  */
-#include "H5MMprivate.h"	/*memory management			  */
-#include "H5Tpkg.h"		/*data-type functions			  */
+#include "H5private.h"          /* generic functions                        */
+#include "H5Eprivate.h"         /* error handling                           */
+#include "H5Iprivate.h"         /* ID functions                             */
+#include "H5MMprivate.h"        /* memory management                        */
+#include "H5Tpkg.h"             /* data-type functions                      */
 
 
 /*--------------------------------------------------------------------------
@@ -54,40 +54,35 @@ H5T_init_fields_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_nmembers
+ * Function:    H5Tget_nmembers
  *
- * Purpose:	Determines how many members TYPE_ID has.  The type must be
- *		either a compound datatype or an enumeration datatype.
+ * Purpose:     Determines how many members TYPE_ID has.  The type must be
+ *              either a compound datatype or an enumeration datatype.
  *
- * Return:	Success:	Number of members defined in the datatype.
+ * Return:      Success:    Number of members defined in the datatype.
  *
- *		Failure:	Negative
+ *              Failure:    Negative
  *
- * Errors:
+ * Programmer:  Robb Matzke
+ *              Monday, December  8, 1997
  *
- * Programmer:	Robb Matzke
- *		Monday, December  8, 1997
- *
- * Modifications:
- *	Robb Matzke, 22 Dec 1998
- *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
 int
 H5Tget_nmembers(hid_t type_id)
 {
-    H5T_t *dt;          /* Datatype to query */
-    int	ret_value;      /* Return value */
+    H5T_t   *dt;            /* Datatype to query */
+    int     ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     if((ret_value = H5T_get_nmembers(dt)) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot return member number")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -95,40 +90,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_get_nmembers
+ * Function:    H5T_get_nmembers
  *
- * Purpose:	Private function for H5Tget_nmembers.  Determines how many
+ * Purpose:     Private function for H5Tget_nmembers.  Determines how many
  *              members DTYPE has.  The type must be either a compound data
  *              type or an enumeration datatype.
  *
- * Return:	Success:	Number of members defined in the datatype.
+ * Return:      Success:    Number of members defined in the datatype.
  *
- *		Failure:	Negative
- *
- * Errors:
+ *              Failure:    Negative
  *
  * Programmer:  Raymond Lu
- *	        October 8, 2002
- *
- * Modifications:
+ *              October 8, 2002
  *
  *-------------------------------------------------------------------------
  */
 int
 H5T_get_nmembers(const H5T_t *dt)
 {
-    int	ret_value;
+    int ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(dt);
 
     if(H5T_COMPOUND == dt->shared->type)
-	ret_value = (int)dt->shared->u.compnd.nmembs;
+        ret_value = (int)dt->shared->u.compnd.nmembs;
     else if(H5T_ENUM == dt->shared->type)
-	ret_value = (int)dt->shared->u.enumer.nmembs;
+        ret_value = (int)dt->shared->u.enumer.nmembs;
     else
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "operation not supported for type class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -136,69 +127,65 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_member_name
+ * Function:    H5Tget_member_name
  *
- * Purpose:	Returns the name of a member of a compound or enumeration
- *		datatype. Members are stored in no particular order with
- *		numbers 0 through N-1 where N is the value returned by
- *		H5Tget_nmembers().
+ * Purpose:     Returns the name of a member of a compound or enumeration
+ *              datatype. Members are stored in no particular order with
+ *              numbers 0 through N-1 where N is the value returned by
+ *              H5Tget_nmembers().
  *
- * Return:	Success:	Ptr to a string allocated with malloc().  The
- *				caller is responsible for freeing the string.
+ * Return:      Success:    Ptr to a string allocated with malloc().  The
+ *                          caller is responsible for freeing the string.
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
+ * Programmer:  Robb Matzke
+ *              Wednesday, January  7, 1998
  *
- * Modifications:
- *	Robb Matzke, 22 Dec 1998
- *	Also works with enumeration datatypes.
  *-------------------------------------------------------------------------
  */
 char *
 H5Tget_member_name(hid_t type_id, unsigned membno)
 {
-    H5T_t	*dt = NULL;
-    char	*ret_value;
+    H5T_t   *dt = NULL;
+    char    *ret_value;
 
     FUNC_ENTER_API(NULL)
 
     /* Check args */
-    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id,H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+    if (NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
 
     if(NULL == (ret_value = H5T__get_member_name(dt, membno)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to get member name")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Tget_member_name */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__get_member_name
+ * Function:    H5T__get_member_name
  *
- * Purpose:	Private function for H5Tget_member_name.  Returns the name
+ * Purpose:     Private function for H5Tget_member_name.  Returns the name
  *              of a member of a compound or enumeration datatype. Members
  *              are stored in no particular order with numbers 0 through
  *              N-1 where N is the value returned by H5Tget_nmembers().
  *
- * Return:	Success:	Ptr to a string allocated with malloc().  The
- *				caller is responsible for freeing the string.
+ * Return:      Success:    Ptr to a string allocated with malloc().  The
+ *                          caller is responsible for freeing the string.
  *
- *		Failure:	NULL
+ *              Failure:    NULL
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              October 9, 2002
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 char *
 H5T__get_member_name(H5T_t const *dt, unsigned membno)
 {
-    char	*ret_value;
+    char    *ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -230,11 +217,11 @@ H5T__get_member_name(H5T_t const *dt, unsigned membno)
         case H5T_NCLASSES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "operation not supported for type class")
-    } /*lint !e788 All appropriate cases are covered */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5T__get_member_name */
 
 
 /*-------------------------------------------------------------------------
@@ -304,30 +291,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__sort_value
+ * Function:    H5T__sort_value
  *
- * Purpose:	Sorts the members of a compound datatype by their offsets;
- *		sorts the members of an enum type by their values. This even
- *		works for locked datatypes since it doesn't change the value
- *		of the type.  MAP is an optional parallel integer array which
- *		is also swapped along with members of DT.
+ * Purpose:     Sorts the members of a compound datatype by their offsets;
+ *              sorts the members of an enum type by their values. This even
+ *              works for locked datatypes since it doesn't change the value
+ *              of the type.  MAP is an optional parallel integer array which
+ *              is also swapped along with members of DT.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
+ * Programmer:  Robb Matzke
+ *              Wednesday, January  7, 1998
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T__sort_value(const H5T_t *dt, int *map)
 {
-    unsigned	nmembs;                 /* Number of members for datatype */
-    size_t	size;
-    hbool_t	swapped;                /* Whether we've swapped fields */
-    uint8_t	tbuf[32];
-    unsigned	i, j;                   /* Local index variables */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    unsigned    nmembs;                 /* Number of members for datatype */
+    size_t      size;
+    hbool_t     swapped;                /* Whether we've swapped fields */
+    uint8_t     tbuf[32];
+    unsigned    i, j;                   /* Local index variables */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -337,69 +324,69 @@ H5T__sort_value(const H5T_t *dt, int *map)
 
     /* Use a bubble sort because we can short circuit */
     if(H5T_COMPOUND == dt->shared->type) {
-	if(H5T_SORT_VALUE != dt->shared->u.compnd.sorted) {
-	    dt->shared->u.compnd.sorted = H5T_SORT_VALUE;
-	    nmembs = dt->shared->u.compnd.nmembs;
-	    for(i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
-		for(j = 0, swapped = FALSE; j < i; j++) {
-		    if(dt->shared->u.compnd.memb[j].offset > dt->shared->u.compnd.memb[j + 1].offset) {
+        if(H5T_SORT_VALUE != dt->shared->u.compnd.sorted) {
+            dt->shared->u.compnd.sorted = H5T_SORT_VALUE;
+            nmembs = dt->shared->u.compnd.nmembs;
+            for(i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
+                for(j = 0, swapped = FALSE; j < i; j++) {
+                    if(dt->shared->u.compnd.memb[j].offset > dt->shared->u.compnd.memb[j + 1].offset) {
                         H5T_cmemb_t tmp = dt->shared->u.compnd.memb[j];
-			dt->shared->u.compnd.memb[j] = dt->shared->u.compnd.memb[j + 1];
-			dt->shared->u.compnd.memb[j + 1] = tmp;
-			if(map) {
-			    int x = map[j];
+                        dt->shared->u.compnd.memb[j] = dt->shared->u.compnd.memb[j + 1];
+                        dt->shared->u.compnd.memb[j + 1] = tmp;
+                        if(map) {
+                            int x = map[j];
 
-			    map[j] = map[j + 1];
-			    map[j + 1] = x;
-			} /* end if */
-			swapped = TRUE;
-		    } /* end if */
-		} /* end for */
-	    } /* end for */
+                            map[j] = map[j + 1];
+                            map[j + 1] = x;
+                        } /* end if */
+                        swapped = TRUE;
+                    } /* end if */
+                } /* end for */
+            } /* end for */
 #ifndef NDEBUG
-	    /* I never trust a sort :-) -RPM */
-	    for(i = 0; i < (nmembs - 1); i++)
-		HDassert(dt->shared->u.compnd.memb[i].offset < dt->shared->u.compnd.memb[i + 1].offset);
+            /* I never trust a sort :-) -RPM */
+            for(i = 0; i < (nmembs - 1); i++)
+                HDassert(dt->shared->u.compnd.memb[i].offset < dt->shared->u.compnd.memb[i + 1].offset);
 #endif
-	} /* end if */
+        } /* end if */
     } else if(H5T_ENUM == dt->shared->type) {
-	if(H5T_SORT_VALUE != dt->shared->u.enumer.sorted) {
-	    dt->shared->u.enumer.sorted = H5T_SORT_VALUE;
-	    nmembs = dt->shared->u.enumer.nmembs;
-	    size = dt->shared->size;
-	    HDassert(size <= sizeof(tbuf));
-	    for(i = (nmembs - 1), swapped = TRUE; i > 0 && swapped; --i) {
-		for(j = 0, swapped = FALSE; j < i; j++) {
-		    if(HDmemcmp(dt->shared->u.enumer.value + (j * size), dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
-			/* Swap names */
-			char *tmp = dt->shared->u.enumer.name[j];
-			dt->shared->u.enumer.name[j] = dt->shared->u.enumer.name[j + 1];
-			dt->shared->u.enumer.name[j + 1] = tmp;
+        if(H5T_SORT_VALUE != dt->shared->u.enumer.sorted) {
+            dt->shared->u.enumer.sorted = H5T_SORT_VALUE;
+            nmembs = dt->shared->u.enumer.nmembs;
+            size = dt->shared->size;
+            HDassert(size <= sizeof(tbuf));
+            for(i = (nmembs - 1), swapped = TRUE; i > 0 && swapped; --i) {
+                for(j = 0, swapped = FALSE; j < i; j++) {
+                    if(HDmemcmp(dt->shared->u.enumer.value + (j * size), dt->shared->u.enumer.value + ((j + 1) * size), size) > 0) {
+                        /* Swap names */
+                        char *tmp = dt->shared->u.enumer.name[j];
+                        dt->shared->u.enumer.name[j] = dt->shared->u.enumer.name[j + 1];
+                        dt->shared->u.enumer.name[j + 1] = tmp;
 
-			/* Swap values */
-			HDmemcpy(tbuf, dt->shared->u.enumer.value + (j * size), size);
-			HDmemcpy(dt->shared->u.enumer.value + (j * size),
-				 dt->shared->u.enumer.value + ((j + 1) * size), size);
-			HDmemcpy(dt->shared->u.enumer.value + ((j + 1) * size), tbuf, size);
+                        /* Swap values */
+                        HDmemcpy(tbuf, dt->shared->u.enumer.value + (j * size), size);
+                        HDmemcpy(dt->shared->u.enumer.value + (j * size),
+                        dt->shared->u.enumer.value + ((j + 1) * size), size);
+                        HDmemcpy(dt->shared->u.enumer.value + ((j + 1) * size), tbuf, size);
 
-			/* Swap map */
-			if(map) {
-			    int x = map[j];
+                        /* Swap map */
+                        if(map) {
+                            int x = map[j];
 
-			    map[j] = map[j + 1];
-			    map[j + 1] = x;
-			} /* end if */
+                            map[j] = map[j + 1];
+                            map[j + 1] = x;
+                        } /* end if */
 
-			swapped = TRUE;
-		    } /* end if */
-		} /* end for */
-	    } /* end for */
+                        swapped = TRUE;
+                    } /* end if */
+                } /* end for */
+            } /* end for */
 #ifndef NDEBUG
-	    /* I never trust a sort :-) -RPM */
-	    for(i = 0; i < (nmembs - 1); i++)
-		HDassert(HDmemcmp(dt->shared->u.enumer.value + (i * size), dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
+            /* I never trust a sort :-) -RPM */
+            for(i = 0; i < (nmembs - 1); i++)
+                HDassert(HDmemcmp(dt->shared->u.enumer.value + (i * size), dt->shared->u.enumer.value + ((i + 1) * size), size) < 0);
 #endif
-	} /* end if */
+        } /* end if */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -407,106 +394,97 @@ H5T__sort_value(const H5T_t *dt, int *map)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5T__sort_name
+ * Function:    H5T__sort_name
  *
- * Purpose:	Sorts members of a compound or enumeration datatype by their
- *		names. This even works for locked datatypes since it doesn't
- *		change the value of the types.
+ * Purpose:     Sorts members of a compound or enumeration datatype by their
+ *              names. This even works for locked datatypes since it doesn't
+ *              change the value of the types.
  *
- * Return:	Success:	Non-negative
+ * Return:      SUCCEED (can't fail)
  *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, January  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T__sort_name(const H5T_t *dt, int *map)
 {
-    unsigned	i, j, nmembs;
-    size_t	size;
-    hbool_t	swapped;
-    uint8_t	tbuf[32];
+    unsigned    i, j, nmembs;
+    size_t      size;
+    hbool_t     swapped;
+    uint8_t     tbuf[32];
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
-    assert(dt);
-    assert(H5T_COMPOUND==dt->shared->type || H5T_ENUM==dt->shared->type);
+    HDassert(dt);
+    HDassert(H5T_COMPOUND == dt->shared->type || H5T_ENUM == dt->shared->type);
 
     /* Use a bubble sort because we can short circuit */
-    if (H5T_COMPOUND==dt->shared->type) {
-	if (H5T_SORT_NAME!=dt->shared->u.compnd.sorted) {
-	    dt->shared->u.compnd.sorted = H5T_SORT_NAME;
-	    nmembs = dt->shared->u.compnd.nmembs;
-	    for (i=nmembs-1, swapped=TRUE; i>0 && swapped; --i) {
-		for (j=0, swapped=FALSE; j<i; j++) {
-		    if (HDstrcmp(dt->shared->u.compnd.memb[j].name,
-				 dt->shared->u.compnd.memb[j+1].name)>0) {
-			H5T_cmemb_t tmp = dt->shared->u.compnd.memb[j];
-			dt->shared->u.compnd.memb[j] = dt->shared->u.compnd.memb[j+1];
-			dt->shared->u.compnd.memb[j+1] = tmp;
-			swapped = TRUE;
-			if (map) {
-			    int x = map[j];
-			    map[j] = map[j+1];
-			    map[j+1] = x;
-			}
-		    }
-		}
-	    }
+    if(H5T_COMPOUND == dt->shared->type) {
+        if(H5T_SORT_NAME != dt->shared->u.compnd.sorted) {
+            dt->shared->u.compnd.sorted = H5T_SORT_NAME;
+            nmembs = dt->shared->u.compnd.nmembs;
+            for(i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
+                for(j = 0, swapped = FALSE; j < i; j++) {
+                    if(HDstrcmp(dt->shared->u.compnd.memb[j].name, dt->shared->u.compnd.memb[j+1].name) > 0) {
+                        H5T_cmemb_t tmp = dt->shared->u.compnd.memb[j];
+                        dt->shared->u.compnd.memb[j] = dt->shared->u.compnd.memb[j+1];
+                        dt->shared->u.compnd.memb[j+1] = tmp;
+                        swapped = TRUE;
+                        if(map) {
+                            int x = map[j];
+                            map[j] = map[j+1];
+                            map[j+1] = x;
+                        } /* end if */
+                    } /* end if */
+                } /* end for */
+            } /* end for */
 #ifndef NDEBUG
-	    /* I never trust a sort :-) -RPM */
-	    for (i=0; i<nmembs-1; i++) {
-		assert(HDstrcmp(dt->shared->u.compnd.memb[i].name,
-				dt->shared->u.compnd.memb[i+1].name)<0);
-	    }
+            /* I never trust a sort :-) -RPM */
+            for(i = 0; i < nmembs - 1; i++)
+                HDassert(HDstrcmp(dt->shared->u.compnd.memb[i].name, dt->shared->u.compnd.memb[i+1].name) < 0);
 #endif
-	}
-    } else if (H5T_ENUM==dt->shared->type) {
-	if (H5T_SORT_NAME!=dt->shared->u.enumer.sorted) {
-	    dt->shared->u.enumer.sorted = H5T_SORT_NAME;
-	    nmembs = dt->shared->u.enumer.nmembs;
-	    size = dt->shared->size;
-	    assert(size<=sizeof(tbuf));
-	    for (i=nmembs-1, swapped=TRUE; i>0 && swapped; --i) {
-		for (j=0, swapped=FALSE; j<i; j++) {
-		    if (HDstrcmp(dt->shared->u.enumer.name[j],
-				 dt->shared->u.enumer.name[j+1])>0) {
-			/* Swap names */
-			char *tmp = dt->shared->u.enumer.name[j];
-			dt->shared->u.enumer.name[j] = dt->shared->u.enumer.name[j+1];
-			dt->shared->u.enumer.name[j+1] = tmp;
+        } /* end if */
+    } else if(H5T_ENUM == dt->shared->type) {
+        if(H5T_SORT_NAME != dt->shared->u.enumer.sorted) {
+            dt->shared->u.enumer.sorted = H5T_SORT_NAME;
+            nmembs = dt->shared->u.enumer.nmembs;
+            size = dt->shared->size;
+            HDassert(size <= sizeof(tbuf));
+            for(i = nmembs - 1, swapped = TRUE; i > 0 && swapped; --i) {
+                for(j = 0, swapped = FALSE; j < i; j++) {
+                    if(HDstrcmp(dt->shared->u.enumer.name[j], dt->shared->u.enumer.name[j+1]) > 0) {
+                        /* Swap names */
+                        char *tmp = dt->shared->u.enumer.name[j];
+                        dt->shared->u.enumer.name[j] = dt->shared->u.enumer.name[j+1];
+                        dt->shared->u.enumer.name[j+1] = tmp;
 
-			/* Swap values */
-			HDmemcpy(tbuf, dt->shared->u.enumer.value+j*size, size);
-			HDmemcpy(dt->shared->u.enumer.value+j*size,
-				 dt->shared->u.enumer.value+(j+1)*size, size);
-			HDmemcpy(dt->shared->u.enumer.value+(j+1)*size, tbuf, size);
+                        /* Swap values */
+                        HDmemcpy(tbuf, dt->shared->u.enumer.value+j * size, size);
+                        HDmemcpy(dt->shared->u.enumer.value + j * size,
+                        dt->shared->u.enumer.value + (j+1) * size, size);
+                        HDmemcpy(dt->shared->u.enumer.value + (j+1) * size, tbuf, size);
 
-			/* Swap map */
-			if (map) {
-			    int x = map[j];
-			    map[j] = map[j+1];
-			    map[j+1] = x;
-			}
+                        /* Swap map */
+                        if(map) {
+                            int x = map[j];
+                            map[j] = map[j+1];
+                            map[j+1] = x;
+                        } /* end if */
 
-			swapped = TRUE;
-		    }
-		}
-	    }
+                        swapped = TRUE;
+                    } /* end if */
+                } /* end for */
+            }
 #ifndef NDEBUG
-	    /* I never trust a sort :-) -RPM */
-	    for (i=0; i<nmembs-1; i++)
-		assert(HDstrcmp(dt->shared->u.enumer.name[i], dt->shared->u.enumer.name[i+1])<0);
+            /* I never trust a sort :-) -RPM */
+            for(i = 0; i < nmembs - 1; i++)
+                HDassert(HDstrcmp(dt->shared->u.enumer.name[i], dt->shared->u.enumer.name[i+1]) < 0);
 #endif
-	}
-    }
+        } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
-
+} /* end H5T__sort_name() */
