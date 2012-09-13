@@ -743,11 +743,11 @@ test_genprop_basic_list_prop(void)
 
     /* Add temporary properties */
 
-    /* Insert first temporary property into class (with no callbacks) */
+    /* Insert first temporary property into list (with no callbacks) */
     ret = H5Pinsert2(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK_I(ret, "H5Pinsert2");
 
-    /* Insert second temporary property into class (with no callbacks) */
+    /* Insert second temporary property into list (with no callbacks) */
     ret = H5Pinsert2(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
     CHECK_I(ret, "H5Pinsert2");
 
@@ -1215,10 +1215,10 @@ test_genprop_list_callback(void)
 
     /* The compare callback should have been called once on property 1 (to check
      * if the create callback modified the value) */
-    VERIFY(prop1_cb_info.cmp_count, 1, "H5Pequal");
+    VERIFY(prop1_cb_info.cmp_count, 1, "H5Pcreate");
     /* The compare callback should not have been called on property 3, as there
      * is no create callback */
-    VERIFY(prop3_cb_info.cmp_count, 0, "H5Pequal");
+    VERIFY(prop3_cb_info.cmp_count, 0, "H5Pcreate");
 
     /* Verify creation callback information for properties tracked */
     VERIFY(prop1_cb_info.crt_count, 1, "H5Pcreate");
@@ -1233,7 +1233,7 @@ test_genprop_list_callback(void)
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
     /* The compare callback should have been called once (to check if the get
      * callback modified the value) */
-    VERIFY(prop1_cb_info.cmp_count, 2, "H5Pequal");
+    VERIFY(prop1_cb_info.cmp_count, 2, "H5Pget");
     ret = H5Pget(lid1, PROP2_NAME,&prop2_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
@@ -1248,7 +1248,7 @@ test_genprop_list_callback(void)
         TestErrPrintf("Property #3 doesn't match!, line=%d\n",__LINE__);
     /* The compare callback should not have been called, as there is no get
      * callback for this property */
-    VERIFY(prop3_cb_info.cmp_count, 0, "H5Pequal");
+    VERIFY(prop3_cb_info.cmp_count, 0, "H5Pget");
     ret = H5Pget(lid1, PROP4_NAME,&prop4_value);
     CHECK_I(ret, "H5Pget");
     /* Verify the floating-poing value in this way to avoid compiler warning. */
@@ -1278,7 +1278,7 @@ test_genprop_list_callback(void)
 
     /* The compare callback should have been called once (to check if the new
      * value needed to be copied onto the property list) */
-    VERIFY(prop1_cb_info.cmp_count, 3, "H5Pequal");
+    VERIFY(prop1_cb_info.cmp_count, 3, "H5Pset");
 
     /* Set value of property #3 to different value */
     ret = H5Pset(lid1, PROP3_NAME,prop3_new_value);
@@ -1286,7 +1286,7 @@ test_genprop_list_callback(void)
 
     /* The compare callback should have been called once (to check if the new
      * value needed to be copied onto the property list) */
-    VERIFY(prop3_cb_info.cmp_count, 1, "H5Pequal");
+    VERIFY(prop3_cb_info.cmp_count, 1, "H5Pset");
 
     /* Check new value of tracked properties */
     ret = H5Pget(lid1, PROP1_NAME,&prop1_value);
@@ -1625,6 +1625,7 @@ test_genprop_equal(void)
     hid_t		cid1;		/* Generic Property class ID */
     hid_t		lid1;		/* Generic Property list ID */
     hid_t		lid2;		/* Generic Property list ID */
+    int                 prop1_new_value = 20;   /* Property #1 new value */
     herr_t		ret;		/* Generic return value	*/
 
     /* Output message about test being performed */
@@ -1651,13 +1652,114 @@ test_genprop_equal(void)
     CHECK_I(lid2, "H5Pcopy");
 
     /* Check that the lists are equal */
-    ret = H5Pequal(lid1,lid2);
+    ret = H5Pequal(lid1, lid2);
     VERIFY(ret, 1, "H5Pequal");
+
+    /* Set property in first list to another value */
+    ret = H5Pset(lid1, PROP1_NAME, &prop1_new_value);
+    CHECK_I(ret, "H5Pset");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Set property in first list back to default */
+    ret = H5Pset(lid1, PROP1_NAME, PROP1_DEF_VALUE);
+    CHECK_I(ret, "H5Pset");
+
+    /* Check that the lists are still equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Insert first temporary property into first list (with no callbacks) */
+    ret = H5Pinsert2(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Insert first temporary property into second list (with no callbacks) */
+    ret = H5Pinsert2(lid2, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
+
+    /* Check that the lists are equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Insert second temporary property into second list (with no callbacks) */
+    ret = H5Pinsert2(lid2, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Insert second temporary property into first list (with no callbacks) */
+    ret = H5Pinsert2(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
+
+    /* Check that the lists are equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Remove first temporary property from first list */
+    ret = H5Premove(lid1, PROP3_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Remove second temporary property from second list */
+    ret = H5Premove(lid2, PROP4_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Remove first temporary property from second list */
+    ret = H5Premove(lid2, PROP3_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Remove first permanent property from first list */
+    ret = H5Premove(lid1, PROP1_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Remove second temporary property from first list */
+    ret = H5Premove(lid1, PROP4_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Check that the lists are not equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 0, "H5Pequal");
+
+    /* Remove first permanent property from second list */
+    ret = H5Premove(lid2, PROP1_NAME);
+    CHECK_I(ret, "H5Premove");
+
+    /* Check that the lists are equal */
+    ret = H5Pequal(lid1, lid2);
+    VERIFY(ret, 1, "H5Pequal");
+
+    /* Close property lists */
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
+    ret = H5Pclose(lid2);
+    CHECK_I(ret, "H5Pclose");
 
     /* Close class */
     ret = H5Pclose_class(cid1);
     CHECK_I(ret, "H5Pclose_class");
-
 } /* ent test_genprop_equal() */
 
 /****************************************************************

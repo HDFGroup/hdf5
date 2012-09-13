@@ -99,6 +99,7 @@
 /* Property class callbacks */
 static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -207,6 +208,7 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     /* Register the free space section threshold */
     if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &free_space_threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_fcrt_reg_prop() */

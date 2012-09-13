@@ -63,7 +63,7 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_strcrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__strcrt_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
@@ -77,7 +77,7 @@ const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_STRING_CREATE_g,	/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
-    H5P_strcrt_reg_prop,	/* Default property registration routine */
+    H5P__strcrt_reg_prop,	/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */
@@ -99,9 +99,9 @@ const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_strcrt_reg_prop
+ * Function:    H5P__strcrt_reg_prop
  *
- * Purpose:     Register the dataset creation property list class's properties
+ * Purpose:     Register the string creation property list class's properties
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -110,41 +110,38 @@ const H5P_libclass_t H5P_CLS_STRCRT[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_strcrt_reg_prop(H5P_genclass_t *pclass)
+H5P__strcrt_reg_prop(H5P_genclass_t *pclass)
 {
     H5T_cset_t char_encoding = H5P_STRCRT_CHAR_ENCODING_DEF;  /* Default character set encoding */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Register character encoding */
     if(H5P_register_real(pclass, H5P_STRCRT_CHAR_ENCODING_NAME, H5P_STRCRT_CHAR_ENCODING_SIZE, &char_encoding, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_strcrt_reg_prop() */
+} /* end H5P__strcrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
- * Function:  H5Pset_char_encoding
+ * Function:    H5Pset_char_encoding
  *
- * Purpose:   Sets the character encoding of the string.
+ * Purpose:     Sets the character encoding of the string.
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:        James Laird
- *            Wednesday, October 26, 2005
- *
- * Modifications:
- *
+ * Programmer:  James Laird
+ *              Wednesday, October 26, 2005
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iTc", plist_id, encoding);
@@ -154,7 +151,7 @@ H5Pset_char_encoding(hid_t plist_id, H5T_cset_t encoding)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "character encoding is not valid")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_STRING_CREATE)))
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_STRING_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set the character encoding */

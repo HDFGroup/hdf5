@@ -1732,11 +1732,9 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
  *
  *-------------------------------------------------------------------------
  */
-char *
+const char *
 H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
 {
-    char* ret_value;
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* There should be no way that this can be NULL since the function
@@ -1744,8 +1742,6 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
      * pasing them */
     assert(data_xform_prop);
 
-    ret_value = data_xform_prop->xform_exp;
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(data_xform_prop->xform_exp)
 } /* H5Z_xform_extract_xform_str() */
 
