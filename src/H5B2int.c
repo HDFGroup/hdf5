@@ -4214,6 +4214,7 @@ H5B2_shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
     HDassert(internal);
     HDassert(*internal);
     HDassert(hdr->swmr_write);
+    HDassert((*internal)->hdr == hdr);
 
     /* We only need to shadow the node if it has not been shadowed since the
      * last time the header was flushed, as otherwise it will be unreachable by
@@ -4254,8 +4255,10 @@ H5B2_shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
         node_protected = TRUE;
 
         /* Add node to shadowed node list */
-        if(hdr->shadowed_internal)
+        if(hdr->shadowed_internal) {
             (*internal)->shadowed_next = hdr->shadowed_internal;
+            hdr->shadowed_internal->shadowed_prev = *internal;
+        } /* end if */
         else
             (*internal)->shadowed_next = *internal;
         hdr->shadowed_internal = *internal;
@@ -4307,6 +4310,7 @@ H5B2_shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     HDassert(leaf);
     HDassert(*leaf);
     HDassert(hdr->swmr_write);
+    HDassert((*leaf)->hdr == hdr);
 
     /* We only need to shadow the node if it has not been shadowed since the
      * last time the header was flushed, as otherwise it will be unreachable by
@@ -4347,8 +4351,10 @@ H5B2_shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
         node_protected = TRUE;
 
         /* Add node to shadowed node list */
-        if(hdr->shadowed_leaf)
+        if(hdr->shadowed_leaf) {
             (*leaf)->shadowed_next = hdr->shadowed_leaf;
+            hdr->shadowed_leaf->shadowed_prev = *leaf;
+        } /* end if */
         else
             (*leaf)->shadowed_next = *leaf;
         hdr->shadowed_leaf = *leaf;

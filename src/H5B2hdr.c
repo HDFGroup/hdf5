@@ -214,6 +214,10 @@ HDmemset(hdr->page, 0, hdr->node_size);
             && (hdr->cls->id == H5B2_CDSET_ID
             || hdr->cls->id == H5B2_CDSET_FILT_ID);
 
+    /* Clear the shadowed list pointers */
+    hdr->shadowed_leaf = NULL;
+    hdr->shadowed_internal = NULL;
+
     /* Create the callback context, if the callback exists */
     if(hdr->cls->crt_context) {
         if(NULL == (hdr->cb_ctx = (*hdr->cls->crt_context)(ctx_udata)))

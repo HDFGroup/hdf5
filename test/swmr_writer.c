@@ -244,7 +244,7 @@ int main(int argc, const char *argv[])
 
     /* Create randomized set of numbers */
     curr_time = time(NULL);
-    srandom(15);//srandom((unsigned)curr_time);
+    srandom((unsigned)curr_time);
 
     /* Emit informational message */
     if(verbose)

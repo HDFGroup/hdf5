@@ -193,6 +193,7 @@ typedef struct H5B2_leaf_t {
     uint8_t     *leaf_native;   /* Pointer to native records                  */
     uint16_t    nrec;           /* Number of records in node                  */
     struct H5B2_leaf_t *shadowed_next; /* Next node in shadowed list          */
+    struct H5B2_leaf_t *shadowed_prev; /* Previous node in shadowed list      */
 } H5B2_leaf_t;
 
 /* B-tree internal node information */
@@ -208,6 +209,7 @@ typedef struct H5B2_internal_t {
     uint16_t    nrec;           /* Number of records in node                  */
     uint16_t    depth;          /* Depth of this node in the B-tree           */
     struct H5B2_internal_t *shadowed_next; /* Next node in shadowed list      */
+    struct H5B2_internal_t *shadowed_prev; /* Previous node in shadowed list  */
 } H5B2_internal_t;
 
 /* v2 B-tree */

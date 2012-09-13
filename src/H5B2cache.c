@@ -345,34 +345,38 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
 
-	/* Write the B-tree header. */
+        /* Write the B-tree header. */
         HDassert((size_t)(p - buf) == hdr->hdr_size);
-	if(H5F_block_write(f, H5FD_MEM_BTREE, addr, hdr->hdr_size, dxpl_id, buf) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree header to disk")
+        if(H5F_block_write(f, H5FD_MEM_BTREE, addr, hdr->hdr_size, dxpl_id, buf) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree header to disk")
 
-	hdr->cache_info.is_dirty = FALSE;
+        hdr->cache_info.is_dirty = FALSE;
 
-	/* Clear shadowed node lists, as the header has been flushed and all
-	 * nodes must be shadowed again (if doing SWMR writes).  Note that this
-	 * algorithm does one extra iteration at the end, as the last node's
-	 * shadowed_next pointer points to itself. */
-	while(hdr->shadowed_internal) {
+        /* Clear shadowed node lists, as the header has been flushed and all
+         * nodes must be shadowed again (if doing SWMR writes).  Note that this
+         * algorithm does one extra iteration at the end, as the last node's
+         * shadowed_next pointer points to itself. */
+        while(hdr->shadowed_internal) {
             H5B2_internal_t *next = hdr->shadowed_internal->shadowed_next;
 
+            HDassert(!hdr->shadowed_internal->cache_info.is_dirty);
             hdr->shadowed_internal->shadowed_next = NULL;
+            hdr->shadowed_internal->shadowed_prev = NULL;
             hdr->shadowed_internal = next;
         } /* end while */
         while(hdr->shadowed_leaf) {
             H5B2_leaf_t *next = hdr->shadowed_leaf->shadowed_next;
 
+            HDassert(!hdr->shadowed_leaf->cache_info.is_dirty);
             hdr->shadowed_leaf->shadowed_next = NULL;
+            hdr->shadowed_leaf->shadowed_prev = NULL;
             hdr->shadowed_leaf = next;
         } /* end while */
     } /* end if */
 
     if(destroy)
         if(H5B2_cache_hdr_dest(f, hdr) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree header")
 
 done:
     /* Release resources */
@@ -599,6 +603,8 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Share B-tree information */
     internal->hdr = udata->hdr;
     internal->parent = udata->parent;
+    internal->shadowed_next = NULL;
+    internal->shadowed_prev = NULL;
 
     /* Read header from disk */
     if(H5F_block_read(f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, dxpl_id, udata->hdr->page) < 0)
@@ -808,6 +814,30 @@ H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
     /* If we're going to free the space on disk, the address must be valid */
     HDassert(!internal->cache_info.free_file_space_on_destroy || H5F_addr_defined(internal->cache_info.addr));
 
+    /* Unlink from shadowed list */
+    if(internal->shadowed_next) {
+        if(internal->shadowed_next != internal) {
+            internal->shadowed_next->shadowed_prev = internal->shadowed_prev;
+
+            if(internal->shadowed_prev)
+                internal->shadowed_prev->shadowed_next = internal->shadowed_next;
+            else {
+                HDassert(internal->hdr->shadowed_internal = internal);
+
+                internal->hdr->shadowed_internal = internal->shadowed_next;
+            } /* end else */
+        } /* end if */
+        else {
+            if(internal->shadowed_prev)
+                internal->shadowed_prev->shadowed_next = internal->shadowed_prev;
+            else {
+                HDassert(internal->hdr->shadowed_internal = internal);
+
+                internal->hdr->shadowed_internal = NULL;
+            } /* end else */
+        } /* end else */
+    } /* end if */
+
     /* Check for freeing file space for B-tree internal node */
     if(internal->cache_info.free_file_space_on_destroy) {
         /* Release the space on disk */
@@ -997,6 +1027,8 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* Share B-tree header information */
     leaf->hdr = udata->hdr;
     leaf->parent = udata->parent;
+    leaf->shadowed_next = NULL;
+    leaf->shadowed_prev = NULL;
 
     /* Read header from disk */
     if(H5F_block_read(udata->f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, dxpl_id, udata->hdr->page) < 0)
@@ -1171,6 +1203,30 @@ H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 
     /* If we're going to free the space on disk, the address must be valid */
     HDassert(!leaf->cache_info.free_file_space_on_destroy || H5F_addr_defined(leaf->cache_info.addr));
+
+    /* Unlink from shadowed list */
+    if(leaf->shadowed_next) {
+        if(leaf->shadowed_next != leaf) {
+            leaf->shadowed_next->shadowed_prev = leaf->shadowed_prev;
+
+            if(leaf->shadowed_prev)
+                leaf->shadowed_prev->shadowed_next = leaf->shadowed_next;
+            else {
+                HDassert(leaf->hdr->shadowed_leaf = leaf);
+
+                leaf->hdr->shadowed_leaf = leaf->shadowed_next;
+            } /* end else */
+        } /* end if */
+        else {
+            if(leaf->shadowed_prev)
+                leaf->shadowed_prev->shadowed_next = leaf->shadowed_prev;
+            else {
+                HDassert(leaf->hdr->shadowed_leaf = leaf);
+
+                leaf->hdr->shadowed_leaf = NULL;
+            } /* end else */
+        } /* end else */
+    } /* end if */
 
     /* Check for freeing file space for B-tree leaf node */
     if(leaf->cache_info.free_file_space_on_destroy) {
