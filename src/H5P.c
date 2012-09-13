@@ -990,8 +990,13 @@ H5Pequal(hid_t id1, hid_t id2)
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id1)) {
-        if(H5P_cmp_plist((const H5P_genplist_t *)obj1, (const H5P_genplist_t *)obj2) == 0)
-            ret_value = TRUE;
+        int cmp_ret = 0;
+
+        if(H5P_cmp_plist((const H5P_genplist_t *)obj1, (const H5P_genplist_t *)obj2, &cmp_ret) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOMPARE, FAIL, "can't compare property lists")
+
+        /* Set return value */
+        ret_value = cmp_ret == 0 ? TRUE : FALSE;
     } /* end if */
     /* Must be property classes */
     else {
@@ -1062,6 +1067,7 @@ done:
         void *udata;                IN/OUT: Pointer to iteration data from user
  RETURNS
     Success: Returns the return value of the last call to ITER_FUNC
+    Failure: negative value
  DESCRIPTION
     This routine calls the actual callback routine for the property in the
 property list or class.

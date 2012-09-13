@@ -94,6 +94,7 @@
 /* Property class callbacks */
 static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -192,6 +193,7 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     if(H5P_register_real(pclass,H5F_CRT_SHMSG_BTREE_MIN_NAME, H5F_CRT_SHMSG_BTREE_MIN_SIZE, &sohm_btree_min,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

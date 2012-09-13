@@ -87,7 +87,7 @@ H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name);
-H5_DLL htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name);
+H5_DLL htri_t H5P_exist_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops,
     hbool_t recurse);

@@ -126,12 +126,6 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
  */
 void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]))
 {
-#if !(defined MAC || defined SYMANTEC_C)
-    /* Un-buffer the stdout and stderr */
-    setbuf(stderr, NULL);
-    setbuf(stdout, NULL);
-#endif
-
     /* Save error printing settings */
     H5Eget_auto2(H5E_DEFAULT, PrintErrorStackFunc, PrintErrorStackData);
     /*
