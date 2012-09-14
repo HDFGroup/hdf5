@@ -3107,12 +3107,12 @@ actual_io_mode_tests(void) {
 static void 
 test_no_collective_cause_mode(int selection_mode) 
 {
-    int no_collective_cause_local_write = 0;
-    int no_collective_cause_local_read = 0;
-    int no_collective_cause_local_expected = 0;
-    int no_collective_cause_global_write = 0;
-    int no_collective_cause_global_read = 0;
-    int no_collective_cause_global_expected = 0;
+    uint32_t no_collective_cause_local_write = 0;
+    uint32_t no_collective_cause_local_read = 0;
+    uint32_t no_collective_cause_local_expected = 0;
+    uint32_t no_collective_cause_global_write = 0;
+    uint32_t no_collective_cause_global_read = 0;
+    uint32_t no_collective_cause_global_expected = 0;
     hsize_t coord[NELM][RANK];
 
     const char  * filename;
@@ -3145,6 +3145,7 @@ test_no_collective_cause_mode(int selection_mode)
 #endif    
     /* set to global value as default */
     int l_facc_type = facc_type;   
+    char message[256];
 
     /* Set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -3401,17 +3402,12 @@ test_no_collective_cause_mode(int selection_mode)
         "reading and writing are the same for global cause of Broken Collective I/O");
     
     /* Test values */
-    if(no_collective_cause_local_expected != (unsigned) -1 && no_collective_cause_global_expected != (unsigned) -1) {
-        char message[100];
-        sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
-        VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
-        sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
-        VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
-    } else {
-        HDfprintf(stderr, "%s %d -> (%d,%d)\n", test_name, mpi_rank,
-            test_no_collective_cause_mode, no_collective_cause_local_write);
-    }
-
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */
     if (sid)
@@ -3465,10 +3461,10 @@ test_no_collective_cause_mode(int selection_mode)
 static void 
 test_no_collective_cause_mode_filter(int selection_mode) 
 {
-    int no_collective_cause_local_read = 0;
-    int no_collective_cause_local_expected = 0;
-    int no_collective_cause_global_read = 0;
-    int no_collective_cause_global_expected = 0;
+    uint32_t no_collective_cause_local_read = 0;
+    uint32_t no_collective_cause_local_expected = 0;
+    uint32_t no_collective_cause_global_read = 0;
+    uint32_t no_collective_cause_global_expected = 0;
 
     const char  * filename;
     const char  * test_name;
@@ -3497,6 +3493,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
 #ifdef H5_HAVE_FILTER_FLETCHER32            
     H5Z_filter_t filter_info;
 #endif    
+    char message[256];
 
     /* Set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -3654,16 +3651,12 @@ test_no_collective_cause_mode_filter(int selection_mode)
     VRFY((ret >= 0), "retriving no collective cause succeeded" );
 
     /* Test values */
-    if(no_collective_cause_local_expected != (unsigned) -1 && no_collective_cause_global_expected != (unsigned) -1) {
-        char message[100];
-        sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
-        VRFY((no_collective_cause_local_read == no_collective_cause_local_expected), message);
-        sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
-        VRFY((no_collective_cause_global_read == no_collective_cause_global_expected), message);
-    } else {
-        HDfprintf(stderr, "%s %d -> (%d,%d)\n", test_name, mpi_rank,
-            test_no_collective_cause_mode_filter, no_collective_cause_local_read);
-    }
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_local_read == (uint32_t)no_collective_cause_local_expected), message);
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_global_read == (uint32_t)no_collective_cause_global_expected), message);
 
     /* Release some resources */
     if (sid)
@@ -3701,8 +3694,6 @@ no_collective_cause_tests(void)
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_rank);
 
-/* skipped these not to disrupt other tests while finding a fix on ember */
-#ifdef TODO_FIX_EMBER
     /* 
      * Test individual cause 
      */
@@ -3729,8 +3720,6 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode (TEST_SET_MPIPOSIX | TEST_DATATYPE_CONVERSION);
     test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
     test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS | TEST_POINT_SELECTIONS);
-
-#endif /* TODO_FIX_EMBER */
 
     return;
 }

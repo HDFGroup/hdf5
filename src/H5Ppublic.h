@@ -412,7 +412,7 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
 H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
-H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, H5D_mpio_no_collective_cause_t *local_no_collective_cause, H5D_mpio_no_collective_cause_t *global_no_collective_cause);
+H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause, uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Link creation property list (LCPL) routines */

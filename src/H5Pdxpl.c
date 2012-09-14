@@ -103,7 +103,7 @@
 #define H5D_MPIO_ACTUAL_IO_MODE_SIZE    sizeof(H5D_mpio_actual_io_mode_t)
 #define H5D_MPIO_ACTUAL_IO_MODE_DEF     H5D_MPIO_NO_COLLECTIVE
 /* Definitions for cause of broken collective io property */
-#define H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE   sizeof(H5D_mpio_no_collective_cause_t)
+#define H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE   sizeof(uint32_t)
 #define H5D_MPIO_NO_COLLECTIVE_CAUSE_DEF   H5D_MPIO_COLLECTIVE 
 /* Definitions for memory MPI type property */
 #define H5FD_MPI_XFER_MEM_MPI_TYPE_SIZE        sizeof(MPI_Datatype)
@@ -292,11 +292,11 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the local cause of broken collective I/O */
-    if(H5P_register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &def_mpio_no_collective_cause, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the global cause of broken collective I/O */
-    if(H5P_register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &def_mpio_actual_io_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME, H5D_MPIO_NO_COLLECTIVE_CAUSE_SIZE, &def_mpio_no_collective_cause, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the MPI memory type property */
@@ -1385,7 +1385,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mpio_no_collective_cause(hid_t plist_id, H5D_mpio_no_collective_cause_t *local_no_collective_cause, H5D_mpio_no_collective_cause_t *global_no_collective_cause)
+H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause, uint32_t *global_no_collective_cause)
 {
     H5P_genplist_t     *plist;
     herr_t ret_value = SUCCEED;   /* return value */
