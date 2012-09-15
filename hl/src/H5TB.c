@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "H5private.h"
 #include "H5LTprivate.h"
 #include "H5TBprivate.h"
 
@@ -663,7 +664,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
     hid_t    m_sid=-1;
     hid_t    file_space_id=-1;
     char     *member_name;
-    hsize_t  i, j;
+    hsize_t  i;
     hid_t    preserve_id;
     size_t   size_native;
 
@@ -688,14 +689,19 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
     /* iterate tru the members */
     for ( i = 0; i < nfields; i++)
     {
+        unsigned  j;
 
-        j = field_index[i];
+        /* Range check value */
+        if(field_index[i] < 0)
+            goto out;
+
+        j = (unsigned)field_index[i];
 
         /* get the member name */
-        member_name = H5Tget_member_name( tid, (unsigned) j );
+        member_name = H5Tget_member_name( tid, j );
 
         /* get the member type */
-        if (( member_type_id = H5Tget_member_type( tid, (unsigned) j )) < 0)
+        if (( member_type_id = H5Tget_member_type( tid, j )) < 0)
             goto out;
 
         /* convert to native type */
@@ -1149,7 +1155,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
     hid_t    m_sid=-1;
     hsize_t  mem_size[1];
     size_t   size_native;
-    hsize_t  i, j;
+    hsize_t  i;
 
     /* open the dataset. */
     if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
@@ -1166,13 +1172,19 @@ herr_t H5TBread_fields_index( hid_t loc_id,
     /* iterate tru the members */
     for ( i = 0; i < nfields; i++)
     {
-        j = field_index[i];
+        unsigned  j;
+
+        /* Range check */
+        if(field_index[i] < 0)
+            goto out;
+
+        j = (unsigned)field_index[i];
 
         /* get the member name */
-        member_name = H5Tget_member_name( tid, (unsigned) j );
+        member_name = H5Tget_member_name( tid, j );
 
         /* get the member type */
-        if (( member_type_id = H5Tget_member_type( tid, (unsigned) j )) < 0)
+        if (( member_type_id = H5Tget_member_type( tid, j )) < 0)
             goto out;
 
         /* get the member size */
@@ -1748,50 +1760,50 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-herr_t H5TBcombine_tables( hid_t loc_id1,
+herr_t H5TBcombine_tables(hid_t loc_id1,
                           const char *dset_name1,
                           hid_t loc_id2,
                           const char *dset_name2,
-                          const char *dset_name3 )
+                          const char *dset_name3)
 {
-
     /* identifiers for the 1st dataset. */
-    hid_t    did_1=-1;
-    hid_t    tid_1=-1;
-    hid_t    sid_1=-1;
-    hid_t    pid_1=-1;
+    hid_t    did_1 = H5I_BADID;
+    hid_t    tid_1 = H5I_BADID;
+    hid_t    sid_1 = H5I_BADID;
+    hid_t    pid_1 = H5I_BADID;
     /* identifiers for the 2nd dataset. */
-    hid_t    did_2=-1;
-    hid_t    tid_2=-1;
-    hid_t    sid_2=-1;
-    hid_t    pid_2=-1;
+    hid_t    did_2 = H5I_BADID;
+    hid_t    tid_2 = H5I_BADID;
+    hid_t    sid_2 = H5I_BADID;
+    hid_t    pid_2 = H5I_BADID;
     /* identifiers for the 3rd dataset. */
-    hid_t    did_3=-1;
-    hid_t    tid_3=-1;
-    hid_t    sid_3=-1;
-    hid_t    pid_3=-1;
+    hid_t    did_3 = H5I_BADID;
+    hid_t    tid_3 = H5I_BADID;
+    hid_t    sid_3 = H5I_BADID;
+    hid_t    pid_3 = H5I_BADID;
+    hid_t    sid = H5I_BADID;
+    hid_t    m_sid = H5I_BADID;
+    hid_t    member_type_id = H5I_BADID;
+    hid_t    attr_id = H5I_BADID;
     hsize_t  count[1];
     hsize_t  offset[1];
-    hid_t    m_sid;
     hsize_t  mem_size[1];
     hsize_t  nfields;
     hsize_t  nrecords;
     hsize_t  dims[1];
-    hsize_t  maxdims[1] = { H5S_UNLIMITED };
-    size_t   type_size;
-    hid_t    sid;
-    hid_t    member_type_id;
-    size_t   member_offset;
-    char     attr_name[255];
-    hid_t    attr_id;
-    char     aux[255];
-    unsigned char *tmp_buf;
-    unsigned char *tmp_fill_buf;
+    hsize_t  maxdims[1] = {H5S_UNLIMITED};
     hsize_t  i;
+    size_t   type_size;
+    size_t   member_offset;
     size_t   src_size;
-    size_t   *src_offset;
-    size_t   *src_sizes;
-    int      has_fill=0;
+    size_t  *src_offset = NULL;
+    size_t  *src_sizes = NULL;
+    char     attr_name[255];
+    char     aux[255];
+    unsigned char *tmp_buf = NULL;
+    unsigned char *tmp_fill_buf = NULL;
+    htri_t   has_fill;
+    int      ret_val = -1;
 
     /*-------------------------------------------------------------------------
     * first we get information about type size and offsets on disk
@@ -1799,18 +1811,17 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     */
 
     /* get the number of records and fields  */
-    if (H5TBget_table_info ( loc_id1, dset_name1, &nfields, &nrecords ) < 0)
-        return -1;
+    if(H5TBget_table_info(loc_id1, dset_name1, &nfields, &nrecords) < 0)
+        goto out;
 
-    src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
-    src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t));
-
-    if (src_offset == NULL )
-        return -1;
+    if(NULL == (src_offset = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
+        goto out;
+    if(NULL == (src_sizes  = (size_t *)HDmalloc((size_t)nfields * sizeof(size_t))))
+        goto out;
 
     /* get field info */
-    if (H5TBget_field_info( loc_id1, dset_name1, NULL, src_sizes, src_offset, &src_size ) < 0)
-        return -1;
+    if(H5TBget_field_info(loc_id1, dset_name1, NULL, src_sizes, src_offset, &src_size) < 0)
+        goto out;
 
     /*-------------------------------------------------------------------------
     * get information about the first table
@@ -1818,24 +1829,24 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     */
 
     /* open the 1st dataset. */
-    if ((did_1 = H5Dopen2(loc_id1, dset_name1, H5P_DEFAULT)) < 0)
+    if((did_1 = H5Dopen2(loc_id1, dset_name1, H5P_DEFAULT)) < 0)
         goto out;
 
     /* get the datatype */
-    if ((tid_1 = H5Dget_type( did_1 )) < 0)
+    if((tid_1 = H5Dget_type(did_1)) < 0)
         goto out;
 
     /* get the dataspace handle */
-    if ((sid_1 = H5Dget_space( did_1 )) < 0)
+    if((sid_1 = H5Dget_space(did_1)) < 0)
         goto out;
 
     /* get creation properties list */
-    if ((pid_1 = H5Dget_create_plist( did_1 )) < 0)
+    if((pid_1 = H5Dget_create_plist(did_1)) < 0)
         goto out;
 
     /* get the dimensions  */
-    if (H5TBget_table_info ( loc_id1, dset_name1, &nfields, &nrecords ) < 0)
-        return -1;
+    if(H5TBget_table_info(loc_id1, dset_name1, &nfields, &nrecords) < 0)
+        goto out;
 
     /*-------------------------------------------------------------------------
     * make the merged table with no data originally
@@ -1843,11 +1854,11 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     */
 
     /* clone the property list */
-    if ((pid_3 = H5Pcopy(pid_1)) < 0)
+    if((pid_3 = H5Pcopy(pid_1)) < 0)
         goto out;
 
     /* clone the type id */
-    if ((tid_3 = H5Tcopy(tid_1)) < 0)
+    if((tid_3 = H5Tcopy(tid_1)) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -1858,96 +1869,97 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     dims[0] = 0;
 
     /* create a simple data space with unlimited size */
-    if ((sid_3 = H5Screate_simple(1, dims, maxdims)) < 0)
-        return -1;
+    if((sid_3 = H5Screate_simple(1, dims, maxdims)) < 0)
+        goto out;
 
     /* create the dataset */
-    if ((did_3 = H5Dcreate2(loc_id1, dset_name3, tid_3, sid_3, H5P_DEFAULT, pid_3, H5P_DEFAULT)) < 0)
+    if((did_3 = H5Dcreate2(loc_id1, dset_name3, tid_3, sid_3, H5P_DEFAULT, pid_3, H5P_DEFAULT)) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
     * attach the conforming table attributes
     *-------------------------------------------------------------------------
     */
-    if (H5TB_attach_attributes("Merge table", loc_id1, dset_name3, nfields, tid_3) < 0)
+    if(H5TB_attach_attributes("Merge table", loc_id1, dset_name3, nfields, tid_3) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
     * get attributes
     *-------------------------------------------------------------------------
     */
-
     type_size = H5Tget_size(tid_3);
 
     /* alloc fill value attribute buffer */
-    tmp_fill_buf = (unsigned char *)malloc(type_size);
+    if(NULL == (tmp_fill_buf = (unsigned char *)HDmalloc(type_size)))
+        goto out;
 
     /* get the fill value attributes */
-    has_fill = H5TBAget_fill(loc_id1, dset_name1, did_1, tmp_fill_buf);
+    if((has_fill = H5TBAget_fill(loc_id1, dset_name1, did_1, tmp_fill_buf)) < 0)
+        goto out;
 
     /*-------------------------------------------------------------------------
     * attach the fill attributes from previous table
     *-------------------------------------------------------------------------
     */
-    if (has_fill == 1 )
-    {
+    if(has_fill) {
 
-        if (( sid = H5Screate(H5S_SCALAR)) < 0)
+        if((sid = H5Screate(H5S_SCALAR)) < 0)
             goto out;
 
-        for ( i = 0; i < nfields; i++)
-        {
-
+        for(i = 0; i < nfields; i++) {
             /* get the member type */
-            if (( member_type_id = H5Tget_member_type( tid_3, (unsigned) i )) < 0)
+            if((member_type_id = H5Tget_member_type(tid_3, (unsigned)i)) < 0)
                 goto out;
 
             /* get the member offset */
             member_offset = H5Tget_member_offset(tid_3, (unsigned)i);
 
-            strcpy(attr_name, "FIELD_");
-            sprintf(aux, "%d", (int)i);
-            strcat(attr_name, aux);
-            sprintf(aux, "%s", "_FILL");
-            strcat(attr_name, aux);
+            HDstrncpy(attr_name, "FIELD_", 6);
+            HDsnprintf(aux, 12, "%d", (int)i);
+            HDstrncat(attr_name, aux, 12);
+            HDsnprintf(aux, 6, "%s", "_FILL");
+            HDstrncat(attr_name, aux, 7);
 
-            if ((attr_id = H5Acreate2(did_3, attr_name, member_type_id, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            if((attr_id = H5Acreate2(did_3, attr_name, member_type_id, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto out;
 
-            if (H5Awrite(attr_id, member_type_id, tmp_fill_buf+member_offset) < 0)
+            if(H5Awrite(attr_id, member_type_id, tmp_fill_buf + member_offset) < 0)
                 goto out;
 
-            if (H5Aclose(attr_id) < 0)
+            if(H5Aclose(attr_id) < 0)
                 goto out;
+            attr_id = H5I_BADID;
 
-            if (H5Tclose(member_type_id) < 0)
+            if(H5Tclose(member_type_id) < 0)
                 goto out;
+            member_type_id = H5I_BADID;
         }
 
         /* close data space. */
-        if (H5Sclose( sid ) < 0)
+        if(H5Sclose(sid) < 0)
             goto out;
+        sid = H5I_BADID;
     }
 
     /*-------------------------------------------------------------------------
     * read data from 1st table
     *-------------------------------------------------------------------------
     */
-
-    tmp_buf = (unsigned char *)calloc((size_t) nrecords, type_size );
+    if(NULL == (tmp_buf = (unsigned char *)HDcalloc((size_t)nrecords, type_size)))
+        goto out;
 
     /* define a hyperslab in the dataset of the size of the records */
     offset[0] = 0;
     count[0]  = nrecords;
-    if (H5Sselect_hyperslab( sid_1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
+    if(H5Sselect_hyperslab(sid_1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
         goto out;
 
     /* create a memory dataspace handle */
     mem_size[0] = count[0];
-    if ((m_sid = H5Screate_simple( 1, mem_size, NULL )) < 0)
+    if((m_sid = H5Screate_simple(1, mem_size, NULL)) < 0)
         goto out;
 
-    if (H5Dread( did_1, tid_1, m_sid, sid_1, H5P_DEFAULT, tmp_buf ) < 0)
+    if(H5Dread(did_1, tid_1, m_sid, sid_1, H5P_DEFAULT, tmp_buf) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -1956,27 +1968,32 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     */
 
     /* append the records to the new table */
-    if (H5TBappend_records( loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
+    if(H5TBappend_records(loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
     * release resources from 1st table
     *-------------------------------------------------------------------------
     */
-
-    if (H5Sclose( m_sid ) < 0)
+    if(H5Sclose(m_sid) < 0)
         goto out;
-    if(H5Sclose( sid_1 ) < 0)
+    m_sid = H5I_BADID;
+    if(H5Sclose(sid_1) < 0)
         goto out;
-    if(H5Tclose( tid_1 ) < 0)
+    sid_1 = H5I_BADID;
+    if(H5Tclose(tid_1) < 0)
         goto out;
-    if(H5Pclose( pid_1 ) < 0)
+    tid_1 = H5I_BADID;
+    if(H5Pclose(pid_1) < 0)
         goto out;
-    if(H5Dclose( did_1 ) < 0)
+    pid_1 = H5I_BADID;
+    if(H5Dclose(did_1) < 0)
         goto out;
+    did_1 = H5I_BADID;
 
     /* Release resources. */
-    free( tmp_buf );
+    free(tmp_buf);
+    tmp_buf = NULL;
 
     /*-------------------------------------------------------------------------
     * get information about the 2nd table
@@ -1984,44 +2001,45 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     */
 
     /* open the dataset. */
-    if ((did_2 = H5Dopen2(loc_id2, dset_name2, H5P_DEFAULT)) < 0)
+    if((did_2 = H5Dopen2(loc_id2, dset_name2, H5P_DEFAULT)) < 0)
         goto out;
 
     /* get the datatype */
-    if ((tid_2 = H5Dget_type( did_2 )) < 0)
+    if((tid_2 = H5Dget_type(did_2)) < 0)
         goto out;
 
     /* get the dataspace handle */
-    if ((sid_2 = H5Dget_space( did_2 )) < 0)
+    if((sid_2 = H5Dget_space(did_2)) < 0)
         goto out;
 
     /* get the property list handle */
-    if ((pid_2 = H5Dget_create_plist( did_2 )) < 0)
+    if((pid_2 = H5Dget_create_plist(did_2)) < 0)
         goto out;
 
     /* get the dimensions  */
-    if (H5TBget_table_info ( loc_id2, dset_name2, &nfields, &nrecords ) < 0)
-        return -1;
+    if(H5TBget_table_info(loc_id2, dset_name2, &nfields, &nrecords) < 0)
+        goto out;
 
     /*-------------------------------------------------------------------------
     * read data from 2nd table
     *-------------------------------------------------------------------------
     */
 
-    tmp_buf = (unsigned char *)calloc((size_t) nrecords, type_size );
+    if(NULL == (tmp_buf = (unsigned char *)HDcalloc((size_t)nrecords, type_size)))
+        goto out;
 
     /* define a hyperslab in the dataset of the size of the records */
     offset[0] = 0;
     count[0]  = nrecords;
-    if (H5Sselect_hyperslab( sid_2, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
+    if(H5Sselect_hyperslab(sid_2, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
         goto out;
 
     /* create a memory dataspace handle */
     mem_size[0] = count[0];
-    if ((m_sid = H5Screate_simple( 1, mem_size, NULL )) < 0)
+    if((m_sid = H5Screate_simple(1, mem_size, NULL)) < 0)
         goto out;
 
-    if (H5Dread( did_2, tid_2, m_sid, sid_2, H5P_DEFAULT, tmp_buf ) < 0)
+    if(H5Dread(did_2, tid_2, m_sid, sid_2, H5P_DEFAULT, tmp_buf) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -2030,7 +2048,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     */
 
     /* append the records to the new table */
-    if (H5TBappend_records( loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
+    if(H5TBappend_records(loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf) < 0)
         goto out;
 
     /*-------------------------------------------------------------------------
@@ -2038,58 +2056,88 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
     *-------------------------------------------------------------------------
     */
 
-    if (H5Sclose( m_sid ) < 0)
+    if(H5Sclose(m_sid) < 0)
         goto out;
-    if (H5Sclose( sid_2 ) < 0)
+    m_sid = H5I_BADID;
+    if(H5Sclose(sid_2) < 0)
         goto out;
-    if (H5Tclose( tid_2 ) < 0)
-        return -1;
-    if (H5Pclose( pid_2 ) < 0)
+    sid_2 = H5I_BADID;
+    if(H5Tclose(tid_2) < 0)
         goto out;
-    if (H5Dclose( did_2 ) < 0)
-        return -1;
+    tid_2 = H5I_BADID;
+    if(H5Pclose(pid_2) < 0)
+        goto out;
+    pid_2 = H5I_BADID;
+    if(H5Dclose(did_2) < 0)
+        goto out;
+    did_2 = H5I_BADID;
 
     /*-------------------------------------------------------------------------
     * release resources from 3rd table
     *-------------------------------------------------------------------------
     */
 
-    if (H5Sclose( sid_3 ) < 0)
-        return -1;
-    if (H5Tclose( tid_3 ) < 0)
-        return -1;
-    if (H5Pclose( pid_3 ) < 0)
-        return -1;
-    if (H5Dclose( did_3 ) < 0)
-        return -1;
+    if(H5Sclose(sid_3) < 0)
+        goto out;
+    sid_3 = H5I_BADID;
+    if(H5Tclose(tid_3) < 0)
+        goto out;
+    tid_3 = H5I_BADID;
+    if(H5Pclose(pid_3) < 0)
+        goto out;
+    pid_3 = H5I_BADID;
+    if(H5Dclose(did_3) < 0)
+        goto out;
+    did_3 = H5I_BADID;
 
-    /* Release resources. */
-    free( tmp_buf );
-    free( tmp_fill_buf );
-    free( src_offset );
-    free( src_sizes );
+    ret_val = 0;
 
-    return 0;
-
-    /* error zone */
 out:
-    H5E_BEGIN_TRY
-    {
-        H5Dclose(did_1);
-        H5Sclose(sid_1);
-        H5Tclose(tid_1);
-        H5Pclose(pid_1);
-        H5Dclose(did_2);
-        H5Sclose(sid_2);
-        H5Tclose(tid_2);
-        H5Pclose(pid_2);
-        H5Dclose(did_3);
-        H5Sclose(sid_3);
-        H5Tclose(tid_3);
-        H5Pclose(pid_3);
-    } H5E_END_TRY;
-    return -1;
+    if(tmp_buf)
+        free(tmp_buf);
+    if(tmp_fill_buf)
+        free(tmp_fill_buf);
+    if(src_offset)
+        free(src_offset);
+    if(src_sizes)
+        free(src_sizes);
 
+    H5E_BEGIN_TRY {
+        if(member_type_id > 0)
+            H5Tclose(member_type_id);
+        if(attr_id > 0)
+            H5Aclose(attr_id);
+        if(sid > 0)
+            H5Sclose(sid);
+        if(m_sid > 0)
+            H5Sclose(m_sid);
+        if(pid_1 > 0)
+            H5Pclose(pid_1);
+        if(tid_1 > 0)
+            H5Tclose(tid_1);
+        if(sid_1 > 0)
+            H5Sclose(sid_1);
+        if(did_1 > 0)
+            H5Dclose(did_1);
+        if(pid_2 > 0)
+            H5Pclose(pid_2);
+        if(tid_2 > 0)
+            H5Tclose(tid_2);
+        if(sid_2 > 0)
+            H5Sclose(sid_2);
+        if(did_2 > 0)
+            H5Dclose(did_2);
+        if(pid_3 > 0)
+            H5Pclose(pid_3);
+        if(tid_3 > 0)
+            H5Tclose(tid_3);
+        if(sid_3 > 0)
+            H5Sclose(sid_3);
+        if(did_3 > 0)
+            H5Dclose(did_3);
+    } H5E_END_TRY;
+
+    return ret_val;
 }
 
 /*-------------------------------------------------------------------------
@@ -2581,7 +2629,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
     size_t   member_offset;
     hid_t    attr_id;
     hsize_t  i;
-    int      has_fill=0;
+    htri_t   has_fill = 0;
 
     /* get the number of records and fields  */
     if (H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0)
@@ -3017,7 +3065,7 @@ herr_t H5TBAget_title( hid_t loc_id,
 *
 * Purpose: Read the table attribute fill values
 *
-* Return: Success: 0, Failure: -1
+* Return: Success: TRUE/FALSE, Failure: -1
 *
 * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
 *
@@ -3029,12 +3077,10 @@ herr_t H5TBAget_title( hid_t loc_id,
 *
 *-------------------------------------------------------------------------
 */
-
-
-herr_t H5TBAget_fill( hid_t loc_id,
+htri_t H5TBAget_fill(hid_t loc_id,
                      const char *dset_name,
                      hid_t dset_id,
-                     unsigned char *dst_buf )
+                     unsigned char *dst_buf)
 {
 
     hsize_t nfields;
@@ -3149,9 +3195,7 @@ herr_t H5TBget_table_info ( hid_t loc_id,
     */
 
     if (nfields)
-    {
-        *nfields = num_members;
-    }
+        *nfields = (hsize_t)num_members;
 
 
     /*-------------------------------------------------------------------------
@@ -3331,19 +3375,19 @@ int H5TB_find_field( const char *field, const char *field_list )
     const char *start = field_list;
     const char *end;
 
-    while ( (end = strstr( start, "," )) != 0 )
+    while ( (end = HDstrstr( start, "," )) != 0 )
     {
-        size_t count = end - start;
-        if(strncmp(start, field, count) == 0 && count == strlen(field) )
+        ptrdiff_t count = end - start;
+
+        if(HDstrncmp(start, field, count) == 0 && count == HDstrlen(field) )
             return 1;
         start = end + 1;
     }
 
-    if(strcmp( start, field ) == 0 )
+    if(HDstrcmp( start, field ) == 0 )
         return 1;
 
     return -1;
-
 }
 
 
