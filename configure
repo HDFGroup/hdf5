@@ -8336,9 +8336,6 @@ test -z "$OBJDUMP" && OBJDUMP=objdump
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
-enable_dlopen=yes
-
-
 
 case `pwd` in
   *\ * | *\	*)
@@ -11883,6 +11880,7 @@ func_stripname_cnf ()
 
 
 # Set options
+enable_dlopen=yes
 
 
 
@@ -26368,6 +26366,23 @@ if test "${enable_threadsafe+set}" = set; then :
   enableval=$enable_threadsafe; THREADSAFE=$enableval
 fi
 
+
+## The --enable-threadsafe flag is not compatible with --enable-cxx.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    as_fn_error $? "--enable-cxx and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    as_fn_error $? "--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error." "$LINENO" 5
+  fi
+fi
 
 case "X-$THREADSAFE" in
   X-|X-no)
