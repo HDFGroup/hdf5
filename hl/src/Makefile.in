@@ -463,7 +463,7 @@ LT_VERS_AGE = 0
 # This library is our main target.
 lib_LTLIBRARIES = libhdf5_hl.la
 
-# Add libtool numbers to the HDF5 HL library (from config/lt_vers.am)
+# Add libtool numbers to the HDF5 hl library (from config/lt_vers.am)
 libhdf5_hl_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
 
 # List sources to include in the HDF5 HL Library.
