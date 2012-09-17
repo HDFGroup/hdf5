@@ -1032,8 +1032,8 @@ AC_LIBTOOL_WIN32_DLL
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
 ## or disabled, it should happen before these macros.
-AC_LIBTOOL_DLOPEN
-AM_PROG_LIBTOOL
+LT_PREREQ([2.2])
+LT_INIT([dlopen])
 
 ## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
@@ -1858,7 +1858,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     fi
 
     AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
-    
+
     AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_TRY_RUN([
         #include <szlib.h>
@@ -1876,7 +1876,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     AC_DEFINE([HAVE_FILTER_SZIP], [1], 
             [Define if support for szip filter is enabled])
     USE_FILTER_SZIP="yes"
-    
+
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
         AC_MSG_RESULT([yes])
     fi 
@@ -1983,6 +1983,23 @@ AC_ARG_ENABLE([threadsafe],
               [AS_HELP_STRING([--enable-threadsafe],
                               [Enable thread safe capability])],
               [THREADSAFE=$enableval])
+
+## The --enable-threadsafe flag is not compatible with --enable-cxx.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-cxx and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-fortran, unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
 
 case "X-$THREADSAFE" in
   X-|X-no)
