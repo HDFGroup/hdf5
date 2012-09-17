@@ -18,7 +18,7 @@ Note: This instruction is written for users who would like to build HDF5
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
       for detailed HDF5 building and installation information, or 
-      INSTALL_Windows_Short.txt for quick HDF5 building and installation
+      INSTALL_Windows_Short_VS2008.txt for quick HDF5 building and installation
       instructions.
                         
 WARNINGS:
@@ -85,7 +85,6 @@ notes in INSTALL_Windows.txt before starting below procedures.
               /vs9              Build HDF5 using Visual Studio 2008
               /fort             Build and test HDF5 with Fortran libraries
               /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
-              /ivf111           Build HDF5 Fortran using Intel Visual Fortran 11.1
               /useenv           Build HDF5 using compiler settings defined
                                 in the environment, rather than the IDE.
               /?                Help information
@@ -113,7 +112,6 @@ notes in INSTALL_Windows.txt before starting below procedures.
               /vs9              Build HDF5 using Visual Studio 2008
               /fort             Build HDF5 with Fortran libraries
               /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
-              /ivf111           Build HDF5 Fortran using Intel Visual Fortran 11.1
               /nodebug          Build HDF5 release versions only
                                 Note: Default is to build debug and release versions
               /useenv           Build HDF5 using compiler settings defined
