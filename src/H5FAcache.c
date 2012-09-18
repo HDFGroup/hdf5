@@ -76,21 +76,22 @@
 /* Metadata cache (H5AC) callbacks */
 static H5FA_hdr_t *H5FA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FA_hdr_t *hdr, unsigned * flags_ptr);
+static herr_t H5FA__cache_hdr_dest(H5F_t *f, H5FA_hdr_t *hdr);
 static herr_t H5FA__cache_hdr_clear(H5F_t *f, H5FA_hdr_t *hdr, hbool_t destroy);
 static herr_t H5FA__cache_hdr_size(const H5F_t *f, const H5FA_hdr_t *hdr, size_t *size_ptr);
-static herr_t H5FA__cache_hdr_dest(H5F_t *f, H5FA_hdr_t *hdr);
 
 static H5FA_dblock_t *H5FA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FA_dblock_t *dblock, unsigned * flags_ptr);
-static herr_t H5FA__cache_dblock_clear(H5F_t *f, H5FA_dblock_t *dblock, hbool_t destroy);
-static herr_t H5FA__cache_dblock_size(const H5F_t *f, const H5FA_dblock_t *dblock, size_t *size_ptr);
 static herr_t H5FA__cache_dblock_dest(H5F_t *f, H5FA_dblock_t *dblock);
+static herr_t H5FA__cache_dblock_clear(H5F_t *f, H5FA_dblock_t *dblock, hbool_t destroy);
+static herr_t H5FA__cache_dblock_notify(H5AC_notify_action_t action, H5FA_dblock_t *dblock);
+static herr_t H5FA__cache_dblock_size(const H5F_t *f, const H5FA_dblock_t *dblock, size_t *size_ptr);
 
 static H5FA_dblk_page_t *H5FA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FA_dblk_page_t *dblk_page, unsigned * flags_ptr);
+static herr_t H5FA__cache_dblk_page_dest(H5F_t *f, H5FA_dblk_page_t *dblk_page);
 static herr_t H5FA__cache_dblk_page_clear(H5F_t *f, H5FA_dblk_page_t *dblk_page, hbool_t destroy);
 static herr_t H5FA__cache_dblk_page_size(const H5F_t *f, const H5FA_dblk_page_t *dblk_page, size_t *size_ptr);
-static herr_t H5FA__cache_dblk_page_dest(H5F_t *f, H5FA_dblk_page_t *dblk_page);
 
 
 /*********************/
@@ -116,7 +117,7 @@ const H5AC_class_t H5AC_FARRAY_DBLOCK[1] = {{
     (H5AC_flush_func_t)H5FA__cache_dblock_flush,
     (H5AC_dest_func_t)H5FA__cache_dblock_dest,
     (H5AC_clear_func_t)H5FA__cache_dblock_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5FA__cache_dblock_notify,
     (H5AC_size_func_t)H5FA__cache_dblock_size,
 }};
 
@@ -377,6 +378,53 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_flush() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_hdr_dest
+ *
+ * Purpose:	Destroys a fixed array header in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_hdr_dest(H5F_t *f, H5FA_hdr_t *hdr))
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(hdr);
+
+    /* Verify that header is clean */
+    HDassert(hdr->cache_info.is_dirty == FALSE);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!hdr->cache_info.free_file_space_on_destroy || H5F_addr_defined(hdr->cache_info.addr));
+
+    /* Check for freeing file space for fixed array header */
+    if(hdr->cache_info.free_file_space_on_destroy) {
+        /* Sanity check address */
+        HDassert(H5F_addr_eq(hdr->addr, hdr->cache_info.addr));
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FARRAY_HDR, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)hdr->size) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to free fixed array header")
+    } /* end if */
+
+    /* Release the fixed array header */
+    if(H5FA__hdr_dest(hdr) < 0)
+        H5E_THROW(H5E_CANTFREE, "can't free fixed array header")
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_hdr_dest() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FA__cache_hdr_clear
  *
  * Purpose:	Mark a fixed array header in memory as non-dirty.
@@ -436,53 +484,6 @@ H5FA__cache_hdr_size(const H5F_t UNUSED *f, const H5FA_hdr_t *hdr,
     *size_ptr = hdr->size;
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FA__cache_hdr_dest
- *
- * Purpose:	Destroys a fixed array header in memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *              Thursday, April 30, 2009
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5FA__cache_hdr_dest(H5F_t *f, H5FA_hdr_t *hdr))
-
-    /* Check arguments */
-    HDassert(f);
-    HDassert(hdr);
-
-    /* Verify that header is clean */
-    HDassert(hdr->cache_info.is_dirty == FALSE);
-
-    /* If we're going to free the space on disk, the address must be valid */
-    HDassert(!hdr->cache_info.free_file_space_on_destroy || H5F_addr_defined(hdr->cache_info.addr));
-
-    /* Check for freeing file space for fixed array header */
-    if(hdr->cache_info.free_file_space_on_destroy) {
-        /* Sanity check address */
-        HDassert(H5F_addr_eq(hdr->addr, hdr->cache_info.addr));
-
-        /* Release the space on disk */
-        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
-        if(H5MF_xfree(f, H5FD_MEM_FARRAY_HDR, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)hdr->size) < 0)
-            H5E_THROW(H5E_CANTFREE, "unable to free fixed array header")
-    } /* end if */
-
-    /* Release the fixed array header */
-    if(H5FA__hdr_dest(hdr) < 0)
-        H5E_THROW(H5E_CANTFREE, "can't free fixed array header")
-
-CATCH
-
-END_FUNC(STATIC)   /* end H5FA__cache_hdr_dest() */
 
 
 /*-------------------------------------------------------------------------
@@ -724,71 +725,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__cache_dblock_clear
- *
- * Purpose:	Mark a fixed array data block in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *              Thursday, April 30, 2009
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5FA__cache_dblock_clear(H5F_t *f, H5FA_dblock_t *dblock, hbool_t destroy))
-
-    /* Sanity check */
-    HDassert(dblock);
-
-    /* Reset the dirty flag */
-    dblock->cache_info.is_dirty = FALSE;
-
-    if(destroy)
-        if(H5FA__cache_dblock_dest(f, dblock) < 0)
-            H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block")
-
-CATCH
-
-END_FUNC(STATIC)   /* end H5FA__cache_dblock_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FA__cache_dblock_size
- *
- * Purpose:	Compute the size in bytes of a fixed array data block
- *		on disk, and return it in *size_ptr.  On failure,
- *		the value of *size_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *              Thursday, April 30, 2009
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-BEGIN_FUNC(STATIC, NOERR,
-herr_t, SUCCEED, -,
-H5FA__cache_dblock_size(const H5F_t UNUSED *f, const H5FA_dblock_t *dblock,
-    size_t *size_ptr))
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(dblock);
-    HDassert(size_ptr);
-
-    /* Set size value */
-    if(!dblock->npages)
-        *size_ptr = (size_t)dblock->size;
-    else
-        *size_ptr = H5FA_DBLOCK_PREFIX_SIZE(dblock);
-
-END_FUNC(STATIC)   /* end H5FA__cache_dblock_size() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5FA__cache_dblock_dest
  *
  * Purpose:	Destroys a fixed array data block in memory.
@@ -834,6 +770,121 @@ H5FA__cache_dblock_dest(H5F_t *f, H5FA_dblock_t *dblock))
 CATCH
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblock_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblock_clear
+ *
+ * Purpose:	Mark a fixed array data block in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblock_clear(H5F_t *f, H5FA_dblock_t *dblock, hbool_t destroy))
+
+    /* Sanity check */
+    HDassert(dblock);
+
+    /* Reset the dirty flag */
+    dblock->cache_info.is_dirty = FALSE;
+
+    if(destroy)
+        if(H5FA__cache_dblock_dest(f, dblock) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block")
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblock_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA__cache_dblock_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblock_notify(H5AC_notify_action_t action, H5FA_dblock_t *dblock))
+
+    /* Sanity check */
+    HDassert(dblock);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(dblock->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on extensible array header */
+                if(H5FA__create_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and header, address = %llu", (unsigned long long)dblock->addr)
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on extensible array header */
+                if(H5FA__destroy_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and header, address = %llu", (unsigned long long)dblock->addr)
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblock_notify() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblock_size
+ *
+ * Purpose:	Compute the size in bytes of a fixed array data block
+ *		on disk, and return it in *size_ptr.  On failure,
+ *		the value of *size_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+BEGIN_FUNC(STATIC, NOERR,
+herr_t, SUCCEED, -,
+H5FA__cache_dblock_size(const H5F_t UNUSED *f, const H5FA_dblock_t *dblock,
+    size_t *size_ptr))
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(dblock);
+    HDassert(size_ptr);
+
+    /* Set size value */
+    if(!dblock->npages)
+        *size_ptr = (size_t)dblock->size;
+    else
+        *size_ptr = H5FA_DBLOCK_PREFIX_SIZE(dblock);
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblock_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1024,6 +1075,42 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_flush() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblk_page_dest
+ *
+ * Purpose:	Destroys a fixed array data block page in memory.
+ *
+ * Note:	Does _not_ free the space for the page on disk, that is
+ *              handled through the data block that "owns" the page.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              Thursday, April 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblk_page_dest(H5F_t UNUSED *f, H5FA_dblk_page_t *dblk_page))
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(dblk_page);
+
+    /* Verify that data block page is clean */
+    HDassert(dblk_page->cache_info.is_dirty == FALSE);
+
+    /* Release the data block page */
+    if(H5FA__dblk_page_dest(dblk_page) < 0)
+        H5E_THROW(H5E_CANTFREE, "can't free fixed array data block page")
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_dest() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FA__cache_dblk_page_clear
  *
  * Purpose:	Mark a fixed array data block page in memory as non-dirty.
@@ -1083,40 +1170,3 @@ H5FA__cache_dblk_page_size(const H5F_t UNUSED *f, const H5FA_dblk_page_t *dblk_p
     *size_ptr = dblk_page->size;
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FA__cache_dblk_page_dest
- *
- * Purpose:	Destroys a fixed array data block page in memory.
- *
- * Note:	Does _not_ free the space for the page on disk, that is
- *              handled through the data block that "owns" the page.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *              Thursday, April 30, 2009
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5FA__cache_dblk_page_dest(H5F_t UNUSED *f, H5FA_dblk_page_t *dblk_page))
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(dblk_page);
-
-    /* Verify that data block page is clean */
-    HDassert(dblk_page->cache_info.is_dirty == FALSE);
-
-    /* Release the data block page */
-    if(H5FA__dblk_page_dest(dblk_page) < 0)
-        H5E_THROW(H5E_CANTFREE, "can't free fixed array data block page")
-
-CATCH
-
-END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_dest() */
-

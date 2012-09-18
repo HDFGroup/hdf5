@@ -137,6 +137,7 @@ typedef struct H5FA_hdr_t {
     haddr_t addr;                       /* Address of header in file */
     size_t size;                        /* Size of header in file */
     H5F_t *f;                           /* Pointer to file for fixed array */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
     size_t file_rc;                     /* Reference count of files using array header */
     hbool_t pending_delete;             /* Array is pending deletion */
     size_t sizeof_addr;                 /* Size of file addresses */
@@ -232,6 +233,12 @@ H5_DLLVAR const H5FA_class_t *const H5FA_client_class_g[H5FA_NUM_CLS_ID];
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5FA__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5FA__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Header routines */
 H5_DLL H5FA_hdr_t *H5FA__hdr_alloc(H5F_t *f);

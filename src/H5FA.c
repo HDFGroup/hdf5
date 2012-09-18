@@ -738,3 +738,88 @@ CATCH
 
 END_FUNC(PRIV)  /* end H5FA_iterate() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA_depend
+ *
+ * Purpose:     Make a child flush dependency between the fixed array's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA_depend(H5AC_info_t *parent_entry, H5FA_t *fa))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fa);
+    HDassert(hdr);
+
+    /* Set the shared array header's file context for this operation */
+    hdr->f = fa->f;
+
+    /* Set up flush dependency between parent entry and extensible array header */
+    if(H5FA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5FA_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA_undepend
+ *
+ * Purpose:     Remove a child flush dependency between the fixed array's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              derobins@hdfgroup.org
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA_undepend(H5AC_info_t *parent_entry, H5FA_t *fa))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fa);
+    HDassert(hdr);
+
+    /* Set the shared array header's file context for this operation */
+    hdr->f = fa->f;
+
+    /* Remove flush dependency between parent entry and extensible array header */
+    if(H5FA__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata")
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5FA_undepend() */

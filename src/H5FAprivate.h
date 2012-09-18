@@ -32,7 +32,8 @@
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
-#include "H5Fprivate.h"        /* File access                */
+#include "H5ACprivate.h"            /* Metadata cache               */
+#include "H5Fprivate.h"             /* File access                  */
 
 
 /**************************/
@@ -120,14 +121,16 @@ H5_DLLVAR const H5FA_class_t H5FA_CLS_FILT_CHUNK[1];
 /* General routines */
 H5_DLL H5FA_t *H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam,
     void *ctx_udata);
-H5_DLL H5FA_t *H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
-H5_DLL herr_t H5FA_get_nelmts(const H5FA_t *ea, hsize_t *nelmts);
-H5_DLL herr_t H5FA_get_addr(const H5FA_t *ea, haddr_t *addr);
-H5_DLL herr_t H5FA_set(const H5FA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
-H5_DLL herr_t H5FA_get(const H5FA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
+H5_DLL H5FA_t *H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata);
+H5_DLL herr_t H5FA_get_nelmts(const H5FA_t *fa, hsize_t *nelmts);
+H5_DLL herr_t H5FA_get_addr(const H5FA_t *fa, haddr_t *addr);
+H5_DLL herr_t H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt);
+H5_DLL herr_t H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt);
+H5_DLL herr_t H5FA_depend(H5AC_info_t *parent_entry, H5FA_t *fa);
+H5_DLL herr_t H5FA_undepend(H5AC_info_t *parent_entry, H5FA_t *fa);
 H5_DLL herr_t H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata);
-H5_DLL herr_t H5FA_close(H5FA_t *ea, hid_t dxpl_id);
-H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
+H5_DLL herr_t H5FA_close(H5FA_t *fa, hid_t dxpl_id);
+H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata);
 
 /* Statistics routines */
 H5_DLL herr_t H5FA_get_stats(const H5FA_t *ea, H5FA_stat_t *stats);
