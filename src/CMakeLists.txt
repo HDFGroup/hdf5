@@ -186,6 +186,7 @@ SET (H5FA_SRCS
     ${HDF5_SRC_DIR}/H5FAdblock.c
     ${HDF5_SRC_DIR}/H5FAdblkpage.c
     ${HDF5_SRC_DIR}/H5FAhdr.c
+    ${HDF5_SRC_DIR}/H5FAint.c
     ${HDF5_SRC_DIR}/H5FAstat.c
     ${HDF5_SRC_DIR}/H5FAtest.c
 )
