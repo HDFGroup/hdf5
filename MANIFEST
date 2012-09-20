@@ -494,7 +494,6 @@
 ./perform/chunk.c
 ./perform/gen_report.pl
 ./perform/iopipe.c
-./perform/mpi-perf.c
 ./perform/overhead.c
 ./perform/perf.c
 ./perform/perf_meta.c
