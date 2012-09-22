@@ -698,6 +698,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - Retired program perform/mpi-perf. Its purpose has been incorporated
+	into h5perf before. (AKC 2012/09/20)
       - ifdefs added to tests around include unistd.h and function to simulate
         getlogin() on Windows. 
         (ADB - 2011/08/15)
