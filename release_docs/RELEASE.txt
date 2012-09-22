@@ -116,6 +116,11 @@ Bug Fixes since HDF5-1.8.9
     ----------------
     - None
 
+    Performance
+    -------------
+      - Retired program perform/mpi-perf. Its purpose has been incorporated
+	into h5perf before. (AKC 2012/09/21)
+
     Tools
     -----
     - h5diff: Fixed not to accumulate attribute difference to dataset
