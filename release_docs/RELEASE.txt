@@ -114,7 +114,9 @@ Bug Fixes since HDF5-1.8.9
 
     Parallel Library
     ----------------
-    - None
+    - The MPI-POSIX VFD was updated to include the POSIX and Windows
+      correctness features added that had already been added to the other VFDs.
+      HDFFV-8058/7845.  (DER 2012/09/17)
 
     Performance
     -------------
