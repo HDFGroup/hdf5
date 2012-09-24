@@ -773,6 +773,7 @@ int do_copy_objects(hid_t fidin,
     void     *hslab_buf=NULL;   /* hyperslab buffer for raw data */
     int      has_filter;        /* current object has a filter */
     int      req_filter;        /* there was a request for a filter */
+    int      req_obj_layout=0;  /* request layout to current object */
     unsigned crt_order_flags;   /* group creation order flag */
     unsigned i;
     unsigned u;
@@ -904,6 +905,22 @@ int do_copy_objects(hid_t fidin,
                 }
             }
 
+            /* check if layout change requested individual object */
+            if (options->layout_g != H5D_LAYOUT_ERROR)
+            {
+	            pack_info_t *pckinfo;
+	            /* any dataset is specified */
+	            if (options->op_tbl->nelems > 0)
+	            {
+	                /* check if object exist */
+	                pckinfo = options_get_object (travt->objs[i].name, options->op_tbl);
+	                if (pckinfo)
+	                {
+	                    req_obj_layout = 1;
+	                }
+	            }
+            }
+
             /* early detection of references */
             if((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                 goto error;
@@ -1023,6 +1040,9 @@ int do_copy_objects(hid_t fidin,
                                 goto error;
                         }
 
+                    /* only if layout change requested for entire file or 
+                     * individual obj */
+                    if (options->all_layout > 0 || req_obj_layout == 1)
                         /*------------------------------------------------- 
                          * Unset the unlimited max dims if convert to other
                          * than chunk layouts, because unlimited max dims

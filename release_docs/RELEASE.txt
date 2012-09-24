@@ -714,6 +714,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
+          source file contains chunked dataset and a chunk dim is bigger than 
+          the dataset dim. Another issue is that the command changed max dims
+          if chunk dim is smaller than the dataset dim.
+          These issue occurred when dataset size is smaller than 64k (compact
+          size limit)  Fixed both.
+          HDFFV-8012 (JKM 2012/09/24)
         - h5diff: Fixed not to accumulate attribute difference to dataset
           difference in verbose mode (-v, -r), which caused incorrect 
           difference between dataset and group/datatype object if attribute 
