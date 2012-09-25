@@ -103,7 +103,6 @@ H5FL_BLK_DEFINE(lheap_chunk);
  *              Failure:    FAIL.  addr_p will be HADDR_UNDEF.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 16 1997
  *
  *-------------------------------------------------------------------------
@@ -138,6 +137,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/))
     heap->single_cache_obj = TRUE;
     heap->dblk_addr = heap->prfx_addr + (hsize_t)heap->prfx_size;
     heap->dblk_size = size_hint;
+    heap->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     if(size_hint)
         if(NULL == (heap->dblk_image = H5FL_BLK_CALLOC(lheap_chunk, size_hint)))
             H5E_THROW(H5E_CANTALLOC, "memory allocation failed");
@@ -194,11 +194,9 @@ END_FUNC(PRIV) /* end H5HL_create() */
  * Purpose:     Go through the heap's freelist and determine if we can
  *              eliminate the free blocks at the tail of the buffer.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -318,7 +316,6 @@ END_FUNC(STATIC) /* H5HL__minimize_heap_space() */
  *              Failure:    NULL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
@@ -408,7 +405,6 @@ END_FUNC(PRIV) /* end H5HL_protect() */
  *              Failure:    Can't fail
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
@@ -431,11 +427,9 @@ END_FUNC(PRIV) /* end H5HL_offset_into() */
  *
  * Purpose:     Unprotect the data retrieved by the H5HL_protect call.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept. 17, 2003
  *
  *-------------------------------------------------------------------------
@@ -484,7 +478,6 @@ END_FUNC(PRIV) /* end H5HL_unprotect() */
  * Return:      NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -512,11 +505,9 @@ END_FUNC(STATIC) /* end H5HL__remove_free() */
  *
  * Purpose:     Mark heap as dirty
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -557,7 +548,6 @@ END_FUNC(STATIC) /* end H5HL__dirty() */
  *              Failure:    UFAIL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -769,11 +759,9 @@ END_FUNC(PRIV) /* H5HL_insert() */
  *              in two separate objects, one at the original offset and
  *              one at the first offset past the removed portion.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 16 1997
  *
  *-------------------------------------------------------------------------
@@ -915,11 +903,9 @@ END_FUNC(PRIV) /* end H5HL_remove() */
  *
  * Purpose:     Deletes a local heap from disk, freeing disk space used.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 22 2003
  *
  *-------------------------------------------------------------------------
@@ -990,11 +976,9 @@ END_FUNC(PRIV) /* end H5HL_delete() */
  *
  * Purpose:     Retrieves the current size of a heap
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Nov  7 2005
  *
  *-------------------------------------------------------------------------
@@ -1041,8 +1025,7 @@ END_FUNC(PRIV) /* end H5HL_get_size() */
  * Purpose:     Compute the size in bytes of the specified instance of
  *              H5HL_t via H5HL_size()
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Vailin Choi
  *              June 19 2007
@@ -1091,11 +1074,9 @@ END_FUNC(PRIV) /* end H5HL_heapsize() */
  * Purpose:     Create a child flush dependency between the local heap
  *              and another piece of metadata in the file.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2011
  *
  *-------------------------------------------------------------------------
@@ -1122,11 +1103,9 @@ END_FUNC(PRIV) /* end H5HL_depend() */
  * Purpose:     Remove a child flush dependency between the local heap and
  *              another piece of metadata in the file.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2011
  *
  *-------------------------------------------------------------------------

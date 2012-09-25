@@ -22,15 +22,15 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
-#define H5FS_TESTING		/*suppress warning about H5FS testing funcs */
+#define H5FS_PACKAGE        /* suppress error about including H5FSpkg       */
+#define H5FS_TESTING        /* suppress warning about H5FS testing funcs    */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FSpkg.h"		/* Free-space manager			*/
+#include "H5private.h"      /* Generic Functions                            */
+#include "H5Eprivate.h"     /* Error handling                               */
+#include "H5FSpkg.h"        /* Free-space manager                           */
 
 /****************/
 /* Local Macros */
@@ -72,13 +72,12 @@
  * Function:    H5FS_get_cparam_test
  *
  * Purpose:     Retrieve the parameters used to create the free-space manager
+ *              similar to H5HF_get_cparam_test()
  *
- * Return:      Success:        non-negative
+ * Return:      SUCCEED/FAIL
  *
- *              Failure:        negative
- *
- * Programmer:  similar to H5HF_get_cparam_test()
- *		Vailin Choi; August 25th, 2008
+ * Programmer:  Vailin Choi
+ *              August 25th, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -104,13 +103,13 @@ H5FS_get_cparam_test(const H5FS_t *frsp, H5FS_create_t *cparam)
 /*-------------------------------------------------------------------------
  * Function:    H5FS_cmp_cparam_test
  *
- * Purpose:     Compare the parameters used to create the fractal heap
+ * Purpose:     Compare the parameters used to create the free space manager
+ *              similar to H5HF_cmp_cparam_test()
  *
- * Return:      Success:        non-negative
- *              Failure:        negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:  similar to H5HF_cmp_cparam_test()
- *		Vailin Choi; August 25th, 2008
+ * Programmer:  Vailin Choi
+ *              August 25th, 2008
  *
  *-------------------------------------------------------------------------
  */

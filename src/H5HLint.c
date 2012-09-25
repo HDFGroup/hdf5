@@ -88,7 +88,6 @@ H5FL_DEFINE_STATIC(H5HL_t);
  *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jan  5 2010
  *
  *-------------------------------------------------------------------------
@@ -129,11 +128,9 @@ END_FUNC(PKG) /* end H5HL__new() */
  *
  * Purpose:     Increment ref. count on heap
  *
- * Return:      Success:    SUCCEED
- *              Failure:    N/A
+ * Return:      SUCCEED (Can't fail)
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -156,11 +153,9 @@ END_FUNC(PKG) /* end H5HL__inc_rc() */
  *
  * Purpose:     Decrement ref. count on heap
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -188,11 +183,9 @@ END_FUNC(PKG) /* end H5HL__dec_rc() */
  *
  * Purpose:     Destroys a heap in memory.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -234,11 +227,9 @@ END_FUNC(PKG) /* end H5HL__dest() */
  *
  * Purpose:     Create a flush dependency between two data structure components
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2011
  *
  *-------------------------------------------------------------------------
@@ -266,11 +257,9 @@ END_FUNC(PKG) /* end H5HL__create_flush_depend() */
  *
  * Purpose:     Destroy a flush dependency between two data structure components
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2011
  *
  *-------------------------------------------------------------------------

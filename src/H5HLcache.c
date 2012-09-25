@@ -76,7 +76,6 @@ static herr_t H5HL__prefix_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t 
     H5HL_prfx_t *prfx, unsigned *flags_ptr);
 static herr_t H5HL__prefix_dest(H5F_t *f, H5HL_prfx_t *prfx);
 static herr_t H5HL__prefix_clear(H5F_t *f, H5HL_prfx_t *prfx, hbool_t destroy);
-static herr_t H5HL__prefix_notify(H5AC_notify_action_t action, H5HL_prfx_t *prfx);
 static herr_t H5HL__prefix_size(const H5F_t *f, H5HL_prfx_t *prfx, size_t *size_ptr);
 
 /* Local heap data block */
@@ -103,7 +102,7 @@ const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     (H5AC_flush_func_t)     H5HL__prefix_flush,
     (H5AC_dest_func_t)      H5HL__prefix_dest,
     (H5AC_clear_func_t)     H5HL__prefix_clear,
-    (H5AC_notify_func_t)    H5HL__prefix_notify,
+    (H5AC_notify_func_t)    NULL,
     (H5AC_size_func_t)      H5HL__prefix_size,
 }};
 
@@ -134,11 +133,9 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
  *
  * Purpose:     Deserialize the free list for a heap data block
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -206,7 +203,6 @@ END_FUNC(STATIC) /* end H5HL__fl_deserialize() */
  * Return:      Nothing (void)
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -246,7 +242,6 @@ END_FUNC_VOID(STATIC) /* end H5HL__fl_serialize() */
  *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -381,11 +376,9 @@ END_FUNC(STATIC) /* end H5HL__prefix_load() */
  * Purpose:     Flushes a heap from memory to disk if it's dirty.  Optionally
  *              deletes the heap from memory.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -483,11 +476,9 @@ END_FUNC(STATIC) /* end H5HL__prefix_flush() */
  *
  * Purpose:     Destroys a heap prefix in memory.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -537,11 +528,9 @@ END_FUNC(STATIC) /* end H5HL__prefix_dest() */
  *
  * Purpose:     Mark a local heap prefix in memory as non-dirty.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 20 2003
  *
  *-------------------------------------------------------------------------
@@ -567,60 +556,13 @@ END_FUNC(STATIC) /* end H5HL__prefix_clear() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5HL__prefix_notify
- *
- * Purpose:     Handle cache action notifications
- *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
- *
- * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
- *              Fall 2011
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5HL__prefix_notify(H5AC_notify_action_t action, H5HL_prfx_t *prfx))
-    
-    /* Sanity check */
-    HDassert(prfx);
-
-    /* Check if the file was opened with SWMR-write access */
-    if(prfx->heap->swmr_write) {
-        /* Determine which action to take */
-        switch(action) {
-            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on child */
-                if(FAIL == H5HL__destroy_flush_depend((H5AC_info_t *)prfx, (H5AC_info_t *)prfx->heap->dblk))
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between prefix and data block, address of prefix = %llu", (unsigned long long)prfx->heap->prfx_addr);
-                break;
-
-            default:
-#ifdef NDEBUG
-                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache");
-#else /* NDEBUG */
-                HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
-        } /* end switch */
-    } /* end if */
-
-CATCH
-    /* No special processing on errors */
-    
-END_FUNC(STATIC) /* end H5HL__prefix_notify() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5HL__prefix_size
  *
  * Purpose:     Compute the size in bytes of the heap prefix on disk,
  *              and return it in *len_ptr.  On failure, the value of *len_ptr
  *              is undefined.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    Can't fail
+ * Return:      SUCCEED (Can't fail)
  *
  * Programmer:  John Mainzer
  *              5/13/04
@@ -656,7 +598,6 @@ END_FUNC(STATIC) /* H5HL__prefix_size() */
  *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jan  5 2010
  *
  *-------------------------------------------------------------------------
@@ -716,11 +657,9 @@ END_FUNC(STATIC) /* end H5HL__datablock_load() */
  * Purpose:     Flushes a heap's data block from memory to disk if it's dirty.
  *              Optionally deletes the heap data block from memory.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 17 1997
  *
  *-------------------------------------------------------------------------
@@ -769,11 +708,9 @@ END_FUNC(STATIC) /* end H5HL__datablock_flush() */
  *
  * Purpose:     Destroys a local heap data block in memory.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jan 15 2003
  *
  *-------------------------------------------------------------------------
@@ -817,11 +754,9 @@ END_FUNC(STATIC) /* end H5HL__datablock_dest() */
  *
  * Purpose:     Mark a local heap data block in memory as non-dirty.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 20 2003
  *
  *-------------------------------------------------------------------------
@@ -850,11 +785,9 @@ END_FUNC(STATIC) /* end H5HL__datablock_clear() */
  *
  * Purpose:     Handle cache action notifications
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2011
  *
  *-------------------------------------------------------------------------
@@ -904,8 +837,7 @@ END_FUNC(STATIC) /* end H5HL__datablock_notify() */
  *              and return it in *len_ptr.  On failure, the value of *len_ptr
  *              is undefined.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    Can't fail
+ * Return:      SUCCEED (Can't fail)
  *
  * Programmer:  John Mainzer
  *              5/13/04

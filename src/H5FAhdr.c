@@ -15,9 +15,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FAhdr.c
+ * Created:     H5FAhdr.c
  *
- * Purpose:		Array header routines for Fixed Array.
+ * Purpose:     Array header routines for Fixed Array.
  *
  *-------------------------------------------------------------------------
  */
@@ -37,10 +37,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FApkg.h"		/* Fixed Arrays			*/
-#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5private.h"      /* Generic Functions                            */
+#include "H5Eprivate.h"     /* Error handling                               */
+#include "H5FApkg.h"        /* Fixed Arrays                                 */
+#include "H5MFprivate.h"    /* File memory management                       */
 
 
 /****************/
@@ -82,13 +82,13 @@ H5FL_DEFINE_STATIC(H5FA_hdr_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_alloc
+ * Function:    H5FA__hdr_alloc
  *
- * Purpose:	Allocate shared Fixed Array header
+ * Purpose:     Allocate shared Fixed Array header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -105,10 +105,11 @@ H5FA__hdr_alloc(H5F_t *f))
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5FA_hdr_t)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for Fixed Array shared header")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for Fixed Array shared header")
 
     /* Set non-zero internal fields */
     hdr->addr = HADDR_UNDEF;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
 
     /* Set the internal parameters for the array */
     hdr->f = f;
@@ -127,13 +128,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_alloc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_init
+ * Function:    H5FA__hdr_init
  *
- * Purpose:	Initialize shared fixed array header
+ * Purpose:     Initialize shared fixed array header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Sunday, November 15, 2009
  *
  *-------------------------------------------------------------------------
@@ -165,13 +166,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_init() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_create
+ * Function:    H5FA__hdr_create
  *
- * Purpose:	Creates a new Fixed Array header in the file
+ * Purpose:     Creates a new Fixed Array header in the file
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -196,17 +197,17 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 {
     /* Check for valid parameters */
     if(cparam->raw_elmt_size == 0)
-	H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
+        H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
     if(cparam->max_dblk_page_nelmts_bits == 0)
-	H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be greater than zero")
+        H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be greater than zero")
     if(cparam->nelmts == 0)
-	H5E_THROW(H5E_BADVALUE, "# of elements must be greater than zero")
+        H5E_THROW(H5E_BADVALUE, "# of elements must be greater than zero")
 }
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FA__hdr_alloc(f)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for Fixed Array shared header")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for Fixed Array shared header")
 
     hdr->dblk_addr = HADDR_UNDEF;
 
@@ -215,15 +216,15 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Finish initializing fixed array header */
     if(H5FA__hdr_init(hdr, ctx_udata) < 0)
-	H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
+        H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_FARRAY_HDR, dxpl_id, (hsize_t)hdr->size)))
-	H5E_THROW(H5E_CANTALLOC, "file allocation failed for Fixed Array header")
+        H5E_THROW(H5E_CANTALLOC, "file allocation failed for Fixed Array header")
 
     /* Cache the new Fixed Array header */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_FARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTINSERT, "can't add fixed array header to cache")
+        H5E_THROW(H5E_CANTINSERT, "can't add fixed array header to cache")
 
     /* Set address of array header to return */
     ret_value = hdr->addr;
@@ -244,13 +245,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_incr
+ * Function:    H5FA__hdr_incr
  *
- * Purpose:	Increment component reference count on shared array header
+ * Purpose:     Increment component reference count on shared array header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -276,13 +277,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_incr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_decr
+ * Function:    H5FA__hdr_decr
  *
- * Purpose:	Decrement component reference count on shared array header
+ * Purpose:     Decrement component reference count on shared array header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -311,13 +312,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_decr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_fuse_incr
+ * Function:    H5FA__hdr_fuse_incr
  *
- * Purpose:	Increment file reference count on shared array header
+ * Purpose:     Increment file reference count on shared array header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -336,13 +337,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_fuse_incr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_fuse_decr
+ * Function:    H5FA__hdr_fuse_decr
  *
- * Purpose:	Decrement file reference count on shared array header
+ * Purpose:     Decrement file reference count on shared array header
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -365,13 +366,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_fuse_decr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_modified
+ * Function:    H5FA__hdr_modified
  *
- * Purpose:	Mark a fixed array as modified
+ * Purpose:     Mark a fixed array as modified
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -393,13 +394,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_modified() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_delete
+ * Function:    H5FA__hdr_delete
  *
- * Purpose:	Delete a fixed array, starting with the header
+ * Purpose:     Delete a fixed array, starting with the header
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -453,13 +454,13 @@ END_FUNC(PKG)   /* end H5FA__hdr_delete() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__hdr_dest
+ * Function:    H5FA__hdr_dest
  *
- * Purpose:	Destroys a fixed array header in memory.
+ * Purpose:     Destroys a fixed array header in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------

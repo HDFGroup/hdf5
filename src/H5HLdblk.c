@@ -89,7 +89,6 @@ H5FL_DEFINE_STATIC(H5HL_dblk_t);
  *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -133,11 +132,9 @@ END_FUNC(PKG) /* end H5HL__dblk_new() */
  *
  * Purpose:     Destroy a local heap data block object
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -179,11 +176,9 @@ END_FUNC(PKG) /* end H5HL__dblk_dest() */
  *
  * Purpose:     Reallocate data block for heap
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------

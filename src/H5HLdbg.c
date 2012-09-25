@@ -32,11 +32,9 @@
  *
  * Purpose:     Prints debugging information about a heap.
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug  1 1997
  *
  *-------------------------------------------------------------------------

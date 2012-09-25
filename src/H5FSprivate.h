@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FSprivate.h
- *			May  2 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5FSprivate.h
+ *              May  2 2006
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Private header for library accessible file free space routines.
+ * Purpose:     Private header for library accessible file free space routines.
  *
  *-------------------------------------------------------------------------
  */
@@ -31,6 +31,7 @@
 #include "H5FSpublic.h"
 
 /* Private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 
@@ -127,8 +128,8 @@ struct H5FS_section_info_t {
 
 /* Free space client IDs for identifying user of free space */
 typedef enum H5FS_client_t {
-    H5FS_CLIENT_FHEAP_ID = 0,	/* Free space is used by fractal heap */
-    H5FS_CLIENT_FILE_ID,	/* Free space is used by file */
+    H5FS_CLIENT_FHEAP_ID = 0,   /* Free space is used by fractal heap */
+    H5FS_CLIENT_FILE_ID,        /* Free space is used by file */
     H5FS_NUM_CLIENT_ID          /* Number of free space client IDs (must be last)   */
 } H5FS_client_t;
 
@@ -147,11 +148,11 @@ typedef struct H5FS_stat_t {
     hsize_t tot_sect_count;     /* Total # of sections tracked                */
     hsize_t serial_sect_count;  /* # of serializable sections tracked         */
     hsize_t ghost_sect_count;   /* # of un-serializable sections tracked      */
-    haddr_t addr;		/* Address of free space header on disk       */
-    hsize_t hdr_size;		/* Size of the free-space header on disk      */
+    haddr_t addr;               /* Address of free space header on disk       */
+    hsize_t hdr_size;           /* Size of the free-space header on disk      */
     haddr_t sect_addr;          /* Address of the section info in the file    */
     hsize_t alloc_sect_size;    /* Allocated size of the section info in the file */
-    hsize_t sect_size;    	/* Size of the section info in the file       */
+    hsize_t sect_size;          /* Size of the section info in the file       */
 } H5FS_stat_t;
 
 /* Typedef for iteration operations */
@@ -183,6 +184,8 @@ H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
 H5_DLL herr_t H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id);
 H5_DLL herr_t H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
 H5_DLL herr_t H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
+H5_DLL herr_t H5FS_depend(H5AC_info_t *parent_entry, H5FS_t *fs);
+H5_DLL herr_t H5FS_undepend(H5AC_info_t *parent_entry, H5FS_t *fs);
 
 /* Free space section routines */
 H5_DLL herr_t H5FS_sect_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,

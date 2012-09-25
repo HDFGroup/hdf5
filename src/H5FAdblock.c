@@ -15,9 +15,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FAdblock.c
+ * Created:     H5FAdblock.c
  *
- * Purpose:		Data block routines for fixed arrays.
+ * Purpose:     Data block routines for fixed arrays.
  *
  *-------------------------------------------------------------------------
  */
@@ -37,11 +37,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FApkg.h"		/* Fixed Arrays				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5MFprivate.h"	/* File memory management		*/
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FApkg.h"        /* Fixed Arrays                             */
+#include "H5FLprivate.h"    /* Free Lists                               */
+#include "H5MFprivate.h"    /* File memory management                   */
 
 
 /****************/
@@ -89,13 +89,13 @@ H5FL_BLK_DEFINE(fa_page_init);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__dblock_alloc
+ * Function:    H5FA__dblock_alloc
  *
- * Purpose:	Allocate fixed array data block
+ * Purpose:     Allocate fixed array data block
  *
- * Return:	Non-NULL pointer to data block on success/NULL on failure
+ * Return:      Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -113,11 +113,11 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
 
     /* Allocate memory for the data block */
     if(NULL == (dblock = H5FL_CALLOC(H5FA_dblock_t)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     /* Share common array information */
     if(H5FA__hdr_incr(hdr) < 0)
-	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+        H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
     dblock->hdr = hdr;
 
     /* Set non-zero internal fields */
@@ -131,19 +131,19 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
         /* Safely assign the number of pages */
         H5_ASSIGN_OVERFLOW(/* To: */ dblock->npages, /* From: */ npages, /* From: */ hsize_t, /* To: */ size_t);
 
-	/* Sanity check that we have at least 1 page */
-	HDassert(dblock->npages > 0);
+        /* Sanity check that we have at least 1 page */
+        HDassert(dblock->npages > 0);
 
         /* Compute size of 'page init' flag array, in bytes */
-	dblock->dblk_page_init_size = (dblock->npages + 7) / 8;
-	HDassert(dblock->dblk_page_init_size > 0);
+        dblock->dblk_page_init_size = (dblock->npages + 7) / 8;
+        HDassert(dblock->dblk_page_init_size > 0);
 
-	/* Allocate space for 'page init' flags */
-	if(NULL == (dblock->dblk_page_init = H5FL_BLK_CALLOC(fa_page_init, dblock->dblk_page_init_size)))
-	    H5E_THROW(H5E_CANTALLOC, "memory allocation failed for page init bitmask")
+        /* Allocate space for 'page init' flags */
+        if(NULL == (dblock->dblk_page_init = H5FL_BLK_CALLOC(fa_page_init, dblock->dblk_page_init_size)))
+            H5E_THROW(H5E_CANTALLOC, "memory allocation failed for page init bitmask")
 
-	/* Compute data block page size */
-	dblock->dblk_page_size = (dblock->dblk_page_nelmts * hdr->cparam.raw_elmt_size) + H5FA_SIZEOF_CHKSUM;
+        /* Compute data block page size */
+        dblock->dblk_page_size = (dblock->dblk_page_nelmts * hdr->cparam.raw_elmt_size) + H5FA_SIZEOF_CHKSUM;
 
         /* Compute the # of elements on last page */
         if(0 == nelmts % dblock->dblk_page_nelmts)
@@ -156,8 +156,8 @@ H5FA__dblock_alloc(H5FA_hdr_t *hdr, hsize_t nelmts))
 
         /* Allocate buffer for elements in data block */
         H5_CHECK_OVERFLOW(dblk_size, /* From: */hsize_t, /* To: */size_t);
-	if(NULL == (dblock->elmts = H5FL_BLK_MALLOC(chunk_elmts, (size_t)dblk_size)))
-	    H5E_THROW(H5E_CANTALLOC, "memory allocation failed for data block element buffer")
+        if(NULL == (dblock->elmts = H5FL_BLK_MALLOC(chunk_elmts, (size_t)dblk_size)))
+            H5E_THROW(H5E_CANTALLOC, "memory allocation failed for data block element buffer")
     } /* end else */
 
     /* Set the return value */
@@ -173,13 +173,13 @@ END_FUNC(PKG)   /* end H5FA__dblock_alloc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__dblock_create
+ * Function:    H5FA__dblock_create
  *
- * Purpose:	Creates a fixed array data block in the file
+ * Purpose:     Creates a fixed array data block in the file
  *
- * Return:	Valid file address on success/HADDR_UNDEF on failure
+ * Return:      Valid file address on success/HADDR_UNDEF on failure
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -204,7 +204,7 @@ HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, h
 
     /* Allocate the data block */
     if(NULL == (dblock = H5FA__dblock_alloc(hdr, nelmts)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     /* Set size of data block on disk */
     hdr->stats.dblk_size = dblock->size = H5FA_DBLOCK_SIZE(dblock);
@@ -215,7 +215,7 @@ HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
 
     /* Allocate space for the data block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
-	H5E_THROW(H5E_CANTALLOC, "file allocation failed for fixed array data block")
+        H5E_THROW(H5E_CANTALLOC, "file allocation failed for fixed array data block")
     dblock->addr = dblock_addr;
 
     /* Don't initialize elements if paged */
@@ -226,7 +226,7 @@ HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
 
     /* Cache the new fixed array data block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTINSERT, "can't add fixed array data block to cache")
+        H5E_THROW(H5E_CANTINSERT, "can't add fixed array data block to cache")
 
     /* Mark the header dirty (for updating statistics) */
     *hdr_dirty = TRUE;
@@ -251,13 +251,13 @@ END_FUNC(PKG)   /* end H5FA__dblock_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__dblock_protect
+ * Function:    H5FA__dblock_protect
  *
- * Purpose:	Convenience wrapper around protecting fixed array data block
+ * Purpose:     Convenience wrapper around protecting fixed array data block
  *
- * Return:	Non-NULL pointer to data block on success/NULL on failure
+ * Return:      Non-NULL pointer to data block on success/NULL on failure
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -293,13 +293,13 @@ END_FUNC(PKG)   /* end H5FA__dblock_protect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__dblock_unprotect
+ * Function:    H5FA__dblock_unprotect
  *
- * Purpose:	Convenience wrapper around unprotecting fixed array data block
+ * Purpose:     Convenience wrapper around unprotecting fixed array data block
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -327,13 +327,13 @@ END_FUNC(PKG)   /* end H5FA__dblock_unprotect() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__dblock_delete
+ * Function:    H5FA__dblock_delete
  *
- * Purpose:	Delete a data block
+ * Purpose:     Delete a data block
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -395,13 +395,13 @@ END_FUNC(PKG)   /* end H5FA__dblock_delete() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__dblock_dest
+ * Function:    H5FA__dblock_dest
  *
- * Purpose:	Destroys a fixed array data block in memory.
+ * Purpose:     Destroys a fixed array data block in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -419,16 +419,16 @@ H5FA__dblock_dest(H5FA_dblock_t *dblock))
         if(dblock->elmts && !dblock->npages) {
             /* Free buffer for data block elements */
             HDassert(dblock->hdr->cparam.nelmts > 0);
-	    dblock->elmts = H5FL_BLK_FREE(chunk_elmts, dblock->elmts);
+            dblock->elmts = H5FL_BLK_FREE(chunk_elmts, dblock->elmts);
         } /* end if */
 
         /* Check if data block is paged */
-	if(dblock->npages) {
-	    /* Free buffer for 'page init' bitmask, if there is one */
-	    HDassert(dblock->dblk_page_init_size > 0);
-	    if(dblock->dblk_page_init)
-		dblock->dblk_page_init = H5FL_BLK_FREE(fa_page_init, dblock->dblk_page_init);
-	} /* end if */
+        if(dblock->npages) {
+            /* Free buffer for 'page init' bitmask, if there is one */
+            HDassert(dblock->dblk_page_init_size > 0);
+            if(dblock->dblk_page_init)
+                dblock->dblk_page_init = H5FL_BLK_FREE(fa_page_init, dblock->dblk_page_init);
+        } /* end if */
 
         /* Decrement reference count on shared info */
         if(H5FA__hdr_decr(dblock->hdr) < 0)

@@ -1034,10 +1034,15 @@
 ./test/space_overflow.c      _DO_NOT_DISTRIBUTE_
 ./test/specmetaread.h5
 ./test/stab.c
+./test/swmr_addrem_writer.c
 ./test/swmr_common.c
 ./test/swmr_common.h
 ./test/swmr_generator.c
 ./test/swmr_reader.c
+./test/swmr_remove_reader.c
+./test/swmr_remove_writer.c
+./test/swmr_sparse_reader.c
+./test/swmr_sparse_writer.c
 ./test/swmr_writer.c
 ./test/tarray.c
 ./test/tarrold.h5

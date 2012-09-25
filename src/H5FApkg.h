@@ -62,56 +62,56 @@
 #define H5FA_SIZEOF_CHKSUM      4
 
 /* "Standard" size of prefix information for fixed array metadata */
-#define H5FA_METADATA_PREFIX_SIZE(c) (                                        \
-    H5_SIZEOF_MAGIC   /* Signature */                                         \
-    + 1 /* Version */                                                         \
-    + 1    /* Array type */                                                \
-    + ((c) ? H5FA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
+#define H5FA_METADATA_PREFIX_SIZE(c) (                                      \
+    H5_SIZEOF_MAGIC                     /* Signature            */          \
+    + 1                                 /* Version              */          \
+    + 1                                 /* Array type           */          \
+    + ((c) ? H5FA_SIZEOF_CHKSUM : 0)    /* Metadata checksum    */          \
     )
 
 /* Size of the Fixed Array header on disk */
-#define H5FA_HEADER_SIZE(h)     (                                             \
-    /* General metadata fields */                                             \
-    H5FA_METADATA_PREFIX_SIZE(TRUE)                                           \
-                                                                              \
-    /* General array information */                                           \
-    + 1 /* Element Size */                                                    \
-    + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
-                                                                              \
-    /* Fixed Array statistics fields */                                       \
-    + (h)->sizeof_size /* # of elements in the fixed array */              \
-                                                                              \
-    /* Fixed Array Header specific fields */                                  \
-    + (h)->sizeof_addr /* File address of Fixed Array data block */            \
+#define H5FA_HEADER_SIZE(h)     (                                           \
+    /* General metadata fields */                                           \
+    H5FA_METADATA_PREFIX_SIZE(TRUE)                                         \
+                                                                            \
+    /* General array information */                                         \
+    + 1 /* Element Size */                                                  \
+    + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */    \
+                                                                            \
+    /* Fixed Array statistics fields */                                     \
+    + (h)->sizeof_size /* # of elements in the fixed array */               \
+                                                                            \
+    /* Fixed Array Header specific fields */                                \
+    + (h)->sizeof_addr /* File address of Fixed Array data block */         \
     )
 
 /* Size of the Fixed Array data block prefix on disk */
-#define H5FA_DBLOCK_PREFIX_SIZE(d)  (                                         \
-    /* General metadata fields */                                             \
-    H5FA_METADATA_PREFIX_SIZE(TRUE)                                           \
-                                                                              \
-    /* Sanity-checking fields */                                              \
-    + (d)->hdr->sizeof_addr        /* File address of Fixed Array header owning the data block */  \
-                                                                              \
-    /* Fixed Array Data Block specific fields */                  \
+#define H5FA_DBLOCK_PREFIX_SIZE(d)  (                                       \
+    /* General metadata fields */                                           \
+    H5FA_METADATA_PREFIX_SIZE(TRUE)                                         \
+                                                                            \
+    /* Sanity-checking fields */                                            \
+    + (d)->hdr->sizeof_addr        /* File address of Fixed Array header owning the data block */   \
+                                                                            \
+    /* Fixed Array Data Block specific fields */                            \
     + (d)->dblk_page_init_size /* Fixed array data block 'page init' bitmasks (can be 0 if no pages) */ \
     )
 
 /* Size of the Fixed Array data block on disk */
-#define H5FA_DBLOCK_SIZE(d)  (                                    \
-    /* Data block prefix size  */                                             \
-    H5FA_DBLOCK_PREFIX_SIZE(d)                                                \
-                                                                              \
-    /* Fixed Array Elements|Pages of Elements*/                      \
-    + ((d)->hdr->cparam.nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size)      \
-    + ((d)->npages * H5FA_SIZEOF_CHKSUM)        /* Checksum */            \
+#define H5FA_DBLOCK_SIZE(d)  (                                              \
+    /* Data block prefix size  */                                           \
+    H5FA_DBLOCK_PREFIX_SIZE(d)                                              \
+                                                                            \
+    /* Fixed Array Elements|Pages of Elements*/                             \
+    + ((d)->hdr->cparam.nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size)    \
+    + ((d)->npages * H5FA_SIZEOF_CHKSUM)        /* Checksum */              \
     )
 
 /* Size of the Fixed Array data block page on disk */
-#define H5FA_DBLK_PAGE_SIZE(d, nelmts)     (                                                 \
-    /* Fixed Array Data Block Page */                          \
-    + (nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in data block page */  \
-    + H5FA_SIZEOF_CHKSUM                            /* Checksum for each page */         \
+#define H5FA_DBLK_PAGE_SIZE(d, nelmts)     (                                \
+    /* Fixed Array Data Block Page */                                       \
+    + (nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in data block page  */  \
+    + H5FA_SIZEOF_CHKSUM                                /* Checksum for each page       */  \
     )
 
 /****************************/
@@ -133,15 +133,15 @@ typedef struct H5FA_hdr_t {
     H5FA_stat_t stats;                  /* Statistcs for Fixed Array */
 
     /* Computed/cached values (not stored in header) */
-    size_t rc;                          /* Reference count of the header */
-    haddr_t addr;                       /* Address of header in file */
-    size_t size;                        /* Size of header in file */
-    H5F_t *f;                           /* Pointer to file for fixed array */
-    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
-    size_t file_rc;                     /* Reference count of files using array header */
-    hbool_t pending_delete;             /* Array is pending deletion */
-    size_t sizeof_addr;                 /* Size of file addresses */
-    size_t sizeof_size;                 /* Size of file sizes */
+    size_t rc;                          /* Reference count of the header                                */
+    haddr_t addr;                       /* Address of header in file                                    */
+    size_t size;                        /* Size of header in file                                       */
+    H5F_t *f;                           /* Pointer to file for fixed array                              */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access    */
+    size_t file_rc;                     /* Reference count of files using array header                  */
+    hbool_t pending_delete;             /* Array is pending deletion                                    */
+    size_t sizeof_addr;                 /* Size of file addresses                                       */
+    size_t sizeof_size;                 /* Size of file sizes                                           */
 
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
@@ -153,22 +153,22 @@ typedef struct H5FA_dblock_t {
     H5AC_info_t cache_info;
 
     /* Fixed array information (stored) */
-    uint8_t     *dblk_page_init;/* Bitmap of whether a data block page is initialized */
-    void        *elmts;         /* Buffer for elements stored in data block  */
+    uint8_t     *dblk_page_init;/* Bitmap of whether a data block page is initialized       */
+    void        *elmts;         /* Buffer for elements stored in data block                 */
 
     /* Internal array information (not stored) */
-    H5FA_hdr_t    *hdr;            /* Shared array header info                  */
+    H5FA_hdr_t    *hdr;            /* Shared array header info                              */
 
     /* Computed/cached values (not stored) */
-    haddr_t     addr;           /* Address of this data block on disk          */
-    hsize_t     size;           /* Size of data block on disk              */
-    size_t      npages;         /* Nummber of pages in data block (zero if not paged) */
-    size_t      last_page_nelmts;  /* Nummber of elements in last page, if paged */
+    haddr_t     addr;               /* Address of this data block on disk                   */
+    hsize_t     size;               /* Size of data block on disk                           */
+    size_t      npages;             /* Nummber of pages in data block (zero if not paged)   */
+    size_t      last_page_nelmts;   /* Nummber of elements in last page, if paged           */
 
     /* Fixed Array data block information (not stored) */
-    size_t dblk_page_nelmts;             /* # of elements per data block page */
-    size_t dblk_page_size;         /* Size of a data block page */
-    size_t dblk_page_init_size;        /* Size of 'page init' bitmask */
+    size_t dblk_page_nelmts;        /* # of elements per data block page                    */
+    size_t dblk_page_size;          /* Size of a data block page                            */
+    size_t dblk_page_init_size;     /* Size of 'page init' bitmask                          */
 } H5FA_dblock_t;
 
 /* The fixed array data block page information */
@@ -180,18 +180,18 @@ typedef struct H5FA_dbk_page_t {
     void        *elmts;         /* Buffer for elements stored in data block page */
 
     /* Internal array information (not stored) */
-    H5FA_hdr_t    *hdr;            /* Shared array header info                  */
+    H5FA_hdr_t    *hdr;         /* Shared array header info                     */
 
     /* Computed/cached values (not stored) */
-    haddr_t     addr;           /* Address of this data block page on disk    */
-    size_t      size;           /* Size of data block page on disk          */
-    size_t      nelmts;         /* Number of elements in data block page      */
+    haddr_t     addr;           /* Address of this data block page on disk      */
+    size_t      size;           /* Size of data block page on disk              */
+    size_t      nelmts;         /* Number of elements in data block page        */
 } H5FA_dblk_page_t;
 
 /* Fixed array */
 struct H5FA_t {
-    H5FA_hdr_t  *hdr;           /* Pointer to internal fixed array header info     */
-    H5F_t      *f;              /* Pointer to file for fixed array         */
+    H5FA_hdr_t  *hdr;           /* Pointer to internal fixed array header info  */
+    H5F_t      *f;              /* Pointer to file for fixed array              */
 };
 
 
@@ -199,14 +199,14 @@ struct H5FA_t {
 
 /* Info needed for loading data block */
 typedef struct H5FA_dblock_cache_ud_t {
-    H5FA_hdr_t *hdr;            /* Shared fixed array information */
+    H5FA_hdr_t *hdr;            /* Shared fixed array information   */
     hsize_t nelmts;             /* Number of elements in data block */
 } H5FA_dblock_cache_ud_t;
 
 /* Info needed for loading data block page */
 typedef struct H5FA_dblk_page_cache_ud_t {
-    H5FA_hdr_t *hdr;            /* Shared fixed array information */
-    size_t nelmts;              /* Number of elements in data block page */
+    H5FA_hdr_t *hdr;            /* Shared fixed array information           */
+    size_t nelmts;              /* Number of elements in data block page    */
 } H5FA_dblk_page_cache_ud_t;
 
 

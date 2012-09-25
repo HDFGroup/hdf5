@@ -22,14 +22,14 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#define H5FS_PACKAGE        /* suppress error about including H5FSpkg   */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FSpkg.h"		/* Free-space manager 			*/
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FSpkg.h"        /* Free-space manager                       */
 
 /****************/
 /* Local Macros */
@@ -72,12 +72,10 @@
  *
  * Purpose:     Retrieve metadata statistics for the free-space manager
  *
- * Return:      Success:        non-negative
- *
- *              Failure:        does not fail
+ * Return:      SUCCEED (Can't fail)
  *
  * Programmer:  Vailin Choi
- *		August 25th, 2008
+ *              August 25th, 2008
  *
  *-------------------------------------------------------------------------
  */

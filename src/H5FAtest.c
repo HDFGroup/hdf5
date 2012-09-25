@@ -14,9 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:
- *
- * Purpose:	Fixed array testing functions.
+ * Purpose:     Fixed array testing functions.
  *
  */
 
@@ -36,11 +34,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FApkg.h"		/* Fixed Arrays				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5Vprivate.h"         /* Vector functions			*/
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FApkg.h"        /* Fixed Arrays                             */
+#include "H5FLprivate.h"    /* Free Lists                               */
+#include "H5Vprivate.h"     /* Vector functions                         */
 
 
 /****************/
@@ -119,14 +117,14 @@ H5FL_DEFINE_STATIC(H5FA__test_ctx_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_crt_context
+ * Function:    H5FA__test_crt_context
  *
- * Purpose:	Create context for callbacks
+ * Purpose:     Create context for callbacks
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -140,7 +138,7 @@ H5FA__test_crt_context(void UNUSED *udata))
 
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
-	H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
+        H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
 
     /* Initialize the context */
     ctx->bogus = H5FA__TEST_BOGUS_VAL;
@@ -154,14 +152,13 @@ END_FUNC(STATIC)  /* end H5FA__test_crt_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_dst_context
+ * Function:    H5FA__test_dst_context
  *
- * Purpose:	Destroy context for callbacks
+ * Purpose:     Destroy context for callbacks
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -183,14 +180,13 @@ END_FUNC(STATIC)  /* end H5FA__test_dst_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_fill
+ * Function:    H5FA__test_fill
  *
- * Purpose:	Fill "missing elements" in block of elements
+ * Purpose:     Fill "missing elements" in block of elements
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -212,14 +208,13 @@ END_FUNC(STATIC)  /* end H5FA__test_fill() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_encode
+ * Function:    H5FA__test_encode
  *
- * Purpose:	Encode an element from "native" to "raw" form
+ * Purpose:     Encode an element from "native" to "raw" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -257,14 +252,13 @@ END_FUNC(STATIC)  /* end H5FA__test_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_decode
+ * Function:    H5FA__test_decode
  *
- * Purpose:	Decode an element from "raw" to "native" form
+ * Purpose:     Decode an element from "raw" to "native" form
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -303,14 +297,13 @@ END_FUNC(STATIC)  /* end H5FA__test_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_debug
+ * Function:    H5FA__test_debug
  *
- * Purpose:	Display an element for debugging
+ * Purpose:     Display an element for debugging
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -336,14 +329,14 @@ END_FUNC(STATIC)  /* end H5FA__test_debug() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA__test_crt_dbg_context
+ * Function:    H5FA__test_crt_dbg_context
  *
- * Purpose:	Create context for debugging callback
+ * Purpose:     Create context for debugging callback
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:      Success:    non-NULL
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, December 1, 2009
  *
  *-------------------------------------------------------------------------
@@ -357,7 +350,7 @@ H5FA__test_crt_dbg_context(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED
 
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5FA__test_ctx_t)))
-	H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
+        H5E_THROW(H5E_CANTALLOC, "can't allocate fixed array client callback context")
 
     /* Initialize the context */
     ctx->bogus = H5FA__TEST_BOGUS_VAL;
@@ -371,14 +364,13 @@ END_FUNC(STATIC)  /* end H5FA__test_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA_get_cparam_test
+ * Function:    H5FA_get_cparam_test
  *
- * Purpose:	Retrieve the parameters used to create the fixed array
+ * Purpose:     Retrieve the parameters used to create the fixed array
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -399,14 +391,13 @@ END_FUNC(PRIV)  /* end H5FA_get_cparam_test() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA_cmp_cparam_test
+ * Function:    H5FA_cmp_cparam_test
  *
- * Purpose:	Compare the parameters used to create the fixed array
+ * Purpose:     Compare the parameters used to create the fixed array
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------

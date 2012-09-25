@@ -88,7 +88,6 @@
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2012
  *
  *-------------------------------------------------------------------------
@@ -118,7 +117,6 @@ END_FUNC(PKG)   /* end H5FA__create_flush_depend() */
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Dana Robinson
- *              derobins@hdfgroup.org
  *              Fall 2012
  *
  *-------------------------------------------------------------------------

@@ -88,7 +88,6 @@ H5FL_DEFINE_STATIC(H5HL_prfx_t);
  *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------
@@ -132,11 +131,9 @@ END_FUNC(PKG) /* end H5HL__prfx_new() */
  *
  * Purpose:     Destroy a local heap prefix object
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 12 2008
  *
  *-------------------------------------------------------------------------

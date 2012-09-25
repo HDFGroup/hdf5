@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FScache.c
- *			May  2 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5FScache.c
+ *              May  2 2006
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Implement file free space metadata cache methods.
+ * Purpose:     Implement file free space metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -28,18 +28,18 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
+#define H5FS_PACKAGE        /* Suppress error about including H5FSpkg   */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FSpkg.h"		/* File free space			*/
-#include "H5MFprivate.h"	/* File memory management		*/
-#include "H5Vprivate.h"		/* Vectors and arrays 			*/
-#include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5ACprivate.h"    /* Metadata cache                           */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FSpkg.h"        /* File free space                          */
+#include "H5MFprivate.h"    /* File memory management                   */
+#include "H5Vprivate.h"     /* Vectors and arrays                       */
+#include "H5WBprivate.h"    /* Wrapped Buffers                          */
 
 /****************/
 /* Local Macros */
@@ -84,10 +84,12 @@ static herr_t H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, had
 static herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *fspace);
 static herr_t H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy);
 static herr_t H5FS_cache_hdr_size(const H5F_t *f, const H5FS_t *fspace, size_t *size_ptr);
+
 static H5FS_sinfo_t *H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5FS_sinfo_t *sinfo, unsigned UNUSED * flags_ptr);
 static herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
 static herr_t H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy);
+static herr_t H5FS_cache_sinfo_notify(H5AC_notify_action_t action, H5FS_sinfo_t *sinfo);
 static herr_t H5FS_cache_sinfo_size(const H5F_t *f, const H5FS_sinfo_t *sinfo, size_t *size_ptr);
 
 
@@ -113,7 +115,7 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     (H5AC_flush_func_t)H5FS_cache_sinfo_flush,
     (H5AC_dest_func_t)H5FS_cache_sinfo_dest,
     (H5AC_clear_func_t)H5FS_cache_sinfo_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5FS_cache_sinfo_notify,
     (H5AC_size_func_t)H5FS_cache_sinfo_size,
 }};
 
@@ -133,15 +135,14 @@ H5FL_BLK_DEFINE_STATIC(sect_block);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_load
+ * Function:    H5FS_cache_hdr_load
  *
- * Purpose:	Loads a free space manager header from the disk.
+ * Purpose:     Loads a free space manager header from the disk.
  *
  * Return:      Success:        Pointer to a new free space header
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -149,16 +150,16 @@ H5FL_BLK_DEFINE_STATIC(sect_block);
 static H5FS_t *
 H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5FS_t		*fspace = NULL; /* Free space header info */
+    H5FS_t              *fspace = NULL; /* Free space header info */
     H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata; /* user data for callback */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for header data */
     uint8_t             hdr_buf[H5FS_HDR_BUF_SIZE]; /* Buffer for header */
-    uint8_t		*hdr;           /* Pointer to header buffer */
-    const uint8_t	*p;             /* Pointer into raw data buffer */
+    uint8_t             *hdr;           /* Pointer to header buffer */
+    const uint8_t       *p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
-    H5FS_t		*ret_value;     /* Return value */
+    H5FS_t              *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -168,7 +169,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Allocate a new free space manager */
     if(NULL == (fspace = H5FS_new(udata->f, udata->nclasses, udata->classes, udata->cls_init_udata)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set free space manager's internal information */
     fspace->addr = udata->addr;
@@ -183,23 +184,23 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Read header from disk */
     if(H5F_block_read(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, dxpl_id, hdr) < 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space header")
 
     p = hdr;
 
     /* Magic number */
     if(HDmemcmp(p, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
     p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5FS_HDR_VERSION)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
 
     /* Client ID */
     fspace->client = (H5FS_client_t)*p++;
     if(fspace->client >= H5FS_NUM_CLIENT_ID)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header")
 
     /* Total space tracked */
     H5F_DECODE_LENGTH(udata->f, p, fspace->tot_space);
@@ -217,7 +218,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* (only check if we actually have some classes) */
     UINT16DECODE(p, nclasses);
     if(fspace->nclasses > 0 && fspace->nclasses != nclasses)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
 
     /* Shrink percent */
     UINT16DECODE(p, fspace->shrink_percent);
@@ -250,7 +251,7 @@ H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Set return value */
     ret_value = fspace;
@@ -268,14 +269,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_flush
+ * Function:    H5FS_cache_hdr_flush
  *
- * Purpose:	Flushes a dirty free space header to disk.
+ * Purpose:     Flushes a dirty free space header to disk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              May  2 2006
  *
  *-------------------------------------------------------------------------
@@ -330,8 +330,8 @@ H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F
         } /* end if */
     } /* end if */
     else if(fspace->serial_sect_count > 0)
-	/* Sanity check that section info has address */
-	HDassert(H5F_addr_defined(fspace->sect_addr));
+        /* Sanity check that section info has address */
+        HDassert(H5F_addr_defined(fspace->sect_addr));
 
     if(fspace->cache_info.is_dirty) {
         uint8_t	*hdr;                   /* Pointer to header buffer */
@@ -401,17 +401,17 @@ H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
 
-	/* Write the free space header. */
+        /* Write the free space header. */
         HDassert((size_t)(p - hdr) == fspace->hdr_size);
-	if(H5F_block_write(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, dxpl_id, hdr) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space header to disk")
+        if(H5F_block_write(f, H5FD_MEM_FSPACE_HDR, addr, fspace->hdr_size, dxpl_id, hdr) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space header to disk")
 
-	fspace->cache_info.is_dirty = FALSE;
+        fspace->cache_info.is_dirty = FALSE;
     } /* end if */
 
     if(destroy)
         if(H5FS_cache_hdr_dest(f, fspace) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
     /* Release resources */
@@ -423,15 +423,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_dest
+ * Function:    H5FS_cache_hdr_dest
  *
- * Purpose:	Destroys a free space header in memory.
+ * Purpose:     Destroys a free space header in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
+ * Programmer:  Quincey Koziol
+ *              May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -472,15 +471,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_clear
+ * Function:    H5FS_cache_hdr_clear
  *
- * Purpose:	Mark a free space header in memory as non-dirty.
+ * Purpose:     Mark a free space header in memory as non-dirty.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
+ * Programmer:  Quincey Koziol
+ *              May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -501,7 +499,7 @@ H5FS_cache_hdr_clear(H5F_t *f, H5FS_t *fspace, hbool_t destroy)
 
     if(destroy)
         if(H5FS_cache_hdr_dest(f, fspace) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -509,17 +507,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_hdr_size
+ * Function:    H5FS_cache_hdr_size
  *
- * Purpose:	Compute the size in bytes of a free space header
- *		on disk, and return it in *size_ptr.  On failure,
- *		the value of *size_ptr is undefined.
+ * Purpose:     Compute the size in bytes of a free space header
+ *              on disk, and return it in *size_ptr.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May  2 2006
+ * Programmer:  Quincey Koziol
+ *              May  2 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -541,15 +537,14 @@ H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_pt
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_load
+ * Function:    H5FS_cache_sinfo_load
  *
- * Purpose:	Loads free space sections from the disk.
+ * Purpose:     Loads free space sections from the disk.
  *
  * Return:      Success:        Pointer to a new free space section info
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              July 31 2006
  *
  *-------------------------------------------------------------------------
@@ -557,15 +552,15 @@ H5FS_cache_hdr_size(const H5F_t UNUSED *f, const H5FS_t *fspace, size_t *size_pt
 static H5FS_sinfo_t *
 H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata)
 {
-    H5FS_sinfo_t	*sinfo = NULL;  /* Free space section info */
+    H5FS_sinfo_t        *sinfo = NULL;  /* Free space section info */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
     haddr_t             fs_addr;        /* Free space header address */
     size_t              old_sect_size;  /* Old section size */
-    uint8_t		*buf = NULL;    /* Temporary buffer */
-    const uint8_t	*p;             /* Pointer into raw data buffer */
+    uint8_t             *buf = NULL;    /* Temporary buffer */
+    const uint8_t       *p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
-    H5FS_sinfo_t	*ret_value;     /* Return value */
+    H5FS_sinfo_t        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -575,7 +570,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
 
     /* Allocate a new free space section info */
     if(NULL == (sinfo = H5FS_sinfo_new(udata->f, udata->fspace)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Allocate space for the buffer to serialize the sections into */
     H5_ASSIGN_OVERFLOW(/* To: */ old_sect_size, /* From: */ udata->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
@@ -584,24 +579,24 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
 
     /* Read buffer from disk */
     if(H5F_block_read(f, H5FD_MEM_FSPACE_SINFO, udata->fspace->sect_addr, (size_t)udata->fspace->sect_size, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space sections")
+        HGOTO_ERROR(H5E_FSPACE, H5E_READERROR, NULL, "can't read free space sections")
 
     /* Deserialize free sections from buffer available */
     p = buf;
 
     /* Magic number */
     if(HDmemcmp(p, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections signature")
     p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5FS_SINFO_VERSION)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections version")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space sections version")
 
     /* Address of free space header for these sections */
     H5F_addr_decode(udata->f, &p, &fs_addr);
     if(H5F_addr_ne(fs_addr, udata->fspace->addr))
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "incorrect header address for free space sections")
 
     /* Check for any serialized sections */
     if(udata->fspace->serial_sect_count > 0) {
@@ -684,7 +679,7 @@ H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, void *_udata
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
     HDassert((size_t)(p - (const uint8_t *)buf) == old_sect_size);
@@ -704,14 +699,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_serialize_sect_cb
+ * Function:    H5FS_sinfo_serialize_sect_cb
  *
- * Purpose:	Skip list iterator callback to serialize free space sections
+ * Purpose:     Skip list iterator callback to serialize free space sections
  *              of a particular size
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, May  8, 2006
  *
  *-------------------------------------------------------------------------
@@ -760,14 +755,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_sinfo_serialize_node_cb
+ * Function:    H5FS_sinfo_serialize_node_cb
  *
- * Purpose:	Skip list iterator callback to serialize free space sections
+ * Purpose:     Skip list iterator callback to serialize free space sections
  *              in a bin
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, May  8, 2006
  *
  *-------------------------------------------------------------------------
@@ -806,14 +801,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_flush
+ * Function:    H5FS_cache_sinfo_flush
  *
- * Purpose:	Flushes a dirty free space section info to disk.
+ * Purpose:     Flushes a dirty free space section info to disk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              July 31 2006
  *
  *-------------------------------------------------------------------------
@@ -916,13 +910,13 @@ H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
 
         buf = H5FL_BLK_FREE(sect_block, buf);
 
-	sinfo->cache_info.is_dirty = FALSE;
+        sinfo->cache_info.is_dirty = FALSE;
         sinfo->dirty = FALSE;
     } /* end if */
 
     if(destroy)
         if(H5FS_cache_sinfo_dest(f, sinfo) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -930,15 +924,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_dest
+ * Function:    H5FS_cache_sinfo_dest
  *
- * Purpose:	Destroys a free space section info in memory.
+ * Purpose:     Destroys a free space section info in memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
+ * Programmer:  Quincey Koziol
+ *              July 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -977,15 +970,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_clear
+ * Function:    H5FS_cache_sinfo_clear
  *
- * Purpose:	Mark a free space section info in memory as non-dirty.
+ * Purpose:     Mark a free space section info in memory as non-dirty.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
+ * Programmer:  Quincey Koziol
+ *              July 31 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1006,7 +998,7 @@ H5FS_cache_sinfo_clear(H5F_t *f, H5FS_sinfo_t *sinfo, hbool_t destroy)
 
     if(destroy)
         if(H5FS_cache_sinfo_dest(f, sinfo) < 0)
-	    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to destroy free space section info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1014,17 +1006,67 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FS_cache_sinfo_size
+ * Function:    H5FS_cache_sinfo_notify
  *
- * Purpose:	Compute the size in bytes of a free space section info
- *		on disk, and return it in *size_ptr.  On failure,
- *		the value of *size_ptr is undefined.
+ * Purpose:     Handle cache action notifications
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		July 31 2006
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_cache_sinfo_notify(H5AC_notify_action_t action, H5FS_sinfo_t *sinfo)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    
+    /* Sanity check */
+    HDassert(sinfo);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(sinfo->fspace->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on extensible array header */
+                if(H5FS__create_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency between data block and header, address = %llu", (unsigned long long)sinfo->fspace->sect_addr)
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on extensible array header */
+                if(H5FS__destroy_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between data block and header, address = %llu", (unsigned long long)sinfo->fspace->sect_addr)
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5FS_cache_sinfo_notify() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_cache_sinfo_size
+ *
+ * Purpose:     Compute the size in bytes of a free space section info
+ *              on disk, and return it in *size_ptr.
+ *
+ * Return:      SUCCEED (Can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              July 31 2006
  *
  *-------------------------------------------------------------------------
  */
