@@ -27,6 +27,7 @@
 #include "H5FDpublic.h"		/* File drivers				*/
 
 /* Private headers needed by this file */
+#include "H5Vprivate.h"		/* Vectors and arrays */
 
 
 /****************************/
@@ -114,6 +115,35 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 /* (Assumes that the high bits of the integer are zero) */
 #  define UINT64ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint64_t, n, l)
 
+/* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT64ENCODE_VARLEN(p, n) {					      \
+   uint64_t __n = (uint64_t)(n);							      \
+   unsigned _s = H5V_limit_enc_size(__n);				      \
+									      \
+   *(p)++ = (uint8_t)_s;						      \
+   UINT64ENCODE_VAR(p, __n, _s);						      \
+}
+
+#  define H5_ENCODE_UNSIGNED(p, n) {					      \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));		      \
+    UINT32ENCODE(p, n)							      \
+}
+
+/* Assumes the endianness of uint64_t is the same as double */
+#  define H5_ENCODE_DOUBLE(p, n) {					      \
+    uint64_t _n;							      \
+    size_t _u;								      \
+    uint8_t *_p = (uint8_t*)(p);					      \
+									      \
+    HDcompile_assert(sizeof(double) == 8);				      \
+    HDcompile_assert(sizeof(double) == sizeof(uint64_t));		      \
+    HDmemcpy(&_n, &n, sizeof(double));					      \
+    for(_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)			      \
+        *_p++ = (uint8_t)(_n & 0xff);					      \
+    (p) = (uint8_t *)(p) + 8;						      \
+}
+
 /* DECODE converts little endian bytes pointed by p to integer values and store
  * it in i.  For signed values, need to do sign-extension when converting
  * the last byte which carries the sign bit.
@@ -134,11 +164,11 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 }
 
 #  define INT32DECODE(p, i) {						      \
-   (i)	= (	     *(p) & 0xff);	  (p)++;			      \
-   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;			      \
-   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;			      \
-   (i) |= ((int32_t)(((*(p) & 0xff) << 24) |                                  \
-                   ((*(p) & 0x80) ? ~0xffffffff : 0x0))); (p)++;	      \
+   (i)	= ((int32_t)(*(p) & (unsigned)0xff));	  (p)++;		      \
+   (i) |= ((int32_t)(*(p) & (unsigned)0xff) <<  8); (p)++;		      \
+   (i) |= ((int32_t)(*(p) & (unsigned)0xff) << 16); (p)++;		      \
+   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                        \
+                   ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
 }
 
 #  define UINT32DECODE(p, i) {						      \
@@ -189,6 +219,34 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
 #  define UINT64DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
+
+/* Decode a 64-bit unsigned integer and its length from a variable-sized buffer */
+/* (Assumes that the high bits of the integer will be zero) */
+#  define UINT64DECODE_VARLEN(p, n) {					      \
+   unsigned _s = *(p)++;						      \
+									      \
+   UINT64DECODE_VAR(p, n, _s);						      \
+}
+
+#  define H5_DECODE_UNSIGNED(p, n) {					      \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));		      \
+    UINT32DECODE(p, n)							      \
+}
+
+/* Assumes the endianness of uint64_t is the same as double */
+#  define H5_DECODE_DOUBLE(p, n) {					      \
+    uint64_t _n;							      \
+    size_t _u;								      \
+									      \
+    HDcompile_assert(sizeof(double) == 8);				      \
+    HDcompile_assert(sizeof(double) == sizeof(uint64_t));		      \
+    _n = 0;								      \
+    (p) += 8;								      \
+    for(_u = 0; _u < sizeof(uint64_t); _u++)				      \
+        _n = (_n << 8) | *(--p);					      \
+    HDmemcpy(&(n), &_n, sizeof(double));					      \
+    (p) += 8;								      \
+}
 
 /* Address-related macros */
 #define H5F_addr_overflow(X,Z)	(HADDR_UNDEF==(X) ||			      \

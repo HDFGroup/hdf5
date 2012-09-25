@@ -108,11 +108,12 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
 	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) \
 	app_ref$(EXEEXT) enum$(EXEEXT) set_extent$(EXEEXT) \
-	ttsafe$(EXEEXT) getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) \
-	dangle$(EXEEXT) dtransform$(EXEEXT) reserved$(EXEEXT) \
-	cross_read$(EXEEXT) freespace$(EXEEXT) mf$(EXEEXT) \
-	farray$(EXEEXT) earray$(EXEEXT) btree2$(EXEEXT) fheap$(EXEEXT) \
-	file_image$(EXEEXT)
+	ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
+	enc_dec_plist_with_endianess$(EXEEXT) getname$(EXEEXT) \
+	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
+	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
+	btree2$(EXEEXT) fheap$(EXEEXT) file_image$(EXEEXT)
 am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
 	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
@@ -121,7 +122,7 @@ am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
 	space_overflow$(EXEEXT) gen_filespace$(EXEEXT) \
 	gen_specmetaread$(EXEEXT) gen_sizes_lheap$(EXEEXT) \
-	gen_file_image$(EXEEXT)
+	gen_file_image$(EXEEXT) gen_plist$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 accum_SOURCES = accum.c
 accum_OBJECTS = accum.$(OBJEXT)
@@ -191,6 +192,15 @@ efc_SOURCES = efc.c
 efc_OBJECTS = efc.$(OBJEXT)
 efc_LDADD = $(LDADD)
 efc_DEPENDENCIES = libh5test.la $(LIBHDF5)
+enc_dec_plist_SOURCES = enc_dec_plist.c
+enc_dec_plist_OBJECTS = enc_dec_plist.$(OBJEXT)
+enc_dec_plist_LDADD = $(LDADD)
+enc_dec_plist_DEPENDENCIES = libh5test.la $(LIBHDF5)
+enc_dec_plist_with_endianess_SOURCES = enc_dec_plist_with_endianess.c
+enc_dec_plist_with_endianess_OBJECTS =  \
+	enc_dec_plist_with_endianess.$(OBJEXT)
+enc_dec_plist_with_endianess_LDADD = $(LDADD)
+enc_dec_plist_with_endianess_DEPENDENCIES = libh5test.la $(LIBHDF5)
 enum_SOURCES = enum.c
 enum_OBJECTS = enum.$(OBJEXT)
 enum_LDADD = $(LDADD)
@@ -299,6 +309,10 @@ gen_nullspace_SOURCES = gen_nullspace.c
 gen_nullspace_OBJECTS = gen_nullspace.$(OBJEXT)
 gen_nullspace_LDADD = $(LDADD)
 gen_nullspace_DEPENDENCIES = libh5test.la $(LIBHDF5)
+gen_plist_SOURCES = gen_plist.c
+gen_plist_OBJECTS = gen_plist.$(OBJEXT)
+gen_plist_LDADD = $(LDADD)
+gen_plist_DEPENDENCIES = libh5test.la $(LIBHDF5)
 gen_sizes_lheap_SOURCES = gen_sizes_lheap.c
 gen_sizes_lheap_OBJECTS = gen_sizes_lheap.$(OBJEXT)
 gen_sizes_lheap_LDADD = $(LDADD)
@@ -454,28 +468,30 @@ am__v_CCLD_1 =
 SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	btree2.c cache.c cache_api.c cache_tagging.c cmpd_dset.c \
 	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
-	earray.c efc.c enum.c err_compat.c error_test.c extend.c \
-	external.c farray.c fheap.c file_image.c fillval.c \
-	filter_fail.c flush1.c flush2.c freespace.c gen_bad_ohdr.c \
-	gen_bogus.c gen_cross.c gen_deflate.c gen_file_image.c \
-	gen_filespace.c gen_filters.c gen_new_array.c gen_new_fill.c \
-	gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+	earray.c efc.c enc_dec_plist.c enc_dec_plist_with_endianess.c \
+	enum.c err_compat.c error_test.c extend.c external.c farray.c \
+	fheap.c file_image.c fillval.c filter_fail.c flush1.c flush2.c \
+	freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
+	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
+	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
+	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_plist.c \
+	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
+	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
+	mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
+	set_extent.c space_overflow.c stab.c tcheck_version.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
+	vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
 	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
 	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c earray.c efc.c enum.c err_compat.c \
+	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
+	enc_dec_plist_with_endianess.c enum.c err_compat.c \
 	error_test.c extend.c external.c farray.c fheap.c file_image.c \
 	fillval.c filter_fail.c flush1.c flush2.c freespace.c \
 	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
 	gen_file_image.c gen_filespace.c gen_filters.c gen_new_array.c \
 	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_sizes_lheap.c \
+	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
@@ -820,7 +836,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
-           set_extent ttsafe \
+           set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
            freespace mf farray earray btree2 fheap file_image
 
@@ -835,7 +851,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
-    gen_sizes_lheap gen_file_image
+    gen_sizes_lheap gen_file_image gen_plist
 
 
 # The libh5test library provides common support code for the tests.
@@ -1008,6 +1024,12 @@ earray$(EXEEXT): $(earray_OBJECTS) $(earray_DEPENDENCIES) $(EXTRA_earray_DEPENDE
 efc$(EXEEXT): $(efc_OBJECTS) $(efc_DEPENDENCIES) $(EXTRA_efc_DEPENDENCIES) 
 	@rm -f efc$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(efc_OBJECTS) $(efc_LDADD) $(LIBS)
+enc_dec_plist$(EXEEXT): $(enc_dec_plist_OBJECTS) $(enc_dec_plist_DEPENDENCIES) $(EXTRA_enc_dec_plist_DEPENDENCIES) 
+	@rm -f enc_dec_plist$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(enc_dec_plist_OBJECTS) $(enc_dec_plist_LDADD) $(LIBS)
+enc_dec_plist_with_endianess$(EXEEXT): $(enc_dec_plist_with_endianess_OBJECTS) $(enc_dec_plist_with_endianess_DEPENDENCIES) $(EXTRA_enc_dec_plist_with_endianess_DEPENDENCIES) 
+	@rm -f enc_dec_plist_with_endianess$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(enc_dec_plist_with_endianess_OBJECTS) $(enc_dec_plist_with_endianess_LDADD) $(LIBS)
 enum$(EXEEXT): $(enum_OBJECTS) $(enum_DEPENDENCIES) $(EXTRA_enum_DEPENDENCIES) 
 	@rm -f enum$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(enum_OBJECTS) $(enum_LDADD) $(LIBS)
@@ -1089,6 +1111,9 @@ gen_noencoder$(EXEEXT): $(gen_noencoder_OBJECTS) $(gen_noencoder_DEPENDENCIES) $
 gen_nullspace$(EXEEXT): $(gen_nullspace_OBJECTS) $(gen_nullspace_DEPENDENCIES) $(EXTRA_gen_nullspace_DEPENDENCIES) 
 	@rm -f gen_nullspace$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gen_nullspace_OBJECTS) $(gen_nullspace_LDADD) $(LIBS)
+gen_plist$(EXEEXT): $(gen_plist_OBJECTS) $(gen_plist_DEPENDENCIES) $(EXTRA_gen_plist_DEPENDENCIES) 
+	@rm -f gen_plist$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(gen_plist_OBJECTS) $(gen_plist_LDADD) $(LIBS)
 gen_sizes_lheap$(EXEEXT): $(gen_sizes_lheap_OBJECTS) $(gen_sizes_lheap_DEPENDENCIES) $(EXTRA_gen_sizes_lheap_DEPENDENCIES) 
 	@rm -f gen_sizes_lheap$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(gen_sizes_lheap_OBJECTS) $(gen_sizes_lheap_LDADD) $(LIBS)
@@ -1195,6 +1220,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enc_dec_plist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enc_dec_plist_with_endianess.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/err_compat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error_test.Po@am__quote@
@@ -1222,6 +1249,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_new_super.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_noencoder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_nullspace.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_plist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_sizes_lheap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_specmetaread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_udlinks.Po@am__quote@

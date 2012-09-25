@@ -64,6 +64,7 @@ $Source = "";
                "int32_t"                    => "Is",
                "unsigned"                   => "Iu",
                "unsigned int"               => "Iu",
+               "uint32_t"                   => "Iu",
                "H5I_type_t"                 => "It",
 	       "H5G_link_t"                 => "Ll", #Same as H5L_type_t now
 	       "H5L_type_t"                 => "Ll",

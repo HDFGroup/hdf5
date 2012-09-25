@@ -49,37 +49,61 @@
 /* Definitions for the size of the file user block in bytes */
 #define H5F_CRT_USER_BLOCK_SIZE      sizeof(hsize_t)
 #define H5F_CRT_USER_BLOCK_DEF       0
+#define H5F_CRT_USER_BLOCK_ENC       H5P__encode_hsize_t
+#define H5F_CRT_USER_BLOCK_DEC       H5P__decode_hsize_t
 /* Definitions for the 1/2 rank for symbol table leaf nodes */
 #define H5F_CRT_SYM_LEAF_SIZE        sizeof(unsigned)
+#define H5F_CRT_SYM_LEAF_ENC         H5P__encode_unsigned
+#define H5F_CRT_SYM_LEAF_DEC         H5P__decode_unsigned
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
 #define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_CHUNK_IK_DEF}
+#define H5F_CRT_BTREE_RANK_ENC       H5P__fcrt_btree_rank_enc
+#define H5F_CRT_BTREE_RANK_DEC       H5P__fcrt_btree_rank_dec
 /* Definitions for byte number in an address                */
 #define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(uint8_t)
 #define H5F_CRT_ADDR_BYTE_NUM_DEF    H5F_OBJ_ADDR_SIZE
+#define H5F_CRT_ADDR_BYTE_NUM_ENC    H5P__encode_uint8_t
+#define H5F_CRT_ADDR_BYTE_NUM_DEC    H5P__decode_uint8_t
 /* Definitions for byte number for object size              */
 #define H5F_CRT_OBJ_BYTE_NUM_SIZE     sizeof(uint8_t)
 #define H5F_CRT_OBJ_BYTE_NUM_DEF      H5F_OBJ_SIZE_SIZE
+#define H5F_CRT_OBJ_BYTE_NUM_ENC      H5P__encode_uint8_t
+#define H5F_CRT_OBJ_BYTE_NUM_DEC      H5P__decode_uint8_t
 /* Definitions for version number of the superblock         */
 #define H5F_CRT_SUPER_VERS_SIZE       sizeof(unsigned)
 #define H5F_CRT_SUPER_VERS_DEF        HDF5_SUPERBLOCK_VERSION_DEF
 /* Definitions for shared object header messages */
 #define H5F_CRT_SHMSG_NINDEXES_SIZE    sizeof(unsigned)
 #define H5F_CRT_SHMSG_NINDEXES_DEF     (0)
+#define H5F_CRT_SHMSG_NINDEXES_ENC     H5P__encode_unsigned
+#define H5F_CRT_SHMSG_NINDEXES_DEC     H5P__decode_unsigned
 #define H5F_CRT_SHMSG_INDEX_TYPES_SIZE sizeof(unsigned[H5O_SHMESG_MAX_NINDEXES])
 #define H5F_CRT_SHMSG_INDEX_TYPES_DEF  {0,0,0,0,0,0}
+#define H5F_CRT_SHMSG_INDEX_TYPES_ENC  H5P__fcrt_shmsg_index_types_enc
+#define H5F_CRT_SHMSG_INDEX_TYPES_DEC  H5P__fcrt_shmsg_index_types_dec
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE sizeof(unsigned[H5O_SHMESG_MAX_NINDEXES])
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_DEF {250,250,250,250,250,250}
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_ENC H5P__fcrt_shmsg_index_minsize_enc
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_DEC H5P__fcrt_shmsg_index_minsize_dec
 /* Definitions for shared object header list/btree phase change cutoffs */
 #define H5F_CRT_SHMSG_LIST_MAX_SIZE     sizeof(unsigned)
 #define H5F_CRT_SHMSG_LIST_MAX_DEF      (50)
+#define H5F_CRT_SHMSG_LIST_MAX_ENC      H5P__encode_unsigned
+#define H5F_CRT_SHMSG_LIST_MAX_DEC      H5P__decode_unsigned
 #define H5F_CRT_SHMSG_BTREE_MIN_SIZE    sizeof(unsigned)
 #define H5F_CRT_SHMSG_BTREE_MIN_DEF     (40)
+#define H5F_CRT_SHMSG_BTREE_MIN_ENC     H5P__encode_unsigned
+#define H5F_CRT_SHMSG_BTREE_MIN_DEC     H5P__decode_unsigned
 /* Definitions for file space handling strategy */
 #define H5F_CRT_FILE_SPACE_STRATEGY_SIZE       sizeof(unsigned)
 #define H5F_CRT_FILE_SPACE_STRATEGY_DEF        H5F_FILE_SPACE_STRATEGY_DEF
+#define H5F_CRT_FILE_SPACE_STRATEGY_ENC        H5P__encode_unsigned
+#define H5F_CRT_FILE_SPACE_STRATEGY_DEC        H5P__decode_unsigned
 #define H5F_CRT_FREE_SPACE_THRESHOLD_SIZE      sizeof(hsize_t)
 #define H5F_CRT_FREE_SPACE_THRESHOLD_DEF       H5F_FREE_SPACE_THRESHOLD_DEF
+#define H5F_CRT_FREE_SPACE_THRESHOLD_ENC       H5P__encode_hsize_t
+#define H5F_CRT_FREE_SPACE_THRESHOLD_DEC       H5P__decode_hsize_t
 
 
 /******************/
@@ -98,6 +122,14 @@
 
 /* Property class callbacks */
 static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
+
+/* property callbacks */
+static herr_t H5P__fcrt_btree_rank_enc(const void *value, uint8_t **pp, size_t *size);
+static herr_t H5P__fcrt_btree_rank_dec(const uint8_t **pp, void *value);
+static herr_t H5P__fcrt_shmsg_index_types_enc(const void *value, uint8_t **pp, size_t *size);
+static herr_t H5P__fcrt_shmsg_index_types_dec(const uint8_t **pp, void *value);
+static herr_t H5P__fcrt_shmsg_index_minsize_enc(const void *value, uint8_t **pp, size_t *size);
+static herr_t H5P__fcrt_shmsg_index_minsize_dec(const uint8_t **pp, void *value);
 
 
 /*********************/
@@ -130,6 +162,21 @@ const H5P_libclass_t H5P_CLS_FCRT[1] = {{
 /* Local Variables */
 /*******************/
 
+/* Property value defaults */
+static const hsize_t H5F_def_userblock_size_g = H5F_CRT_USER_BLOCK_DEF;    /* Default userblock size */
+static const unsigned H5F_def_sym_leaf_k_g = H5F_CRT_SYM_LEAF_DEF;         /* Default size for symbol table leaf nodes */
+static const unsigned H5F_def_btree_k_g[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;    /* Default 'K' values for B-trees in file */
+static const uint8_t H5F_def_sizeof_addr_g = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
+static const uint8_t H5F_def_sizeof_size_g = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
+static const unsigned H5F_def_superblock_ver_g = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
+static const unsigned H5F_def_num_sohm_indexes_g    = H5F_CRT_SHMSG_NINDEXES_DEF;
+static const unsigned H5F_def_sohm_index_flags_g[H5O_SHMESG_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
+static const unsigned H5F_def_sohm_index_minsizes_g[H5O_SHMESG_MAX_NINDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
+static const unsigned H5F_def_sohm_list_max_g  = H5F_CRT_SHMSG_LIST_MAX_DEF;
+static const unsigned H5F_def_sohm_btree_min_g  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
+static const unsigned H5F_def_file_space_strategy_g = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
+static const hsize_t H5F_def_free_space_threshold_g = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
+
 
 
 /*-------------------------------------------------------------------------
@@ -146,67 +193,80 @@ const H5P_libclass_t H5P_CLS_FCRT[1] = {{
 static herr_t
 H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    hsize_t userblock_size = H5F_CRT_USER_BLOCK_DEF;    /* Default userblock size */
-    unsigned sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;         /* Default size for symbol table leaf nodes */
-    unsigned btree_k[H5B_NUM_BTREE_ID] = H5F_CRT_BTREE_RANK_DEF;    /* Default 'K' values for B-trees in file */
-    uint8_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
-    uint8_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
-    unsigned superblock_ver = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
-    unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
-    unsigned sohm_index_flags[H5O_SHMESG_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
-    unsigned sohm_index_minsizes[H5O_SHMESG_MAX_NINDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
-    unsigned sohm_list_max  = H5F_CRT_SHMSG_LIST_MAX_DEF;
-    unsigned sohm_btree_min  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
-    unsigned file_space_strategy = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
-    hsize_t free_space_threshold = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Register the user block size */
-    if(H5P_register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE, &userblock_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE, &H5F_def_userblock_size_g, 
+            NULL, NULL, NULL, H5F_CRT_USER_BLOCK_ENC, H5F_CRT_USER_BLOCK_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 1/2 rank for symbol table leaf nodes */
-    if(H5P_register_real(pclass, H5F_CRT_SYM_LEAF_NAME, H5F_CRT_SYM_LEAF_SIZE, &sym_leaf_k, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_SYM_LEAF_NAME, H5F_CRT_SYM_LEAF_SIZE, &H5F_def_sym_leaf_k_g, 
+            NULL, NULL, NULL, H5F_CRT_SYM_LEAF_ENC, H5F_CRT_SYM_LEAF_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 1/2 rank for btree internal nodes */
-    if(H5P_register_real(pclass, H5F_CRT_BTREE_RANK_NAME, H5F_CRT_BTREE_RANK_SIZE, btree_k, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_BTREE_RANK_NAME, H5F_CRT_BTREE_RANK_SIZE, H5F_def_btree_k_g, 
+            NULL, NULL, NULL, H5F_CRT_BTREE_RANK_ENC, H5F_CRT_BTREE_RANK_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the byte number for an address */
-    if(H5P_register_real(pclass, H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &sizeof_addr, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_ADDR_BYTE_NUM_NAME, H5F_CRT_ADDR_BYTE_NUM_SIZE, &H5F_def_sizeof_addr_g, 
+            NULL, NULL, NULL, H5F_CRT_ADDR_BYTE_NUM_ENC, H5F_CRT_ADDR_BYTE_NUM_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the byte number for object size */
-    if(H5P_register_real(pclass, H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE, &sizeof_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_OBJ_BYTE_NUM_NAME, H5F_CRT_OBJ_BYTE_NUM_SIZE, &H5F_def_sizeof_size_g, 
+            NULL, NULL, NULL, H5F_CRT_OBJ_BYTE_NUM_ENC, H5F_CRT_OBJ_BYTE_NUM_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the superblock version number */
-    if(H5P_register_real(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE, &superblock_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE, &H5F_def_superblock_ver_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the shared OH message information */
-    if(H5P_register_real(pclass,H5F_CRT_SHMSG_NINDEXES_NAME, H5F_CRT_SHMSG_NINDEXES_SIZE, &num_sohm_indexes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register_real(pclass, H5F_CRT_SHMSG_NINDEXES_NAME, H5F_CRT_SHMSG_NINDEXES_SIZE, &H5F_def_num_sohm_indexes_g,
+            NULL, NULL, NULL, H5F_CRT_SHMSG_NINDEXES_ENC, H5F_CRT_SHMSG_NINDEXES_DEC,
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass,H5F_CRT_SHMSG_INDEX_TYPES_NAME, H5F_CRT_SHMSG_INDEX_TYPES_SIZE, &sohm_index_flags,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register_real(pclass, H5F_CRT_SHMSG_INDEX_TYPES_NAME, H5F_CRT_SHMSG_INDEX_TYPES_SIZE, &H5F_def_sohm_index_flags_g,
+            NULL, NULL, NULL, H5F_CRT_SHMSG_INDEX_TYPES_ENC, H5F_CRT_SHMSG_INDEX_TYPES_DEC,
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass,H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE, &sohm_index_minsizes,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register_real(pclass, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, H5F_CRT_SHMSG_INDEX_MINSIZE_SIZE, &H5F_def_sohm_index_minsizes_g,
+            NULL, NULL, NULL, H5F_CRT_SHMSG_INDEX_MINSIZE_ENC, H5F_CRT_SHMSG_INDEX_MINSIZE_DEC,
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the shared OH cutoff size information */
-    if(H5P_register_real(pclass,H5F_CRT_SHMSG_LIST_MAX_NAME, H5F_CRT_SHMSG_LIST_MAX_SIZE, &sohm_list_max,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register_real(pclass, H5F_CRT_SHMSG_LIST_MAX_NAME, H5F_CRT_SHMSG_LIST_MAX_SIZE, &H5F_def_sohm_list_max_g,
+            NULL, NULL, NULL, H5F_CRT_SHMSG_LIST_MAX_ENC, H5F_CRT_SHMSG_LIST_MAX_DEC,
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register_real(pclass,H5F_CRT_SHMSG_BTREE_MIN_NAME, H5F_CRT_SHMSG_BTREE_MIN_SIZE, &sohm_btree_min,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_register_real(pclass, H5F_CRT_SHMSG_BTREE_MIN_NAME, H5F_CRT_SHMSG_BTREE_MIN_SIZE, &H5F_def_sohm_btree_min_g,
+            NULL, NULL, NULL, H5F_CRT_SHMSG_BTREE_MIN_ENC, H5F_CRT_SHMSG_BTREE_MIN_DEC,
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file space handling strategy */
-    if(H5P_register_real(pclass, H5F_CRT_FILE_SPACE_STRATEGY_NAME, H5F_CRT_FILE_SPACE_STRATEGY_SIZE, &file_space_strategy, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_FILE_SPACE_STRATEGY_NAME, H5F_CRT_FILE_SPACE_STRATEGY_SIZE, &H5F_def_file_space_strategy_g, 
+            NULL, NULL, NULL, H5F_CRT_FILE_SPACE_STRATEGY_ENC, H5F_CRT_FILE_SPACE_STRATEGY_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the free space section threshold */
-    if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &free_space_threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, H5F_CRT_FREE_SPACE_THRESHOLD_SIZE, &H5F_def_free_space_threshold_g, 
+            NULL, NULL, NULL, H5F_CRT_FREE_SPACE_THRESHOLD_ENC, H5F_CRT_FREE_SPACE_THRESHOLD_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -615,6 +675,95 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_btree_rank_enc
+ *
+ * Purpose:        Callback routine which is called whenever the index storage
+ *                 btree in file creation property list is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_btree_rank_enc(const void *value, uint8_t **pp, size_t *size)
+{
+    const unsigned *btree_k = (const unsigned *)value; /* Create local alias for values */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(btree_k);
+    HDassert(size);
+
+    if(NULL != *pp) {
+        unsigned u;             /* Local index variable */
+
+        /* Encode the size of an unsigned*/
+        *(*pp)++ = (uint8_t)sizeof(unsigned);
+
+        /* Encode all the btree  */
+        for(u = 0 ; u < H5B_NUM_BTREE_ID; u++) {
+            /* Encode the left split value */
+            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)btree_k)
+            btree_k++;
+        } /* end for */
+    } /* end if */
+
+    /* Size of type flags values */
+    *size += 1 + (H5B_NUM_BTREE_ID * sizeof(unsigned));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__fcrt_btree_rank_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_btree_rank_dec
+ *
+ * Purpose:        Callback routine which is called whenever the index storage
+ *                 btree in file creation property list is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_btree_rank_dec(const uint8_t **pp, void *_value)
+{
+    unsigned *btree_k = (unsigned *)_value;
+    unsigned enc_size;                  /* Size of encoded property */
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(btree_k);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    if(enc_size != sizeof(unsigned))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+
+    /* Decode all the type flags */
+    for(u = 0 ; u < H5B_NUM_BTREE_ID; u++)
+        H5_DECODE_UNSIGNED(*pp, btree_k[u])
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__fcrt_btree_rank_dec() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_shared_mesg_nindexes
  *
  * Purpose:	Set the number of Shared Object Header Message (SOHM)
@@ -811,6 +960,188 @@ H5Pget_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned *mesg_type
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_shared_mesg_index() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_shmsg_index_types_enc
+ *
+ * Purpose:        Callback routine which is called whenever the shared
+ *                 message indec types in file creation property list
+ *                 is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_shmsg_index_types_enc(const void *value, uint8_t **pp, size_t *size)
+{
+    const unsigned *type_flags = (const unsigned *)value; /* Create local alias for values */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(type_flags);
+    HDassert(size);
+
+    if(NULL != *pp) {
+        unsigned u;             /* Local index variable */
+
+        /* Encode the size of a double*/
+        *(*pp)++ = (uint8_t)sizeof(unsigned);
+
+        /* Encode all the type flags */
+        for(u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++) {
+            /* Encode the left split value */
+            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)type_flags)
+            type_flags++;
+        } /* end for */
+    } /* end if */
+
+    /* Size of type flags values */
+    *size += 1 + (H5O_SHMESG_MAX_NINDEXES * sizeof(unsigned));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__fcrt_shmsg_index_types_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_shmsg_index_types_dec
+ *
+ * Purpose:        Callback routine which is called whenever the shared
+ *                 message indec types in file creation property list
+ *                 is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_shmsg_index_types_dec(const uint8_t **pp, void *_value)
+{
+    unsigned *type_flags = (unsigned *)_value;
+    unsigned enc_size;                  /* Size of encoded property */
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(type_flags);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    if(enc_size != sizeof(unsigned))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+
+    /* Decode all the type flags */
+    for(u = 0; u < H5O_SHMESG_MAX_NINDEXES; u++)
+        H5_DECODE_UNSIGNED(*pp, type_flags[u])
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__fcrt_shmsg_index_types_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_shmsg_index_minsize_enc
+ *
+ * Purpose:        Callback routine which is called whenever the shared
+ *                 message index minsize in file creation property list
+ *                 is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_shmsg_index_minsize_enc(const void *value, uint8_t **pp, size_t *size)
+{
+    const unsigned *minsizes = (const unsigned *)value; /* Create local alias for values */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(minsizes);
+    HDassert(size);
+
+    if(NULL != *pp) {
+        unsigned u;             /* Local index variable */
+
+        /* Encode the size of a double*/
+        *(*pp)++ = (uint8_t)sizeof(unsigned);
+
+        /* Encode all the minsize values */
+        for(u = 0 ; u < H5O_SHMESG_MAX_NINDEXES; u++) {
+            /* Encode the left split value */
+            H5_ENCODE_UNSIGNED(*pp, *(const unsigned *)minsizes)
+            minsizes++;
+        } /* end for */
+    } /* end if */
+
+    /* Size of type flags values */
+    *size += 1 + (H5O_SHMESG_MAX_NINDEXES * sizeof(unsigned));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__fcrt_shmsg_index_minsize_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__fcrt_shmsg_index_minsize_dec
+ *
+ * Purpose:        Callback routine which is called whenever the shared
+ *                 message indec minsize in file creation property list
+ *                 is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 7, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__fcrt_shmsg_index_minsize_dec(const uint8_t **pp, void *_value)
+{
+    unsigned *minsizes = (unsigned *)_value;
+    unsigned enc_size;                  /* Size of encoded property */
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(minsizes);
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    if(enc_size != sizeof(unsigned))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+
+    /* Decode all the minsize values */
+    for(u = 0 ; u < H5O_SHMESG_MAX_NINDEXES; u++)
+        H5_DECODE_UNSIGNED(*pp, minsizes[u])
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__fcrt_shmsg_index_minsize_dec() */
 
 
 /*-------------------------------------------------------------------------

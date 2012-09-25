@@ -59,36 +59,57 @@
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
 #define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC__DEFAULT_CACHE_CONFIG
+#define H5F_ACS_META_CACHE_INIT_CONFIG_ENC	H5P__facc_cache_config_enc
+#define H5F_ACS_META_CACHE_INIT_CONFIG_DEC	H5P__facc_cache_config_dec
+#define H5F_ACS_META_CACHE_INIT_CONFIG_CMP      H5P__facc_cache_config_cmp
 /* Definitions for size of raw data chunk cache(slots) */
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE       sizeof(size_t)
 #define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF        521
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC        H5P__encode_size_t
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC        H5P__decode_size_t
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        (1024*1024)
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC        H5P__encode_size_t
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC        H5P__decode_size_t
 /* Definition for preemption read chunks first */
 #define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
 #define H5F_ACS_PREEMPT_READ_CHUNKS_DEF         0.75f
+#define H5F_ACS_PREEMPT_READ_CHUNKS_ENC         H5P__encode_double
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
 /* Definition for threshold for alignment */
 #define H5F_ACS_ALIGN_THRHD_SIZE                sizeof(hsize_t)
 #define H5F_ACS_ALIGN_THRHD_DEF                 1
+#define H5F_ACS_ALIGN_THRHD_ENC                 H5P__encode_hsize_t
+#define H5F_ACS_ALIGN_THRHD_DEC                 H5P__decode_hsize_t
 /* Definition for alignment */
 #define H5F_ACS_ALIGN_SIZE                      sizeof(hsize_t)
 #define H5F_ACS_ALIGN_DEF                       1
+#define H5F_ACS_ALIGN_ENC                       H5P__encode_hsize_t
+#define H5F_ACS_ALIGN_DEC                       H5P__decode_hsize_t
 /* Definition for minimum metadata allocation block size (when
    aggregating metadata allocations. */
 #define H5F_ACS_META_BLOCK_SIZE_SIZE            sizeof(hsize_t)
 #define H5F_ACS_META_BLOCK_SIZE_DEF             2048
+#define H5F_ACS_META_BLOCK_SIZE_ENC             H5P__encode_hsize_t
+#define H5F_ACS_META_BLOCK_SIZE_DEC             H5P__decode_hsize_t
 /* Definition for maximum sieve buffer size (when data sieving
    is allowed by file driver */
 #define H5F_ACS_SIEVE_BUF_SIZE_SIZE             sizeof(size_t)
 #define H5F_ACS_SIEVE_BUF_SIZE_DEF              (64*1024)
+#define H5F_ACS_SIEVE_BUF_SIZE_ENC              H5P__encode_size_t
+#define H5F_ACS_SIEVE_BUF_SIZE_DEC              H5P__decode_size_t
 /* Definition for minimum "small data" allocation block size (when
    aggregating "small" raw data allocations. */
 #define H5F_ACS_SDATA_BLOCK_SIZE_SIZE           sizeof(hsize_t)
 #define H5F_ACS_SDATA_BLOCK_SIZE_DEF            2048
+#define H5F_ACS_SDATA_BLOCK_SIZE_ENC            H5P__encode_hsize_t
+#define H5F_ACS_SDATA_BLOCK_SIZE_DEC            H5P__decode_hsize_t
 /* Definition for garbage-collect references */
 #define H5F_ACS_GARBG_COLCT_REF_SIZE            sizeof(unsigned)
 #define H5F_ACS_GARBG_COLCT_REF_DEF             0
+#define H5F_ACS_GARBG_COLCT_REF_ENC             H5P__encode_unsigned
+#define H5F_ACS_GARBG_COLCT_REF_DEC             H5P__decode_unsigned
 /* Definition for file driver ID */
 #define H5F_ACS_FILE_DRV_ID_SIZE                sizeof(hid_t)
 #define H5F_ACS_FILE_DRV_ID_DEF                 H5_DEFAULT_VFD
@@ -98,9 +119,13 @@
 /* Definition for file close degree */
 #define H5F_CLOSE_DEGREE_SIZE		        sizeof(H5F_close_degree_t)
 #define H5F_CLOSE_DEGREE_DEF		        H5F_CLOSE_DEFAULT
+#define H5F_CLOSE_DEGREE_ENC		        H5P__facc_fclose_degree_enc
+#define H5F_CLOSE_DEGREE_DEC		        H5P__facc_fclose_degree_dec
 /* Definition for offset position in file for family file driver */
 #define H5F_ACS_FAMILY_OFFSET_SIZE              sizeof(hsize_t)
 #define H5F_ACS_FAMILY_OFFSET_DEF               0
+#define H5F_ACS_FAMILY_OFFSET_ENC               H5P__encode_hsize_t
+#define H5F_ACS_FAMILY_OFFSET_DEC               H5P__decode_hsize_t
 /* Definition for new member size of family driver. It's private
  * property only used by h5repart */
 #define H5F_ACS_FAMILY_NEWSIZE_SIZE             sizeof(hsize_t)
@@ -112,9 +137,13 @@
 /* Definition for data type in multi file driver */
 #define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
 #define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
+#define H5F_ACS_MULTI_TYPE_ENC                  H5P__facc_multi_type_enc
+#define H5F_ACS_MULTI_TYPE_DEC                  H5P__facc_multi_type_dec
 /* Definition for 'use latest format version' flag */
 #define H5F_ACS_LATEST_FORMAT_SIZE              sizeof(hbool_t)
 #define H5F_ACS_LATEST_FORMAT_DEF               FALSE
+#define H5F_ACS_LATEST_FORMAT_ENC               H5P__encode_hbool_t
+#define H5F_ACS_LATEST_FORMAT_DEC               H5P__decode_hbool_t
 /* Definition for whether to query the file descriptor from the core VFD
  * instead of the memory address.  (Private to library)
  */
@@ -123,6 +152,8 @@
 /* Definition for external file cache size */
 #define H5F_ACS_EFC_SIZE_SIZE                   sizeof(unsigned)
 #define H5F_ACS_EFC_SIZE_DEF                    0
+#define H5F_ACS_EFC_SIZE_ENC                    H5P__encode_unsigned
+#define H5F_ACS_EFC_SIZE_DEC                    H5P__decode_unsigned
 /* Definition of pointer to initial file image info */
 #define H5F_ACS_FILE_IMAGE_INFO_SIZE            sizeof(H5FD_file_image_info_t)
 #define H5F_ACS_FILE_IMAGE_INFO_DEF             H5FD_DEFAULT_FILE_IMAGE_INFO
@@ -155,6 +186,15 @@ static herr_t H5P_file_image_info_del(hid_t prop_id, const char *name, size_t si
 static herr_t H5P_file_image_info_copy(const char *name, size_t size, void *value);
 static herr_t H5P_file_image_info_close(const char *name, size_t size, void *value);
 
+/* encode & decode callbacks */
+static herr_t H5P__facc_cache_config_enc(const void *value, uint8_t **pp, size_t *size);
+static herr_t H5P__facc_cache_config_dec(const uint8_t **pp, void *value);
+static int H5P__facc_cache_config_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_fclose_degree_enc(const void *value, uint8_t **pp, size_t *size);
+static herr_t H5P__facc_fclose_degree_dec(const uint8_t **pp, void *value);
+static herr_t H5P__facc_multi_type_enc(const void *value, uint8_t **pp, size_t *size);
+static herr_t H5P__facc_multi_type_dec(const uint8_t **pp, void *value);
+
 
 /*********************/
 /* Package Variables */
@@ -186,6 +226,28 @@ const H5P_libclass_t H5P_CLS_FACC[1] = {{
 /* Local Variables */
 /*******************/
 
+/* Property value defaults */
+static const H5AC_cache_config_t H5F_def_mdc_initCacheCfg_g = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
+static const size_t H5F_def_rdcc_nslots_g = H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
+static const size_t H5F_def_rdcc_nbytes_g = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
+static const double H5F_def_rdcc_w0_g = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
+static const hsize_t H5F_def_threshold_g = H5F_ACS_ALIGN_THRHD_DEF;                /* Default allocation alignment threshold */
+static const hsize_t H5F_def_alignment_g = H5F_ACS_ALIGN_DEF;                      /* Default allocation alignment value */
+static const hsize_t H5F_def_meta_block_size_g = H5F_ACS_META_BLOCK_SIZE_DEF;      /* Default metadata allocation block size */
+static const size_t H5F_def_sieve_buf_size_g = H5F_ACS_SIEVE_BUF_SIZE_DEF;         /* Default raw data I/O sieve buffer size */
+static const hsize_t H5F_def_sdata_block_size_g = H5F_ACS_SDATA_BLOCK_SIZE_DEF;    /* Default small data allocation block size */
+static const unsigned H5F_def_gc_ref_g = H5F_ACS_GARBG_COLCT_REF_DEF;              /* Default garbage collection for references setting */
+static const void *H5F_def_driver_info_g = H5F_ACS_FILE_DRV_INFO_DEF;              /* Default VFL driver info */
+static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF;     /* Default file close degree */
+static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF;          /* Default offset for family VFD */
+static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
+static const hbool_t H5F_def_family_to_sec2_g = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
+static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
+static const hbool_t H5F_def_latest_format_g = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
+static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
+static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
+static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;  /* Default file image info and callbacks */
+
 
 
 /*-------------------------------------------------------------------------
@@ -202,114 +264,137 @@ const H5P_libclass_t H5P_CLS_FACC[1] = {{
 static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
-    H5AC_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
-    size_t rdcc_nslots = H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
-    size_t rdcc_nbytes = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
-    double rdcc_w0 = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
-    hsize_t threshold = H5F_ACS_ALIGN_THRHD_DEF;                /* Default allocation alignment threshold */
-    hsize_t alignment = H5F_ACS_ALIGN_DEF;                      /* Default allocation alignment value */
-    hsize_t meta_block_size = H5F_ACS_META_BLOCK_SIZE_DEF;      /* Default metadata allocation block size */
-    size_t sieve_buf_size = H5F_ACS_SIEVE_BUF_SIZE_DEF;         /* Default raw data I/O sieve buffer size */
-    hsize_t sdata_block_size = H5F_ACS_SDATA_BLOCK_SIZE_DEF;    /* Default small data allocation block size */
-    unsigned gc_ref = H5F_ACS_GARBG_COLCT_REF_DEF;              /* Default garbage collection for references setting */
-    hid_t driver_id = H5F_ACS_FILE_DRV_ID_DEF;                  /* Default VFL driver ID */
-    void *driver_info = H5F_ACS_FILE_DRV_INFO_DEF;              /* Default VFL driver info */
-    H5F_close_degree_t close_degree = H5F_CLOSE_DEGREE_DEF;     /* Default file close degree */
-    hsize_t family_offset = H5F_ACS_FAMILY_OFFSET_DEF;          /* Default offset for family VFD */
-    hsize_t family_newsize = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
-    hbool_t family_to_sec2 = H5F_ACS_FAMILY_TO_SEC2_DEF;        /* Default ?? for family VFD */
-    H5FD_mem_t mem_type = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
-    hbool_t latest_format = H5F_ACS_LATEST_FORMAT_DEF;          /* Default setting for "use the latest version of the format" flag */
-    hbool_t want_posix_fd = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
-    unsigned efc_size = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
-    H5FD_file_image_info_t file_image_info = H5F_ACS_FILE_IMAGE_INFO_DEF;  /* Default file image info and callbacks */
+    const hid_t def_driver_id = H5F_ACS_FILE_DRV_ID_DEF;        /* Default VFL driver ID (initialized from a variable) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Register the initial metadata cache resize configuration */
-    if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &mdc_initCacheCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &H5F_def_mdc_initCacheCfg_g, 
+            NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_ENC, H5F_ACS_META_CACHE_INIT_CONFIG_DEC, 
+            NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_CMP, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &H5F_def_rdcc_nslots_g, 
+            NULL, NULL, NULL, H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC, H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
-    if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &rdcc_nbytes, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &H5F_def_rdcc_nbytes_g, 
+            NULL, NULL, NULL, H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC, H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the preemption for reading chunks */
-    if(H5P_register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &H5F_def_rdcc_w0_g, 
+            NULL, NULL, NULL, H5F_ACS_PREEMPT_READ_CHUNKS_ENC, H5F_ACS_PREEMPT_READ_CHUNKS_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the threshold for alignment */
-    if(H5P_register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &threshold, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &H5F_def_threshold_g, 
+            NULL, NULL, NULL, H5F_ACS_ALIGN_THRHD_ENC, H5F_ACS_ALIGN_THRHD_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the alignment */
-    if(H5P_register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &alignment, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &H5F_def_alignment_g, 
+            NULL, NULL, NULL, H5F_ACS_ALIGN_ENC, H5F_ACS_ALIGN_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum metadata allocation block size */
-    if(H5P_register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE, &meta_block_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE, &H5F_def_meta_block_size_g, 
+            NULL, NULL, NULL, H5F_ACS_META_BLOCK_SIZE_ENC, H5F_ACS_META_BLOCK_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the maximum sieve buffer size */
-    if(H5P_register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE, &sieve_buf_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE, &H5F_def_sieve_buf_size_g, 
+            NULL, NULL, NULL, H5F_ACS_SIEVE_BUF_SIZE_ENC, H5F_ACS_SIEVE_BUF_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum "small data" allocation block size */
-    if(H5P_register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &sdata_block_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &H5F_def_sdata_block_size_g, 
+            NULL, NULL, NULL, H5F_ACS_SDATA_BLOCK_SIZE_ENC, H5F_ACS_SDATA_BLOCK_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the garbage collection reference */
-    if(H5P_register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE, &gc_ref, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE, &H5F_def_gc_ref_g, 
+            NULL, NULL, NULL, H5F_ACS_GARBG_COLCT_REF_ENC, H5F_ACS_GARBG_COLCT_REF_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver ID */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_ID_NAME, H5F_ACS_FILE_DRV_ID_SIZE, &driver_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_ID_NAME, H5F_ACS_FILE_DRV_ID_SIZE, &def_driver_id, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver info */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_INFO_NAME, H5F_ACS_FILE_DRV_INFO_SIZE, &driver_info, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_ACS_FILE_DRV_INFO_NAME, H5F_ACS_FILE_DRV_INFO_SIZE, &H5F_def_driver_info_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file close degree */
-    if(H5P_register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &close_degree, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &H5F_def_close_degree_g, 
+            NULL, NULL, NULL, H5F_CLOSE_DEGREE_ENC, H5F_CLOSE_DEGREE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the offset of family driver info */
-    if(H5P_register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE, &family_offset, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE, &H5F_def_family_offset_g, 
+            NULL, NULL, NULL, H5F_ACS_FAMILY_OFFSET_ENC, H5F_ACS_FAMILY_OFFSET_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of new family file size. It's used by h5repart only. */
-    if(H5P_register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE, &family_newsize, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE, &H5F_def_family_newsize_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether convert family to sec2 driver. It's used by h5repart only. */
-    if(H5P_register_real(pclass, H5F_ACS_FAMILY_TO_SEC2_NAME, H5F_ACS_FAMILY_TO_SEC2_SIZE, &family_to_sec2, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_ACS_FAMILY_TO_SEC2_NAME, H5F_ACS_FAMILY_TO_SEC2_SIZE, &H5F_def_family_to_sec2_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data type of multi driver info */
-    if(H5P_register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &mem_type, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &H5F_def_mem_type_g, 
+            NULL, NULL, NULL, H5F_ACS_MULTI_TYPE_ENC, H5F_ACS_MULTI_TYPE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'use the latest version of the format' flag */
-    if(H5P_register_real(pclass, H5F_ACS_LATEST_FORMAT_NAME, H5F_ACS_LATEST_FORMAT_SIZE, &latest_format, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_LATEST_FORMAT_NAME, H5F_ACS_LATEST_FORMAT_SIZE, &H5F_def_latest_format_g, 
+            NULL, NULL, NULL, H5F_ACS_LATEST_FORMAT_ENC, H5F_ACS_LATEST_FORMAT_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to retrieve the file descriptor from the core VFD */
     /* (used internally to the library only) */
-    if(H5P_register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &want_posix_fd, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &H5F_def_want_posix_fd_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the external file cache size */
-    if(H5P_register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &efc_size, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &H5F_def_efc_size_g, 
+            NULL, NULL, NULL, H5F_ACS_EFC_SIZE_ENC, H5F_ACS_EFC_SIZE_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the initial file image info */
-    if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &file_image_info, NULL, NULL, NULL, H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if(H5P_register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g, 
+            NULL, NULL, NULL, NULL, NULL, 
+            H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, NULL, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -2346,4 +2431,546 @@ H5P_file_image_info_close(const char UNUSED *name, size_t UNUSED size, void *val
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_file_image_info_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5P__facc_cache_config_cmp
+ *
+ * Purpose: Compare two cache configurations.
+ *
+ * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
+ *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 September 24, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t UNUSED size)
+{
+    const H5AC_cache_config_t *config1 = (const H5AC_cache_config_t *)_config1; /* Create local aliases for values */
+    const H5AC_cache_config_t *config2 = (const H5AC_cache_config_t *)_config2; /* Create local aliases for values */
+    int ret_value = 0;               /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check for a property being set */
+    if(config1 == NULL && config2 != NULL) HGOTO_DONE(-1);
+    if(config1 != NULL && config2 == NULL) HGOTO_DONE(1);
+
+    if(config1->version < config2->version) HGOTO_DONE(-1);
+    if(config1->version > config2->version) HGOTO_DONE(1);
+
+    if(config1->rpt_fcn_enabled < config2->rpt_fcn_enabled) HGOTO_DONE(-1);
+    if(config1->rpt_fcn_enabled > config2->rpt_fcn_enabled) HGOTO_DONE(1);
+
+    if(config1->open_trace_file < config2->open_trace_file) HGOTO_DONE(-1);
+    if(config1->open_trace_file > config2->open_trace_file) HGOTO_DONE(1);
+
+    if(config1->close_trace_file < config2->close_trace_file) HGOTO_DONE(-1);
+    if(config1->close_trace_file > config2->close_trace_file) HGOTO_DONE(1);
+
+    if((ret_value = HDstrncmp(config1->trace_file_name, config2->trace_file_name, 
+                              H5AC__MAX_TRACE_FILE_NAME_LEN + 1)) != 0)
+        HGOTO_DONE(ret_value);
+
+    if(config1->evictions_enabled < config2->evictions_enabled) HGOTO_DONE(-1);
+    if(config1->evictions_enabled > config2->evictions_enabled) HGOTO_DONE(1);
+
+    if(config1->set_initial_size < config2->set_initial_size) HGOTO_DONE(-1);
+    if(config1->set_initial_size > config2->set_initial_size) HGOTO_DONE(1);
+
+    if(config1->initial_size < config2->initial_size) HGOTO_DONE(-1);
+    if(config1->initial_size > config2->initial_size) HGOTO_DONE(1);
+
+    if(config1->min_clean_fraction < config2->min_clean_fraction) HGOTO_DONE(-1);
+    if(config1->min_clean_fraction > config2->min_clean_fraction) HGOTO_DONE(1);
+
+    if(config1->max_size < config2->max_size) HGOTO_DONE(-1);
+    if(config1->max_size > config2->max_size) HGOTO_DONE(1);
+
+    if(config1->min_size < config2->min_size) HGOTO_DONE(-1);
+    if(config1->min_size > config2->min_size) HGOTO_DONE(1);
+
+    if(config1->epoch_length < config2->epoch_length) HGOTO_DONE(-1);
+    if(config1->epoch_length > config2->epoch_length) HGOTO_DONE(1);
+
+    if(config1->incr_mode < config2->incr_mode) HGOTO_DONE(-1);
+    if(config1->incr_mode > config2->incr_mode) HGOTO_DONE(1);
+
+    if(config1->lower_hr_threshold < config2->lower_hr_threshold) HGOTO_DONE(-1);
+    if(config1->lower_hr_threshold > config2->lower_hr_threshold) HGOTO_DONE(1);
+
+    if(config1->increment < config2->increment) HGOTO_DONE(-1);
+    if(config1->increment > config2->increment) HGOTO_DONE(1);
+
+    if(config1->apply_max_increment < config2->apply_max_increment) HGOTO_DONE(-1);
+    if(config1->apply_max_increment > config2->apply_max_increment) HGOTO_DONE(1);
+
+    if(config1->max_increment < config2->max_increment) HGOTO_DONE(-1);
+    if(config1->max_increment > config2->max_increment) HGOTO_DONE(1);
+
+    if(config1->flash_incr_mode < config2->flash_incr_mode) HGOTO_DONE(-1);
+    if(config1->flash_incr_mode > config2->flash_incr_mode) HGOTO_DONE(1);
+
+    if(config1->flash_multiple < config2->flash_multiple) HGOTO_DONE(-1);
+    if(config1->flash_multiple > config2->flash_multiple) HGOTO_DONE(1);
+
+    if(config1->flash_threshold < config2->flash_threshold) HGOTO_DONE(-1);
+    if(config1->flash_threshold > config2->flash_threshold) HGOTO_DONE(1);
+
+    if(config1->decr_mode < config2->decr_mode) HGOTO_DONE(-1);
+    if(config1->decr_mode > config2->decr_mode) HGOTO_DONE(1);
+
+    if(config1->upper_hr_threshold < config2->upper_hr_threshold) HGOTO_DONE(-1);
+    if(config1->upper_hr_threshold > config2->upper_hr_threshold) HGOTO_DONE(1);
+
+    if(config1->decrement < config2->decrement) HGOTO_DONE(-1);
+    if(config1->decrement > config2->decrement) HGOTO_DONE(1);
+
+    if(config1->apply_max_decrement < config2->apply_max_decrement) HGOTO_DONE(-1);
+    if(config1->apply_max_decrement > config2->apply_max_decrement) HGOTO_DONE(1);
+
+    if(config1->max_decrement < config2->max_decrement) HGOTO_DONE(-1);
+    if(config1->max_decrement > config2->max_decrement) HGOTO_DONE(1);
+
+    if(config1->epochs_before_eviction < config2->epochs_before_eviction) HGOTO_DONE(-1);
+    if(config1->epochs_before_eviction > config2->epochs_before_eviction) HGOTO_DONE(1);
+
+    if(config1->apply_empty_reserve < config2->apply_empty_reserve) HGOTO_DONE(-1);
+    if(config1->apply_empty_reserve > config2->apply_empty_reserve) HGOTO_DONE(1);
+
+    if(config1->empty_reserve < config2->empty_reserve) HGOTO_DONE(-1);
+    if(config1->empty_reserve > config2->empty_reserve) HGOTO_DONE(1);
+
+    if(config1->dirty_bytes_threshold < config2->dirty_bytes_threshold) HGOTO_DONE(-1);
+    if(config1->dirty_bytes_threshold > config2->dirty_bytes_threshold) HGOTO_DONE(1);
+
+    if(config1->metadata_write_strategy < config2->metadata_write_strategy) HGOTO_DONE(-1);
+    if(config1->metadata_write_strategy > config2->metadata_write_strategy) HGOTO_DONE(1);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_cache_config_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_cache_config_enc
+ *
+ * Purpose:        Callback routine which is called whenever the default
+ *                 cache config property in the file creation property list is
+ *                 encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 09, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_cache_config_enc(const void *value, uint8_t **pp, size_t *size)
+{
+    const H5AC_cache_config_t *config = (const H5AC_cache_config_t *)value; /* Create local aliases for values */
+    unsigned enc_size;      /* Size of encoded property */
+    uint64_t enc_value;         /* Property to encode */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    if(NULL != *pp) {
+        /* Encode type sizes (as a safety check) */
+        *(*pp)++ = (uint8_t)sizeof(unsigned);
+        *(*pp)++ = (uint8_t)sizeof(double);
+
+        /* int */
+        INT32ENCODE(*pp, (int32_t)config->version);
+
+        H5_ENCODE_UNSIGNED(*pp, config->rpt_fcn_enabled);
+
+        H5_ENCODE_UNSIGNED(*pp, config->open_trace_file);
+
+        H5_ENCODE_UNSIGNED(*pp, config->close_trace_file);
+
+        HDmemcpy(*pp, (const uint8_t *)(config->trace_file_name), H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+        *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
+
+        H5_ENCODE_UNSIGNED(*pp, config->evictions_enabled);
+
+        H5_ENCODE_UNSIGNED(*pp, config->set_initial_size);
+
+        enc_value = (uint64_t)config->initial_size;
+        enc_size = H5V_limit_enc_size(enc_value);
+        HDassert(enc_size < 256);
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        H5_ENCODE_DOUBLE(*pp, config->min_clean_fraction);
+
+        enc_value = (uint64_t)config->max_size;
+        enc_size = H5V_limit_enc_size(enc_value);
+        HDassert(enc_size < 256);
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        enc_value = (uint64_t)config->min_size;
+        enc_size = H5V_limit_enc_size(enc_value);
+        HDassert(enc_size < 256);
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        /* long int */
+        INT64ENCODE(*pp, (int64_t)config->epoch_length);
+
+        /* enum */
+        *(*pp)++ = (uint8_t)config->incr_mode;
+
+        H5_ENCODE_DOUBLE(*pp, config->lower_hr_threshold);
+
+        H5_ENCODE_DOUBLE(*pp, config->increment);
+
+        H5_ENCODE_UNSIGNED(*pp, config->apply_max_increment);
+
+        enc_value = (uint64_t)config->max_increment;
+        enc_size = H5V_limit_enc_size(enc_value);
+        HDassert(enc_size < 256);
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        /* enum */
+        *(*pp)++ = (uint8_t)config->flash_incr_mode;
+
+        H5_ENCODE_DOUBLE(*pp, config->flash_multiple);
+
+        H5_ENCODE_DOUBLE(*pp, config->flash_threshold);
+
+        /* enum */
+        *(*pp)++ = (uint8_t)config->decr_mode;
+
+        H5_ENCODE_DOUBLE(*pp, config->upper_hr_threshold);
+
+        H5_ENCODE_DOUBLE(*pp, config->decrement);
+
+        H5_ENCODE_UNSIGNED(*pp, config->apply_max_decrement);
+
+        enc_value = (uint64_t)config->max_decrement;
+        enc_size = H5V_limit_enc_size(enc_value);
+        HDassert(enc_size < 256);
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        /* int */
+        INT32ENCODE(*pp, (int32_t)config->epochs_before_eviction);
+
+        H5_ENCODE_UNSIGNED(*pp, config->apply_empty_reserve);
+
+        H5_ENCODE_DOUBLE(*pp, config->empty_reserve);
+
+        /* int */
+        INT32ENCODE(*pp, (int32_t)config->dirty_bytes_threshold);
+
+        /* int */
+        INT32ENCODE(*pp, (int32_t)config->metadata_write_strategy);
+    } /* end if */
+
+    /* Compute encoded size of variably-encoded values */
+    enc_value = (uint64_t)config->initial_size;
+    *size += 1 + H5V_limit_enc_size(enc_value);
+    enc_value = (uint64_t)config->max_size;
+    *size += 1 + H5V_limit_enc_size(enc_value);
+    enc_value = (uint64_t)config->min_size;
+    *size += 1 + H5V_limit_enc_size(enc_value);
+    enc_value = (uint64_t)config->max_increment;
+    *size += 1 + H5V_limit_enc_size(enc_value);
+    enc_value = (uint64_t)config->max_decrement;
+    *size += 1 + H5V_limit_enc_size(enc_value);
+
+    /* Compute encoded size of fixed-size values */
+    *size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) +
+            (sizeof(int32_t) * 4) + sizeof(int64_t) +
+            H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_cache_config_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_cache_config_dec
+ *
+ * Purpose:        Callback routine which is called whenever the default
+ *                 cache config property in the file creation property list is
+ *                 decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 August 09, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_cache_config_dec(const uint8_t **pp, void *_value)
+{
+    H5AC_cache_config_t *config = (H5AC_cache_config_t *)_value;
+    unsigned enc_size;
+    uint64_t enc_value;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(config);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Set property to default value */
+    HDmemcpy(config, &H5F_def_mdc_initCacheCfg_g, sizeof(H5AC_cache_config_t));
+
+    /* Decode type sizes */
+    enc_size = *(*pp)++;
+    if(enc_size != sizeof(unsigned))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
+    enc_size = *(*pp)++;
+    if(enc_size != sizeof(double))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded")
+
+    /* int */
+    INT32DECODE(*pp, config->version);
+
+    H5_DECODE_UNSIGNED(*pp, config->rpt_fcn_enabled);
+
+    H5_DECODE_UNSIGNED(*pp, config->open_trace_file);
+
+    H5_DECODE_UNSIGNED(*pp, config->close_trace_file);
+
+    HDstrcpy(config->trace_file_name, (const char *)(*pp));
+    *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
+
+    H5_DECODE_UNSIGNED(*pp, config->evictions_enabled);
+
+    H5_DECODE_UNSIGNED(*pp, config->set_initial_size);
+
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    config->initial_size = (size_t)enc_value;
+
+    H5_DECODE_DOUBLE(*pp, config->min_clean_fraction);
+
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    config->max_size = (size_t)enc_value;
+
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    config->min_size = (size_t)enc_value;
+
+    /* long int */
+    {
+        int64_t temp;
+        INT64DECODE(*pp, temp);
+        config->epoch_length = (long int)temp;
+    }
+    /* enum */
+    config->incr_mode = (enum H5C_cache_incr_mode)*(*pp)++;
+
+    H5_DECODE_DOUBLE(*pp, config->lower_hr_threshold);
+
+    H5_DECODE_DOUBLE(*pp, config->increment);
+
+    H5_DECODE_UNSIGNED(*pp, config->apply_max_increment);
+
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    config->max_increment = (size_t)enc_value;
+
+    /* enum */
+    config->flash_incr_mode = (enum H5C_cache_flash_incr_mode)*(*pp)++;
+
+    H5_DECODE_DOUBLE(*pp, config->flash_multiple);
+
+    H5_DECODE_DOUBLE(*pp, config->flash_threshold);
+
+    /* enum */
+    config->decr_mode = (enum H5C_cache_decr_mode)*(*pp)++;
+
+    H5_DECODE_DOUBLE(*pp, config->upper_hr_threshold);
+
+    H5_DECODE_DOUBLE(*pp, config->decrement);
+
+    H5_DECODE_UNSIGNED(*pp, config->apply_max_decrement);
+
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    config->max_decrement = (size_t)enc_value;
+
+    /* int */
+    INT32DECODE(*pp, config->epochs_before_eviction);
+
+    H5_DECODE_UNSIGNED(*pp, config->apply_empty_reserve);
+
+    H5_DECODE_DOUBLE(*pp, config->empty_reserve);
+
+    /* int */
+    INT32DECODE(*pp, config->dirty_bytes_threshold);
+
+    /* int */
+    INT32DECODE(*pp, config->metadata_write_strategy);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_cache_config_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_fclose_degree_enc
+ *
+ * Purpose:        Callback routine which is called whenever the file close
+ *                 degree property in the file access property list
+ *                 is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_fclose_degree_enc(const void *value, uint8_t **pp, size_t *size)
+{
+    const H5F_close_degree_t *fclose_degree = (const H5F_close_degree_t *)value; /* Create local alias for values */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(fclose_degree);
+    HDassert(size);
+
+    if(NULL != *pp)
+        /* Encode file close degree */
+        *(*pp)++ = (uint8_t)*fclose_degree;
+
+    /* Size of file close degree */
+    (*size)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_fclose_degree_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_fclose_degree_dec
+ *
+ * Purpose:        Callback routine which is called whenever the file close
+ *                 degree property in the file access property list
+ *                 is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_fclose_degree_dec(const uint8_t **pp, void *_value)
+{
+    H5F_close_degree_t *fclose_degree = (H5F_close_degree_t *)_value;            /* File close degree */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(fclose_degree);
+
+    /* Decode file close degree */
+    *fclose_degree = (H5F_close_degree_t)*(*pp)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_fclose_degree_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_multi_type_enc
+ *
+ * Purpose:        Callback routine which is called whenever the multi VFD
+ *                 memory type property in the file access property list
+ *                 is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_multi_type_enc(const void *value, uint8_t **pp, size_t *size)
+{
+    const H5FD_mem_t *type = (const H5FD_mem_t *)value; /* Create local alias for values */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(type);
+    HDassert(size);
+
+    if(NULL != *pp)
+        /* Encode file close degree */
+        *(*pp)++ = (uint8_t)*type;
+
+    /* Size of multi VFD memory type */
+    (*size)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_multi_type_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__facc_multi_type_dec
+ *
+ * Purpose:        Callback routine which is called whenever the multi VFD
+ *                 memory type property in the file access property list
+ *                 is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_multi_type_dec(const uint8_t **pp, void *_value)
+{
+    H5FD_mem_t *type = (H5FD_mem_t *)_value;            /* File close degree */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(type);
+
+    /* Decode multi VFD memory type */
+    *type = (H5FD_mem_t)*(*pp)++;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_multi_type_dec() */
 

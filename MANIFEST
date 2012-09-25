@@ -820,6 +820,7 @@
 ./src/H5Pdcpl.c
 ./src/H5Pdeprec.c
 ./src/H5Pdxpl.c
+./src/H5Pencdec.c
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
 ./src/H5Pfmpl.c
@@ -945,6 +946,8 @@
 ./test/dtransform.c
 ./test/earray.c
 ./test/efc.c
+./test/enc_dec_plist.c
+./test/enc_dec_plist_with_endianess.c
 ./test/enum.c
 ./test/extend.c
 ./test/external.c
@@ -987,6 +990,7 @@
 ./test/gen_old_group.c          _DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c         _DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c          _DO_NOT_DISTRIBUTE_
+./test/gen_plist.c              _DO_NOT_DISTRIBUTE_
 ./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
 ./test/gen_specmetaread.c       _DO_NOT_DISTRIBUTE_
 ./test/gen_udlinks.c            _DO_NOT_DISTRIBUTE_
@@ -1072,6 +1076,31 @@
 ./test/gen_filters.c
 ./test/chunk_info.c
 
+./test/plist_files/acpl_be
+./test/plist_files/acpl_le
+./test/plist_files/dapl_be
+./test/plist_files/dapl_le
+./test/plist_files/dcpl_be
+./test/plist_files/dcpl_le
+./test/plist_files/dxpl_be
+./test/plist_files/dxpl_le
+./test/plist_files/fapl_be
+./test/plist_files/fapl_le
+./test/plist_files/fcpl_be
+./test/plist_files/fcpl_le
+./test/plist_files/gcpl_be
+./test/plist_files/gcpl_le
+./test/plist_files/lapl_be
+./test/plist_files/lapl_le
+./test/plist_files/lcpl_be
+./test/plist_files/lcpl_le
+./test/plist_files/ocpl_be
+./test/plist_files/ocpl_le
+./test/plist_files/ocpypl_be
+./test/plist_files/ocpypl_le
+./test/plist_files/strcpl_be
+./test/plist_files/strcpl_le
+
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
 ./test/testfiles/error_test_1
@@ -1082,18 +1111,19 @@
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
+./testpar/t_chunk_alloc.c
+./testpar/t_coll_chunk.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_file_image.c
+./testpar/t_filter_read.c
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
-./testpar/t_chunk_alloc.c
-./testpar/t_coll_chunk.c
-./testpar/t_filter_read.c
 ./testpar/t_posix_compliant.c
+./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
