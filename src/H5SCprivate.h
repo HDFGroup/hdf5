@@ -15,24 +15,22 @@
 
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
- *              January, 2012
+ *              July, 2012
  *
- * Purpose:	The public header file for the Native VOL plugin.
+ * Purpose:	header file for commsplitter library.
  */
-#ifndef H5VLnative_H
-#define H5VLnative_H
 
-#define H5VL_NATIVE	(H5VL_native_init())
+#ifndef _H5SCprivate_H
+#define _H5SCprivate_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+typedef struct commsplitter_t {
+    int   gsize;
+    int   grank;
+    /* pcontrol - default is yes*/
+    int enabled;
+    MPI_Comm split_comm;
+} commsplitter_t;
 
-H5_DLL H5VL_class_t *H5VL_native_init(void);
-H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
-#ifdef __cplusplus
-}
-#endif
+extern commsplitter_t commsplitter_data;
 
-#endif
+#endif /* _H5SCprivate_H */

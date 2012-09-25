@@ -14,25 +14,44 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
- *              January, 2012
+ * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.org>
+ *              Septemeber 11, 2012
  *
- * Purpose:	The public header file for the Native VOL plugin.
+ * Purpose:	The header file for the mds driver.
  */
-#ifndef H5VLnative_H
-#define H5VLnative_H
+#ifndef H5FDmds_H
+#define H5FDmds_H
 
-#define H5VL_NATIVE	(H5VL_native_init())
+#ifdef H5_HAVE_PARALLEL
+#   define H5FD_MDS	(H5FD_mds_init())
+#else
+#   define H5FD_MDS	(-1)
+#endif /* H5_HAVE_PARALLEL */
 
+/* Macros */
+
+#define IS_H5FD_MDS(f)	/* (H5F_t *f) */				    \
+    (H5FD_MDS==H5F_DRIVER_ID(f))
+
+#ifdef H5_HAVE_PARALLEL
+/*Turn on H5FDmds_debug if H5F_DEBUG is on */
+#ifdef H5F_DEBUG
+#ifndef H5FDmds_DEBUG
+#define H5FDmds_DEBUG
+#endif
+#endif
+
+/* Function prototypes */
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-H5_DLL H5VL_class_t *H5VL_native_init(void);
-H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL hid_t H5FD_mds_init(void);
+H5_DLL herr_t H5P_set_fapl_mds(hid_t fapl_id, const char *name, hid_t plist_id);
 #ifdef __cplusplus
 }
 #endif
 
+#endif /* H5_HAVE_PARALLEL */
+
 #endif
+

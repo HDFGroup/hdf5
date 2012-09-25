@@ -17,20 +17,20 @@
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              January, 2012
  *
- * Purpose:	The public header file for the Native VOL plugin.
+ * Purpose:	The public header file for the Mds VOL plugin.
  */
-#ifndef H5VLnative_H
-#define H5VLnative_H
+#ifndef H5VLmds_H
+#define H5VLmds_H
 
-#define H5VL_NATIVE	(H5VL_native_init())
+#define H5VL_MDS	(H5VL_mds_init())
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL H5VL_class_t *H5VL_native_init(void);
-H5_DLL herr_t H5Pset_fapl_native(hid_t fapl_id);
-H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL H5VL_class_t *H5VL_mds_init(void);
+H5_DLL herr_t H5Pset_fapl_mds(hid_t fapl_id);
+H5_DLL hid_t H5VL_mds_register(H5I_type_t type, void *obj, hbool_t app_ref);
 #ifdef __cplusplus
 }
 #endif
