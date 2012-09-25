@@ -70,6 +70,7 @@ static herr_t H5P_acrt_reg_prop(H5P_genclass_t *pclass);
 /* Attribute creation property list class library initialization object */
 const H5P_libclass_t H5P_CLS_ACRT[1] = {{
     "attribute create",		/* Class name for debugging     */
+    H5P_TYPE_ATTRIBUTE_CREATE,  /* Class type                   */
     &H5P_CLS_STRING_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_ATTRIBUTE_CREATE_g, /* Pointer to class ID          */
     &H5P_LST_ATTRIBUTE_CREATE_g, /* Pointer to default property list ID */
@@ -112,17 +113,17 @@ H5P_acrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the type ID property*/
     if(H5P_register_real(pclass, H5VL_ATTR_TYPE_ID, sizeof(hid_t), &type_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space ID property */
     if(H5P_register_real(pclass, H5VL_ATTR_SPACE_ID, sizeof(hid_t), &space_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the lcpl ID property */
     if(H5P_register_real(pclass, H5VL_ATTR_LOC_PARAMS, H5A_CRT_LOCATION_SIZE, &loc_params, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

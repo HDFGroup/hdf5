@@ -87,13 +87,6 @@ TRACE=perl $(top_srcdir)/bin/trace
 F9XMODEXT=@F9XMODEXT@
 F9XMODFLAG=@F9XMODFLAG@
 
-# Set the paths for AFS installs of autotools for Linux machines
-# Ideally, these tools should never be needed during the build.
-AUTOCONF=/home1/packages/autoconf/autoconf-2.60/bin/autoconf
-AUTOMAKE=/home1/packages/automake/automake-1.9.6/bin/automake-1.9
-AUTOHEADER=/home1/packages/autoconf/autoconf-2.60/bin/autoheader
-ACLOCAL=/home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
-
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.

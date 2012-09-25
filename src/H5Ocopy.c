@@ -382,7 +382,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     void                   *cpy_udata = NULL;       /* User data for passing to message callbacks */
     uint64_t               dst_oh_size;             /* Total size of the destination OH */
     size_t                 dst_oh_null;             /* Size of the null message to add to destination OH */
-    unsigned               dst_oh_gap;              /* Size of the gap in chunk #0 of destination OH */
+    size_t                 dst_oh_gap;              /* Size of the gap in chunk #0 of destination OH */
     uint8_t                *current_pos;            /* Current position in destination image */
     size_t                 msghdr_size;
     herr_t                 ret_value = SUCCEED;
@@ -669,14 +669,14 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Compute space for messages. */
     dst_oh_size = 0;
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
-        dst_oh_size += H5O_SIZEOF_MSGHDR_OH(oh_dst);
+        dst_oh_size += (uint64_t)H5O_SIZEOF_MSGHDR_OH(oh_dst);
         dst_oh_size += oh_dst->mesg[mesgno].raw_size;
     } /* end for */
 
     /* Check if we need to determine correct value for chunk #0 size bits */
     if(oh_dst->version > H5O_VERSION_1) {
         /* Reset destination object header's "chunk 0 size" flags */
-        oh_dst->flags &= ~H5O_HDR_CHUNK0_SIZE;
+        oh_dst->flags = (uint8_t)(oh_dst->flags & ~H5O_HDR_CHUNK0_SIZE);
 
         /* Determine correct value for chunk #0 size bits */
         if(dst_oh_size > 4294967295)
@@ -785,7 +785,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Check if we need to add a NULL message to this header */
     if(dst_oh_null > 0) {
-        unsigned null_idx;              /* Index of new NULL message */
+        size_t null_idx;                /* Index of new NULL message */
 
         /* Make sure we have enough space for new NULL message */
         if(oh_dst->nmesgs + 1 > oh_dst->alloc_nmesgs)
@@ -902,7 +902,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Insert destination object header in cache */
     if(H5AC_insert_entry(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+        HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
     oh_dst = NULL;
     inserted = TRUE;
 
@@ -1106,10 +1106,14 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
     HDassert(oloc_src);
     HDassert(oloc_src->file);
     HDassert(H5F_addr_defined(oloc_src->addr));
     HDassert(oloc_dst->file);
+
+    /* Intialize copy info before errors can be thrown */
+    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
 
     /* Get the copy property list */
     if(NULL == (ocpy_plist = (H5P_genplist_t *)H5I_object(ocpypl_id)))
@@ -1128,7 +1132,6 @@ H5O_copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info")
 
     /* Convert copy flags into copy struct */
-    HDmemset(&cpy_info, 0, sizeof(H5O_copy_t));
     if((cpy_option & H5O_COPY_SHALLOW_HIERARCHY_FLAG) > 0) {
         cpy_info.copy_shallow = TRUE;
         cpy_info.max_depth = 1;
@@ -1453,7 +1456,7 @@ H5O_copy_free_comm_dt_cb(void *item, void *_key, void UNUSED *op_data)
     haddr_t     *addr = (haddr_t *)item;
     H5O_copy_search_comm_dt_key_t *key = (H5O_copy_search_comm_dt_key_t *)_key;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(addr);
     HDassert(key);
@@ -1489,7 +1492,7 @@ H5O_copy_comm_dt_cmp(const void *_key1, const void *_key2)
     const H5O_copy_search_comm_dt_key_t *key2 = (const H5O_copy_search_comm_dt_key_t *)_key2;
     int ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check fileno.  It is unlikely to be different so check if they are equal
      * first so only one comparison needs to be made. */
@@ -1602,6 +1605,10 @@ done:
  * Programmer:  Neil Fortner
  *              Nov 3 2011
  *
+ * Modifications:
+ *      Vailin Choi; August 2012
+ *      Use H5O_obj_class to get object type instead of
+ *      H5O_get_info(...TRUE....) saving time in traversing metadata.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1611,8 +1618,8 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
     H5O_copy_search_comm_dt_key_t *key = NULL; /* Skiplist key */
     haddr_t     *addr = NULL;           /* Destination address */
     hbool_t     obj_inserted = FALSE;   /* Object inserted into skip list */
-    H5O_info_t  oinfo;                  /* Object info */
     H5A_attr_iter_op_t attr_op;         /* Attribute iteration operator */
+    const H5O_obj_class_t  *obj_class = NULL;       /* Type of object */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1623,13 +1630,13 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
     HDassert(udata->dst_dt_list);
     HDassert(udata->dst_root_loc);
 
-    /* Get the object's info */
-    if(H5O_get_info(obj_oloc, udata->dxpl_id, TRUE, &oinfo) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info")
+    /* Get pointer to object class for this object */
+    if((obj_class = H5O_obj_class(obj_oloc, udata->dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
     /* Check if the object is a datatype, a dataset using a committed
      * datatype, or contains an attribute using a committed datatype */
-    if(oinfo.type == H5O_TYPE_NAMED_DATATYPE) {
+    if(obj_class->type == H5O_TYPE_NAMED_DATATYPE) {
         /* Allocate key */
         if(NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1654,7 +1661,7 @@ H5O_copy_search_comm_dt_check(H5O_loc_t *obj_oloc,
             obj_inserted = TRUE;
         } /* end if */
     } /* end if */
-    else if(oinfo.type == H5O_TYPE_DATASET) {
+    else if(obj_class->type == H5O_TYPE_DATASET) {
         /* Allocate key */
         if(NULL == (key = H5FL_MALLOC(H5O_copy_search_comm_dt_key_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")

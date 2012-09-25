@@ -212,6 +212,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 	if('[' == *type) {
 	    if('a' == type[1]) {
 		asize_idx = (int)HDstrtol(type + 2, &rest, 10);
+                HDassert(0 <= asize_idx && asize_idx < (int) NELMTS(asize));
 		HDassert(']'==*rest);
 		type = rest + 1;
 	    } else {
@@ -529,6 +530,60 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                 default:
                                     fprintf(out, "%ld", (long)layout);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+
+                    case 'n':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5D_mpio_no_collective_cause_t nocol_cause_mode = (H5D_mpio_no_collective_cause_t)va_arg(ap, int);
+
+                            switch(nocol_cause_mode) {
+                                case H5D_MPIO_COLLECTIVE:
+                                    fprintf(out, "H5D_MPIO_COLLECTIVE");
+                                    break;
+
+                                case H5D_MPIO_SET_INDEPENDENT:
+                                    fprintf(out, "H5D_MPIO_SET_INDEPENDENT");
+                                    break;
+
+                                case H5D_MPIO_DATATYPE_CONVERSION:
+                                    fprintf(out, "H5D_MPIO_DATATYPE_CONVERSION");
+                                    break;
+
+                                case H5D_MPIO_DATA_TRANSFORMS:
+                                    fprintf(out, "H5D_MPIO_DATA_TRANSFORMS");
+                                    break;
+
+                                case H5D_MPIO_SET_MPIPOSIX:
+                                    fprintf(out, "H5D_MPIO_SET_MPIPOSIX");
+                                    break;
+
+                                case H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES:
+                                    fprintf(out, "H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES");
+                                    break;
+
+                                case H5D_MPIO_POINT_SELECTIONS:
+                                    fprintf(out, "H5D_MPIO_POINT_SELECTIONS");
+                                    break;
+
+                                case H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET:
+                                    fprintf(out, "H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET");
+                                    break;
+
+                                case H5D_MPIO_FILTERS:
+                                    fprintf(out, "H5D_MPIO_FILTERS");
+                                    break;
+
+                                default:
+                                    fprintf(out, "%ld", (long)nocol_cause_mode);
                                     break;
                             } /* end switch */
                         } /* end else */

@@ -20,6 +20,8 @@
 #  Added $FILEN variables for file names
 #   
 
+srcdir=@srcdir@
+
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
@@ -42,6 +44,9 @@ H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
 
 GREP='grep'
 CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
 
 H5DETECTSZIP=testh5repack_detect_szip              
 H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    
@@ -50,15 +55,10 @@ H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-#
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
 # source dirs
 SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
@@ -137,12 +137,20 @@ COPY_TESTFILES_TO_TESTDIR()
         echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
         RET=$?
         if [ $RET -eq 1 ]; then
-            if [ -a $tstfile ]; then
-                $CP -f $tstfile $TESTDIR
-            else
-                echo "Error: FAILED to copy $tstfile"
-                echo "       $tstfile doesn't exist!"
-                exit $EXIT_FAILURE
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
             fi
         fi
     done
@@ -809,6 +817,27 @@ VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CONTI
 # should remain as original layout (chunk)
 TOOLTEST_MAIN h5repack_layout3.h5 -l chunk_unlimit1:COMPA
 VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CHUNK
+
+#--------------------------------------------------------------------------
+# Test -f for some specific cases. Chunked dataset with unlimited max dims.
+# (HDFFV-8012)
+#--------------------------------------------------------------------------
+# - should not fail 
+# - should not change max dims from unlimit
+
+# chunk dim is bigger than dataset dim. ( dset size < 64k )
+TOOLTEST_MAIN h5repack_layout3.h5 -f chunk_unlimit1:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 H5S_UNLIMITED
+# chunk dim is bigger than dataset dim. ( dset size > 64k )
+TOOLTEST_MAIN h5repack_layout3.h5 -f chunk_unlimit2:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit2 H5S_UNLIMITED
+
+# chunk dims are smaller than dataset dims. ( dset size < 64k )
+TOOLTEST_MAIN h5repack_layout3.h5  -f chunk_unlimit3:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit3 H5S_UNLIMITED
+
+# file input - should not fail
+TOOLTEST h5repack_layout3.h5 -f NONE
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will

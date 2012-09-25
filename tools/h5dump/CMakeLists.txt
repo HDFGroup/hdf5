@@ -159,6 +159,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tperror.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/treference.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarattrintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscaleoffset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tshuffle.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink-1.ddl
@@ -260,6 +262,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarattrintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file-m.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file-r.h5
@@ -781,16 +785,6 @@ IF (BUILD_TESTING)
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_XML_H5_TEST file)
 
-  # --------------------------------------------------------------------
-  # Determine which filters are available
-  # --------------------------------------------------------------------
-  SET (USE_FILTER_SZIP H5_HAVE_FILTER_SZIP)
-  SET (USE_FILTER_DEFLATE H5_HAVE_FILTER_DEFLATE)
-  SET (USE_FILTER_SHUFFLE H5_HAVE_FILTER_SHUFFLE)
-  SET (USE_FILTER_FLETCHER32 H5_HAVE_FILTER_FLETCHER32)
-  SET (USE_FILTER_NBIT H5_HAVE_FILTER_NBIT)
-  SET (USE_FILTER_SCALEOFFSET H5_HAVE_FILTER_SCALEOFFSET)
-
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
@@ -1026,6 +1020,10 @@ IF (BUILD_TESTING)
           treference.out.err
           tsaf.out
           tsaf.out.err
+          tscalarintsize.out
+          tscalarintsize.out.err
+          tscalarattrintsize.out
+          tscalarattrintsize.out.err
           tscaleoffset.out
           tscaleoffset.out.err
           tshuffle.out
@@ -1089,10 +1087,14 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (packedbits 0 --enable-error-stack packedbits.h5)
   # test for compound signed/unsigned datasets
   ADD_H5_TEST (tcmpdintsize 0 --enable-error-stack tcmpdintsize.h5)
+  # test for signed/unsigned scalar datasets
+  ADD_H5_TEST (tscalarintsize 0 --enable-error-stack tscalarintsize.h5)
   # test for signed/unsigned attributes
   ADD_H5_TEST (tattrintsize 0 --enable-error-stack tattrintsize.h5)
   # test for compound signed/unsigned attributes
   ADD_H5_TEST (tcmpdattrintsize 0 --enable-error-stack tcmpdattrintsize.h5)
+  # test for signed/unsigned scalar attributes
+  ADD_H5_TEST (tscalarattrintsize 0 --enable-error-stack tscalarattrintsize.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups
@@ -1280,53 +1282,25 @@ IF (BUILD_TESTING)
 
   # tests for filters
   # SZIP
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_SZIP)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_SZIP)
-  ADD_SKIP_H5_TEST (tszip 0 ${TESTTYPE} --enable-error-stack -H -p -d szip tfilters.h5)
+  ADD_H5_TEST (tszip 0 --enable-error-stack -H -p -d szip tfilters.h5)
 
   # deflate
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_DEFLATE)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_DEFLATE)
-  ADD_SKIP_H5_TEST (tdeflate 0 ${TESTTYPE} --enable-error-stack -H -p -d deflate tfilters.h5)
+  ADD_H5_TEST (tdeflate 0 --enable-error-stack -H -p -d deflate tfilters.h5)
 
   # shuffle
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_SHUFFLE)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_SHUFFLE)
-  ADD_SKIP_H5_TEST (tshuffle 0 ${TESTTYPE} --enable-error-stack -H -p -d shuffle tfilters.h5)
+  ADD_H5_TEST (tshuffle 0 --enable-error-stack -H -p -d shuffle tfilters.h5)
 
   # fletcher32
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_FLETCHER32)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_FLETCHER32)
-  ADD_SKIP_H5_TEST (tfletcher32 0 ${TESTTYPE} --enable-error-stack -H -p -d fletcher32  tfilters.h5)
+  ADD_H5_TEST (tfletcher32 0 --enable-error-stack -H -p -d fletcher32  tfilters.h5)
 
   # nbit
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_NBIT)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_NBIT)
-  ADD_SKIP_H5_TEST (tnbit 0 ${TESTTYPE} --enable-error-stack -H -p -d nbit  tfilters.h5)
+  ADD_H5_TEST (tnbit 0 --enable-error-stack -H -p -d nbit  tfilters.h5)
 
   # scaleoffset
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_SCALEOFFSET)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_SCALEOFFSET)
-  ADD_SKIP_H5_TEST (tscaleoffset 0 ${TESTTYPE} --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
+  ADD_H5_TEST (tscaleoffset 0 --enable-error-stack -H -p -d scaleoffset  tfilters.h5)
 
   # all
-  SET (TESTTYPE "TEST")
-  IF (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_NBIT OR NOT USE_FILTER_SCALEOFFSET)
-    SET (TESTTYPE "SKIP")
-  ENDIF (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SHUFFLE OR NOT USE_FILTER_FLETCHER32 OR NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_NBIT OR NOT USE_FILTER_SCALEOFFSET)
-  ADD_SKIP_H5_TEST (tallfilters 0 ${TESTTYPE} --enable-error-stack -H -p -d all  tfilters.h5)
+  ADD_H5_TEST (tallfilters 0 --enable-error-stack -H -p -d all  tfilters.h5)
 
   # user defined
   ADD_H5_TEST (tuserfilter 0 --enable-error-stack -H  -p -d myfilter  tfilters.h5)
@@ -1938,7 +1912,7 @@ ENDIF (BUILD_TESTING)
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 
-INSTALL_PROGRAM_PDB (h5dump ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+#INSTALL_PROGRAM_PDB (h5dump ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
 INSTALL (
     TARGETS

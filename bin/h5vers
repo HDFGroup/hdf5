@@ -71,7 +71,7 @@ use strict;
 # the command line) then the first line of the README.txt and RELEASE.txt files
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
-# The AC_INIT macro in configure.in will also change in this case to be
+# The AC_INIT macro in configure.ac will also change in this case to be
 # something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [help@hdfgroup.org])
 # Version changes are also reflected in the Windows-maintained H5pubconf.h
 # file.
@@ -159,10 +159,10 @@ while ($_ = shift) {
 die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.txt,
-# release_docs/RELEASE.txt, configure.in, windows/src/H5pubconf.h,
-# vms/src/h5pubcof.h and config/lt_vers.am. 
-# The README.txt, release_docs/RELEASE.txt, configure.in, 
-# windows/src/H5pubconf.h, vms/src/h5pubconf.h and config/lt_vers.am 
+# release_docs/RELEASE.txt, configure.ac, windows/src/H5pubconf.h,
+# vms/src/h5pubconf.h and config/lt_vers.am. 
+# The README.txt, release_docs/RELEASE.txt, configure.ac, 
+# vms/src/h5pubconf.h, windows/src/H5pubconf.h, and config/lt_vers.am 
 # files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
@@ -183,9 +183,9 @@ die "unable to read file: $README\n" unless -r $file;
 my $RELEASE = $file;
 $RELEASE =~ s/[^\/]*$/..\/release_docs\/RELEASE.txt/;
 die "unable to read file: $RELEASE\n" unless -r $file;
-# configure.in
+# configure.ac
 my $CONFIGURE = $file;
-$CONFIGURE =~ s/[^\/]*$/..\/configure.in/;
+$CONFIGURE =~ s/[^\/]*$/..\/configure.ac/;
 die "unable to read file: $CONFIGURE\n" unless -r $file;
 # windows/src/H5pubconf.h
 my $H5PUBCONF = $file;
@@ -339,7 +339,7 @@ sub gen_configure {
   print FILE @contents;
   close FILE;
 
-  $conf =~ /^(.*?)\/?configure.in$/;
+  $conf =~ /^(.*?)\/?configure.ac$/;
 
   if ($1) {
     $rc = system("cd $1 && bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
@@ -352,7 +352,7 @@ sub gen_configure {
   }
 }
 
-# Update the configure.in files and regenerate them
+# Update the configure.ac files and regenerate them
 gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
 
 sub gen_h5pubconf {

@@ -56,12 +56,15 @@ char H5FD_mpi_native_g[] = "native";
 int
 H5FD_mpi_get_rank(const H5FD_t *file)
 {
-    const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
+    const H5FD_class_mpi_t *cls;
+
     int	ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file && cls);
+    assert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    assert(cls);
     assert(cls->get_rank);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
@@ -92,12 +95,14 @@ done:
 int
 H5FD_mpi_get_size(const H5FD_t *file)
 {
-    const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
+    const H5FD_class_mpi_t *cls;
     int	ret_value;
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file && cls);
+    assert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    assert(cls);
     assert(cls->get_size);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
@@ -128,12 +133,14 @@ done:
 MPI_Comm
 H5FD_mpi_get_comm(const H5FD_t *file)
 {
-    const H5FD_class_mpi_t *cls=(const H5FD_class_mpi_t *)(file->cls);
+    const H5FD_class_mpi_t *cls;
     MPI_Comm	ret_value;
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    assert(file && cls);
+    assert(file);
+    cls = (const H5FD_class_mpi_t *)(file->cls);
+    assert(cls);
     assert(cls->get_comm);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
@@ -479,11 +486,11 @@ H5FD_mpi_setup_collective(hid_t dxpl_id, MPI_Datatype *btype, MPI_Datatype *ftyp
 
     /* Set buffer MPI type */
     if(H5P_set(plist, H5FD_MPI_XFER_MEM_MPI_TYPE_NAME, btype) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
     /* Set File MPI type */
     if(H5P_set(plist, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, ftype) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert MPI-I/O property")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -608,7 +608,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_is_hdf5() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5F_new
  *
@@ -808,13 +807,15 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          * Only try to flush the file if it was opened with write access, and if
          * the caller requested a flush.
          */
-        if((f->shared->flags & H5F_ACC_RDWR) && flush)
+        if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if(H5F_flush(f, dxpl_id, TRUE) < 0)
+                /* Push error, but keep going*/
                 HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 
         /* Release the external file cache */
         if(f->shared->efc) {
             if(H5F_efc_destroy(f->shared->efc) < 0)
+                /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't destroy external file cache")
             f->shared->efc = NULL;
         } /* end if */
@@ -832,6 +833,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                 if(H5MF_close(f, dxpl_id) < 0)
                     /* Push error, but keep going*/
                     HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+
+                /* Flush the file again (if requested), as shutting down the
+                 * free space manager may dirty some data structures again.
+                 */
+                if(flush)
+                    if(H5F_flush(f, dxpl_id, TRUE) < 0)
+                        /* Push error, but keep going*/
+                        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
             } /* end if */
 
             /* Unpin the superblock, since we're about to destroy the cache */
@@ -2080,3 +2089,42 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_store_msg_crt_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_id
+ *
+ * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_id(H5F_t *file, hbool_t app_ref)
+{
+    hid_t       ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
+        /* resurrect the ID - Register an ID with the native plugin */
+        if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        file->id_exists = TRUE;
+    }
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(ret_value, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_id() */

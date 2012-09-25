@@ -19,6 +19,8 @@
 # Modification:
 #
 
+srcdir=@srcdir@
+
 # Initializations
 TESTNAME=h5fc
 EXIT_SUCCESS=0
@@ -45,11 +47,6 @@ verbose=yes
 # setup my machine information.
 myos=`uname -s`
 myhostnama=`uname -n`
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 # Generate some source files and library for tests.
 suffix=f90		# source file suffix

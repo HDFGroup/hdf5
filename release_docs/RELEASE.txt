@@ -1,4 +1,4 @@
-HDF5 version 1.9.124 currently under development
+HDF5 version 1.9.131 currently under development
 ================================================================================
 
 
@@ -39,6 +39,10 @@ New Features
 
     Configuration:
     -------------
+    - Updated to latest autotools and changed all hard *.sh scripts to
+      configure managed *.sh.in files. Removed overloading of autotools
+      TESTS variable by examples and tests. Renamed configure.in to
+      configure.ac. (ADB - 2012/08/23 - HDFFV-8129)
     - Added code to display the version information of XL fortran and C++
       in the summary of configure. (AKC - 2012/02/28 - HDFFV-7793)
     - Configure now generates Makefiles that build in "silent make mode"
@@ -163,6 +167,9 @@ New Features
 
     Parallel Library:
     -----------------
+    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
+      why the collective I/O was broken during read/write IO access. 
+      (JKM - 2012/08/30 HDFFV-8143)
     - Special Collective IO (IO when some processes do not contribute to the
       IO) and Complex Derived Datatype MPI functionalities are no longer
       conditionally enabled in the library by configure. They are always
@@ -378,6 +385,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an error that could occur when calling H5Ocopy within an
+            H5Literate callback (and possibly other situations).
+            (NAF - 2012/7/25 - HDFFV-5853)
       - Fixed an error that would occur when copying an object with attribute
             creation order tracked and indexed. (NAF - 2012/3/28 - HDFFV-7762)
       - Fixed a bug in H5Ocopy(): When copying an opened object, call the
@@ -688,6 +698,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - Retired program perform/mpi-perf. Its purpose has been incorporated
+	into h5perf before. (AKC 2012/09/20)
       - ifdefs added to tests around include unistd.h and function to simulate
         getlogin() on Windows. 
         (ADB - 2011/08/15)
@@ -702,6 +714,30 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
+          source file contains chunked dataset and a chunk dim is bigger than 
+          the dataset dim. Another issue is that the command changed max dims
+          if chunk dim is smaller than the dataset dim.
+          These issue occurred when dataset size is smaller than 64k (compact
+          size limit)  Fixed both.
+          HDFFV-8012 (JKM 2012/09/24)
+        - h5diff: Fixed not to accumulate attribute difference to dataset
+          difference in verbose mode (-v, -r), which caused incorrect 
+          difference between dataset and group/datatype object if attribute 
+          exist with any differences. This also lead to fix inconsistent
+          format indicating difference between dataset and group/datatype
+          object. HDFFV-5919 (JKM 2012/09/05)
+        - h5diff: Fixed the incorrect result when comparing attribute data 
+          values and the data type has same class but different size.
+          HDFFV-7942  (JKM 2012/08/15)
+        - ph5diff: Fixed intermittent hang issue on a certain operation in 
+          parallel mode. It was detected by daily test for comparing 
+          non-comparable objects, but it could have occurred in other 
+          operations depend on machine condition.  HDFFV-8003 (JKM 2012/08/01)
+        - h5diff: Fixed test failure for "make check" due to failure of 
+          copying test files when performed in HDF5 source tree. Also applied
+          to other tools.
+          HDFFV-8107 (JKM 2012/08/01)
         - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of
 	  testh5diff.sh to better report when there is an error in the file
 	  copying. HDFFV-8105 (AKC -2012/07/22)
@@ -1043,22 +1079,14 @@ Platforms Tested
                                   Sun Fortran 95 8.4 SunOS_sparc Patch
 128231-06
                                   Sun C++ 5.10 SunOS_sparc 128228-11
- 
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
-          
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
-
-    Windows 7                     Visual Studio 2010
-
-    Windows 7 x64                 Visual Studio 2010
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -1081,10 +1109,8 @@ Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-Windows XP                         n        y(3)   n(3)     y     y     y
-Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        y(3)   n(3)     y     y     y
-Windows Vista x64                  n        y(3)   n(3)     y     y     y
+Windows 7                          y        y      n        y     y     y
+Windows 7 x64                      y        y      n        y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
 FreeBSD 8.2 32- and 64-bit         n        x      n        x     y     y
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y

@@ -94,13 +94,13 @@
 
 /*
  * If a program may include both `time.h' and `sys/time.h' then
- * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.in).
+ * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
  * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
  * protected against multiple inclusion, so programs should not explicitly
  * include both files. This macro is useful in programs that use, for example,
  * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
  * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
- * by `AC_CHECK_HEADERS(sys/time.h)' in configure.in.
+ * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
  */
 #if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
@@ -2292,7 +2292,8 @@ func_init_failed:                    \
     /* Close Function */                  \
 }
 
-/* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient) */
+/* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
+ * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
 #define H5_BEGIN_TAG(dxpl, tag, err) {                                           \
     haddr_t prv_tag = HADDR_UNDEF;                                               \
     hid_t my_dxpl_id = dxpl;                                                     \

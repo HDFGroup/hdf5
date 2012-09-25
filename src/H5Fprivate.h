@@ -27,6 +27,7 @@
 #include "H5FDpublic.h"		/* File drivers				*/
 
 /* Private headers needed by this file */
+#include "H5Vprivate.h"		/* Vectors and arrays */
 
 /****************************/
 /* Library Private Typedefs */
@@ -82,10 +83,10 @@ typedef struct {
    *(p) = (uint8_t)(((i) >> 24) & 0xff); (p)++;				      \
 }
 
-/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* Encode an unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
-#  define UINT32ENCODE_VAR(p, n, l) {					      \
-   uint32_t _n = (n);							      \
+#  define ENCODE_VAR(p, typ, n, l) {					      \
+   typ _n = (n);							      \
    size_t _i;								      \
    uint8_t *_p = (uint8_t*)(p);						      \
 									      \
@@ -93,6 +94,10 @@ typedef struct {
       *_p++ = (uint8_t)(_n & 0xff);					      \
    (p) = (uint8_t*)(p) + l;						      \
 }
+
+/* Encode a 32-bit unsigned integer into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT32ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint32_t, n, l)
 
 #  define INT64ENCODE(p, n) {						      \
    int64_t _n = (n);							      \
@@ -120,14 +125,35 @@ typedef struct {
 
 /* Encode a 64-bit unsigned integer into a variable-sized buffer */
 /* (Assumes that the high bits of the integer are zero) */
-#  define UINT64ENCODE_VAR(p, n, l) {					      \
-   uint64_t _n = (n);							      \
-   size_t _i;								      \
-   uint8_t *_p = (uint8_t*)(p);						      \
+#  define UINT64ENCODE_VAR(p, n, l)     ENCODE_VAR(p, uint64_t, n, l)
+
+/* Encode a 64-bit unsigned integer and its length into a variable-sized buffer */
+/* (Assumes that the high bits of the integer are zero) */
+#  define UINT64ENCODE_VARLEN(p, n) {					      \
+   uint64_t __n = (uint64_t)(n);							      \
+   unsigned _s = H5V_limit_enc_size(__n);				      \
 									      \
-   for(_i = 0; _i < l; _i++, _n >>= 8)					      \
-      *_p++ = (uint8_t)(_n & 0xff);					      \
-   (p) = (uint8_t*)(p) + l;						      \
+   *(p)++ = (uint8_t)_s;						      \
+   UINT64ENCODE_VAR(p, __n, _s);						      \
+}
+
+#  define H5_ENCODE_UNSIGNED(p, n) {					      \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));		      \
+    UINT32ENCODE(p, n)							      \
+}
+
+/* Assumes the endianness of uint64_t is the same as double */
+#  define H5_ENCODE_DOUBLE(p, n) {					      \
+    uint64_t _n;							      \
+    size_t _u;								      \
+    uint8_t *_p = (uint8_t*)(p);					      \
+									      \
+    HDcompile_assert(sizeof(double) == 8);				      \
+    HDcompile_assert(sizeof(double) == sizeof(uint64_t));		      \
+    HDmemcpy(&_n, &n, sizeof(double));					      \
+    for(_u = 0; _u < sizeof(uint64_t); _u++, _n >>= 8)			      \
+        *_p++ = (uint8_t)(_n & 0xff);					      \
+    (p) = (uint8_t *)(p) + 8;						      \
 }
 
 /* DECODE converts little endian bytes pointed by p to integer values and store
@@ -150,11 +176,11 @@ typedef struct {
 }
 
 #  define INT32DECODE(p, i) {						      \
-   (i)	= (	     *(p) & 0xff);	  (p)++;			      \
-   (i) |= ((int32_t)(*(p) & 0xff) <<  8); (p)++;			      \
-   (i) |= ((int32_t)(*(p) & 0xff) << 16); (p)++;			      \
-   (i) |= ((int32_t)(((*(p) & 0xff) << 24) |                                  \
-                   ((*(p) & 0x80) ? ~0xffffffff : 0x0))); (p)++;	      \
+   (i)	= ((int32_t)(*(p) & (unsigned)0xff));	  (p)++;		      \
+   (i) |= ((int32_t)(*(p) & (unsigned)0xff) <<  8); (p)++;		      \
+   (i) |= ((int32_t)(*(p) & (unsigned)0xff) << 16); (p)++;		      \
+   (i) |= ((int32_t)(((*(p) & (unsigned)0xff) << 24) |                        \
+                   ((*(p) & (unsigned)0x80) ? (unsigned)(~0xffffffff) : (unsigned)0x0))); (p)++; \
 }
 
 #  define UINT32DECODE(p, i) {						      \
@@ -164,12 +190,9 @@ typedef struct {
    (i) |= ((uint32_t)(*(p) & 0xff) << 24); (p)++;			      \
 }
 
-/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* Decode a variable-sized buffer */
 /* (Assumes that the high bits of the integer will be zero) */
-/* (Note: this is exactly the same code as the 64-bit variable-length decoder
- *      and bugs/improvements should be make in both places - QAK)
- */
-#  define UINT32DECODE_VAR(p, n, l) {					      \
+#  define DECODE_VAR(p, n, l) {						      \
    size_t _i;								      \
 									      \
    n = 0;								      \
@@ -178,6 +201,10 @@ typedef struct {
       n = (n << 8) | *(--p);						      \
    (p) += l;								      \
 }
+
+/* Decode a variable-sized buffer into a 32-bit unsigned integer */
+/* (Assumes that the high bits of the integer will be zero) */
+#  define UINT32DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
 
 #  define INT64DECODE(p, n) {						      \
    /* WE DON'T CHECK FOR OVERFLOW! */					      \
@@ -203,17 +230,34 @@ typedef struct {
 
 /* Decode a variable-sized buffer into a 64-bit unsigned integer */
 /* (Assumes that the high bits of the integer will be zero) */
-/* (Note: this is exactly the same code as the 32-bit variable-length decoder
- *      and bugs/improvements should be make in both places - QAK)
- */
-#  define UINT64DECODE_VAR(p, n, l) {					      \
-   size_t _i;								      \
+#  define UINT64DECODE_VAR(p, n, l)     DECODE_VAR(p, n, l)
+
+/* Decode a 64-bit unsigned integer and its length from a variable-sized buffer */
+/* (Assumes that the high bits of the integer will be zero) */
+#  define UINT64DECODE_VARLEN(p, n) {					      \
+   unsigned _s = *(p)++;						      \
 									      \
-   n = 0;								      \
-   (p) += l;								      \
-   for (_i = 0; _i < l; _i++)						      \
-      n = (n << 8) | *(--p);						      \
-   (p) += l;								      \
+   UINT64DECODE_VAR(p, n, _s);						      \
+}
+
+#  define H5_DECODE_UNSIGNED(p, n) {					      \
+    HDcompile_assert(sizeof(unsigned) == sizeof(uint32_t));		      \
+    UINT32DECODE(p, n)							      \
+}
+
+/* Assumes the endianness of uint64_t is the same as double */
+#  define H5_DECODE_DOUBLE(p, n) {					      \
+    uint64_t _n;							      \
+    size_t _u;								      \
+									      \
+    HDcompile_assert(sizeof(double) == 8);				      \
+    HDcompile_assert(sizeof(double) == sizeof(uint64_t));		      \
+    _n = 0;								      \
+    (p) += 8;								      \
+    for(_u = 0; _u < sizeof(uint64_t); _u++)				      \
+        _n = (_n << 8) | *(--p);					      \
+    HDmemcpy(&(n), &_n, sizeof(double));					      \
+    (p) += 8;								      \
 }
 
 /* Address-related macros */

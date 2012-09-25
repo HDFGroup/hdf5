@@ -184,6 +184,7 @@ int my_yyinput(char *buf, int max_size)
 int H5LTyyerror(char *msg)
 {
    printf("ERROR: %s before \"%s\".\n", msg, yytext);
+   return 0;
 }
 
 int yywrap()

@@ -226,6 +226,9 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
             break;
 
         /* User-defined links */
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
         default:
             if(lnk->type < H5L_TYPE_UD_MIN || lnk->type > H5L_TYPE_MAX)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown link type")
@@ -306,9 +309,9 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
         link_flags = H5O_LINK_NAME_2;
     else
         link_flags = H5O_LINK_NAME_1;
-    link_flags |= lnk->corder_valid ? H5O_LINK_STORE_CORDER : 0;
-    link_flags |= (lnk->type != H5L_TYPE_HARD) ? H5O_LINK_STORE_LINK_TYPE : 0;
-    link_flags |= (lnk->cset != H5T_CSET_ASCII) ? H5O_LINK_STORE_NAME_CSET : 0;
+    link_flags = (unsigned char)(link_flags | (lnk->corder_valid ? H5O_LINK_STORE_CORDER : 0));
+    link_flags = (unsigned char)(link_flags | ((lnk->type != H5L_TYPE_HARD) ? H5O_LINK_STORE_LINK_TYPE : 0));
+    link_flags = (unsigned char)(link_flags | ((lnk->cset != H5T_CSET_ASCII) ? H5O_LINK_STORE_NAME_CSET : 0));
     *p++ = link_flags;
 
     /* Store the type of a non-default link */
@@ -366,6 +369,9 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
             break;
 
         /* User-defined links */
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
         default:
             HDassert(lnk->type >= H5L_TYPE_UD_MIN && lnk->type <= H5L_TYPE_MAX);
 
@@ -511,6 +517,9 @@ H5O_link_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
                         HDstrlen(lnk->u.soft.name);     /* Link value */
             break;
 
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_MAX:
         default: /* Default is user-defined link type */
             HDassert(lnk->type >= H5L_TYPE_UD_MIN);
             ret_value += 2 +                            /* User-defined data size */
@@ -837,6 +846,9 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
                       "Link Value:", lnk->u.soft.name);
             break;
 
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_MAX:
         default:
             if(lnk->type >= H5L_TYPE_UD_MIN) {
                 if(lnk->type == H5L_TYPE_EXTERNAL) {

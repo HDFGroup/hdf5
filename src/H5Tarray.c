@@ -194,7 +194,8 @@ H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
     ret_value->shared->type = H5T_ARRAY;
 
     /* Copy the base type of the array */
-    ret_value->shared->parent = H5T_copy(base, H5T_COPY_ALL);
+    if(NULL == (ret_value->shared->parent = H5T_copy(base, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "unable to copy base datatype")
 
     /* Set the array parameters */
     ret_value->shared->u.array.ndims = ndims;
@@ -279,7 +280,7 @@ H5T__get_array_ndims(const H5T_t *dt)
     HDassert(dt->shared->type == H5T_ARRAY);
 
     /* Retrieve the number of dimensions */
-    FUNC_LEAVE_NOAPI(dt->shared->u.array.ndims)
+    FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
 }   /* end H5T__get_array_ndims */
 
 
@@ -337,9 +338,8 @@ int
 H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
 {
     unsigned u;         /* Local index variable */
-    int	ret_value;	/* return value			*/
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(dt);
     HDassert(dt->shared->type == H5T_ARRAY);
@@ -350,10 +350,7 @@ H5T__get_array_dims(const H5T_t *dt, hsize_t dims[])
             dims[u] = dt->shared->u.array.dim[u];
 
     /* Pass along the array rank as the return value */
-    ret_value = dt->shared->u.array.ndims;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((int)dt->shared->u.array.ndims)
 }   /* end H5T__get_array_dims */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS

@@ -25,7 +25,8 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 TEST_PROG=h5copygentest
-TEST_SCRIPT=$(srcdir)/testh5copy.sh
+TEST_SCRIPT=testh5copy.sh
+
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5copy$(EXEEXT)
 

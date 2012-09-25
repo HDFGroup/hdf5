@@ -2336,8 +2336,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Iget_file_id
  *
- * Purpose:	The public version of H5I_get_file_id(), obtains the file
- *              ID given an object ID.  User has to close this ID.
+ * Purpose:	Obtains the file ID given an object ID.  User has to close 
+ *              this ID. This routine goes through the VOL to get the file 
+ *              struct and checks if an ID for that struct exists (increments 
+ *              ref count & returns this ID) or creates a new ID for it. 
  *
  * Return:	Success:	file ID
  *
@@ -2346,6 +2348,9 @@ done:
  * Programmer:  Raymond Lu
  *              Oct 27, 2003
  *
+ * Modified:    Mohamad Chaarawi
+ *              September, 2012
+ *              Update for Virtual Object Layer
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -2409,7 +2414,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5I_get_file_id
  *
- * Purpose:	The private version of H5Iget_file_id(), obtains the file
+ * Purpose:	The native version of H5Iget_file_id(), obtains the file
  *              ID given an object ID.
  *
  * Return:	Success:	file ID
@@ -2417,6 +2422,10 @@ done:
  *
  * Programmer:  Raymond Lu
  *              Oct 27, 2003
+ *
+ * Modified:    Mohamad Chaarawi
+ *              September, 2012
+ *              Update for Virtual Object Layer
  *
  *-------------------------------------------------------------------------
  */
@@ -2430,17 +2439,18 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 
     /* Get object type */
     type = H5I_TYPE(obj_id);
+
+    /* object is a file, just increment reference count on ID */
     if(type == H5I_FILE) {
-        /* Increment reference count on file ID */
         if(H5I_inc_ref(obj_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
-
-        /* Set return value */
         ret_value = obj_id;
     } /* end if */
     else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
         H5G_loc_t loc;              /* Location of object */
 
+        /* If object is a named datatype, we need to do extra processing to get the actual
+           datatype struct (the VOL struct) */
         if (H5I_DATATYPE == type) {
             void *obj = NULL;
 
@@ -2449,9 +2459,9 @@ H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
             if (NULL == (obj = H5T_get_named_type((H5T_t *)obj)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a named datatype")
-            if(H5G_loc_real(obj, type, &loc) < 0) {
+            /* Get the object location information */
+            if(H5G_loc_real(obj, type, &loc) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-            }
         }
         else {
             /* Get the object location information */

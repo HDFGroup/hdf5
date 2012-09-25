@@ -1127,10 +1127,8 @@ test_compound_5(void)
     }
 
     /* Free memory buffers */
-    if(buf)
-        HDfree(buf);
-    if(bkg)
-        HDfree(bkg);
+    HDfree(buf);
+    HDfree(bkg);
     return retval;
 }
 
@@ -4698,11 +4696,12 @@ test_bitfield_funcs(void)
 {
     hid_t		type=-1, ntype=-1, super=-1;
     int                 size;
-    char*               tag;
+    char*               tag=0;
     H5T_pad_t           inpad;
     H5T_cset_t          cset;
     H5T_str_t           strpad;
     herr_t              ret;
+    int                 retval=-1;
 
     TESTING("some type functions for bitfield");
 
@@ -4786,16 +4785,18 @@ test_bitfield_funcs(void)
         goto error;
     } /* end if */
 
-    H5Tclose(type);
-    H5Tclose(ntype);
-    PASSED();
-    reset_hdf5();
-    return 0;
+    retval = 0;
 
  error:
+
+    if (retval == -1) retval = 1;
+
+    HDfree(tag);
+    H5Tclose(ntype);
     H5Tclose(type);
+    if (retval == 0) PASSED();
     reset_hdf5();
-    return 1;
+    return retval;
 }
 
 
@@ -7049,11 +7050,13 @@ error:
  */
 int test_utf_ascii_conv(void)
 {
-    hid_t fid;
-    hid_t did;
-    hid_t utf8_vtid, ascii_vtid;
-    hid_t utf8_tid, ascii_tid;
-    hid_t sid;
+    hid_t fid = -1;
+    hid_t did = -1;
+    hid_t utf8_vtid = -1;
+    hid_t ascii_vtid = -1;
+    hid_t utf8_tid = -1;
+    hid_t ascii_tid = -1;
+    hid_t sid = -1;
     const char *utf8_w = "foo!";
     char *ascii_r = NULL;
     const char *ascii_w = "bar!";

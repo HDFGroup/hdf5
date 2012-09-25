@@ -37,7 +37,7 @@
 ./aclocal.m4
 ./acsite.m4
 ./configure
-./configure.in
+./configure.ac
 
 ./bin/COPYING
 ./bin/buildhdf5
@@ -494,7 +494,6 @@
 ./perform/chunk.c
 ./perform/gen_report.pl
 ./perform/iopipe.c
-./perform/mpi-perf.c
 ./perform/overhead.c
 ./perform/perf.c
 ./perform/perf_meta.c
@@ -514,22 +513,21 @@
 ./perform/sio_timer.h
 ./perform/zip_perf.c
 
+./release_docs/CMake.txt
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_9.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
+./release_docs/INSTALL_MinGW.txt
+./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
-./release_docs/USING_Windows.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
-./release_docs/INSTALL_Windows_Short_NET.TXT
-./release_docs/INSTALL_Windows_Short_VS2005.TXT
 ./release_docs/INSTALL_Windows_Short_VS2008.TXT
-./release_docs/CMake.txt
-./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
-./release_docs/Using_CMake.txt
+./release_docs/USING_CMake.txt
+./release_docs/USING_Windows.txt
 
 ./src/.indent.pro      _DO_NOT_DISTRIBUTE_
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
@@ -829,6 +827,7 @@
 ./src/H5Pdcpl.c
 ./src/H5Pdeprec.c
 ./src/H5Pdxpl.c
+./src/H5Pencdec.c
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
 ./src/H5Pfmpl.c
@@ -954,6 +953,8 @@
 ./test/dtransform.c
 ./test/earray.c
 ./test/efc.c
+./test/enc_dec_plist.c
+./test/enc_dec_plist_with_endianess.c
 ./test/enum.c
 ./test/extend.c
 ./test/external.c
@@ -996,6 +997,7 @@
 ./test/gen_old_group.c          _DO_NOT_DISTRIBUTE_
 ./test/gen_old_layout.c         _DO_NOT_DISTRIBUTE_
 ./test/gen_old_mtime.c          _DO_NOT_DISTRIBUTE_
+./test/gen_plist.c              _DO_NOT_DISTRIBUTE_
 ./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
 ./test/gen_specmetaread.c       _DO_NOT_DISTRIBUTE_
 ./test/gen_udlinks.c            _DO_NOT_DISTRIBUTE_
@@ -1086,23 +1088,48 @@
 ./test/testfiles/error_test_1
 ./test/testfiles/error_test_2
 ./test/testfiles/links_env.out
+./test/testfiles/plist_files/acpl_be
+./test/testfiles/plist_files/acpl_le
+./test/testfiles/plist_files/dapl_be
+./test/testfiles/plist_files/dapl_le
+./test/testfiles/plist_files/dcpl_be
+./test/testfiles/plist_files/dcpl_le
+./test/testfiles/plist_files/dxpl_be
+./test/testfiles/plist_files/dxpl_le
+./test/testfiles/plist_files/fapl_be
+./test/testfiles/plist_files/fapl_le
+./test/testfiles/plist_files/fcpl_be
+./test/testfiles/plist_files/fcpl_le
+./test/testfiles/plist_files/gcpl_be
+./test/testfiles/plist_files/gcpl_le
+./test/testfiles/plist_files/lapl_be
+./test/testfiles/plist_files/lapl_le
+./test/testfiles/plist_files/lcpl_be
+./test/testfiles/plist_files/lcpl_le
+./test/testfiles/plist_files/ocpl_be
+./test/testfiles/plist_files/ocpl_le
+./test/testfiles/plist_files/ocpypl_be
+./test/testfiles/plist_files/ocpypl_le
+./test/testfiles/plist_files/strcpl_be
+./test/testfiles/plist_files/strcpl_le
 
 ./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
+./testpar/t_chunk_alloc.c
+./testpar/t_coll_chunk.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_file_image.c
+./testpar/t_filter_read.c
 ./testpar/t_mdset.c
 ./testpar/t_mpi.c
 ./testpar/t_ph5basic.c
 ./testpar/t_pflush1.c
 ./testpar/t_pflush2.c
-./testpar/t_chunk_alloc.c
-./testpar/t_coll_chunk.c
-./testpar/t_filter_read.c
 ./testpar/t_posix_compliant.c
+./testpar/t_prop.c
 ./testpar/t_shapesame.c
 ./testpar/t_span_tree.c
 ./testpar/testpar.h
@@ -1136,7 +1163,7 @@
 ./tools/h5import/h5import.h
 ./tools/h5import/h5import.c
 ./tools/h5import/h5importtest.c
-./tools/h5import/h5importtestutil.sh
+./tools/h5import/h5importtestutil.sh.in
 
 # testfiles for h5import
 ./tools/h5import/testfiles/binfp64.conf
@@ -1197,8 +1224,8 @@
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/ph5diff_main.c
 ./tools/h5diff/h5diffgentest.c
-./tools/h5diff/testh5diff.sh
-./tools/h5diff/testph5diff.sh
+./tools/h5diff/testh5diff.sh.in
+./tools/h5diff/testph5diff.sh.in
 
 # h5repack sources
 ./tools/h5repack/Makefile.am
@@ -1223,7 +1250,7 @@
 ./tools/h5ls/testh5ls.sh.in
 
 # h5copy sources
-./tools/h5copy/testh5copy.sh
+./tools/h5copy/testh5copy.sh.in
 ./tools/h5copy/Makefile.in
 ./tools/h5copy/h5copy.c
 ./tools/h5copy/h5copygentest.c
@@ -1264,7 +1291,7 @@
 ./tools/misc/h5repart.c
 ./tools/misc/h5repart_gentest.c
 ./tools/misc/repart_test.c
-./tools/misc/testh5mkgrp.sh
+./tools/misc/testh5mkgrp.sh.in
 ./tools/misc/testh5repart.sh.in
 ./tools/misc/talign.c
 ./tools/misc/testfiles/h5mkgrp_help.txt
@@ -1456,6 +1483,10 @@
 ./tools/testfiles/topaque.h5
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
+./tools/testfiles/tscalarattrintsize.ddl
+./tools/testfiles/tscalarattrintsize.h5
+./tools/testfiles/tscalarintsize.ddl
+./tools/testfiles/tscalarintsize.h5
 ./tools/testfiles/tscaleoffset.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl
@@ -1822,6 +1853,7 @@
 ./tools/h5diff/testfiles/h5diff_56.txt
 ./tools/h5diff/testfiles/h5diff_57.txt
 ./tools/h5diff/testfiles/h5diff_58.txt
+./tools/h5diff/testfiles/h5diff_59.txt
 ./tools/h5diff/testfiles/h5diff_600.txt
 ./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
@@ -2187,7 +2219,7 @@
 ./hl/tools/gif2h5/hdfgifwr.c
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
-./hl/tools/gif2h5/h52giftest.sh
+./hl/tools/gif2h5/h52giftest.sh.in
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
@@ -2297,7 +2329,7 @@
 ./config/cmake/CheckTypeSize.cmake
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
-./config/cmake/FindHDF5.cmake
+./config/cmake/FindHDF5.cmake.in
 ./config/cmake/FindMPI.cmake
 ./config/cmake/hdf5-config.cmake.build.in
 ./config/cmake/hdf5-config.cmake.install.in

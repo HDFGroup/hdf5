@@ -8,6 +8,8 @@ SET (BUILD_SHARED_LIBS ON CACHE BOOL "Build Shared Libraries" FORCE)
 
 SET (BUILD_TESTING ON CACHE BOOL "Build HDF5 Unit Testing" FORCE)
 
+SET (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
+
 SET (HDF5_BUILD_CPP_LIB ON CACHE BOOL "Build HDF5 C++ Library" FORCE)
 
 SET (HDF5_BUILD_EXAMPLES ON CACHE BOOL "Build HDF5 Library Examples" FORCE)
@@ -69,3 +71,7 @@ SET (SZIP_SVN_URL "http://svn.hdfgroup.uiuc.edu/szip/trunk" CACHE STRING "Use SZ
 SET (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
 
 SET (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
+
+SET (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
+
+SET (SZIP_PACKAGE_NAME "szip" CACHE STRING "Name of SZIP package" FORCE)

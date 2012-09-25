@@ -408,7 +408,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
             if (!fullname[0])
                 /* We didn't append the prefix yet */
-                HDstrncpy(fullname, prefix, MIN(strlen(prefix), size));
+                HDstrncpy(fullname, prefix, MIN(HDstrlen(prefix), size));
 
             if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
                 /*
@@ -735,6 +735,8 @@ h5_set_info_object(void)
 
         valp = envp = next = HDstrdup(envp);
 
+        if (!valp) return 0;
+
         /* create an INFO object if not created yet */
         if (h5_io_info_g == MPI_INFO_NULL)
             MPI_Info_create(&h5_io_info_g);
@@ -749,7 +751,7 @@ h5_set_info_object(void)
             /* copy key/value pair into temporary buffer */
             len = strcspn(valp, ";");
             next = &valp[len];
-            key_val = calloc(1, len + 1);
+            key_val = (char *)calloc(1, len + 1);
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
@@ -761,8 +763,10 @@ h5_set_info_object(void)
             while (*namep && (*namep == ' ' || *namep == '\t'))
                 namep++;
 
+            if (!*namep) continue; /* was all white space, so move to next k/v pair */
+
             /* eat up any ending white spaces */
-            endp = &namep[strlen(namep) - 1];
+            endp = &namep[HDstrlen(namep) - 1];
 
             while (endp && (*endp == ' ' || *endp == '\t'))
                 *endp-- = '\0';
@@ -1057,7 +1061,7 @@ getenv_all(MPI_Comm comm, int root, const char* name)
   if(mpi_rank == root) {
       env = HDgetenv(name);
       if(env) {
-    len = HDstrlen(env);
+    len = (int)HDstrlen(env);
     MPI_Bcast(&len, 1, MPI_INT, root, comm);
     MPI_Bcast(env, len, MPI_CHAR, root, comm);
       }
@@ -1071,9 +1075,9 @@ getenv_all(MPI_Comm comm, int root, const char* name)
       MPI_Bcast(&len, 1, MPI_INT, root, comm);
       if(len >= 0) {
     if(env == NULL)
-        env = (char*) HDmalloc(len+1);
-    else if(strlen(env) < len)
-        env = (char*) HDrealloc(env, len+1);
+        env = (char*) HDmalloc((size_t)len+1);
+    else if(HDstrlen(env) < (size_t)len)
+        env = (char*) HDrealloc(env, (size_t)len+1);
 
     MPI_Bcast(env, len, MPI_CHAR, root, comm);
     env[len] = '\0';
@@ -1125,7 +1129,11 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 #ifdef H5_VMS 
     HDstrcat(filename, origfilename);
 #else
-    char * srcdir = HDgetenv("srcdir"); /* The source directory */
+    const char * srcdir = HDgetenv("srcdir"); /* The source directory */
+
+    /* Check for using the srcdir from configure time */
+    if(NULL == srcdir)
+        srcdir = config_srcdir;
 
     if(srcdir && ((HDstrlen(srcdir) +
                    HDstrlen(origfilename) + 6) < FILENAME_BUF_SIZE)) {

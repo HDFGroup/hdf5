@@ -67,7 +67,7 @@ H5S_select_offset(H5S_t *space, const hssize_t *offset)
 
     /* Check args */
     HDassert(space);
-    HDassert(space->extent.rank);
+    HDassert(0 < space->extent.rank && space->extent.rank <= H5S_MAX_RANK);
     HDassert(offset);
 
     /* Copy the offset over */
