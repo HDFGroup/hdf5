@@ -981,8 +981,6 @@ H5R_get_name(H5G_loc_t *loc, hid_t lapl_id, hid_t dxpl_id, H5R_type_t ref_type,
     /* Retrieve file ID for name search */
     if((file_id = H5F_get_id(f, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
-            //if((file_id = H5I_get_file_id(id, FALSE)) < 0)
-            //HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
     /* Get name, length, etc. */
     if((ret_value = H5G_get_name_by_addr(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)

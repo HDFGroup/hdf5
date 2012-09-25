@@ -113,17 +113,17 @@ H5P_acrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the type ID property*/
     if(H5P_register_real(pclass, H5VL_ATTR_TYPE_ID, sizeof(hid_t), &type_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space ID property */
     if(H5P_register_real(pclass, H5VL_ATTR_SPACE_ID, sizeof(hid_t), &space_id, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the lcpl ID property */
     if(H5P_register_real(pclass, H5VL_ATTR_LOC_PARAMS, H5A_CRT_LOCATION_SIZE, &loc_params, 
-                         NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:

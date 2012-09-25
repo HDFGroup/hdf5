@@ -2089,3 +2089,42 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F_set_store_msg_crt_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_id
+ *
+ * Purpose:	Get the file ID, incrementing it, or "resurrecting" it as
+ *              appropriate.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		Oct 29, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5F_get_id(H5F_t *file, hbool_t app_ref)
+{
+    hid_t       ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    if (FAIL == (ret_value = H5I_get_id(file, H5I_FILE))) {
+        /* resurrect the ID - Register an ID with the native plugin */
+        if((ret_value = H5VL_native_register(H5I_FILE, file, app_ref)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        file->id_exists = TRUE;
+    }
+    else {
+        /* Increment ref count on existing ID */
+        if(H5I_inc_ref(ret_value, app_ref) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_id() */
