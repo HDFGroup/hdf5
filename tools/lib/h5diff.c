@@ -1547,6 +1547,8 @@ hsize_t diff(hid_t file1_id,
               diff_opt_t * options,
               diff_args_t *argdata)
 {
+    hid_t   dset1_id = (-1);
+    hid_t   dset2_id = (-1);
     hid_t   type1_id = (-1);
     hid_t   type2_id = (-1);
     hid_t   grp1_id = (-1);
@@ -1714,6 +1716,10 @@ hsize_t diff(hid_t file1_id,
         *----------------------------------------------------------------------
         */
         case H5TRAV_TYPE_DATASET:
+            if((dset1_id = H5Dopen2(file1_id, path1, H5P_DEFAULT)) < 0)
+                goto out;
+            if((dset2_id = H5Dopen2(file2_id, path2, H5P_DEFAULT)) < 0)
+                goto out;
       /* verbose (-v) and report (-r) mode */
             if(options->m_verbose || options->m_report)
             {
@@ -1737,6 +1743,22 @@ hsize_t diff(hid_t file1_id,
                     print_found(nfound);  
                 }
             }
+
+
+            /*---------------------------------------------------------
+             * compare attributes
+             * if condition refers to cases when the dataset is a 
+             * referenced object
+             *---------------------------------------------------------
+             */
+            if(path1)
+                nfound += diff_attr(dset1_id, dset2_id, path1, path2, options);
+
+
+            if(H5Dclose(dset1_id) < 0)
+                goto out;
+            if(H5Dclose(dset2_id) < 0)
+                goto out;
             break;
 
        /*----------------------------------------------------------------------

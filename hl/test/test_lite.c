@@ -2152,8 +2152,11 @@ int main( void )
     /* test attribute functions */
     nerrors += test_attr();
 
-    /* test text-dtype functions */
+    /* test valid path functions */
     nerrors += test_valid_path();
+
+    /* test text-dtype functions */
+    nerrors += test_text_dtype();
 
     /* check for errors */
     if (nerrors)

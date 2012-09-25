@@ -54,7 +54,7 @@
 #define H5O_CRT_OHDR_FLAGS_SIZE         sizeof(uint8_t)
 /* Definitions for filter pipeline */
 #define H5O_CRT_PIPELINE_SIZE sizeof(H5O_pline_t)
-#define H5O_CRT_PIPELINE_CMP  H5P_ocrt_pipeline_cmp
+#define H5O_CRT_PIPELINE_CMP            H5P__ocrt_pipeline_cmp
 
 
 /******************/
@@ -72,12 +72,12 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_ocrt_reg_prop(H5P_genclass_t *pclass);
-static herr_t H5P_ocrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_data);
-static herr_t H5P_ocrt_close(hid_t dxpl_id, void *close_data);
+static herr_t H5P__ocrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__ocrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_data);
+static herr_t H5P__ocrt_close(hid_t dxpl_id, void *close_data);
 
 /* Property callbacks */
-static int H5P_ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
+static int H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
 
 
 /*********************/
@@ -91,12 +91,12 @@ const H5P_libclass_t H5P_CLS_OCRT[1] = {{
     &H5P_CLS_ROOT_g,		/* Parent class ID              */
     &H5P_CLS_OBJECT_CREATE_g,	/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
-    H5P_ocrt_reg_prop,		/* Default property registration routine */
+    H5P__ocrt_reg_prop,		/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
-    H5P_ocrt_copy,		/* Class copy callback          */
+    H5P__ocrt_copy,		/* Class copy callback          */
     NULL,		        /* Class copy callback info     */
-    H5P_ocrt_close,		/* Class close callback         */
+    H5P__ocrt_close,		/* Class close callback         */
     NULL 		        /* Class close callback info    */
 }};
 
@@ -114,7 +114,7 @@ const H5P_libclass_t H5P_CLS_OCRT[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_ocrt_reg_prop
+ * Function:    H5P__ocrt_reg_prop
  *
  * Purpose:     Initialize the object creation property list class
  *
@@ -126,7 +126,7 @@ const H5P_libclass_t H5P_CLS_OCRT[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
+H5P__ocrt_reg_prop(H5P_genclass_t *pclass)
 {
     unsigned attr_max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;   /* Default max. compact attribute storage settings */
     unsigned attr_min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;       /* Default min. dense attribute storage settings */
@@ -134,7 +134,7 @@ H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
     H5O_pline_t pline = H5O_CRT_PIPELINE_DEF;           /* Default I/O pipeline setting */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Register max. compact attribute storage property */
     if(H5P_register_real(pclass, H5O_CRT_ATTR_MAX_COMPACT_NAME, H5O_CRT_ATTR_MAX_COMPACT_SIZE, &attr_max_compact, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -150,15 +150,15 @@ H5P_ocrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the pipeline property */
     if(H5P_register_real(pclass, H5O_CRT_PIPELINE_NAME, H5O_CRT_PIPELINE_SIZE, &pline, NULL, NULL, NULL, NULL, NULL, H5O_CRT_PIPELINE_CMP, NULL) < 0)
-       HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_ocrt_reg_prop() */
+} /* end H5P__ocrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_ocrt_copy
+ * Function:       H5P__ocrt_copy
  *
  * Purpose:        Callback routine which is called whenever any object
  *                 creation property list is copied.  This routine copies
@@ -174,14 +174,14 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
+H5P__ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
 {
     H5O_pline_t    src_pline, dst_pline;        /* Source & destination pipelines */
     H5P_genplist_t *src_plist;                  /* Pointer to source property list */
     H5P_genplist_t *dst_plist;                  /* Pointer to destination property list */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Verify property list IDs */
     if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_plist_id)))
@@ -203,11 +203,11 @@ H5P_ocrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_ocrt_copy() */
+} /* end H5P__ocrt_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_ocrt_close
+ * Function:	H5P__ocrt_close
  *
  * Purpose:	Callback routine which is called whenever any object create
  *              property list is closed.  This routine performs any generic
@@ -223,13 +223,13 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5P_ocrt_close(hid_t dcpl_id, void UNUSED *close_data)
+H5P__ocrt_close(hid_t dcpl_id, void UNUSED *close_data)
 {
     H5O_pline_t     pline;              /* I/O pipeline */
     H5P_genplist_t *plist;              /* Property list */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
@@ -245,7 +245,7 @@ H5P_ocrt_close(hid_t dcpl_id, void UNUSED *close_data)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_ocrt_close() */
+} /* end H5P__ocrt_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1330,7 +1330,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_ocrt_pipeline_cmp
+ * Function:       H5P__ocrt_pipeline_cmp
  *
  * Purpose:        Callback routine which is called whenever a filter pipeline
  *                 property in a property list is compared.
@@ -1345,23 +1345,19 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
  *-------------------------------------------------------------------------
  */
 static int
-H5P_ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED size)
+H5P__ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED size)
 {
     const H5O_pline_t *pline1 = (const H5O_pline_t *)_pline1,     /* Create local aliases for values */
         *pline2 = (const H5O_pline_t *)_pline2;
     int cmp_value;              /* Value from comparison */
     herr_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(pline1);
     HDassert(pline2);
     HDassert(size == sizeof(H5O_pline_t));
-
-    /* Check the number of allocated pipeline entries */
-    if(pline1->nalloc < pline2->nalloc) HGOTO_DONE(-1);
-    if(pline1->nalloc > pline2->nalloc) HGOTO_DONE(1);
 
     /* Check the number of used pipeline entries */
     if(pline1->nused < pline2->nused) HGOTO_DONE(-1);
@@ -1412,7 +1408,7 @@ H5P_ocrt_pipeline_cmp(const void *_pline1, const void *_pline2, size_t UNUSED si
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_ocrt_pipeline_cmp() */
+} /* end H5P__ocrt_pipeline_cmp() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
@@ -1566,6 +1562,5 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_filter_by_id1() */
-
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

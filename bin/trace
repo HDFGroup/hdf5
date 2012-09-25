@@ -38,6 +38,7 @@ $Source = "";
 	       "H5FD_mpio_chunk_opt_t"      => "Dh",
                "H5D_mpio_actual_io_mode_t"  => "Di",
                "H5D_layout_t"               => "Dl",
+               "H5D_mpio_no_collective_cause_t" => "Dn",
                "H5D_mpio_actual_chunk_opt_mode_t" => "Do",
                "H5D_space_status_t"         => "Ds",
                "H5FD_mpio_xfer_t"           => "Dt",

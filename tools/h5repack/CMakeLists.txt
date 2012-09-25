@@ -800,6 +800,28 @@ ADD_H5_VERIFY_TEST (chunk2conti "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CONT
 ADD_H5_TEST (chunk2compa "TEST" h5repack_layout3.h5 -l chunk_unlimit1:COMPA)
 ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CHUNK)
 
+#--------------------------------------------------------------------------
+# Test -f for some specific cases. Chunked dataset with unlimited max dims.
+# (HDFFV-8012)
+#--------------------------------------------------------------------------
+# - should not fail 
+# - should not change max dims from unlimit
+
+# chunk dim is bigger than dataset dim. ( dset size < 64k )
+ADD_H5_TEST (error1 "TEST" h5repack_layout3.h5 -f chunk_unlimit1:NONE)
+ADD_H5_VERIFY_TEST (error1 "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 H5S_UNLIMITED)
+
+# chunk dim is bigger than dataset dim. ( dset size > 64k )
+ADD_H5_TEST (error2 "TEST" h5repack_layout3.h5 -f chunk_unlimit2:NONE)
+ADD_H5_VERIFY_TEST (error2 "TEST" 0 h5repack_layout3.h5 chunk_unlimit2 H5S_UNLIMITED)
+
+# chunk dims are smaller than dataset dims. ( dset size < 64k )
+ADD_H5_TEST (error3 "TEST" h5repack_layout3.h5 -f chunk_unlimit3:NONE)
+ADD_H5_VERIFY_TEST (error3 "TEST" 0 h5repack_layout3.h5 chunk_unlimit3 H5S_UNLIMITED)
+
+# file input - should not fail
+ADD_H5_TEST (error4 "TEST" h5repack_layout3.h5 -f NONE)
+
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.

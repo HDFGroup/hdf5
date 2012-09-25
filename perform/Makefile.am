@@ -38,7 +38,7 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
 if BUILD_PARALLEL_CONDITIONAL
-    PARA_BUILD_ALL=benchpar mpi-perf
+    PARA_BUILD_ALL=benchpar
 endif
 if BUILD_ALL_CONDITIONAL
     BUILD_ALL_PROGS=$(PARA_BUILD_ALL)

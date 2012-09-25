@@ -14,10 +14,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ed>
+ * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
  *              Thursday, July 11, 2002
  *
- * Purpose:  This is a "combination" MPI-2 and posix I/O driver.
+ * Purpose:     This is a "combination" MPI-2 and posix I/O driver.
  *              It uses MPI for coordinating the actions of several processes
  *              and posix I/O calls to do the actual I/O to the disk.
  *
@@ -230,7 +230,7 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_truncate,         /* truncate         */
     NULL,                           /* lock             */
     NULL,                           /* unlock           */
-    H5FD_FLMAP_SINGLE               /* fl_map           */
+    H5FD_FLMAP_DICHOTOMY            /* fl_map           */
     },  /* End of superclass information */
     H5FD_mpiposix_mpi_rank,         /* get_rank         */
     H5FD_mpiposix_mpi_size,         /* get_size         */

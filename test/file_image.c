@@ -163,6 +163,7 @@ error:
     return retval;
 } /* end test_properties() */
 
+
 /******************************************************************************
  * Function:    malloc_cb
  *
@@ -185,6 +186,7 @@ malloc_cb(size_t size, H5FD_file_image_op_t op, void *udata)
     return HDmalloc(size);
 }
 
+
 /******************************************************************************
  * Function:    memcpy_cb
  *
@@ -207,6 +209,7 @@ memcpy_cb(void *dest, const void *src, size_t size, H5FD_file_image_op_t op, voi
     return HDmemcpy(dest, src, size);
 }
 
+
 /******************************************************************************
  * Function:    realloc_cb
  *
@@ -229,6 +232,7 @@ realloc_cb(void *ptr, size_t size, H5FD_file_image_op_t op, void *udata)
     return HDrealloc(ptr,size);
 }
 
+
 /******************************************************************************
  * Function:    free_cb
  *
@@ -250,6 +254,7 @@ free_cb(void *ptr, H5FD_file_image_op_t op, void *udata)
     return(SUCCEED);
 }
 
+
 /******************************************************************************
  * Function:    udata_copy_cb
  *
@@ -273,6 +278,7 @@ udata_copy_cb(void *udata)
     return udata;
 }
 
+
 /******************************************************************************
  * Function:    udata_free_cb
  *
@@ -296,6 +302,7 @@ udata_free_cb(void *udata)
     return(SUCCEED);
 }
 
+
 /******************************************************************************
  * Function:    reset_udata
  *
@@ -314,6 +321,7 @@ reset_udata(udata_t *u)
     u->malloc_src = u->memcpy_src = u->realloc_src = u->free_src = H5FD_FILE_IMAGE_OP_NO_OP;
 }
 
+
 /******************************************************************************
  * Function:    test_callbacks
  *
@@ -502,6 +510,7 @@ error:
     return 1;
 } /* test_callbacks() */
 
+
 /******************************************************************************
  * Function:    test_core
  *
@@ -647,6 +656,7 @@ error:
     return 1;
 } /* end test_core() */
 
+
 /******************************************************************************
  * Function:    test_get_file_image
  *
@@ -899,6 +909,7 @@ error:
     return 1;
 } /* end test_get_file_image() */
 
+
 /******************************************************************************
  * Function:    test_get_file_image_error_rejection
  *
@@ -1282,7 +1293,7 @@ main(void)
 
     /* test H5Fget_file_image() with sec2 driver */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(0 > H5Pset_fapl_sec2(fapl))
+    if(H5Pset_fapl_sec2(fapl) < 0)
         errors++;
     else
         errors += test_get_file_image("H5Fget_file_image() with sec2 driver",
@@ -1290,7 +1301,7 @@ main(void)
 
     /* test H5Fget_file_image() with stdio driver */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(0 > H5Pset_fapl_stdio(fapl))
+    if(H5Pset_fapl_stdio(fapl) < 0)
         errors++;
     else
         errors += test_get_file_image("H5Fget_file_image() with stdio driver",
@@ -1298,7 +1309,7 @@ main(void)
 
     /* test H5Fget_file_image() with core driver */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(0 > H5Pset_fapl_core(fapl, (size_t)(64 *1024), TRUE))
+    if(H5Pset_fapl_core(fapl, (size_t)(64 *1024), TRUE) < 0)
         errors++;
     else
         errors += test_get_file_image("H5Fget_file_image() with core driver",
