@@ -20,6 +20,9 @@
  * Purpose:	This is the MDS driver.
  */
 
+#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5FD_mds_init_interface
 
@@ -28,11 +31,16 @@
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Fpkg.h"             /* File pkg                             */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmds.h"            /* MDS file driver        		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5Ppkg.h"             /* Property lists                       */
+#include "H5VLmds.h"            /* MDS VOL plugin			*/
+#include "H5VLmdserver.h"       /* MDS helper routines			*/
 
 /* Loop through all mapped files */
 #define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
@@ -50,6 +58,7 @@
     H5FD_mem_t LOOPVAR;							      \
     for (LOOPVAR=H5FD_MEM_DEFAULT; LOOPVAR<H5FD_MEM_NTYPES; LOOPVAR=(H5FD_mem_t)(LOOPVAR+1)) {
 
+#define END_MEMBERS	}}
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
  * is defined. This allows applications to still have the H5FD_MDS
@@ -81,7 +90,7 @@ typedef struct H5FD_mds_fapl_t {
 
 /* Callbacks */
 static herr_t H5FD_mds_term(void);
-static void *H5FD_mds_fapl_get(H5FD_t *_file);
+static void *H5FD_get_fapl_mds(H5FD_t *_file);
 static void *H5FD_mds_fapl_copy(const void *_old_fa);
 static herr_t H5FD_mds_fapl_free(void *_fa);
 static H5FD_t *H5FD_mds_open(const char *name, unsigned flags, hid_t fapl_id,
@@ -98,18 +107,10 @@ static herr_t H5FD_mds_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hadd
             size_t size, const void *buf);
 static herr_t H5FD_mds_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_mds_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static int H5FD_mds_mpi_rank(const H5FD_t *_file);
-static int H5FD_mds_mpi_size(const H5FD_t *_file);
-static MPI_Comm H5FD_mds_communicator(const H5FD_t *_file);
 
-/* MDS-specific file access properties */
-typedef struct H5FD_mds_fapl_t {
-    MPI_Comm		comm;		/*communicator			*/
-    MPI_Info		info;		/*file information		*/
-} H5FD_mds_fapl_t;
 
 /* The MDS file driver information */
-static const H5FD_class_mpi_t H5FD_mds_g = {
+static const H5FD_class_t H5FD_mds_g = {
     "mds",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
     H5F_CLOSE_SEMI,				/* fc_degree		*/
@@ -118,7 +119,7 @@ static const H5FD_class_mpi_t H5FD_mds_g = {
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
     sizeof(H5FD_mds_fapl_t),			/*fapl_size		*/
-    H5FD_mds_fapl_get,				/*fapl_get		*/
+    H5FD_get_fapl_mds,				/*fapl_get		*/
     H5FD_mds_fapl_copy,			/*fapl_copy		*/
     H5FD_mds_fapl_free, 			/*fapl_free		*/
     0,		                		/*dxpl_size		*/
@@ -243,14 +244,11 @@ H5FD_mds_term(void)
 herr_t
 H5P_set_fapl_mds(hid_t fapl_id, const char *name, hid_t plist_id)
 {
-    H5FD_mem_t		mt;
-    H5FD_mem_t		memb_map[H5FD_MEM_NTYPES];
     H5FD_mds_fapl_t	fa;
     H5P_genplist_t      *plist;      /* Property list pointer */
     herr_t              ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
-    H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
     if(fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -268,18 +266,19 @@ H5P_set_fapl_mds(hid_t fapl_id, const char *name, hid_t plist_id)
         fa.memb_fapl = plist_id;
     else
         fa.memb_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    fa.memb_name = name;
+    fa.memb_name = H5MM_strdup(name);
     fa.memb_addr = 0;
 
     ret_value= H5P_set_driver(plist, H5FD_MDS, &fa);
 
+    H5MM_free(fa.memb_name);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_mds_fapl_get
+ * Function:	H5FD_get_fapl_mds
  *
  * Purpose:	Returns a file access property list which indicates how the
  *		specified file is being accessed. The return list could be
@@ -298,13 +297,28 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5FD_mds_fapl_get(H5FD_t *_file)
+H5FD_get_fapl_mds(H5FD_t *_file)
 {
     H5FD_mds_t	*file = (H5FD_mds_t*)_file;
+    H5FD_mds_fapl_t *fa = NULL;
+    void *ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
-    FUNC_LEAVE_NOAPI(H5FD_mds_fapl_copy(&(file->fa)))
+    HDassert(file);
+    HDassert(H5FD_MDS == file->pub.driver_id);
+
+    if(NULL == (fa = (H5FD_mds_fapl_t *)H5MM_calloc(sizeof(H5FD_mds_fapl_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* MSC - Need to think more about that */
+    
+    /* Set return value */
+    ret_value = (void *)fa;
+
+done:
+    //FUNC_LEAVE_NOAPI(H5FD_mds_fapl_copy(&(file->fa)))
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 
@@ -376,11 +390,11 @@ static herr_t
 H5FD_mds_fapl_free(void *_fa)
 {
     H5FD_mds_fapl_t	*fa = (H5FD_mds_fapl_t*)_fa;
-    herr_r ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
     if (fa->memb_fapl >= 0)
-        if(H5Pclose(fa->memb_fapl[mt])<0)
+        if(H5Pclose(fa->memb_fapl)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close plist") 
     if (fa->memb_name)
         free(fa->memb_name);
@@ -407,11 +421,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_mds_open(const char *name, unsigned flags, hid_t fapl_id,
+H5FD_mds_open(const char UNUSED *name, unsigned flags, hid_t fapl_id,
               haddr_t UNUSED maxaddr)
 {
-    H5FD_mds_t			*file=NULL;
-    H5FD_t			*ret_value;     /* Return value */
+    H5FD_mds_fapl_t     *fa = NULL;
+    H5FD_mds_t	       	*file=NULL;
+    H5FD_t		*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -420,7 +435,7 @@ H5FD_mds_open(const char *name, unsigned flags, hid_t fapl_id,
 
     fa = (H5FD_mds_fapl_t *)H5Pget_driver_info(fapl_id);
 
-    file->memb = H5FDopen(fa.memb_name, flags, fa.memb_fapl, HADDR_UNDEF);
+    file->memb = H5FDopen(fa->memb_name, flags, fa->memb_fapl, HADDR_UNDEF);
     if (!file->memb)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error opening member file")
 
@@ -456,13 +471,14 @@ H5FD_mds_close(H5FD_t *_file)
 
     if (file->memb)
         if (H5FDclose(file->memb) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSE, FAIL, "can't close member file")
-
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "can't close member file")
+                /*
     if (file->fa.memb_fapl >= 0)
         if(H5Pclose(file->fa.memb_fapl) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close plist") 
     if (file->fa.memb_name) 
         free(file->fa.memb_name);
+                */
     free(file);
 
 done:
@@ -486,16 +502,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mds_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
+H5FD_mds_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    H5FD_mdc_t			*file = (H5FD_mdc_t*)_file;
-    herr_t              	ret_value = SUCCEED;
+    const H5FD_mds_t	*file = (const H5FD_mds_t*)_file;
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     ret_value = H5FDquery(file->memb, flags);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -518,9 +533,9 @@ H5FD_mds_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
 {
     const H5FD_mds_t	*file = (const H5FD_mds_t*)_file;
 
-    /* Copy file's free space type mapping */
+    /* MSC - need to figure this out - Copy file's free space type mapping 
     memcpy(type_map, file->fa.memb_map, sizeof(file->fa.memb_map));
-
+    */
     return(0);
 } /* end H5FD_mds_get_type_map() */
 

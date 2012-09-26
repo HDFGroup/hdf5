@@ -33,27 +33,27 @@ typedef struct H5VL_mds_object_t {
     */
 } H5VL_mds_object_t;
 
-struct H5VL_mds_file_t {
+typedef struct H5VL_mds_file_t {
     H5VL_mds_object_t common; /* common stuff, must be first */
     H5F_t  *raw_file; /* the raw data file that is created by the client */
-};
+} H5VL_mds_file_t;
 
-struct H5VL_mds_dset_t {
+typedef struct H5VL_mds_dset_t {
     H5VL_mds_object_t common; /* common stuff, must be first */
     H5T_t   *type;   /* the dataset type */
-};
+} H5VL_mds_dset_t;
 
 
 
 /* Operation types for the MDS */
 typedef enum H5VL_mds_op_type_t {
     H5VL_MDS_FILE_CREATE   = 0,
-    H5VL_MDS_FILE_OPEN     = 1,
-    H5VL_MDS_DSET_CREATE   = 2
+    H5VL_MDS_DSET_CREATE   = 1,
+    H5VL_MDS_ALLOC         = 2
 } H5VL_mds_op_type_t;
 
 H5_DLL herr_t H5VL_mds_start(void);
 H5_DLL herr_t H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...);
-H5_DLL herr_t H5VL_mds_perform_op(const void *buf, size_t buf_size);
+H5_DLL herr_t H5VL_mds_perform_op(const void *buf, int source);
 
 #endif /* _H5VLmdserver_H */

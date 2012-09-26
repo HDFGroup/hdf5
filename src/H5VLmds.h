@@ -23,13 +23,15 @@
 #define H5VLmds_H
 
 #define H5VL_MDS	(H5VL_mds_init())
-
+#define MDS_RANK        0
+#define H5VL_MDS_LISTEN_TAG 352
+#define H5VL_MDS_SEND_TAG 356
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 H5_DLL H5VL_class_t *H5VL_mds_init(void);
-H5_DLL herr_t H5Pset_fapl_mds(hid_t fapl_id);
+H5_DLL herr_t H5Pset_fapl_mds(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 H5_DLL hid_t H5VL_mds_register(H5I_type_t type, void *obj, hbool_t app_ref);
 #ifdef __cplusplus
 }

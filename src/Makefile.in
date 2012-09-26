@@ -136,9 +136,10 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Fquery.lo H5Fsfile.lo H5Fsuper.lo H5Fsuper_cache.lo \
 	H5Ftest.lo H5FA.lo H5FAcache.lo H5FAdbg.lo H5FAdblock.lo \
 	H5FAdblkpage.lo H5FAhdr.lo H5FAstat.lo H5FAtest.lo H5VL.lo \
-	H5VLint.lo H5VLnative.lo H5VLdummy.lo H5VLmds.lo H5SC.lo \
-	H5FD.lo H5FDcore.lo H5FDdirect.lo H5FDfamily.lo H5FDint.lo \
-	H5FDlog.lo H5FDmpi.lo H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo \
+	H5VLint.lo H5VLnative.lo H5VLdummy.lo H5VLmds.lo \
+	H5VLmdserver.lo H5SC.lo H5FD.lo H5FDcore.lo H5FDmdc.lo \
+	H5FDmds.lo H5FDdirect.lo H5FDfamily.lo H5FDint.lo H5FDlog.lo \
+	H5FDmpi.lo H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo \
 	H5FDsec2.lo H5FDspace.lo H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo \
 	H5FScache.lo H5FSdbg.lo H5FSsection.lo H5FSstat.lo H5FStest.lo \
 	H5G.lo H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo H5Gdense.lo \
@@ -549,9 +550,10 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAstat.c H5FAtest.c \
-        H5VL.c H5VLint.c H5VLnative.c H5VLdummy.c H5VLmds.c  \
+        H5VL.c H5VLint.c H5VLnative.c H5VLdummy.c H5VLmds.c H5VLmdserver.c  \
         H5SC.c \
         H5FD.c H5FDcore.c  \
+        H5FDmdc.c H5FDmds.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c H5FSstat.c H5FStest.c \
@@ -607,8 +609,9 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
+        H5FDmdc.h H5FDmds.h  \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
-        H5VLpublic.h H5VLnative.h H5VLdummy.h H5VLmds.h \
+        H5VLpublic.h H5VLnative.h H5VLdummy.h H5VLmds.h H5VLmdserver.h\
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h
@@ -814,6 +817,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDfamily.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDlog.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmdc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDmpiposix.Plo@am__quote@
@@ -1000,6 +1005,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VLdummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VLint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VLmds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VLmdserver.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5VLnative.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5WB.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Z.Plo@am__quote@

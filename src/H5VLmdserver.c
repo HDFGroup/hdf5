@@ -29,6 +29,7 @@
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 #define H5R_PACKAGE		/*suppress error about including H5Rpkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
@@ -48,6 +49,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmds.h"            /* MDS file driver      		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -57,6 +59,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Rpkg.h"		/* References   			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
@@ -145,7 +148,7 @@ H5VL_mds_start(void)
 
     while(1) {
         /* probe for a message from a client */
-        if(MPI_SUCCESS != MPI_probe(MPI_ANY_SOURCE, H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
+        if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message")
         /* get the incoming message size from the probe result */
         if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -160,7 +163,7 @@ H5VL_mds_start(void)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receivemessage")
 
         /* decode the buffer and perform the requested operation */        
-        if((ret_value = H5VL_mds_perform_op(recv_buf, incoming_msg_size, status.MPI_SOURCE)) < 0)
+        if((ret_value = H5VL_mds_perform_op(recv_buf, status.MPI_SOURCE)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to decode buffer and execute operation")
 
         if (NULL != recv_buf)
@@ -188,7 +191,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
+H5VL_mds_perform_op(const void *buf, int source)
 {
     const uint8_t *p = (const uint8_t *)buf;     /* Current pointer into buffer */
     H5VL_mds_op_type_t op_type;
@@ -206,20 +209,23 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
     switch(op_type) {
         case H5VL_MDS_FILE_CREATE:
             {
-                char *name = NULL;
-                char *mds_filename = NULL;
-                unsigned flags;
-                hbool_t fcpl_encoded, fapl_encoded;
-                hid_t fcpl_id = FAIL, fapl_id = FAIL;
-                H5F_t *new_file = NULL;
-                hid_t file_id;
-                size_t len = 0;
+                char *name = NULL; /* name of HDF5 container (decoded) */
+                size_t len = 0; /* length of name (decoded) */
+                char *mds_filename = NULL; /* name of the metadata file (generated from name) */
+                unsigned flags; /* access flags */
+                hbool_t fcpl_encoded, fapl_encoded; /* flag to indicate whether plists are encoded (non-default) or not encoded (default) */
+                hid_t fcpl_id = FAIL, fapl_id = FAIL; /* plist IDs */
+                hid_t temp_fapl; /* fapl used for underlying MDS VFD */
+                H5F_t *new_file = NULL; /* struct for MDS file */
+                hid_t file_id; /* ID of MDS file */
 
                 /* decode length of name and name */
                 UINT64DECODE_VARLEN(p, len);
                 name = H5MM_xstrdup((const char *)(p));
-                *p += len;
-                mds_filename = H5MM_alloc (sizeof(char) * (len + 3));
+                p += len;
+
+                /* generate the MDS file name by adding a .md extension to the file name */
+                mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 3));
                 sprintf(mds_filename, "%s.md", name);
                 printf("file name  %d  %s  %s\n", len, name, mds_filename);
 
@@ -233,21 +239,22 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                     if((fcpl_id = H5Pdecode((const void *)p)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
                 }
-                else
-                    fcpl_id = H5P_DEFAULT;
-
+                else {
+                    fcpl_id = H5P_FILE_CREATE_DEFAULT;
+                }
                 fapl_encoded = (hbool_t)*p++;
                 if(fapl_encoded) {
                     if((fapl_id = H5Pdecode((const void *)p)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
                 }
-                else
+                else {
                     fapl_id = H5P_FILE_ACCESS_DEFAULT;
+                }
 
                 /* set the underlying MDS VFD */
                 temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-                if(H5P_fapl_set_mds(temp_fapl, name, fapl_id) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDS plist")
+                if(H5P_set_fapl_mds(temp_fapl, name, fapl_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist")
 
                 /* create the metadata file locally */
                 if(NULL == (new_file = H5F_open(mds_filename, flags, fcpl_id, temp_fapl, H5AC_dxpl_id)))
@@ -255,7 +262,7 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
 
                 new_file->id_exists = TRUE;
 
-                if((file_id = H5I_register(new_file, H5I_FILE)) < 0)
+                if((file_id = H5I_register(H5I_FILE, new_file, FALSE)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
                 /* Send the meta data file to the client */
@@ -267,17 +274,20 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                 H5MM_xfree(mds_filename);
                 break;
             }
-        case H5VL_MDS_DATASET_CREATE:
+        case H5VL_MDS_DSET_CREATE:
             {
-                hid_t obj_id, dset_id = FAIL;
-                H5VL_loc_params_t loc_params;
-                char *name = NULL;
-                hbool_t dcpl_encoded, dapl_encoded, lcpl_encoded;
-                hid_t dcpl_id = FAIL, dapl_id = FAIL, lcpl_id = FAIL;
-                size_t len = 0;
+                hid_t obj_id; /* id of location for dataset */
+                hid_t dset_id = FAIL; /* dset id */
+                H5D_t *dset = NULL; /* New dataset's info */
+                H5VL_loc_params_t loc_params; /* location parameters for obj_id */
                 H5G_loc_t loc; /* Object location to insert dataset into */
-                H5D_t *dset = NULL;        /* New dataset's info */
-                const H5S_t *space;              /* Dataspace for dataset */
+                char *name = NULL; /* name of dataset (if named) */
+                size_t len = 0; /* len of dataset name */
+                hbool_t dcpl_encoded, dapl_encoded, lcpl_encoded; /* flag to indicate whether plists are encoded (non-default) or not encoded (default) */
+                hid_t dcpl_id = FAIL, dapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
+                hid_t type_id; /* datatype for dataset */
+                hid_t space_id; /* dataspace for dataset */
+                const H5S_t *space; /* Dataspace for dataset */
 
                 /* decode the object id */
                 INT32DECODE(p, obj_id);
@@ -289,8 +299,8 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                 /* decode length of the dataset name and the actual dataset name */
                 UINT64DECODE_VARLEN(p, len);
                 if(len) {
-                    name = H5MM_xstrdup((char *)(p));
-                    *p += len;
+                    name = H5MM_xstrdup((const char *)(p));
+                    p += len;
                 }
                 printf("dataset name  %d  %s\n", len, name);
 
@@ -321,10 +331,10 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                     lcpl_id = H5P_DEFAULT;
 
                 if((type_id = H5Tdecode((const void *)p)) < 0)
-                    HGOTO_ERROR(H5E_TYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
 
                 if((space_id = H5Sdecode((const void *)p)) < 0)
-                    HGOTO_ERROR(H5E_SPACE, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
 
                 /* Check dataset create parameters */
                 if(H5G_loc(obj_id, &loc) < 0)
@@ -349,7 +359,7 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset");
                 }
 
-                if((dset_id = H5I_register(dset, H5I_DATASET)) < 0)
+                if((dset_id = H5I_register(H5I_DATASET, dset, FALSE)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create dataset");
 
                 /* Send the dataset id to the client */
@@ -360,17 +370,19 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                 H5MM_xfree(name);
                 break;
             }
-        case H5VL_MDS_GET_EOA:
+        case H5VL_MDS_ALLOC:
             {
-                hid_t file_id, dxpl_id;
-                hsize_t size;
-                H5FD_mem_t type;
-                H5F_t *file = NULL;
-                H5FD_t *fd = NULL;
-                hsize_t orig_size;   /* Original allocation size */
-                haddr_t eoa;         /* Address of end-of-allocated space */
-                hsize_t extra;       /* Extra space to allocate, to align request */
-                haddr_t return_addr;
+                hid_t file_id; /* metadata file ID */
+                H5F_t *file = NULL; /* metadata file struct */
+                H5FD_t *fd = NULL; /* metadata file driver struct */
+                hid_t dxpl_id; /* encoded dxpl */
+                hbool_t dxpl_encoded; /* flag to indicate whether plists are encoded (non-default) or not encoded (default) */
+                H5FD_mem_t type; /* Memory VFD type to indicate metadata or raw data */
+                hsize_t size; /* requested size to allocate from the EOA */
+                hsize_t orig_size; /* Original allocation size */
+                haddr_t eoa; /* Address of end-of-allocated space */
+                hsize_t extra; /* Extra space to allocate, to align request */
+                haddr_t return_addr = HADDR_UNDEF;
 
                 /* the metadata file id */
                 INT32DECODE(p, file_id);
@@ -407,7 +419,7 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
 
                     /* Check for EOA already aligned */
                     if((mis_align = (eoa % fd->alignment)) > 0) {
-                        extra = file->alignment - mis_align;
+                        extra = fd->alignment - mis_align;
                     } /* end if */
                 } /* end if */
 
@@ -415,18 +427,28 @@ H5VL_mds_perform_op(const void *buf, size_t buf_size, int source)
                 size += extra;
 
                 /* Check for overflow when extending */
-                if(H5F_addr_overflow(eoa, size) || (eoa + size) > fd->maxaddr)
-                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
-
+                if(H5F_addr_overflow(eoa, size) || (eoa + size) > fd->maxaddr) {
+                    /* Send undefined haddr to the client */
+                    if(MPI_SUCCESS != MPI_Send(&return_addr, sizeof(uint64_t), MPI_UINT64_T, source, 
+                                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
+                }
                 /* Set the [possibly aligned] address to return */
                 return_addr = eoa + extra;
 
                 /* Extend the end-of-allocated space address */
                 eoa += size;
-                if(file->cls->set_eoa(file, fd, eoa) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, HADDR_UNDEF, "file allocation request failed")
+                if(fd->cls->set_eoa(fd, type, eoa) < 0) {
+                    return_addr = HADDR_UNDEF;
+                    /* Send undefined haddr to the client */
+                    if(MPI_SUCCESS != MPI_Send(&return_addr, sizeof(uint64_t), MPI_UINT64_T, source, 
+                                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                    HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, FAIL, "file allocation request failed")
+                }
 
-                /* Send the dataset id to the client */
+                /* Send the haddr to the client */
                 if(MPI_SUCCESS != MPI_Send(&return_addr, sizeof(uint64_t), MPI_UINT64_T, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
@@ -462,7 +484,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    va_start (arguments, req);
+    va_start (arguments, size);
 
     switch(request_type) {
         case H5VL_MDS_FILE_CREATE:
@@ -472,13 +494,20 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
                 hid_t fcpl_id = va_arg (arguments, hid_t);
                 hid_t fapl_id = va_arg (arguments, hid_t);
                 size_t len = 0, fcpl_size = 0, fapl_size = 0;
+                H5P_genplist_t *fcpl, *fapl;
+
+                /* check plists */
+                if(NULL == (fcpl = (H5P_genplist_t *)H5I_object_verify(fcpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(NULL == (fapl = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
                 /* get property list sizes */
                 if(H5P_DEFAULT != fcpl_id)
-                    if((ret_value = H5Pencode(fcpl_id, FALSE, NULL, &fcpl_size)) < 0)
+                    if((ret_value = H5P__encode(fcpl, FALSE, NULL, &fcpl_size)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                 if(H5P_DEFAULT != fapl_id)
-                    if((ret_value = H5Pencode(fapl_id, FALSE, NULL, &fapl_size)) < 0)
+                    if((ret_value = H5P__encode(fapl, FALSE, NULL, &fapl_size)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
                 len = HDstrlen(name);
@@ -499,7 +528,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
                      * encode property lists if they are not default*/
                     if(H5P_DEFAULT != fcpl_id) {
                         *p++ = (uint8_t)TRUE;
-                        if((ret_value = H5Pencode(fcpl_id, FALSE, (void *)p, fcpl_size)) < 0)
+                        if((ret_value = H5P__encode(fcpl, FALSE, (void *)p, &fcpl_size)) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                     }
                     else
@@ -507,7 +536,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
                     if(H5P_DEFAULT != fapl_id) {
                         *p++ = (uint8_t)TRUE;
-                        if((ret_value = H5Pencode(fapl_id, FALSE, (void *)p, fapl_size)) < 0)
+                        if((ret_value = H5P__encode(fapl, FALSE, (void *)p, &fapl_size)) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                     }
                     else
@@ -518,7 +547,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
                 break;
             }
-        case H5VL_MDS_DATASET_CREATE:
+        case H5VL_MDS_DSET_CREATE:
             {
                 hid_t obj_id = va_arg (arguments, hid_t);
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
@@ -529,26 +558,35 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
                 hid_t space_id = va_arg (arguments, hid_t);
                 hid_t lcpl_id = va_arg (arguments, hid_t);
                 size_t len = 0, dcpl_size = 0, dapl_size = 0, lcpl_size = 0;
-                size_t type_size = 0, space_size = 0;
+                H5P_genplist_t *dcpl, *dapl, *lcpl;
+                size_t type_size = 0, space_size = 0, loc_size = 0;
+
+                /* check plists */
+                if(NULL == (dcpl = (H5P_genplist_t *)H5I_object_verify(dcpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(NULL == (dapl = (H5P_genplist_t *)H5I_object_verify(dapl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
                 /* get size for property lists to encode */
                 if(H5P_DEFAULT != dcpl_id)
-                    if((ret_value = H5Pencode(dcpl_id, FALSE, NULL, &dcpl_size)) < 0)
+                    if((ret_value = H5P__encode(dcpl, FALSE, NULL, &dcpl_size)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                 if(H5P_DEFAULT != dapl_id)
-                    if((ret_value = H5Pencode(dapl_id, FALSE, NULL, &dapl_size)) < 0)
+                    if((ret_value = H5P__encode(dapl, FALSE, NULL, &dapl_size)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                 if(H5P_DEFAULT != lcpl_id)
-                    if((ret_value = H5Pencode(lcpl_id, FALSE, NULL, &lcpl_size)) < 0)
+                    if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
                 /* get Type size to encode */
                 if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
-                    HGOTO_ERROR(H5E_TYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
 
                 /* get Dataspace size to encode */
                 if((ret_value = H5Sencode(space_id, NULL, &space_size)) < 0)
-                    HGOTO_ERROR(H5E_SPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
 
                 /* get name size to encode */
                 if(NULL != name)
@@ -579,7 +617,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
                      * encode property lists if they are not default*/
                     if(H5P_DEFAULT != dcpl_id) {
                         *p++ = (uint8_t)TRUE;
-                        if((ret_value = H5Pencode(dcpl_id, FALSE, (void *)p, dcpl_size)) < 0)
+                        if((ret_value = H5P__encode(dcpl, FALSE, (void *)p, &dcpl_size)) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                     }
                     else
@@ -587,7 +625,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
                     if(H5P_DEFAULT != dapl_id) {
                         *p++ = (uint8_t)TRUE;
-                        if((ret_value = H5Pencode(dapl_id, FALSE, (void *)p, dapl_size)) < 0)
+                        if((ret_value = H5P__encode(dapl, FALSE, (void *)p, &dapl_size)) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                     }
                     else
@@ -595,7 +633,7 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
                     if(NULL!= name && H5P_DEFAULT != lcpl_id) {
                         *p++ = (uint8_t)TRUE;
-                        if((ret_value = H5Pencode(lcpl_id, FALSE, (void *)p, lcpl_size)) < 0)
+                        if((ret_value = H5P__encode(lcpl, FALSE, (void *)p, &lcpl_size)) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                     }
                     else
@@ -603,11 +641,11 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
                     /* encode datatype */
                     if((ret_value = H5Tencode(type_id, (void *)p, &type_size)) < 0)
-                        HGOTO_ERROR(H5E_TYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
 
                     /* encode datatspace */
                     if((ret_value = H5Sencode(space_id, (void *)p, &space_size)) < 0)
-                        HGOTO_ERROR(H5E_SPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
 
                 }
                 *size += (1 + sizeof(int32_t) + loc_size + H5V_limit_enc_size((uint64_t)len) + len + 

@@ -56,7 +56,7 @@ static void get_app_args_from_proc(int *argc, char **argv, int max_args)
     *argc   = 0;
     *argv = NULL;
 
-    buf = malloc(COMMSPLITTER_PATH_MAX);
+    buf = (char *)malloc(COMMSPLITTER_PATH_MAX);
     f = fopen("/proc/self/cmdline", "r");
     if (f != NULL) {
         if (fread(buf, 1, COMMSPLITTER_PATH_MAX, f) > 0) {
@@ -81,7 +81,7 @@ static int split_comm_world(void)
 {
     int rc = 0;
     int enabled_save;
-    uint32_t color=0;
+    int color=0;
 
     if (commsplitter_data.grank == 0)
         color = 0;
@@ -186,7 +186,7 @@ extern void mpi_init_thread_(int *required, int *provided, int *ierr)
 }
 
 
-static int commsplitter_MPI_Finalize()
+static int commsplitter_MPI_Finalize(void)
 {
     int rc = 0;
 

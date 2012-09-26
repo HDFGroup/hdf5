@@ -42,6 +42,8 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmds.h"            /* MDS file driver      		*/
+#include "H5FDmdc.h"            /* MDC file driver      		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -391,8 +393,7 @@ H5VL_mds_fapl_free(void *_fa)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_mds(hid_t fapl_id, const char *meta_name, hid_t meta_fapl_id,
-                const char *raw_name, hid_t raw_fapl_id, MPI_Comm comm, MPI_Info info)
+H5Pset_fapl_mds(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
 {
     H5VL_mds_fapl_t    fa;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -447,13 +448,15 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 {
     void *send_buf;
     size_t buf_size;
+    hid_t temp_fapl; /* the fapl created here for the underlying VFD for clients */
     H5VL_mds_fapl_t *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     int my_rank;
     MPI_Request mpi_req;
     MPI_Status mpi_stat;
     H5F_t *new_file = NULL;
-    H5VL_mds_object_t *file = NULL;
+    hid_t mds_file; /* Metadata file ID recieved from the MDS */
+    H5VL_mds_file_t *file = NULL;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -470,7 +473,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* obtain the process rank from the communicator attached to the fapl ID */
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if(NULL == (fa = H5P_get_vol_info(plist)))
+    if(NULL == (fa = (H5VL_mds_fapl_t *)H5P_get_vol_info(plist)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get MDS info struct")
     MPI_Comm_rank(fa->comm, &my_rank);
 
@@ -498,7 +501,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     /* set the underlying VFD for clients (MDC)*/
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5P_fapl_set_mdc(temp_fapl, name, fapl_id) < 0)
+    if(H5P_set_fapl_mdc(temp_fapl, name, fapl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Create the raw data file */ 
@@ -516,7 +519,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     if (0 == my_rank) {
         MPI_Pcontrol(0);
         if(MPI_SUCCESS != MPI_Recv(&mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG, 
-                                   MPI_COMM_WORLD, MPI_STATUS_NULL))
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
         MPI_Pcontrol(1);
     }
@@ -526,13 +529,14 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     HDassert(mds_file);
 
-    (H5FD_mdc_t *)(new_file->shared->lf)->mdfile_id = mds_file;
+    H5FD_mdc_set_mdfile(new_file, mds_file);
+
     file->common.obj_type = H5I_FILE; 
     file->common.obj_id = mds_file;
     file->common.raw_file = new_file;
 
     if (0 == my_rank) {
-        MPI_Wait(&request, &mpi_stat);
+        MPI_Wait(&mpi_req, &mpi_stat);
         H5MM_free(send_buf);
     }
 
@@ -569,6 +573,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     MPI_Status     mpi_stat;
     hid_t          type_id, space_id, lcpl_id;
     H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5VL_mds_dset_t *dset = NULL;
     void           *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -605,26 +610,26 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
                                 H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &mpi_req))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
 
-    if(NULL == (dset = (H5VL_mds_object_t *)calloc(1, sizeof(H5VL_mds_object_t))))
+    if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    dset->obj_type = H5I_DATASET;
+    dset->common.obj_type = H5I_DATASET;
 
     /* Recieve the Dataset ID from the MDS process */
-    if(MPI_SUCCESS != MPI_Recv(&(dset->obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG, 
-                               MPI_COMM_WORLD, MPI_STATUS_NULL))
+    if(MPI_SUCCESS != MPI_Recv(&(dset->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
 
-    MPI_Wait(&request, &mpi_stat);
+    MPI_Wait(&mpi_req, &mpi_stat);
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);
-    ret_value = (void *)dset_id;
+    ret_value = (void *)dset;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_create() */
-
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_mds_dataset_write
@@ -679,3 +684,4 @@ H5VL_mds_dataset_write(void *_obj, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_write() */
+#endif
