@@ -314,6 +314,8 @@ SET (H5_TESTS
     testmeta
     #links_env
     file_image
+    enc_dec_plist
+    enc_dec_plist_with_endianess
 )
 
 FOREACH (test ${H5_TESTS})
@@ -638,6 +640,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
       gen_specmetaread
       gen_sizes_lheap
       gen_file_image
+      gen_plist
   )
 
   FOREACH (gen ${H5_GENERATORS})

@@ -457,6 +457,7 @@ SET (H5P_SRCS
     ${HDF5_SRC_DIR}/H5Pdcpl.c
     ${HDF5_SRC_DIR}/H5Pdeprec.c
     ${HDF5_SRC_DIR}/H5Pdxpl.c
+    ${HDF5_SRC_DIR}/H5Pencdec.c
     ${HDF5_SRC_DIR}/H5Pfapl.c
     ${HDF5_SRC_DIR}/H5Pfcpl.c
     ${HDF5_SRC_DIR}/H5Pfmpl.c
