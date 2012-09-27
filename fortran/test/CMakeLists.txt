@@ -106,6 +106,7 @@ IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
       tH5F.f90
       tH5E_F03.f90
       tH5L_F03.f90
+      tH5O_F03.f90
       tH5P_F03.f90
       tH5T_F03.f90
   )
