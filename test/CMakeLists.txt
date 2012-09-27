@@ -64,6 +64,30 @@ SET (HDF5_REFERENCE_FILES
     error_test_1
     error_test_2
     links_env.out
+    plist_files/acpl_be
+    plist_files/acpl_le
+    plist_files/dapl_be
+    plist_files/dapl_le
+    plist_files/dcpl_be
+    plist_files/dcpl_le
+    plist_files/dxpl_be
+    plist_files/dxpl_le
+    plist_files/fapl_be
+    plist_files/fapl_le
+    plist_files/fcpl_be
+    plist_files/fcpl_le
+    plist_files/gcpl_be
+    plist_files/gcpl_le
+    plist_files/lapl_be
+    plist_files/lapl_le
+    plist_files/lcpl_be
+    plist_files/lcpl_le
+    plist_files/ocpl_be
+    plist_files/ocpl_le
+    plist_files/ocpypl_be
+    plist_files/ocpypl_le
+    plist_files/strcpl_be
+    plist_files/strcpl_le
 )
 
 FOREACH (ref_file ${HDF5_REFERENCE_FILES})
