@@ -117,6 +117,10 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Testing writing/reading string datatypes, using C_LOC', total_error)
 
   ret_total_error = 0
+  CALL vl_test_special_char(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing string datatypes containing control characters', total_error)
+
+  ret_total_error = 0
   CALL test_create(ret_total_error)
   CALL write_test_status(ret_total_error, &
        ' Testing filling functions', &

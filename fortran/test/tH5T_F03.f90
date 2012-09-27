@@ -2800,6 +2800,47 @@ SUBROUTINE t_string(total_error)
 
 END SUBROUTINE t_string
 
+SUBROUTINE vl_test_special_char(cleanup, total_error)
+  
+  USE hdf5
+  IMPLICIT NONE
+  
+  INTERFACE
+     SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
+       USE hdf5
+       USE ISO_C_BINDING
+       IMPLICIT NONE
+       CHARACTER(len=*), DIMENSION(:) :: data_in
+       INTEGER(size_t), DIMENSION(:) :: line_lengths
+       CHARACTER(KIND=C_CHAR,LEN=*) :: char_type
+     END SUBROUTINE setup_buffer
+  END INTERFACE
+  
+  LOGICAL, INTENT(IN) :: cleanup
+  INTEGER, INTENT(OUT) :: total_error
+  
+  CHARACTER(LEN=16), PARAMETER :: filename  = "t_controlchar.h5"
+  INTEGER, PARAMETER :: line_length = 10
+  INTEGER(hid_t) :: file
+  INTEGER(hid_t) :: dataset0
+  CHARACTER(len=line_length), DIMENSION(1:100) :: data_in
+  CHARACTER(len=line_length), DIMENSION(1:100) :: data_out
+  INTEGER(size_t), DIMENSION(1:100) :: line_lengths
+  INTEGER(hid_t) :: string_id, space, dcpl
+  INTEGER(hsize_t), DIMENSION(1:1) :: dims = (/0/)
+  INTEGER(hsize_t), DIMENSION(1:1) :: max_dims = (/0/)
+  INTEGER(hsize_t), DIMENSION(1:2) :: data_dims = (/0,0/)
+  INTEGER(hsize_t), DIMENSION(1:1) :: chunk =(/10/)
+  INTEGER, PARAMETER :: ncontrolchar = 7
+  CHARACTER(KIND=C_CHAR,LEN=1), DIMENSION(1:ncontrolchar) :: controlchar = &
+       (/C_ALERT, C_BACKSPACE,C_CARRIAGE_RETURN, C_FORM_FEED,C_HORIZONTAL_TAB,C_VERTICAL_TAB, C_NEW_LINE/)
+  INTEGER :: i, j, n, error
+  n = 8
+  !
+  ! Create a new file using the default properties.
+  !
+  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file, error)
+  CALL check("h5fcreate_f",error, total_error)
 
 !-------------------------------------------------------------------------
 ! Function:    test_nbit
