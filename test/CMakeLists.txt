@@ -64,30 +64,6 @@ SET (HDF5_REFERENCE_FILES
     error_test_1
     error_test_2
     links_env.out
-    plist_files/acpl_be
-    plist_files/acpl_le
-    plist_files/dapl_be
-    plist_files/dapl_le
-    plist_files/dcpl_be
-    plist_files/dcpl_le
-    plist_files/dxpl_be
-    plist_files/dxpl_le
-    plist_files/fapl_be
-    plist_files/fapl_le
-    plist_files/fcpl_be
-    plist_files/fcpl_le
-    plist_files/gcpl_be
-    plist_files/gcpl_le
-    plist_files/lapl_be
-    plist_files/lapl_le
-    plist_files/lcpl_be
-    plist_files/lcpl_le
-    plist_files/ocpl_be
-    plist_files/ocpl_le
-    plist_files/ocpypl_be
-    plist_files/ocpypl_le
-    plist_files/strcpl_be
-    plist_files/strcpl_le
 )
 
 FOREACH (ref_file ${HDF5_REFERENCE_FILES})
@@ -100,6 +76,47 @@ FOREACH (ref_file ${HDF5_REFERENCE_FILES})
       ARGS       ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest} -l3
   )
 ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
+
+# --------------------------------------------------------------------
+# Copy test files from test/testfiles/plist_files dir to test dir
+# --------------------------------------------------------------------
+SET (HDF5_REFERENCE_PLIST_FILES
+    acpl_be
+    acpl_le
+    dapl_be
+    dapl_le
+    dcpl_be
+    dcpl_le
+    dxpl_be
+    dxpl_le
+    fapl_be
+    fapl_le
+    fcpl_be
+    fcpl_le
+    gcpl_be
+    gcpl_le
+    lapl_be
+    lapl_le
+    lcpl_be
+    lcpl_le
+    ocpl_be
+    ocpl_le
+    ocpypl_be
+    ocpypl_le
+    strcpl_be
+    strcpl_le
+)
+
+FOREACH (plistfile ${HDF5_REFERENCE_PLIST_FILES})
+  SET (dest "${PROJECT_BINARY_DIR}/${plistfile}")
+  #MESSAGE (STATUS " Copying ${plistfile} to ${dset}")
+  ADD_CUSTOM_COMMAND (
+      TARGET     ${HDF5_TEST_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile} ${dest}
+  )
+ENDFOREACH (plistfile ${HDF5_REFERENCE_PLIST_FILES})
 
 # --------------------------------------------------------------------
 #-- Copy all the HDF5 files from the test directory into the source directory
