@@ -1976,8 +1976,8 @@ SUBROUTINE t_regref(total_error)
 
   INTEGER(HSIZE_T), DIMENSION(1:1) :: maxdims
   INTEGER(hssize_t) :: npoints
-  TYPE(hdset_reg_ref_t_f), DIMENSION(1:dim0), TARGET :: wdata ! Write buffer
-  TYPE(hdset_reg_ref_t_f), DIMENSION(:), ALLOCATABLE, TARGET :: rdata ! Read buffer
+  TYPE(hdset_reg_ref_t_f03), DIMENSION(1:dim0), TARGET :: wdata ! Write buffer
+  TYPE(hdset_reg_ref_t_f03), DIMENSION(:), ALLOCATABLE, TARGET :: rdata ! Read buffer
 
   INTEGER(size_t) :: size
   CHARACTER(LEN=1), DIMENSION(1:ds2dim0,1:ds2dim1), TARGET :: wdata2
@@ -2058,7 +2058,6 @@ SUBROUTINE t_regref(total_error)
   CALL check("h5sclose_f",error, total_error)
   CALL h5fclose_f(file , error)
   CALL check("h5fclose_f",error, total_error)
-
   !
   ! Now we begin the read section of this example.
   !
@@ -2095,10 +2094,11 @@ SUBROUTINE t_regref(total_error)
      ! Open the referenced object, retrieve its region as a
      ! dataspace selection.
      !
-     CALL H5Rdereference_f(dset, rdata(i), dset2, error)
+     f_ptr = C_LOC(rdata(i))
+     CALL H5Rdereference_f(dset, H5R_DATASET_REGION_F, f_ptr, dset2, error)
      CALL check("H5Rdereference_f",error, total_error)
      
-     CALL H5Rget_region_f(dset, rdata(i), space, error)
+     CALL H5Rget_region_f(dset, f_ptr, space, error)
      CALL check("H5Rget_region_f",error, total_error)
   
      !
@@ -2754,7 +2754,7 @@ SUBROUTINE t_string(total_error)
   CALL check("H5Dget_type_f",error, total_error)
   CALL H5Tget_size_f(filetype, size, error)
   CALL check("H5Tget_size_f",error, total_error)
-  CALL VERIFY("H5Tget_size_f", size, sdim, total_error)
+  CALL VERIFY("H5Tget_size_f", INT(size), INT(sdim), total_error)
   !
   ! Get dataspace.
   !
@@ -2799,5 +2799,151 @@ SUBROUTINE t_string(total_error)
 
 
 END SUBROUTINE t_string
+
+
+!-------------------------------------------------------------------------
+! Function:    test_nbit
+!
+! Purpose:     Tests (real, 4 byte) datatype for nbit filter
+!
+! Return:      Success:        0
+!              Failure:        >0
+!
+! Programmer:  M. Scot Breitenfeld
+!              Decemeber 7, 2010
+!
+! Modifications: Moved this subroutine from the 1.8 test file and
+! modified it to use F2003 features. 
+! This routine requires 4 byte reals, so we use F2003 features to 
+! ensure the requirement is satisfied in a portable way. 
+! The need for this arises when a user specifies the default real is 8 bytes.
+! MSB 7/31/12
+!
+!-------------------------------------------------------------------------
+!
+
+SUBROUTINE test_nbit(cleanup, total_error )
+
+  USE HDF5
+  USE ISO_C_BINDING
+
+  IMPLICIT NONE
+  INTEGER, PARAMETER :: wp = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(INOUT) :: total_error
+  INTEGER(hid_t) :: file
+  
+  INTEGER(hid_t) :: dataset, datatype, space, dc, mem_type_id
+  INTEGER(hsize_t), DIMENSION(1:2) :: dims = (/2,5/)
+  INTEGER(hsize_t), DIMENSION(1:2) :: chunk_dim = (/2,5/)
+  ! orig_data[] are initialized to be within the range that can be represented by
+  ! dataset datatype (no precision loss during datatype conversion)
+  !
+  REAL(kind=wp), DIMENSION(1:2,1:5), TARGET :: orig_data = &
+       RESHAPE( (/188384.00, 19.103516, -1.0831790e9, -84.242188, &
+       5.2045898, -49140.000, 2350.2500, -3.2110596e-1, 6.4998865e-5, -0.0000000/) , (/2,5/) )
+  REAL(kind=wp), DIMENSION(1:2,1:5), TARGET :: new_data
+  INTEGER(size_t) :: PRECISION, offset
+  INTEGER :: error
+  LOGICAL :: status
+  INTEGER(size_t) :: i, j
+  TYPE(C_PTR) :: f_ptr
+
+  ! check to see if filter is available
+  CALL H5Zfilter_avail_f(H5Z_FILTER_NBIT_F, status, error)
+  IF(.NOT.status)THEN ! We don't have H5Z_FILTER_NBIT_F filter
+     total_error = -1     ! so return
+     RETURN
+  ENDIF
+
+  CALL H5Fcreate_f("nbit.h5", H5F_ACC_TRUNC_F, file, error)
+  CALL check("H5Fcreate_f", error, total_error)
+
+  ! Define dataset datatype (integer), and set precision, offset
+  CALL H5Tcopy_f(H5T_IEEE_F32BE, datatype, error)
+  CALL CHECK(" H5Tcopy_f", error, total_error)
+  CALL H5Tset_fields_f(datatype, 26_size_t, 20_size_t, 6_size_t, 7_size_t, 13_size_t, error)
+  CALL CHECK(" H5Tset_fields_f", error, total_error)
+  offset = 7
+  CALL H5Tset_offset_f(datatype, offset, error)
+  CALL CHECK(" H5Tset_offset_f", error, total_error)
+  PRECISION = 20
+  CALL H5Tset_precision_f(datatype,PRECISION, error)
+  CALL CHECK(" H5Tset_precision_f", error, total_error)
+  
+  CALL H5Tset_size_f(datatype, 4_size_t, error)
+  CALL CHECK(" H5Tset_size_f", error, total_error)
+  
+  CALL H5Tset_ebias_f(datatype, 31_size_t, error)
+  CALL CHECK(" H5Tset_ebias_f", error, total_error)
+ 
+  ! Create the data space 
+  CALL H5Screate_simple_f(2, dims, space, error)
+  CALL CHECK(" H5Screate_simple_f", error, total_error)
+
+  ! USE nbit filter
+  CALL H5Pcreate_f(H5P_DATASET_CREATE_F, dc, error)
+  CALL CHECK(" H5Pcreate_f", error, total_error)
+
+  CALL H5Pset_chunk_f(dc, 2, chunk_dim, error)
+  CALL CHECK(" H5Pset_chunk_f", error, total_error)
+  CALL H5Pset_nbit_f(dc, error)
+  CALL CHECK(" H5Pset_nbit_f", error, total_error)
+
+  ! Create the dataset
+  CALL  H5Dcreate_f(file, "nbit_real", datatype, &
+       space, dataset, error, dc)
+  CALL CHECK(" H5Dcreate_f", error, total_error)
+
+  !----------------------------------------------------------------------
+  ! STEP 1: Test nbit by setting up a chunked dataset and writing
+  ! to it.
+  !----------------------------------------------------------------------
+  !
+  mem_type_id = h5kind_to_type(wp,H5_REAL_KIND)
+
+  f_ptr = C_LOC(orig_data(1,1))
+  CALL H5Dwrite_f(dataset, mem_type_id, f_ptr, error)
+  CALL CHECK(" H5Dwrite_f", error, total_error)
+
+  !----------------------------------------------------------------------
+  ! STEP 2: Try to read the data we just wrote.
+  !----------------------------------------------------------------------
+  !  
+  f_ptr = C_LOC(new_data(1,1))
+  CALL H5Dread_f(dataset, mem_type_id, f_ptr, error)
+  CALL CHECK(" H5Dread_f", error, total_error)
+
+  ! Check that the values read are the same as the values written
+  ! Assume size of long long = size of double
+  !
+  i_loop: DO i = 1, dims(1)
+     j_loop: DO j = 1, dims(2)
+        IF(.NOT.(orig_data(i,j).EQ.orig_data(i,j))) CYCLE  ! skip IF value is NaN
+        IF(new_data(i,j) .NE. orig_data(i,j))THEN
+           total_error = total_error + 1
+           WRITE(*,'("    Read different values than written.")')
+           WRITE(*,'("    At index ", 2(1X,I0))') i, j
+           EXIT i_loop
+        END IF
+     ENDDO j_loop
+  ENDDO i_loop
+
+  !----------------------------------------------------------------------
+  ! Cleanup
+  !----------------------------------------------------------------------
+  !
+  CALL H5Tclose_f(datatype, error)
+  CALL CHECK(" H5Tclose_f", error, total_error)
+  CALL H5Pclose_f(dc, error)
+  CALL CHECK(" H5Pclose_f", error, total_error)
+  CALL H5Sclose_f(space, error)
+  CALL CHECK(" H5Sclose_f", error, total_error)
+  CALL H5Dclose_f(dataset, error)
+  CALL CHECK(" H5Dclose_f", error, total_error)
+  CALL H5Fclose_f(file, error)
+  CALL CHECK(" H5Fclose_f", error, total_error)
+
+END SUBROUTINE test_nbit
 
 

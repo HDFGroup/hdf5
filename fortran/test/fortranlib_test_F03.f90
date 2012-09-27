@@ -139,6 +139,11 @@ PROGRAM fortranlibtest_F03
   ret_total_error = 0
   CALL test_iter_group(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing Group Iteration Functionality', total_error)
+
+  ret_total_error = 0
+  CALL test_nbit(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing nbit filter', total_error)
+
  
 !     write(*,*)
 !     write(*,*) '========================================='

@@ -1179,6 +1179,7 @@ H5_FCDLL int_f nh5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_
 #define nh5rdereference_object_c H5_FC_FUNC_(h5rdereference_object_c, H5RDEREFERENCE_OBJECT_C)
 #define nh5rdereference_ptr_c H5_FC_FUNC_(h5rdereference_ptr_c, H5RDEREFERENCE_PTR_C)
 #define nh5rget_region_region_c H5_FC_FUNC_(h5rget_region_region_c, H5RGET_REGION_REGION_C)
+#define nh5rget_region_ptr_c H5_FC_FUNC_(h5rget_region_ptr_c, H5RGET_REGION_PTR_C)
 #define nh5rget_object_type_obj_c H5_FC_FUNC_(h5rget_object_type_obj_c, H5RGET_OBJECT_TYPE_OBJ_C)
 #define nh5rget_name_object_c H5_FC_FUNC_(h5rget_name_object_c, H5RGET_NAME_OBJECT_C)
 #define nh5rget_name_region_c H5_FC_FUNC_(h5rget_name_region_c, H5RGET_NAME_REGION_C)
@@ -1193,6 +1194,7 @@ H5_FCDLL int_f nh5rdereference_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *
 H5_FCDLL int_f nh5rdereference_object_c (hid_t_f *dset_id, haddr_t_f *ref, hid_t_f *obj_id);
 H5_FCDLL int_f nh5rdereference_ptr_c (hid_t_f *obj_id, int_f *ref_type, void *ref, hid_t_f *ref_obj_id);
 H5_FCDLL int_f nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id);
+H5_FCDLL int_f nh5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id);
 H5_FCDLL int_f nh5rget_object_type_obj_c (hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type);
 H5_FCDLL int_f nh5rget_name_object_c (hid_t_f *loc_id, haddr_t_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default);
 H5_FCDLL int_f nh5rget_name_region_c (hid_t_f *loc_id, int_f *ref, _fcd name, size_t_f *name_len, size_t_f *size_default);
