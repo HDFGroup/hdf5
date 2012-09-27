@@ -442,6 +442,8 @@
 ./c++/src/H5IntType.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
+./c++/src/H5Location.cpp
+./c++/src/H5Location.h
 ./c++/src/H5Object.cpp
 ./c++/src/H5Object.h
 ./c++/src/H5PredType.cpp
