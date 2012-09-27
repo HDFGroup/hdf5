@@ -39,6 +39,9 @@ New Features
 
     Configuration:
     -------------
+    - Fixed AIX Fortran compiler flags to use appropriate settings for
+      debugging, profiling, optimization situations. HDFFV-8069. (AKC
+      2012/09/27)
     - Updated to latest autotools and changed all hard *.sh scripts to
       configure managed *.sh.in files. Removed overloading of autotools
       TESTS variable by examples and tests. Renamed configure.in to
