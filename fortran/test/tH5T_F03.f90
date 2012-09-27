@@ -2842,6 +2842,106 @@ SUBROUTINE vl_test_special_char(cleanup, total_error)
   !
   CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file, error)
   CALL check("h5fcreate_f",error, total_error)
+ 
+  max_dims = (/H5S_UNLIMITED_F/)
+
+  !
+  ! Create the memory datatype.
+  !
+  CALL h5tcopy_f(h5t_string, string_id, error)
+  CALL check("h5tcopy_f", error, total_error)
+  CALL h5tset_strpad_f(string_id, h5t_str_nullpad_f, error)
+  CALL check("h5tset_strpad_f", error, total_error)
+  dims(1) = n
+  !
+  ! Create dataspace.
+  !
+  CALL h5screate_simple_f(1, dims, space, error, max_dims)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5pcreate_f(h5p_dataset_create_f, dcpl, error)
+  CALL check("h5pcreate_f", error, total_error)
+  CALL h5pset_chunk_f(dcpl, 1, chunk, error)
+  CALL check("h5pset_chunk_f", error, total_error)
+  
+  data_dims(1) = line_length
+  data_dims(2) = n
+  !
+  ! Create data with strings containing various control characters.
+  !
+  DO i = 1, ncontrolchar
+     !
+     ! Create the dataset, for the string with control character and write the string data to it.
+     !
+     CALL h5dcreate_f(file, controlchar(i), string_id, space, dataset0, error, dcpl)
+     CALL check("h5dcreate_f", error, total_error)
+     CALL setup_buffer(data_in(1:n), line_lengths, controlchar(i))
+     CALL h5dwrite_vl_f(dataset0, string_id, data_in(1:n), data_dims, line_lengths(1:n), error, space)
+     CALL check("h5dwrite_vl_f", error, total_error)
+     !
+     ! Read the string back.
+     !
+     CALL h5dread_vl_f(dataset0, string_id, data_out(1:n), data_dims, line_lengths(1:n), error, space)
+     CALL check("h5dread_vl_f", error, total_error)
+  
+     DO j = 1, n
+        IF(data_in(j).NE.data_out(j))THEN
+           total_error = total_error + 1
+           EXIT
+        ENDIF
+     ENDDO
+
+     CALL h5dclose_f(dataset0, error)
+     CALL check("h5dclose_f", error, total_error)
+  ENDDO
+
+  CALL h5pclose_f(dcpl, error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5sclose_f(space, error)
+  CALL check("h5sclose_f", error, total_error)
+  CALL h5fclose_f(file, error)
+  CALL check("h5fclose_f", error, total_error)
+  
+END SUBROUTINE vl_test_special_char
+
+
+SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
+  
+  USE HDF5
+  USE ISO_C_BINDING
+  
+  IMPLICIT NONE
+  
+  ! Creates a simple "Data_in" consisting of the letters of the alphabet,
+  ! one per line, with a control character.
+  
+  CHARACTER(len=10), DIMENSION(:) :: data_in
+  INTEGER(size_t), DIMENSION(:) :: line_lengths
+  INTEGER, DIMENSION(1:3) :: letters
+  CHARACTER(LEN=3) :: lets
+  CHARACTER(KIND=C_CHAR,LEN=*) :: char_type
+  INTEGER :: i, j, n, ff
+  
+  ! Convert the letters and special character to integers    
+  lets = 'abc'
+  
+  READ(lets,'(3A1)') letters
+  READ(char_type,'(A1)') ff
+  n = SIZE(data_in)
+  j = 1
+  DO i=1,n-1
+     IF( j .EQ. 4 )THEN
+        WRITE(data_in(i:i),'(A1)') ff
+     ELSE
+        WRITE(data_in(i:i),'(A1)') letters(j)
+     ENDIF
+     line_lengths(i) = LEN_TRIM(data_in(i))
+     j = j + 1
+     IF( j .EQ. 5 ) j = 1
+  END DO
+  WRITE(data_in(n:n),'(A1)') ff
+  line_lengths(n) = 1
+  
+END SUBROUTINE setup_buffer
 
 !-------------------------------------------------------------------------
 ! Function:    test_nbit
