@@ -64,10 +64,7 @@ PROGRAM fortranlibtest_F03
 !  CALL write_test_status(ret_total_error, ' Test error API based on data I/O', total_error)
 
   WRITE(*,*)
-!     write(*,*)
-!     write(*,*) '========================================='
-!     write(*,*) 'Testing DATATYPE interface               '
-!     write(*,*) '========================================='
+
   ret_total_error = 0
   CALL test_array_compound_atomic(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing 1-D Array of Compound Datatypes Functionality', total_error)
@@ -122,15 +119,11 @@ PROGRAM fortranlibtest_F03
 
   ret_total_error = 0
   CALL test_create(ret_total_error)
-  CALL write_test_status(ret_total_error, &
-       ' Testing filling functions', &
-       total_error)
+  CALL write_test_status(ret_total_error, ' Testing filling functions', total_error)
 
   ret_total_error = 0
   CALL test_h5kind_to_type(total_error)
-  CALL write_test_status(ret_total_error, &
-       ' Test function h5kind_to_type', &
-       total_error)
+  CALL write_test_status(ret_total_error, ' Test function h5kind_to_type', total_error)
 
   ret_total_error = 0
   CALL test_array_bkg(ret_total_error)
@@ -142,7 +135,7 @@ PROGRAM fortranlibtest_F03
 
   ret_total_error = 0
   CALL test_iter_group(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing Group Iteration Functionality', total_error)
+  CALL write_test_status(ret_total_error, ' Testing group iteration functionality', total_error)
 
   ret_total_error = 0
   CALL test_nbit(ret_total_error)
@@ -154,7 +147,18 @@ PROGRAM fortranlibtest_F03
 !     write(*,*) 'Testing GROUP interface             '
 !     write(*,*) '========================================='
 
-  
+  ret_total_error = 0
+  CALL test_h5o_refcount(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing object functions ', total_error)
+
+  ret_total_error = 0
+  CALL obj_visit(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing object visiting functions ', total_error)
+
+  ret_total_error = 0
+  CALL obj_info(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing object info functions ', total_error)
+
   WRITE(*,*)
 
   WRITE(*,*) '                  ============================================  '

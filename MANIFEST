@@ -349,6 +349,7 @@
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
 ./fortran/test/tH5O.f90
+./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
 ./fortran/test/tH5P.f90
 ./fortran/test/tH5R.f90

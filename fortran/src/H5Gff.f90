@@ -927,7 +927,7 @@ CONTAINS
                                            ! Buffer to hold a comment
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the current_name string
+    INTEGER :: namelen ! Length of the current_name string
 
     INTERFACE
        INTEGER FUNCTION h5gget_comment_c(loc_id, name, namelen, size, buffer)

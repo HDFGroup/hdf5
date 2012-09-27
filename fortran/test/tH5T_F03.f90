@@ -103,7 +103,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
 
   ! Create file 
   CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid1,error)
-  CALL check("h5fcreate_f", error, total_error)    
+  CALL check("h5fcreate_f", error, total_error)
 
   ! Create dataspace for datasets 
   CALL h5screate_simple_f(SPACE1_RANK, sdims1, sid1, error)
@@ -1988,6 +1988,7 @@ SUBROUTINE t_regref(total_error)
   TYPE(C_PTR) :: f_ptr
   CHARACTER(LEN=ds2dim0) :: chrvar
   CHARACTER(LEN=20), DIMENSION(1:2) :: chrref_correct
+  TYPE(h5o_info_t) :: oinfo                  ! Object info struct
 
   chrvar = "The quick brown "
   READ(chrvar,'(16A1)') wdata2(1:16,1)
@@ -2097,7 +2098,7 @@ SUBROUTINE t_regref(total_error)
      f_ptr = C_LOC(rdata(i))
      CALL H5Rdereference_f(dset, H5R_DATASET_REGION_F, f_ptr, dset2, error)
      CALL check("H5Rdereference_f",error, total_error)
-     
+ 
      CALL H5Rget_region_f(dset, f_ptr, space, error)
      CALL check("H5Rget_region_f",error, total_error)
   

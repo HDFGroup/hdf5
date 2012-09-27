@@ -181,14 +181,14 @@ CONTAINS
 ! Inputs:
 !  loc_id      - File or group identifier specifying location of group 
 !                in which object is located.
-!  name        - Name of group, relative to loc_id
+!  name        - Name of group, relative to loc_id.
 !
 ! Outputs:  
-!  object_info - Buffer in which to return object information
-!  hdferr      - Returns 0 if successful and -1 if fails
+!  object_info - Buffer in which to return object information.
+!  hdferr      - Returns 0 if successful and -1 if fails.
 !
 ! Optional parameters:
-!  lapl_id     - Link access property list
+!  lapl_id     - Link access property list.
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
@@ -218,11 +218,12 @@ CONTAINS
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OGET_INFO_BY_NAME_C'::h5oget_info_by_name_c
          !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T)  , INTENT(IN)  :: loc_id
          CHARACTER(LEN=*), INTENT(IN)  :: name
          INTEGER(SIZE_T) , INTENT(IN)  :: namelen
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
-         TYPE(C_PTR),value             :: object_info
+         TYPE(C_PTR),VALUE             :: object_info
 
        END FUNCTION h5oget_info_by_name_c
     END INTERFACE
@@ -237,6 +238,223 @@ CONTAINS
     hdferr = H5Oget_info_by_name_c(loc_id, name, namelen, lapl_id_default, ptr)
 
   END SUBROUTINE H5Oget_info_by_name_f
+
+!****s* H5O (F03)/h5oget_info_f_F03
+!
+! NAME
+!  h5oget_info_f
+!
+! PURPOSE
+!  Retrieves the metadata for an object specified by an identifier.
+!
+! Inputs:
+!  object_id   - Identifier for target object.
+!
+! Outputs:
+!  object_info - Buffer in which to return object information.
+!  hdferr      - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  May 11, 2012
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5oget_info_f(object_id, object_info, hdferr)
+
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)            :: object_id
+    TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
+    INTEGER         , INTENT(OUT)           :: hdferr
+!*****
+    TYPE(C_PTR) :: ptr
+    
+    INTERFACE
+       INTEGER FUNCTION h5oget_info_c(object_id, object_info)
+         USE H5GLOBAL
+         USE, INTRINSIC :: ISO_C_BINDING
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OGET_INFO_C'::h5oget_info_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN)  :: object_id
+         TYPE(C_PTR), VALUE          :: object_info
+
+       END FUNCTION h5oget_info_c
+    END INTERFACE
+
+    ptr = C_LOC(object_info)
+    hdferr = H5Oget_info_c(object_id, ptr)
+
+  END SUBROUTINE H5Oget_info_f
+
+!****s* H5O (F03)/h5oget_info_by_idx_f_F03
+!
+! NAME
+!  h5oget_info_by_idx_f
+!
+! PURPOSE
+!  Retrieves the metadata for an object, identifying the object by an index position.
+!
+! Inputs:
+!  loc_id      - File or group identifier specifying location of group 
+!                in which object is located.
+!  group_name  - Name of group in which object is located.
+!  index_field - Index or field that determines the order.
+!  order       - Order within field or index.
+!  n           - Object for which information is to be returned
+!
+! Outputs:  
+!  object_info - Buffer in which to return object information.
+!  hdferr      - Returns 0 if successful and -1 if fails.
+!
+! Optional parameters:
+!  lapl_id     - Link access property list. (Not currently used.)
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  May 11, 2012
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
+       object_info, hdferr, lapl_id)
+
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)            :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)            :: group_name
+    INTEGER         , INTENT(IN)            :: index_field
+    INTEGER         , INTENT(IN)            :: order
+    INTEGER(HSIZE_T), INTENT(IN)            :: n
+    TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
+    INTEGER         , INTENT(OUT)           :: hdferr
+    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
+!*****
+    INTEGER         :: corder_valid
+    INTEGER(SIZE_T) :: namelen
+    INTEGER(HID_T)  :: lapl_id_default
+    TYPE(C_PTR)     :: ptr
+    
+    INTERFACE
+       INTEGER FUNCTION h5oget_info_by_idx_c(loc_id, group_name, namelen, &
+            index_field, order, n, lapl_id_default, object_info)
+         USE H5GLOBAL
+         USE, INTRINSIC :: ISO_C_BINDING
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OGET_INFO_BY_IDX_C'::h5oget_info_by_idx_c
+         !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: group_name
+         INTEGER(HID_T)  , INTENT(IN)  :: loc_id
+         CHARACTER(LEN=*), INTENT(IN)  :: group_name
+         INTEGER(SIZE_T) , INTENT(IN)  :: namelen
+         INTEGER         , INTENT(IN)  :: index_field
+         INTEGER         , INTENT(IN)  :: order
+         INTEGER(HSIZE_T), INTENT(IN)  :: n
+         INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
+         TYPE(C_PTR), VALUE            :: object_info
+
+       END FUNCTION h5oget_info_by_idx_c
+    END INTERFACE
+
+    namelen = LEN(group_name)
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    ptr = C_LOC(object_info)
+    hdferr = H5Oget_info_by_idx_c(loc_id, group_name, namelen, index_field, order, n, lapl_id_default, ptr)
+
+  END SUBROUTINE H5Oget_info_by_idx_f
+
+
+!****s* H5O (F03)/h5ovisit_by_name_f_F03
+!
+! NAME
+!  h5ovisit_by_name_f
+!
+! PURPOSE
+!  Recursively visits all objects starting from a specified object.
+!
+! Inputs:
+!  loc_id      - Identifier of a file or group.
+!  object_name - Name of the object, generally relative to loc_id, that will serve as root of the iteration 
+!  index_type  - Type of index; valid values include:
+!                 H5_INDEX_NAME_F
+!                 H5_INDEX_CRT_ORDER_F
+!  order       - Order in which index is traversed; valid values include:
+!                 H5_ITER_DEC_F
+!                 H5_ITER_INC_F
+!                 H5_ITER_NATIVE_F
+!  op 	       - Callback function passing data regarding the group to the calling application
+!  op_data     - User-defined pointer to data required by the application for its processing of the group
+!
+! Outputs:
+!  return_value - Returns the return value of the first operator that returns a positive value, or 
+!                 zero if all members were processed with no operator returning non-zero.
+!  hdferr       - Returns 0 if successful and -1 if fails
+!
+! Optional parameters:
+!  lapl_id      - Link access property list identifier.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  November 19, 2008
+!
+! Fortran2003 Interface:
+  SUBROUTINE h5ovisit_by_name_f(loc_id, object_name, index_type, order, op, op_data, &
+       return_value, hdferr, lapl_id)
+    USE, INTRINSIC :: ISO_C_BINDING
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)             :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)             :: object_name
+    INTEGER         , INTENT(IN)             :: index_type 
+    INTEGER         , INTENT(IN)             :: order
+
+    TYPE(C_FUNPTR)                           :: op
+    TYPE(C_PTR)                              :: op_data
+    INTEGER         , INTENT(OUT)            :: return_value
+    INTEGER         , INTENT(OUT)            :: hdferr
+    INTEGER(HID_T)  , INTENT(IN) , OPTIONAL  :: lapl_id
+!*****
+
+    INTEGER(SIZE_T) :: namelen
+    INTEGER(HID_T)  :: lapl_id_default
+    TYPE(C_PTR)     :: ptr
+
+    INTERFACE
+       INTEGER FUNCTION h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
+            op, op_data, lapl_id)
+         USE, INTRINSIC :: ISO_C_BINDING
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OVISIT_BY_NAME_C'::h5ovisit_by_name_c
+         !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: object_name
+         INTEGER(HID_T)  , INTENT(IN) :: loc_id
+         CHARACTER(LEN=*), INTENT(IN) :: object_name
+         INTEGER(SIZE_T)              :: namelen
+         INTEGER         , INTENT(IN) :: index_type
+         INTEGER         , INTENT(IN) :: order
+         TYPE(C_FUNPTR)  , VALUE      :: op
+         TYPE(C_PTR)     , VALUE      :: op_data
+         INTEGER(HID_T)  , INTENT(IN) :: lapl_id
+       END FUNCTION h5ovisit_by_name_c
+    END INTERFACE
+
+    namelen = LEN(object_name)
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    return_value = h5ovisit_by_name_c(loc_id, object_name, namelen, index_type, order, &
+         op, op_data, lapl_id_default)
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE h5ovisit_by_name_f
 
 END MODULE H5O_PROVISIONAL
 
