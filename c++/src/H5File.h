@@ -21,7 +21,7 @@
 namespace H5 {
 #endif
 
-class H5_DLLCPP H5File : public IdComponent, public CommonFG {
+class H5_DLLCPP H5File : public H5Location, public CommonFG {
    public:
 	// Creates or opens an HDF5 file.
 	H5File( const char* name, unsigned int flags,
@@ -40,17 +40,11 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Close this file.
 	virtual void close();
 
-	// Flushes all buffers associated with this file to disk
-	void flush(H5F_scope_t scope) const;
-
 	// Gets the access property list of this file.
 	FileAccPropList getAccessPlist() const;
 
 	// Gets the creation property list of this file.
 	FileCreatPropList getCreatePlist() const;
-
-	// Gets the name of this file.
-	H5std_string getFileName() const;
 
 	// Retrieves the file size of an opened file.
 	hsize_t getFileSize() const;
@@ -67,11 +61,6 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// and datatypes) in the same file.
 	void getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const;
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
@@ -86,13 +75,6 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Reopens this file.
 	void reOpen();	// added for better name
 	void reopen();
-
-	// Creates a reference to a named HDF5 object or to a dataset region
-	// in this object.
-	void reference(void* ref, const char* name, const DataSpace& dataspace,
-			H5R_type_t ref_type = H5R_DATASET_REGION) const;
-	void reference(void* ref, const char* name) const;
-	void reference(void* ref, const H5std_string& name) const;
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("H5File"); }

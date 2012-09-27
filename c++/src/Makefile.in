@@ -120,12 +120,12 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_cpp_la_DEPENDENCIES = $(LIBHDF5)
 am_libhdf5_cpp_la_OBJECTS = H5Exception.lo H5IdComponent.lo \
-	H5Library.lo H5Attribute.lo H5Object.lo H5PropList.lo \
-	H5FaccProp.lo H5FcreatProp.lo H5DcreatProp.lo H5DxferProp.lo \
-	H5DataType.lo H5DataSpace.lo H5AbstractDs.lo H5AtomType.lo \
-	H5PredType.lo H5EnumType.lo H5IntType.lo H5FloatType.lo \
-	H5StrType.lo H5ArrayType.lo H5VarLenType.lo H5CompType.lo \
-	H5DataSet.lo H5CommonFG.lo H5Group.lo H5File.lo
+	H5Library.lo H5Attribute.lo H5Location.lo H5Object.lo \
+	H5PropList.lo H5FaccProp.lo H5FcreatProp.lo H5DcreatProp.lo \
+	H5DxferProp.lo H5DataType.lo H5DataSpace.lo H5AbstractDs.lo \
+	H5AtomType.lo H5PredType.lo H5EnumType.lo H5IntType.lo \
+	H5FloatType.lo H5StrType.lo H5ArrayType.lo H5VarLenType.lo \
+	H5CompType.lo H5DataSet.lo H5CommonFG.lo H5Group.lo H5File.lo
 libhdf5_cpp_la_OBJECTS = $(am_libhdf5_cpp_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -257,7 +257,6 @@ FILTERS = @FILTERS@
 FSEARCH_DIRS = @FSEARCH_DIRS@
 GPFS = @GPFS@
 GREP = @GREP@
-H5BLD_STATIC = @H5BLD_STATIC@
 H5_CFLAGS = @H5_CFLAGS@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
@@ -272,7 +271,6 @@ HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
-HDF5_USE_SHLIB = @HDF5_USE_SHLIB@
 HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HDF_FORTRAN2003 = @HDF_FORTRAN2003@
@@ -469,7 +467,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 121
+LT_VERS_REVISION = 118
 LT_VERS_AGE = 0
 
 # Include src directory
@@ -484,12 +482,12 @@ bin_SCRIPTS = h5c++
 
 # Source files for the library
 libhdf5_cpp_la_SOURCES = H5Exception.cpp H5IdComponent.cpp H5Library.cpp        \
-        H5Attribute.cpp H5Object.cpp H5PropList.cpp H5FaccProp.cpp            \
-        H5FcreatProp.cpp H5DcreatProp.cpp H5DxferProp.cpp H5DataType.cpp      \
-        H5DataSpace.cpp H5AbstractDs.cpp H5AtomType.cpp H5PredType.cpp        \
-        H5EnumType.cpp H5IntType.cpp H5FloatType.cpp H5StrType.cpp            \
-        H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp H5DataSet.cpp         \
-        H5CommonFG.cpp H5Group.cpp H5File.cpp
+        H5Attribute.cpp H5Location.cpp H5Object.cpp H5PropList.cpp	      \
+	H5FaccProp.cpp H5FcreatProp.cpp H5DcreatProp.cpp H5DxferProp.cpp      \
+	H5DataType.cpp H5DataSpace.cpp H5AbstractDs.cpp H5AtomType.cpp        \
+	H5PredType.cpp H5EnumType.cpp H5IntType.cpp H5FloatType.cpp           \
+	H5StrType.cpp H5ArrayType.cpp H5VarLenType.cpp H5CompType.cpp         \
+	H5DataSet.cpp H5CommonFG.cpp H5Group.cpp H5File.cpp
 
 
 # HDF5 C++ library depends on HDF5 Library.
@@ -500,8 +498,9 @@ include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h 
         H5CommonFG.h H5CompType.h H5DataSet.h H5DataSpace.h H5DataType.h      \
         H5DcreatProp.h H5DxferProp.h H5EnumType.h H5Exception.h H5FaccProp.h  \
         H5FcreatProp.h H5File.h H5FloatType.h H5Group.h H5IdComponent.h       \
-        H5Include.h H5IntType.h H5Library.h H5Object.h H5PredType.h           \
-        H5PropList.h H5StrType.h H5CppDoc.h H5ArrayType.h H5VarLenType.h      
+        H5Include.h H5IntType.h H5Library.h H5Location.h H5Object.h           \
+	H5PredType.h H5PropList.h H5StrType.h H5CppDoc.h H5ArrayType.h        \
+	H5VarLenType.h      
 
 
 # h5c++ and libhdf5.settings are generated during configure.  Remove only when
@@ -666,6 +665,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IdComponent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IntType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Library.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Location.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Object.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PredType.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5PropList.Plo@am__quote@

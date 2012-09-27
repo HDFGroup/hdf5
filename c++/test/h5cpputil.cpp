@@ -100,6 +100,7 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
 {
     //if (GetTestVerbosity()>=VERBO_HI)
     {
+	cerr << endl;
         cerr << ">>> FAILED in " << where << " at line " << line
              << " in " << file_name << " - " << message << endl << endl;
     }

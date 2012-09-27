@@ -679,31 +679,6 @@ bool DataType::isVariableStr() const
    }
 }
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-//--------------------------------------------------------------------------
-// Function:	DataType::getObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param		ref      - IN: Reference to query
-///\param		ref_type - IN: Type of reference to query
-///\return	Object type, which can be one of the following:
-///			\li \c H5G_LINK Object is a symbolic link.
-///			\li \c H5G_GROUP Object is a group.
-///			\li \c H5G_DATASET   Object is a dataset.
-///			\li \c H5G_TYPE Object is a named datatype
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      return(p_get_obj_type(ref, ref_type));
-   }
-   catch (IdComponentException E) {
-      throw DataTypeIException(inMemFunc("getObjType"), E.getDetailMsg());
-   }
-}
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
 //--------------------------------------------------------------------------
 // Function:	DataType::getRegion
 ///\brief	Retrieves a dataspace with the region pointed to selected.
