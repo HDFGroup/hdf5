@@ -121,10 +121,11 @@ H5HF_hdr_alloc(H5F_t *f)
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5HF_hdr_t)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "allocation failed for fractal heap shared header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "allocation failed for fractal heap shared header")
 
     /* Set the internal parameters for the heap */
     hdr->f = f;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
@@ -220,7 +221,7 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
     /* Compute/cache some values */
     hdr->heap_off_size = (uint8_t)H5HF_SIZEOF_OFFSET_BITS(hdr->man_dtable.cparam.max_index);
     if(H5HF_dtable_init(&hdr->man_dtable) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 
     /* Set the size of heap IDs */
     hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
@@ -313,11 +314,11 @@ H5HF_hdr_finish_init(H5HF_hdr_t *hdr)
 
     /* First phase of header final initialization */
     if(H5HF_hdr_finish_init_phase1(hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #1 of header final initialization")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #1 of header final initialization")
 
     /* Second phase of header final initialization */
     if(H5HF_hdr_finish_init_phase2(hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #2 of header final initialization")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't finish phase #2 of header final initialization")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -355,34 +356,34 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 #ifndef NDEBUG
     /* Check for valid parameters */
     if(cparam->managed.width == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width must be greater than zero")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width must be greater than zero")
     if(cparam->managed.width > H5HF_WIDTH_LIMIT)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width too large")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width too large")
     if(!POWER_OF_TWO(cparam->managed.width))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width not power of two")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "width not power of two")
     if(cparam->managed.start_block_size == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size must be greater than zero")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size must be greater than zero")
     if(!POWER_OF_TWO(cparam->managed.start_block_size))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size not power of two")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "starting block size not power of two")
     if(cparam->managed.max_direct_size == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size must be greater than zero")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size must be greater than zero")
     if(cparam->managed.max_direct_size > H5HF_MAX_DIRECT_SIZE_LIMIT)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size too large")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size too large")
     if(!POWER_OF_TWO(cparam->managed.max_direct_size))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not power of two")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not power of two")
     if(cparam->managed.max_direct_size < cparam->max_man_size)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
     if(cparam->managed.max_index == 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size must be greater than zero")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size must be greater than zero")
 #endif /* NDEBUG */
 
     /* Allocate & basic initialization for the shared header */
     if(NULL == (hdr = H5HF_hdr_alloc(f)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't allocate space for shared heap info")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't allocate space for shared heap info")
 
 #ifndef NDEBUG
     if(cparam->managed.max_index > (8 * hdr->sizeof_size))
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size too large for file")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size too large for file")
 #endif /* NDEBUG */
 
     /* Set the creation parameters for the heap */
@@ -402,7 +403,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* First phase of header final initialization */
     /* (doesn't need ID length set up) */
     if(H5HF_hdr_finish_init_phase1(hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #1 of header final initialization")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #1 of header final initialization")
 
     /* Copy any I/O filter pipeline */
     /* (This code is not in the "finish init phase" routines because those
@@ -487,21 +488,21 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* Second phase of header final initialization */
     /* (needs ID and filter lengths set up) */
     if(H5HF_hdr_finish_init_phase2(hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #2 of header final initialization")
 
     /* Extra checking for possible gap between max. direct block size minus
      * overhead and "huge" object size */
     dblock_overhead = H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
     if((cparam->managed.max_direct_size - dblock_overhead) < cparam->max_man_size)
-	HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. direct block size not large enough to hold all managed blocks")
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (hdr->heap_addr = H5MF_alloc(f, H5FD_MEM_FHEAP_HDR, dxpl_id, (hsize_t)hdr->heap_size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
 
     /* Cache the new fractal heap header */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
     /* Set address of heap header to return */
     ret_value = hdr->heap_addr;

@@ -15,16 +15,16 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HF.c
- *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5HF.c
+ *              Feb 24 2006
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Implements a "fractal heap" for storing variable-
- *                      length objects in a file.
+ * Purpose:     Implements a "fractal heap" for storing variable-
+ *              length objects in a file.
  *
- *                      Please see the documentation in:
- *                      doc/html/TechNotes/FractalHeap.html for a full description
- *                      of how they work, etc.
+ *              Please see the documentation in:
+ *              doc/html/TechNotes/FractalHeap.html for a full description
+ *              of how they work, etc.
  *
  *-------------------------------------------------------------------------
  */
@@ -33,7 +33,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#define H5HF_PACKAGE		/* Suppress error about including H5HFpkg.h  */
 
 /***********/
 /* Headers */
@@ -165,7 +165,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 
     /* Create shared fractal heap header */
     if(HADDR_UNDEF == (fh_addr = H5HF_hdr_create(f, dxpl_id, cparam)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Allocate fractal heap wrapper */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
@@ -178,11 +178,11 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
     if(H5HF_hdr_incr(fh->hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Increment # of files using this heap header */
     if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -249,7 +249,7 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 
     /* Increment # of files using this heap header */
     if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -886,3 +886,90 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_delete() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF_depend
+ *
+ * Purpose:     Make a child flush dependency between the fracal heap's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_depend(H5AC_info_t *parent_entry, H5HF_t *fh)
+{
+    /* Local variables */
+    H5HF_hdr_t *hdr = fh->hdr;              /* Header for fractal heap */
+    herr_t ret_value = SUCCEED;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(hdr);
+
+    /* Set the shared heap header's file context for this operation */
+    hdr->f = fh->f;
+
+    /* Set up flush dependency between parent entry and fractal heap header */
+    if(H5HF__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on file metadata")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5HF_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF_undepend
+ *
+ * Purpose:     Remove a child flush dependency between the fractal heap's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_undepend(H5AC_info_t *parent_entry, H5HF_t *fh)
+{
+    /* Local variables */
+    H5HF_hdr_t *hdr = fh->hdr;              /* Header for fractal heap */
+    herr_t ret_value = SUCCEED;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(hdr);
+
+    /* Set the shared heap header's file context for this operation */
+    hdr->f = fh->f;
+
+    /* Remove flush dependency between parent entry and fractal heap header */
+    if(H5HF__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency on file metadata")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5HF_undepend() */

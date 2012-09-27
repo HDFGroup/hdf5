@@ -737,6 +737,7 @@
 ./src/H5HFhdr.c
 ./src/H5HFhuge.c
 ./src/H5HFiblock.c
+./src/H5HFint.c
 ./src/H5HFiter.c
 ./src/H5HFman.c
 ./src/H5HFpkg.h

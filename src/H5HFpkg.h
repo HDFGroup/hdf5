@@ -32,11 +32,11 @@
 #include "H5HFprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5B2private.h"	/* v2 B-trees				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5FSprivate.h"	/* Free space manager			*/
-#include "H5SLprivate.h"	/* Skip lists				*/
+#include "H5ACprivate.h"    /* Metadata cache                               */
+#include "H5B2private.h"    /* v2 B-trees                                   */
+#include "H5FLprivate.h"    /* Free Lists                                   */
+#include "H5FSprivate.h"    /* Free space manager                           */
+#include "H5SLprivate.h"    /* Skip lists                                   */
 
 /**************************/
 /* Package Private Macros */
@@ -360,6 +360,7 @@ typedef struct H5HF_hdr_t {
     uint8_t     heap_off_size;  /* Size of heap offsets (in bytes) */
     uint8_t     heap_len_size;  /* Size of heap ID lengths (in bytes) */
     hbool_t     checked_filters; /* TRUE if pipeline passes can_apply checks */
+    hbool_t     swmr_write;     /* Flag indicating the file is opened with SWMR-write access */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
@@ -569,6 +570,12 @@ H5FL_BLK_EXTERN(direct_block);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5HF__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5HF__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Doubling table routines */
 H5_DLL herr_t H5HF_dtable_init(H5HF_dtable_t *dtable);
