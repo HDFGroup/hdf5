@@ -55,7 +55,7 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// attribute to disk
 	void flush( H5F_scope_t scope ) const;
 
-	// Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("Attribute"); }
 
 	// Creates a copy of an existing attribute using the attribute id

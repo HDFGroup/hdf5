@@ -24,7 +24,7 @@
 // Group, DataSet, and DataType.
 // DataType, in turn, has several specific datatypes as subclasses.
 // Modification:
-// 	Sept 18, 2012: Added class H5Location in between IdComponent and
+//	Sept 18, 2012: Added class H5Location in between IdComponent and
 //		H5Object.  An H5File now inherits from H5Location.  All HDF5
 //		wrappers in H5Object are moved up to H5Location.  H5Object
 //		is left mostly empty for future wrappers that are only for
@@ -37,24 +37,6 @@
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
-
-// Define the operator function pointer for H5Aiterate().
-typedef void (*attr1_operator_t)( H5Object& loc/*in*/,
-				 const H5std_string attr_name/*in*/,
-				 void *operator_data/*in,out*/);
-
-class UserData4Aiterate1 { // user data for attribute iteration
-   public:
-	attr1_operator_t op;
-	void* opData;
-	H5Object* object;
-};
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
-// The above part is being moved into Iterator, but not completed
 
 class H5_DLLCPP H5Object : public H5Location {
    public:

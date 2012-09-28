@@ -680,26 +680,6 @@ bool DataType::isVariableStr() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	DataType::getRegion
-///\brief	Retrieves a dataspace with the region pointed to selected.
-///\param	ref      - IN: Reference to get region of
-///\param	ref_type - IN: Type of reference to get region of - default
-///\return	DataSpace instance
-///\exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-DataSpace DataType::getRegion(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      DataSpace dataspace(p_get_region(ref, ref_type));
-      return(dataspace);
-   }
-   catch (IdComponentException E) {
-      throw DataTypeIException(inMemFunc("getRegion"), E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:    DataType::getId
 // Purpose:     Get the id of this attribute
 // Modification:

@@ -50,7 +50,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File() : H5Location(0) {}
+H5File::H5File() : H5Location(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
@@ -148,7 +148,7 @@ H5File::H5File(const H5File& original) : H5Location(original)
 
 //--------------------------------------------------------------------------
 // Function:	H5File::isHdf5
-///\brief	Determines whether a file in HDF5 format.
+///\brief	Determines whether a file in HDF5 format. (Static)
 ///\param	name - IN: Name of the file
 ///\return	true if the file is in HDF5 format, and false, otherwise
 ///\exception	H5::FileIException
@@ -172,7 +172,7 @@ bool H5File::isHdf5(const char* name)
 //--------------------------------------------------------------------------
 // Function:	H5File::isHdf5
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It takes an \c H5std_string for \a name.
+///		It takes an \c H5std_string for \a name. (Static)
 ///\param	name - IN: Name of the file - \c H5std_string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -250,8 +250,8 @@ void H5File::reOpen()
         throw FileIException("H5File::reOpen", close_error.getDetailMsg());
     }
 
-   // call C routine to reopen the file - Note: not sure about this
-   // does id need to be closed later?  which id to be the parameter?
+   // call C routine to reopen the file - Note: not sure about this,
+   // which id to be the parameter when closing?
    id = H5Freopen( id );
    if( id < 0 ) // Raise exception when H5Freopen returns a neg value
       throw FileIException("H5File::reOpen", "H5Freopen failed");
@@ -259,12 +259,10 @@ void H5File::reOpen()
 
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
-///\brief	Reopens this file.
-///
-///\exception	H5::FileIException
-///\par Description
-///		This function will be replaced by the above function \c reOpen
-///		in future releases.
+// Purpose:	Reopens this file.
+// Exception	H5::FileIException
+// Description
+//		This function is replaced by the above function reOpen.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5File::reopen()
@@ -470,27 +468,6 @@ void H5File::getVFDHandle(void **file_handle) const
    }
 }
 
-
-//--------------------------------------------------------------------------
-// Function:	H5File::getRegion
-///\brief	Retrieves a dataspace with the region pointed to selected.
-///\param	ref      - IN: Reference to get region of
-///\param	ref_type - IN: Type of reference to get region of - default
-///\return	DataSpace instance
-///\exception	H5::FileIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-DataSpace H5File::getRegion(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      DataSpace dataspace(p_get_region(ref, ref_type));
-      return(dataspace);
-   }
-   catch (IdComponentException E) {
-      throw FileIException("H5File::getRegion", E.getDetailMsg());
-   }
-}
-
 //--------------------------------------------------------------------------
 // Function:	H5File::getFileSize
 ///\brief	Returns the file size of the HDF5 file.
@@ -510,47 +487,6 @@ hsize_t H5File::getFileSize() const
       throw FileIException("H5File::getFileSize", "H5Fget_filesize failed");
    }
    return (file_size);
-}
-
-//--------------------------------------------------------------------------
-// Function:    H5File::p_reference (protected)
-// Purpose      Creates a reference to an HDF5 object or a dataset region.
-// Parameters
-//              name - IN: Name of the object to be referenced
-//              dataspace - IN: Dataspace with selection
-//              ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-// Exception    H5::IdComponentException
-// Programmer   Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void H5File::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const
-{
-   herr_t ret_value = H5Rcreate(ref, getId(), name, ref_type, space_id);
-   if (ret_value < 0)
-   {
-      throw IdComponentException("", "H5Rcreate failed");
-   }
-}
-
-
-//--------------------------------------------------------------------------
-// Function:    H5File::p_get_region (protected)
-// Purpose      Retrieves a dataspace with the region pointed to selected.
-// Parameters
-//              ref_type - IN: Type of reference to get region of - default
-//                              to H5R_DATASET_REGION
-//              ref      - IN: Reference to get region of
-// Return       Dataspace id
-// Exception    H5::IdComponentException
-// Programmer   Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-hid_t H5File::p_get_region(void *ref, H5R_type_t ref_type) const
-{
-   hid_t space_id = H5Rget_region(getId(), ref_type, ref);
-   if (space_id < 0)
-   {
-      throw IdComponentException("", "H5Rget_region failed");
-   }
-   return(space_id);
 }
 
 //--------------------------------------------------------------------------

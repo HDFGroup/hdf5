@@ -37,30 +37,11 @@ namespace H5 {
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-// userAttrOpWrpr simply interfaces between the user's function and the
-// C library function H5Aiterate2; used to resolve the different prototype
-// problem.  May be moved to Iterator later.
-extern "C" herr_t userAttrOpWrpr1(hid_t loc_id, const char *attr_name,
-    const H5A_info_t *ainfo, void *op_data)
-{
-   H5std_string s_attr_name = H5std_string( attr_name );
-#ifdef NO_STATIC_CAST
-   UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
-#else
-   UserData4Aiterate* myData = static_cast <UserData4Aiterate *> (op_data);
-#endif
-   myData->op( *myData->location, s_attr_name, myData->opData );
-   return 0;
-}
-
 //--------------------------------------------------------------------------
 // Function:	H5Object default constructor (protected)
-// Description
-//		The id is set by H5Location() but subclass constructor will
-//		set it to a valid HDF5 id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Object::H5Object() : H5Location(0) {}
+H5Object::H5Object() : H5Location() {}
 
 //--------------------------------------------------------------------------
 // Function:	H5Object overloaded constructor (protected)

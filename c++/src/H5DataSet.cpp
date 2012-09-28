@@ -645,27 +645,6 @@ void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
 }
 
 //--------------------------------------------------------------------------
-// Function:	DataSet::getRegion
-///\brief	Retrieves a dataspace with the region pointed to selected.
-///\param	ref      - IN: Reference to get region of
-///\param	ref_type - IN: Type of reference to get region of - default
-///		to H5R_DATASET_REGION
-///\return	DataSpace instance
-///\exception	H5::DataSetIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      DataSpace dataspace(p_get_region(ref, ref_type));
-      return(dataspace);
-   }
-   catch (IdComponentException E) {
-      throw DataSetIException("DataSet::getRegion", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:    DataSet::getId
 ///\brief	Get the id of this dataset.
 // Description:
