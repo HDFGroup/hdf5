@@ -98,6 +98,10 @@ FFLAGS="${HDF5_FFLAGS:-$FFLAGSBASE}"
 LDFLAGS="${HDF5_LDFLAGS:-$LDFLAGSBASE}"
 LIBS="${HDF5_LIBS:-$LIBSBASE}"
 
+# If static was disabled, @HDF5_USE_SHLIB@ will be yes.  In that case
+# HDF5_USE_SHLIB should be set to yes because there are no static
+# lib files.
+HDF5_USE_SHLIB="@HDF5_USE_SHLIB@"
 USE_SHARED_LIB="${HDF5_USE_SHLIB:-no}"
 
 usage() {

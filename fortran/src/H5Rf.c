@@ -331,6 +331,47 @@ done:
      return ret_value;
 } /* end nh5rget_region_region_c() */
 
+/****if* H5Rf/h5rget_region_ptr_c
+ * NAME
+ *  h5rget_region_ptr_c
+ * PURPOSE
+ *  Call H5Rget_region to dereference dataspace region
+ * INPUTS
+ *   dset_id - dataset identifier
+ *       ref - reference to the dataset region
+ * OUTPUTS
+ *  space_id - dereferenced  dataset dataspace identifier
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  August 4, 2012
+ * HISTORY
+ *
+ * SOURCE
+*/
+int_f
+nh5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
+/******/
+{
+     hid_t c_space_id;
+     hdset_reg_ref_t ref_c;
+     int_f ret_value = 0;
+
+     /*
+      * Call H5Rget_region function.
+      */
+     if((c_space_id = H5Rget_region((hid_t)*dset_id, H5R_DATASET_REGION, ref)) < 0)
+         HGOTO_DONE(FAIL)
+
+     /* Copy the dataspace ID */
+     *space_id = (hid_t_f)c_space_id;
+
+done:
+     return ret_value;
+} /* end nh5rget_region_ptr_c() */
+
+
 /****if* H5Rf/h5rget_object_type_obj_c
  * NAME
  *        h5rget_object_type_obj_c

@@ -2409,8 +2409,6 @@ nh5dread_f_c ( hid_t_f *dset_id ,  hid_t_f *mem_type_id, hid_t_f *mem_space_id,
   /*
    * Call H5Dread function.
    */
-
-
   status = H5Dread(c_dset_id, c_mem_type_id, c_mem_space_id, c_file_space_id, c_xfer_prp, buf);
   if ( status < 0 ) return ret_value;
 
