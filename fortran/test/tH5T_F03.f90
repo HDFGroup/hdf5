@@ -1988,7 +1988,6 @@ SUBROUTINE t_regref(total_error)
   TYPE(C_PTR) :: f_ptr
   CHARACTER(LEN=ds2dim0) :: chrvar
   CHARACTER(LEN=20), DIMENSION(1:2) :: chrref_correct
-  TYPE(h5o_info_t) :: oinfo                  ! Object info struct
 
   chrvar = "The quick brown "
   READ(chrvar,'(16A1)') wdata2(1:16,1)
