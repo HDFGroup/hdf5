@@ -39,8 +39,8 @@
 #include "H5Dpkg.h"             /* Dataset pkg                          */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmds.h"            /* MDS file driver      		*/
 #include "H5FDmdc.h"            /* MDC file driver      		*/
@@ -57,14 +57,15 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLmds.h"            /* MDS VOL plugin			*/
 #include "H5VLmdserver.h"       /* MDS helper stuff			*/
+#include "H5VLprivate.h"	/* VOL plugins				*/
 
 /* Prototypes */
 static void *H5VL_mds_fapl_copy(const void *_old_fa);
 static herr_t H5VL_mds_fapl_free(void *_fa);
 
+#if 0
 /* Atrribute callbacks */
 static void *H5VL_mds_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
 static void *H5VL_mds_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
@@ -79,9 +80,10 @@ static void *H5VL_mds_datatype_commit(void *obj, H5VL_loc_params_t loc_params, c
 static void *H5VL_mds_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
 static ssize_t H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t req);
 static herr_t H5VL_mds_datatype_close(void *dt, hid_t req);
-
+#endif
 /* Dataset callbacks */
 static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
+#if 0
 static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
 static herr_t H5VL_mds_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                        hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
@@ -90,9 +92,10 @@ static herr_t H5VL_mds_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_sp
 static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
 static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
-
+#endif
 /* File callbacks */
 static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
+#if 0
 static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
@@ -129,6 +132,7 @@ static herr_t H5VL_mds_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_
 static herr_t H5VL_mds_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+#endif
 
 /* MDS-specific file access properties */
 typedef struct H5VL_mds_fapl_t {
@@ -145,59 +149,59 @@ static H5VL_class_t H5VL_mds_g = {
     H5VL_mds_fapl_copy,			     /*fapl_copy */
     H5VL_mds_fapl_free, 		     /*fapl_free */
     {                                        /* attribute_cls */
-        H5VL_mds_attr_create,                /* create */
-        H5VL_mds_attr_open,                  /* open */
-        H5VL_mds_attr_read,                  /* read */
-        H5VL_mds_attr_write,                 /* write */
-        H5VL_mds_attr_get,                   /* get */
-        H5VL_mds_attr_remove,                /* remove */
-        H5VL_mds_attr_close                  /* close */
+        NULL,//H5VL_mds_attr_create,                /* create */
+        NULL,//H5VL_mds_attr_open,                  /* open */
+        NULL,//H5VL_mds_attr_read,                  /* read */
+        NULL,//H5VL_mds_attr_write,                 /* write */
+        NULL,//H5VL_mds_attr_get,                   /* get */
+        NULL,//H5VL_mds_attr_remove,                /* remove */
+        NULL,//H5VL_mds_attr_close                  /* close */
     },
     {                                        /* datatype_cls */
-        H5VL_mds_datatype_commit,            /* commit */
-        H5VL_mds_datatype_open,              /* open */
-        H5VL_mds_datatype_get_binary,        /* get_size */
-        H5VL_mds_datatype_close              /* close */
+        NULL,//H5VL_mds_datatype_commit,            /* commit */
+        NULL,//H5VL_mds_datatype_open,              /* open */
+        NULL,//H5VL_mds_datatype_get_binary,        /* get_size */
+        NULL,//H5VL_mds_datatype_close              /* close */
     },
     {                                        /* dataset_cls */
         H5VL_mds_dataset_create,             /* create */
-        H5VL_mds_dataset_open,               /* open */
-        H5VL_mds_dataset_read,               /* read */
-        H5VL_mds_dataset_write,              /* write */
-        H5VL_mds_dataset_set_extent,         /* set extent */
-        H5VL_mds_dataset_get,                /* get */
-        H5VL_mds_dataset_close               /* close */
+        NULL,//H5VL_mds_dataset_open,               /* open */
+        NULL,//H5VL_mds_dataset_read,               /* read */
+        NULL,//H5VL_mds_dataset_write,              /* write */
+        NULL,//H5VL_mds_dataset_set_extent,         /* set extent */
+        NULL,//H5VL_mds_dataset_get,                /* get */
+        NULL,//H5VL_mds_dataset_close               /* close */
     },
     {                                        /* file_cls */
         H5VL_mds_file_create,                /* create */
-        H5VL_mds_file_open,                  /* open */
-        H5VL_mds_file_flush,                 /* flush */
-        H5VL_mds_file_get,                   /* get */
-        H5VL_mds_file_misc,                  /* misc */
-        H5VL_mds_file_optional,              /* optional */
-        H5VL_mds_file_close                  /* close */
+        NULL,//H5VL_mds_file_open,                  /* open */
+        NULL,//H5VL_mds_file_flush,                 /* flush */
+        NULL,//H5VL_mds_file_get,                   /* get */
+        NULL,//H5VL_mds_file_misc,                  /* misc */
+        NULL,//H5VL_mds_file_optional,              /* optional */
+        NULL,//H5VL_mds_file_close                  /* close */
     },
     {                                        /* group_cls */
-        H5VL_mds_group_create,               /* create */
-        H5VL_mds_group_open,                 /* open */
-        H5VL_mds_group_get,                  /* get */
-        H5VL_mds_group_close                 /* close */
+        NULL,//H5VL_mds_group_create,               /* create */
+        NULL,//H5VL_mds_group_open,                 /* open */
+        NULL,//H5VL_mds_group_get,                  /* get */
+        NULL,//H5VL_mds_group_close                 /* close */
     },
     {                                        /* link_cls */
-        H5VL_mds_link_create,                /* create */
-        H5VL_mds_link_move,                  /* move */
-        H5VL_mds_link_iterate,               /* iterate */
-        H5VL_mds_link_get,                   /* get */
-        H5VL_mds_link_remove                 /* remove */
+        NULL,//H5VL_mds_link_create,                /* create */
+        NULL,//H5VL_mds_link_move,                  /* move */
+        NULL,//H5VL_mds_link_iterate,               /* iterate */
+        NULL,//H5VL_mds_link_get,                   /* get */
+        NULL,//H5VL_mds_link_remove                 /* remove */
     },
     {                                        /* object_cls */
-        H5VL_mds_object_open,                /* open */
-        H5VL_mds_object_copy,                /* copy */
-        H5VL_mds_object_visit,               /* visit */
-        H5VL_mds_object_get,                 /* get */
-        H5VL_mds_object_misc,                /* misc */
-        H5VL_mds_object_optional,            /* optional */
-        H5VL_mds_object_close                /* close */
+        NULL,//H5VL_mds_object_open,                /* open */
+        NULL,//H5VL_mds_object_copy,                /* copy */
+        NULL,//H5VL_mds_object_visit,               /* visit */
+        NULL,//H5VL_mds_object_get,                 /* get */
+        NULL,//H5VL_mds_object_misc,                /* misc */
+        NULL,//H5VL_mds_object_optional,            /* optional */
+        NULL,//H5VL_mds_object_close                /* close */
     }
 };
 
@@ -477,6 +481,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get MDS info struct")
     MPI_Comm_rank(fa->comm, &my_rank);
 
+    printf("Client File create\n");
     /* the first process in the communicator will tell the MDS process to create the metadata file */
     if (0 == my_rank) {
         /* determine the size of the buffer needed to encode the parameters */
@@ -501,11 +506,12 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     /* set the underlying VFD for clients (MDC)*/
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5P_set_fapl_mdc(temp_fapl, name, fapl_id) < 0)
+    H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
+    if(H5P_set_fapl_mdc(fapl_id, name, temp_fapl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Create the raw data file */ 
-    if(NULL == (new_file = H5F_open(name, flags, fcpl_id, temp_fapl, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
 
     new_file->id_exists = TRUE;

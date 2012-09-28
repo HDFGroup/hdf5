@@ -39,8 +39,9 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Ppkg.h"             /* Property lists                       */
-#include "H5VLmds.h"            /* MDS VOL plugin			*/
 #include "H5VLmdserver.h"       /* MDS helper routines			*/
+
+#ifdef H5_HAVE_PARALLEL
 
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
@@ -89,9 +90,13 @@ static herr_t H5FD_mdc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hadd
                              size_t size, const void *buf);
 static herr_t H5FD_mdc_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_mdc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static int H5FD_mdc_mpi_rank(const H5FD_t *_file);
+static int H5FD_mdc_mpi_size(const H5FD_t *_file);
+static int H5FD_mdc_communicator(const H5FD_t *_file);
 
 /* The MDC file driver information */
-static const H5FD_class_t H5FD_mdc_g = {
+static const H5FD_class_mpi_t H5FD_mdc_g = {
+    {  /* Start of superclass information */
     "mdc",					/*name			*/
     HADDR_MAX,					/*maxaddr		*/
     H5F_CLOSE_SEMI,				/* fc_degree		*/
@@ -101,7 +106,7 @@ static const H5FD_class_t H5FD_mdc_g = {
     NULL,					/*sb_decode		*/
     sizeof(H5FD_mdc_fapl_t),			/*fapl_size		*/
     H5FD_get_fapl_mdc,				/*fapl_get		*/
-    H5FD_mdc_fapl_copy,			/*fapl_copy		*/
+    H5FD_mdc_fapl_copy,     			/*fapl_copy		*/
     H5FD_mdc_fapl_free, 			/*fapl_free		*/
     0,		                		/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
@@ -116,7 +121,7 @@ static const H5FD_class_t H5FD_mdc_g = {
     H5FD_mdc_get_eoa,				/*get_eoa		*/
     H5FD_mdc_set_eoa, 				/*set_eoa		*/
     H5FD_mdc_get_eof,  				/*get_eof		*/
-    H5FD_mdc_get_handle,                        /*get_handle            */
+    NULL,                                       /*get_handle            */
     H5FD_mdc_read,				/*read			*/
     H5FD_mdc_write,				/*write			*/
     H5FD_mdc_flush,				/*flush			*/
@@ -124,6 +129,10 @@ static const H5FD_class_t H5FD_mdc_g = {
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE                           /*fl_map                */
+    },
+    H5FD_mdc_mpi_rank,         /* get_rank         */
+    H5FD_mdc_mpi_size,         /* get_size         */
+    H5FD_mdc_communicator      /* get_comm         */
 };
 
 
@@ -503,16 +512,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mdc_query(const H5FD_t *_file, unsigned long *flags /* out */)
+H5FD_mdc_query(const H5FD_t UNUSED*_file, unsigned long *flags /* out */)
 {
-    const H5FD_mdc_t		*file = (const H5FD_mdc_t*)_file;
-    herr_t              	ret_value = SUCCEED;
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = H5FDquery(file->memb, flags);
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags=0;
+        *flags|=H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations */
+        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags|=H5FD_FEAT_HAS_MPI;             /* This driver uses MPI */
+        *flags|=H5FD_FEAT_ALLOCATE_EARLY;      /* Allocate space early instead of late */
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 
@@ -605,7 +618,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_mdc_alloc */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mdc_get_eoa
@@ -634,13 +646,17 @@ H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    buf_size = sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t);
+        buf_size = 1 /* request type*/ + sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t);
 
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
 
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode request type */
+    *p++ = (uint8_t)H5VL_MDS_GET_EOA;
+
     /* encode the object id */
     INT32ENCODE(p, file->mdfile_id);
     *p++ = (uint8_t)type;
@@ -683,17 +699,46 @@ done:
 static herr_t
 H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 {
-    H5FD_mdc_t	*file = (H5FD_mdc_t*)_file;
-    herr_t       ret_value = SUCCEED;
+    const H5FD_mdc_t	*file = (const H5FD_mdc_t*)_file;
+    size_t buf_size;
+    uint8_t *p = NULL;
+    void *send_buf = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5FD_MEM_DRAW != type) {
-        if((ret_value = H5FDset_eoa(file->memb, type, eoa)) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't set member EOA")
-    }
-    else
-        file->raw_eoa = eoa;
+    buf_size = 1 /* request type*/ + sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t) +
+        sizeof(uint64_t);
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode request type */
+    *p++ = (uint8_t)H5VL_MDS_SET_EOA;
+
+    /* encode the object id */
+    INT32ENCODE(p, file->mdfile_id);
+    /* VFD memory type */
+    *p++ = (uint8_t)type;
+    /* eoa value */
+    UINT64ENCODE(p, eoa);
+
+    MPI_Pcontrol(0);
+    /* send the EOA request */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
+
+    /* recieve the current EOA */
+    if(MPI_SUCCESS != MPI_Recv(&ret_value, sizeof(int), MPI_INT, MDS_RANK, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message")
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -727,6 +772,7 @@ H5FD_mdc_get_eof(const H5FD_t *_file)
     FUNC_LEAVE_NOAPI(H5FDget_eof(file->memb))
 }
 
+#if 0
 
 /*-------------------------------------------------------------------------
  * Function:       H5FD_mdc_get_handle
@@ -846,8 +892,8 @@ H5FD_mdc_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
  * Return:      Success:	Non-negative
  * 		Failure:	Negative
  *
- * Programmer:  Quincey Koziol
- *              January 31, 2008
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -860,3 +906,74 @@ H5FD_mdc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     FUNC_LEAVE_NOAPI(H5FDtruncate(file->memb, dxpl_id, closing))
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mdc_mpi_rank
+ *
+ * Purpose:     Returns the MPI rank for a process
+ *
+ * Return:      MPI rank.  Cannot report failure.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_mdc_mpi_rank(const H5FD_t *_file)
+{
+    const H5FD_mdc_t *file = (const H5FD_mdc_t*)_file;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(H5FD_mpi_get_rank(file->memb))
+} /* end H5FD_mdc_mpi_rank() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mdc_mpi_size
+ *
+ * Purpose:     Returns the number of MPI processes
+ *
+ * Return:      The number of MPI processes.  Cannot report failure.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5FD_mdc_mpi_size(const H5FD_t *_file)
+{
+    const H5FD_mdc_t *file = (const H5FD_mdc_t*)_file;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(H5FD_mpi_get_size(file->memb))
+} /* end H5FD_mdc_mpi_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_mdc_communicator
+ *
+ * Purpose:     Returns the MPI communicator for the file.
+ *
+ * Return:      The MPI communicator.  Cannot report failure.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              September, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static MPI_Comm
+H5FD_mdc_communicator(const H5FD_t *_file)
+{
+    const H5FD_mdc_t *file = (const H5FD_mdc_t*)_file;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    FUNC_LEAVE_NOAPI(H5FD_mpi_get_comm(file->memb))
+} /* end H5FD_mdc_communicator() */
+
+#endif /*H5_HAVE_PARALLEL*/

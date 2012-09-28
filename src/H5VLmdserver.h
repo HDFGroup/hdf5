@@ -20,6 +20,16 @@
 #ifndef _H5VLmdserver_H
 #define _H5VLmdserver_H
 
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5Fprivate.h"         /* File access                          */
+#include "H5Iprivate.h"         /* IDs                                  */
+#include "H5Tprivate.h"         /* Datatypes                            */
+#include "H5VLprivate.h"        /* VOL plugins                          */
+
+#define MDS_RANK            0
+#define H5VL_MDS_LISTEN_TAG 352
+#define H5VL_MDS_SEND_TAG   356
+
 /* the object structure of the MDS VOL plugin */
 typedef struct H5VL_mds_object_t {
     H5I_type_t obj_type;
@@ -44,16 +54,18 @@ typedef struct H5VL_mds_dset_t {
 } H5VL_mds_dset_t;
 
 
-
 /* Operation types for the MDS */
 typedef enum H5VL_mds_op_type_t {
     H5VL_MDS_FILE_CREATE   = 0,
     H5VL_MDS_DSET_CREATE   = 1,
-    H5VL_MDS_ALLOC         = 2
+    H5VL_MDS_ALLOC         = 2,
+    H5VL_MDS_GET_EOA       = 3,
+    H5VL_MDS_SET_EOA       = 4
 } H5VL_mds_op_type_t;
 
 H5_DLL herr_t H5VL_mds_start(void);
 H5_DLL herr_t H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...);
 H5_DLL herr_t H5VL_mds_perform_op(const void *buf, int source);
+H5_DLL hid_t H5VL_mds_register(H5I_type_t type, void *obj, hbool_t app_ref);
 
 #endif /* _H5VLmdserver_H */

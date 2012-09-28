@@ -25,6 +25,7 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5SCprivate.h"        /* comm splitter header                 */
+#include "H5VLmdserver.h"       /* MDS helper routines			*/
 
 commsplitter_t commsplitter_data;
 
@@ -116,6 +117,10 @@ static int commsplitter_MPI_Init(int *argc, char ***argv)
 
     rc = split_comm_world();
 
+    if(MDS_RANK == commsplitter_data.grank) {
+        if(H5VL_mds_start() < 0)
+            return -1;
+    }
     return(rc);
 }
 
@@ -150,13 +155,17 @@ static int commsplitter_MPI_Init_thread(int *argc, char ***argv, int required, i
     int enabled_save;
 
     enabled_save = commsplitter_data.enabled;
-    commsplitter_data.enabled = 0;
+    commsplitter_data.enabled = 1;
 
     rc = PMPI_Init_thread(argc, argv, required, provided);
 
     commsplitter_data.enabled = enabled_save;
 
     rc=split_comm_world();
+
+    if(MDS_RANK == commsplitter_data.grank)
+        if(H5VL_mds_start() < 0)
+            return -1;
 
     return(rc);
 }

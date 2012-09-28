@@ -35,4 +35,4 @@ H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
 }
 #endif
 
-#endif
+#endif /* _H5VLnative_H */
