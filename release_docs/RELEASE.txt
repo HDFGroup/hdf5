@@ -701,6 +701,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - Removed program perform/benchpar from the enable-build-all list. The
+	program will be retired or moved to another location. HDFFV-8156
+	(AKC 2012/10/01)
       - Retired program perform/mpi-perf. Its purpose has been incorporated
 	into h5perf before. (AKC 2012/09/20)
       - ifdefs added to tests around include unistd.h and function to simulate
