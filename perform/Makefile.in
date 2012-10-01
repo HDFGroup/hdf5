@@ -90,21 +90,17 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = benchpar$(EXEEXT)
+am__EXEEXT_1 =
 @BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 PROGRAMS = $(bin_PROGRAMS)
-benchpar_SOURCES = benchpar.c
-benchpar_OBJECTS = benchpar.$(OBJEXT)
-benchpar_LDADD = $(LDADD)
-benchpar_DEPENDENCIES = $(LIBHDF5)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 chunk_SOURCES = chunk.c
 chunk_OBJECTS = chunk.$(OBJEXT)
 chunk_LDADD = $(LDADD)
 chunk_DEPENDENCIES = $(LIBHDF5)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 	pio_timer.$(OBJEXT)
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
@@ -169,12 +165,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
-	$(h5perf_serial_SOURCES) iopipe.c overhead.c perf.c \
-	perf_meta.c zip_perf.c
-DIST_SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
-	$(h5perf_serial_SOURCES) iopipe.c overhead.c perf.c \
-	perf_meta.c zip_perf.c
+SOURCES = chunk.c $(h5perf_SOURCES) $(h5perf_serial_SOURCES) iopipe.c \
+	overhead.c perf.c perf_meta.c zip_perf.c
+DIST_SOURCES = chunk.c $(h5perf_SOURCES) $(h5perf_serial_SOURCES) \
+	iopipe.c overhead.c perf.c perf_meta.c zip_perf.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -479,7 +473,8 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
-@BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = benchpar
+# Currently there is no such program.
+@BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = 
 @BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = $(PARA_BUILD_ALL)
 
 # Define programs that will be run in 'make check'
@@ -614,9 +609,6 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-benchpar$(EXEEXT): $(benchpar_OBJECTS) $(benchpar_DEPENDENCIES) $(EXTRA_benchpar_DEPENDENCIES) 
-	@rm -f benchpar$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(benchpar_OBJECTS) $(benchpar_LDADD) $(LIBS)
 chunk$(EXEEXT): $(chunk_OBJECTS) $(chunk_DEPENDENCIES) $(EXTRA_chunk_DEPENDENCIES) 
 	@rm -f chunk$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(chunk_OBJECTS) $(chunk_LDADD) $(LIBS)
@@ -648,7 +640,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/benchpar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iopipe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/overhead.Po@am__quote@
