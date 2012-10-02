@@ -37,8 +37,9 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
+# Currently there is no such program.
 if BUILD_PARALLEL_CONDITIONAL
-    PARA_BUILD_ALL=benchpar
+    PARA_BUILD_ALL=
 endif
 if BUILD_ALL_CONDITIONAL
     BUILD_ALL_PROGS=$(PARA_BUILD_ALL)
