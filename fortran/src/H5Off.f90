@@ -647,7 +647,7 @@ CONTAINS
          INTEGER         , INTENT(IN)  :: index_type
          INTEGER         , INTENT(IN)  :: order
          INTEGER(HSIZE_T), INTENT(IN)  :: n
-         INTEGER(HID_T)  , INTENT(IN)  :: obj_id
+         INTEGER(HID_T)  , INTENT(OUT) :: obj_id
          INTEGER(HID_T)  , INTENT(IN)  :: lapl_id_default
 
        END FUNCTION h5oopen_by_idx_c

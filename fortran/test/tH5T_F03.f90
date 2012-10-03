@@ -2918,8 +2918,9 @@ SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
   INTEGER, DIMENSION(1:3) :: letters
   CHARACTER(LEN=3) :: lets
   CHARACTER(KIND=C_CHAR,LEN=*) :: char_type
+  CHARACTER(KIND=C_CHAR,LEN=1) :: char_tmp
   INTEGER :: i, j, n, ff
-  
+
   ! Convert the letters and special character to integers    
   lets = 'abc'
   
@@ -2929,15 +2930,18 @@ SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
   j = 1
   DO i=1,n-1
      IF( j .EQ. 4 )THEN
-        WRITE(data_in(i:i),'(A1)') ff
+        WRITE(char_tmp,'(A1)') ff
+        data_in(i:i) = char_tmp
      ELSE
-        WRITE(data_in(i:i),'(A1)') letters(j)
+        WRITE(char_tmp,'(A1)') letters(j)
+        data_in(i:i) = char_tmp
      ENDIF
      line_lengths(i) = LEN_TRIM(data_in(i))
      j = j + 1
      IF( j .EQ. 5 ) j = 1
   END DO
-  WRITE(data_in(n:n),'(A1)') ff
+  WRITE(char_tmp,'(A1)') ff
+  data_in(n:n) =  char_tmp
   line_lengths(n) = 1
   
 END SUBROUTINE setup_buffer

@@ -32,7 +32,6 @@ fill_h5o_info_t_f(H5O_info_t Oinfo, H5O_info_t_f *object_info) {
   object_info->fileno    = Oinfo.fileno;
   object_info->addr      = (haddr_t_f)Oinfo.addr;
  
-
   object_info->type      = (int_f)Oinfo.type;
   object_info->rc        = (int_f)Oinfo.rc;
 

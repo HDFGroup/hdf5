@@ -54,11 +54,11 @@ MODULE visit_cb
   ! Object visit structs
   TYPE, bind(c) :: obj_visit_t
      CHARACTER(LEN=1), DIMENSION(1:180) :: path   ! Path to object
-     INTEGER(c_int) :: type_obj ! type of object
+     INTEGER :: type_obj ! type of object
   END TYPE obj_visit_t
 
   TYPE, bind(c) :: ovisit_ud_t
-     INTEGER(c_int) :: idx              ! Index in object visit structure
+     INTEGER :: idx              ! Index in object visit structure
      TYPE(obj_visit_t), DIMENSION(1:info_size) :: info   ! Pointer to the object visit structure to use
   END TYPE ovisit_ud_t
 
@@ -74,7 +74,7 @@ CONTAINS
     TYPE(ovisit_ud_t) :: op_data
 
     INTEGER :: len, i
-    INTEGER(C_INT) :: idx
+    INTEGER :: idx
 
     visit_obj_cb = 0
 

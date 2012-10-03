@@ -82,9 +82,9 @@ MODULE H5O_PROVISIONAL
   ENDTYPE meta_size_t
   
   TYPE, BIND(C) :: h5o_info_t
-     INTEGER(c_long)  :: fileno     ! File number that object is located in
+     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
      INTEGER(haddr_t) :: addr       ! Object address in file  
-     INTEGER          :: type       ! Basic object type (group, dataset, etc.) 
+     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.) 
      INTEGER          :: rc         ! Reference count of object
 
      INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --

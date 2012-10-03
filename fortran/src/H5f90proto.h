@@ -61,7 +61,7 @@ typedef struct H5O_hdr_info_t_f {
 typedef struct H5O_info_t_f {
     unsigned long 	fileno;		/* File number that object is located in */
     haddr_t_f 		addr;		/* Object address in file	*/
-    int_f 		type;		/* Basic object type (group, dataset, etc.) */
+    int 		type;		/* Basic object type (group, dataset, etc.) */
     int_f 		rc;		/* Reference count of object    */
     int_f	        atime[8];	/* Access time			*/
     int_f		mtime[8];	/* Modification time		*/
