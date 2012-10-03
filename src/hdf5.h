@@ -42,7 +42,6 @@
 
 /* Predefined VOL plugins */
 #include "H5VLnative.h"		/* Native HDF5 plugin           	*/
-#include "H5VLdummy.h"     	/* Dummy plugin for testing     	*/
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/
