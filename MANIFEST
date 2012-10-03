@@ -349,6 +349,7 @@
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
 ./fortran/test/tH5O.f90
+./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
 ./fortran/test/tH5P.f90
 ./fortran/test/tH5R.f90
@@ -441,6 +442,8 @@
 ./c++/src/H5IntType.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
+./c++/src/H5Location.cpp
+./c++/src/H5Location.h
 ./c++/src/H5Object.cpp
 ./c++/src/H5Object.h
 ./c++/src/H5PredType.cpp

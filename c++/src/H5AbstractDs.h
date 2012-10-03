@@ -65,7 +65,7 @@ class H5_DLLCPP AbstractDs {
 	// dataset - pure virtual.
 	virtual hsize_t getStorageSize() const = 0;
 
-	// Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass() const = 0;
 
 	// Copy constructor

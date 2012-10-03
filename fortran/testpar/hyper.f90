@@ -50,6 +50,7 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER        :: icount                          ! number of elements in array
   CHARACTER(len=80) :: filename                     ! filename
   INTEGER        :: i
+  INTEGER        :: actual_io_mode                  ! The type of I/O performed by this process
 
   !//////////////////////////////////////////////////////////
   ! initialize the array data between the processes (3)
@@ -179,6 +180,24 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
   CALL check("h5dwrite_f", hdferror, nerrors)
 
+
+  ! Check h5pget_mpio_actual_io_mode_f function
+  CALL h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferror)
+  CALL check("h5pget_mpio_actual_io_mode_f", hdferror, nerrors)
+
+  IF(do_collective.AND.do_chunk)THEN
+     IF(actual_io_mode.NE.H5D_MPIO_CHUNK_COLLECTIVE_F)THEN
+        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+     ENDIF
+  ELSEIF(.NOT.do_collective)THEN
+     IF(actual_io_mode.NE.H5D_MPIO_NO_COLLECTIVE_F)THEN
+        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+     ENDIF
+  ELSEIF( do_collective.AND.(.NOT.do_chunk))THEN
+     IF(actual_io_mode.NE.H5D_MPIO_CONTIG_COLLECTIVE_F)THEN
+        CALL check("h5pget_mpio_actual_io_mode_f", -1, nerrors)
+     ENDIF
+  ENDIF
 
   !//////////////////////////////////////////////////////////
   ! close HDF5 I/O

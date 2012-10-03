@@ -234,4 +234,49 @@ CONTAINS
     IF (flag .EQ. 1) use_gpfs = .TRUE.
   END SUBROUTINE h5pget_fapl_mpiposix_f
 
+
+!****s* H5P/h5pget_mpio_actual_io_mode_f
+! NAME
+!  h5pget_mpio_actual_io_mode_f
+!
+! PURPOSE
+!  Retrieves the type of I/O that HDF5 actually performed on the last 
+!  parallel I/O call. This is not necessarily the type of I/O requested. 
+!
+! INPUTS
+!  dxpl_id        - Dataset transfer property list identifier.
+! OUTPUTS
+!  actual_io_mode - The type of I/O performed by this process.
+!  hdferr         - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  July 27, 2012
+!
+! HISTORY
+!
+! Fortran90 Interface:
+  SUBROUTINE h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: dxpl_id
+    INTEGER       , INTENT(OUT) :: actual_io_mode
+    INTEGER       , INTENT(OUT) :: hdferr 
+!*****    
+    INTERFACE
+       INTEGER FUNCTION h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_MPIO_ACTUAL_IO_MODE_C'::h5pget_mpio_actual_io_mode_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN)  :: dxpl_id
+         INTEGER       , INTENT(OUT) :: actual_io_mode
+       END FUNCTION h5pget_mpio_actual_io_mode_c
+    END INTERFACE
+
+    actual_io_mode = -1
+
+    hdferr = h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
+
+  END SUBROUTINE h5pget_mpio_actual_io_mode_f
+
 END MODULE H5FDMPIO
