@@ -4,7 +4,7 @@
 
 NOTE:
 We are no longer actively supporting MinGW as of 1.8.5.
------- 1.8.9 notes ------
+------ 1.8.10 notes ------
 Autotools configure failed to correctly generate the *config.h files.
 CMake 2.8.6 can configure and build the library, however fortran programs did 
   not execute correctly. Some tests may fail. Used the "MSYS Makefiles"
