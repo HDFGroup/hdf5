@@ -78,7 +78,17 @@ New Features
  
     Tools
     -----
-    - None
+    - h5import: Allow use of h5dump output as input files to h5import.
+      h5dump must include the "-p" option to print the properties,  
+      configuration file is captured output of h5dump. The restrictions are 
+      that only one dataset with a simple datatype (integer, floating-point, 
+      or string) can be processed. 
+      Integers and floating-point imports from h5dump must use the "binary" 
+      option for the data file. 
+      The string version uses the h5dump "-y --width=1" options to disable the 
+      indexing printouts, print single columns and obviously NOT use the 
+      "binary" option. 
+      (ADB - 2012/07/19 HDFFV-721)
 
     High-Level APIs
     ---------------
@@ -158,8 +168,6 @@ Bug Fixes since HDF5-1.8.9
     - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of testh5diff.sh
       to better report when there is an error in the file copying.
       HDFFV-8105 (AKC 2012/07/22)
-    - h5import: Allow use of h5dump output as input files to h5import.
-      HDFFV-721 (ADB 2012/07/19)
     - h5dump: Fix sort by name display to maintain correct parent / child
       releationships between ascending / descending order.
       HDFFV-8095 (ADB 2012/07/12)
