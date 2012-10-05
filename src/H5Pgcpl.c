@@ -67,10 +67,10 @@
 static herr_t H5P__gcrt_reg_prop(H5P_genclass_t *pclass);
 
 /* Property callbacks */
-static herr_t H5P__gcrt_group_info_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__gcrt_group_info_dec(const uint8_t **pp, void *value);
-static herr_t H5P__gcrt_link_info_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__gcrt_link_info_dec(const uint8_t **pp, void *value);
+static herr_t H5P__gcrt_group_info_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__gcrt_group_info_dec(const void **_pp, void *value);
+static herr_t H5P__gcrt_link_info_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__gcrt_link_info_dec(const void **_pp, void *value);
 
 
 /*********************/
@@ -541,9 +541,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5P__gcrt_group_info_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__gcrt_group_info_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_ginfo_t *ginfo = (const H5O_ginfo_t *)value; /* Create local aliases for values */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -577,9 +578,10 @@ H5P__gcrt_group_info_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5P__gcrt_group_info_dec(const uint8_t **pp, void *_value)
+H5P__gcrt_group_info_dec(const void **_pp, void *_value)
 {
     H5O_ginfo_t *ginfo = (H5O_ginfo_t *)_value;     /* Group info settings */
+    const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
@@ -626,9 +628,10 @@ H5P__gcrt_group_info_dec(const uint8_t **pp, void *_value)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5P__gcrt_link_info_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__gcrt_link_info_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_linfo_t *linfo = (const H5O_linfo_t *)value; /* Create local aliases for values */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -667,9 +670,10 @@ H5P__gcrt_link_info_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5P__gcrt_link_info_dec(const uint8_t **pp, void *_value)
+H5P__gcrt_link_info_dec(const void **_pp, void *_value)
 {
     H5O_linfo_t *linfo = (H5O_linfo_t *)_value;  /* Link info settings */
+    const uint8_t **pp = (const uint8_t **)_pp;
     unsigned crt_order_flags;
     unsigned enc_size;
     herr_t ret_value = SUCCEED;                 /* Return value */

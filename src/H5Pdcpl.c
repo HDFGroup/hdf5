@@ -126,13 +126,13 @@ static herr_t H5P__dcrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_da
 static herr_t H5P__dcrt_close(hid_t dxpl_id, void *close_data);
 
 /* Property callbacks */
-static herr_t H5P__dcrt_layout_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__dcrt_layout_dec(const uint8_t **pp, void *value);
+static herr_t H5P__dcrt_layout_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dcrt_layout_dec(const void **pp, void *value);
 static int H5P__dcrt_layout_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5P__fill_value_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__fill_value_dec(const uint8_t **pp, void *value);
-static herr_t H5P__dcrt_ext_file_list_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__dcrt_ext_file_list_dec(const uint8_t **pp, void *value);
+static herr_t H5P__fill_value_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__fill_value_dec(const void **pp, void *value);
+static herr_t H5P__dcrt_ext_file_list_enc(const void *value, void **pp, size_t *size);
+static herr_t H5P__dcrt_ext_file_list_dec(const void **pp, void *value);
 static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 
 
@@ -414,9 +414,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_layout_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_layout_t *layout = (const H5O_layout_t *)value; /* Create local aliases for values */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -471,11 +472,12 @@ H5P__dcrt_layout_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_layout_dec(const uint8_t **pp, void *value)
+H5P__dcrt_layout_dec(const void **_pp, void *value)
 {
     const H5O_layout_t *layout;         /* Storage layout */
     H5O_layout_t chunk_layout;          /* Layout structure for chunk info */
     H5D_layout_t type;                  /* Layout type */
+    const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -627,11 +629,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fill_value_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__fill_value_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_fill_t *fill = (const H5O_fill_t *)value; /* Create local aliases for values */
     size_t   dt_size = 0;                 /* Size of encoded datatype */
     herr_t ret_value = SUCCEED;         /* Return value */
+    uint8_t **pp = (uint8_t **)_pp;
     uint64_t enc_value;
     unsigned enc_size;
 
@@ -721,9 +724,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fill_value_dec(const uint8_t **pp, void *_value)
+H5P__fill_value_dec(const void **_pp, void *_value)
 {
     H5O_fill_t *fill = (H5O_fill_t *)_value;   /* Fill value */
+    const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_STATIC
@@ -848,11 +852,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_ext_file_list_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__dcrt_ext_file_list_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_efl_t *efl = (const H5O_efl_t *)value; /* Create local aliases for values */
     size_t len = 0;                     /* String length of slot name */
     size_t u;                           /* Local index variable */
+    uint8_t **pp = (uint8_t **)_pp;
     unsigned enc_size;
     uint64_t enc_value;
 
@@ -933,9 +938,10 @@ H5P__dcrt_ext_file_list_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__dcrt_ext_file_list_dec(const uint8_t **pp, void *_value)
+H5P__dcrt_ext_file_list_dec(const void **_pp, void *_value)
 {
     H5O_efl_t *efl = (H5O_efl_t *)_value;  /* External file list */
+    const uint8_t **pp = (const uint8_t **)_pp;
     size_t u, nused;
     unsigned enc_size;
     uint64_t enc_value;

@@ -124,12 +124,12 @@
 static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
 
 /* property callbacks */
-static herr_t H5P__fcrt_btree_rank_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__fcrt_btree_rank_dec(const uint8_t **pp, void *value);
-static herr_t H5P__fcrt_shmsg_index_types_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__fcrt_shmsg_index_types_dec(const uint8_t **pp, void *value);
-static herr_t H5P__fcrt_shmsg_index_minsize_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__fcrt_shmsg_index_minsize_dec(const uint8_t **pp, void *value);
+static herr_t H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__fcrt_btree_rank_dec(const void **_pp, void *value);
+static herr_t H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *value);
+static herr_t H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *value);
 
 
 /*********************/
@@ -689,9 +689,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fcrt_btree_rank_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size)
 {
     const unsigned *btree_k = (const unsigned *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -735,9 +736,10 @@ H5P__fcrt_btree_rank_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fcrt_btree_rank_dec(const uint8_t **pp, void *_value)
+H5P__fcrt_btree_rank_dec(const void **_pp, void *_value)
 {
     unsigned *btree_k = (unsigned *)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
     unsigned enc_size;                  /* Size of encoded property */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -978,9 +980,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fcrt_shmsg_index_types_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__fcrt_shmsg_index_types_enc(const void *value, void **_pp, size_t *size)
 {
     const unsigned *type_flags = (const unsigned *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1025,9 +1028,10 @@ H5P__fcrt_shmsg_index_types_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fcrt_shmsg_index_types_dec(const uint8_t **pp, void *_value)
+H5P__fcrt_shmsg_index_types_dec(const void **_pp, void *_value)
 {
     unsigned *type_flags = (unsigned *)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
     unsigned enc_size;                  /* Size of encoded property */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1069,9 +1073,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fcrt_shmsg_index_minsize_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__fcrt_shmsg_index_minsize_enc(const void *value, void **_pp, size_t *size)
 {
     const unsigned *minsizes = (const unsigned *)value; /* Create local alias for values */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1116,9 +1121,10 @@ H5P__fcrt_shmsg_index_minsize_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__fcrt_shmsg_index_minsize_dec(const uint8_t **pp, void *_value)
+H5P__fcrt_shmsg_index_minsize_dec(const void **_pp, void *_value)
 {
     unsigned *minsizes = (unsigned *)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
     unsigned enc_size;                  /* Size of encoded property */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
