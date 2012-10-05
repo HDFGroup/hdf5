@@ -233,7 +233,8 @@ Install HDF5 on Cygwin
 
 8. Known Problems 
    
-   dt_arith tests may fail.
+   dt_arith tests may fail due to the use of fork. This is a known issue
+   with cygwin on windows.
 
 -----------------------------------------------------------------------
 
