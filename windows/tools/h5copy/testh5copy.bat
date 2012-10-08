@@ -244,9 +244,6 @@ rem
     rem Note: The modification time and storage utilization are masked off
     rem so that the output is more portable
     (
-        echo.#############################
-        echo.Expected output for %h5ls% %*
-        echo.#############################
         %h5ls_bin% %h5ls_args% %*
     ) > %actual% 2>&1
     

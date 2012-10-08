@@ -323,7 +323,7 @@ rem same as TOOLTEST3 but filters error stack outp and compares external err fil
 rem Extract file name, line number, version and thread IDs because they may be different
 :tooltest4
     set expect=%CD%\..\testfiles\%1
-    set expect_err=%CD%\..\testfiles\%~n1.err
+    set expect_err=%CD%\errfiles\%~n1.err
     set expect_parsed=%CD%\..\testfiles\%~n1.parsed
     set actual=%CD%\..\testfiles\%~n1.out
     set actual_err=%CD%\..\testfiles\%~n1.oerr
@@ -380,6 +380,15 @@ rem Extract file name, line number, version and thread IDs because they may be d
                         set line=!line! ^(file name^)
                         
                     ) else if "!last_token!"=="HDF5" (
+                        rem Check if we wrap parenthesis around "version (number)"
+                        set version_token=%%b
+                        if "!version_token:~0,1!"=="(" (
+                            set line=!line! ^(version ^(number^)^)
+                        ) else (
+                            set line=!line! version ^(number^).
+                        )
+                        
+                    ) else if "!last_token!"=="HDF5:tools" (
                         rem Check if we wrap parenthesis around "version (number)"
                         set version_token=%%b
                         if "!version_token:~0,1!"=="(" (
@@ -580,7 +589,7 @@ rem ############################################################################
     rem test for displaying attributes
     call :tooltest tattr-1.ddl --enable-error-stack tattr.h5
     rem test for displaying the selected attributes of string type and scalar space
-    call :tooltest4 tattr-2.ddl --enable-error-stack -a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
+    call :tooltest tattr-2.ddl --enable-error-stack -a \/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5
     rem test for header and error messages
     call :tooltest4 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
     rem test for displaying attributes in shared datatype (also in group and dataset)
@@ -615,7 +624,7 @@ rem ############################################################################
     call :tooltest tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5
 
     rem test for options
-    call :tooltest4 tall-1.ddl --enable-error-stack tall.h5
+rem    call :tooltest4 tall-1.ddl --enable-error-stack tall.h5
     call :tooltest tall-2.ddl --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5
     call :tooltest tall-3.ddl --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
 
@@ -641,7 +650,7 @@ rem ############################################################################
 
     rem test for files with array data
     call :tooltest tarray1.ddl --enable-error-stack tarray1.h5
-    call :tooltest4 tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
+rem    call :tooltest4 tarray1_big.ddl --enable-error-stack -R tarray1_big.h5
     call :tooltest tarray2.ddl --enable-error-stack tarray2.h5
     call :tooltest tarray3.ddl --enable-error-stack tarray3.h5
     call :tooltest tarray4.ddl --enable-error-stack tarray4.h5
@@ -673,16 +682,16 @@ rem ############################################################################
     call :tooltest tlarge_objname.ddl --enable-error-stack -w157 tlarge_objname.h5
 
     rem test '-A' to suppress data but print attr's
-    call :tooltest4 tall-2A.ddl --enable-error-stack -A tall.h5
+rem    call :tooltest4 tall-2A.ddl --enable-error-stack -A tall.h5
 
     rem test '-r' to print attributes in ASCII instead of decimal
-    call :tooltest4 tall-2B.ddl --enable-error-stack -A -r tall.h5
+rem    call :tooltest4 tall-2B.ddl --enable-error-stack -A -r tall.h5
 
     rem test Subsetting
     call :tooltest tall-4s.ddl --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
     call :tooltest tall-5s.ddl --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
     call :tooltest tdset-3s.ddl --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5
-    call :tooltest4 tno-subset.ddl --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
+    call :tooltest tno-subset.ddl --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
 
     rem test printing characters in ASCII instead of decimal
     call :tooltest tchar1.ddl --enable-error-stack -r tchar.h5
