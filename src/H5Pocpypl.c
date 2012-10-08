@@ -85,8 +85,8 @@ static H5O_copy_dtype_merge_list_t *H5P__free_merge_comm_dtype_list(H5O_copy_dty
 static herr_t H5P__ocpy_reg_prop(H5P_genclass_t *pclass);
 
 /* Property callbacks */
-static herr_t H5P__ocpy_merge_comm_dt_list_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__ocpy_merge_comm_dt_list_dec(const uint8_t **pp, void *value);
+static herr_t H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *value);
 static herr_t H5P__ocpy_merge_comm_dt_list_copy(const char* name, size_t size, void* value);
 static int H5P__ocpy_merge_comm_dt_list_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__ocpy_merge_comm_dt_list_close(const char* name, size_t size, void* value);
@@ -219,9 +219,10 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__ocpy_merge_comm_dt_list_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__ocpy_merge_comm_dt_list_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_copy_dtype_merge_list_t * const *dt_list_ptr = (const H5O_copy_dtype_merge_list_t * const *)value;
+    uint8_t **pp = (uint8_t **)_pp;
     const H5O_copy_dtype_merge_list_t *dt_list;         /* Pointer to merge named datatype list */
     size_t len;                                 /* Length of path component */
 
@@ -276,9 +277,10 @@ H5P__ocpy_merge_comm_dt_list_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5P__ocpy_merge_comm_dt_list_dec(const uint8_t **pp, void *_value)
+H5P__ocpy_merge_comm_dt_list_dec(const void **_pp, void *_value)
 {
     H5O_copy_dtype_merge_list_t **dt_list = (H5O_copy_dtype_merge_list_t **)_value;        /* Pointer to merge named datatype list */
+    const uint8_t **pp = (const uint8_t **)_pp;
     H5O_copy_dtype_merge_list_t *dt_list_tail = NULL, *tmp_dt_list = NULL; /* temporary merge named datatype lists */
     size_t len;                         /* Length of path component */
     herr_t ret_value = SUCCEED;         /* Return value */
