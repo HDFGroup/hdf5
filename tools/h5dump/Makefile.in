@@ -437,8 +437,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
 TEST_PROG = h5dumpgentest
-#TEST_SCRIPT=testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
-TEST_SCRIPT = testh5dumppbits.sh testh5dumpxml.sh
+TEST_SCRIPT = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5dump$(EXEEXT)
 
@@ -450,8 +449,7 @@ LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
 # Source files for the program
 h5dump_SOURCES = h5dump.c h5dump_ddl.c h5dump_xml.c
-#DISTCLEANFILES=testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
-DISTCLEANFILES = testh5dumppbits.sh testh5dumpxml.sh
+DISTCLEANFILES = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

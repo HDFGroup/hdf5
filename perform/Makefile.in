@@ -101,7 +101,6 @@ chunk_DEPENDENCIES = $(LIBHDF5)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-am__v_lt_1 = 
 am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 	pio_timer.$(OBJEXT)
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
