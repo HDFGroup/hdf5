@@ -76,7 +76,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1) binread$(EXEEXT)
 bin_PROGRAMS = h5dump$(EXEEXT)
-TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
+TESTS = $(am__EXEEXT_1) $(am__EXEEXT_1)
 subdir = tools/h5dump
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -87,7 +87,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_1 = h5dumpgentest$(EXEEXT)
+am__EXEEXT_1 =
 PROGRAMS = $(bin_PROGRAMS)
 binread_SOURCES = binread.c
 binread_OBJECTS = binread.$(OBJEXT)
@@ -104,10 +104,6 @@ h5dump_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5dump_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5dump_LDFLAGS) $(LDFLAGS) -o $@
-h5dumpgentest_SOURCES = h5dumpgentest.c
-h5dumpgentest_OBJECTS = h5dumpgentest.$(OBJEXT)
-h5dumpgentest_LDADD = $(LDADD)
-h5dumpgentest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -134,8 +130,8 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-SOURCES = binread.c $(h5dump_SOURCES) h5dumpgentest.c
-DIST_SOURCES = binread.c $(h5dump_SOURCES) h5dumpgentest.c
+SOURCES = binread.c $(h5dump_SOURCES)
+DIST_SOURCES = binread.c $(h5dump_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -436,8 +432,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.bin
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_PROG = h5dumpgentest
-TEST_SCRIPT = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
+TEST_PROG = #h5dumpgentest
+TEST_SCRIPT = #testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = h5dump$(EXEEXT)
 
@@ -449,7 +445,7 @@ LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
 # Source files for the program
 h5dump_SOURCES = h5dump.c h5dump_ddl.c h5dump_xml.c
-DISTCLEANFILES = testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
+DISTCLEANFILES = #testh5dump.sh testh5dumppbits.sh testh5dumpxml.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -572,9 +568,6 @@ binread$(EXEEXT): $(binread_OBJECTS) $(binread_DEPENDENCIES) $(EXTRA_binread_DEP
 h5dump$(EXEEXT): $(h5dump_OBJECTS) $(h5dump_DEPENDENCIES) $(EXTRA_h5dump_DEPENDENCIES) 
 	@rm -f h5dump$(EXEEXT)
 	$(AM_V_CCLD)$(h5dump_LINK) $(h5dump_OBJECTS) $(h5dump_LDADD) $(LIBS)
-h5dumpgentest$(EXEEXT): $(h5dumpgentest_OBJECTS) $(h5dumpgentest_DEPENDENCIES) $(EXTRA_h5dumpgentest_DEPENDENCIES) 
-	@rm -f h5dumpgentest$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5dumpgentest_OBJECTS) $(h5dumpgentest_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -586,7 +579,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump_ddl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dump_xml.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dumpgentest.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
