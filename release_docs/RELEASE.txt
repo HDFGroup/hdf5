@@ -191,7 +191,9 @@ Bug Fixes since HDF5-1.8.9
 
     High-Level APIs:
     ------
-    - None
+    - Corrected return type of H5TBAget_fill from herr_t to htri_t to reflect
+      that a return value of 1 indicates that a fill value is present, 0
+      indicates a fill value is not present and <0 indicates an error.
 
     Fortran High-Level APIs:
     ------
