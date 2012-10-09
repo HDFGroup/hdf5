@@ -54,7 +54,7 @@
 typedef struct {
     hbool_t encode;             /* Whether the property list should be encoded */
     size_t *enc_size_ptr;       /* Pointer to size of encoded buffer */
-    uint8_t **pp;               /* Pointer to encoding buffer pointer */
+    void **pp;               /* Pointer to encoding buffer pointer */
 } H5P_enc_iter_ud_t;
 
 
@@ -114,9 +114,10 @@ H5P_init_encdec_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_size_t(const void *value, uint8_t **pp, size_t *size)
+H5P__encode_size_t(const void *value, void **_pp, size_t *size)
 {
     uint64_t enc_value = (uint64_t)*(const size_t *)value;    /* Property value to encode */
+    uint8_t **pp = (uint8_t **)_pp;
     unsigned enc_size = H5V_limit_enc_size(enc_value);  /* Size of encoded property */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -155,10 +156,11 @@ H5P__encode_size_t(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_hsize_t(const void *value, uint8_t **pp, size_t *size)
+H5P__encode_hsize_t(const void *value, void **_pp, size_t *size)
 {
     uint64_t enc_value = (uint64_t)*(const hsize_t *)value;    /* Property value to encode */
     unsigned enc_size = H5V_limit_enc_size(enc_value);  /* Size of encoded property */
+    uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -195,8 +197,10 @@ H5P__encode_hsize_t(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_unsigned(const void *value, uint8_t **pp, size_t *size)
+H5P__encode_unsigned(const void *value, void **_pp, size_t *size)
 {
+    uint8_t **pp = (uint8_t **)_pp;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
@@ -232,8 +236,10 @@ H5P__encode_unsigned(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_uint8_t(const void *value, uint8_t **pp, size_t *size)
+H5P__encode_uint8_t(const void *value, void **_pp, size_t *size)
 {
+    uint8_t **pp = (uint8_t **)_pp;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
@@ -266,8 +272,10 @@ H5P__encode_uint8_t(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_hbool_t(const void *value, uint8_t **pp, size_t *size)
+H5P__encode_hbool_t(const void *value, void **_pp, size_t *size)
 {
+    uint8_t **pp = (uint8_t **)_pp;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
@@ -299,8 +307,10 @@ H5P__encode_hbool_t(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__encode_double(const void *value, uint8_t **pp, size_t *size)
+H5P__encode_double(const void *value, void **_pp, size_t *size)
 {
+    uint8_t **pp = (uint8_t **)_pp;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
@@ -363,7 +373,7 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
         prop_name_len = HDstrlen(prop->name) + 1;
         if(udata->encode) {
             HDstrncpy((char *)*(udata->pp), prop->name, prop_name_len);
-            *(udata->pp) += prop_name_len;
+            *(uint8_t **)(udata->pp) += prop_name_len;
         } /* end if */
         *(udata->enc_size_ptr) += prop_name_len;
 
@@ -438,7 +448,7 @@ H5P__encode(const H5P_genplist_t *plist, hbool_t enc_all_prop, void *buf,
     /* Initialize user data for iteration callback */
     udata.encode = encode;
     udata.enc_size_ptr = &encode_size;
-    udata.pp = &p;
+    udata.pp = (void **)&p;
 
     /* Iterate over all properties in property list, encoding them */
     idx = 0;
@@ -472,9 +482,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_size_t(const uint8_t **pp, void *_value)
+H5P__decode_size_t(const void **_pp, void *_value)
 {
     size_t *value = (size_t *)_value;   /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
     uint64_t enc_value;                 /* Decoded property value */
     unsigned enc_size;                  /* Size of encoded property */
 
@@ -512,9 +523,10 @@ H5P__decode_size_t(const uint8_t **pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_hsize_t(const uint8_t **pp, void *_value)
+H5P__decode_hsize_t(const void **_pp, void *_value)
 {
     hsize_t *value = (hsize_t *)_value; /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
     uint64_t enc_value;                 /* Decoded property value */
     unsigned enc_size;                  /* Size of encoded property */
 
@@ -552,9 +564,10 @@ H5P__decode_hsize_t(const uint8_t **pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_unsigned(const uint8_t **pp, void *_value)
+H5P__decode_unsigned(const void **_pp, void *_value)
 {
     unsigned *value = (unsigned *)_value; /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
     unsigned enc_size;          /* Size of encoded property */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -591,9 +604,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_uint8_t(const uint8_t **pp, void *_value)
+H5P__decode_uint8_t(const void **_pp, void *_value)
 {
     uint8_t *value = (uint8_t *)_value; /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -624,9 +638,10 @@ H5P__decode_uint8_t(const uint8_t **pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_hbool_t(const uint8_t **pp, void *_value)
+H5P__decode_hbool_t(const void **_pp, void *_value)
 {
     hbool_t *value = (hbool_t *)_value; /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -657,9 +672,10 @@ H5P__decode_hbool_t(const uint8_t **pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__decode_double(const uint8_t **pp, void *_value)
+H5P__decode_double(const void **_pp, void *_value)
 {
     double *value = (double *)_value; /* Property value to return */
+    const uint8_t **pp = (const uint8_t **)_pp;
     unsigned enc_size;          /* Size of encoded property */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -767,7 +783,7 @@ H5P__decode(const void *buf)
 
         /* Decode serialized value */
         if(prop->decode) {
-            if((prop->decode)(&p, value_buf) < 0)
+            if((prop->decode)((const void **)&p, value_buf) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "property decoding routine failed, property: '%s'", name)
         } /* end if */
         else

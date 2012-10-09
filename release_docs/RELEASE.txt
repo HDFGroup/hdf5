@@ -1,4 +1,4 @@
-HDF5 version 1.9.131 currently under development
+HDF5 version 1.9.132 currently under development
 ================================================================================
 
 
@@ -39,6 +39,9 @@ New Features
 
     Configuration:
     -------------
+    - Fixed AIX Fortran compiler flags to use appropriate settings for
+      debugging, profiling, optimization situations. HDFFV-8069. (AKC
+      2012/09/27)
     - Updated to latest autotools and changed all hard *.sh scripts to
       configure managed *.sh.in files. Removed overloading of autotools
       TESTS variable by examples and tests. Renamed configure.in to
@@ -698,6 +701,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - Removed program perform/benchpar from the enable-build-all list. The
+	program will be retired or moved to another location. HDFFV-8156
+	(AKC 2012/10/01)
       - Retired program perform/mpi-perf. Its purpose has been incorporated
 	into h5perf before. (AKC 2012/09/20)
       - ifdefs added to tests around include unistd.h and function to simulate

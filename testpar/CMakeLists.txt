@@ -23,6 +23,7 @@ SET (testphdf5_SRCS
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_span_tree.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_chunk_alloc.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_filter_read.c
+    ${HDF5_TEST_PAR_SOURCE_DIR}/t_prop.c
 )
 
 #-- Adding test for testhdf5

@@ -113,8 +113,8 @@ typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, vo
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
-typedef herr_t (*H5P_prp_encode_func_t)(const void *value, uint8_t **buf, size_t *size);
-typedef herr_t (*H5P_prp_decode_func_t)(const uint8_t **buf, void *value);
+typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
+typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);

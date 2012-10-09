@@ -37,6 +37,7 @@
 !*****
 MODULE H5R_PROVISIONAL
   USE H5GLOBAL
+  USE, INTRINSIC :: ISO_C_BINDING
 
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
@@ -51,6 +52,19 @@ MODULE H5R_PROVISIONAL
   !             INTEGER ref(REF_REG_BUF_LEN)
   !        END TYPE
   !
+
+  TYPE :: hdset_reg_ref_t_f03 
+     INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
+  END TYPE hdset_reg_ref_t_f03
+
+  INTERFACE h5rget_region_f
+
+     MODULE PROCEDURE h5rget_region_region_f ! obsolete
+     MODULE PROCEDURE h5rget_region_ptr_f  ! F2003
+
+  END INTERFACE
+
+
   INTERFACE h5rcreate_f
 
      MODULE PROCEDURE h5rcreate_object_f ! obsolete
@@ -123,7 +137,113 @@ MODULE H5R_PROVISIONAL
      END FUNCTION h5rcreate_ptr_c
   END INTERFACE
 
+  INTERFACE
+     INTEGER FUNCTION h5rget_region_ptr_c(dset_id, ref, space_id)
+       USE, INTRINSIC :: ISO_C_BINDING
+       USE H5GLOBAL
+       !DEC$IF DEFINED(HDF5F90_WINDOWS)
+       !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_REGION_PTR_C':: h5rget_region_ptr_c
+       !DEC$ENDIF
+       INTEGER(HID_T), INTENT(IN) :: dset_id
+       TYPE(C_PTR), VALUE :: ref
+       INTEGER(HID_T), INTENT(OUT) :: space_id
+     END FUNCTION h5rget_region_ptr_c
+  END INTERFACE
+
 CONTAINS
+
+!****s* H5R/h5rget_region_region_f
+!
+! NAME
+!  h5rget_region_region_f
+!
+! PURPOSE
+!  Retrieves a dataspace with the specified region selected
+!
+! INPUTS
+!  dset_id 	 - identifier of the dataset containing
+!                  reference to the regions
+!  ref 	         - reference to open
+! OUTPUTS
+!  space_id 	 - dataspace identifier
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY 	
+!  Explicit Fortran interfaces were added for
+!  called C functions (it is needed for Windows
+!  port).  February 28, 2001
+!
+! NOTES
+!  This is a module procedure for the h5rget_region_f subroutine.
+!
+! SOURCE
+  SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
+    TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref ! Dataset region reference
+    INTEGER(HID_T), INTENT(OUT) :: space_id    ! Space identifier
+    INTEGER, INTENT(OUT) :: hdferr             ! Error code
+!*****
+    INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
+
+    INTERFACE
+       INTEGER FUNCTION h5rget_region_region_c(dset_id, ref_f, space_id)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_REGION_REGION_C':: h5rget_region_region_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dset_id
+         !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
+         INTEGER :: ref_f(REF_REG_BUF_LEN)
+         INTEGER(HID_T), INTENT(OUT) :: space_id
+       END FUNCTION h5rget_region_region_c
+    END INTERFACE
+
+    ref_f = ref%ref
+    hdferr = h5rget_region_region_c(dset_id, ref_f, space_id )
+
+  END SUBROUTINE h5rget_region_region_f
+
+!****s* H5R/h5rget_region_ptr_f
+!
+! NAME
+!  h5rget_region_ptr_f
+!
+! PURPOSE
+!  Retrieves a dataspace with the specified region 
+!  selected using pointer
+!
+! INPUTS
+!  dset_id 	 - identifier of the dataset containing
+!                  reference to the regions
+!  ref 	         - reference to open
+! OUTPUTS
+!  space_id 	 - dataspace identifier
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! AUTHOR
+!  M. Scot Breitenfeld
+!  August 4, 2012
+!
+! NOTES
+!  This is a module procedure for the h5rget_region_f subroutine.
+!
+! SOURCE
+  SUBROUTINE h5rget_region_ptr_f(dset_id, ref, space_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
+    TYPE(C_PTR), INTENT(IN) :: ref ! Dataset region reference
+    INTEGER(HID_T), INTENT(OUT) :: space_id    ! Space identifier
+    INTEGER, INTENT(OUT) :: hdferr             ! Error code
+!*****
+    INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
+
+    hdferr = h5rget_region_ptr_c(dset_id, ref, space_id )
+
+  END SUBROUTINE h5rget_region_ptr_f
+
 
 !****s* H5R (F03)/h5rcreate_object_f
 !
@@ -175,7 +295,7 @@ CONTAINS
 
   END SUBROUTINE h5rcreate_object_f
 
-!****s* H5R (F03)/h5rcreate_region_f
+!****s* H5R (F90)/h5rcreate_region_f
 !
 ! NAME
 !  h5rcreate_region_f
@@ -183,16 +303,15 @@ CONTAINS
 ! PURPOSE
 !  Creates reference to the dataset region
 !
-! Inputs:
+! INPUTS
 !  loc_id 	 - location identifier
 !  name 	 - name of the dataset at the specified location
 !  space_id 	 - dataspace identifier that describes selected region
-! Outputs:
+! OUTPUTS
 !  ref 	         - reference to the dataset region
 !  hdferr:	 - error code
 !                   Success:  0
 !                   Failure: -1
-!
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
@@ -205,46 +324,39 @@ CONTAINS
 ! NOTES
 !  This is a module procedure for the h5rcreate_f subroutine.
 !
-! Signature:
+! SOURCE
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset at location specified
                                            ! by loc_id identifier
     INTEGER(HID_T), INTENT(IN) :: space_id ! Dataset's dataspace identifier
-    TYPE(hdset_reg_ref_t_f), INTENT(INOUT), TARGET :: ref ! Dataset region reference
+    TYPE(hdset_reg_ref_t_f), INTENT(OUT) :: ref ! Dataset region reference
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
     INTEGER :: namelen                     ! Name length
     INTEGER :: ref_f(REF_REG_BUF_LEN)      ! Local buffer to pass reference
 
-    TYPE(C_PTR) :: f_ptr
-
-!  !$    INTERFACE
-!  !$       INTEGER FUNCTION h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id)
-!  !$         USE H5GLOBAL
-!  !$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
-!  !$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RCREATE_REGION_C':: h5rcreate_region_c
-!  !$         !DEC$ENDIF
-!  !$         !DEC$ATTRIBUTES reference :: name
-!  !$         !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
-!  !$         INTEGER :: ref_f(REF_REG_BUF_LEN)
-!  !$         INTEGER(HID_T), INTENT(IN) :: loc_id
-!  !$         CHARACTER(LEN=*), INTENT(IN) :: name
-!  !$         INTEGER :: namelen
-!  !$         INTEGER(HID_T), INTENT(IN) :: space_id
-!  !$       END FUNCTION h5rcreate_region_c
-!  !$    END INTERFACE
-
-    f_ptr = C_LOC(ref)
+    INTERFACE
+       INTEGER FUNCTION h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RCREATE_REGION_C':: h5rcreate_region_c
+         !DEC$ENDIF
+         !DEC$ATTRIBUTES reference :: name
+         !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
+         INTEGER :: ref_f(REF_REG_BUF_LEN)
+         INTEGER(HID_T), INTENT(IN) :: loc_id
+         CHARACTER(LEN=*), INTENT(IN) :: name
+         INTEGER :: namelen
+         INTEGER(HID_T), INTENT(IN) :: space_id
+       END FUNCTION h5rcreate_region_c
+    END INTERFACE
 
     namelen = LEN(name)
-    hdferr = h5rcreate_ptr_c(f_ptr, loc_id, name, namelen, 1, space_id)
-
-!  !$            ref_f = 0
-!  !$            hdferr = h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id )
-!  !$            ref%ref = ref_f
+    ref_f = 0
+    hdferr = h5rcreate_region_c(ref_f, loc_id, name, namelen, space_id )
+    ref%ref = ref_f
 
   END SUBROUTINE h5rcreate_region_f
 

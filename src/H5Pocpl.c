@@ -86,8 +86,8 @@ static herr_t H5P__ocrt_copy(hid_t new_plist_t, hid_t old_plist_t, void *copy_da
 static herr_t H5P__ocrt_close(hid_t dxpl_id, void *close_data);
 
 /* Property callbacks */
-static herr_t H5P__ocrt_pipeline_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P__ocrt_pipeline_dec(const uint8_t **pp, void *value);
+static herr_t H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__ocrt_pipeline_dec(const void **_pp, void *value);
 static int H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
 
 
@@ -1366,9 +1366,10 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__ocrt_pipeline_enc(const void *value, uint8_t **pp, size_t *size)
+H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_pline_t *pline = (const H5O_pline_t *)value;
+    uint8_t **pp = (uint8_t **)_pp;
     size_t u;           /* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
@@ -1458,9 +1459,10 @@ H5P__ocrt_pipeline_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5P__ocrt_pipeline_dec(const uint8_t **pp, void *_value)
+H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 {
     H5O_pline_t *pline = (H5O_pline_t *)_value;   /* Property to set */
+    const uint8_t **pp = (const uint8_t **)_pp;
     size_t nused;                       /* Number of filters used for pipeline */
     unsigned enc_size;                  /* Size of encoded value (in bytes) */
     uint64_t enc_value;                 /* Value to encode */

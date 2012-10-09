@@ -629,8 +629,7 @@
     case H5T_CONV_INIT:							      \
 	/* Sanity check and initialize statistics */			      \
 	cdata->need_bkg = H5T_BKG_NO;					      \
-        if (NULL==(st=(H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) ||     \ 
-            NULL==(dt=(H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))       \
+        if (NULL==(st=(H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) ||  NULL==(dt=(H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE))) \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
                           "unable to dereference datatype object ID")	      \
 	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))     \
@@ -677,8 +676,7 @@
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback") \
                                                                               \
         /* Get source and destination datatypes */			      \
-        if (NULL==(st=(H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) ||     \ 
-            NULL==(dt=(H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))       \
+        if (NULL==(st=(H5T_t*)H5I_object_verify(src_id, H5I_DATATYPE)) ||  NULL==(dt=(H5T_t*)H5I_object_verify(dst_id, H5I_DATATYPE)))       \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to dereference datatype object ID") \
 									      \
         /* Get source & destination precisions into a variable */	      \

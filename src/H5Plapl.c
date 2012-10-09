@@ -101,14 +101,14 @@
 static herr_t H5P_lacc_reg_prop(H5P_genclass_t *pclass);
 
 /* Property list callbacks */
-static herr_t H5P_lacc_elink_pref_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P_lacc_elink_pref_dec(const uint8_t **pp, void *value);
+static herr_t H5P_lacc_elink_pref_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P_lacc_elink_pref_dec(const void **_pp, void *value);
 static herr_t H5P_lacc_elink_pref_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_pref_copy(const char* name, size_t size, void* value);
 static int H5P_lacc_elink_pref_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P_lacc_elink_pref_close(const char* name, size_t size, void* value);
-static herr_t H5P_lacc_elink_fapl_enc(const void *value, uint8_t **pp, size_t *size);
-static herr_t H5P_lacc_elink_fapl_dec(const uint8_t **pp, void *value);
+static herr_t H5P_lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P_lacc_elink_fapl_dec(const void **_pp, void *value);
 static herr_t H5P_lacc_elink_fapl_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P_lacc_elink_fapl_copy(const char* name, size_t size, void* value);
 static int H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t size);
@@ -228,9 +228,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_lacc_elink_fapl_enc(const void *value, uint8_t **pp, size_t *size)
+H5P_lacc_elink_fapl_enc(const void *value, void **_pp, size_t *size)
 {
     const hid_t *elink_fapl = (const hid_t *)value;     /* Property to encode */
+    uint8_t **pp = (uint8_t **)_pp;
     H5P_genplist_t *fapl_plist;         /* Pointer to property list */
     hbool_t non_default_fapl = FALSE;   /* Whether the FAPL is non-default */
     size_t enc_size = 0;                /* FAPL's encoded size */
@@ -282,9 +283,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_lacc_elink_fapl_dec(const uint8_t **pp, void *_value)
+H5P_lacc_elink_fapl_dec(const void **_pp, void *_value)
 {
     hid_t *elink_fapl = (hid_t *)_value;        /* The elink FAPL value */
+    const uint8_t **pp = (const uint8_t **)_pp;
     hbool_t non_default_fapl;           /* Whether the FAPL is non-default */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -495,9 +497,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_lacc_elink_pref_enc(const void *value, uint8_t **pp, size_t *size)
+H5P_lacc_elink_pref_enc(const void *value, void **_pp, size_t *size)
 {
     const char *elink_pref = *(const char * const *)value;
+    uint8_t **pp = (uint8_t **)_pp;
     size_t len = 0;
     uint64_t enc_value;
     unsigned enc_size;
@@ -550,9 +553,10 @@ H5P_lacc_elink_pref_enc(const void *value, uint8_t **pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_lacc_elink_pref_dec(const uint8_t **pp, void *_value)
+H5P_lacc_elink_pref_dec(const void **_pp, void *_value)
 {
     char **elink_pref = (char **)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
     size_t len;
     uint64_t enc_value;                 /* Decoded property value */
     unsigned enc_size;                  /* Size of encoded property */

@@ -59,7 +59,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAstat.c H5FAtest.c \
-        H5VL.c H5VLint.c H5VLnative.c H5VLdummy.c H5VLmds.c H5VLmdserver.c  \
+        H5VL.c H5VLint.c H5VLnative.c H5VLmds.c H5VLmdserver.c  \
         H5SC.c \
         H5FD.c H5FDcore.c  \
         H5FDmdc.c H5FDmds.c  \
@@ -120,7 +120,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmdc.h H5FDmds.h  \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
-        H5VLpublic.h H5VLnative.h H5VLdummy.h H5VLmds.h \
+        H5VLpublic.h H5VLnative.h H5VLmds.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h

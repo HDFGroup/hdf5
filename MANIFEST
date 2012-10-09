@@ -349,6 +349,7 @@
 ./fortran/test/tH5I.f90
 ./fortran/test/tH5L_F03.f90
 ./fortran/test/tH5O.f90
+./fortran/test/tH5O_F03.f90
 ./fortran/test/tH5P_F03.f90
 ./fortran/test/tH5P.f90
 ./fortran/test/tH5R.f90
@@ -441,6 +442,8 @@
 ./c++/src/H5IntType.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
+./c++/src/H5Location.cpp
+./c++/src/H5Location.h
 ./c++/src/H5Object.cpp
 ./c++/src/H5Object.h
 ./c++/src/H5PredType.cpp
@@ -658,12 +661,6 @@
 ./src/H5FAprivate.h
 ./src/H5FAstat.c
 ./src/H5FAtest.c
-./src/H5VLpublic.h
-./src/H5VLprivate.h
-./src/H5VL.c
-./src/H5VLint.c
-./src/H5VLnative.h
-./src/H5VLnative.c
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
@@ -904,6 +901,13 @@
 ./src/H5TSprivate.h
 ./src/H5V.c
 ./src/H5Vprivate.h
+./src/H5VL.c
+./src/H5VLint.c
+./src/H5VLnative.c
+./src/H5VLnative.h
+./src/H5VLpkg.h
+./src/H5VLprivate.h
+./src/H5VLpublic.h
 ./src/H5WB.c
 ./src/H5WBprivate.h
 ./src/H5Z.c

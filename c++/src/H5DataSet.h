@@ -76,15 +76,10 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
         int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	// Returns this class name
+	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DataSet"); }
 
 	// Creates a dataset by way of dereference.
@@ -110,6 +105,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
    private:
 	hid_t id;       // HDF5 dataset id
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
         // This function contains the common code that is used by
         // getTypeClass and various API functions getXxxType
         // defined in AbstractDs for generic datatype and specific
@@ -123,6 +119,7 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
    protected:
         // Sets the dataset id.
         virtual void p_setId(const hid_t new_id);
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 #ifndef H5_NO_NAMESPACE
 }
