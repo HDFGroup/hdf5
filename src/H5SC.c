@@ -118,8 +118,9 @@ static int commsplitter_MPI_Init(int *argc, char ***argv)
     rc = split_comm_world();
 
     if(MDS_RANK == commsplitter_data.grank) {
-        if(H5VL_mds_start() < 0)
-            return -1;
+        H5open();
+        H5VL_mds_start();
+        exit(1);
     }
     return(rc);
 }
@@ -163,9 +164,11 @@ static int commsplitter_MPI_Init_thread(int *argc, char ***argv, int required, i
 
     rc=split_comm_world();
 
-    if(MDS_RANK == commsplitter_data.grank)
-        if(H5VL_mds_start() < 0)
-            return -1;
+    if(MDS_RANK == commsplitter_data.grank) {
+        H5open();
+        H5VL_mds_start();
+        exit(1);
+    }
 
     return(rc);
 }

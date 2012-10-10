@@ -46,7 +46,7 @@
 extern "C" {
 #endif
 H5_DLL hid_t H5FD_mdc_init(void);
-H5_DLL herr_t H5P_set_fapl_mdc(hid_t fapl_id, const char *name, hid_t plist_id);
+    H5_DLL herr_t H5P_set_fapl_mdc(hid_t fapl_id, const char *name, hid_t plist_id, hid_t mdfile_id);
 H5_DLL herr_t H5FD_mdc_set_mdfile(H5F_t *file, hid_t mdfile_id);
 #ifdef __cplusplus
 }

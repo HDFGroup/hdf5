@@ -455,9 +455,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     hid_t temp_fapl; /* the fapl created here for the underlying VFD for clients */
     H5VL_mds_fapl_t *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    int my_rank;
-    MPI_Request mpi_req;
-    MPI_Status mpi_stat;
+    int my_rank, my_size;
     H5F_t *new_file = NULL;
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
     H5VL_mds_file_t *file = NULL;
@@ -480,8 +478,8 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     if(NULL == (fa = (H5VL_mds_fapl_t *)H5P_get_vol_info(plist)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get MDS info struct")
     MPI_Comm_rank(fa->comm, &my_rank);
+    MPI_Comm_size(fa->comm, &my_size);
 
-    printf("Client File create\n");
     /* the first process in the communicator will tell the MDS process to create the metadata file */
     if (0 == my_rank) {
         /* determine the size of the buffer needed to encode the parameters */
@@ -497,21 +495,30 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file create parameters")
 
         MPI_Pcontrol(0);
-        /* send the message */
-        if(MPI_SUCCESS != MPI_Isend(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                    H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &mpi_req))
+        /* send the request to the MDS process and recieve the metadata file ID */
+        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                       &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                       MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
         MPI_Pcontrol(1);
+        H5MM_free(send_buf);
     }
+
+    /* Process 0 Bcasts the metadata file ID to other processes if there are any */
+    if(my_size > 1) {
+        if(MPI_SUCCESS != MPI_Bcast(&mds_file, sizeof(hid_t), MPI_BYTE, 0, fa->comm))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
+    }
+    HDassert(mds_file);
 
     /* set the underlying VFD for clients (MDC)*/
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
-    if(H5P_set_fapl_mdc(fapl_id, name, temp_fapl) < 0)
+    if(H5P_set_fapl_mdc(fapl_id, name, temp_fapl, mds_file) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Create the raw data file */ 
-    if(NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_raw_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
 
     new_file->id_exists = TRUE;
@@ -520,31 +527,14 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     if(NULL == (file = (H5VL_mds_file_t *)calloc(1, sizeof(H5VL_mds_file_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* the first process recieves the metadata file ID from the MDS process and 
-       bcasts it to the other processes in the communicator that opened the file */
-    if (0 == my_rank) {
-        MPI_Pcontrol(0);
-        if(MPI_SUCCESS != MPI_Recv(&mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG, 
-                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
-        MPI_Pcontrol(1);
-    }
-
-    if(MPI_SUCCESS != MPI_Bcast(&mds_file, sizeof(hid_t), MPI_BYTE, 0, fa->comm))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
-
-    HDassert(mds_file);
-
+    /* store the metadata file ID in the local raw data file struct 
     H5FD_mdc_set_mdfile(new_file, mds_file);
+    */
 
+    /* create the file object that is passed to the API layer */
     file->common.obj_type = H5I_FILE; 
     file->common.obj_id = mds_file;
     file->common.raw_file = new_file;
-
-    if (0 == my_rank) {
-        MPI_Wait(&mpi_req, &mpi_stat);
-        H5MM_free(send_buf);
-    }
 
     ret_value = (void *)file;
 done:
@@ -610,16 +600,23 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
                        dcpl_id, dapl_id, type_id, space_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset create parameters")
 
-    MPI_Pcontrol(0);
-    /* send the message */
-    if(MPI_SUCCESS != MPI_Isend(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &mpi_req))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
-
     if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     dset->common.obj_type = H5I_DATASET;
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the dataset ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &(dset->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
+
+#if 0
+    /* send the message */
+    if(MPI_SUCCESS != MPI_Isend(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &mpi_req))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
 
     /* Recieve the Dataset ID from the MDS process */
     if(MPI_SUCCESS != MPI_Recv(&(dset->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, 
@@ -627,6 +624,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
 
     MPI_Wait(&mpi_req, &mpi_stat);
+#endif
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);

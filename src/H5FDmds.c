@@ -512,14 +512,20 @@ done:
 static herr_t
 H5FD_mds_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    const H5FD_mds_t	*file = (const H5FD_mds_t*)_file;
-    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = H5FDquery(file->memb, flags);
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags = 0;
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations                             */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA;    /* OK to accumulate metadata for faster writes                      */
+        *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
+        *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* VFD handle is POSIX I/O call compatible                          */
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
 #if 0

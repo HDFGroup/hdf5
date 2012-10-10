@@ -58,15 +58,16 @@ static hid_t H5FD_MDC_g = 0;
  */
 typedef struct H5FD_mdc_t {
     H5FD_t	pub;		/*public stuff, must be first		*/
-    H5FD_t	*memb;	        /*member pointer         		*/
+    H5FD_t     *memb;	        /*member pointer         		*/
     hid_t       mdfile_id;      /* file id of the metadata file created by the MDS */
 } H5FD_mdc_t;
 
 /* MDC specific file access properties */
 typedef struct H5FD_mdc_fapl_t {
     hid_t	memb_fapl;                 /* underlying fapl    	*/
-    char	*memb_name;                /* metadata file name	*/
+    char       *memb_name;                 /* metadata file name	*/
     haddr_t	memb_addr;                 /* starting addr     	*/
+    hid_t       mdfile_id;                 /* metadata file ID          */
 } H5FD_mdc_fapl_t;
 
 /* Private Prototypes */
@@ -256,7 +257,7 @@ H5FD_mdc_set_mdfile(H5F_t *file, hid_t mdfile_id)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_set_fapl_mdc(hid_t fapl_id, const char *name, hid_t plist_id)
+H5P_set_fapl_mdc(hid_t fapl_id, const char *name, hid_t plist_id, hid_t mdfile_id)
 {
     H5FD_mdc_fapl_t	fa;
     H5P_genplist_t      *plist;      /* Property list pointer */
@@ -277,6 +278,7 @@ H5P_set_fapl_mdc(hid_t fapl_id, const char *name, hid_t plist_id)
         fa.memb_fapl = H5Pcreate(H5P_FILE_ACCESS);
     fa.memb_name = H5MM_strdup(name);
     fa.memb_addr = 0;
+    fa.mdfile_id = mdfile_id;
 
     ret_value= H5P_set_driver(plist, H5FD_MDC, &fa);
 
@@ -371,6 +373,7 @@ H5FD_mdc_fapl_copy(const void *_old_fa)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         strcpy(new_fa->memb_name, old_fa->memb_name);
     }
+    new_fa->mdfile_id = old_fa->mdfile_id;
 
     ret_value = (void *)new_fa;
 
@@ -444,6 +447,10 @@ H5FD_mdc_open(const char UNUSED *name, unsigned flags, hid_t fapl_id,
 
     fa = (H5FD_mdc_fapl_t *)H5Pget_driver_info(fapl_id);
 
+    /* set the metadata file id in the FD struct */
+    file->mdfile_id = fa->mdfile_id;
+
+    /* open the file from the underlying VFD */
     file->memb = H5FDopen(fa->memb_name, flags, fa->memb_fapl, HADDR_UNDEF);
     if (!file->memb)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "error opening member file")
@@ -727,15 +734,11 @@ H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     UINT64ENCODE(p, eoa);
 
     MPI_Pcontrol(0);
-    /* send the EOA request */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+    /* send the EOA set request & recieve the set confirmation*/
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
-
-    /* recieve the current EOA */
-    if(MPI_SUCCESS != MPI_Recv(&ret_value, sizeof(int), MPI_INT, MDS_RANK, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message")
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);
