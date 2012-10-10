@@ -8298,7 +8298,7 @@ gent_intscalars(void)
     /* Double Dummy set for failure tests */
     dims[0] = F73_XDIM; dims[1] = F73_YDIM8;
     space = H5Screate(H5S_SCALAR);
-    tid = H5Tarray_create2(H5T_IEEE_F64BE, F73_ARRAY_RANK, dims);
+    tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, F73_ARRAY_RANK, dims);
     dataset = H5Dcreate2(fid, F73_DUMMYDBL, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     for(i = 0; i < dims[0]; i++)
@@ -8497,7 +8497,7 @@ gent_attr_intscalars(void)
     /* Double Dummy set for failure tests */
     dims[0] = F73_XDIM; dims[1] = F73_YDIM8;
     space = H5Screate(H5S_SCALAR);
-    tid = H5Tarray_create2(H5T_IEEE_F64BE, F73_ARRAY_RANK, dims);
+    tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, F73_ARRAY_RANK, dims);
     attr = H5Acreate2(root, F73_DUMMYDBL, tid, space, H5P_DEFAULT, H5P_DEFAULT);
 
     for(i = 0; i < dims[0]; i++)
