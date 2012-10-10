@@ -188,6 +188,8 @@ New Features
     Fortran Library:
     ----------------
 
+    - Added parallel routine H5Pget_mpio_actual_io_mode_f (MSB - 2012/09/27)
+
     - Added for the C API the Fortran wrapper:
        h5ocopy_f (MSB - 2012/03/22)
 
@@ -231,6 +233,7 @@ New Features
             h5pset_chunk_cache_f
             h5pget_chunk_cache_f 
           (MSB - 2009/04/17)
+
 
 
     C++ Library:
@@ -718,6 +721,16 @@ Bug Fixes since HDF5-1.8.0 release
         with other Fortran functions; cleaned the code from debug statements.
         (EIP - 2012/06/23)
 
+      - Fixed problem writing/reading control characters to a dataset; writing
+        a string containing: alerts, backspace, carriage_return, form_feed,
+        horizontal_tab, vertical_tab, new_line is now tested and working.
+        (MSB - 2012/09/01)
+
+      - Corrected the integer type of H5S_UNLIMITED_F to HSIZE_T (MSB - 2012/09/01)
+
+      - Corrected the number of continuation lines in the src files
+        to be less then 32 lines for F95 compliance. (MSB - 2012/10/01)
+
     Tools
     -----
         - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
@@ -947,6 +960,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+
+      - Fixed problem with H5TBdelete_record destroying all data following the deletion
+        of a row. (MSB- 2012/7/26)
+
+      - Fixed H5LTget_attribute_string not closing an object identifier when an 
+        error occurs. (MSB- 2012/7/21)
+
       - Fixed the H5LTdtype_to_text function.  It had some memory problems when
         dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
 
