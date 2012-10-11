@@ -133,11 +133,11 @@ H5B2_t *
 H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     void *ctx_udata, void *parent)
 {
-    H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
-    H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
+    H5B2_t      *bt2 = NULL;            /* Pointer to the B-tree */
+    H5B2_hdr_t  *hdr = NULL;            /* Pointer to the B-tree header */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     haddr_t     hdr_addr;               /* B-tree header address */
-    H5B2_t	*ret_value;             /* Return value */
+    H5B2_t      *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -152,7 +152,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
 
     /* Create shared v2 B-tree header */
     if(HADDR_UNDEF == (hdr_addr = H5B2_hdr_create(f, dxpl_id, cparam, ctx_udata, parent)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't create v2 B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't create v2 B-tree header")
 
     /* Create v2 B-tree wrapper */
     if(NULL == (bt2 = H5FL_MALLOC(H5B2_t)))
@@ -163,7 +163,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     cache_udata.parent = parent;
     cache_udata.ctx_udata = ctx_udata;
     if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
 
     /* Point v2 B-tree wrapper at header and bump it's ref count */
     bt2->hdr = hdr;
@@ -172,7 +172,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
 
     /* Increment # of files using this v2 B-tree header */
     if(H5B2_hdr_fuse_incr(bt2->hdr) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment file reference count on shared v2 B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment file reference count on shared v2 B-tree header")
 
     /* Set file pointer for this v2 B-tree open context */
     bt2->f = f;
@@ -427,15 +427,15 @@ htri_t
 H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     void *op_data)
 {
-    H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
+    H5B2_hdr_t  *hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
     void        *parent = NULL;         /* Parent of current node */
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    htri_t	ret_value = TRUE;       /* Return value */
+    htri_t      ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI(FALSE)
 
     /* Check arguments. */
     HDassert(bt2);
@@ -1403,7 +1403,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
+H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5AC_info_t *child)
 {
     H5B2_hdr_t  *hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
@@ -1476,7 +1476,7 @@ H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
         } /* end if */
         else {
             /* Add flush dependency on child */
-            if(H5AC_create_flush_dependency(internal, child) < 0)
+            if(H5B2__create_flush_depend((H5AC_info_t *)internal, child) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
             /* Unlock current node */
@@ -1508,7 +1508,7 @@ H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
 
         if(cmp == 0) {
             /* Add flush dependency on child */
-            if(H5AC_create_flush_dependency(leaf, child) < 0)
+            if(H5B2__create_flush_depend((H5AC_info_t *)leaf, child) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
             /* Indicate child was supported */
@@ -1548,7 +1548,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
+H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5AC_info_t *child)
 {
     H5B2_hdr_t  *hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
@@ -1556,7 +1556,7 @@ H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    htri_t      ret_value = SUCCEED;    /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1621,8 +1621,8 @@ H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
         } /* end if */
         else {
             /* Remove flush dependency on child */
-            if(H5AC_destroy_flush_dependency(internal, child) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+            if(H5B2__destroy_flush_depend((H5AC_info_t *)internal, child) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to destroy flush dependency")
 
             /* Unlock current node */
             if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
@@ -1652,9 +1652,9 @@ H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata, void *child)
         cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
 
         if(cmp == 0) {
-            /* Add flush dependency on child */
-            if(H5AC_destroy_flush_dependency(leaf, child) < 0)
-                HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+            /* Remove flush dependency on child */
+            if(H5B2__destroy_flush_depend((H5AC_info_t *)leaf, child) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to destroy flush dependency")
         } /* end if */
         else
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "node not found in B-tree")
@@ -1673,4 +1673,94 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_unsupport() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_depend
+ *
+ * Purpose:     Make a child flush dependency between the v2 B-tree's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_depend(H5AC_info_t *parent_entry, H5B2_t *bt2)
+{
+    /* Local variables */
+    H5B2_hdr_t  *hdr = bt2->hdr;        /* Header for B-tree */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(SUCCEED)
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(hdr);
+
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
+
+    /* Set up flush dependency between parent entry and B-tree header */
+    if(H5B2__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on file metadata")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_undepend
+ *
+ * Purpose:     Remove a child flush dependency between the v2 B-tree's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_undepend(H5AC_info_t *parent_entry, H5B2_t *bt2)
+{
+    /* Local variables */
+    H5B2_hdr_t  *hdr = bt2->hdr;        /* Header for B-tree */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(SUCCEED)
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(hdr);
+
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
+
+    /* Remove flush dependency between parent entry and B-tree header */
+    if(H5B2__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency on file metadata")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2_undepend() */
 

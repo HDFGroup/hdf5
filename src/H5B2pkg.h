@@ -230,8 +230,8 @@ typedef struct H5B2_internal_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;            /* v2 B-tree header */
     void *parent;               /* Flush dependency parent */
-    unsigned nrec;              /* Number of records in node to load */
-    unsigned depth;             /* Depth of node to load */
+    uint16_t nrec;              /* Number of records in node to load */
+    uint16_t depth;             /* Depth of node to load */
 } H5B2_internal_cache_ud_t;
 
 /* Callback info for loading a free space leaf node into the cache */
@@ -239,14 +239,14 @@ typedef struct H5B2_leaf_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;            /* v2 B-tree header */
     void *parent;               /* Flush dependency parent */
-    unsigned nrec;              /* Number of records in node to load */
+    uint16_t nrec;              /* Number of records in node to load */
 } H5B2_leaf_cache_ud_t;
 
 #ifdef H5B2_TESTING
 /* Node information for testing */
 typedef struct {
-    unsigned depth;             /* Depth of node */
-    unsigned nrec;              /* Number of records in node */
+    uint16_t depth;             /* Depth of node */
+    uint16_t nrec;              /* Number of records in node */
 } H5B2_node_info_test_t;
 #endif /* H5B2_TESTING */
 
@@ -282,6 +282,12 @@ extern const H5B2_class_t *const H5B2_client_class_g[H5B2_NUM_BTREE_ID];
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5B2__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5B2__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Routines for managing B-tree header info */
 H5_DLL H5B2_hdr_t *H5B2_hdr_alloc(H5F_t *f);

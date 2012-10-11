@@ -440,16 +440,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_compute_size
+ * Function:    H5B_compute_size
  *
- * Purpose:	Compute the size in bytes of the specified instance of
- *		H5B_t on disk, and return it in *len_ptr.  On failure,
- *		the value of *len_ptr is undefined.
+ * Purpose:     Compute the size in bytes of the specified instance of
+ *              H5B_t on disk, and return it in *len_ptr.  On failure,
+ *              the value of *len_ptr is undefined.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	John Mainzer
- *		5/13/04
+ * Programmer:  John Mainzer
+ *              5/13/04
  *
  *-------------------------------------------------------------------------
  */
@@ -458,7 +458,7 @@ H5B_compute_size(const H5F_t UNUSED *f, const H5B_t *bt, size_t *size_ptr)
 {
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);

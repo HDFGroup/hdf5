@@ -403,9 +403,9 @@ H5B2_split1(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                 /* Update flush dependencies if necessary */
                 if(update_deps) {
-                    if(H5AC_destroy_flush_dependency(left_child, grandchild) < 0)
+                    if(H5B2__destroy_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                    if(H5AC_create_flush_dependency(right_child, grandchild) < 0)
+                    if(H5B2__create_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                 } /* end if */
 
@@ -746,9 +746,9 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                     /* Update flush dependencies if necessary */
                     if(update_deps) {
-                        if(H5AC_destroy_flush_dependency(right_child, grandchild) < 0)
+                        if(H5B2__destroy_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                        if(H5AC_create_flush_dependency(left_child, grandchild) < 0)
+                        if(H5B2__create_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                     } /* end if */
 
@@ -868,9 +868,9 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                     /* Update flush dependencies if necessary */
                     if(update_deps) {
-                        if(H5AC_destroy_flush_dependency(left_child, grandchild) < 0)
+                        if(H5B2__destroy_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                        if(H5AC_create_flush_dependency(right_child, grandchild) < 0)
+                        if(H5B2__create_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                     } /* end if */
 
@@ -1189,9 +1189,9 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                         /* Update flush dependencies if necessary */
                         if(update_deps) {
-                            if(H5AC_destroy_flush_dependency(middle_child, grandchild) < 0)
+                            if(H5B2__destroy_flush_depend((H5AC_info_t *)middle_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                            if(H5AC_create_flush_dependency(left_child, grandchild) < 0)
+                            if(H5B2__create_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                         } /* end if */
 
@@ -1305,9 +1305,9 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                         /* Update flush dependencies if necessary */
                         if(update_deps) {
-                            if(H5AC_destroy_flush_dependency(middle_child, grandchild) < 0)
+                            if(H5B2__destroy_flush_depend((H5AC_info_t *)middle_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                            if(H5AC_create_flush_dependency(right_child, grandchild) < 0)
+                            if(H5B2__create_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                         } /* end if */
 
@@ -1421,9 +1421,9 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                         /* Update flush dependencies if necessary */
                         if(update_deps) {
-                            if(H5AC_destroy_flush_dependency(left_child, grandchild) < 0)
+                            if(H5B2__destroy_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                            if(H5AC_create_flush_dependency(middle_child, grandchild) < 0)
+                            if(H5B2__create_flush_depend((H5AC_info_t *)middle_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                         } /* end else */
 
@@ -1536,9 +1536,9 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                         /* Update flush dependencies if necessary */
                         if(update_deps) {
-                            if(H5AC_destroy_flush_dependency(right_child, grandchild) < 0)
+                            if(H5B2__destroy_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                            if(H5AC_create_flush_dependency(middle_child, grandchild) < 0)
+                            if(H5B2__create_flush_depend((H5AC_info_t *)middle_child, (H5AC_info_t *)grandchild) < 0)
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                         } /* end if */
 
@@ -1830,9 +1830,9 @@ H5B2_merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                     /* Update flush dependencies if necessary */
                     if(update_deps) {
-                        if(H5AC_destroy_flush_dependency(right_child, grandchild) < 0)
+                        if(H5B2__destroy_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                        if(H5AC_create_flush_dependency(left_child, grandchild) < 0)
+                        if(H5B2__create_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                     } /* end if */
 
@@ -2135,9 +2135,9 @@ H5B2_merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                     /* Update flush dependencies if necessary */
                     if(update_deps) {
-                        if(H5AC_destroy_flush_dependency(middle_child, grandchild) < 0)
+                        if(H5B2__destroy_flush_depend((H5AC_info_t *)middle_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                        if(H5AC_create_flush_dependency(left_child, grandchild) < 0)
+                        if(H5B2__create_flush_depend((H5AC_info_t *)left_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                     } /* end if */
 
@@ -2227,9 +2227,9 @@ H5B2_merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
                     /* Update flush dependencies if necessary */
                     if(update_deps) {
-                        if(H5AC_destroy_flush_dependency(right_child, grandchild) < 0)
+                        if(H5B2__destroy_flush_depend((H5AC_info_t *)right_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                        if(H5AC_create_flush_dependency(middle_child, grandchild) < 0)
+                        if(H5B2__create_flush_depend((H5AC_info_t *)middle_child, (H5AC_info_t *)grandchild) < 0)
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                     } /* end if */
 
@@ -3196,9 +3196,9 @@ H5B2_remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
 
             /* Update flush dependency if necessary */
             if(update_dep) {
-                if(H5AC_destroy_flush_dependency(internal, new_root) < 0)
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)internal, (H5AC_info_t *)new_root) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                if(H5AC_create_flush_dependency(hdr, new_root) < 0)
+                if(H5B2__create_flush_depend((H5AC_info_t *)hdr, (H5AC_info_t *)new_root) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
             } /* end if */
 
@@ -3565,9 +3565,9 @@ H5B2_remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
 
             /* Update flush dependency if necessary */
             if(update_dep) {
-                if(H5AC_destroy_flush_dependency(internal, new_root) < 0)
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)internal, (H5AC_info_t *)new_root) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
-                if(H5AC_create_flush_dependency(hdr, new_root) < 0)
+                if(H5B2__create_flush_depend((H5AC_info_t *)hdr, (H5AC_info_t *)new_root) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
             } /* end if */
 
@@ -4504,4 +4504,68 @@ H5B2_assert_internal2(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2
     return(0);
 } /* end H5B2_assert_internal2() */
 #endif /* H5B2_DEBUG */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2__create_flush_depend
+ *
+ * Purpose:     Create a flush dependency between two data structure components
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    
+    /* Sanity check */
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Create a flush dependency between parent and child entry */
+    if(H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__create_flush_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2__destroy_flush_depend
+ *
+ * Purpose:     Destroy a flush dependency between two data structure components
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    
+    /* Sanity check */
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Destroy a flush dependency between parent and child entry */
+    if(H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__destroy_flush_depend() */
 

@@ -31,7 +31,8 @@
 #include "H5B2public.h"
 
 /* Private headers needed by this file */
-#include "H5Fprivate.h"		/* File access				*/
+#include "H5ACprivate.h"        /* Metadata cache                   */
+#include "H5Fprivate.h"         /* File access                      */
 
 /**************************/
 /* Library Private Macros */
@@ -157,9 +158,11 @@ H5_DLL herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     void *ctx_udata, void *parent, H5B2_remove_t op, void *op_data);
 H5_DLL htri_t H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata,
-    void *child);
+    H5AC_info_t *child);
 H5_DLL herr_t H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata,
-    void *child);
+    H5AC_info_t *child);
+H5_DLL herr_t H5B2_depend(H5AC_info_t *parent_entry, H5B2_t *bt2);
+H5_DLL herr_t H5B2_undepend(H5AC_info_t *parent_entry, H5B2_t *bt2);
 
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);

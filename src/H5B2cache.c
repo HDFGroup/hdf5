@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5B2cache.c
- *			Jan 31 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5B2cache.c
+ *              Jan 31 2005
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Implement v2 B-tree metadata cache methods.
+ * Purpose:     Implement v2 B-tree metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -499,13 +499,13 @@ H5B2_cache_hdr_notify(H5AC_notify_action_t action, H5B2_hdr_t *hdr)
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
                 /* Create flush dependency on parent */
-                if(H5AC_create_flush_dependency(hdr->parent, hdr) < 0)
+                if(H5B2__create_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
-                if(H5AC_destroy_flush_dependency(hdr->parent, hdr) < 0)
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
                 break;
 
@@ -524,27 +524,28 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2_cache_hdr_size
+ * Function:    H5B2_cache_hdr_size
  *
- * Purpose:	Compute the size in bytes of a B-tree header
- *		on disk, and return it in *size_ptr.  On failure,
- *		the value of *size_ptr is undefined.
+ * Purpose:     Compute the size in bytes of a B-tree header
+ *              on disk, and return it in *size_ptr.  On failure,
+ *              the value of *size_ptr is undefined.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Feb 1 2005
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Feb 1 2005
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5B2_cache_hdr_size(const H5F_t UNUSED *f, const H5B2_hdr_t *hdr, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check arguments */
     HDassert(f);
+    HDassert(hdr);
     HDassert(size_ptr);
 
     /* Set size value */
@@ -598,7 +599,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Increment ref. count on B-tree header */
     if(H5B2_hdr_incr(udata->hdr) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header")
 
     /* Share B-tree information */
     internal->hdr = udata->hdr;
@@ -608,7 +609,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Read header from disk */
     if(H5F_block_read(f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, dxpl_id, udata->hdr->page) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree internal node")
 
     p = udata->hdr->page;
 
@@ -619,11 +620,11 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Version */
     if(*p++ != H5B2_INT_VERSION)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
 
     /* B-tree type */
     if(*p++ != (uint8_t)udata->hdr->cls->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
     if(NULL == (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[udata->depth].nat_rec_fac)))
@@ -675,7 +676,7 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
 
     /* Set return value */
     ret_value = internal;
@@ -923,13 +924,13 @@ H5B2_cache_internal_notify(H5AC_notify_action_t action, H5B2_internal_t *interna
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
                 /* Create flush dependency on parent */
-                if(H5AC_create_flush_dependency(internal->parent, internal) < 0)
+                if(H5B2__create_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
-                if(H5AC_destroy_flush_dependency(internal->parent, internal) < 0)
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
                 break;
 
@@ -1014,7 +1015,7 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Allocate new leaf node and reset cache info */
     if(NULL == (leaf = H5FL_MALLOC(H5B2_leaf_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&leaf->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Set the B-tree header's file context for this operation */
@@ -1022,7 +1023,7 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Increment ref. count on B-tree header */
     if(H5B2_hdr_incr(udata->hdr) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, NULL, "can't increment ref. count on B-tree header")
 
     /* Share B-tree header information */
     leaf->hdr = udata->hdr;
@@ -1032,26 +1033,26 @@ H5B2_cache_leaf_load(H5F_t UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 
     /* Read header from disk */
     if(H5F_block_read(udata->f, H5FD_MEM_BTREE, addr, udata->hdr->node_size, dxpl_id, udata->hdr->page) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree leaf node")
+        HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree leaf node")
 
     p = udata->hdr->page;
 
     /* Magic number */
     if(HDmemcmp(p, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node signature")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node signature")
     p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5B2_LEAF_VERSION)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node version")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node version")
 
     /* B-tree type */
     if(*p++ != (uint8_t)udata->hdr->cls->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
     if(NULL == (leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(udata->hdr->node_info[0].nat_rec_fac)))
-	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree leaf native keys")
+        HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree leaf native keys")
 
     /* Set the number of records in the leaf */
     leaf->nrec = udata->nrec;
@@ -1313,13 +1314,13 @@ H5B2_cache_leaf_notify(H5AC_notify_action_t action, H5B2_leaf_t *leaf)
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
                 /* Create flush dependency on parent */
-                if(H5AC_create_flush_dependency(leaf->parent, leaf) < 0)
+                if(H5B2__create_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
                 /* Destroy flush dependency on parent */
-                if(H5AC_destroy_flush_dependency(leaf->parent, leaf) < 0)
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
                 break;
 

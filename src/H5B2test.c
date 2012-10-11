@@ -400,7 +400,7 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
     void        *parent = NULL;         /* Parent of current node */
-    unsigned    depth;                  /* Current depth of the tree */
+    uint16_t    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
     herr_t	ret_value = SUCCEED;    /* Return value */
