@@ -83,6 +83,7 @@ static herr_t H5VL_mds_datatype_close(void *dt, hid_t req);
 #endif
 /* Dataset callbacks */
 static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
+static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 #if 0
 static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
 static herr_t H5VL_mds_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
@@ -95,13 +96,13 @@ static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 #endif
 /* File callbacks */
 static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
+static herr_t H5VL_mds_file_close(void *file, hid_t req);
 #if 0
 static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_close(void *file, hid_t req);
 
 /* Group callbacks */
 static void *H5VL_mds_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
@@ -167,10 +168,10 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_dataset_create,             /* create */
         NULL,//H5VL_mds_dataset_open,               /* open */
         NULL,//H5VL_mds_dataset_read,               /* read */
-        NULL,//H5VL_mds_dataset_write,              /* write */
+        H5VL_mds_dataset_write,              /* write */
         NULL,//H5VL_mds_dataset_set_extent,         /* set extent */
         NULL,//H5VL_mds_dataset_get,                /* get */
-        NULL,//H5VL_mds_dataset_close               /* close */
+        H5VL_mds_dataset_close               /* close */
     },
     {                                        /* file_cls */
         H5VL_mds_file_create,                /* create */
@@ -179,7 +180,7 @@ static H5VL_class_t H5VL_mds_g = {
         NULL,//H5VL_mds_file_get,                   /* get */
         NULL,//H5VL_mds_file_misc,                  /* misc */
         NULL,//H5VL_mds_file_optional,              /* optional */
-        NULL,//H5VL_mds_file_close                  /* close */
+        H5VL_mds_file_close                  /* close */
     },
     {                                        /* group_cls */
         NULL,//H5VL_mds_group_create,               /* create */
@@ -442,7 +443,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              October, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -546,6 +547,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_file_close
+ *
+ * Purpose:	Closes a file.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, file not closed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_file_close(void *obj, hid_t UNUSED req)
+{
+    H5VL_mds_file_t *file = (H5VL_mds_file_t *)obj;
+    int nref;
+    H5F_t *f = file->common.raw_file;
+    hid_t file_id = FAIL;
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Flush file if this is the last reference to this id and we have write
+     * intent, unless it will be flushed by the "shared" file being closed.
+     * This is only necessary to replicate previous behaviour, and could be
+     * disabled by an option/property to improve performance. */
+    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+        /* get the file ID corresponding to the H5F_t struct */
+        if((file_id = H5I_get_id(f, H5I_FILE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom")
+        /* get the number of references outstanding for this file ID */
+        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
+        if(nref == 1)
+            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+    } /* end if */
+    /* close the file */
+    if(H5F_close(f) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_file_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_mds_dataset_create
  *
  * Purpose:	Sends a request to the MDS to create a dataset
@@ -554,7 +603,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              October, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -565,8 +614,6 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     void           *send_buf = NULL;
     size_t         buf_size;
     H5P_genplist_t *plist;      /* Property list pointer */
-    MPI_Request    mpi_req;
-    MPI_Status     mpi_stat;
     hid_t          type_id, space_id, lcpl_id;
     H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
     H5VL_mds_dset_t *dset = NULL;
@@ -603,29 +650,17 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    dset->common.obj_type = H5I_DATASET;
-
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the dataset ID */
     if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
                                    &(dset->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
-
-#if 0
-    /* send the message */
-    if(MPI_SUCCESS != MPI_Isend(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &mpi_req))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
-
-    /* Recieve the Dataset ID from the MDS process */
-    if(MPI_SUCCESS != MPI_Recv(&(dset->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
-
-    MPI_Wait(&mpi_req, &mpi_stat);
-#endif
     MPI_Pcontrol(1);
+
+    dset->common.obj_type = H5I_DATASET;
+    dset->common.raw_file = obj->raw_file;
+    dset->type = type;
 
     H5MM_free(send_buf);
     ret_value = (void *)dset;
@@ -633,7 +668,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_create() */
-#if 0
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_mds_dataset_write
@@ -644,7 +679,7 @@ done:
  *		Failure:	-1, dataset not writed.
  *
  * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              October, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -688,4 +723,56 @@ H5VL_mds_dataset_write(void *_obj, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_write() */
-#endif
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_dataset_close
+ *
+ * Purpose:	Closes a dataset.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, dataset not closed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
+{
+    H5VL_mds_dset_t *dataset = (H5VL_mds_dset_t *)obj;
+    void            *send_buf = NULL;
+    uint8_t         *p = NULL;
+    size_t           buf_size;
+    herr_t           ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    buf_size = 1 /* request type */ + sizeof(int) /* dataset id */;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode request type */
+    *p++ = (uint8_t)H5VL_MDS_DSET_CLOSE;
+
+    /* encode the object id */
+    INT32ENCODE(p, dataset->common.obj_id);
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata file ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+    H5MM_free(dataset);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_dataset_close() */

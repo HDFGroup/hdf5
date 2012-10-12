@@ -49,18 +49,21 @@ typedef struct H5VL_mds_file_t {
 } H5VL_mds_file_t;
 
 typedef struct H5VL_mds_dset_t {
-    H5VL_mds_object_t common; /* common stuff, must be first */
-    H5T_t   *type;   /* the dataset type */
+    H5VL_mds_object_t common;  /* common stuff, must be first  */
+    H5O_layout_t      layout;  /* Data layout                  */
+    H5T_t            *type;    /* Datatype of this dataset     */
+    H5S_t            *space;   /* Dataspace of this dataset    */
 } H5VL_mds_dset_t;
-
 
 /* Operation types for the MDS */
 typedef enum H5VL_mds_op_type_t {
-    H5VL_MDS_FILE_CREATE   = 0,
-    H5VL_MDS_DSET_CREATE   = 1,
-    H5VL_MDS_ALLOC         = 2,
-    H5VL_MDS_GET_EOA       = 3,
-    H5VL_MDS_SET_EOA       = 4
+    H5VL_MDS_FILE_CREATE,
+    H5VL_MDS_FILE_CLOSE,
+    H5VL_MDS_DSET_CREATE,
+    H5VL_MDS_DSET_CLOSE,
+    H5VL_MDS_ALLOC,
+    H5VL_MDS_GET_EOA,
+    H5VL_MDS_SET_EOA
 } H5VL_mds_op_type_t;
 
 H5_DLL herr_t H5VL_mds_start(void);

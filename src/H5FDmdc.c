@@ -481,9 +481,50 @@ static herr_t
 H5FD_mdc_close(H5FD_t *_file)
 {
     H5FD_mdc_t	*file = (H5FD_mdc_t*)_file;
+    MPI_Comm    comm;
+    int         my_rank;
     herr_t      ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the communicator of the file */
+    comm = H5FD_mpi_get_comm(file->memb);
+    /* get the rank of the process */
+    my_rank = H5FD_mpi_get_rank(file->memb);
+
+    /* Get all processes that opened the file here so they all have sent their requests to the
+       MDS already so that one process would not terminate the MDS while other processes have
+       more work to do before closing */
+    MPI_Barrier(comm);
+
+    /* the first process in the communicator will tell the MDS process to close the metadata file */
+    if (0 == my_rank) {
+        size_t buf_size;
+        uint8_t *p = NULL;
+        void *send_buf = NULL;
+
+        buf_size = 1 /* request type */ + sizeof(int) /* metadata file id */;
+
+        /* allocate the buffer for encoding the parameters */
+        if(NULL == (send_buf = H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
+
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_MDS_FILE_CLOSE;
+
+        /* encode the object id */
+        INT32ENCODE(p, file->mdfile_id);
+
+        MPI_Pcontrol(0);
+        /* send the request to the MDS process and recieve the metadata file ID */
+        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                       &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                       MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
+        MPI_Pcontrol(1);
+        H5MM_free(send_buf);
+    }
 
     if (file->memb)
         if (H5FDclose(file->memb) < 0)
@@ -576,10 +617,10 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, HADDR_UNDEF, "unable to encode property list");
     }
 
-    buf_size = 1 /* request type */ + 
-        sizeof(int) /* metadata file id */ + 
-        sizeof(H5FD_mem_t) /* requested type of space */ +
-        1 + dxpl_size + 
+    buf_size = 1 + /* request type */ 
+        sizeof(int) + /* metadata file id */
+        sizeof(H5FD_mem_t) + /* requested type of space */
+        H5V_limit_enc_size((uint64_t)dxpl_size) + dxpl_size + 
         H5V_limit_enc_size((uint64_t)size);
 
     /* allocate the buffer for encoding the parameters */
@@ -594,6 +635,15 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     INT32ENCODE(p, file->mdfile_id);
     *p++ = (uint8_t)type;
 
+    /* encode the plist size */
+    UINT64ENCODE_VARLEN(p, dxpl_size);
+    /* encode property lists if they are not default*/
+    if(H5P_DATASET_ACCESS_DEFAULT != dxpl_id) {
+        if(H5P__encode(dxpl, FALSE, p, &dxpl_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, HADDR_UNDEF, "unable to encode property list");
+        p += dxpl_size;
+    }
+#if 0
     /* encode a flag to indicate whether the property lists are default or not & 
      * encode property lists if they are not default*/
     if(H5P_DEFAULT != dxpl_id) {
@@ -604,19 +654,17 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     }
     else
         *p++ = (uint8_t)FALSE;
+#endif
 
     /* encode size requested */
     UINT64ENCODE_VARLEN(p, size);
 
     MPI_Pcontrol(0);
-    /* send the EOA request */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+    /* send the request to the MDS process and recieve the metadata file ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(uint64_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to send message")
-    /* Recieve the Dataset ID from the MDS process */
-    if(MPI_SUCCESS != MPI_Recv(&ret_value, sizeof(uint64_t), MPI_UINT64_T, MDS_RANK, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to receive message")
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);
