@@ -108,7 +108,7 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  */
 herr_t
 H5B2_hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
-    void *parent, uint16_t depth)
+    void *parent, unsigned depth)
 {
     size_t sz_max_nrec;                 /* Temporary variable for range checking */
     unsigned u_max_nrec_size;           /* Temporary variable for range checking */
@@ -137,7 +137,7 @@ H5B2_hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
     hdr->pending_delete = FALSE;
 
     /* Assign dynamic information */
-    hdr->depth = depth;
+    hdr->depth = (uint16_t)depth;
 
     /* Assign user's information */
     hdr->split_percent = cparam->split_percent;
@@ -312,7 +312,7 @@ H5B2_hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
-    if(H5B2_hdr_init(hdr, cparam, ctx_udata, parent, (uint16_t)0) < 0)
+    if(H5B2_hdr_init(hdr, cparam, ctx_udata, parent, (unsigned)0) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */

@@ -359,7 +359,7 @@ H5HF_man_dblock_new(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t request,
     } /* end else */
 
     /* Adjust the size of block needed to fulfill request, with overhead */
-    if((min_dblock_size - request) < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr))
+    if(min_dblock_size < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr) + request)
         min_dblock_size *= 2;
 
     /* Check if this is the first block in the heap */

@@ -382,7 +382,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "can't allocate space for shared heap info")
 
 #ifndef NDEBUG
-    if(cparam->managed.max_index > (8 * hdr->sizeof_size))
+    if(cparam->managed.max_index > (unsigned)(8 * hdr->sizeof_size))
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, HADDR_UNDEF, "max. heap size too large for file")
 #endif /* NDEBUG */
 

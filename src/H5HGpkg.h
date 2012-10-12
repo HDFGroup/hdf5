@@ -117,9 +117,9 @@ H5FL_BLK_EXTERN(gheap_chunk);
 /****************************/
 
 typedef struct H5HG_obj_t {
-    int		nrefs;		/*reference count		*/
-    size_t		size;		/*total size of object		*/
-    uint8_t		*begin;		/*ptr to object into heap->chunk*/
+    int         nrefs;      /* reference count                  */
+    size_t      size;       /* total size of object             */
+    uint8_t     *begin;     /* ptr to object into heap->chunk   */
 } H5HG_obj_t;
 
 /* Forward declarations for fields */

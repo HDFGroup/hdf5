@@ -96,7 +96,7 @@ H5HF_get_cparam_test(const H5HF_t *fh, H5HF_create_t *cparam)
     /* Get fractal heap creation parameters */
     if(fh->hdr->id_len == (unsigned)(1 + fh->hdr->heap_off_size + fh->hdr->heap_len_size))
         cparam->id_len = 0;
-    else if(fh->hdr->id_len == (1 + fh->hdr->sizeof_size + fh->hdr->sizeof_addr))
+    else if(fh->hdr->id_len == (unsigned)(1 + fh->hdr->sizeof_size + fh->hdr->sizeof_addr))
         cparam->id_len = 1;
     else
         cparam->id_len = fh->hdr->id_len;

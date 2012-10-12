@@ -112,7 +112,7 @@ CATCH
     if(h && FAIL == H5HL_unprotect(h))
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release/unprotect local heap");
 
-    if(marker && FAIL == H5MM_xfree(marker))
+    if(marker && NULL != (marker = (uint8_t *)H5MM_xfree(marker)))
         H5E_THROW(H5E_CANTFREE, "can't free marker buffer");
 
 END_FUNC(PRIV) /* end H5HL_debug() */

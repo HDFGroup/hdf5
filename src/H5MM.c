@@ -15,13 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5MM.c
- *			Jul 10 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5MM.c
+ *              Jul 10 1997
+ *              Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Memory management functions.
- *
- * Modifications:
+ * Purpose:     Memory management functions
  *
  *-------------------------------------------------------------------------
  */
@@ -34,22 +32,19 @@
 #ifndef NDEBUG
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_malloc
+ * Function:    H5MM_malloc
  *
- * Purpose:	Just like the POSIX version of malloc(3). This routine
- *		specifically checks for allocations of 0 bytes and fails
+ * Purpose:     Just like the POSIX version of malloc(3). This routine
+ *              specifically checks for allocations of 0 bytes and fails
  *              in that case.  This routine is not called when NDEBUG is
- *		defined.
+ *              defined.
  *
- * Return:	Success:	Ptr to new memory
+ * Return:      Success:    Ptr to new memory
+ *              Failure:    NULL
  *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Nov  8 2003
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Nov  8 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -66,23 +61,20 @@ H5MM_malloc(size_t size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_calloc
+ * Function:    H5MM_calloc
  *
- * Purpose:	Similar to the POSIX version of calloc(3), except this routine
+ * Purpose:     Similar to the POSIX version of calloc(3), except this routine
  *              just takes a 'size' parameter. This routine
- *		specifically checks for allocations of 0 bytes and fails
+ *              specifically checks for allocations of 0 bytes and fails
  *              in that case.  This routine is not called when NDEBUG is
- *		defined.
+ *              defined.
  *
- * Return:	Success:	Ptr to new memory
+ * Return:      Success:    Ptr to new memory
+ *              Failure:    NULL
  *
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Nov  8 2003
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Nov  8 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -100,24 +92,23 @@ H5MM_calloc(size_t size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_realloc
+ * Function:    H5MM_realloc
  *
- * Purpose:	Just like the POSIX version of realloc(3). Specifically, the
- *		following calls are equivalent
+ * Purpose:     Just like the POSIX version of realloc(3). Specifically, the
+ *              following calls are equivalent
  *
- *		H5MM_realloc (NULL, size) <==> H5MM_malloc (size)
- *		H5MM_realloc (ptr, 0)	  <==> H5MM_xfree (ptr)
- *		H5MM_realloc (NULL, 0)	  <==> NULL
+ *              H5MM_realloc (NULL, size) <==> H5MM_malloc (size)
+ *              H5MM_realloc (ptr, 0)     <==> H5MM_xfree (ptr)
+ *              H5MM_realloc (NULL, 0)    <==> NULL
  *
- * Return:	Success:	Ptr to new memory or NULL if the memory
- *				was freed or HDrealloc couldn't allocate
- *				memory.
+ * Return:      Success:    Ptr to new memory or NULL if the memory
+ *                          was freed or HDrealloc couldn't allocate
+ *                          memory.
+ *              Failure:    NULL
  *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */
@@ -130,15 +121,15 @@ H5MM_realloc(void *mem, size_t size)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(NULL == mem) {
-	if(0 == size)
+        if(0 == size)
             ret_value = NULL;
         else
             ret_value = H5MM_malloc(size);
     } /* end if */
     else if(0 == size)
-	ret_value = H5MM_xfree(mem);
+        ret_value = H5MM_xfree(mem);
     else
-	ret_value = HDrealloc(mem, size);
+        ret_value = HDrealloc(mem, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */
@@ -151,7 +142,6 @@ H5MM_realloc(void *mem, size_t size)
  *              NULL is an acceptable value for the input string.
  *
  * Return:      Success:    Pointer to a new string (NULL if s is NULL).
- *
  *              Failure:    abort()
  *
  * Programmer:  Robb Matzke
@@ -162,7 +152,7 @@ H5MM_realloc(void *mem, size_t size)
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*ret_value = NULL;
+    char    *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -187,7 +177,6 @@ done:
  *              an error will be raised.
  *
  * Return:      Success:    Pointer to a new string
- *
  *              Failure:    abort()
  *
  * Programmer:  Robb Matzke
@@ -214,21 +203,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_xfree
+ * Function:    H5MM_xfree
  *
- * Purpose:	Just like free(3) except null pointers are allowed as
- *		arguments, and the return value (always NULL) can be
- *		assigned to the pointer whose memory was just freed:
+ * Purpose:     Just like free(3) except null pointers are allowed as
+ *              arguments, and the return value (always NULL) can be
+ *              assigned to the pointer whose memory was just freed:
  *
- *			thing = H5MM_xfree (thing);
+ *              thing = H5MM_xfree (thing);
  *
- * Return:	Success:	NULL
+ * Return:      Success:    NULL
+ *              Failure:    never fails
  *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */

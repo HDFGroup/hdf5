@@ -2957,7 +2957,7 @@ H5B2_iterate_node(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
     HDmemcpy(native, node_native, (hdr->cls->nrec_size * curr_node->node_nrec));
 
     /* Unlock the node */
-    if(H5AC_unprotect(hdr->f, dxpl_id, curr_node_class, curr_node->addr, node, hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_unprotect(hdr->f, dxpl_id, curr_node_class, curr_node->addr, node, (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
     if(hdr->swmr_write)
         node_pinned = TRUE;
@@ -4033,7 +4033,7 @@ H5B2_delete_node(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
 
 done:
     /* Unlock & delete current node */
-    if(node && H5AC_unprotect(hdr->f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG | (hdr->swmr_write ? 0 : H5AC__FREE_FILE_SPACE_FLAG)) < 0)
+    if(node && H5AC_unprotect(hdr->f, dxpl_id, curr_node_class, curr_node->addr, node, (unsigned)(H5AC__DELETED_FLAG | (hdr->swmr_write ? 0 : H5AC__FREE_FILE_SPACE_FLAG))) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
