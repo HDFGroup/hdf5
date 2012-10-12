@@ -1,25 +1,25 @@
-HDF5 version 1.8.10-snap14 currently under development
+HDF5 version 1.8.11-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.9 and 
-HDF5 1.8.10-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.10-*. 
+This document describes the differences between HDF5-1.8.10 and 
+HDF5 1.8.11-*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.11-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.10 source code, documentation, and additional materials
+Links to the HDF5 1.8.11 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.10 release can be obtained from:
+The HDF5 1.8.11 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.10 can be accessed directly at this location: 
+User documentation for 1.8.11 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.10 (current 
-release) versus Release 1.8.9":
+from Release to Release" document, in the section "Release 1.8.11 (current 
+release) versus Release 1.8.10":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.9
+- Bug Fixes since HDF5-1.8.10
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -60,37 +60,15 @@ New Features
     
     Library
     -------
-    - Updated to latest autotools and changed all hard *.sh scripts to
-      configure managed *.sh.in files. Removed overloading of autotools
-      TESTS variable by examples and tests. Renamed configure.in to
-      configure.ac. (ADB - 2012/08/23 - HDFFV-8129)
-    - The data sieve buffer size was for all the datasets in the file.  It
-      could waste memory if any dataset size is smaller than the sieve buffer
-      size.  Now the library picks the smaller one between the dataset size
-      and the sieve buffer size from the file access property. See Issue 7934.
-      (SLU - 2012/4/11)
+    - None
  
     Parallel Library
     ----------------
-    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
-      why the collective I/O was broken during read/write IO access. 
-      (JKM - 2012/08/30 HDFFV-8143)
-
-    - Added H5Pget_mpio_actual_io_mode_f (MSB - 2012/09/27)
+    - None
  
     Tools
     -----
-    - h5import: Allow use of h5dump output as input files to h5import.
-      h5dump must include the "-p" option to print the properties,  
-      configuration file is captured output of h5dump. The restrictions are 
-      that only one dataset with a simple datatype (integer, floating-point, 
-      or string) can be processed. 
-      Integers and floating-point imports from h5dump must use the "binary" 
-      option for the data file. 
-      The string version uses the h5dump "-y --width=1" options to disable the 
-      indexing printouts, print single columns and obviously NOT use the 
-      "binary" option. 
-      (ADB - 2012/07/19 HDFFV-721)
+    - None
 
     High-Level APIs
     ---------------
@@ -98,10 +76,6 @@ New Features
 
     Fortran API
     -----------
-    - Fixed a typo in return value of the nh5dread_f_c function ( was 1 
-      instead of 0 on success); fixed the return value to make it consistent
-      with other Fortran functions; cleaned the code from debug statements.
-      (EIP - 2012/06/23)
 
     C++ API
     -------
@@ -112,94 +86,32 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - None
 
-Bug Fixes since HDF5-1.8.9
+Bug Fixes since HDF5-1.8.10
 ==========================
 
     Configuration
     -------------
-    - Fixed AIX Fortran compiler flags to use appropriate settings for
-      debugging, profiling, optimization situations. HDFFV-8069. (AKC
-      2012/09/27)
+    - None
 
     Library
     -------
-    - Fix a memory leak exposed when inserting/removing a property
-    from a property list several times. HDFFV-8022. (MSC 2012/05/18)
+    - None
 
     Parallel Library
     ----------------
-    - The MPI-POSIX VFD was updated to include the POSIX and Windows
-      correctness features added that had already been added to the other VFDs.
-      HDFFV-8058/7845.  (DER 2012/09/17)
+    - None
 
     Performance
     -------------
-    - Removed program perform/benchpar from the enable-build-all list.  The
-      program will be retired or moved to another location.  HDFFV-8156
-      (AKC 2012/10/01)
-    - Retired program perform/mpi-perf. Its purpose has been incorporated
-      into h5perf before. (AKC 2012/09/21)
+    - None
 
     Tools
     -----
-    - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
-      source file contains chunked dataset and a chunk dim is bigger than 
-      the dataset dim. Another issue is that the command changed max dims
-      if chunk dim is smaller than the dataset dim.
-      These issue occurred when dataset size is smaller than 64k (compact
-      size limit)  Fixed both.
-      HDFFV-8012 (JKM 2012/09/24)
-    - h5diff: Fixed not to accumulate attribute difference to dataset
-      difference in verbose mode (-v, -r), which caused incorrect 
-      difference between dataset and group/datatype object if attribute 
-      exist with any differences. This also lead to fix inconsistent
-      format indicating difference between dataset and group/datatype
-      object. HDFFV-5919 (JKM 2012/09/10)
-    - h5diff: Fixed the incorrect result when comparing attribute data 
-      values and the data type has same class but different size.
-      HDFFV-7942  (JKM 2012/08/15)
-    - h5dump: Replace single element fwrite with block writes.
-      HDFFV-1208 (ADB 2012/08/13)
-    - h5diff: Fixed test failure for "make check" due to failure of 
-      copying test files when performed in HDF5 source tree. Also applied
-      to other tools.  HDFFV-8107 (JKM 2012/08/01)
-    - ph5diff: Fixed intermittent hang issue on a certain operation in 
-      parallel mode. It was detected by daily test for comparing 
-      non-comparable objects, but it could have occurred in other 
-      operations depend on machine condition.  HDFFV-8003 (JKM 2012/08/01)
-    - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of testh5diff.sh
-      to better report when there is an error in the file copying.
-      HDFFV-8105 (AKC 2012/07/22)
-    - h5dump: Fix sort by name display to maintain correct parent / child
-      releationships between ascending / descending order.
-      HDFFV-8095 (ADB 2012/07/12)
-    - h5dump: Fix display by creation order when using option -n (print contents).
-      HDFFV-5942 (ADB 2012/07/09)
-    - h5dump: Allow H5T_CSET_UTF8 to be displayed in h5dump output. Use 
-      technique like in h5ls (matches library options).
-      HDFFV-7999 (ADB 2012/05/23)
-    - h5diff: Fixed not to check and display dangling link status without 
-      --follow-symlinks option. This also improved performance when 
-      comparing lots of external links without the --follow-symlinks
-      option.  HDFFV-7998 (JKM 2012/04/26)
+    - None
 
     F90 API
     -------
-    
-    - Fixed a typo in return value of the nh5dread_f_c function ( was 1
-      instead of 0 on success); fixed the return value to make it consistent
-      with other Fortran functions; cleaned the code from debug statements.
-      (EIP - 2012/06/23)
-
-    - Fixed problem writing/reading control characters to a dataset; writing
-      a string containing: alerts, backspace, carriage_return, form_feed,
-      horizontal_tab, vertical_tab, new_line is now tested and working.
-      (MSB - 2012/09/01)
-
-    - Corrected the integer type of H5S_UNLIMITED_F to HSIZE_T (MSB - 2012/09/01)
-
-    - Corrected the number of continuation lines in the src files
-      to be less than 32 lines for F95 compliance. (MSB - 2012/10/01)
+    - None
 
     C++ API
     ------
@@ -207,16 +119,7 @@ Bug Fixes since HDF5-1.8.9
 
     High-Level APIs:
     ------
-
-    - Fixed problem with H5TBdelete_record destroying all data following the deletion
-      of a row. (MSB- 2012/7/26)
-
-    - Fixed H5LTget_attribute_string not closing an object identifier when an 
-      error occurs. (MSB- 2012/7/21)
-
-    - Corrected return type of H5TBAget_fill from herr_t to htri_t to reflect
-      that a return value of 1 indicates that a fill value is present, 0
-      indicates a fill value is not present and <0 indicates an error.
+    - None
 
     Fortran High-Level APIs:
     ------
