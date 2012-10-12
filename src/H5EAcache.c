@@ -1478,7 +1478,7 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata))
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array data block")
+	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array data block - # pages = %d", dblock->npages)
 
     /* Set return value */
     ret_value = dblock;
