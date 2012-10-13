@@ -1,3 +1,18 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "swmr_common.h"
 #include <unistd.h>
 
@@ -15,21 +30,21 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Open dataset for symbol */
     if((dsid = H5Dopen2(fid, symbol->name, H5P_DEFAULT)) < 0)
-        return(-1);
+        return -1;
 
     /* Get the dataset's dataspace */
     if((file_sid = H5Dget_space(dsid)) < 0)
-        return(-1);
+        return -1;
 
     /* Choose the random record in the dataset (will be the same as chosen by
      * the writer) */
     start[1] = (hsize_t)random() % symbol->nrecords;
     if(H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-        return(-1);
+        return -1;
 
     /* Emit informational message */
     if(verbose)
-        printf("Symbol = '%s', location = %lld\n", symbol->name, (long long)start);
+        fprintf(stderr, "Symbol = '%s', location = %lld\n", symbol->name, (long long)start);
 
     /* Read record from dataset */
 #ifdef OHDR_DEPS_WORK
@@ -43,7 +58,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     record->rec_id = (uint64_t)0;
 #endif /* OHDR_DEPS_WORK */
     if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0)
-        return(-1);
+        return -1;
 
     /* Verify record value */
     if(record->rec_id != start[1]
@@ -51,20 +66,21 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
              && record->rec_id != (uint64_t)0
 #endif
             ) {
-        printf("Incorrect record value!\n");
-        printf("Symbol = '%s', location = %lld, record->rec_id = %llu\n", symbol->name, (long long)start, (unsigned long long)record->rec_id);
+        fprintf(stderr, "*** ERROR ***\n");
+        fprintf(stderr, "Incorrect record value!\n");
+        fprintf(stderr, "Symbol = '%s', location = %lld, record->rec_id = %llu\n", symbol->name, (long long)start, (unsigned long long)record->rec_id);
         return(-1);
     } /* end if */
 
     /* Close the dataset's dataspace */
     if(H5Sclose(file_sid) < 0)
-        return(-1);
+        return -1;
 
     /* Close dataset for symbol */
     if(H5Dclose(dsid) < 0)
-        return(-1);
+        return -1;
 
-    return(0);
+    return 0;
 } /* end check_dataset() */
 
 static int
@@ -79,24 +95,24 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     unsigned seed;              /* Seed for random number generator */
     unsigned iter_to_reopen = reopen_count; /* # of iterations until reopen */
     unsigned long u;            /* Local index variable */
-hid_t fapl;
-fapl = H5Pcreate(H5P_FILE_ACCESS);
-H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
+    hid_t fapl;
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
     /* Emit informational message */
         if(verbose)
-            printf("Opening file: %s\n", filename);
+            fprintf(stderr, "Opening file: %s\n", filename);
 
     /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-        return(-1);
+        return -1;
 
     /* Seed the random number generator with the attribute in the file */
     if((aid = H5Aopen(fid, "seed", H5P_DEFAULT)) < 0)
-        return(-1);
+        return -1;
     if(H5Aread(aid, H5T_NATIVE_UINT, &seed) < 0)
-        return(-1);
+        return -1;
     if(H5Aclose(aid) < 0)
-        return(-1);
+        return -1;
     srandom(seed);
 
     /* Reset the record */
@@ -105,11 +121,11 @@ H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
 
     /* Create a dataspace for the record to read */
     if((mem_sid = H5Screate(H5S_SCALAR)) < 0)
-        return(-1);
+        return -1;
 
     /* Emit informational message */
     if(verbose)
-        printf("Reading records\n");
+        fprintf(stderr, "Reading records\n");
 
     /* Get the starting time */
     start_time = time(NULL);
@@ -131,16 +147,16 @@ H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
         do {
             /* Check if sequence attribute exists */
             if((attr_exists = H5Aexists_by_name(fid, symbol->name, "seq", H5P_DEFAULT)) < 0)
-                return(-1);
+                return -1;
 
             if(attr_exists) {
                 /* Read sequence number attribute */
                 if((aid = H5Aopen_by_name(fid, symbol->name, "seq", H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                    return(-1);
+                    return -1;
                 if(H5Aread(aid, H5T_NATIVE_ULONG, &file_u) < 0)
-                    return(-1);
+                    return -1;
                 if(H5Aclose(aid) < 0)
-                    return(-1);
+                    return -1;
 
                 /* Check if sequence number is at least u - if so, this should
                  * guarantee that this record has been written */
@@ -150,8 +166,8 @@ H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
 
             /* Check for timeout */
             if(time(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
-                printf("Reader timed out\n");
-                return(-1);
+                fprintf(stderr, "Reader timed out\n");
+                return -1;
             } /* end if */
 
             /* Pause */
@@ -159,52 +175,52 @@ H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
 
             /* Reopen the file */
             if(H5Fclose(fid) < 0)
-                return(-1);
+                return -1;
             if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-                return(-1);
+                return -1;
             iter_to_reopen = reopen_count;
         } while(1);
 
         /* Emit informational message */
         if(verbose)
-            printf("Checking dataset %lu\n", u);
+            fprintf(stderr, "Checking dataset %lu\n", u);
 
         /* Check dataset */
         if(check_dataset(fid, verbose, symbol, &record, mem_sid) < 0)
-            return(-1);
+            return -1;
 
         /* Check for reopen */
         iter_to_reopen--;
         if(iter_to_reopen == 0) {
             /* Emit informational message */
             if(verbose)
-                printf("Reopening file: %s\n", filename);
+                fprintf(stderr, "Reopening file: %s\n", filename);
 
             /* Reopen the file */
             if(H5Fclose(fid) < 0)
-                return(-1);
+                return -1;
             if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
-                return(-1);
+                return -1;
             iter_to_reopen = reopen_count;
         } /* end if */
     } /* end while */
 
     /* Close file */
     if(H5Fclose(fid) < 0)
-        return(-1);
+        return -1;
 
     /* Close the memory dataspace */
     if(H5Sclose(mem_sid) < 0)
-        return(-1);
+        return -1;
 
-    return(0);
+    return 0;
 } /* end read_records() */
 
 static void
 usage(void)
 {
     printf("Usage error!\n");
-    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>] [-r <# of reads between reopens>] <# of records>\n");
+    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>] [-n <# of reads between reopens>] <# of records>\n");
     printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read between reopens ('-r 1')\n");
     printf("Note that the # of records *must* be the same as that supplied to swmr_sparse_writer\n");
     exit(1);
@@ -212,11 +228,11 @@ usage(void)
 
 int main(int argc, const char *argv[])
 {
-    long nrecords = 0;  /* # of records to read */
-    int poll_time = 1;  /* # of seconds to sleep when waiting for writer */
-    int reopen_count = 1; /* # of reads between reopens */
-    unsigned verbose = 1;       /* Whether to emit some informational messages */
-    unsigned u;         /* Local index variables */
+    long nrecords = 0;      /* # of records to read */
+    int poll_time = 1;      /* # of seconds to sleep when waiting for writer */
+    int reopen_count = 1;   /* # of reads between reopens */
+    unsigned verbose = 1;   /* Whether to emit some informational messages */
+    unsigned u;             /* Local index variables */
 
     /* Parse command line options */
     if(argc < 2)
@@ -227,7 +243,7 @@ int main(int argc, const char *argv[])
             if(argv[u][0] == '-') {
                 switch(argv[u][1]) {
                     /* # of reads between reopens */
-                    case 'r':
+                    case 'n':
                         reopen_count = atoi(argv[u + 1]);
                         if(reopen_count < 0)
                             usage();
@@ -266,52 +282,52 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        printf("Parameters:\n");
-        printf("\t# of seconds between polling = %d\n", poll_time);
-        printf("\t# of reads between reopens = %d\n", reopen_count);
-        printf("\t# of records to read = %ld\n", nrecords);
+        fprintf(stderr, "Parameters:\n");
+        fprintf(stderr, "\t# of seconds between polling = %d\n", poll_time);
+        fprintf(stderr, "\t# of reads between reopens = %d\n", reopen_count);
+        fprintf(stderr, "\t# of records to read = %ld\n", nrecords);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        printf("Generating symbol names\n");
+        fprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0) {
-        printf("Error generating symbol names!\n");
+        fprintf(stderr, "Error generating symbol names!\n");
         exit(1);
     } /* end if */
 
     /* Create datatype for creating datasets */
     if((symbol_tid = create_symbol_datatype()) < 0)
-        return(-1);
+        return -1;
 
     /* Reading records from datasets */
     if(read_records(FILENAME, verbose, (unsigned long) nrecords, (unsigned)poll_time, (unsigned)reopen_count) < 0) {
-        printf("Error reading records from datasets!\n");
+        fprintf(stderr, "Error reading records from datasets!\n");
         exit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        printf("Releasing symbols\n");
+        fprintf(stderr, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
-        printf("Error releasing symbols!\n");
+        fprintf(stderr, "Error releasing symbols!\n");
         exit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        printf("Closing objects\n");
+        fprintf(stderr, "Closing objects\n");
 
     /* Close objects created */
     if(H5Tclose(symbol_tid) < 0) {
-        printf("Error closing symbol datatype!\n");
+        fprintf(stderr, "Error closing symbol datatype!\n");
         exit(1);
     } /* end if */
 
-    return(0);
+    return 0;
 }
 

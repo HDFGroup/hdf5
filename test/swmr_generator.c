@@ -1,10 +1,27 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include <sys/time.h>
+
 #include "swmr_common.h"
 
 #define CHUNK_SIZE      50
 
 static int
 gen_skeleton(const char *filename, unsigned verbose, int comp_level,
-    const char *index_type)
+    const char *index_type, unsigned random_seed)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fcpl;         /* File creation property list */
@@ -19,34 +36,33 @@ gen_skeleton(const char *filename, unsigned verbose, int comp_level,
 #ifdef FILLVAL_WORKS
     symbol_t fillval;   /* Dataset fill value */
 #endif /* FILLVAL_WORKS */
-    unsigned seed;      /* Random seed to write to root group attribute */
     unsigned u, v;      /* Local index variable */
 
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        return(-1);
+        return -1;
 
     /* Select the correct index type */
     if(strcmp(index_type, "b1"))
         if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            return(-1);
+            return -1;
     if(!strcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
 #ifdef QAK
-/* Increase the initial size of the metadata cache */
-{
-    H5AC_cache_config_t mdc_config;
+    /* Increase the initial size of the metadata cache */
+    {
+        H5AC_cache_config_t mdc_config;
 
-    mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-    H5Pget_mdc_config(fapl, &mdc_config);
-printf("mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-    mdc_config.set_initial_size = 1;
-    mdc_config.initial_size = 16 * 1024 * 1024;
-/*    mdc_config.epoch_length = 5000; */
-    H5Pset_mdc_config(fapl, &mdc_config);
-}
+        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+        H5Pget_mdc_config(fapl, &mdc_config);
+        fprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
+        fprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
+        mdc_config.set_initial_size = 1;
+        mdc_config.initial_size = 16 * 1024 * 1024;
+        /* mdc_config.epoch_length = 5000; */
+        H5Pset_mdc_config(fapl, &mdc_config);
+    }
 #endif /* QAK */
 
 #ifdef QAK
@@ -59,7 +75,7 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
 
     /* Create file creation property list */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        return(-1);
+        return -1;
 
 #ifdef QAK
     H5Pset_link_phase_change(fcpl, 0, 0);
@@ -67,47 +83,46 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
 
     /* Emit informational message */
     if(verbose)
-        printf("Creating file\n");
+        fprintf(stderr, "Creating file\n");
 
     /* Create the file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-        return(-1);
+        return -1;
 
     /* Close file creation property list */
     if(H5Pclose(fcpl) < 0)
-        return(-1);
+        return -1;
 
     /* Close file access property list */
     if(H5Pclose(fapl) < 0)
-        return(-1);
+        return -1;
 
     /* Create attribute with (shared) random number seed - for sparse test */
-    seed = (unsigned)time(NULL);
     if((sid = H5Screate(H5S_SCALAR)) < 0)
-        return(-1);
+        return -1;
     if((aid = H5Acreate2(fid, "seed", H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        return(-1);
-    if(H5Awrite(aid, H5T_NATIVE_UINT, &seed) < 0)
-        return(-1);
+        return -1;
+    if(H5Awrite(aid, H5T_NATIVE_UINT, &random_seed) < 0)
+        return -1;
     if(H5Sclose(sid) < 0)
-        return(-1);
+        return -1;
 
     /* Create datatype for creating datasets */
     if((tid = create_symbol_datatype()) < 0)
-        return(-1);
+        return -1;
 
     /* Create dataspace for creating datasets */
     if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
-        return(-1);
+        return -1;
 
     /* Create dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        return(-1);
+        return -1;
     if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
-        return(-1);
+        return -1;
     if(comp_level >= 0) {
         if(H5Pset_deflate(dcpl, (unsigned)comp_level) < 0)
-            return(-1);
+            return -1;
     } /* end if */
 #ifdef FILLVAL_WORKS
     /* Currently fill values do not work because they can bump the dataspace
@@ -116,12 +131,12 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
     memset(&fillval, 0, sizeof(fillval));
     fillval.rec_id = (uint64_t)ULLONG_MAX;
     if(H5Pset_fill_value(dcpl, tid, &fillval) < 0)
-        return(-1);
+        return -1;
 #endif /* FILLVAL_WORKS */
 
     /* Emit informational message */
     if(verbose)
-        printf("Creating datasets\n");
+        fprintf(stderr, "Creating datasets\n");
 
     /* Create the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -131,34 +146,35 @@ printf("mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length
 
             generate_name(name_buf, u, v);
             if((dsid = H5Dcreate2(fid, name_buf, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-                return(-1);
+                return -1;
 
             if(H5Dclose(dsid) < 0)
-                return(-1);
+                return -1;
         } /* end for */
 
     /* Emit informational message */
     if(verbose)
-        printf("Closing objects\n");
+        fprintf(stderr, "Closing objects\n");
 
     /* Close everythign */
     if(H5Pclose(dcpl) < 0)
-        return(-1);
+        return -1;
     if(H5Sclose(sid) < 0)
-        return(-1);
+        return -1;
     if(H5Tclose(tid) < 0)
-        return(-1);
+        return -1;
     if(H5Fclose(fid) < 0)
-        return(-1);
+        return -1;
 
-    return(0);
+    return 0;
 } /* end gen_skeleton() */
 
 static void
 usage(void)
 {
     printf("Usage error!\n");
-    printf("Usage: swmr_generator [-q] [-c <deflate compression level>] [-i <index type>]\n");
+    printf("Usage: swmr_generator [-q] [-c <deflate compression level>] [-i <index type>] [-r <random # seed>]\n");
+    printf("NOTE: The random seed option is only used by the sparse test\n");
     printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
     printf("<index type> should be b1, b2, fa, or ea (fa not yet implemented)\n");
     printf("Defaults to verbose (no '-q' given), no compression ('-c -1') and v1 b-tree\n");
@@ -168,10 +184,13 @@ usage(void)
 
 int main(int argc, const char *argv[])
 {
-    int comp_level = (-1);      /* Compression level (-1 is no compression) */
-    unsigned verbose = 1;       /* Whether to emit some informational messages */
-    const char *index_type = "b1"; /* Chunk index type */
-    unsigned u;                 /* Local index variables */
+    int comp_level = -1;            /* Compression level (-1 is no compression) */
+    unsigned verbose = 1;           /* Whether to emit some informational messages */
+    const char *index_type = "b1";  /* Chunk index type */
+    unsigned use_seed = 0;          /* Set to 1 if a seed was set on the command line */
+    unsigned random_seed = 0;       /* Random # seed */
+    unsigned u;                     /* Local index variables */
+    int temp;
 
     /* Parse command line options */
     if(argc > 1) {
@@ -197,6 +216,17 @@ int main(int argc, const char *argv[])
                         u += 2;
                         break;
 
+                    /* Random # seed */
+                    case 'r':
+                        use_seed = 1;
+                        temp = atoi(argv[u + 1]);
+                        if(temp < 0)
+                            usage();
+                        else
+                            random_seed = (unsigned)temp;
+                        u += 2;
+                        break;
+
                     /* Be quiet */
                     case 'q':
                         verbose = 0;
@@ -213,21 +243,30 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        printf("Parameters:\n");
-        printf("\tcompression level = %d\n", comp_level);
-        printf("\tindex_type = %s\n", index_type);
+        fprintf(stderr, "Parameters:\n");
+        fprintf(stderr, "\tcompression level = %d\n", comp_level);
+        fprintf(stderr, "\tindex_type = %s\n", index_type);
     } /* end if */
+    
+    /* Set the random seed */
+    if(0 == use_seed) {
+        struct timeval t;
+        gettimeofday(&t, NULL);
+        random_seed = (unsigned)((t.tv_sec * 1000) + t.tv_usec);
+    } /* end if */
+    srandom(random_seed);
+    /* ALWAYS emit the random seed for possible debugging */
+    fprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
 
     /* Emit informational message */
     if(verbose)
-        printf("Generating skeleton file: %s\n", FILENAME);
+        fprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
 
     /* Generate file skeleton */
-    if(gen_skeleton(FILENAME, verbose, comp_level, index_type) < 0) {
-        printf("Error generating skeleton file!\n");
+    if(gen_skeleton(FILENAME, verbose, comp_level, index_type, random_seed) < 0) {
+        fprintf(stderr, "Error generating skeleton file!\n");
         exit(1);
     } /* end if */
 
-    return(0);
+    return 0;
 }
-
