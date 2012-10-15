@@ -164,6 +164,9 @@ H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id)
     if(H5B2_get_addr(hdr->huge_bt2, &hdr->huge_bt2_addr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get v2 B-tree address for tracking 'huge' heap objects")
 
+    /* Create a flush dependency between the 'huge' v2 B-tree and the fractal heap */
+    if(hdr->swmr_write && H5B2_depend((H5AC_info_t *)hdr, hdr->huge_bt2) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "can't create flush dependency between fractal heap and 'huge' v2 B-tree")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_huge_bt2_create() */
@@ -1034,6 +1037,10 @@ H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id)
     if(H5F_addr_defined(hdr->huge_bt2_addr) && hdr->huge_nobjs == 0) {
         /* Sanity check */
         HDassert(hdr->huge_size == 0);
+        
+        /* Destroy the flush dependency between the 'huge' v2 B-tree and the fractal heap */
+        if(hdr->swmr_write && H5B2_undepend((H5AC_info_t *)hdr, hdr->huge_bt2) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "can't destroy flush dependency between fractal heap and 'huge' v2 B-tree")
 
         /* Delete the v2 B-tree */
         /* (any v2 B-tree class will work here) */
