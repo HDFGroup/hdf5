@@ -220,7 +220,7 @@ The following platforms and compilers have been tested for this release.
     Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
     Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
     Intel 64-bit                      (Apple Inc. build 5666) (dot 3)
-    (fred)                        GNU Fortan (GCC) 4.6.1 (gfortran)
+    (fred)                        GNU Fortran (GCC) 4.6.2 20111019 (prerelease)
                                   Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
