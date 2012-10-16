@@ -194,13 +194,6 @@ AC_SUBST([enable_shared])
 AC_SUBST([enable_static])
 AC_SUBST([UNAME_INFO]) UNAME_INFO=`uname -a`
 
-## Define symbol variables to allow h5cc.in and its companions to determine
-## whether static libraries are built or not.  When they are not built, the
-## compile scripts should use shared libraries by default
-
-AC_SUBST([H5BLD_STATIC]) H5BLD_STATIC=yes
-AC_SUBST([HDF5_USE_SHLIB])
-
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
 ## that it actually does what it's supposed to do. Catch this early
@@ -4375,14 +4368,6 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
 ##
-
-## If $enable_static = "no", set HDF5_USE_SHLIB to "yes" so that the compile
-## scripts will default to use shared libraries instead of defaulting to
-## use static libraries.  Otherwise they fail because the static libraries
-## don't exist.
-if test "X$enable_static" = "Xno"; then
-  HDF5_USE_SHLIB="yes"
-fi
 
 ## The directory search list
 AC_SUBST([SEARCH]) SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'
