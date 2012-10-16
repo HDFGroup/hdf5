@@ -1469,7 +1469,7 @@ test_file_ishdf5(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_hdf5(FILE1);
+    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
     VERIFY(status, TRUE, "H5Fis_hdf5");
 
 
@@ -1493,7 +1493,7 @@ test_file_ishdf5(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is an HDF5 file */
-    status = H5Fis_hdf5(FILE1);
+    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
     VERIFY(status, TRUE, "H5Fis_hdf5");
 
 
@@ -1514,7 +1514,7 @@ test_file_ishdf5(void)
     CHECK(ret, FAIL, "HDclose");
 
     /* Verify that the file is not an HDF5 file */
-    status = H5Fis_hdf5(FILE1);
+    status = H5Fis_accessible(FILE1, H5P_DEFAULT);
     VERIFY(status, FALSE, "H5Fis_hdf5");
 
 } /* end test_file_ishdf5() */

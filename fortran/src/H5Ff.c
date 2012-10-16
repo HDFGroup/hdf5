@@ -404,17 +404,18 @@ nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
      return ret_value;
 }
 
-/****if* H5Ff/h5fis_hdf5_c
+/****if* H5Ff/h5fis_accessible_c
  * NAME
- *        h5fis_hdf5_c
+ *        h5fis_accessible_c
  * PURPOSE
- *     Call H5Fis_hdf5 to determone if the file is an HDF5 file
+ *     Call H5Fis_accessible to determone if the file is accessible with fapl
  * INPUTS
  *      name - name of the file
  *              namelen - name length
+ *              acc_prp - identifier of access property list
  * OUTPUTS
- *     flag - 0 if file is not HDF5 file , positive if a file
- *                     is an HDF5 file, and negative on failure.
+ *     flag - 0 if file is not accessible , positive if a file
+ *                     is accessible, and negative on failure.
  * RETURNS
  *     0 on success, -1 on failure
  * AUTHOR
@@ -425,14 +426,16 @@ nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id)
  * SOURCE
 */
 int_f
-nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
+nh5fis_accessible_c (_fcd name, int_f *namelen, hid_t_f *acc_prp, int_f *flag)
 /******/
 {
      int ret_value = -1;
      char *c_name;
      int_f c_namelen;
+     hid_t c_acc_prp;
      htri_t status;
 
+     c_acc_prp = (hid_t)*acc_prp;
      /*
       * Convert FORTRAN name to C name
       */
@@ -443,7 +446,7 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
      /*
       * Call H5Fopen function.
       */
-     status = H5Fis_hdf5(c_name);
+     status = H5Fis_accessible(c_name, c_acc_prp);
      *flag = (int_f)status;
      if (status >= 0) ret_value = 0;
 

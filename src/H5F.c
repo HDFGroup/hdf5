@@ -451,9 +451,16 @@ H5Fis_accessible(const char *name, hid_t fapl_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "*si", name, fapl_id);
 
-    /* Check args and all the boring stuff. */
+    /* Check args */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
+
+    /* Check the file access property list */
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     if(H5VL_file_misc(NULL, NULL, H5VL_FILE_IS_ACCESSIBLE, H5_REQUEST_NULL, 
                       fapl_id, name, &ret_value) < 0)

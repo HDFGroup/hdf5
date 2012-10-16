@@ -158,7 +158,7 @@ main (int argc, const char *argv[])
 
   ifname = HDstrdup (argv[opt_ind]);
 
-  testval = H5Fis_hdf5 (ifname);
+  testval = H5Fis_accessible (ifname, H5P_DEFAULT);
 
   if (testval <= 0)
     {
