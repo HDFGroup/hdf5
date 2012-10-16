@@ -52,7 +52,7 @@
 
 /* Having a common dataset name is an error */
 #define DATASETNAME		"commonname"
-#define EXPECTED_ERROR_DEPTH	8
+#define EXPECTED_ERROR_DEPTH	9
 #define WRITE_NUMBER		37
 
 static herr_t error_callback(hid_t , void *);
@@ -67,7 +67,7 @@ typedef struct err_num_struct {
     hid_t min_num;
 } err_num_t;
 
-err_num_t expected[8];
+err_num_t expected[9];
 
 int error_flag = 0;
 int error_count = 0;
@@ -85,23 +85,29 @@ void tts_error(void)
     expected[0].maj_num = H5E_DATASET;
     expected[0].min_num = H5E_CANTINIT;
 
-    expected[1].maj_num = H5E_DATASET;
+    expected[1].maj_num = H5E_VOL;
     expected[1].min_num = H5E_CANTINIT;
 
-    expected[2].maj_num = H5E_LINK;
+    expected[2].maj_num = H5E_DATASET;
     expected[2].min_num = H5E_CANTINIT;
 
-    expected[3].maj_num = H5E_SYM;
-    expected[3].min_num = H5E_CANTINSERT;
+    expected[3].maj_num = H5E_DATASET;
+    expected[3].min_num = H5E_CANTINIT;
 
-    expected[4].maj_num = H5E_SYM;
-    expected[4].min_num = H5E_NOTFOUND;
+    expected[4].maj_num = H5E_LINK;
+    expected[4].min_num = H5E_CANTINIT;
 
     expected[5].maj_num = H5E_SYM;
-    expected[5].min_num = H5E_CALLBACK;
+    expected[5].min_num = H5E_CANTINSERT;
 
     expected[6].maj_num = H5E_SYM;
-    expected[6].min_num = H5E_EXISTS;
+    expected[6].min_num = H5E_NOTFOUND;
+
+    expected[7].maj_num = H5E_SYM;
+    expected[7].min_num = H5E_CALLBACK;
+
+    expected[8].maj_num = H5E_SYM;
+    expected[8].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
     H5TS_mutex_init(&error_mutex);
@@ -221,6 +227,7 @@ herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void UNUSED
         if (n < EXPECTED_ERROR_DEPTH && maj_num == expected[n].maj_num &&
                 min_num == expected[n].min_num)
             return SUCCEED;
+        printf("n=%d exited\n", n);
     }
 
     error_flag = -1;
