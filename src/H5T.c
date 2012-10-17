@@ -1060,6 +1060,8 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_SOFT, "struct(no-opt)", compound, compound, H5T__conv_struct, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "struct(opt)", compound, compound, H5T__conv_struct_opt, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "enum", enum_type, enum_type, H5T__conv_enum, H5AC_dxpl_id, FALSE);
+    status |= H5T_register(H5T_PERS_SOFT, "enum_i", enum_type, fixedpt, H5T__conv_enum_numeric, H5AC_dxpl_id, FALSE);
+    status |= H5T_register(H5T_PERS_SOFT, "enum_f", enum_type, floatpt, H5T__conv_enum_numeric, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "vlen", vlen, vlen, H5T__conv_vlen, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "array", array, array, H5T__conv_array, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "objref", objref, objref, H5T__conv_order_opt, H5AC_dxpl_id, FALSE);

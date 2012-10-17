@@ -109,9 +109,9 @@ test_named(hid_t file)
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_noconv
+ * Function:	test_conv
  *
- * Purpose:	Tests creation of datasets when no conversion is present.
+ * Purpose:	Tests writing and read data
  *
  * Return:	Success:	0
  *
@@ -119,24 +119,32 @@ test_named(hid_t file)
  *
  * Programmer:	Robb Matzke
  *              Monday, January  4, 1999
+ *
+ *              Raymond Lu
+ *              12 October 2012
+ *              I added tests for enum-integer and enum-float conversions
  *-------------------------------------------------------------------------
  */
 static int
-test_noconv(hid_t file)
+test_conv(hid_t file)
 {
     hid_t	cwg=-1, type=-1, space=-1, dset=-1;
     c_e1	val;
+    /* Some values are out of range for testing. The library should accept them */        
     static c_e1	data1[]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			 E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED,
 			 E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK, E1_WHITE,
-			 E1_RED,   E1_WHITE, E1_GREEN, E1_GREEN, E1_BLUE};
+			 E1_RED,   E1_WHITE, 0, -1, -2};
     c_e1	data2[NELMTS(data1)];
+    short 	data_short[NELMTS(data1)];
+    int 	data_int[NELMTS(data1)];
+    double 	data_double[NELMTS(data1)];
     hsize_t	ds_size[1]={NELMTS(data1)};
     size_t	i;
 
-    TESTING("no-conversion datasets");
+    TESTING("enumeration conversions");
 
-    if((cwg = H5Gcreate2(file, "test_noconv", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((cwg = H5Gcreate2(file, "test_conv", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     if((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "RED",   CPTR(val, E1_RED  )) < 0) FAIL_STACK_ERROR
@@ -146,20 +154,96 @@ test_noconv(hid_t file)
     if(H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0) FAIL_STACK_ERROR
 
     if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-    if((dset = H5Dcreate2(cwg, "color_table", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /***************************************
+     *    Dataset of enumeration type
+     ***************************************/
+    /* Create a dataset of enum type and write enum data to it */
+    if((dset = H5Dcreate2(cwg, "color_table1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
+
+    /* Test reading back the data with no conversion */
     if(H5Dread(dset, type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
 	if(data1[i] != data2[i]) {
 	    H5_FAILED();
-	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
+	    printf("    1. data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
 		   (unsigned long)i, (int)(data2[i]));
 	    goto error;
 	} /* end if */
 
+    /* Test converting the data to integer. Read enum data back as integer */
+    if(H5Dread(dset, H5T_NATIVE_SHORT, space, space, H5P_DEFAULT, data_short) < 0) FAIL_STACK_ERROR
+
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+	if(data1[i] != data_short[i]) {
+	    H5_FAILED();
+	    printf("    2. data1[%lu]=%d, data_short[%lu]=%d (should be same)\n",
+		   (unsigned long)i, (int)(data1[i]),
+		   (unsigned long)i, (int)(data_short[i]));
+	    goto error;
+	} /* end if */
+
+    /* Test converting the data to floating number. Read enum data back as floating number */
+    if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0) FAIL_STACK_ERROR
+
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+	if(data1[i] != (int)data_double[i]) {
+	    H5_FAILED();
+	    printf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n",
+		   (unsigned long)i, (int)(data1[i]),
+		   (unsigned long)i, (int)(data_double[i]));
+	    goto error;
+	} /* end if */
+
     if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+    /***************************************
+     *    Dataset of integer type
+     ***************************************/
+    /* Create a dataset of native integer and write enum data to it */
+    if((dset = H5Dcreate2(cwg, "color_table2", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    if(H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
+
+    /* Test reading back the data with no conversion */
+    if(H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, data_int) < 0) FAIL_STACK_ERROR
+
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+	if(data1[i] != data_int[i]) {
+	    H5_FAILED();
+	    printf("    4. data1[%lu]=%d, data_int[%lu]=%d (should be same)\n",
+		   (unsigned long)i, (int)(data1[i]),
+		   (unsigned long)i, (int)(data_int[i]));
+	    goto error;
+	} /* end if */
+
+    if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
+    /***************************************
+     *    Dataset of double type
+     ***************************************/
+    /* Create a dataset of native double and write enum data to it */
+    if((dset = H5Dcreate2(cwg, "color_table3", H5T_NATIVE_DOUBLE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    if(H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
+
+    /* Test reading back the data with no conversion */
+    if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0) FAIL_STACK_ERROR
+
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+	if(data1[i] != (int)data_double[i]) {
+	    H5_FAILED();
+	    printf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n",
+		   (unsigned long)i, (int)(data1[i]),
+		   (unsigned long)i, (int)(data_double[i]));
+	    goto error;
+	} /* end if */
+
+    if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+
     if(H5Sclose(space) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
     if(H5Gclose(cwg) < 0) FAIL_STACK_ERROR
@@ -572,7 +656,7 @@ main(void)
 
     /* Tests */
     nerrors += test_named(file);
-    nerrors += test_noconv(file);
+    nerrors += test_conv(file);
     nerrors += test_tr1(file);
     nerrors += test_tr2(file);
     nerrors += test_value_dsnt_exist();
