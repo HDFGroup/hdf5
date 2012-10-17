@@ -146,12 +146,11 @@ Bug Fixes since HDF5-1.8.9
       if chunk dim is smaller than the dataset dim. These issue occurred 
       when dataset size is smaller than 64k (compact size limit)  Fixed both.
       HDFFV-8012 (JKM 2012/09/24)
-    - h5diff: Fixed not to accumulate attribute difference to dataset
-      difference in verbose mode (-v, -r), which caused incorrect 
-      difference between dataset and group/datatype object if attribute 
-      exist with any differences. This also lead to fix inconsistent
-      format indicating difference between dataset and group/datatype
-      object. HDFFV-5919 (JKM 2012/09/10)
+    - h5diff: Fixed the counter in verbose mode (-v, -r) so that it will no 
+      longer add together the differences between datasets and the differences 
+      between attributes of those datasets. This change makes the output of 
+      verbose mode consistent for datasets, groups, and committed datatypes. 
+      HDFFV-5919 (JKM 2012/09/10)
     - h5diff: Fixed the incorrect result when comparing attribute data 
       values and the data type has the same class but different sizes.
       HDFFV-7942  (JKM 2012/08/15)
@@ -177,10 +176,11 @@ Bug Fixes since HDF5-1.8.9
       Used technique similar to what was done in h5ls (matches library 
       options).
       HDFFV-7999 (ADB 2012/05/23)
-    - h5diff: Fixed not to check and display dangling link status without 
-      --follow-symlinks option. This also improved performance when 
-      comparing lots of external links without the --follow-symlinks
-      option.  HDFFV-7998 (JKM 2012/04/26)
+    - h5diff: Fixed the tool so that it will not check and display the status 
+      of dangling links without setting the --follow-symlinks option. This 
+      also improved performance when comparing lots of external links without 
+      the --follow-symlinks option.  
+      HDFFV-7998 (JKM 2012/04/26)
 
     F90 API
     -------
