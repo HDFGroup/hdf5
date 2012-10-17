@@ -64,7 +64,7 @@ New Features
       configure managed *.sh.in files. Removed overloading of autotools
       TESTS variable by examples and tests. Renamed configure.in to
       configure.ac. (ADB - 2012/08/23 - HDFFV-8129)
-    - The data sieve buffer size was for all the datasets in the file.  It
+    - The data sieve buffer size was set for all the datasets in the file.  It
       could waste memory if any dataset size is smaller than the sieve buffer
       size.  Now the library picks the smaller one between the dataset size
       and the sieve buffer size from the file access property. See Issue 7934.
@@ -72,24 +72,22 @@ New Features
  
     Parallel Library
     ----------------
-    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
-      why the collective I/O was broken during read/write IO access. 
+    - Added the H5Pget_mpio_no_collective_cause() function that retrieves 
+      reasons why the collective I/O was broken during read/write IO access. 
       (JKM - 2012/08/30 HDFFV-8143)
 
     - Added H5Pget_mpio_actual_io_mode_f (MSB - 2012/09/27)
  
     Tools
     -----
-    - h5import: Allow use of h5dump output as input files to h5import.
-      h5dump must include the "-p" option to print the properties,  
+    - h5import: Changed to allow the use of h5dump output as input files to 
+      h5import. h5dump must include the "-p" option to print the properties; 
       configuration file is captured output of h5dump. The restrictions are 
       that only one dataset with a simple datatype (integer, floating-point, 
-      or string) can be processed. 
-      Integers and floating-point imports from h5dump must use the "binary" 
-      option for the data file. 
-      The string version uses the h5dump "-y --width=1" options to disable the 
-      indexing printouts, print single columns and obviously NOT use the 
-      "binary" option. 
+      or string) can be processed. Integers and floating-point imports from 
+      h5dump must use the "binary" option for the data file. The string version 
+      uses the h5dump "-y --width=1" options to disable the indexing printouts, 
+      print single columns, and obviously NOT use the "binary" option. 
       (ADB - 2012/07/19 HDFFV-721)
 
     High-Level APIs
@@ -98,9 +96,9 @@ New Features
 
     Fortran API
     -----------
-    - Fixed a typo in return value of the nh5dread_f_c function ( was 1 
+    - Fixed a typo in return value of the nh5dread_f_c function (was 1 
       instead of 0 on success); fixed the return value to make it consistent
-      with other Fortran functions; cleaned the code from debug statements.
+      with other Fortran functions; cleaned debug statements from the code.
       (EIP - 2012/06/23)
 
     C++ API
@@ -118,13 +116,13 @@ Bug Fixes since HDF5-1.8.9
     Configuration
     -------------
     - Fixed AIX Fortran compiler flags to use appropriate settings for
-      debugging, profiling, optimization situations. HDFFV-8069. (AKC
-      2012/09/27)
+      debugging, profiling, and optimization situations. HDFFV-8069. 
+      (AKC 2012/09/27)
 
     Library
     -------
-    - Fix a memory leak exposed when inserting/removing a property
-    from a property list several times. HDFFV-8022. (MSC 2012/05/18)
+    - Fixed a memory leak exposed when inserting/removing a property
+      from a property list several times. HDFFV-8022. (MSC 2012/05/18)
 
     Parallel Library
     ----------------
@@ -138,16 +136,15 @@ Bug Fixes since HDF5-1.8.9
       program will be retired or moved to another location.  HDFFV-8156
       (AKC 2012/10/01)
     - Retired program perform/mpi-perf. Its purpose has been incorporated
-      into h5perf before. (AKC 2012/09/21)
+      into h5perf. (AKC 2012/09/21)
 
     Tools
     -----
     - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
       source file contains chunked dataset and a chunk dim is bigger than 
       the dataset dim. Another issue is that the command changed max dims
-      if chunk dim is smaller than the dataset dim.
-      These issue occurred when dataset size is smaller than 64k (compact
-      size limit)  Fixed both.
+      if chunk dim is smaller than the dataset dim. These issue occurred 
+      when dataset size is smaller than 64k (compact size limit)  Fixed both.
       HDFFV-8012 (JKM 2012/09/24)
     - h5diff: Fixed not to accumulate attribute difference to dataset
       difference in verbose mode (-v, -r), which caused incorrect 
@@ -156,9 +153,9 @@ Bug Fixes since HDF5-1.8.9
       format indicating difference between dataset and group/datatype
       object. HDFFV-5919 (JKM 2012/09/10)
     - h5diff: Fixed the incorrect result when comparing attribute data 
-      values and the data type has same class but different size.
+      values and the data type has the same class but different sizes.
       HDFFV-7942  (JKM 2012/08/15)
-    - h5dump: Replace single element fwrite with block writes.
+    - h5dump: Replaced single element fwrite with block writes.
       HDFFV-1208 (ADB 2012/08/13)
     - h5diff: Fixed test failure for "make check" due to failure of 
       copying test files when performed in HDF5 source tree. Also applied
@@ -166,17 +163,19 @@ Bug Fixes since HDF5-1.8.9
     - ph5diff: Fixed intermittent hang issue on a certain operation in 
       parallel mode. It was detected by daily test for comparing 
       non-comparable objects, but it could have occurred in other 
-      operations depend on machine condition.  HDFFV-8003 (JKM 2012/08/01)
-    - h5diff: Fixed the Function COPY_TESTFILES_TO_TESTDIR() of testh5diff.sh
+      operations depending on machine condition.  HDFFV-8003 (JKM 2012/08/01)
+    - h5diff: Fixed the function COPY_TESTFILES_TO_TESTDIR() of testh5diff.sh
       to better report when there is an error in the file copying.
       HDFFV-8105 (AKC 2012/07/22)
-    - h5dump: Fix sort by name display to maintain correct parent / child
-      releationships between ascending / descending order.
+    - h5dump: Fixed the sort by name display to maintain correct parent/child
+      relationships between ascending/descending order.
       HDFFV-8095 (ADB 2012/07/12)
-    - h5dump: Fix display by creation order when using option -n (print contents).
+    - h5dump: Fixed the display by creation order when using option -n 
+      (print contents).
       HDFFV-5942 (ADB 2012/07/09)
-    - h5dump: Allow H5T_CSET_UTF8 to be displayed in h5dump output. Use 
-      technique like in h5ls (matches library options).
+    - h5dump: Changed to allow H5T_CSET_UTF8 to be displayed in h5dump output. 
+      Used technique similar to what was done in h5ls (matches library 
+      options).
       HDFFV-7999 (ADB 2012/05/23)
     - h5diff: Fixed not to check and display dangling link status without 
       --follow-symlinks option. This also improved performance when 
@@ -186,14 +185,14 @@ Bug Fixes since HDF5-1.8.9
     F90 API
     -------
     
-    - Fixed a typo in return value of the nh5dread_f_c function ( was 1
+    - Fixed a typo in return value of the nh5dread_f_c function (was 1
       instead of 0 on success); fixed the return value to make it consistent
-      with other Fortran functions; cleaned the code from debug statements.
+      with other Fortran functions; cleaned debug statements from the code.
       (EIP - 2012/06/23)
 
-    - Fixed problem writing/reading control characters to a dataset; writing
-      a string containing: alerts, backspace, carriage_return, form_feed,
-      horizontal_tab, vertical_tab, new_line is now tested and working.
+    - Fixed a problem writing/reading control characters to a dataset; writing
+      a string containing alerts, backspace, carriage_return, form_feed,
+      horizontal_tab, vertical_tab, or new_line is now tested and working.
       (MSB - 2012/09/01)
 
     - Corrected the integer type of H5S_UNLIMITED_F to HSIZE_T (MSB - 2012/09/01)
@@ -208,15 +207,16 @@ Bug Fixes since HDF5-1.8.9
     High-Level APIs:
     ------
 
-    - Fixed problem with H5TBdelete_record destroying all data following the deletion
-      of a row. (MSB- 2012/7/26)
+    - Fixed problem with H5TBdelete_record destroying all data following the 
+      deletion of a row. (MSB- 2012/7/26)
 
     - Fixed H5LTget_attribute_string not closing an object identifier when an 
       error occurs. (MSB- 2012/7/21)
 
-    - Corrected return type of H5TBAget_fill from herr_t to htri_t to reflect
-      that a return value of 1 indicates that a fill value is present, 0
-      indicates a fill value is not present and <0 indicates an error.
+    - Corrected the return type of H5TBAget_fill from herr_t to htri_t to 
+      reflect that a return value of 1 indicates that a fill value is 
+      present, 0 indicates a fill value is not present, and <0 indicates an 
+      error.
 
     Fortran High-Level APIs:
     ------
@@ -272,9 +272,9 @@ The following platforms and compilers have been tested for this release.
                                   MPICH mpich2-1.3.1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
-    Linux 2.6.32-220.7.1.el6.ppc64 gcc (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
-    (ostrich)                     GNU Fortran (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
+    Linux 2.6.32-220.7.1.el6.ppc64 gcc (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3) 
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20110731 
+    (ostrich)                     GNU Fortran (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3)
 
     Linux 2.6.18-108chaos         Intel C, C++, Fortran Compilers Version 11.1
     #1 SMP x86_64 GNU/Linux
@@ -317,7 +317,7 @@ The following platforms and compilers have been tested for this release.
     Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
     Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
     Intel 64-bit                      (Apple Inc. build 5666) (dot 3)
-    (fred)                        GNU Fortran (GCC) 4.6.2 20111019 (prerelease) 
+    (fred)                        GNU Fortan (GCC) 4.6.1 (gfortran)
                                   Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
