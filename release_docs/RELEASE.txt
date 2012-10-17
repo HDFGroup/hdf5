@@ -371,10 +371,10 @@ The following platforms and compilers have been tested for this release.
                                   GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
                                   (Use optimization level -O1)
     
-    Cray Linux Environment (CLE)  PrgEnv-pgi 2.2.74
-    hopper.nersc.gov              pgcc 11.9-0 64-bit target on x86-64 Linux -tp k8e
-                                  pgf90 11.9-0 64-bit target on x86-64 Linux -tp k8e
-                                  pgCC 11.9-0 64-bit target on x86-64 Linux -tp k8e
+    Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
+    hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgf90 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgCC 12.5-0 64-bit target on x86-64 Linux -tp shanghai
     
 
 Tested Configuration Features Summary
@@ -412,7 +412,7 @@ CentOS 5.5 Linux 2.6.18 x86_64 PGI      W  n        y      n        y     y     
 Linux 2.6.32-220.7.1.el6.ppc64             n        y      n        y     y     y
 SGI ProPack 7 Linux 2.6.32.24              y        y      y        y     y     y
 Red Hat Enterprise Linux 6                 y        y      y        y     y     y
-CLE hopper.nersc.gov                       y        y(3)   y        y     y     n
+CLE hopper.nersc.gov                       y        y(3)   y        n     y     n
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
