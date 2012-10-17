@@ -932,7 +932,7 @@ parse_mask_list(const char *h_list)
 static void
 free_handler(struct handler_t *hand, int len)
 {
-    register int i;
+    int i;
     
     if(hand) {
         for (i = 0; i < len; i++) {
@@ -1293,7 +1293,7 @@ parse_start:
                     if (s->count.data) {
                         HDfree(s->count.data);
                         s->count.data = NULL;
-                }
+                    }
                     parse_hsize_list(opt_arg, &s->count);
                     break;
                 case 'k':
@@ -1423,6 +1423,7 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
@@ -1449,28 +1450,28 @@ main(int argc, const char *argv[])
                     "to display selected objects");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (display_bb) {
             error_msg("option \"%s\" not available for XML\n", "--boot-block");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (display_oid == 1) {
             error_msg("option \"%s\" not available for XML\n", "--object-ids");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (display_char == TRUE) {
             error_msg("option \"%s\" not available for XML\n", "--string");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (usingdasho) {
             error_msg("option \"%s\" not available for XML\n", "--output");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-    } 
+    }
     else {
         if (xml_dtd_uri) {
             warn_msg("option \"%s\" only applies with XML: %s\n", "--xml-dtd", xml_dtd_uri);

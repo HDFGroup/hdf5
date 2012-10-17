@@ -633,7 +633,7 @@ H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t **pp, haddr_t *ad
 H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
+H5_DLL void H5F_sfile_assert_num(unsigned n);
 
 /* Routines for creating & destroying "fake" file structures */
 H5_DLL H5F_t *H5F_fake_alloc(uint8_t sizeof_size);

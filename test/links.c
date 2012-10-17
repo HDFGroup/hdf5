@@ -1884,7 +1884,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
-    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
+    H5F_sfile_assert_num(0);
 
     /* Open first file again with read-only access and check on objects created */
     if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
@@ -1908,7 +1908,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
-    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
+    H5F_sfile_assert_num(0);
 
     /* Verify that new objects can't be created through a read-only external
      * link.
@@ -1925,7 +1925,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 
     /* Check that all file IDs have been closed */
     if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
-    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
+    H5F_sfile_assert_num(0);
 
     PASSED();
     return 0;
@@ -6754,8 +6754,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that only 1 file is open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Open and close the target of the external link */
     if((oid = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
@@ -6764,16 +6763,14 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that both files are now open */
-    if(H5F_sfile_assert_num(2) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(2);
 
     /* Close file 1 */
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
 
     /* Verify that both files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -6795,8 +6792,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that only 1 file is open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Open and close the target of the external link */
     if((oid = H5Oopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
@@ -6805,24 +6801,21 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that both files are now open */
-    if(H5F_sfile_assert_num(2) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(2);
 
     /* Release file 1's EFC */
     if(H5Fclear_elink_file_cache(fid1) < 0)
         TEST_ERROR
 
     /* Verify that only the parent file is now open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Close file 1 */
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
 
     /* Verify that both files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -6858,8 +6851,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that only 1 file is open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Open and close one branch of the tree */
     if((oid = H5Oopen(fid1, "link_to_2/link_to_3", H5P_DEFAULT)) < 0)
@@ -6868,8 +6860,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that files 2 and 3 are now open */
-    if(H5F_sfile_assert_num(3) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(3);
 
     /* Open and close the other branch of the tree */
     if((oid = H5Oopen(fid1, "link_to_2/link_to_4", H5P_DEFAULT)) < 0)
@@ -6878,16 +6869,14 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that all files are now open */
-    if(H5F_sfile_assert_num(4) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(4);
 
     /* Close file 1 */
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
 
     /* Verify that all files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -6923,8 +6912,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that only 1 file is open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Open and close one branch of the tree */
     if((oid = H5Oopen(fid1, "link_to_2/link_to_3", H5P_DEFAULT)) < 0)
@@ -6933,8 +6921,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that files 2 and 3 are now open */
-    if(H5F_sfile_assert_num(3) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(3);
 
     /* Open and close the other branch of the tree */
     if((oid = H5Oopen(fid1, "link_to_2/link_to_4", H5P_DEFAULT)) < 0)
@@ -6943,24 +6930,21 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that all files are now open */
-    if(H5F_sfile_assert_num(4) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(4);
 
     /* Release file 1's EFC */
     if(H5Fclear_elink_file_cache(fid1) < 0)
         TEST_ERROR
 
     /* Verify that only file 1 is now open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Close file 1 */
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
 
     /* Verify that all files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 #ifndef H5_CANNOT_OPEN_TWICE
     /*
@@ -6992,8 +6976,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that only 1 file is open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Open and close one complete cycle */
     if((oid = H5Oopen(fid1, "link_to_2/link_to_3/link_to_1", H5P_DEFAULT)) < 0)
@@ -7002,16 +6985,14 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that all files are now open */
-    if(H5F_sfile_assert_num(3) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(3);
 
     /* Close file 1 */
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
 
     /* Verify that all files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -7043,8 +7024,7 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that only 1 file is open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Open and close one complete cycle */
     if((oid = H5Oopen(fid1, "link_to_2/link_to_3/link_to_1", H5P_DEFAULT)) < 0)
@@ -7053,24 +7033,21 @@ external_file_cache(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that all files are now open */
-    if(H5F_sfile_assert_num(3) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(3);
 
     /* Release file 1's EFC */
     if(H5Fclear_elink_file_cache(fid1) < 0)
         TEST_ERROR
 
     /* Verify that only file 1 is now open */
-    if(H5F_sfile_assert_num(1) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(1);
 
     /* Close file 1 */
     if(H5Fclose(fid1) < 0)
         TEST_ERROR
 
     /* Verify that all files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 #endif /* H5_CANNOT_OPEN_TWICE */
 
     /* Close fapl */
@@ -7165,8 +7142,7 @@ external_open_twice(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that both files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -7212,8 +7188,7 @@ external_open_twice(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that both files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -7263,8 +7238,7 @@ external_open_twice(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that both files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     /*
@@ -7312,8 +7286,7 @@ external_open_twice(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that both files are now closed */
-    if(H5F_sfile_assert_num(0) < 0)
-        TEST_ERROR
+    H5F_sfile_assert_num(0);
 
 
     PASSED();
