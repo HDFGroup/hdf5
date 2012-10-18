@@ -114,7 +114,7 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        printf("Opening datasets\n");
+        fprintf(stderr, "Opening datasets\n");
 
     /* Seed the random number generator with the attribute in the file */
     if((aid = H5Aopen(fid, "seed", H5P_DEFAULT)) < 0)

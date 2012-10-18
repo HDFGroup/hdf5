@@ -101,7 +101,7 @@ choose_dataset(void)
     /* Determine the offset of the level */
     offset = random() % symbol_count[level];
 
-    return(&symbol_info[level][offset]);
+    return &symbol_info[level][offset];
 } /* end choose_dataset() */
 
 
@@ -142,7 +142,7 @@ create_symbol_datatype(void)
     if(H5Tclose(opaq_type_id) < 0)
         return -1;
 
-    return(sym_type_id);
+    return sym_type_id;
 } /* end create_symbol_datatype() */
 
 

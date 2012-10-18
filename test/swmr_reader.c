@@ -252,22 +252,22 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
 
     /* Emit informational message */
     if(verbose)
-        printf("Reading records\n");
+        fprintf(stderr, "Reading records\n");
 
     /* Get the starting time */
     start_time = time(NULL);
     curr_time = start_time;
-    
-    /* Emit informational message */
-    if(verbose)
-        fprintf(stderr, "Opening file: %s\n", filename);
-
-    /* Open the file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
-        return -1;
 
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
+
+        /* Emit informational message */
+        if(verbose)
+            fprintf(stderr, "Opening file: %s\n", filename);
+
+        /* Open the file */
+        if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
+            return -1;
 
         /* Check 'common' datasets, if any */
         if(ncommon > 0) {
@@ -299,20 +299,20 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
             } /* end for */
         } /* end if */
 
+        /* Emit informational message */
+        if(verbose)
+            fprintf(stderr, "Closing file\n");
+            
+        /* Close the file */
+        if(H5Fclose(fid) < 0)
+            return -1;
+
         /* Sleep for the appropriate # of seconds */
         sleep(poll_time);
 
         /* Retrieve the current time */
         curr_time = time(NULL);
     } /* end while */
-
-    /* Emit informational message */
-        if(verbose)
-            fprintf(stderr, "Closing file\n");
-
-    /* Close the file */
-        if(H5Fclose(fid) < 0)
-            return -1;
 
     /* Close the memory dataspace */
     if(H5Sclose(mem_sid) < 0)

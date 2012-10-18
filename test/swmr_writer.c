@@ -116,7 +116,7 @@ open_skeleton(const char *filename, unsigned verbose)
             symbol_info[u][v].nrecords = 0;
         } /* end for */
 
-    return(fid);
+    return fid;
 }
 
 
