@@ -1045,7 +1045,7 @@ H5FS_cache_sinfo_notify(H5AC_notify_action_t action, H5FS_sinfo_t *sinfo)
 
             default:
 #ifdef NDEBUG
-                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
 #else /* NDEBUG */
                 HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
