@@ -1,5 +1,5 @@
-#ifndef __BENCHMARK_COMMON_H
-#define __BENCHMARK_COMMON_H
+#ifndef _SWMR_COMMON_H
+#define _SWMR_COMMON_H
 
 /* Headers needed */
 
@@ -9,9 +9,26 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "hdf5.h"
 
+/**********/
 /* Macros */
+/**********/
 
 #ifndef TRUE
 #define TRUE 1
@@ -20,13 +37,16 @@
 #define FALSE 0
 #endif /* FALSE */
 
-#define NLEVELS         5
-#define NMAPPING        9
+#define NLEVELS         5   /* # of datasets in the SWMR test file */
 
-#define FILENAME        "swmr_data.h5"
-#define DTYPE_SIZE      150
+#define NMAPPING        9   
 
+#define FILENAME        "swmr_data.h5"  /* SWMR test file name */
+#define DTYPE_SIZE      150             /* Data size in opaque type */
+
+/************/
 /* Typedefs */
+/************/
 
 /* Information about a symbol/dataset */
 typedef struct {
@@ -41,16 +61,19 @@ typedef struct {
     uint8_t info[DTYPE_SIZE];   /* "Other" information for this record */
 } symbol_t;
 
-/* Global variables */
+/********************/
+/* Global Variables */
+/********************/
 extern symbol_info_t *symbol_info[NLEVELS];
 extern unsigned symbol_count[NLEVELS];
 
+/**************/
 /* Prototypes */
-extern symbol_info_t * choose_dataset(void);
-extern hid_t create_symbol_datatype(void);
-extern int generate_name(char *name_buf, unsigned level, unsigned count);
-extern int generate_symbols(void);
-extern int shutdown_symbols(void);
+/**************/
+symbol_info_t * choose_dataset(void);
+hid_t create_symbol_datatype(void);
+int generate_name(char *name_buf, unsigned level, unsigned count);
+int generate_symbols(void);
+int shutdown_symbols(void);
 
-#endif /* __BENCHMARK_COMMON_H */
-
+#endif /* _SWMR_COMMON_H */

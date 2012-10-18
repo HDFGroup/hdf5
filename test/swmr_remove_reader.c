@@ -13,13 +13,76 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_remove_reader.c
+ *
+ * Purpose:     Reads data from a randomly selected subset of the datasets
+ *              in the SWMR test file.  Unlike the regular reader, these
+ *              datasets will be shrinking.
+ *
+ *              This program is intended to run concurrently with the
+ *              swmr_remove_writer program.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
 #include <unistd.h>
 #include <sys/time.h>
 
 #include "swmr_common.h"
 
+/*******************/
+/* Local Variables */
+/*******************/
+
 static hid_t symbol_tid = -1;
 
+/********************/
+/* Local Prototypes */
+/********************/
+
+static int check_dataset(hid_t fid, unsigned verbose, const char *sym_name,
+    symbol_t *record, hid_t rec_sid);
+static int read_records(const char *filename, unsigned verbose, unsigned long nseconds,
+    unsigned poll_time, unsigned ncommon, unsigned nrandom);
+static void usage(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    check_dataset
+ *
+ * Purpose:     For a given dataset, checks to make sure that the stated
+ *              and actual sizes are the same.  If they are not, then
+ *              we have an inconsistent dataset due to a SWMR error.
+ *
+ * Parameters:  hid_t fid
+ *              The SWMR test file's ID.
+ *
+ *              unsigned verbose
+ *              Whether verbose console output is desired.
+ *
+ *              const char *sym_name
+ *              The name of the dataset from which to read.
+ *
+ *              symbol_t *record
+ *              Memory for the record.  Must be pre-allocated.
+ *
+ *              hid_t rec_sid
+ *              The memory dataspace for access.  It's always the same so
+ *              there is no need to re-create it every time this function
+ *              is called.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *record,
     hid_t rec_sid)
@@ -28,6 +91,11 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     hid_t file_sid;             /* Dataset's space ID */
     hssize_t snpoints;          /* Number of elements in dataset */
     hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
+
+    assert(fid >= 0);
+    assert(sym_name);
+    assert(record);
+    assert(rec_sid >= 0);
 
     /* Open dataset for symbol */
     if((dsid = H5Dopen2(fid, sym_name, H5P_DEFAULT)) < 0)
@@ -90,16 +158,58 @@ check_dataset(hid_t fid, unsigned verbose, const char *sym_name, symbol_t *recor
     return 0;
 } /* end check_dataset() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    read_records
+ *
+ * Purpose:     For a given dataset, checks to make sure that the stated
+ *              and actual sizes are the same.  If they are not, then
+ *              we have an inconsistent dataset due to a SWMR error.
+ *
+ *              The "common" datasets are a random selection from among
+ *              the level 0 datasets.  The "random" datasets are a random
+ *              selection from among all the file's datasets.  This scheme
+ *              ensures that the level 0 datasets are interrogated vigorously.
+ *
+ * Parameters:  const char *filename
+ *              The SWMR test file's name.
+ *
+ *              unsigned verbose
+ *              Whether verbose console output is desired.
+ *
+ *              unsigned long nseconds
+ *              The amount of time to read records (ns).
+ *
+ *              unsigned poll_time
+ *              The amount of time to sleep (s).
+ *
+ *              unsigned ncommon
+ *              The number of common/non-random datasets that will be opened.
+ *
+ *              unsigned nrandom
+ *              The number of random datasets that will be opened.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     unsigned poll_time, unsigned ncommon, unsigned nrandom)
 {
     time_t start_time;          /* Starting time */
     time_t curr_time;           /* Current time */
-    symbol_info_t **sym_com = NULL, **sym_rand = NULL;        /* Pointers to arrays of common & random dataset IDs */
+    symbol_info_t **sym_com = NULL;     /* Pointers to array of common dataset IDs */
+    symbol_info_t **sym_rand = NULL;    /* Pointers to array of random dataset IDs */
     hid_t mem_sid;              /* Memory dataspace ID */
+    hid_t fid;                  /* SWMR test file ID */
     symbol_t record;            /* The record to add to the dataset */
     unsigned v;                 /* Local index variable */
+
+    assert(filename);
+    assert(nseconds != 0);
+    assert(poll_time != 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
@@ -163,17 +273,16 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     start_time = time(NULL);
     curr_time = start_time;
 
+    /* Emit informational message */
+    if(verbose)
+         fprintf(stderr, "Opening file: %s\n", filename);
+
+    /* Open the file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
+        return -1;
+
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
-        hid_t fid;              /* File ID */
-
-        /* Emit informational message */
-        if(verbose)
-            fprintf(stderr, "Opening file: %s\n", filename);
-
-        /* Open the file */
-        if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, H5P_DEFAULT)) < 0)
-            return -1;
 
         /* Check 'common' datasets, if any */
         if(ncommon > 0) {
@@ -186,6 +295,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
                 /* Check common dataset */
                 if(check_dataset(fid, verbose, sym_com[v]->name, &record, mem_sid) < 0)
                     return -1;
+                memset(&record, 0, sizeof(record));
             } /* end for */
         } /* end if */
 
@@ -200,16 +310,9 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
                 /* Check random dataset */
                 if(check_dataset(fid, verbose, sym_rand[v]->name, &record, mem_sid) < 0)
                     return -1;
+                memset(&record, 0, sizeof(record));
             } /* end for */
         } /* end if */
-
-        /* Emit informational message */
-        if(verbose)
-            fprintf(stderr, "Closing file\n");
-
-        /* Close the file */
-        if(H5Fclose(fid) < 0)
-            return -1;
 
         /* Sleep for the appropriate # of seconds */
         sleep(poll_time);
@@ -217,6 +320,14 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
         /* Retrieve the current time */
         curr_time = time(NULL);
     } /* end while */
+
+    /* Emit informational message */
+    if(verbose)
+        fprintf(stderr, "Closing file\n");
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        return -1;
 
     /* Close the memory dataspace */
     if(H5Sclose(mem_sid) < 0)
@@ -244,9 +355,17 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_reader [-q] [-s <# of seconds to sleep between polling>] [-h <# of common symbols to poll>] [-l <# of random symbols to poll>] [-r <random # seed>] <# of seconds to test>\n");
-    printf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'), 5 common symbols to poll ('-h 5') and 10 random symbols to poll ('-l 10')\n");
+    printf("\n");
+    printf("Usage: swmr_remove_reader [-q] [-s <# of seconds to sleep between\n");
+    printf("    polling>] [-h <# of common symbols to poll>] [-l <# of random symbols\n");
+    printf("    to poll>] [-r <random seed>] <# of seconds to test>\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'),\n");
+    printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
+    printf("and will generate a random seed (no -r given).\n");
+    printf("\n");
     exit(1);
 } 
 

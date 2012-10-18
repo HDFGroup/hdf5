@@ -13,12 +13,67 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_addrem_writer.c
+ *
+ * Purpose:     Adds and removes data to a randomly selected subset of the
+ *              datasets in the SWMR test file.
+ *
+ *              This program is intended to run concurrently with the
+ *              swmr_reader program.  It is also run AFTER a sequential
+ *              (not concurrent!) invoking of swmr_writer so the writer
+ *              can dump a bunch of data into the datasets.  Otherwise,
+ *              there wouldn't be much to shrink :)
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
 #include <sys/time.h>
 
 #include "swmr_common.h"
 
-#define MAX_SIZE_CHANGE 10
+/****************/
+/* Local Macros */
+/****************/
 
+/* The maximum # of records to add/remove from the dataset in one step */
+#define MAX_SIZE_CHANGE     10
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+static hid_t
+open_skeleton(const char *filename, unsigned verbose);
+static int addrem_records(hid_t fid, unsigned verbose, unsigned long nops,
+    unsigned long flush_count);
+static void usage(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_skeleton
+ *
+ * Purpose:     Opens the SWMR HDF5 file and datasets.
+ *
+ * Parameters:  const char *filename
+ *              The filename of the SWMR HDF5 file to open
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ * Return:      Success:    The file ID of the opened SWMR file
+ *                          The dataset IDs are stored in a global array
+ *
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
@@ -27,6 +82,8 @@ open_skeleton(const char *filename, unsigned verbose)
     hid_t sid;          /* Dataspace ID */
     hsize_t dim[2];     /* Dataspace dimension */
     unsigned u, v;      /* Local index variable */
+
+    assert(filename);
 
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -81,6 +138,30 @@ open_skeleton(const char *filename, unsigned verbose)
     return(fid);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    addrem_records
+ *
+ * Purpose:     Adds/removes a specified number of records to random datasets
+ *              to the SWMR test file.
+ *
+ * Parameters:  hid_t fid
+ *              The file ID of the SWMR HDF5 file
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ *              unsigned long nops
+ *              # of records to read/write in the datasets
+ *
+ *              unsigned long flush_count
+ *              # of records to write before flushing the file to disk
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long flush_count)
 {
@@ -93,6 +174,8 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
     unsigned long op_to_flush;          /* # of operations before flush */
     unsigned long u, v;                 /* Local index variables */
+
+    assert(fid > 0);
 
     /* Reset the buffer */
     memset(&buf, 0, sizeof(buf));
@@ -219,10 +302,20 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_addrem_writer [-q] [-f <# of operations between flushing file contents>] [-r <random # seed>] <# of shrinks>\n");
-    printf("<# of operations between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of shrinks> - 1)\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 1000 operations('-f 1000')\n");
+    printf("\n");
+    printf("Usage: swmr_addrem_writer [-q] [-f <# of operations between flushing\n");
+    printf("    file contents>] [-r <random seed>] <# of operations>\n");
+    printf("\n");
+    printf("<# of operations between flushing file contents> should be 0 (for\n");
+    printf("no flushing) or between 1 and (<# of operations> - 1).\n");
+    printf("\n");
+    printf("<# of operations> must be specified.\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
+    printf("('-f 1000'), and will generate a random seed (no -r given).\n");
+    printf("\n");
     exit(1);
 }
 

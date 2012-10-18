@@ -13,12 +13,68 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_generator.c
+ *
+ * Purpose:     Functions for building and setting up the SWMR test file
+ *              and datasets.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+ /***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
 #include <sys/time.h>
 
 #include "swmr_common.h"
 
-#define CHUNK_SIZE      50
+/****************/
+/* Local Macros */
+/****************/
 
+#define CHUNK_SIZE      50      /* Chunk size for created datasets */
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+static int gen_skeleton(const char *filename, unsigned verbose, int comp_level,
+    const char *index_type, unsigned random_seed);
+static void usage(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    gen_skeleton
+ *
+ * Purpose:     Creates the HDF5 file and datasets which will be used in
+ *              the SWMR testing.
+ *
+ * Parameters:  const char *filename
+ *              The SWMR test file's name.
+ *
+ *              unsigned verbose
+ *              Whether verbose console output is desired.
+ *
+ *              int comp_level
+ *              The zlib compression level to use. -1 = no compression.
+ *
+ *              const char *index_type
+ *              The chunk index type (b1 | b2 | ea | fa)
+ *
+ *              unsigned random_seed
+ *              The random seed to store in the file.  The sparse tests use
+ *              this value.
+ *
+ * Return:      Success:    0
+ *                          
+ *              Failure:    Can't fail
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 gen_skeleton(const char *filename, unsigned verbose, int comp_level,
     const char *index_type, unsigned random_seed)
@@ -37,6 +93,9 @@ gen_skeleton(const char *filename, unsigned verbose, int comp_level,
     symbol_t fillval;   /* Dataset fill value */
 #endif /* FILLVAL_WORKS */
     unsigned u, v;      /* Local index variable */
+
+    assert(filename);
+    assert(index_type);
 
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -172,13 +231,22 @@ gen_skeleton(const char *filename, unsigned verbose, int comp_level,
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_generator [-q] [-c <deflate compression level>] [-i <index type>] [-r <random # seed>]\n");
-    printf("NOTE: The random seed option is only used by the sparse test\n");
+    printf("\n");
+    printf("Usage: swmr_generator [-q] [-c <deflate compression level>] [-i <index type>]\n");
+    printf("    [-r <random seed>]\n");
+    printf("\n");
+    printf("NOTE: The random seed option is only used by the sparse test.  Other\n");
+    printf("      tests specify the random seed as a reader/writer option.\n");
+    printf("\n");
     printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    printf("\n");
     printf("<index type> should be b1, b2, fa, or ea (fa not yet implemented)\n");
-    printf("Defaults to verbose (no '-q' given), no compression ('-c -1') and v1 b-tree\n");
-    printf("    (-i b1)");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), no compression ('-c -1'), v1 b-tree\n");
+    printf("indexing (-i b1), and will generate a random seed (no -r given).\n");
+    printf("\n");
     exit(1);
 } /* end usage() */
 

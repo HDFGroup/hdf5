@@ -13,10 +13,62 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+ /*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_sparse_writer.c
+ *
+ * Purpose:     Writes data to a randomly selected subset of the datasets
+ *              in the SWMR test file.
+ *
+ *              This program is intended to run concurrently with the
+ *              swmr_sparse_reader program.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
+
 #include "swmr_common.h"
+
+/****************/
+/* Local Macros */
+/****************/
 
 #define BUSY_WAIT 100000
 
+/********************/
+/* Local Prototypes */
+/********************/
+
+static hid_t open_skeleton(const char *filename, unsigned verbose);
+static int add_records(hid_t fid, unsigned verbose, unsigned long nrecords,
+    unsigned long flush_count);
+static void usage(void);
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_skeleton
+ *
+ * Purpose:     Opens the SWMR HDF5 file and datasets.
+ *
+ * Parameters:  const char *filename
+ *              The filename of the SWMR HDF5 file to open
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ * Return:      Success:    The file ID of the opened SWMR file
+ *                          The dataset IDs are stored in a global array
+ *
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
@@ -25,6 +77,8 @@ open_skeleton(const char *filename, unsigned verbose)
     hid_t aid;          /* Attribute ID */
     unsigned seed;      /* Seed for random number generator */
     unsigned u, v;      /* Local index variable */
+
+    assert(filename);
 
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -82,12 +136,37 @@ open_skeleton(const char *filename, unsigned verbose)
     return fid;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    add_records
+ *
+ * Purpose:     Writes a specified number of records to random datasets in
+ *              the SWMR test file.
+ *
+ * Parameters:  hid_t fid
+ *              The file ID of the SWMR HDF5 file
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ *              unsigned long nrecords
+ *              # of records to write to the datasets
+ *
+ *              unsigned long flush_count
+ *              # of records to write before flushing the file to disk
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long flush_count)
 {
     hid_t tid;                          /* Datatype ID for records */
     hid_t mem_sid;                      /* Memory dataspace ID */
-    hsize_t start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0};          /* Hyperslab selection values */
+    hsize_t count[2] = {1, 1};          /* Hyperslab selection values */
     symbol_t record;                    /* The record to add to the dataset */
     H5AC_cache_config_t mdc_config_orig; /* Original metadata cache configuration */
     H5AC_cache_config_t mdc_config_cork; /* Corked metadata cache configuration */
@@ -95,6 +174,8 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     volatile int dummy;                 /* Dummy varialbe for busy sleep */
     hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
     unsigned long u, v;                 /* Local index variables */
+
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
@@ -240,10 +321,18 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_sparse_writer [-q] [-f <# of records to write between flushing file contents>] <# of records>\n");
-    printf("<# of records to write between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of records> - 1)\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 1000 records('-f 1000')\n");
+    printf("\n");
+    printf("Usage: swmr_sparse_writer [-q] [-f <# of records to write between\n");
+    printf("    flushing file contents>] <# of records>\n");
+    printf("\n");
+    printf("<# of records to write between flushing file contents> should be 0\n");
+    printf("(for no flushing) or between 1 and (<# of records> - 1)\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
+    printf("('-f 1000')\n");
+    printf("\n");
     exit(1);
 }
 

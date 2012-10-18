@@ -13,12 +13,66 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_remove_writer.c
+ *
+ * Purpose:     Removes data from a randomly selected subset of the datasets
+ *              in the SWMR test file.
+ *
+ *              This program is intended to run concurrently with the
+ *              swmr_remove_reader program.  It is also run AFTER a sequential
+ *              (not concurrent!) invoking of swmr_writer so the writer
+ *              can dump a bunch of data into the datasets.  Otherwise,
+ *              there wouldn't be much to shrink :)
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
 #include <sys/time.h>
 
 #include "swmr_common.h"
 
-#define MAX_REMOVE_SIZE 10
+/****************/
+/* Local Macros */
+/****************/
 
+/* The maximum number of records to remove in one step */
+#define MAX_REMOVE_SIZE     10
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+static hid_t open_skeleton(const char *filename, unsigned verbose);
+static int remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks,
+    unsigned long flush_count);
+static void usage(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_skeleton
+ *
+ * Purpose:     Opens the SWMR HDF5 file and datasets.
+ *
+ * Parameters:  const char *filename
+ *              The filename of the SWMR HDF5 file to open
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ * Return:      Success:    The file ID of the opened SWMR file
+ *                          The dataset IDs are stored in a global array
+ *
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
@@ -27,6 +81,8 @@ open_skeleton(const char *filename, unsigned verbose)
     hid_t sid;          /* Dataspace ID */
     hsize_t dim[2];     /* Dataspace dimensions */
     unsigned u, v;      /* Local index variable */
+
+    assert(filename);
 
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -81,12 +137,38 @@ open_skeleton(const char *filename, unsigned verbose)
     return fid;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    remove_records
+ *
+ * Purpose:     Removes a specified number of records from random datasets in
+ *              the SWMR test file.
+ *
+ * Parameters:  hid_t fid
+ *              The file ID of the SWMR HDF5 file
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ *              unsigned long nshrinks
+ *              # of records to remove from the datasets
+ *
+ *              unsigned long flush_count
+ *              # of records to write before flushing the file to disk
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned long flush_count)
 {
     unsigned long shrink_to_flush;      /* # of removals before flush */
     hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
     unsigned long u, v;                 /* Local index variables */
+
+    assert(fid >= 0);
 
     /* Remove records from random datasets, according to frequency distribution */
     shrink_to_flush = flush_count;
@@ -140,10 +222,18 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_remove_writer [-q] [-f <# of shrinks between flushing file contents>] [-r <random # seed>] <# of shrinks>\n");
-    printf("<# of shrinks between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of shrinks> - 1)\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 1000 shrinks('-f 1000')\n");
+    printf("\n");
+    printf("Usage: swmr_remove_writer [-q] [-f <# of shrinks between flushing\n");
+    printf("    file contents>] [-r <random seed>] <# of shrinks>\n");
+    printf("\n");
+    printf("<# of shrinks between flushing file contents> should be 0 (for no\n");
+    printf("flushing) or between 1 and (<# of shrinks> - 1)\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), flushing every 1000 shrinks\n");
+    printf("('-f 1000'), and will generate a random seed (no -r given).\n");
+    printf("\n");
     exit(1);
 }
 

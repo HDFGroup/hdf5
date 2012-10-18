@@ -13,20 +13,95 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_sparse_reader.c
+ *
+ * Purpose:     Reads data from a randomly selected subset of the datasets
+ *              in the SWMR test file.  Unlike the regular reader, these
+ *              datasets will be shrinking.
+ *
+ *              This program is intended to run concurrently with the
+ *              swmr_sparse_writer program.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
 #include "swmr_common.h"
+
 #include <unistd.h>
+
+/****************/
+/* Local Macros */
+/****************/
 
 #define TIMEOUT 300
 
+/*******************/
+/* Local Variables */
+/*******************/
+
 static hid_t symbol_tid = (-1);
 
+/********************/
+/* Local Prototypes */
+/********************/
+
+static int check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol,
+    symbol_t *record, hid_t rec_sid);
+static int read_records(const char *filename, unsigned verbose, unsigned long nrecords,
+    unsigned poll_time, unsigned reopen_count);
+static void usage(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    check_dataset
+ *
+ * Purpose:     For a given dataset, checks to make sure that the stated
+ *              and actual sizes are the same.  If they are not, then
+ *              we have an inconsistent dataset due to a SWMR error.
+ *
+ * Parameters:  hid_t fid
+ *              The SWMR test file's ID.
+ *
+ *              unsigned verbose
+ *              Whether verbose console output is desired.
+ *
+ *              const symbol_info_t *symbol
+ *              The dataset from which to read (the ID is in the struct).
+ *              Must be pre-allocated.
+ *
+ *              symbol_t *record
+ *              Memory for the record.  Must be pre-allocated.
+ *
+ *              hid_t rec_sid
+ *              The memory dataspace for access.  It's always the same so
+ *              there is no need to re-create it every time this function
+ *              is called.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t *record,
     hid_t rec_sid)
 {
     hid_t dsid;                 /* Dataset ID */
     hid_t file_sid;             /* Dataset's space ID */
-    hsize_t start[2] = {0, 0}, count[2] = {1, 1};   /* Hyperslab selection values */
+    hsize_t start[2] = {0, 0};  /* Hyperslab selection values */
+    hsize_t count[2] = {1, 1};  /* Hyperslab selection values */
+
+    assert(fid >= 0);
+    assert(symbol);
+    assert(record);
+    assert(rec_sid >= 0);
 
     /* Open dataset for symbol */
     if((dsid = H5Dopen2(fid, symbol->name, H5P_DEFAULT)) < 0)
@@ -83,6 +158,34 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     return 0;
 } /* end check_dataset() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    read_records
+ *
+ * Purpose:     For a given dataset, checks to make sure that the stated
+ *              and actual sizes are the same.  If they are not, then
+ *              we have an inconsistent dataset due to a SWMR error.
+ *
+ * Parameters:  const char *filename
+ *              The SWMR test file's name.
+ *
+ *              unsigned verbose
+ *              Whether verbose console output is desired.
+ *
+ *              unsigned long nrecords
+ *              The total number of records to read.
+ *
+ *              unsigned poll_time
+ *              The amount of time to sleep (s).
+ *
+ *              unsigned reopen_count
+ *              
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     unsigned poll_time, unsigned reopen_count)
@@ -96,6 +199,10 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
     unsigned iter_to_reopen = reopen_count; /* # of iterations until reopen */
     unsigned long u;            /* Local index variable */
     hid_t fapl;
+
+    assert(filename);
+    assert(poll_time != 0);
+    
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
     /* Emit informational message */
@@ -188,6 +295,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
         /* Check dataset */
         if(check_dataset(fid, verbose, symbol, &record, mem_sid) < 0)
             return -1;
+        memset(&record, 0, sizeof(record));
 
         /* Check for reopen */
         iter_to_reopen--;
@@ -219,10 +327,18 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>] [-n <# of reads between reopens>] <# of records>\n");
-    printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read between reopens ('-r 1')\n");
-    printf("Note that the # of records *must* be the same as that supplied to swmr_sparse_writer\n");
+    printf("\n");
+    printf("Usage: swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
+    printf("    [-n <# of reads between reopens>] <# of records>\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
+    printf("between reopens ('-r 1')\n");
+    printf("\n");
+    printf("Note that the # of records *must* be the same as that supplied to\n");
+    printf("swmr_sparse_writer\n");
+    printf("\n");
     exit(1);
 } /* end usage() */
 
@@ -330,4 +446,3 @@ int main(int argc, const char *argv[])
 
     return 0;
 }
-

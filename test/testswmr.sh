@@ -72,7 +72,7 @@ done
 for index_type in "-i b1" "-i ea" "-i b2" 
 do
     # Try with and without compression
-    for compress in "" "-c 1"
+    for compress in "" "-c 5"
     do
         echo
         echo "###############################################################################"

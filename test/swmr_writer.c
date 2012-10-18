@@ -13,16 +13,64 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*-------------------------------------------------------------------------
+ *
+ * Created:     swmr_writer.c
+ *
+ * Purpose:     Writes data to a randomly selected subset of the datasets
+ *              in the SWMR test file.
+ *
+ *              This program is intended to run concurrently with the
+ *              swmr_reader program.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/***********/
+/* Headers */
+/***********/
+
+#include <assert.h>
 #include <sys/time.h>
 
 #include "swmr_common.h"
 
+/********************/
+/* Local Prototypes */
+/********************/
+
+static hid_t open_skeleton(const char *filename, unsigned verbose);
+static int add_records(hid_t fid, unsigned verbose, unsigned long nrecords,
+    unsigned long flush_count);
+static void usage(void);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    open_skeleton
+ *
+ * Purpose:     Opens the SWMR HDF5 file and datasets.
+ *
+ * Parameters:  const char *filename
+ *              The filename of the SWMR HDF5 file to open
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ * Return:      Success:    The file ID of the opened SWMR file
+ *                          The dataset IDs are stored in a global array
+ *
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static hid_t
 open_skeleton(const char *filename, unsigned verbose)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
     unsigned u, v;      /* Local index variable */
+
+    assert(filename);
 
     /* Create file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -71,6 +119,30 @@ open_skeleton(const char *filename, unsigned verbose)
     return(fid);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    add_records
+ *
+ * Purpose:     Writes a specified number of records to random datasets in
+ *              the SWMR test file.
+ *
+ * Parameters:  hid_t fid
+ *              The file ID of the SWMR HDF5 file
+ *
+ *              unsigned verbose
+ *              Whether or not to emit verbose console messages
+ *
+ *              unsigned long nrecords
+ *              # of records to write to the datasets
+ *
+ *              unsigned long flush_count
+ *              # of records to write before flushing the file to disk
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
 static int
 add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long flush_count)
 {
@@ -83,6 +155,8 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     H5AC_cache_config_t mdc_config_cork;    /* Corked metadata cache configuration */
     unsigned long rec_to_flush;             /* # of records left to write before flush */
     unsigned long u, v;                     /* Local index variables */
+
+    assert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
@@ -194,10 +268,20 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 static void
 usage(void)
 {
+    printf("\n");
     printf("Usage error!\n");
-    printf("Usage: swmr_writer [-q] [-f <# of records to write between flushing file contents>] [-r <random # seed>] <# of records>\n");
-    printf("<# of records to write between flushing file contents> should be 0 (for no flushing) or between 1 and (<# of records> - 1)\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 10000 records('-f 10000')\n");
+    printf("\n");
+    printf("Usage: swmr_writer [-q] [-f <# of records to write between flushing\n");
+    printf("    file contents>] [-r <random seed>] <# of records>\n");
+    printf("\n");
+    printf("<# of records to write between flushing file contents> should be 0\n");
+    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    printf("\n");
+    printf("<# of records> must be specified.\n");
+    printf("\n");
+    printf("Defaults to verbose (no '-q' given), flushing every 10000 records\n");
+    printf("('-f 10000'), and will generate a random seed (no -r given).\n");
+    printf("\n");
     exit(1);
 }
 
