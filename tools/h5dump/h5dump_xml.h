@@ -102,14 +102,6 @@ static h5tool_format_t         xml_dataformat = {
 extern "C" {
 #endif
 
-/* internal functions used by XML option */
-static void             xml_print_datatype(hid_t, unsigned);
-static void             xml_print_enum(hid_t);
-static int              xml_print_refs(hid_t, int);
-static int              xml_print_strs(hid_t, int);
-static char            *xml_escape_the_string(const char *, int);
-static char            *xml_escape_the_name(const char *);
-
 /* The dump functions of the dump_function_table */
 /* XML format:   same interface, alternative output */
 

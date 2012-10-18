@@ -284,14 +284,14 @@ static void gent_nested_vl(hid_t loc_id)
     /* allocate and initialize VL dataset to write */
     buf[0].len = 1;
     buf[0].p = malloc( 1 * sizeof(hvl_t));
-    tvl = buf[0].p;
+    tvl = (hvl_t *)buf[0].p;
     tvl->p = malloc( 1 * sizeof(int) );
     tvl->len = 1;
     ((int *)tvl->p)[0]=1;
 
     buf[1].len = 1;
     buf[1].p = malloc( 1 * sizeof(hvl_t));
-    tvl = buf[1].p;
+    tvl = (hvl_t *)buf[1].p;
     tvl->p = malloc( 2 * sizeof(int) );
     tvl->len = 2;
     ((int *)tvl->p)[0]=2;
@@ -642,7 +642,7 @@ out:
  * Purpose: Testing with various objects
  *
  *------------------------------------------------------------------------*/
-static void Test_Obj_Copy()
+static void Test_Obj_Copy(void)
 {
     hid_t fid=0;
 
@@ -673,7 +673,7 @@ out:
  * Purpose: Testing with various references
  *
  *------------------------------------------------------------------------*/
-static void Test_Ref_Copy()
+static void Test_Ref_Copy(void)
 {
     hid_t fid=0;
     herr_t status;
@@ -839,7 +839,7 @@ out:
  * Purpose: gerenate external link files
  *
  *------------------------------------------------------------------------*/
-static void Test_Extlink_Copy()
+static void Test_Extlink_Copy(void)
 {
     hid_t fid1=0;
     hid_t fid2=0;

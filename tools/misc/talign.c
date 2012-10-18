@@ -23,6 +23,7 @@
 
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5tools.h"
 
 const char *fname = "talign.h5";
 const char *setname = "align";
@@ -46,8 +47,8 @@ int main(void)
     hsize_t cdim[4];
 
     char string5[5];
-    float fok[2] = {1234., 2341.};
-    float fnok[2] = {5678., 6785.};
+    float fok[2] = {1234.0f, 2341.0f};
+    float fnok[2] = {5678.0f, 6785.0f};
     float *fptr;
 
     char *data = NULL;
@@ -125,7 +126,7 @@ int main(void)
     H5Dclose(set);
 
     /* Now open the set, and read it back in */
-    data = malloc(H5Tget_size(fix));
+    data = (char *)malloc(H5Tget_size(fix));
 
     if(!data) {
         perror("malloc() failed");
@@ -159,8 +160,8 @@ out:
             "%14s (%2d) %6f = %f\n"
             "                    %6f = %f\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,1),
-            fok[0], fptr[0],
-            fok[1], fptr[1]);
+            (double)fok[0], (double)fptr[0],
+            (double)fok[1], (double)fptr[1]);
         if(mname)
             free(mname);
 
@@ -169,8 +170,8 @@ out:
         printf("%14s (%2d) %6f = %f\n"
             "                    %6f = %6f\n",
             mname ? mname : "(null)", (int)H5Tget_member_offset(fix,2),
-            fnok[0], fptr[0],
-            fnok[1], fptr[1]);
+            (double)fnok[0], (double)fptr[0],
+            (double)fnok[1], (double)fptr[1]);
         if(mname)
             free(mname);
 
@@ -181,10 +182,10 @@ out:
             "                    %6f = %f\n"
             "                    %6f = %f\n"
             "                    %6f = %f\n",
-            fok[0], fptr[0],
-            fok[1], fptr[1],
-            fnok[0], fptr[2],
-            fnok[1], fptr[3]);
+            (double)fok[0], (double)fptr[0],
+            (double)fok[1], (double)fptr[1],
+            (double)fnok[0], (double)fptr[2],
+            (double)fnok[1], (double)fptr[3]);
         puts("*FAILED - compound type alignmnent problem*");
     } else {
         puts(" PASSED");
