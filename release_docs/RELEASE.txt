@@ -276,8 +276,8 @@ The following platforms and compilers have been tested for this release.
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20110731 
     (ostrich)                     GNU Fortran (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3)
 
-    Linux 2.6.18-108chaos         Intel C, C++, Fortran Compilers Version 11.1
-    #1 SMP x86_64 GNU/Linux
+    Linux 2.6.32-220.23.1.1chaos  Intel C, C++, Fortran Compilers
+    ch5.x86_64 GNU/Linux              Version 12.1.5.339
     (LLNL Aztec)
 
     IBM Blue Gene/P               XL C for Blue Gene/P, bgxlc V9.0
