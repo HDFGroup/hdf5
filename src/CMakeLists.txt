@@ -250,6 +250,7 @@ SET (H5FS_SRCS
     ${HDF5_SRC_DIR}/H5FS.c
     ${HDF5_SRC_DIR}/H5FScache.c
     ${HDF5_SRC_DIR}/H5FSdbg.c
+    ${HDF5_SRC_DIR}/H5FSint.c
     ${HDF5_SRC_DIR}/H5FSsection.c
     ${HDF5_SRC_DIR}/H5FSstat.c
     ${HDF5_SRC_DIR}/H5FStest.c
