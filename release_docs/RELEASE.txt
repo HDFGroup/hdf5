@@ -1054,14 +1054,12 @@ Platforms Tested
                                   xlf90 12.1.0.6
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
-    (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
-                                  gcc 4.6.1 20110422
+    (loyalty)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
     FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
-    (freedom)                     g++ 4.2.1 [FreeBSD] 20070719
-                                  gcc 4.6.1 20110422
+    (freedom)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
@@ -1138,7 +1136,7 @@ SunOS5.10 32-bit                   n        y      n        y     y     y
 Windows 7                          y        y      n        y     y     y
 Windows 7 x64                      y        y      n        y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
-FreeBSD 8.2 32- and 64-bit         n        x      n        x     y     y
+FreeBSD 8.2 32- and 64-bit         n        y      n        y     y     y
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
 RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
 RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
@@ -1154,7 +1152,6 @@ SuSe Linux 2.6.5
 Alpha OpenVMS 7.3.2                n        y      n        y     n     n
 
 
-
 Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
@@ -1164,7 +1161,7 @@ Windows XP x64                      y        y(3)      y         y        n
 Windows Vista                       y        y(3)      y         y        y
 Windows Vista x64                   y        y(3)      y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
-FreeBSD 8.2 32- and 64-bit          y        x         x         y        y
+FreeBSD 8.2 32- and 64-bit          y        y         y         y        y
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
 RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
 RHEL4 2.6.9 i686 PGI              W y        y         y         x        n
@@ -1190,6 +1187,11 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The C++ and FORTRAN bindings are not currently working on FreeBSD with the
+  native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
+  ports (and probably gcc releases after that).
+  (QAK - 2012/10/19)
+
 * The data conversion test dt_arith.c has failures (segmentation fault) from
   "long double" to other datatypes during hard conversion when the library
   is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
