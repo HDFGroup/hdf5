@@ -435,7 +435,7 @@ typedef struct h5tool_format_t {
      * indentlevel: a string that shows how far to indent if extra spacing
      *              is needed. dumper uses it.
      */
-    int         line_ncols;             /*columns of output             */
+    unsigned    line_ncols;             /*columns of output             */
     size_t      line_per_line;          /*max elements per line         */
     const char  *line_pre;              /*prefix at front of each line  */
     const char  *line_1st;              /*alternate pre. on first line  */

@@ -997,7 +997,7 @@ parse_command_line(int argc, const char *argv[])
 
     /* this will be plenty big enough to hold the info */
     if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
-            goto error;
+        goto error;
     }
 
     /* parse command line options */
@@ -1054,7 +1054,7 @@ parse_start:
             break;
         case 'w':
             h5tools_nCols = HDatoi(opt_arg);
-            if (h5tools_nCols==0) {
+            if (h5tools_nCols <= 0) {
                 h5tools_nCols = 65535;
             }
             last_was_dset = FALSE;
@@ -1356,6 +1356,7 @@ error:
 
     return hand;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    main

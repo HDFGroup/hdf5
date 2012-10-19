@@ -380,6 +380,10 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
      * they might be different. */
     cls_ptr = (H5E_cls_t *)H5I_object_verify(err_desc->cls_id, H5I_ERROR_CLASS);
 
+    /* Check for bad pointer(s), but can't issue error, just leave */
+    if(!cls_ptr)
+        HGOTO_DONE(FAIL)
+
     /* Print error class header if new class */
     if(eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
         /* update to the new class information */
