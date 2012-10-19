@@ -268,9 +268,16 @@ H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, H5F_t *f, hsize_t size,
     if(!H5F_addr_defined(ret_value))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "real 'alloc' request failed")
 
-    /* Mark superblock dirty in cache, so change to EOA will get encoded */
-    if(H5F_super_dirty(f) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, HADDR_UNDEF, "unable to mark superblock as dirty")
+    if(H5FD_MEM_DRAW != type) /* MSC - This check is necessary for the
+                                 MDS VOL plugin to work since the
+                                 client that allocates space for raw
+                                 data does not have a superblock -
+                                 needs to be fixed by adding a
+                                 different alloc routine for MDS
+                                 plugin */
+        /* Mark superblock dirty in cache, so change to EOA will get encoded */
+        if(H5F_super_dirty(f) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTMARKDIRTY, HADDR_UNDEF, "unable to mark superblock as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -622,8 +622,9 @@ H5FD_mds_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
         if((ret_value = H5FDset_eoa(file->memb, type, eoa)) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't set member EOA")
     }
-    else
+    else {
         file->raw_eoa = eoa;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

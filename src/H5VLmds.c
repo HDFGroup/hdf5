@@ -26,6 +26,7 @@
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 #define H5R_PACKAGE		/*suppress error about including H5Rpkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
@@ -53,6 +54,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Rpkg.h"		/* References   			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
@@ -83,13 +85,13 @@ static herr_t H5VL_mds_datatype_close(void *dt, hid_t req);
 #endif
 /* Dataset callbacks */
 static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
-static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
-#if 0
 static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
+static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 static herr_t H5VL_mds_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                       hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
+                                    hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
 static herr_t H5VL_mds_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                        hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
+                                     hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
+#if 0
 static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
 static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
@@ -166,8 +168,8 @@ static H5VL_class_t H5VL_mds_g = {
     },
     {                                        /* dataset_cls */
         H5VL_mds_dataset_create,             /* create */
-        NULL,//H5VL_mds_dataset_open,               /* open */
-        NULL,//H5VL_mds_dataset_read,               /* read */
+        H5VL_mds_dataset_open,               /* open */
+        H5VL_mds_dataset_read,               /* read */
         H5VL_mds_dataset_write,              /* write */
         NULL,//H5VL_mds_dataset_set_extent,         /* set extent */
         NULL,//H5VL_mds_dataset_get,                /* get */
@@ -522,6 +524,9 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     if(NULL == (new_file = H5F_raw_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
 
+    /* set the file space manager to use the VFD */
+    new_file->shared->fs_strategy = H5F_FILE_SPACE_VFD;
+
     new_file->id_exists = TRUE;
 
     /* allocate the file object that is returned to the user */
@@ -599,7 +604,7 @@ done:
  *
  * Purpose:	Sends a request to the MDS to create a dataset
  *
- * Return:	Success:	dataset id. 
+ * Return:	Success:	dataset object. 
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
@@ -611,63 +616,306 @@ static void *
 H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, 
                         hid_t dapl_id, hid_t UNUSED req)
 {
-    void           *send_buf = NULL;
-    size_t         buf_size;
-    H5P_genplist_t *plist;      /* Property list pointer */
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the dataset */
+    H5VL_mds_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5D_t          *new_dset = NULL; /* the lighweight dataset struct used to hold the dataset's metadata */
+    void           *send_buf = NULL; /* buffer where the dataset create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
+    void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    H5P_genplist_t *plist;
+    MPI_Status     status;
+    uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
     hid_t          type_id, space_id, lcpl_id;
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
-    H5VL_mds_dset_t *dset = NULL;
+    H5O_layout_t   layout;        /* Dataset's layout information */
     void           *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Get the plist structure */
+    /* Get the dcpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
-    /* get creation properties */
+    /* get datatype, dataspace, and lcpl IDs that were added in the dcpl at the API layer */
     if(H5P_get(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id");
     if(H5P_get(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id");
     if(H5P_get(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* determine the size of the buffer needed to encode the parameters */
     if(H5VL_mds_encode(H5VL_MDS_DSET_CREATE, NULL, &buf_size, obj->obj_id, loc_params, name, 
                        dcpl_id, dapl_id, type_id, space_id, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
 
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* encode the parameters */
     if(H5VL_mds_encode(H5VL_MDS_DSET_CREATE, send_buf, &buf_size, obj->obj_id, loc_params, name, 
                        dcpl_id, dapl_id, type_id, space_id, lcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset create parameters")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset create parameters");
 
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                               MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
+
+    /* allocate the dataset object that is returned to the user */
     if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    MPI_Pcontrol(0);
-    /* send the request to the MDS process and recieve the dataset ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &(dset->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
-                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
 
+    p = (uint8_t *)recv_buf;
+
+    /* decode the dataset ID at the MDS */
+    INT32DECODE(p, dset->common.obj_id);
+
+    /* decode the dataset layout */
+    if(FAIL == H5D__decode_layout(p, &layout))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
+
+    /* Initialize the dataset object */
+    if(NULL == (new_dset = (H5D_t *)H5MM_malloc(sizeof(H5D_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    /* create the "lightweight" client dataset */
+    if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
+
+    /* set the layout of the dataset */
+    new_dset->shared->layout = layout;
+    /* Set the dataset's I/O operations */
+    if(H5D__layout_set_io_ops(new_dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
+
+    new_dset->oloc.file = obj->raw_file;
+    /* set the dataset struct in the high level object */
+    dset->dset = new_dset;
+
+    /* set common object parameters */
     dset->common.obj_type = H5I_DATASET;
     dset->common.raw_file = obj->raw_file;
-    dset->type = type;
 
     H5MM_free(send_buf);
+    H5MM_free(recv_buf);
     ret_value = (void *)dset;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_dataset_open
+ *
+ * Purpose:	Sends a request to the MDS to open a dataset
+ *
+ * Return:	Success:	dataset object. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                      hid_t dapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the dataset */
+    H5VL_mds_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5D_t          *new_dset = NULL; /* the lighweight dataset struct used to hold the dataset's metadata */
+    void           *send_buf = NULL; /* buffer where the dataset create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
+    void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    MPI_Status     status;
+    uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
+    hid_t          type_id, space_id, dcpl_id;
+    H5O_layout_t   layout;        /* Dataset's layout information */
+    size_t         type_size, space_size, dcpl_size, layout_size;
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL_mds_encode(H5VL_MDS_DSET_OPEN, NULL, &buf_size, obj->obj_id, loc_params, 
+                       name, dapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL_mds_encode(H5VL_MDS_DSET_OPEN, send_buf, &buf_size, obj->obj_id, loc_params, 
+                       name, dapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset open parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                               MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
+
+    /* allocate the dataset object that is returned to the user */
+    if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
+    MPI_Pcontrol(1);
+
+    p = (uint8_t *)recv_buf;
+
+    /* decode the dataset ID at the MDS */
+    INT32DECODE(p, dset->common.obj_id);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dcpl_size);
+    /* decode property lists if they are not default*/
+    if(dcpl_size) {
+        if((dcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "unable to decode property list");
+        p += dcpl_size;
+    }
+    else {
+        dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+    }
+
+    /* decode the type size */
+    UINT64DECODE_VARLEN(p, type_size);
+    /* decode the datatype */
+    if((type_id = H5Tdecode(p)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
+    p += type_size;
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    /* decode the dataspace */
+    if((space_id = H5Sdecode((const void *)p)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "unable to decode dataspace");
+    p += space_size;
+
+    /* decode the layout size */
+    UINT64DECODE_VARLEN(p, layout_size);
+    /* decode the dataset layout */
+    if(FAIL == H5D__decode_layout(p, &layout))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
+    p += layout_size;
+
+    /* Initialize the dataset object */
+    if(NULL == (new_dset = (H5D_t *)H5MM_malloc(sizeof(H5D_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    /* create the "lightweight" client dataset */
+    if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
+
+    /* set the layout of the dataset */
+    new_dset->shared->layout = layout;
+    /* Set the dataset's I/O operations */
+    if(H5D__layout_set_io_ops(new_dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
+
+    new_dset->oloc.file = obj->raw_file;
+    /* set the dataset struct in the high level object */
+    dset->dset = new_dset;
+
+    /* set common object parameters */
+    dset->common.obj_type = H5I_DATASET;
+    dset->common.raw_file = obj->raw_file;
+
+    H5MM_free(send_buf);
+    H5MM_free(recv_buf);
+    ret_value = (void *)dset;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_dataset_open() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_dataset_read
+ *
+ * Purpose:	Reads raw data from a dataset into a buffer.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, data not read.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
+                      hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t UNUSED req)
+{
+    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    //hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
+    const H5S_t   *mem_space = NULL;
+    const H5S_t   *file_space = NULL;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check arguments */
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
+
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    /* read raw data */
+    if(H5D__mdc_read(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_dataset_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -684,41 +932,41 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_dataset_write(void *_obj, hid_t mem_type_id, hid_t mem_space_id,
+H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
-    hid_t          dset_id = obj->obj_id;
+    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    //hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
-    herr_t         ret_value = SUCCEED;                 /* Return value */
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
 	/* Check for valid selection */
 	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     } /* end if */
     if(H5S_ALL != file_space_id) {
 	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
 	/* Check for valid selection */
 	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     } /* end if */
 
     if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
     /* write raw data */
-    if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    if(H5D__mdc_write(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -741,7 +989,7 @@ done:
 static herr_t
 H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 {
-    H5VL_mds_dset_t *dataset = (H5VL_mds_dset_t *)obj;
+    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
     void            *send_buf = NULL;
     uint8_t         *p = NULL;
     size_t           buf_size;
@@ -749,30 +997,53 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    buf_size = 1 /* request type */ + sizeof(int) /* dataset id */;
+    buf_size = 1 /* request type */ + sizeof(int) /* dset id */;
 
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
     *p++ = (uint8_t)H5VL_MDS_DSET_CLOSE;
 
     /* encode the object id */
-    INT32ENCODE(p, dataset->common.obj_id);
+    INT32ENCODE(p, dset->common.obj_id);
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata file ID */
     if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
                                    &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);
-    H5MM_free(dataset);
+
+    /* Free the dataset's memory structure */
+    H5MM_free(dset->dset);
+    //if(H5D_close(dset->dset) < 0)
+    //HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset");
+
+    H5MM_free(dset);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_close() */
+
+#if 0
+    /* get the datatype the dataset was created with */
+    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
+    /* copy and store the datatype in the dataset object */
+    if(NULL == (dset->type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy datatype");
+
+    /* get the dataspace the dataset was created with */
+    if(NULL == (ds = (H5S_t *)H5I_object(space_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace");
+    /* copy and store the dataspace in the dataset object */
+    if(NULL == (dset->space = H5S_copy(ds, FALSE, TRUE)))
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy dataspace");
+
+#endif

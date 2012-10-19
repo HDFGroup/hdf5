@@ -612,7 +612,7 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a property list");
 
     /* get property list size */
-    if(H5P_DEFAULT != dxpl_id) {
+    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         if(H5P__encode(dxpl, FALSE, NULL, &dxpl_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, HADDR_UNDEF, "unable to encode property list");
     }
@@ -638,23 +638,11 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* encode the plist size */
     UINT64ENCODE_VARLEN(p, dxpl_size);
     /* encode property lists if they are not default*/
-    if(H5P_DATASET_ACCESS_DEFAULT != dxpl_id) {
+    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
         if(H5P__encode(dxpl, FALSE, p, &dxpl_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, HADDR_UNDEF, "unable to encode property list");
         p += dxpl_size;
     }
-#if 0
-    /* encode a flag to indicate whether the property lists are default or not & 
-     * encode property lists if they are not default*/
-    if(H5P_DEFAULT != dxpl_id) {
-        *p++ = (uint8_t)TRUE;
-        /* encode property list */
-        if(H5P__encode(dxpl, FALSE, (void *)p, &dxpl_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, HADDR_UNDEF, "unable to encode property list");
-    }
-    else
-        *p++ = (uint8_t)FALSE;
-#endif
 
     /* encode size requested */
     UINT64ENCODE_VARLEN(p, size);
@@ -668,7 +656,6 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_mdc_alloc */
@@ -876,7 +863,7 @@ H5FD_mdc_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type == H5FD_MEM_DRAW);
-
+    printf("reading raw data size = %d\n", size);
     FUNC_LEAVE_NOAPI(H5FDread(file->memb, type, dxpl_id, addr, size, buf))
 }
 
@@ -905,7 +892,7 @@ H5FD_mdc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type == H5FD_MEM_DRAW);
-
+    printf("writing raw data size = %d\n", size);
     FUNC_LEAVE_NOAPI(H5FDwrite(file->memb, type, dxpl_id, addr, size, buf))
 } /* end H5FD_mdc_write() */
 

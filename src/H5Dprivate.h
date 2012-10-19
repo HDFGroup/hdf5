@@ -176,6 +176,16 @@ H5_DLL hid_t H5D_get_create_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_space(H5D_t *dset);
 H5_DLL hid_t H5D_get_type(H5D_t *dset);
 
+/* MDS VOL plugin dataset routines */
+H5_DLL H5D_t *H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, 
+                               hid_t dcpl_id, hid_t dapl_id);
+H5_DLL herr_t H5D__mdc_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
+                            const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/);
+H5_DLL herr_t H5D__mdc_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
+                             const H5S_t *file_space, hid_t dxpl_id, const void *buf);
+H5_DLL herr_t H5D__encode_layout(H5O_layout_t layout, void *p, size_t *size);
+H5_DLL herr_t H5D__decode_layout(const void *buf, H5O_layout_t *layout);
+
 /* Functions that operate on vlen data */
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
     void *buf);

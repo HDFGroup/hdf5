@@ -21,8 +21,11 @@
 #define _H5VLmdserver_H
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Fprivate.h"         /* File access                          */
 #include "H5Iprivate.h"         /* IDs                                  */
+#include "H5Oprivate.h"         /* Objects                              */
+#include "H5Sprivate.h"         /* Dataspace                            */
 #include "H5Tprivate.h"         /* Datatypes                            */
 #include "H5VLprivate.h"        /* VOL plugins                          */
 
@@ -50,9 +53,7 @@ typedef struct H5VL_mds_file_t {
 
 typedef struct H5VL_mds_dset_t {
     H5VL_mds_object_t common;  /* common stuff, must be first  */
-    H5O_layout_t      layout;  /* Data layout                  */
-    H5T_t            *type;    /* Datatype of this dataset     */
-    H5S_t            *space;   /* Dataspace of this dataset    */
+    H5D_t             *dset;
 } H5VL_mds_dset_t;
 
 /* Operation types for the MDS */
@@ -60,6 +61,7 @@ typedef enum H5VL_mds_op_type_t {
     H5VL_MDS_FILE_CREATE,
     H5VL_MDS_FILE_CLOSE,
     H5VL_MDS_DSET_CREATE,
+    H5VL_MDS_DSET_OPEN,
     H5VL_MDS_DSET_CLOSE,
     H5VL_MDS_ALLOC,
     H5VL_MDS_GET_EOA,

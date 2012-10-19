@@ -1102,6 +1102,103 @@ done:
 } /* end H5D__create() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5D__mdc_create
+ *
+ * Purpose:	This routine just creates a dataset struct that the client
+ *              uses to access raw data in the raw data file.
+ *
+ * Return:	Success:	Pointer to a new dataset
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		October 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5D_t *
+H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
+{
+    const H5T_t         *type, *dt;             /* Datatype for dataset */
+    const H5S_t         *space;                 /* Dataspace for dataset */
+    H5D_t		*new_dset = NULL;
+    hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
+    H5G_loc_t           dset_loc;               /* Dataset location */
+    H5D_t		*ret_value;             /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* check args */
+    HDassert(file);
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
+
+    /* Get the dataset's datatype */
+     if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
+
+    /* Get the actual datatype object if this is a named datatype */
+    if(NULL == (type = (const H5T_t *)H5T_get_named_type(dt)))
+        type = dt;
+
+    /* Check if the datatype is "sensible" for use in a dataset */
+    if(H5T_is_sensible(type) != TRUE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible")
+
+    /* Check if the datatype is/contains a VL-type */
+    if(H5T_detect_class(type, H5T_VLEN, FALSE))
+        has_vl_type = TRUE;
+
+    /* Get the dataset's datatype */
+     if(NULL == (space = (const H5S_t *)H5I_object(space_id)))
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace")
+
+    /* Check if the dataspace has an extent set (or is NULL) */
+    if(!H5S_has_extent(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
+
+    /* Initialize the dataset object */
+    if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Set up & reset dataset location */
+    dset_loc.oloc = &(new_dset->oloc);
+    dset_loc.path = &(new_dset->path);
+    H5G_loc_reset(&dset_loc);
+
+    /* Initialize the shared dataset space */
+    if(NULL == (new_dset->shared = H5D__new(dcpl_id, TRUE, has_vl_type)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Copy & initialize datatype for dataset */
+    if(H5D__init_type(file, new_dset, type_id, type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
+
+    /* Copy & initialize dataspace for dataset */
+    if(H5D__init_space(file, new_dset, space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy dataspace")
+
+    /* Set the dataset's checked_filters flag to enable writing */
+    new_dset->shared->checked_filters = TRUE;
+
+    /* Success */
+    ret_value = new_dset;
+
+done:
+    if(!ret_value && new_dset && new_dset->shared) {
+        if(new_dset->shared) {
+            new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
+        } /* end if */
+        new_dset->oloc.file = NULL;
+        new_dset = H5FL_FREE(H5D_t, new_dset);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__mdc_create() */
+
+
 /*
  *-------------------------------------------------------------------------
  * Function:	H5D_open
@@ -2735,3 +2832,153 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5D__encode_layout
+ *
+ * Purpose:        Callback routine which is called whenever the layout
+ *                 property in the dataset creation property list is
+ *                 encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 Monday, October 10, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != p) {
+        /* Encode layout type */
+        *p++ = (uint8_t)layout.type;
+        H5_ENCODE_UNSIGNED(p, layout.version);
+
+        /* If layout is chunked, encode chunking structure */
+        if(H5D_CHUNKED == layout.type) {
+            unsigned u;     /* Local index variable */
+
+            H5_ENCODE_UNSIGNED(p, layout.u.chunk.ndims);
+            UINT32ENCODE(p, layout.u.chunk.size)
+            UINT64ENCODE(p, layout.u.chunk.nchunks)
+
+            for(u = 0; u < layout.u.chunk.ndims; u++) {
+                UINT32ENCODE(p, layout.u.chunk.dim[u])
+                UINT64ENCODE(p, layout.u.chunk.chunks[u])
+                UINT64ENCODE(p, layout.u.chunk.down_chunks[u])
+            }
+        } /* end if */
+        *p++ = (uint8_t)layout.storage.type;
+
+        switch(layout.storage.type) {
+            case H5D_CONTIGUOUS:
+                {
+                    UINT64ENCODE(p, layout.storage.u.contig.addr)
+                    UINT64ENCODE(p, layout.storage.u.contig.size)
+                    break;
+                }
+            case H5D_CHUNKED:
+            case H5D_COMPACT:
+            default:
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+        } /* end switch */
+    } /* end if */
+
+    /* Size of layout type */
+    *size += sizeof(uint8_t) + sizeof(unsigned);
+
+    /* Size of chunk info encoding */
+    if(H5D_CHUNKED == layout.type) {
+        *size += sizeof(unsigned) + sizeof(uint32_t) + sizeof(uint64_t);
+        *size += layout.u.chunk.ndims * (sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t));
+    } /* end if */
+
+    *size += sizeof(uint8_t);
+
+    switch(layout.storage.type) {
+        case H5D_CONTIGUOUS:
+            {
+                *size += 2 * sizeof(uint64_t);
+                break;
+            }
+        case H5D_CHUNKED:
+        case H5D_COMPACT:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__encode_layout() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5D__decode_layout
+ *
+ * Purpose:        Callback routine which is called whenever the layout
+ *                 property in the dataset creation property list is
+ *                 decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 Monday, October 10, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__decode_layout(const void *buf, H5O_layout_t *layout)
+{
+    const uint8_t *p = (const uint8_t *)buf;     /* Current pointer into buffer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(layout);
+
+    /* Decode layout type */
+    layout->type = (H5D_layout_t)*p++;
+    /* Decode version */
+    H5_DECODE_UNSIGNED(p, layout->version);
+
+    if(H5D_CHUNKED == layout->type) {
+        unsigned u;
+
+        H5_DECODE_UNSIGNED(p, layout->u.chunk.ndims);
+        UINT32DECODE(p, layout->u.chunk.size);
+        UINT32DECODE(p, layout->u.chunk.nchunks);
+
+        for(u = 0; u < layout->u.chunk.ndims; u++) {
+            UINT32DECODE(p, layout->u.chunk.dim[u]);
+            UINT64DECODE(p, layout->u.chunk.chunks[u]);
+            UINT64DECODE(p, layout->u.chunk.down_chunks[u]);
+        }
+    } /* end if */
+
+    layout->storage.type = (H5D_layout_t)*p++;
+
+    switch(layout->storage.type) {
+        case H5D_CONTIGUOUS:
+            {
+                UINT64DECODE(p, layout->storage.u.contig.addr);
+                UINT64DECODE(p, layout->storage.u.contig.size);
+                break;
+            }
+        case H5D_CHUNKED:
+        case H5D_COMPACT:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__decode_layout() */

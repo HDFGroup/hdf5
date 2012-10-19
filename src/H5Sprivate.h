@@ -199,6 +199,8 @@ H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+H5_DLL herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
+H5_DLL H5S_t* H5S_decode(const unsigned char *buf);
 
 /* Operations on dataspace extents */
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);

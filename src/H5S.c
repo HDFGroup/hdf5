@@ -55,9 +55,6 @@
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
-static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
-static H5S_t *H5S_decode(const unsigned char *buf);
-
 
 /*********************/
 /* Package Variables */
@@ -1503,7 +1500,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc)
 {
     size_t      extent_size;    /* Size of serialized dataspace extent */
@@ -1619,7 +1616,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5S_t*
+H5S_t*
 H5S_decode(const unsigned char *buf)
 {
     H5S_t       *ds;
