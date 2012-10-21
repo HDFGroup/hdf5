@@ -134,7 +134,7 @@ test_conv(hid_t file)
     static c_e1	data1[]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			 E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED,
 			 E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK, E1_WHITE,
-			 E1_RED,   E1_WHITE, 0, -1, -2};
+			 E1_RED,   E1_WHITE, (c_e1)0, (c_e1)-1, (c_e1)-2};
     c_e1	data2[NELMTS(data1)];
     short 	data_short[NELMTS(data1)];
     int 	data_int[NELMTS(data1)];
@@ -178,7 +178,7 @@ test_conv(hid_t file)
     if(H5Dread(dset, H5T_NATIVE_SHORT, space, space, H5P_DEFAULT, data_short) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
-	if(data1[i] != data_short[i]) {
+	if((short)data1[i] != data_short[i]) {
 	    H5_FAILED();
 	    printf("    2. data1[%lu]=%d, data_short[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
@@ -190,7 +190,7 @@ test_conv(hid_t file)
     if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
-	if(data1[i] != (int)data_double[i]) {
+	if(data1[i] != (unsigned)data_double[i]) {
 	    H5_FAILED();
 	    printf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
@@ -212,7 +212,7 @@ test_conv(hid_t file)
     if(H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, data_int) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
-	if(data1[i] != data_int[i]) {
+	if((int)data1[i] != data_int[i]) {
 	    H5_FAILED();
 	    printf("    4. data1[%lu]=%d, data_int[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
@@ -234,7 +234,7 @@ test_conv(hid_t file)
     if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
-	if(data1[i] != (int)data_double[i]) {
+	if(data1[i] != (unsigned)data_double[i]) {
 	    H5_FAILED();
 	    printf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),

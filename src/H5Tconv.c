@@ -2909,8 +2909,8 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
 	      size_t buf_stride, size_t UNUSED bkg_stride, void *_buf,
               void UNUSED *bkg, hid_t UNUSED dxpl_id)
 {
-    H5T_t	*src = NULL, *dst = NULL;	/*src and dst datatypes	*/
-    H5T_t	*src_parent = NULL;	/*parent type for src           */
+    H5T_t	*src, *dst;		/*src and dst datatypes	*/
+    H5T_t	*src_parent;		/*parent type for src           */
     hid_t       src_parent_id = -1;     /*ID for parent of the source   */
     H5T_path_t  *tpath;                 /* Conversion information       */
     herr_t      ret_value = SUCCEED;    /* Return value                 */
@@ -2941,24 +2941,17 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
             src_parent = src->shared->parent;
-            if(H5T_INTEGER != src_parent->shared->type)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "the base type of the source enum is not an integer type")
 
             if(NULL == (tpath = H5T_path_find(src_parent, dst, NULL, NULL, dxpl_id, FALSE))) {
 	        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
-            } else if (!H5T_path_noop(tpath)) {
+            } else if(!H5T_path_noop(tpath)) {
                 if((src_parent_id = H5I_register(H5I_DATATYPE, H5T_copy(src_parent, H5T_COPY_ALL), FALSE)) < 0) 
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
+
+                /* Convert the data */
+                if(H5T_convert(tpath, src_parent_id, dst_id, nelmts, buf_stride, bkg_stride, _buf, bkg, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
             }
-
-            /* Convert the data */
-            if(H5T_convert(tpath, src_parent_id, dst_id, nelmts, buf_stride, bkg_stride, _buf, bkg, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
-
-            /* Release the temporary datatype IDs used */
-            if(src_parent_id >= 0)
-                H5I_dec_ref(src_parent_id);
-
             break;
 
         default:
@@ -2967,6 +2960,10 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
     } /* end switch */
 
 done:
+    /* Release the temporary datatype IDs used */
+    if(src_parent_id >= 0)
+        H5I_dec_ref(src_parent_id);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__conv_enum_numeric() */
 
