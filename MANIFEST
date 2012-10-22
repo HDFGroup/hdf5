@@ -526,8 +526,8 @@
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
-./release_docs/INSTALL_Windows_From_Command_Line.txt
-./release_docs/INSTALL_Windows_Short_VS2008.TXT
+./release_docs/obsolete_windows_docs/INSTALL_Windows_From_Command_Line.txt
+./release_docs/obsolete_windows_docs/INSTALL_Windows_Short_VS2008.TXT
 ./release_docs/RELEASE.txt
 ./release_docs/USING_CMake.txt
 ./release_docs/USING_Windows.txt
