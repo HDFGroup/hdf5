@@ -395,11 +395,6 @@ Known Problems
   resolved in a future release.
   (AKC - 2012/05/05 - HDFFV-8009)
   
-* The dt_arith test reports several errors involving "long double" on
-  Mac OS X 10.7 Lion when any level of optimization is enabled. The test does
-  not fail in debug mode. This will be addressed in a future release.
-  (SLU - 2012/05/08)
-
 * The following h5dump test case fails in BG/P machines (and potentially other
   machines that use a command script to launch executables):
 
