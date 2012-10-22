@@ -30,7 +30,7 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "Function entry/exit"))==NULL)
 if((H5E_FUNC_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_FILE_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MAJOR, "File accessability"))==NULL)
+if((msg = H5E_create_msg(cls, H5E_MAJOR, "File accessibilty"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FILE_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
@@ -477,7 +477,7 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "No error"))==NULL)
 if((H5E_NONE_MINOR_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
-/* File accessability errors */
+/* File accessibilty errors */
 assert(H5E_FILEEXISTS_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "File already exists"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
