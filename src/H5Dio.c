@@ -28,7 +28,10 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLmdserver.h"	/* MDS VOL plugins			*/
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -660,6 +663,7 @@ done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__write() */
 
+#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__mdc_read
@@ -698,9 +702,7 @@ H5D__mdc_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
-#ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
-#endif /*H5_HAVE_PARALLEL*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
@@ -728,12 +730,10 @@ H5D__mdc_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
     type_info_init = TRUE;
 
-#ifdef H5_HAVE_PARALLEL
     /* Collective access is not permissible without a MPI based VFD */
     if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
             !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Make certain that the number of elements in each selection is the same */
     if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
@@ -780,9 +780,8 @@ H5D__mdc_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     io_info.u.rbuf = buf;
     if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
-#ifdef H5_HAVE_PARALLEL
+
     io_info_init = TRUE;
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Call storage method's I/O initialization routine */
     HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
@@ -791,11 +790,9 @@ H5D__mdc_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
-#ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
     if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Invoke correct "high level" I/O routine */
     if((*io_info.io_ops.multi_read)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
@@ -805,12 +802,10 @@ done:
     /* Shut down the I/O op information */
     if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
-#ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
     if(io_info_init)
         if(H5D__ioinfo_term(&io_info) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
-#endif /*H5_HAVE_PARALLEL*/
     /* Shut down datatype info for operation */
     if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
@@ -861,9 +856,7 @@ H5D__mdc_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
-#ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
-#endif /*H5_HAVE_PARALLEL*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
@@ -960,30 +953,6 @@ H5D__mdc_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(!(H5S_has_extent(mem_space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
 
-    /* Retrieve dataset properties */
-    /* <none needed currently> */
-
-    /* Allocate data space and initialize it if it hasn't been. */
-    if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-            !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
-        hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
-        hbool_t full_overwrite; /* Whether we are over-writing all the elements */
-
-        /* Get the number of elements in file dataset's dataspace */
-        if((file_nelmts = H5S_GET_EXTENT_NPOINTS(file_space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
-
-        /* Always allow fill values to be written if the dataset has a VL datatype */
-        if(H5T_detect_class(dataset->shared->type, H5T_VLEN, FALSE))
-            full_overwrite = FALSE;
-        else
-            full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
-
- 	/* Allocate storage */
-        if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
-
     /* Set up I/O operation */
     io_info.op_type = H5D_IO_OP_WRITE;
     io_info.u.wbuf = buf;
@@ -1026,6 +995,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mdc_write() */
+#endif /*H5_HAVE_PARALLEL*/
 
 
 /*-------------------------------------------------------------------------

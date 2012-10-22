@@ -863,7 +863,7 @@ H5FD_mdc_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type == H5FD_MEM_DRAW);
-    printf("reading raw data size = %d\n", size);
+
     FUNC_LEAVE_NOAPI(H5FDread(file->memb, type, dxpl_id, addr, size, buf))
 }
 
@@ -892,7 +892,7 @@ H5FD_mdc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type == H5FD_MEM_DRAW);
-    printf("writing raw data size = %d\n", size);
+
     FUNC_LEAVE_NOAPI(H5FDwrite(file->memb, type, dxpl_id, addr, size, buf))
 } /* end H5FD_mdc_write() */
 

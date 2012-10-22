@@ -41,26 +41,7 @@
 #include "H5Ppkg.h"             /* Property lists                       */
 #include "H5VLmdserver.h"       /* MDS helper routines			*/
 
-#if 0
-/* Loop through all mapped files */
-#define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
-    H5FD_mem_t _unmapped, LOOPVAR;					      \
-    hbool_t _seen[H5FD_MEM_NTYPES];					      \
-									      \
-    memset(_seen, 0, sizeof _seen);					      \
-    for (_unmapped=H5FD_MEM_SUPER; _unmapped<H5FD_MEM_NTYPES; _unmapped=(H5FD_mem_t)(_unmapped+1)) {  \
-	LOOPVAR = MAP[_unmapped];					      \
-	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
-	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
-	if (_seen[LOOPVAR]++) continue;
-
-#define ALL_MEMBERS(LOOPVAR) {						      \
-    H5FD_mem_t LOOPVAR;							      \
-    for (LOOPVAR=H5FD_MEM_DEFAULT; LOOPVAR<H5FD_MEM_NTYPES; LOOPVAR=(H5FD_mem_t)(LOOPVAR+1)) {
-
-#define END_MEMBERS	}}
-
-#endif
+#ifdef H5_HAVE_PARALLEL
 
 /*
  * The driver identification number, initialized at runtime if H5_HAVE_PARALLEL
@@ -520,9 +501,10 @@ H5FD_mds_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags = 0;
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations                             */
         *flags |= H5FD_FEAT_ACCUMULATE_METADATA;    /* OK to accumulate metadata for faster writes                      */
-        *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
-        *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* VFD handle is POSIX I/O call compatible                          */
+        *flags |= H5FD_FEAT_ALLOCATE_EARLY;           /* Allocate space early instead of late */
+        //*flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
+        //*flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
+        //*flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* VFD handle is POSIX I/O call compatible                          */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -792,3 +774,5 @@ H5FD_mds_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     FUNC_LEAVE_NOAPI(H5FDtruncate(file->memb, dxpl_id, closing))
 }
+
+#endif /* H5_HAVE_PARALLEL */

@@ -1101,6 +1101,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create() */
 
+#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__mdc_create
@@ -1197,6 +1198,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mdc_create() */
+#endif /*H5_HAVE_PARALLEL*/
 
 
 /*

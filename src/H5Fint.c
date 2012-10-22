@@ -1179,6 +1179,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
+#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_raw_open
@@ -1196,7 +1197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_raw_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+H5F_mdc_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hid_t dxpl_id)
 {
     H5F_t              *file = NULL;        /*the success return value      */
@@ -1363,6 +1364,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_raw_open() */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

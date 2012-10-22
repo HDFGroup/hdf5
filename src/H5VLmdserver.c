@@ -66,7 +66,10 @@
 #include "H5Tpkg.h"		/* Datatypes				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
+#include "H5VLnative.h"         /* Native VOL plugin			*/
 #include "H5VLmdserver.h"       /* MDS helper routines			*/
+
+#ifdef H5_HAVE_PARALLEL
 
 /****************/
 /* Local Macros */
@@ -259,7 +262,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                 /* set the underlying MDS VFD */
                 temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
                 if(H5P_set_fapl_mds(fapl_id, mds_filename, temp_fapl) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist")
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
                 /* create the metadata file locally */
                 if(NULL == (new_file = H5F_open(mds_filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
@@ -267,14 +270,14 @@ H5VL_mds_perform_op(const void *buf, int source)
 
                 new_file->id_exists = TRUE;
 
-                if((file_id = H5I_register(H5I_FILE, new_file, FALSE)) < 0)
+                if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
                 /* Send the meta data file to the client */
                 if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-
+                printf("MDS created file %d\n", file_id);
                 H5MM_xfree(name);
                 H5MM_xfree(mds_filename);
                 break;
@@ -307,6 +310,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                         if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
                 } /* end if */
+
                 /* close the file */
                 if((ret = H5F_close(f)) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
@@ -315,6 +319,8 @@ H5VL_mds_perform_op(const void *buf, int source)
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                printf("MDS closed file %d\n", file_id);
                 break;
             } /* end H5VL_MDS_FILE_CLOSE */
         case H5VL_MDS_DSET_CREATE:
@@ -423,7 +429,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset");
                 }
 
-                if((dset_id = H5I_register(H5I_DATASET, dset, FALSE)) < 0)
+                if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create dataset");
 
                 /* determine the buffer size needed to store the encoded layout of the dataset */ 
@@ -451,7 +457,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-
+                printf("MDS created dataset %d on file %d\n", dset_id, obj_id);
                 H5MM_xfree(send_buf);
                 H5MM_xfree(name);
                 break;
@@ -475,9 +481,9 @@ H5VL_mds_perform_op(const void *buf, int source)
 
                 size_t dcpl_size = 0, dapl_size = 0, type_size = 0, space_size = 0;
                 size_t buf_size = 0;
-                hid_t dcpl_id = FAIL, dapl_id = FAIL; /* plist IDs */
+                hid_t dapl_id = FAIL; /* plist IDs */
                 void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
-                size_t layout_size; /* send_buf size */
+                size_t layout_size; /* size of dataset layout*/
                 uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
 
                 /* decode request parameters */
@@ -534,7 +540,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                 if(NULL == (dset = H5D_open(&dset_loc, dapl_id, H5AC_dxpl_id)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset");
 
-                if((dset_id = H5I_register(H5I_DATASET, dset, FALSE)) < 0)
+                if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create dataset");
                 /* END open dataset */
 
@@ -579,7 +585,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                 /* encode the plist size */
                 UINT64ENCODE_VARLEN(p1, dcpl_size);
                 /* encode property lists if they are not default*/
-                if(H5P_DATASET_CREATE_DEFAULT != dcpl_id) {
+                if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
                     if((ret_value = H5P__encode(dcpl, FALSE, p1, &dcpl_size)) < 0)
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                     p1 += dcpl_size;
@@ -612,23 +618,35 @@ H5VL_mds_perform_op(const void *buf, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 /* END send metadata to client */
 
+                printf("MDS opened dataset %d on file %d\n", dset_id, obj_id);
+
                 H5MM_xfree(name);
                 H5MM_xfree(send_buf);
                 break;
             } /* H5VL_MDS_DSET_OPEN */
+        case H5VL_MDS_DSET_WRITE:
+            {
+                ;
+            } /* end H5VL_MDS_DSET_WRITE */
+        case H5VL_MDS_DSET_READ:
+            {
+                ;
+            } /* end H5VL_MDS_DSET_READ */
         case H5VL_MDS_DSET_CLOSE:
             {
                 hid_t dset_id = FAIL; /* dset id */
-                H5D_t *dataset = NULL;
-                herr_t ret;
+                herr_t ret = SUCCEED;
 
                 /* decode the object id */
                 INT32DECODE(p, dset_id);
-                if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset ID");
+                printf("MDS closing dataset %d\n", dset_id);
 
-                if((ret = H5D_close(dataset)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close dataset");
+                /* Check/fix arguments. */
+                if(H5I_DATASET != H5I_get_type(dset_id))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID");
+
+                if(H5I_dec_app_ref_always_close(dset_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID");
 
                 /* Send the haddr to the client */
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, source, 
@@ -1058,3 +1076,5 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_encode() */
+
+#endif /* H5_HAVE_PARALLEL */
