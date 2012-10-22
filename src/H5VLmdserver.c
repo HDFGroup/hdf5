@@ -198,6 +198,7 @@ H5VL_mds_perform_op(const void *buf, int source)
 {
     const uint8_t *p = (const uint8_t *)buf;     /* Current pointer into buffer */
     H5VL_mds_op_type_t op_type;
+    int shutdown_counter = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -654,6 +655,242 @@ H5VL_mds_perform_op(const void *buf, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             } /* H5VL_MDS_DSET_CLOSE */
+        case H5VL_MDS_DTYPE_COMMIT:
+            {
+                hid_t obj_id; /* id of location for dataset */
+                H5T_t *type = NULL; /* New dataset's info */
+                H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+                H5G_loc_t loc; /* Object location to insert dataset into */
+                char *name = NULL; /* name of dataset (if named) */
+                size_t len = 0; /* len of dataset name */
+                size_t tcpl_size = 0, tapl_size = 0, lcpl_size = 0, type_size = 0;
+                hid_t tcpl_id = FAIL, tapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
+                hid_t type_id; /* datatype for dataset */
+
+                /* decode the object id */
+                INT32DECODE(p, obj_id);
+
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, &loc_params)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+
+                /* decode length of the dataset name and the actual dataset name */
+                UINT64DECODE_VARLEN(p, len);
+                if(0 != len) {
+                    name = H5MM_xstrdup((const char *)(p));
+                    name[len] = '\0';
+                    p += len;
+                }
+
+                /* decode the type size */
+                UINT64DECODE_VARLEN(p, type_size);
+                /* decode the datatype */
+                if((type_id = H5Tdecode(p)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+                p += type_size;
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, lcpl_size);
+                /* decode property lists if they are not default*/
+                if(lcpl_size) {
+                    if((lcpl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += lcpl_size;
+                }
+                else {
+                    lcpl_id = H5P_LINK_CREATE_DEFAULT;
+                }
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, tcpl_size);
+                /* decode property lists if they are not default*/
+                if(tcpl_size) {
+                    if((tcpl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += tcpl_size;
+                }
+                else {
+                    tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+                }
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, tapl_size);
+                /* decode property lists if they are not default*/
+                if(tapl_size) {
+                    if((tapl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += tapl_size;
+                }
+                else {
+                    tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+                }
+
+                if(H5G_loc(obj_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
+                if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+
+                if(NULL != name) { /* H5Tcommit */
+                    /* Commit the type */
+                    if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype");
+                }
+                else { /* H5Tcommit_anon */
+                    /* Commit the type */
+                    if(H5T__commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype");
+
+                    /* Release the datatype's object header */
+                    {
+                        H5O_loc_t *oloc;         /* Object location for datatype */
+
+                        /* Get the new committed datatype's object location */
+                        if(NULL == (oloc = H5T_oloc(type)))
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get object location of committed datatype");
+
+                        /* Decrement refcount on committed datatype's object header in memory */
+                        if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object");
+                    } /* end if */
+                }
+
+                /* Send the dataset id to the client */
+                if(MPI_SUCCESS != MPI_Send(&type_id, sizeof(hid_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                printf("MDS created datatype %d on file %d\n", type_id, obj_id);
+                H5MM_xfree(name);
+                break;
+            }/* H5VL_MDS_DTYPE_COMMIT */
+        case H5VL_MDS_DTYPE_OPEN:
+            {
+                hid_t obj_id; /* id of location for dataset */
+                H5T_t *type = NULL; /* New datatype */
+                hid_t type_id; /* datatype id */
+                hid_t tapl_id = FAIL;
+                H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+                H5G_loc_t loc; /* Object location to insert dataset into */
+                H5G_name_t   path;            	/* Datatype group hier. path */
+                H5O_loc_t    oloc;            	/* Datatype object location */
+                H5O_type_t   obj_type;              /* Type of object at location */
+                H5G_loc_t    type_loc;              /* Group object for datatype */
+                hbool_t      obj_found = FALSE;     /* Object at 'name' found */
+                hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
+                char *name = NULL; /* name of dataset (if named) */
+                size_t tapl_size = 0, type_size = 0, len = 0, buf_size = 0;
+                void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
+                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+                /* decode the object id */
+                INT32DECODE(p, obj_id);
+
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, &loc_params)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+
+                /* decode length of the dataset name and the actual dataset name */
+                UINT64DECODE_VARLEN(p, len);
+                if(0 != len) {
+                    name = H5MM_xstrdup((const char *)(p));
+                    name[len] = '\0';
+                    p += len;
+                }
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, tapl_size);
+                /* decode property lists if they are not default*/
+                if(tapl_size) {
+                    if((tapl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += tapl_size;
+                }
+                else {
+                    tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+                }
+
+                if(H5G_loc(obj_id, &loc) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
+
+                /* Set up datatype location to fill in */
+                type_loc.oloc = &oloc;
+                type_loc.path = &path;
+                H5G_loc_reset(&type_loc);
+
+                /*
+                 * Find the named datatype object header and read the datatype message
+                 * from it.
+                 */
+                if(H5G_loc_find(&loc, name, &type_loc/*out*/, tapl_id, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
+                obj_found = TRUE;
+
+                /* Check that the object found is the correct type */
+                if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type");
+                if(obj_type != H5O_TYPE_NAMED_DATATYPE)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype");
+
+                /* Open it */
+                if(NULL == (type = H5T_open(&type_loc, dxpl_id)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype");
+
+                if((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create datatype");
+
+                /* get Type size to encode */
+                if((ret_value = H5T_encode(type, NULL, &type_size)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+
+                buf_size = type_size + sizeof(hid_t);
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the object id */
+                INT32ENCODE(p1, type_id);
+
+                /* encode datatype */
+                if((ret_value = H5T_encode(type, p1, &type_size)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                p1 += type_size;
+
+                /* Send the dataset id to the client */
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                /* END send metadata to client */
+
+                printf("MDS opened datatype %d on file %d\n", type_id, obj_id);
+
+                H5MM_xfree(name);
+                H5MM_xfree(send_buf);
+                break;
+            }/* H5VL_MDS_DTYPE_OPEN */
+        case H5VL_MDS_DTYPE_CLOSE:
+            {
+                hid_t type_id = FAIL;
+                H5T_t *dt = NULL;
+                herr_t ret = SUCCEED;
+
+                /* decode the object id */
+                INT32DECODE(p, type_id);
+                printf("MDS closing datatype %d\n", type_id);
+
+                if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID");
+
+                if((ret = H5T_close(dt)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype")
+
+                /* Send the haddr to the client */
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            } /* H5VL_MDS_DTYPE_CLOSE */
         case H5VL_MDS_ALLOC:
             {
                 hid_t file_id; /* metadata file ID */
@@ -1068,6 +1305,165 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
                           H5V_limit_enc_size((uint64_t)dapl_size) + dapl_size);
                 break;
             } /* H5VL_MDS_DSET_OPEN */
+        case H5VL_MDS_DTYPE_COMMIT:
+            {
+                hid_t obj_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                const char *name = va_arg (arguments, const char *);
+                hid_t type_id = va_arg (arguments, hid_t);
+                hid_t lcpl_id = va_arg (arguments, hid_t);
+                hid_t tcpl_id = va_arg (arguments, hid_t);
+                hid_t tapl_id = va_arg (arguments, hid_t);
+                size_t len = 0, tcpl_size = 0, tapl_size = 0, lcpl_size = 0;
+                H5P_genplist_t *tcpl, *tapl, *lcpl;
+                size_t type_size = 0, loc_size = 0;
+
+                /* check plists */
+                if(NULL == (tcpl = (H5P_genplist_t *)H5I_object_verify(tcpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(NULL == (tapl = (H5P_genplist_t *)H5I_object_verify(tapl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+                /* get size for property lists to encode */
+                if(H5P_DATATYPE_CREATE_DEFAULT != tcpl_id)
+                    if((ret_value = H5P__encode(tcpl, FALSE, NULL, &tcpl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                if(H5P_DATATYPE_ACCESS_DEFAULT != tapl_id)
+                    if((ret_value = H5P__encode(tapl, FALSE, NULL, &tapl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                if(H5P_LINK_CREATE_DEFAULT != lcpl_id)
+                    if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+
+                /* get Type size to encode */
+                if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name);
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)request_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+
+                    /* encode length of the datatype name and the actual datatype name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != name)
+                        HDmemcpy(p, (uint8_t *)name, len);
+                    p += len;
+
+                    /* encode the datatype size */
+                    UINT64ENCODE_VARLEN(p, type_size);
+                    /* encode datatype */
+                    if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                    p += type_size;
+
+                    /* encode the plist size */
+                    UINT64ENCODE_VARLEN(p, lcpl_size);
+                    /* encode property lists if they are not default*/
+                    if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+                        if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                        p += lcpl_size;
+                    }
+
+                    /* encode the plist size */
+                    UINT64ENCODE_VARLEN(p, tcpl_size);
+                    /* encode property lists if they are not default*/
+                    if(H5P_DATATYPE_CREATE_DEFAULT != tcpl_id) {
+                        if((ret_value = H5P__encode(tcpl, FALSE, p, &tcpl_size)) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                        p += tcpl_size;
+                    }
+
+                    /* encode the plist size */
+                    UINT64ENCODE_VARLEN(p, tapl_size);
+                    /* encode property lists if they are not default*/
+                    if(H5P_DATATYPE_ACCESS_DEFAULT != tapl_id) {
+                        if((ret_value = H5P__encode(tapl, FALSE, p, &tapl_size)) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                        p += tapl_size;
+                    }
+                }
+                *size += (1 + sizeof(int32_t) + loc_size + H5V_limit_enc_size((uint64_t)len) + len + 
+                          H5V_limit_enc_size((uint64_t)tapl_size) + tapl_size + 
+                          H5V_limit_enc_size((uint64_t)tcpl_size) + tcpl_size + 
+                          H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size + 
+                          H5V_limit_enc_size((uint64_t)type_size) + type_size);
+                break;
+            } /* H5VL_MDS_DTYPE_COMMIT */
+        case H5VL_MDS_DTYPE_OPEN:
+            {
+                hid_t obj_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                const char *name = va_arg (arguments, const char *);
+                hid_t tapl_id = va_arg (arguments, hid_t);
+                size_t len = 0, tapl_size = 0;
+                H5P_genplist_t *tapl;
+                size_t loc_size = 0;
+
+                /* check plists */
+                if(NULL == (tapl = (H5P_genplist_t *)H5I_object_verify(tapl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+                /* get size for property lists to encode */
+                if(H5P_DATATYPE_ACCESS_DEFAULT != tapl_id)
+                    if((ret_value = H5P__encode(tapl, FALSE, NULL, &tapl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name);
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)request_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+
+                    /* encode length of the datatype name and the actual datatype name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != name)
+                        HDmemcpy(p, (uint8_t *)name, len);
+                    p += len;
+
+                    /* encode the plist size */
+                    UINT64ENCODE_VARLEN(p, tapl_size);
+                    /* encode property lists if they are not default*/
+                    if(H5P_DATATYPE_ACCESS_DEFAULT != tapl_id) {
+                        if((ret_value = H5P__encode(tapl, FALSE, p, &tapl_size)) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                        p += tapl_size;
+                    }
+                }
+                *size += (1 + sizeof(int32_t) + loc_size + H5V_limit_enc_size((uint64_t)len) + len + 
+                          H5V_limit_enc_size((uint64_t)tapl_size) + tapl_size);
+                break;
+            } /* H5VL_MDS_DTYPE_OPEN */
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "invalid operation type to encode");
     } /* end switch */

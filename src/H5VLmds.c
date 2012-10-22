@@ -76,13 +76,13 @@ static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, h
 static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
 static herr_t H5VL_mds_attr_close(void *attr, hid_t req);
-
+#endif
 /* Datatype callbacks */
 static void *H5VL_mds_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
 static void *H5VL_mds_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
 static ssize_t H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t req);
 static herr_t H5VL_mds_datatype_close(void *dt, hid_t req);
-#endif
+
 /* Dataset callbacks */
 static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
 static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
@@ -94,7 +94,6 @@ static herr_t H5VL_mds_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_sp
 #if 0
 static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
 static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 #endif
 /* File callbacks */
 static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
@@ -161,10 +160,10 @@ static H5VL_class_t H5VL_mds_g = {
         NULL,//H5VL_mds_attr_close                  /* close */
     },
     {                                        /* datatype_cls */
-        NULL,//H5VL_mds_datatype_commit,            /* commit */
-        NULL,//H5VL_mds_datatype_open,              /* open */
-        NULL,//H5VL_mds_datatype_get_binary,        /* get_size */
-        NULL,//H5VL_mds_datatype_close              /* close */
+        H5VL_mds_datatype_commit,            /* commit */
+        H5VL_mds_datatype_open,              /* open */
+        H5VL_mds_datatype_get_binary,        /* get_size */
+        H5VL_mds_datatype_close              /* close */
     },
     {                                        /* dataset_cls */
         H5VL_mds_dataset_create,             /* create */
@@ -998,7 +997,7 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
     INT32ENCODE(p, dset->common.obj_id);
 
     MPI_Pcontrol(0);
-    /* send the request to the MDS process and recieve the metadata file ID */
+    /* send the request to the MDS process and recieve the return value */
     if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
                                    &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
@@ -1017,6 +1016,261 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_datatype_commit
+ *
+ * Purpose:	Commits a datatype inside a mds h5 file.
+ *
+ * Return:	Success:	datatype id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
+                         hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the datatype */
+    H5VL_mds_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5T_t          *dt = NULL;
+    void           *send_buf = NULL; /* buffer where the datatype create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL_mds_encode(H5VL_MDS_DTYPE_COMMIT, NULL, &buf_size, obj->obj_id, loc_params, name, 
+                       type_id, lcpl_id, tcpl_id, tapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype ID");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL_mds_encode(H5VL_MDS_DTYPE_COMMIT, send_buf, &buf_size, obj->obj_id, loc_params, name, 
+                       type_id, lcpl_id, tcpl_id, tapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype commit parameters");
+
+    /* allocate the dataset object that is returned to the user */
+    if(NULL == (dtype = (H5VL_mds_dtype_t *)calloc(1, sizeof(H5VL_mds_dtype_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata datatype ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &(dtype->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    if(dtype->common.obj_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "MDS failed to commit datatype");
+
+    /* set common object parameters */
+    dtype->common.obj_type = H5I_DATATYPE;
+    dtype->common.raw_file = obj->raw_file;
+
+    if(NULL == (dtype->dtype = H5T_copy(dt, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
+
+    ret_value = (void *)dtype;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_datatype_commit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_datatype_open
+ *
+ * Purpose:	Opens a named datatype inside a mds h5 file.
+ *
+ * Return:	Success:	datatype id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                       hid_t tapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the datatype */
+    H5VL_mds_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    void           *send_buf = NULL; /* buffer where the datatype create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
+    void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    MPI_Status     status;
+    uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL_mds_encode(H5VL_MDS_DTYPE_OPEN, NULL, &buf_size, obj->obj_id, loc_params, name, 
+                       tapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL_mds_encode(H5VL_MDS_DTYPE_OPEN, send_buf, &buf_size, obj->obj_id, loc_params, name, 
+                       tapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype open parameters");
+
+    /* allocate the dataset object that is returned to the user */
+    if(NULL == (dtype = (H5VL_mds_dtype_t *)calloc(1, sizeof(H5VL_mds_dtype_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                               MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
+
+    /* allocate the dataset object that is returned to the user */
+    if(NULL == (dtype = (H5VL_mds_dtype_t *)calloc(1, sizeof(H5VL_mds_dtype_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
+
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
+    MPI_Pcontrol(1);
+
+    p = (uint8_t *)recv_buf;
+
+    /* decode the dataset ID at the MDS */
+    INT32DECODE(p, dtype->common.obj_id);
+    if(dtype->common.obj_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "MDS failed to open datatype");
+
+    if(NULL == (dtype->dtype = H5T_decode((const unsigned char *)p)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
+
+    /* set common object parameters */
+    dtype->common.obj_type = H5I_DATATYPE;
+    dtype->common.raw_file = obj->raw_file;
+
+    ret_value = (void *)dtype;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_datatype_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_datatype_get_binary
+ *
+ * Purpose:	gets size required to encode the datatype
+ *
+ * Return:	Success:	datatype id. 
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static ssize_t
+H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t UNUSED req)
+{
+    H5VL_mds_dtype_t *dtype = (H5VL_mds_dtype_t *)obj;
+    H5T_t       *type = dtype->dtype;
+    size_t       nalloc = size;
+    ssize_t      ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5T_encode(type, buf, &nalloc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
+
+    ret_value = (ssize_t) nalloc;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_datatype_get_binary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_datatype_close
+ *
+ * Purpose:	Closes an datatype.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, datatype not closed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
+{
+    H5VL_mds_dtype_t *dtype = (H5VL_mds_dtype_t *)obj;
+    void            *send_buf = NULL;
+    uint8_t         *p = NULL;
+    size_t           buf_size;
+    herr_t           ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    buf_size = 1 /* request type */ + sizeof(int) /* dtype id */;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode request type */
+    *p++ = (uint8_t)H5VL_MDS_DTYPE_CLOSE;
+
+    /* encode the object id */
+    INT32ENCODE(p, dtype->common.obj_id);
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata file ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    if((ret_value = H5T_close(dtype->dtype)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype")
+
+    H5MM_free(send_buf);
+    H5MM_free(dtype);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_datatype_close() */
 
 #endif /* H5_HAVE_PARALLEL */
 

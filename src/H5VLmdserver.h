@@ -55,8 +55,13 @@ typedef struct H5VL_mds_file_t {
 
 typedef struct H5VL_mds_dset_t {
     H5VL_mds_object_t common;  /* common stuff, must be first  */
-    H5D_t             *dset;
+    H5D_t *dset; /* the lightweight dataset struct created by the client */
 } H5VL_mds_dset_t;
+
+typedef struct H5VL_mds_dtype_t {
+    H5VL_mds_object_t common; /* common stuff, must be first  */
+    H5T_t *dtype; /* the uncommitted datatype struct for the client */
+}H5VL_mds_dtype_t;
 
 /* Operation types for the MDS */
 typedef enum H5VL_mds_op_type_t {
@@ -67,6 +72,9 @@ typedef enum H5VL_mds_op_type_t {
     H5VL_MDS_DSET_READ,
     H5VL_MDS_DSET_WRITE,
     H5VL_MDS_DSET_CLOSE,
+    H5VL_MDS_DTYPE_COMMIT,
+    H5VL_MDS_DTYPE_OPEN,
+    H5VL_MDS_DTYPE_CLOSE,
     H5VL_MDS_ALLOC,
     H5VL_MDS_GET_EOA,
     H5VL_MDS_SET_EOA
