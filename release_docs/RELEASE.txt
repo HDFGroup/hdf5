@@ -307,10 +307,12 @@ The following platforms and compilers have been tested for this release.
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
+                                  (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
+                                  (cmake and autotools)
 
     Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
     Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
@@ -339,34 +341,42 @@ The following platforms and compilers have been tested for this release.
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
+                                  (cmake and autotools)
 
     Debian6.0.3 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
+                                  (cmake and autotools)
 
     Fedora17 3.5.2-1.fc17.i6866 #1 SMP i686 i686 i386 GNU/Linux
                                   gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
                                   GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  (cmake and autotools)
 
     Fedora17 3.5.2-1.fc17.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
                                   GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  (cmake and autotools)
 
     SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
                                   gcc (SUSE Linux) 4.7.1
                                   GNU Fortran (SUSE Linux) 4.7.1
+                                  (cmake and autotools)
 
     SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (SUSE Linux) 4.7.1
                                   GNU Fortran (SUSE Linux) 4.7.1 
+                                  (cmake and autotools)
 
     Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP i686 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
                                   GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  (cmake and autotools)
 
     Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP x86_64 GNU/Linux
                                   gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
                                   GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  (cmake and autotools)
                                   (Use optimization level -O1)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
