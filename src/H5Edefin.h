@@ -24,7 +24,7 @@
 hid_t H5E_DATASET_g        = FAIL;      /* Dataset */
 hid_t H5E_FUNC_g           = FAIL;      /* Function entry/exit */
 hid_t H5E_STORAGE_g        = FAIL;      /* Data storage */
-hid_t H5E_FILE_g           = FAIL;      /* File accessability */
+hid_t H5E_FILE_g           = FAIL;      /* File accessibilty */
 hid_t H5E_SOHM_g           = FAIL;      /* Shared Object Header Messages */
 hid_t H5E_SYM_g            = FAIL;      /* Symbol table */
 hid_t H5E_VFL_g            = FAIL;      /* Virtual File Layer */
@@ -129,7 +129,7 @@ hid_t H5E_PATH_g           = FAIL;      /* Problem with path to object */
 /* No error */
 hid_t H5E_NONE_MINOR_g     = FAIL;      /* No error */
 
-/* File accessability errors */
+/* File accessibilty errors */
 hid_t H5E_FILEEXISTS_g     = FAIL;      /* File already exists */
 hid_t H5E_FILEOPEN_g       = FAIL;      /* File already open */
 hid_t H5E_CANTCREATE_g     = FAIL;      /* Unable to create file */
