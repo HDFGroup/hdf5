@@ -468,7 +468,8 @@ Known Problems
   is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
   with optimization (-O3, -O2, and -O1).  Some newer versions of GCC do not
   have this problem.  Users should disable optimization or try newer version
-  of GCC.
+  of GCC (This release of the library automatically disable the
+  optimization).
   (SLU - 2012/06/12 - HDFFV-8017)
 
 * The h5repacktst test fails on AIX 32-bit because the test uses more
@@ -490,11 +491,6 @@ Known Problems
   resolved in a future release.
   (AKC - 2012/05/05 - HDFFV-8009)
   
-* The dt_arith test reports several errors involving "long double" on
-  Mac OS X 10.7 Lion when any level of optimization is enabled. The test does
-  not fail in debug mode. This will be addressed in a future release.
-  (SLU - 2012/05/08)
-
 * The following h5dump test case fails in BG/P machines (and potentially other
   machines that use a command script to launch executables):
 
