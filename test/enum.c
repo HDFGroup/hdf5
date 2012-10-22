@@ -190,7 +190,7 @@ test_conv(hid_t file)
     if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
-	if(data1[i] != (unsigned)data_double[i]) {
+	if((int)data1[i] != (int)data_double[i]) {
 	    H5_FAILED();
 	    printf("    3. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
@@ -234,7 +234,7 @@ test_conv(hid_t file)
     if(H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, data_double) < 0) FAIL_STACK_ERROR
 
     for(i = 0; i < (size_t)ds_size[0]; i++)
-	if(data1[i] != (unsigned)data_double[i]) {
+	if((int)data1[i] != (int)data_double[i]) {
 	    H5_FAILED();
 	    printf("    5. data1[%lu]=%d, data_double[%lu]=%d (should be same)\n",
 		   (unsigned long)i, (int)(data1[i]),
