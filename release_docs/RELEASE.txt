@@ -100,6 +100,9 @@ New Features
 
     Library:
     --------
+    - The library now supports the data conversion from enumeration to numeric
+      (integer and floating-point number) datatypes. See Issue 8221.
+      (SLU - 2012/10/23)  
     - The data sieve buffer size was for all the datasets in the file.  It
       could waste memory if any dataset size is smaller than the sieve buffer
       size.  Now the library picks the smaller one between the dataset size
