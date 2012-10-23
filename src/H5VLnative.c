@@ -58,9 +58,6 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLnative.h"         /* Native VOL plugin			*/
 
-/* Prototypes */
-static H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
-
 /* Atrribute callbacks */
 static void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
 static void *H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
@@ -256,7 +253,7 @@ H5VL_native_init(void)
  *
  *---------------------------------------------------------------------------
  */
-static H5F_t *
+H5F_t *
 H5VL_native_get_file(void *obj, H5I_type_t type)
 {
     H5F_t	*ret_value = NULL;      /* File to flush */

@@ -1122,7 +1122,6 @@ H5D_t *
 H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
     const H5T_t         *type, *dt;             /* Datatype for dataset */
-    const H5S_t         *space;                 /* Dataspace for dataset */
     H5D_t		*new_dset = NULL;
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
     H5G_loc_t           dset_loc;               /* Dataset location */
@@ -1133,7 +1132,6 @@ H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     /* check args */
     HDassert(file);
     HDassert(H5I_DATATYPE == H5I_get_type(type_id));
-    HDassert(space);
     HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
 
     /* Get the dataset's datatype */
@@ -1152,14 +1150,6 @@ H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     if(H5T_detect_class(type, H5T_VLEN, FALSE))
         has_vl_type = TRUE;
 
-    /* Get the dataset's datatype */
-     if(NULL == (space = (const H5S_t *)H5I_object(space_id)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace")
-
-    /* Check if the dataspace has an extent set (or is NULL) */
-    if(!H5S_has_extent(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
-
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -1177,9 +1167,21 @@ H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     if(H5D__init_type(file, new_dset, type_id, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
 
-    /* Copy & initialize dataspace for dataset */
-    if(H5D__init_space(file, new_dset, space) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy dataspace")
+    if(space_id) {
+        const H5S_t         *space = NULL;          /* Dataspace for dataset */
+
+        /* Get the dataset's dataspace */
+        if(NULL == (space = (const H5S_t *)H5I_object(space_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace")
+
+        /* Check if the dataspace has an extent set (or is NULL) */
+        if(!H5S_has_extent(space))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
+
+        /* Copy & initialize dataspace for dataset */
+        if(H5D__init_space(file, new_dset, space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy dataspace")
+    }
 
     /* Set the dataset's checked_filters flag to enable writing */
     new_dset->shared->checked_filters = TRUE;
@@ -2880,18 +2882,20 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
         } /* end if */
         *p++ = (uint8_t)layout.storage.type;
 
-        switch(layout.storage.type) {
-            case H5D_CONTIGUOUS:
-                {
-                    UINT64ENCODE(p, layout.storage.u.contig.addr)
-                    UINT64ENCODE(p, layout.storage.u.contig.size)
-                    break;
-                }
-            case H5D_CHUNKED:
-            case H5D_COMPACT:
-            default:
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
-        } /* end switch */
+        if(layout.storage.type) {
+            switch(layout.storage.type) {
+                case H5D_CONTIGUOUS:
+                    {
+                        UINT64ENCODE(p, layout.storage.u.contig.addr)
+                            UINT64ENCODE(p, layout.storage.u.contig.size)
+                            break;
+                    }
+                case H5D_CHUNKED:
+                case H5D_COMPACT:
+                default:
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+            } /* end switch */
+        } /* end if */
     } /* end if */
 
     /* Size of layout type */
@@ -2905,16 +2909,18 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
 
     *size += sizeof(uint8_t);
 
-    switch(layout.storage.type) {
-        case H5D_CONTIGUOUS:
-            {
-                *size += 2 * sizeof(uint64_t);
-                break;
-            }
-        case H5D_CHUNKED:
-        case H5D_COMPACT:
-        default:
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+    if(layout.storage.type) {
+        switch(layout.storage.type) {
+            case H5D_CONTIGUOUS:
+                {
+                    *size += 2 * sizeof(uint64_t);
+                    break;
+                }
+            case H5D_CHUNKED:
+            case H5D_COMPACT:
+            default:
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+        }
     }
 
 done:
@@ -2968,19 +2974,20 @@ H5D__decode_layout(const void *buf, H5O_layout_t *layout)
 
     layout->storage.type = (H5D_layout_t)*p++;
 
-    switch(layout->storage.type) {
-        case H5D_CONTIGUOUS:
-            {
-                UINT64DECODE(p, layout->storage.u.contig.addr);
-                UINT64DECODE(p, layout->storage.u.contig.size);
-                break;
-            }
-        case H5D_CHUNKED:
-        case H5D_COMPACT:
-        default:
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
-    } /* end switch */
-
+    if(layout->storage.type) {
+        switch(layout->storage.type) {
+            case H5D_CONTIGUOUS:
+                {
+                    UINT64DECODE(p, layout->storage.u.contig.addr);
+                    UINT64DECODE(p, layout->storage.u.contig.size);
+                    break;
+                }
+            case H5D_CHUNKED:
+            case H5D_COMPACT:
+            default:
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+        } /* end switch */
+    } /* end if */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__decode_layout() */

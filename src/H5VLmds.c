@@ -97,10 +97,10 @@ static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_
 #endif
 /* File callbacks */
 static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
-static herr_t H5VL_mds_file_close(void *file, hid_t req);
-#if 0
 static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
+static herr_t H5VL_mds_file_close(void *file, hid_t req);
+#if 0
 static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
@@ -176,8 +176,8 @@ static H5VL_class_t H5VL_mds_g = {
     },
     {                                        /* file_cls */
         H5VL_mds_file_create,                /* create */
-        NULL,//H5VL_mds_file_open,                  /* open */
-        NULL,//H5VL_mds_file_flush,                 /* flush */
+        H5VL_mds_file_open,                  /* open */
+        H5VL_mds_file_flush,                 /* flush */
         NULL,//H5VL_mds_file_get,                   /* get */
         NULL,//H5VL_mds_file_misc,                  /* misc */
         NULL,//H5VL_mds_file_optional,              /* optional */
@@ -551,6 +551,176 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_file_open
+ *
+ * Purpose:	Opens a file for raw data and tells the metadata server
+ *              to open the metadata file.
+ *
+ * Return:	Success:	the file object 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED req)
+{
+    void *send_buf;
+    size_t buf_size;
+    hid_t temp_fapl; /* the fapl opend here for the underlying VFD for clients */
+    H5VL_mds_fapl_t *fa;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    int my_rank, my_size;
+    H5F_t *new_file = NULL;
+    hid_t mds_file; /* Metadata file ID recieved from the MDS */
+    H5VL_mds_file_t *file = NULL;
+    void  *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* obtain the process rank from the communicator attached to the fapl ID */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+    if(NULL == (fa = (H5VL_mds_fapl_t *)H5P_get_vol_info(plist)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get MDS info struct")
+    MPI_Comm_rank(fa->comm, &my_rank);
+    MPI_Comm_size(fa->comm, &my_size);
+
+    /* the first process in the communicator will tell the MDS process to open the metadata file */
+    if (0 == my_rank) {
+        /* determine the size of the buffer needed to encode the parameters */
+        if(H5VL_mds_encode(H5VL_MDS_FILE_OPEN, NULL, &buf_size, name, flags, fapl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
+
+        /* allocate the buffer for encoding the parameters */
+        if(NULL == (send_buf = H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* encode the parameters */
+        if(H5VL_mds_encode(H5VL_MDS_FILE_OPEN, send_buf, &buf_size, name, flags, fapl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file open parameters")
+
+        MPI_Pcontrol(0);
+        /* send the request to the MDS process and recieve the metadata file ID */
+        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                       &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                       MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
+        MPI_Pcontrol(1);
+        H5MM_free(send_buf);
+    }
+
+    /* Process 0 Bcasts the metadata file ID to other processes if there are any */
+    if(my_size > 1) {
+        if(MPI_SUCCESS != MPI_Bcast(&mds_file, sizeof(hid_t), MPI_BYTE, 0, fa->comm))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
+    }
+    HDassert(mds_file);
+
+    /* set the underlying VFD for clients (MDC)*/
+    temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
+    if(H5P_set_fapl_mdc(fapl_id, name, temp_fapl, mds_file) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
+
+    /* Open the raw data file */ 
+    if(NULL == (new_file = H5F_mdc_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+
+    /* set the file space manager to use the VFD */
+    new_file->shared->fs_strategy = H5F_FILE_SPACE_VFD;
+
+    new_file->id_exists = TRUE;
+
+    /* allocate the file object that is returned to the user */
+    if(NULL == (file = (H5VL_mds_file_t *)calloc(1, sizeof(H5VL_mds_file_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* store the metadata file ID in the local raw data file struct 
+    H5FD_mdc_set_mdfile(new_file, mds_file);
+    */
+
+    /* open the file object that is passed to the API layer */
+    file->common.obj_type = H5I_FILE; 
+    file->common.obj_id = mds_file;
+    file->common.raw_file = new_file;
+
+    ret_value = (void *)file;
+done:
+    if(NULL == ret_value && new_file) 
+        if(H5F_close(new_file) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_file_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_file_flush
+ *
+ * Purpose:	Flushes a file.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, file not flushed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t scope, 
+                    hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    hid_t obj_id = obj->obj_id;
+    void *send_buf = NULL;
+    uint8_t *p = NULL;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    buf_size = 1 /* request type */ + sizeof(int) /* object id */ + 1 /* scope */;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode request type */
+    *p++ = (uint8_t)H5VL_MDS_FILE_FLUSH;
+
+    /* encode the object id */
+    INT32ENCODE(p, obj_id);
+
+    /* encode scope */
+    *p++ = (uint8_t)scope;
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+#if 0
+    /* MSC - I don't think we have raw data to flush here */
+    if(H5F_INTENT(f) & H5F_ACC_RDWR) {
+        if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+    } /* end if */
+#endif
+
+    H5MM_free(send_buf);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_file_flush() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_mds_file_close
  *
  * Purpose:	Closes a file.
@@ -572,7 +742,13 @@ H5VL_mds_file_close(void *obj, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* We do not have a raw data cache at the client side, so there is nothing to flush here */
+#if 0
+    /* MSC - I don't think we have raw data to flush here */
+    if(H5F_INTENT(f) & H5F_ACC_RDWR) {
+        if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+    } /* end if */
+#endif
 
     /* close the file */
     if((ret_value = H5F_close(f)) < 0)
@@ -735,7 +911,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
     MPI_Status     status;
     uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
-    hid_t          type_id, space_id, dcpl_id;
+    hid_t          type_id=FAIL, space_id=FAIL, dcpl_id=H5P_DATASET_CREATE_DEFAULT;
     H5O_layout_t   layout;        /* Dataset's layout information */
     size_t         type_size, space_size, dcpl_size, layout_size;
     void           *ret_value;
@@ -795,23 +971,24 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "unable to decode property list");
         p += dcpl_size;
     }
-    else {
-        dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-    }
 
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
-    /* decode the datatype */
-    if((type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
-    p += type_size;
+    if(type_size) {
+        /* decode the datatype */
+        if((type_id = H5Tdecode(p)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
+        p += type_size;
+    }
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
-    /* decode the dataspace */
-    if((space_id = H5Sdecode((const void *)p)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "unable to decode dataspace");
-    p += space_size;
+    if(space_size) {
+        /* decode the dataspace */
+        if((space_id = H5Sdecode((const void *)p)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "unable to decode dataspace");
+        p += space_size;
+    }
 
     /* decode the layout size */
     UINT64DECODE_VARLEN(p, layout_size);

@@ -119,4 +119,7 @@ H5_DLL herr_t H5D_close_dataset(void *dset, H5VL_t *vol_plugin);
 H5_DLL herr_t H5G_close_group(void *grp, H5VL_t *vol_plugin);
 H5_DLL herr_t H5T_close_datatype(void *dt, H5VL_t *vol_plugin);
 
+/* Native routines that are useful in other library plugins */
+H5_DLL H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
+
 #endif /* _H5VLprivate_H */

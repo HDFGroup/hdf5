@@ -66,6 +66,8 @@ typedef struct H5VL_mds_dtype_t {
 /* Operation types for the MDS */
 typedef enum H5VL_mds_op_type_t {
     H5VL_MDS_FILE_CREATE,
+    H5VL_MDS_FILE_OPEN,
+    H5VL_MDS_FILE_FLUSH,
     H5VL_MDS_FILE_CLOSE,
     H5VL_MDS_DSET_CREATE,
     H5VL_MDS_DSET_OPEN,

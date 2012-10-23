@@ -152,10 +152,10 @@ H5VL_mds_start(void)
         printf("MDS Process Waiting\n");
         /* probe for a message from a client */
         if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
         /* get the incoming message size from the probe result */
         if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
         /* allocate the receive buffer */
         recv_buf = H5MM_malloc (incoming_msg_size);
@@ -163,11 +163,13 @@ H5VL_mds_start(void)
         /* receive the actual message */
         if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
                                     H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receivemessage")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receivemessage");
 
         /* decode the buffer and perform the requested operation */        
-        if((ret_value = H5VL_mds_perform_op(recv_buf, status.MPI_SOURCE)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to decode buffer and execute operation")
+        if((ret_value = H5VL_mds_perform_op(recv_buf, status.MPI_SOURCE)) < 0) 
+            if(MPI_SUCCESS != MPI_Send(&ret, sizeof(hid_t), MPI_BYTE, source, 
+                                       H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
         if (NULL != recv_buf)
             H5MM_free(recv_buf);
@@ -198,7 +200,6 @@ H5VL_mds_perform_op(const void *buf, int source)
 {
     const uint8_t *p = (const uint8_t *)buf;     /* Current pointer into buffer */
     H5VL_mds_op_type_t op_type;
-    int shutdown_counter = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -283,6 +284,113 @@ H5VL_mds_perform_op(const void *buf, int source)
                 H5MM_xfree(mds_filename);
                 break;
             }/* H5VL_MDS_FILE_CREATE */
+        case H5VL_MDS_FILE_OPEN:
+            {
+                char *name = NULL; /* name of HDF5 container (decoded) */
+                size_t len = 0; /* length of name (decoded) */
+                size_t fapl_size = 0; /* plist sizes */
+                char *mds_filename = NULL; /* name of the metadata file (generated from name) */
+                unsigned flags; /* access flags */
+                hid_t fapl_id = FAIL; /* plist IDs */
+                hid_t temp_fapl; /* fapl used for underlying MDS VFD */
+                H5F_t *new_file = NULL; /* struct for MDS file */
+                hid_t file_id; /* ID of MDS file */
+
+                /* decode length of name and name */
+                UINT64DECODE_VARLEN(p, len);
+                name = H5MM_xstrdup((const char *)(p));
+                name[len] = '\0';
+                p += len;
+
+                /* generate the MDS file name by adding a .md extension to the file name */
+                mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 3));
+                sprintf(mds_filename, "%s.md", name);
+
+                /* deocde create flags */
+                H5_DECODE_UNSIGNED(p, flags);
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, fapl_size);
+                /* decode property lists if they are not default*/
+                if(fapl_size) {
+                    if((fapl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += fapl_size;
+                }
+                else {
+                    fapl_id = H5P_FILE_ACCESS_DEFAULT;
+                }
+
+                /* set the underlying MDS VFD */
+                temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
+                if(H5P_set_fapl_mds(fapl_id, mds_filename, temp_fapl) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
+
+                /* create the metadata file locally */
+                if(NULL == (new_file = H5F_open(mds_filename, flags, H5P_FILE_CREATE_DEFAULT, 
+                                                fapl_id, H5AC_dxpl_id)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+
+                new_file->id_exists = TRUE;
+
+                if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
+
+                /* Send the meta data file to the client */
+                if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                printf("MDS opened file %d\n", file_id);
+                H5MM_xfree(name);
+                H5MM_xfree(mds_filename);
+                break;
+            }/* H5VL_MDS_FILE_OPEN */
+        case H5VL_MDS_FILE_FLUSH:
+            {
+                hid_t obj_id; /* metadata object ID */
+                H5F_t *f = NULL; /* metadata file struct */
+                H5F_scope_t scope;
+                herr_t ret = SUCCEED;
+
+                /* the metadata file id */
+                INT32DECODE(p, obj_id);
+
+                /* decode the scope */
+                scope = (H5F_scope_t)*p++;
+
+                if(NULL == (f = H5VL_native_get_file(H5I_object(obj_id), H5I_get_type(obj_id))))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
+
+                /* Flush the file */
+                /*
+                 * Nothing to do if the file is read only.	This determination is
+                 * made at the shared open(2) flags level, implying that opening a
+                 * file twice, once for read-only and once for read-write, and then
+                 * calling H5Fflush() with the read-only handle, still causes data
+                 * to be flushed.
+                 */
+                if(H5F_ACC_RDWR & H5F_INTENT(f)) {
+                    /* Flush other files, depending on scope */
+                    if(H5F_SCOPE_GLOBAL == scope) {
+                        /* Call the flush routine for mounted file hierarchies */
+                        if((ret = H5F_flush_mounts(f, H5AC_dxpl_id)) < 0)
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy");
+                    } /* end if */
+                    else {
+                        /* Call the flush routine, for this file */
+                        if((ret = H5F_flush(f, H5AC_dxpl_id, FALSE)) < 0)
+                            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information");
+                    } /* end else */
+                } /* end if */
+                /* Send the haddr to the client */
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(herr_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                printf("MDS flushed file on object %d\n", obj_id);
+
+                break;
+            } /* H5VL_MDS_FILE_FLUSH */
         case H5VL_MDS_FILE_CLOSE:
             {
                 hid_t file_id; /* metadata file ID */
@@ -317,7 +425,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
 
                 /* Send the haddr to the client */
-                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, source, 
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(herr_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
@@ -650,7 +758,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID");
 
                 /* Send the haddr to the client */
-                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, source, 
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(herr_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
@@ -886,7 +994,7 @@ H5VL_mds_perform_op(const void *buf, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype")
 
                 /* Send the haddr to the client */
-                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, source, 
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(herr_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
@@ -1134,6 +1242,50 @@ H5VL_mds_encode(H5VL_mds_op_type_t request_type, void *buf, size_t *size, ...)
 
                 break;
             } /* H5VL_MDS_FILE_CREATE */
+        case H5VL_MDS_FILE_OPEN:
+            {
+                char *name = va_arg (arguments, char *);
+                unsigned flags = va_arg (arguments, unsigned);
+                hid_t fapl_id = va_arg (arguments, hid_t);
+                size_t len = 0, fapl_size = 0;
+                H5P_genplist_t *fapl;
+
+                /* check plists */
+                if(NULL == (fapl = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+                /* get property list sizes */
+                if(H5P_DEFAULT != fapl_id)
+                    if((ret_value = H5P__encode(fapl, FALSE, NULL, &fapl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+
+                len = HDstrlen(name);
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)request_type;
+
+                    /* encode length of name and name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    HDmemcpy(p, (uint8_t *)name, len);
+                    p += len;
+
+                    /* encode open flags */
+                    H5_ENCODE_UNSIGNED(p, flags);
+
+                    /* encode the plist size */
+                    UINT64ENCODE_VARLEN(p, fapl_size);
+                    /* encode property lists if they are not default*/
+                    if(H5P_DEFAULT != fapl_id) {
+                        if((ret_value = H5P__encode(fapl, FALSE, p, &fapl_size)) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                        p += fapl_size;
+                    }
+                }
+                *size += (1 + H5V_limit_enc_size((uint64_t)len) + len + sizeof(unsigned) + 
+                          H5V_limit_enc_size((uint64_t)fapl_size) + fapl_size);
+                break;
+            } /* H5VL_MDS_FILE_OPEN */
         case H5VL_MDS_DSET_CREATE:
             {
                 hid_t obj_id = va_arg (arguments, hid_t);
