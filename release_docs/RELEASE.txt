@@ -1,4 +1,4 @@
-HDF5 version 1.8.10-pre2 currently under development
+HDF5 version 1.8.10-pre2 released on 2012-10-22
 ================================================================================
 
 INTRODUCTION
@@ -328,15 +328,15 @@ The following platforms and compilers have been tested for this release.
                                   Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
-    Mac OS X Lion 10.7.3          GCC 4.2.1 gcc
-    32- and 64-bit                GNU Fortran (GCC) 4.6.1 gfortran
-    (duck)                        GCC 4.2.1. g++
+    Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
+    32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
+    (duck)                        gfortran GNU Fortran (GCC) 4.6.2
 
-    Mac OS X Mountain Lion 10.8.1 GCC 4.2.1 gcc
-    (owl)			  GNU Fortran (GCC) 4.6.1 gfortran
-                                  GCC 4.2.1. g++
-				  Apple clang version 4.0 (cc)
-				  Apple clang version 4.0 (c++)
+    Mac OS X Mountain Lion 10.8.1 cc Apple clang version 4.0 from Xcode 4.5.1
+    (owl)                         c++ Apple clang version 4.0 from Xcode 4.5.1
+				  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.5.1
+				  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.5.1
+    			          gfortran GNU Fortran (GCC) 4.6.2
 
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
