@@ -60,7 +60,9 @@ New Features
     
     Library
     -------
-    - None
+    - The library now supports the data conversion from enumeration to numeric
+      (integer and floating-point number) datatypes. See Issue 8221.
+      (SLU - 2012/10/23)
  
     Parallel Library
     ----------------
