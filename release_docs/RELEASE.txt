@@ -147,33 +147,31 @@ The following platforms and compilers have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Linux 2.6.18-194.3.1.el5PAE   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
     (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-52)
-                                      Version 4.5.2
+                                      Version 4.6.3
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
-                                      Version 11.8-0
                                       Version 11.9-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
-                                      Version 12.0
                                       Version 12.1
                                   MPICH mpich2-1.3.1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
-    Linux 2.6.18-308.1.1.el5      GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers for 32-bit applications;
     (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-52)
-                                      Version 4.5.2
+                                      Version 4.6.3
                                   PGI C, Fortran, C++ for 64-bit target on 
                                   x86-64;
-                                      Version 11.9-0 (64-bit)
-                                      Version 11.8-0 (32-bit)
+                                      Version 11.9-0 
+                                      Version 12.5-0
                                   Intel(R) C, C++, Fortran Compilers for 
                                   applications running on Intel(R) 64; 
-                                      Version 12.0
-                                      Version 12.1
+                                      Version 12.1 (Build 20110811)
+                                      Version 12.1 (Build 20120212)
                                   MPICH mpich2-1.3.1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
@@ -318,9 +316,9 @@ Mac OS X Lion 10.7.3 64-bit                n        y      n        y     y     
 Mac OS X Mountain Lion 10.8.1 64-bit       n        y      n        y     y     n
 AIX 5.3 32- and 64-bit                     y        y      y        y     y     y
 FreeBSD 8.2-STABLE 32&64 bit               n        y      n        y     y     y
-CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y        y(2)   y        y     y     y
-CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  n        y      n        y     y     y
-CentOS 5.5 Linux 2.6.18-194 i686 PGI    W  n        y      n        y     y     y
+CentOS 5.5 Linux 2.6.18-308 i686 GNU (1)W  y        y(2)   y        y     y     y
+CentOS 5.5 Linux 2.6.18-308 i686 Intel  W  n        y      n        y     y     y
+CentOS 5.5 Linux 2.6.18-308 i686 PGI    W  n        y      n        y     y     y
 CentOS 5.5 Linux 2.6.18 x86_64 GNU (1)  W  y        y(3)   y        y     y     y
 CentOS 5.5 Linux 2.6.18 x86_64 Intel    W  n        y      n        y     y     y
 CentOS 5.5 Linux 2.6.18 x86_64 PGI      W  n        y      n        y     y     y
@@ -343,9 +341,9 @@ Mac OS X Lion 10.7.3 64-bit                y       n         y         y
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
 AIX 5.3 32- and 64-bit                     n       n         n         y        
 FreeBSD 8.2-STABLE 32&64 bit               y       y         y         y        
-CentOS 5.5 Linux 2.6.18-194 i686 GNU (1)W  y       y(2)      y         y        
-CentOS 5.5 Linux 2.6.18-194 i686 Intel  W  y       y         y         n        
-CentOS 5.5 Linux 2.6.18-194 i686 PGI    W  y       y         y         n        
+CentOS 5.5 Linux 2.6.18-308 i686 GNU (1)W  y       y(2)      y         y        
+CentOS 5.5 Linux 2.6.18-308 i686 Intel  W  y       y         y         n        
+CentOS 5.5 Linux 2.6.18-308 i686 PGI    W  y       y         y         n        
 CentOS 5.5 Linux 2.6.18 x86_64 GNU (1)  W  y       y         y         y        
 CentOS 5.5 Linux 2.6.18 x86_64 Intel    W  y       y         y         n        
 CentOS 5.5 Linux 2.6.18 x86_64 PGI      W  y       y         y         n        
@@ -378,19 +376,6 @@ Known Problems
   of GCC.
   (SLU - 2012/06/12 - HDFFV-8017)
 
-* The h5repacktst test fails on AIX 32-bit because the test uses more
-  memory than the default amount. The failure message typically looks like:
-
-    "time: 0551-010 The process was stopped abnormally. Try again."
-
-  This is an issue with the test only and does not represent a problem with
-  the library. To allow the test to pass, request more memory when testing
-  via appropriate command such as:
-
-    $ env LDR_CNRTL=MAXDATA=0x20000000@DSA make check
-
-  (AKC - 2012/05/09 - HDFFV-8016)
-
 * The file_image test will fail in the "initial file image and callbacks in
   the core VFD" sub-test if the source directory is read-only as the test
   fails to create its test files in the build directory. This will be
@@ -408,11 +393,6 @@ Known Problems
   arguments to h5dump's -d flag. The command passes if run by hand, just
   not via the test script.
   (AKC - 2012/05/03)
-
-* The ph5diff (parallel h5diff) tool can intermittently hang in parallel mode
-  when comparing two HDF5 files that contain objects with the same names but
-  with different object types.
-  (JKM - 2012/04/27)
 
 * On hopper, the build failed when RUNSERIAL and RUNPARALLEL are set
   to aprun -np X, because the H5lib_settings.c file was not generated
