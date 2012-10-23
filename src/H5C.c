@@ -1893,9 +1893,10 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
                     if ( ( ( ! flush_marked_entries ) ||
                            ( entry_ptr->flush_marker ) ) &&
                          ( ( ! entry_ptr->flush_me_last ) ||
-                           ( ( entry_ptr->flush_me_last ) &&
-                             ( cache_ptr->num_last_entries >=
-                               cache_ptr->slist_len ) ) ) ) {
+                           ( cache_ptr->num_last_entries >=
+                             cache_ptr->slist_len ) ||
+                             ( flush_marked_entries &&
+                               entry_ptr->flush_marker ) ) ) {
 
                         if ( entry_ptr->is_protected ) {
 
