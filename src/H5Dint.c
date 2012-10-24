@@ -2854,12 +2854,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
+H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *nalloc)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    if(NULL == nalloc)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad allocation size pointer")
 
     if(NULL != p) {
         /* Encode layout type */
@@ -2881,14 +2886,13 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
             }
         } /* end if */
         *p++ = (uint8_t)layout.storage.type;
-
         if(layout.storage.type) {
             switch(layout.storage.type) {
                 case H5D_CONTIGUOUS:
                     {
                         UINT64ENCODE(p, layout.storage.u.contig.addr)
-                            UINT64ENCODE(p, layout.storage.u.contig.size)
-                            break;
+                        UINT64ENCODE(p, layout.storage.u.contig.size)
+                        break;
                     }
                 case H5D_CHUNKED:
                 case H5D_COMPACT:
@@ -2898,22 +2902,18 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
         } /* end if */
     } /* end if */
 
-    /* Size of layout type */
-    *size += sizeof(uint8_t) + sizeof(unsigned);
+    size += 2*sizeof(uint8_t) + sizeof(unsigned);
 
     /* Size of chunk info encoding */
     if(H5D_CHUNKED == layout.type) {
-        *size += sizeof(unsigned) + sizeof(uint32_t) + sizeof(uint64_t);
-        *size += layout.u.chunk.ndims * (sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t));
+        size += sizeof(unsigned) + sizeof(uint32_t) + sizeof(uint64_t);
+        size += layout.u.chunk.ndims * (sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t));
     } /* end if */
-
-    *size += sizeof(uint8_t);
-
     if(layout.storage.type) {
         switch(layout.storage.type) {
             case H5D_CONTIGUOUS:
                 {
-                    *size += 2 * sizeof(uint64_t);
+                    size += 2 * sizeof(uint64_t);
                     break;
                 }
             case H5D_CHUNKED:
@@ -2923,8 +2923,9 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *size)
         }
     }
 
+    *nalloc = size;
 done:
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__encode_layout() */
 
 

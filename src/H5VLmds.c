@@ -826,6 +826,8 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
+    H5MM_free(send_buf);
+
     /* allocate the dataset object that is returned to the user */
     if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -876,7 +878,6 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     dset->common.obj_type = H5I_DATASET;
     dset->common.raw_file = obj->raw_file;
 
-    H5MM_free(send_buf);
     H5MM_free(recv_buf);
     ret_value = (void *)dset;
 
@@ -910,7 +911,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
     void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
     MPI_Status     status;
-    uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
+    uint8_t        *p; /* pointer into recv_buf; used for decoding */
     hid_t          type_id=FAIL, space_id=FAIL, dcpl_id=H5P_DATASET_CREATE_DEFAULT;
     H5O_layout_t   layout;        /* Dataset's layout information */
     size_t         type_size, space_size, dcpl_size, layout_size;
@@ -950,7 +951,8 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
@@ -976,7 +978,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     UINT64DECODE_VARLEN(p, type_size);
     if(type_size) {
         /* decode the datatype */
-        if((type_id = H5Tdecode(p)) < 0)
+        if((type_id = H5Tdecode((unsigned char *)p)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
         p += type_size;
     }
@@ -985,7 +987,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     UINT64DECODE_VARLEN(p, space_size);
     if(space_size) {
         /* decode the dataspace */
-        if((space_id = H5Sdecode((const void *)p)) < 0)
+        if((space_id = H5Sdecode((unsigned char *)p)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "unable to decode dataspace");
         p += space_size;
     }

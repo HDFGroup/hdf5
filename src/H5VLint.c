@@ -467,19 +467,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size)
+H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
 {
     size_t plist_size = 0;
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t len = 0;
+    size_t size = 0;
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-    HDassert(size);
+    HDassert(nalloc);
 
-    *size += 2;
+    size += 2;
     switch(loc_params.type) {
         case H5VL_OBJECT_BY_SELF:
             break;
@@ -493,8 +494,8 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size)
                                           NULL, &plist_size)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
-            *size += (H5V_limit_enc_size((uint64_t)len) + len + 
-                      H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
+            size += (1 + H5V_limit_enc_size((uint64_t)len) + len + 
+                      1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
             break;
         case H5VL_OBJECT_BY_IDX:
             /* get length of name */
@@ -506,12 +507,12 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size)
                                           NULL, &plist_size)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
-            *size += (H5V_limit_enc_size((uint64_t)len) + len + 2 + 
-                      H5V_limit_enc_size((uint64_t)plist_size) + plist_size + 
-                      H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_idx.n));
+            size += (1 + H5V_limit_enc_size((uint64_t)len) + len + 2 + 
+                      1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size + 
+                      1 + H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_idx.n));
             break;
         case H5VL_OBJECT_BY_ADDR:
-            *size += H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_addr.addr);
+            size += 1 + H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_addr.addr);
             break;
         case H5VL_OBJECT_BY_REF:
             /* get size of property list */
@@ -520,7 +521,7 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size)
                                           NULL, &plist_size)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
 
-            *size += (H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
+            size += (1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
             break;
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "invalid location type");
@@ -533,10 +534,7 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size)
 
         switch(loc_params.type) {
             case H5VL_OBJECT_BY_SELF:
-                {
-                    /* nothing else to encode */
-                    break;
-                }
+                break;
             case H5VL_OBJECT_BY_NAME:
                 {
                     /* get length of name */
@@ -608,6 +606,7 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size)
         } /* end switch */
     } /* end if */
 
+    *nalloc = size;
 done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__encode_loc_params() */

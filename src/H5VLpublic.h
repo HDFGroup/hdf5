@@ -152,11 +152,11 @@ typedef enum H5VL_object_get_t {
 
 /* types for different ways that objects are located in an HDF5 container */
 typedef enum H5VL_loc_type_t {
-    H5VL_OBJECT_BY_SELF     = 0,
-    H5VL_OBJECT_BY_NAME	    = 1,
-    H5VL_OBJECT_BY_IDX	    = 2,
-    H5VL_OBJECT_BY_ADDR	    = 3,
-    H5VL_OBJECT_BY_REF      = 4
+    H5VL_OBJECT_BY_SELF = 1,
+    H5VL_OBJECT_BY_NAME,
+    H5VL_OBJECT_BY_IDX,
+    H5VL_OBJECT_BY_ADDR,
+    H5VL_OBJECT_BY_REF
 } H5VL_loc_type_t;
 
 struct H5VL_loc_by_name {
