@@ -115,6 +115,11 @@ Bug Fixes since HDF5-1.8.9
 
     Configuration
     -------------
+    - Fixed configure --enable-production to not use -O optimization for Lion
+      and Mountain Lion systems when gcc (i686-apple-darwin11-llvm-gcc-4.2
+      (GCC) 4.2.1) is used.  Somehow the -O optimization will cause some of
+      the hard conversion code in test/dt_arith.c to fail. HDFFV-8017.
+      (AKC - 2012/10/10)
     - Fixed AIX Fortran compiler flags to use appropriate settings for
       debugging, profiling, and optimization situations. HDFFV-8069. 
       (AKC 2012/09/27)
@@ -460,15 +465,6 @@ Known Problems
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
   (QAK - 2012/10/19)
-
-* The data conversion test dt_arith.c has failures (segmentation fault) from
-  "long double" to other datatypes during hard conversion when the library
-  is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
-  with optimization (-O3, -O2, and -O1).  Some newer versions of GCC do not
-  have this problem.  Users should disable optimization or try newer version
-  of GCC (This release of the library automatically disable the
-  optimization).
-  (SLU - 2012/06/12 - HDFFV-8017)
 
 * The file_image test will fail in the "initial file image and callbacks in
   the core VFD" sub-test if the source directory is read-only as the test
