@@ -511,7 +511,7 @@ H5FD_mdc_close(H5FD_t *_file)
         p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
         /* encode request type */
-        *p++ = (uint8_t)H5VL_MDS_FILE_CLOSE;
+        *p++ = (uint8_t)H5VL_FILE_CLOSE;
 
         /* encode the object id */
         INT32ENCODE(p, file->mdfile_id);
@@ -629,7 +629,7 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
-    *p++ = (uint8_t)H5VL_MDS_ALLOC;
+    *p++ = (uint8_t)H5VL_ALLOC;
 
     /* encode the object id */
     INT32ENCODE(p, file->mdfile_id);
@@ -697,7 +697,7 @@ H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
-    *p++ = (uint8_t)H5VL_MDS_GET_EOA;
+    *p++ = (uint8_t)H5VL_GET_EOA;
 
     /* encode the object id */
     INT32ENCODE(p, file->mdfile_id);
@@ -759,7 +759,7 @@ H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
-    *p++ = (uint8_t)H5VL_MDS_SET_EOA;
+    *p++ = (uint8_t)H5VL_SET_EOA;
 
     /* encode the object id */
     INT32ENCODE(p, file->mdfile_id);

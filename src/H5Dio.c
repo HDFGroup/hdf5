@@ -472,7 +472,6 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* check args */
     HDassert(dataset && dataset->oloc.file);
 
-    printf("dcpl %d type %d\n", dataset->shared->dcpl_id, dataset->shared->type_id);
     /* All filters in the DCPL must have encoding enabled. */
     if(!dataset->shared->checked_filters) {
         if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)

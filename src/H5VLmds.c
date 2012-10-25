@@ -485,7 +485,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* the first process in the communicator will tell the MDS process to create the metadata file */
     if (0 == my_rank) {
         /* determine the size of the buffer needed to encode the parameters */
-        if(H5VL_mds_encode(H5VL_MDS_FILE_CREATE, NULL, &buf_size, name, flags, fcpl_id, fapl_id) < 0)
+        if(H5VL__encode_file_create_params(NULL, &buf_size, name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
 
         /* allocate the buffer for encoding the parameters */
@@ -493,7 +493,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* encode the parameters */
-        if(H5VL_mds_encode(H5VL_MDS_FILE_CREATE, send_buf, &buf_size, name, flags, fcpl_id, fapl_id) < 0)
+        if(H5VL__encode_file_create_params(send_buf, &buf_size, name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file create parameters")
 
         MPI_Pcontrol(0);
@@ -591,7 +591,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     /* the first process in the communicator will tell the MDS process to open the metadata file */
     if (0 == my_rank) {
         /* determine the size of the buffer needed to encode the parameters */
-        if(H5VL_mds_encode(H5VL_MDS_FILE_OPEN, NULL, &buf_size, name, flags, fapl_id) < 0)
+        if(H5VL__encode_file_open_params(NULL, &buf_size, name, flags, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
 
         /* allocate the buffer for encoding the parameters */
@@ -599,7 +599,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* encode the parameters */
-        if(H5VL_mds_encode(H5VL_MDS_FILE_OPEN, send_buf, &buf_size, name, flags, fapl_id) < 0)
+        if(H5VL__encode_file_open_params(send_buf, &buf_size, name, flags, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file open parameters")
 
         MPI_Pcontrol(0);
@@ -690,7 +690,7 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
-    *p++ = (uint8_t)H5VL_MDS_FILE_FLUSH;
+    *p++ = (uint8_t)H5VL_FILE_FLUSH;
 
     /* encode the object id */
     INT32ENCODE(p, obj_id);
@@ -807,7 +807,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* determine the size of the buffer needed to encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DSET_CREATE, NULL, &buf_size, obj->obj_id, loc_params, name, 
+    if(H5VL__encode_dataset_create_params(NULL, &buf_size, obj->obj_id, loc_params, name, 
                        dcpl_id, dapl_id, type_id, space_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
 
@@ -816,8 +816,8 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DSET_CREATE, send_buf, &buf_size, obj->obj_id, loc_params, name, 
-                       dcpl_id, dapl_id, type_id, space_id, lcpl_id) < 0)
+    if(H5VL__encode_dataset_create_params(send_buf, &buf_size, obj->obj_id, loc_params, name, 
+                                          dcpl_id, dapl_id, type_id, space_id, lcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset create parameters");
 
     MPI_Pcontrol(0);
@@ -920,8 +920,8 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     FUNC_ENTER_NOAPI_NOINIT
 
     /* determine the size of the buffer needed to encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DSET_OPEN, NULL, &buf_size, obj->obj_id, loc_params, 
-                       name, dapl_id) < 0)
+    if(H5VL__encode_dataset_open_params(NULL, &buf_size, obj->obj_id, loc_params, 
+                                        name, dapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
 
     /* allocate the buffer for encoding the parameters */
@@ -929,8 +929,8 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DSET_OPEN, send_buf, &buf_size, obj->obj_id, loc_params, 
-                       name, dapl_id) < 0)
+    if(H5VL__encode_dataset_open_params(send_buf, &buf_size, obj->obj_id, loc_params, 
+                                        name, dapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset open parameters");
 
     MPI_Pcontrol(0);
@@ -1170,7 +1170,7 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
-    *p++ = (uint8_t)H5VL_MDS_DSET_CLOSE;
+    *p++ = (uint8_t)H5VL_DSET_CLOSE;
 
     /* encode the object id */
     INT32ENCODE(p, dset->common.obj_id);
@@ -1224,7 +1224,7 @@ H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     FUNC_ENTER_NOAPI_NOINIT
 
     /* determine the size of the buffer needed to encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DTYPE_COMMIT, NULL, &buf_size, obj->obj_id, loc_params, name, 
+    if(H5VL__encode_datatype_commit_params(NULL, &buf_size, obj->obj_id, loc_params, name, 
                        type_id, lcpl_id, tcpl_id, tapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
 
@@ -1236,7 +1236,7 @@ H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DTYPE_COMMIT, send_buf, &buf_size, obj->obj_id, loc_params, name, 
+    if(H5VL__encode_datatype_commit_params(send_buf, &buf_size, obj->obj_id, loc_params, name, 
                        type_id, lcpl_id, tcpl_id, tapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype commit parameters");
 
@@ -1298,8 +1298,8 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     FUNC_ENTER_NOAPI_NOINIT
 
     /* determine the size of the buffer needed to encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DTYPE_OPEN, NULL, &buf_size, obj->obj_id, loc_params, name, 
-                       tapl_id) < 0)
+    if(H5VL__encode_datatype_open_params(NULL, &buf_size, obj->obj_id, loc_params, name, 
+                                         tapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
 
     /* allocate the buffer for encoding the parameters */
@@ -1307,7 +1307,7 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* encode the parameters */
-    if(H5VL_mds_encode(H5VL_MDS_DTYPE_OPEN, send_buf, &buf_size, obj->obj_id, loc_params, name, 
+    if(H5VL__encode_datatype_open_params(send_buf, &buf_size, obj->obj_id, loc_params, name, 
                        tapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype open parameters");
 
@@ -1428,7 +1428,7 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
     p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
     /* encode request type */
-    *p++ = (uint8_t)H5VL_MDS_DTYPE_CLOSE;
+    *p++ = (uint8_t)H5VL_DTYPE_CLOSE;
 
     /* encode the object id */
     INT32ENCODE(p, dtype->common.obj_id);
@@ -1452,178 +1452,3 @@ done:
 } /* end H5VL_mds_datatype_close() */
 
 #endif /* H5_HAVE_PARALLEL */
-
-#if 0
-    /* get the datatype the dataset was created with */
-    if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype");
-    /* copy and store the datatype in the dataset object */
-    if(NULL == (dset->type = H5T_copy(dt, H5T_COPY_TRANSIENT)))
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy datatype");
-
-    /* get the dataspace the dataset was created with */
-    if(NULL == (ds = (H5S_t *)H5I_object(space_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace");
-    /* copy and store the dataspace in the dataset object */
-    if(NULL == (dset->space = H5S_copy(ds, FALSE, TRUE)))
-	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy dataspace");
-
-#endif
-
-#if 0
-    /* Allocate data space and initialize it if it hasn't been. */
-    if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
-       !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
-        hssize_t file_nelmts;   /* Number of elements in file dataset's dataspace */
-        hbool_t full_overwrite; /* Whether we are over-writing all the elements */
-        size_t dxpl_size = 0;
-        size_t buf_size = 0; /* size of send_buf */
-        int incoming_msg_size; /* incoming buffer size for MDS returned dataset */
-        void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
-        MPI_Status status;
-        H5P_genplist_t *dxpl;
-        void *send_buf = NULL;
-        H5O_layout_t layout;
-        uint8_t *p = NULL; /* temporary pointer into send_buf for encoding */
-
-        /* Get the number of elements in file dataset's dataspace */
-        if((file_nelmts = H5S_GET_EXTENT_NPOINTS(file_space)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "can't retrieve number of elements in file dataset")
-
-        /* Always allow fill values to be written if the dataset has a VL datatype */
-        if(H5T_detect_class(dataset->shared->type, H5T_VLEN, FALSE))
-            full_overwrite = FALSE;
-        else
-            full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
-
-        if(H5P_DATASET_XFER_DEFAULT != dxpl_id)
-            if((ret_value = H5P__encode(dxpl, FALSE, NULL, &dxpl_size)) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-
-        buf_size = 2 + sizeof(unsigned) + sizeof(int) + 
-            H5V_limit_enc_size((uint64_t)dxpl_size) + dxpl_size;
-
-        /* allocate the buffer for encoding the parameters */
-        if(NULL == (send_buf = H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-        p = (uint8_t *)send_buf;
-
-        /* encode request type */
-        *p++ = (uint8_t)H5VL_MDS_DSET_WRITE;
-
-        H5_ENCODE_UNSIGNED(p, full_overwrite);
-        //*p++ = (uint8_t)full_overwrite;
-
-        *p++ = (uint8_t)H5D_ALLOC_WRITE;
-
-        /* encode the object id */
-        INT32ENCODE(p, dset->common.obj_id);
-
-        /* encode the plist size */
-        UINT64ENCODE_VARLEN(p, dxpl_size);
-        /* encode property lists if they are not default*/
-        if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
-            if(H5P__encode(dxpl, FALSE, p, &dxpl_size) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-            p += dxpl_size;
-        }
-
-        MPI_Pcontrol(0);
-        /* send the request to the MDS process */
-        if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   MPI_COMM_WORLD))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-
-        /* probe for a message from the mds */
-        if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
-        /* get the incoming message size from the probe result */
-        if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
-
-        /* allocate the receive buffer */
-        recv_buf = (void *)H5MM_malloc (incoming_msg_size);
-
-        /* receive the actual message */
-        if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
-                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
-        MPI_Pcontrol(1);
-
-        p = (uint8_t *)recv_buf;
-
-        /* decode the dataset layout */
-        if(FAIL == H5D__decode_layout(p, &layout))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataset layout");
-
-        /* set the layout of the dataset */
-        dataset->shared->layout = layout;
-
-        H5MM_free(send_buf);
-        H5MM_free(recv_buf);
-
- 	/* Allocate storage */
-        if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
-
-                hid_t dset_id = FAIL; /* dset id */
-                hid_t dxpl_id;
-                size_t dxpl_size, buf_size;
-                void *send_buf = NULL;
-                H5D_t *dataset = NULL;
-                hbool_t full_overwrite;
-                H5D_time_alloc_t alloc_time;
-                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
-
-                //full_overwrite = (hbool_t)*p++;
-                H5_DECODE_UNSIGNED(p, full_overwrite);
-                alloc_time = (H5D_time_alloc_t)*p++;
-
-                /* decode the object id */
-                INT32DECODE(p, dset_id);
-                printf("MDS allocating dataset %d\n", dset_id);
-                /* decode the plist size */
-                UINT64DECODE_VARLEN(p, dxpl_size);
-                /* decode property lists if they are not default*/
-                if(dxpl_size) {
-                    if((dxpl_id = H5P__decode(p)) < 0)
-                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-                    p += dxpl_size;
-                }
-                else {
-                    dxpl_id = H5P_DATASET_XFER_DEFAULT;
-                }
-
-                if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dset ID");
-
-                /* Allocate storage */
-                if(H5D__alloc_storage(dataset, dxpl_id, alloc_time, full_overwrite, NULL) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage");
-
-                /* determine the buffer size needed to store the encoded layout of the dataset */ 
-                if(FAIL == H5D__encode_layout(dataset->shared->layout, NULL, &buf_size))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
-
-                /* allocate the buffer for encoding the parameters */
-                if(NULL == (send_buf = H5MM_malloc(buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-
-                p1 = (uint8_t *)send_buf;
-
-                /* encode layout of the dataset */ 
-                if(FAIL == H5D__encode_layout(dataset->shared->layout, p1, &buf_size))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
-
-                /* Send the dataset id to the client */
-                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-
-                H5MM_free(send_buf);
-                break;
-
-#endif
-

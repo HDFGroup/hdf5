@@ -273,6 +273,7 @@ H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 
     /* Call generic selection operation */
     H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
+
     if(H5D__select_io(io_info, type_info->src_type_size, (size_t)nelmts,
             file_space, mem_space) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")

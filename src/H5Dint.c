@@ -2886,20 +2886,18 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *nalloc)
             }
         } /* end if */
         *p++ = (uint8_t)layout.storage.type;
-        if(layout.storage.type) {
-            switch(layout.storage.type) {
-                case H5D_CONTIGUOUS:
-                    {
-                        UINT64ENCODE(p, layout.storage.u.contig.addr)
-                        UINT64ENCODE(p, layout.storage.u.contig.size)
-                        break;
-                    }
-                case H5D_CHUNKED:
-                case H5D_COMPACT:
-                default:
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
-            } /* end switch */
-        } /* end if */
+        switch(layout.type) {
+            case H5D_CONTIGUOUS:
+                {
+                    UINT64ENCODE(p, layout.storage.u.contig.addr)
+                    UINT64ENCODE(p, layout.storage.u.contig.size)
+                    break;
+                }
+            case H5D_CHUNKED:
+            case H5D_COMPACT:
+            default:
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+        } /* end switch */
     } /* end if */
 
     size += 2*sizeof(uint8_t) + sizeof(unsigned);
@@ -2909,18 +2907,17 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *nalloc)
         size += sizeof(unsigned) + sizeof(uint32_t) + sizeof(uint64_t);
         size += layout.u.chunk.ndims * (sizeof(uint32_t) + sizeof(uint64_t) + sizeof(uint64_t));
     } /* end if */
-    if(layout.storage.type) {
-        switch(layout.storage.type) {
-            case H5D_CONTIGUOUS:
-                {
-                    size += 2 * sizeof(uint64_t);
-                    break;
-                }
-            case H5D_CHUNKED:
-            case H5D_COMPACT:
-            default:
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
-        }
+
+    switch(layout.type) {
+        case H5D_CONTIGUOUS:
+            {
+                size += 2 * sizeof(uint64_t);
+                break;
+            }
+        case H5D_CHUNKED:
+        case H5D_COMPACT:
+         default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
     }
 
     *nalloc = size;
@@ -2975,20 +2972,19 @@ H5D__decode_layout(const void *buf, H5O_layout_t *layout)
 
     layout->storage.type = (H5D_layout_t)*p++;
 
-    if(layout->storage.type) {
-        switch(layout->storage.type) {
-            case H5D_CONTIGUOUS:
-                {
-                    UINT64DECODE(p, layout->storage.u.contig.addr);
-                    UINT64DECODE(p, layout->storage.u.contig.size);
-                    break;
-                }
-            case H5D_CHUNKED:
-            case H5D_COMPACT:
-            default:
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
-        } /* end switch */
-    } /* end if */
+    switch(layout->type) {
+        case H5D_CONTIGUOUS:
+            {
+                UINT64DECODE(p, layout->storage.u.contig.addr);
+                UINT64DECODE(p, layout->storage.u.contig.size);
+                break;
+            }
+        case H5D_CHUNKED:
+        case H5D_COMPACT:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
+    } /* end switch */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__decode_layout() */
