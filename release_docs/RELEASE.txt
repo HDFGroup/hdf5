@@ -272,7 +272,7 @@ Supported Platforms
 
     IBM Blue Gene/P               XL C for Blue Gene/P, bgxlc V9.0
     (LLNL uDawn)                  XL C++ for Blue Gene/P, bgxlC V9.0
-                                  XL Fortran for Blue Gene/P, bgxlf0 V11.1
+                                  XL Fortran for Blue Gene/P, bgxlf90 V11.1
 
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
     (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
@@ -446,6 +446,15 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* The following h5stat test case fails in BG/P machines (and potentially other
+  machines that displays extra output if an MPI task returns with a non-zero
+  code.)
+    Testing h5stat notexist.h5
+  
+  The test actually runs and passes as expected. It is the extra output from
+  the MPI process that causes the test script to fail. This will be fixed
+  in the next release.  (AKC - 2012/10/25 - HDFFV-8233)
+
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
