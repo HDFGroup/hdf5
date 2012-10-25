@@ -70,20 +70,6 @@ H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t app_ref);
 H5_DLL ssize_t H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL void *H5VL_get_object(hid_t id);
-H5_DLL herr_t H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size);
-H5_DLL herr_t H5VL__decode_loc_params(const void *buf, H5VL_loc_params_t *loc_params);
-H5_DLL herr_t H5VL__encode_file_create_params(void *buf, size_t *nalloc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-H5_DLL herr_t H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsigned flags, hid_t fapl_id);
-H5_DLL herr_t H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id, 
-                                                 H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id,
-                                                 hid_t dapl_id, hid_t type_id, hid_t space_id, hid_t lcpl_id);
-H5_DLL herr_t  H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params,
-                                                const char *name, hid_t dapl_id);
-H5_DLL herr_t H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id, 
-                                                  H5VL_loc_params_t loc_params, const char *name, hid_t type_id,
-                                                  hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
-H5_DLL herr_t H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id, 
-                                                H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id);
 H5_DLL herr_t H5VL_close(H5VL_class_t *vol_plugin);
 
 H5_DLL void *H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
@@ -154,5 +140,21 @@ H5_DLL herr_t H5T_close_datatype(void *dt, H5VL_t *vol_plugin);
 
 /* Native routines that are useful in other library plugins */
 H5_DLL H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
+
+/* encode & decode prototypes */
+H5_DLL herr_t H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size);
+H5_DLL herr_t H5VL__decode_loc_params(const void *buf, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL__encode_file_create_params(void *buf, size_t *nalloc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+H5_DLL herr_t H5VL__decode_file_create_params(void *buf, char **name, unsigned *flags, hid_t *fcpl_id, hid_t *fapl_id);
+H5_DLL herr_t H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsigned flags, hid_t fapl_id);
+H5_DLL herr_t H5VL__decode_file_open_params(void *buf, char **name, unsigned *flags, hid_t *fapl_id);
+H5_DLL herr_t H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t type_id, hid_t space_id, hid_t lcpl_id);
+H5_DLL herr_t H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dcpl_id, hid_t *dapl_id, hid_t *type_id, hid_t *space_id, hid_t *lcpl_id);
+H5_DLL herr_t H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id);
+H5_DLL herr_t H5VL__decode_dataset_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dapl_id);
+H5_DLL herr_t H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
+H5_DLL herr_t H5VL__decode_datatype_commit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *type_id, hid_t *lcpl_id, hid_t *tcpl_id, hid_t *tapl_id);
+H5_DLL herr_t H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id);
+H5_DLL herr_t H5VL__decode_datatype_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *tapl_id);
 
 #endif /* _H5VLprivate_H */

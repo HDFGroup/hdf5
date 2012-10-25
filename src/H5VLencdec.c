@@ -393,6 +393,64 @@ done:
 } /* end H5VL__encode_file_create_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_file_create_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_file_create_params(void *buf, char **mds_filename, unsigned *flags, 
+                                hid_t *fcpl_id, hid_t *fapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* length of name (decoded) */
+    char *name = NULL;
+    size_t fcpl_size = 0, fapl_size = 0; /* plist sizes */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode length of name and name */
+    UINT64DECODE_VARLEN(p, len);
+    name = H5MM_xstrdup((const char *)(p));
+    name[len] = '\0';
+    p += len;
+
+    /* generate the MDS file name by adding a .md extension to the file name */
+    *mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 4));
+    sprintf(*mds_filename, "%s.md", name);
+
+    /* deocde create flags */
+    H5_DECODE_UNSIGNED(p, *flags);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, fcpl_size);
+    /* decode property lists if they are not default*/
+    if(fcpl_size) {
+        if((*fcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += fcpl_size;
+    }
+    else {
+        *fcpl_id = H5P_FILE_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, fapl_size);
+    /* decode property lists if they are not default*/
+    if(fapl_size) {
+        if((*fapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += fapl_size;
+    }
+    else {
+        *fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    }
+
+    if(name)
+        H5MM_xfree(name);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_file_create_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_file_open_params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -446,6 +504,51 @@ H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsig
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__encode_file_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_file_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_file_open_params(void *buf, char **mds_filename, unsigned *flags, hid_t *fapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* length of name (decoded) */
+    char *name = NULL;
+    size_t fapl_size = 0; /* plist sizes */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode length of name and name */
+    UINT64DECODE_VARLEN(p, len);
+    name = H5MM_xstrdup((const char *)(p));
+    name[len] = '\0';
+    p += len;
+
+    /* generate the MDS file name by adding a .md extension to the file name */
+    *mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 4));
+    sprintf(*mds_filename, "%s.md", name);
+
+    /* deocde open flags */
+    H5_DECODE_UNSIGNED(p, *flags);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, fapl_size);
+    /* decode property lists if they are not default*/
+    if(fapl_size) {
+        if((*fapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += fapl_size;
+    }
+    else {
+        *fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    }
+
+    if(name)
+        H5MM_xfree(name);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_file_open_params() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode_dataset_create_params
@@ -577,6 +680,92 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
 } /* end H5VL__encode_dataset_create_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_dataset_create_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                   char **name, hid_t *dcpl_id, hid_t *dapl_id, 
+                                   hid_t *type_id, hid_t *space_id, hid_t *lcpl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* len of dataset name */
+    size_t dcpl_size = 0, dapl_size = 0, lcpl_size = 0, type_size = 0, space_size = 0, loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode length of the dataset name and the actual dataset name */
+    UINT64DECODE_VARLEN(p, len);
+    if(0 != len) {
+        *name = H5MM_xstrdup((const char *)(p));
+        (*name)[len] = '\0';
+        p += len;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dcpl_size);
+    /* decode property lists if they are not default*/
+    if(dcpl_size) {
+        if((*dcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dcpl_size;
+    }
+    else {
+        *dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dapl_size);
+    /* decode property lists if they are not default*/
+    if(dapl_size) {
+        if((*dapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dapl_size;
+    }
+    else {
+        *dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lcpl_size);
+    /* decode property lists if they are not default*/
+    if(lcpl_size) {
+        if((*lcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lcpl_size;
+    }
+    else {
+        *lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    }
+
+    /* decode the type size */
+    UINT64DECODE_VARLEN(p, type_size);
+    /* decode the datatype */
+    if((*type_id = H5Tdecode(p)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    p += type_size;
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    /* decode the dataspace */
+    if((*space_id = H5Sdecode((const void *)p)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
+    p += space_size;
+
+ done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_dataset_create_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_dataset_open_encode__params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -645,6 +834,53 @@ H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_l
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__encode_dataset_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_dataset_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_dataset_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                 char **name, hid_t *dapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* len of dataset name */
+    size_t dapl_size = 0, loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode length of the dataset name and the actual dataset name */
+    UINT64DECODE_VARLEN(p, len);
+    if(0 != len) {
+        *name = H5MM_xstrdup((const char *)(p));
+        (*name)[len] = '\0';
+        p += len;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dapl_size);
+    /* decode property lists if they are not default*/
+    if(dapl_size) {
+        if((*dapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dapl_size;
+    }
+    else {
+        *dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_dataset_open_params() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode_datatype_commit_params
@@ -763,6 +999,85 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
 } /* end H5VL__encode_datatype_commit_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_datatype_commit_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_datatype_commit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                    char **name, hid_t *type_id, hid_t *lcpl_id, 
+                                    hid_t *tcpl_id, hid_t *tapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* len of dataset name */
+    size_t tcpl_size = 0, tapl_size = 0, lcpl_size = 0, type_size = 0, loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode length of the dataset name and the actual dataset name */
+    UINT64DECODE_VARLEN(p, len);
+    if(0 != len) {
+        *name = H5MM_xstrdup((const char *)(p));
+        (*name)[len] = '\0';
+        p += len;
+    }
+
+    /* decode the type size */
+    UINT64DECODE_VARLEN(p, type_size);
+    /* decode the datatype */
+    if((*type_id = H5Tdecode(p)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    p += type_size;
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lcpl_size);
+    /* decode property lists if they are not default*/
+    if(lcpl_size) {
+        if((*lcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lcpl_size;
+    }
+    else {
+        *lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, tcpl_size);
+    /* decode property lists if they are not default*/
+    if(tcpl_size) {
+        if((*tcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += tcpl_size;
+    }
+    else {
+        *tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, tapl_size);
+    /* decode property lists if they are not default*/
+    if(tapl_size) {
+        if((*tapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += tapl_size;
+    }
+    else {
+        *tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    }
+
+ done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_datatype_commit_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_datatype_open_params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -831,6 +1146,53 @@ H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__encode_datatype_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_datatype_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_datatype_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                  char **name, hid_t *tapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* len of dataset name */
+    size_t tapl_size = 0, loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode length of the dataset name and the actual dataset name */
+    UINT64DECODE_VARLEN(p, len);
+    if(0 != len) {
+        *name = H5MM_xstrdup((const char *)(p));
+        (*name)[len] = '\0';
+        p += len;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, tapl_size);
+    /* decode property lists if they are not default*/
+    if(tapl_size) {
+        if((*tapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += tapl_size;
+    }
+    else {
+        *tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    }
+
+ done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_datatype_open_params() */
 
 #if 0
 /*-------------------------------------------------------------------------

@@ -221,9 +221,6 @@ done:
 static herr_t
 H5VL__file_create_cb(uint8_t *p, int source)
 {
-    char *name = NULL; /* name of HDF5 container (decoded) */
-    size_t len = 0; /* length of name (decoded) */
-    size_t fcpl_size = 0, fapl_size = 0; /* plist sizes */
     char *mds_filename = NULL; /* name of the metadata file (generated from name) */
     unsigned flags; /* access flags */
     hid_t fcpl_id = FAIL, fapl_id = FAIL; /* plist IDs */
@@ -234,42 +231,8 @@ H5VL__file_create_cb(uint8_t *p, int source)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* decode length of name and name */
-    UINT64DECODE_VARLEN(p, len);
-    name = H5MM_xstrdup((const char *)(p));
-    name[len] = '\0';
-    p += len;
-
-    /* generate the MDS file name by adding a .md extension to the file name */
-    mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 4));
-    sprintf(mds_filename, "%s.md", name);
-
-    /* deocde create flags */
-    H5_DECODE_UNSIGNED(p, flags);
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, fcpl_size);
-    /* decode property lists if they are not default*/
-    if(fcpl_size) {
-        if((fcpl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += fcpl_size;
-    }
-    else {
-        fcpl_id = H5P_FILE_CREATE_DEFAULT;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, fapl_size);
-    /* decode property lists if they are not default*/
-    if(fapl_size) {
-        if((fapl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += fapl_size;
-    }
-    else {
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    }
+    if(H5VL__decode_file_create_params(p, &mds_filename, &flags, &fcpl_id, &fapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file create params");
 
     /* set the underlying MDS VFD */
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -285,12 +248,10 @@ H5VL__file_create_cb(uint8_t *p, int source)
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
-    if(name)
-        H5MM_xfree(name);
+done:
     if(mds_filename)
         H5MM_xfree(mds_filename);
 
-done:
     if(SUCCEED == ret_value) {
         /* Send the meta data file ID to the client */
         if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
@@ -313,9 +274,6 @@ done:
 static herr_t
 H5VL__file_open_cb(uint8_t *p, int source)
 {
-    char *name = NULL; /* name of HDF5 container (decoded) */
-    size_t len = 0; /* length of name (decoded) */
-    size_t fapl_size = 0; /* plist sizes */
     char *mds_filename = NULL; /* name of the metadata file (generated from name) */
     unsigned flags; /* access flags */
     hid_t fapl_id = FAIL; /* plist IDs */
@@ -326,30 +284,8 @@ H5VL__file_open_cb(uint8_t *p, int source)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* decode length of name and name */
-    UINT64DECODE_VARLEN(p, len);
-    name = H5MM_xstrdup((const char *)(p));
-    name[len] = '\0';
-    p += len;
-
-    /* generate the MDS file name by adding a .md extension to the file name */
-    mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 4));
-    sprintf(mds_filename, "%s.md", name);
-
-    /* deocde create flags */
-    H5_DECODE_UNSIGNED(p, flags);
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, fapl_size);
-    /* decode property lists if they are not default*/
-    if(fapl_size) {
-        if((fapl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += fapl_size;
-    }
-    else {
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    }
+    if(H5VL__decode_file_open_params(p, &mds_filename, &flags, &fapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file open params");
 
     /* set the underlying MDS VFD */
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -367,6 +303,9 @@ H5VL__file_open_cb(uint8_t *p, int source)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
+    if(mds_filename)
+        H5MM_xfree(mds_filename);
+
     if(SUCCEED == ret_value) {
         /* Send the meta data file ID to the client */
         if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
@@ -379,11 +318,6 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
-    if(name)
-        H5MM_xfree(name);
-    if(mds_filename)
-        H5MM_xfree(mds_filename);
-
     printf("MDS opened file %d\n", file_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__file_open_cb */
@@ -449,8 +383,6 @@ static herr_t
 H5VL__file_close_cb(uint8_t *p, int source)
 {
     hid_t file_id; /* metadata file ID */
-    H5F_t *f = NULL; /* metadata file struct */
-    int nref;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -458,6 +390,14 @@ H5VL__file_close_cb(uint8_t *p, int source)
     /* the metadata file id */
     INT32DECODE(p, file_id);
 
+    /* Check/fix arguments. */
+    if(H5I_FILE != H5I_get_type(file_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID");
+
+    /* Decrement reference count on atom.  When it reaches zero the file will be closed. */
+    if(H5I_dec_ref(file_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed");
+#if 0
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID");
 
@@ -480,6 +420,7 @@ H5VL__file_close_cb(uint8_t *p, int source)
     /* close the file */
     if((ret_value = H5F_close(f)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
+#endif
 
 done:
     /* send status to client */
@@ -502,8 +443,6 @@ H5VL__dataset_create_cb(uint8_t *p, int source)
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
     H5G_loc_t loc; /* Object location to insert dataset into */
     char *name = NULL; /* name of dataset (if named) */
-    size_t len = 0; /* len of dataset name */
-    size_t dcpl_size = 0, dapl_size = 0, lcpl_size = 0, type_size = 0, space_size = 0, loc_size = 0;
     hid_t dcpl_id = FAIL, dapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
     hid_t type_id; /* datatype for dataset */
     hid_t space_id; /* dataspace for dataset */
@@ -515,72 +454,9 @@ H5VL__dataset_create_cb(uint8_t *p, int source)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* decode the object id */
-    INT32DECODE(p, obj_id);
-
-    UINT64DECODE_VARLEN(p, loc_size);
-    /* decode the location parameters */
-    if((ret_value = H5VL__decode_loc_params(p, &loc_params)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
-    p += loc_size;
-
-    /* decode length of the dataset name and the actual dataset name */
-    UINT64DECODE_VARLEN(p, len);
-    if(0 != len) {
-        name = H5MM_xstrdup((const char *)(p));
-        name[len] = '\0';
-        p += len;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, dcpl_size);
-    /* decode property lists if they are not default*/
-    if(dcpl_size) {
-        if((dcpl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += dcpl_size;
-    }
-    else {
-        dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, dapl_size);
-    /* decode property lists if they are not default*/
-    if(dapl_size) {
-        if((dapl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += dapl_size;
-    }
-    else {
-        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, lcpl_size);
-    /* decode property lists if they are not default*/
-    if(lcpl_size) {
-        if((lcpl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += lcpl_size;
-    }
-    else {
-        lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    }
-
-    /* decode the type size */
-    UINT64DECODE_VARLEN(p, type_size);
-    /* decode the datatype */
-    if((type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
-    p += type_size;
-
-    /* decode the space size */
-    UINT64DECODE_VARLEN(p, space_size);
-    /* decode the dataspace */
-    if((space_id = H5Sdecode((const void *)p)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
-    p += space_size;
+    if(H5VL__decode_dataset_create_params(p, &obj_id, &loc_params, &name, &dcpl_id, &dapl_id,
+                                          &type_id, &space_id, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset create params");
 
     /* Check dataset create parameters */
     if(H5G_loc(obj_id, &loc) < 0)
@@ -662,14 +538,13 @@ H5VL__dataset_open_cb(uint8_t *p, int source)
     H5D_t *dset = NULL; /* New dataset's info */
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
     char *name = NULL; /* name of dataset (if named) */
-    size_t len = 0; /* len of dataset name */
     H5G_loc_t loc; /* Object location of group */
     H5G_loc_t dset_loc; /* Object location of dataset */
     H5G_name_t path; /* Dataset group hier. path */
     H5O_loc_t oloc; /* Dataset object location */
     H5O_type_t obj_type; /* Type of object at location */
     hbool_t loc_found = FALSE; /* Location at 'name' found */
-    size_t dcpl_size = 0, dapl_size = 0, type_size = 0, space_size = 0, layout_size = 0, loc_size = 0;
+    size_t dcpl_size = 0, type_size = 0, space_size = 0, layout_size = 0;
     H5P_genplist_t *dcpl;
     size_t buf_size = 0;
     hid_t dapl_id = FAIL; /* plist IDs */
@@ -679,36 +554,8 @@ H5VL__dataset_open_cb(uint8_t *p, int source)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* decode request parameters */
-    /* decode the object id */
-    INT32DECODE(p, obj_id);
-
-    UINT64DECODE_VARLEN(p, loc_size);
-    /* decode the location parameters */
-    if((ret_value = H5VL__decode_loc_params(p, &loc_params)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
-    p += loc_size;
-
-    /* decode length of the dataset name and the actual dataset name */
-    UINT64DECODE_VARLEN(p, len);
-    if(0 != len) {
-        name = H5MM_xstrdup((const char *)(p));
-        name[len] = '\0';
-        p += len;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, dapl_size);
-    /* decode property lists if they are not default*/
-    if(dapl_size) {
-        if((dapl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += dapl_size;
-    }
-    else {
-        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-    }
-    /* END decode request parameters */
+    if(H5VL__decode_dataset_open_params(p, &obj_id, &loc_params, &name, &dapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset open params");
 
     /* START open dataset */
     /* Check dataset create parameters */
@@ -893,73 +740,15 @@ H5VL__datatype_commit_cb(uint8_t *p, int source)
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
     H5G_loc_t loc; /* Object location to insert dataset into */
     char *name = NULL; /* name of dataset (if named) */
-    size_t len = 0; /* len of dataset name */
-    size_t tcpl_size = 0, tapl_size = 0, lcpl_size = 0, type_size = 0, loc_size = 0;
     hid_t tcpl_id = FAIL, tapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
     hid_t type_id; /* datatype for dataset */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* decode the object id */
-    INT32DECODE(p, obj_id);
-
-    UINT64DECODE_VARLEN(p, loc_size);
-    /* decode the location parameters */
-    if((ret_value = H5VL__decode_loc_params(p, &loc_params)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
-    p += loc_size;
-
-    /* decode length of the dataset name and the actual dataset name */
-    UINT64DECODE_VARLEN(p, len);
-    if(0 != len) {
-        name = H5MM_xstrdup((const char *)(p));
-        name[len] = '\0';
-        p += len;
-    }
-
-    /* decode the type size */
-    UINT64DECODE_VARLEN(p, type_size);
-    /* decode the datatype */
-    if((type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
-    p += type_size;
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, lcpl_size);
-    /* decode property lists if they are not default*/
-    if(lcpl_size) {
-        if((lcpl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += lcpl_size;
-    }
-    else {
-        lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, tcpl_size);
-    /* decode property lists if they are not default*/
-    if(tcpl_size) {
-        if((tcpl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += tcpl_size;
-    }
-    else {
-        tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, tapl_size);
-    /* decode property lists if they are not default*/
-    if(tapl_size) {
-        if((tapl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += tapl_size;
-    }
-    else {
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    }
+    if(H5VL__decode_datatype_commit_params(p, &obj_id, &loc_params, &name, &type_id, &lcpl_id, 
+                                           &tcpl_id, &tapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset create params");
 
     if(H5G_loc(obj_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
@@ -1028,41 +817,15 @@ H5VL__datatype_open_cb(uint8_t *p, int source)
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     char *name = NULL; /* name of dataset (if named) */
-    size_t tapl_size = 0, type_size = 0, len = 0, buf_size = 0, loc_size = 0;
+    size_t type_size = 0, buf_size = 0;
     void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
     uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* decode the object id */
-    INT32DECODE(p, obj_id);
-
-    UINT64DECODE_VARLEN(p, loc_size);
-    /* decode the location parameters */
-    if((ret_value = H5VL__decode_loc_params(p, &loc_params)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
-    p += loc_size;
-
-    /* decode length of the dataset name and the actual dataset name */
-    UINT64DECODE_VARLEN(p, len);
-    if(0 != len) {
-        name = H5MM_xstrdup((const char *)(p));
-        name[len] = '\0';
-        p += len;
-    }
-
-    /* decode the plist size */
-    UINT64DECODE_VARLEN(p, tapl_size);
-    /* decode property lists if they are not default*/
-    if(tapl_size) {
-        if((tapl_id = H5P__decode(p)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += tapl_size;
-    }
-    else {
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    }
+    if(H5VL__decode_datatype_open_params(p, &obj_id, &loc_params, &name, &tapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset create params");
 
     if(H5G_loc(obj_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
