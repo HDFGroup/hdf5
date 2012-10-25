@@ -551,6 +551,102 @@ done:
 } /* end H5VL__decode_file_open_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_file_flush_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_file_flush_params(void *buf, size_t *nalloc, hid_t obj_id, H5F_scope_t scope)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_FILE_FLUSH;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        /* encode scope */
+        *p++ = (uint8_t)scope;
+    }
+
+    size = 2 + sizeof(int);
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_file_flush_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_file_flush_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_file_flush_params(void *buf, hid_t *obj_id, H5F_scope_t *scope)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* the metadata file id */
+    INT32DECODE(p, *obj_id);
+
+    /* decode the scope */
+    *scope = (H5F_scope_t)*p++;
+
+ done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_file_flush_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_file_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_file_close_params(void *buf, size_t *nalloc, hid_t obj_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_FILE_CLOSE;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+    }
+
+    size = 1 + sizeof(int);
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_file_close_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_file_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_file_close_params(void *buf, hid_t *file_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* the metadata file id */
+    INT32DECODE(p, *file_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_file_close_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_dataset_create_params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -883,6 +979,51 @@ done:
 } /* end H5VL__decode_dataset_open_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_dataset_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_dataset_close_params(void *buf, size_t *nalloc, hid_t dataset_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_DSET_CLOSE;
+
+        /* encode the object id */
+        INT32ENCODE(p, dataset_id);
+    }
+
+    size = 1 + sizeof(int);
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_dataset_close_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_dataset_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_dataset_close_params(void *buf, hid_t *dataset_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* the metadata dataset id */
+    INT32DECODE(p, *dataset_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_dataset_close_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_datatype_commit_params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -1194,6 +1335,51 @@ H5VL__decode_datatype_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *l
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode_datatype_open_params() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_datatype_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_datatype_close_params(void *buf, size_t *nalloc, hid_t datatype_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_DTYPE_CLOSE;
+
+        /* encode the object id */
+        INT32ENCODE(p, datatype_id);
+    }
+
+    size = 1 + sizeof(int);
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_datatype_close_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_datatype_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_datatype_close_params(void *buf, hid_t *datatype_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* the metadata datatype id */
+    INT32DECODE(p, *datatype_id);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_datatype_close_params() */
+
 #if 0
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode__params
@@ -1215,97 +1401,19 @@ done:
 } /* end H5VL__encode__params() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL__encode__params
+ * Function:	H5VL__decode__params
  *------------------------------------------------------------------------- */
 herr_t 
-H5VL__encode__params(void *buf, size_t *nalloc, )
+H5VL__decode__params(void *buf, )
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    size_t size = 0;
-    herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 
-    *nalloc = size;
-
-done:
+ done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__encode__params() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL__encode__params
- *------------------------------------------------------------------------- */
-herr_t 
-H5VL__encode__params(void *buf, size_t *nalloc, )
-{
-    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    size_t size = 0;
-    herr_t  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
+} /* end H5VL__decode__params() */
 
 
-    *nalloc = size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__encode__params() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL__encode__params
- *------------------------------------------------------------------------- */
-herr_t 
-H5VL__encode__params(void *buf, size_t *nalloc, )
-{
-    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    size_t size = 0;
-    herr_t  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-
-    *nalloc = size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__encode__params() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL__encode__params
- *------------------------------------------------------------------------- */
-herr_t 
-H5VL__encode__params(void *buf, size_t *nalloc, )
-{
-    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    size_t size = 0;
-    herr_t  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-
-    *nalloc = size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__encode__params() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL__encode__params
- *------------------------------------------------------------------------- */
-herr_t 
-H5VL__encode__params(void *buf, size_t *nalloc, )
-{
-    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    size_t size = 0;
-    herr_t  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-
-    *nalloc = size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__encode__params() */
 #endif

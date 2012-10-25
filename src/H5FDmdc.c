@@ -500,7 +500,6 @@ H5FD_mdc_close(H5FD_t *_file)
     /* the first process in the communicator will tell the MDS process to close the metadata file */
     if (0 == my_rank) {
         size_t buf_size;
-        uint8_t *p = NULL;
         void *send_buf = NULL;
 
         buf_size = 1 /* request type */ + sizeof(int) /* metadata file id */;
@@ -508,13 +507,10 @@ H5FD_mdc_close(H5FD_t *_file)
         /* allocate the buffer for encoding the parameters */
         if(NULL == (send_buf = H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
-        /* encode request type */
-        *p++ = (uint8_t)H5VL_FILE_CLOSE;
-
-        /* encode the object id */
-        INT32ENCODE(p, file->mdfile_id);
+        /* encode file close params */
+        if(H5VL__encode_file_close_params(send_buf, &buf_size, file->mdfile_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file close params")
 
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the metadata file ID */

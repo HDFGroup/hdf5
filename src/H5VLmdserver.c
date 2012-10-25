@@ -335,11 +335,8 @@ H5VL__file_flush_cb(uint8_t *p, int source)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* the metadata file id */
-    INT32DECODE(p, obj_id);
-
-    /* decode the scope */
-    scope = (H5F_scope_t)*p++;
+    if(H5VL__decode_file_flush_params(p, &obj_id, &scope) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file flush params");
 
     if(NULL == (f = H5VL_native_get_file(H5I_object(obj_id), H5I_get_type(obj_id))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
@@ -387,8 +384,8 @@ H5VL__file_close_cb(uint8_t *p, int source)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* the metadata file id */
-    INT32DECODE(p, file_id);
+    if(H5VL__decode_file_close_params(p, &file_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file close params");
 
     /* Check/fix arguments. */
     if(H5I_FILE != H5I_get_type(file_id))
@@ -710,7 +707,9 @@ H5VL__dataset_close_cb(uint8_t *p, int source)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* decode the object id */
-    INT32DECODE(p, dset_id);
+    if(H5VL__decode_dataset_close_params(p, &dset_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset close params");
+
     printf("MDS closing dataset %d\n", dset_id);
 
     /* Check/fix arguments. */
@@ -911,7 +910,8 @@ H5VL__datatype_close_cb(uint8_t *p, int source)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* decode the object id */
-    INT32DECODE(p, type_id);
+    if(H5VL__decode_datatype_close_params(p, &type_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode datatype close params");
     printf("MDS closing datatype %d\n", type_id);
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))

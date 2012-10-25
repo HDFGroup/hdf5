@@ -687,16 +687,10 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_FILE_FLUSH;
-
-    /* encode the object id */
-    INT32ENCODE(p, obj_id);
-
-    /* encode scope */
-    *p++ = (uint8_t)scope;
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_file_flush_params(send_buf, &buf_size, obj_id, scope) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
@@ -1167,13 +1161,10 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_DSET_CLOSE;
-
-    /* encode the object id */
-    INT32ENCODE(p, dset->common.obj_id);
+    /* encode dataset close params */
+    if(H5VL__encode_dataset_close_params(send_buf, &buf_size, dset->common.obj_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset close params")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
@@ -1414,7 +1405,6 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
 {
     H5VL_mds_dtype_t *dtype = (H5VL_mds_dtype_t *)obj;
     void            *send_buf = NULL;
-    uint8_t         *p = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
 
@@ -1425,13 +1415,10 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    p = (uint8_t *)send_buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_DTYPE_CLOSE;
-
-    /* encode the object id */
-    INT32ENCODE(p, dtype->common.obj_id);
+    /* encode datatype close params */
+    if(H5VL__encode_datatype_close_params(send_buf, &buf_size, dtype->common.obj_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype close params")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata file ID */
