@@ -38,18 +38,18 @@
 #include <mpi.h>
 #endif /* H5_HAVE_PARALLEL */
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5ACpkg.h"		/* Metadata cache			*/
+#include "H5private.h"          /* Generic Functions                    */
+#include "H5ACpkg.h"            /* Metadata cache                       */
 #include "H5Cpkg.h"             /* Cache                                */
-#include "H5Dprivate.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fpkg.h"		/* Files				*/
-#include "H5FDprivate.h"	/* File drivers				*/
+#include "H5Dprivate.h"         /* Dataset functions                    */
+#include "H5Eprivate.h"         /* Error handling                       */
+#include "H5Fpkg.h"             /* Files                                */
+#include "H5FDprivate.h"        /* File drivers                         */
 #include "H5FLprivate.h"        /* Free Lists                           */
-#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Iprivate.h"         /* IDs                                  */
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
-
+#include "H5SLprivate.h"        /* Skip Lists                           */
 
 #ifdef H5_HAVE_PARALLEL
 
