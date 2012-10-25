@@ -397,17 +397,6 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    SGI Altix UV                  Intel(R) C, Fortran Compilers
-    SGI ProPack 7 Linux               Version 11.1 20100806
-    2.6.32.24-0.2.1.2230.2.PTF-   SGI MPT 2.02
-    default #1 SMP                
-    (NCSA ember)
-
-    Dell NVIDIA Cluster           Intel(R) C, Fortran Compilers
-    Red Hat Enterprise Linux 6        Version 12.0.4 20110427
-    2.6.32-131.4.1.el6.x86_64     mvapich2 1.7rc1-intel-12.0.4
-    (NCSA forge)
-
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
