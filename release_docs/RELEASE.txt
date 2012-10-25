@@ -447,7 +447,7 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 * The following h5stat test case fails in BG/P machines (and potentially other
-  machines that displays extra output if an MPI task returns with a non-zero
+  machines that display extra output if an MPI task returns with a non-zero
   code.)
     Testing h5stat notexist.h5
   
