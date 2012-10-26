@@ -970,6 +970,19 @@ H5D__mdc_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 
+    {
+        unsigned u;
+        H5O_layout_t layout = dataset->shared->layout;
+
+        printf("type %d version %d\n", layout.type, layout.version);
+        printf("ndims %d size %d, nchunks %llu\n", layout.u.chunk.ndims,
+               layout.u.chunk.size, layout.u.chunk.nchunks);
+        for(u = 0; u < layout.u.chunk.ndims; u++) {
+            printf("%d: dim %d chunk %llu, down_chunk %llu\n", u, layout.u.chunk.dim[u],
+                   layout.u.chunk.chunks[u], layout.u.chunk.down_chunks[u]);
+        }
+    }
+
     /* Invoke correct "high level" I/O routine */
     if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")

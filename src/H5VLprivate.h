@@ -47,6 +47,9 @@ typedef enum H5VL_op_type_t {
     H5VL_DTYPE_COMMIT,
     H5VL_DTYPE_OPEN,
     H5VL_DTYPE_CLOSE,
+    H5VL_GROUP_CREATE,
+    H5VL_GROUP_OPEN,
+    H5VL_GROUP_CLOSE,
     H5VL_ALLOC,
     H5VL_GET_EOA,
     H5VL_SET_EOA
@@ -164,4 +167,10 @@ H5_DLL herr_t H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t
 H5_DLL herr_t H5VL__decode_datatype_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *tapl_id);
 H5_DLL herr_t H5VL__encode_datatype_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_datatype_close_params(void *buf, hid_t *obj_id);
+H5_DLL herr_t H5VL__encode_group_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t lcpl_id);
+H5_DLL herr_t H5VL__decode_group_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *gcpl_id, hid_t *gapl_id, hid_t *lcpl_id);
+H5_DLL herr_t H5VL__encode_group_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id);
+H5_DLL herr_t H5VL__decode_group_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *gapl_id);
+H5_DLL herr_t H5VL__encode_group_close_params(void *buf, size_t *nalloc, hid_t obj_id);
+H5_DLL herr_t H5VL__decode_group_close_params(void *buf, hid_t *obj_id);
 #endif /* _H5VLprivate_H */

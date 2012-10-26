@@ -34,7 +34,7 @@
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5VL_init_mdserver_interface
+#define H5_INTERFACE_INIT_FUNC	H5VL_mdserver_init_interface
 
 
 /***********/
@@ -51,6 +51,7 @@
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmds.h"            /* MDS file driver      		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5Gprivate.h"		/* Groups		  		*/
 #include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* links                                */
@@ -93,6 +94,9 @@ static herr_t H5VL__dataset_close_cb(uint8_t *p, int source);
 static herr_t H5VL__datatype_commit_cb(uint8_t *p, int source);
 static herr_t H5VL__datatype_open_cb(uint8_t *p, int source);
 static herr_t H5VL__datatype_close_cb(uint8_t *p, int source);
+static herr_t H5VL__group_create_cb(uint8_t *p, int source);
+static herr_t H5VL__group_open_cb(uint8_t *p, int source);
+static herr_t H5VL__group_close_cb(uint8_t *p, int source);
 static herr_t H5VL__allocate_cb(uint8_t *p, int source);
 static herr_t H5VL__set_eoa_cb(uint8_t *p, int source);
 static herr_t H5VL__get_eoa_cb(uint8_t *p, int source);
@@ -117,23 +121,23 @@ typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 
 /*--------------------------------------------------------------------------
 NAME
-   H5VL_init_mdserver_interface -- Initialize interface-specific information
+   H5VL_mdserver_init_interface -- Initialize interface-specific information
 USAGE
     herr_t H5VL_init_mdserver_interface()
 RETURNS
     Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5VL_init() currently).
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5VL_init_mdserver_interface(void)
+H5VL_mdserver_init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5VL_init_mdserver_interface() */
+    FUNC_ENTER_NOAPI(FAIL)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL_mdserver_init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -167,9 +171,16 @@ H5VL_mds_start(void)
     mds_ops[H5VL_DTYPE_COMMIT]  = H5VL__datatype_commit_cb;
     mds_ops[H5VL_DTYPE_OPEN]    = H5VL__datatype_open_cb;
     mds_ops[H5VL_DTYPE_CLOSE]   = H5VL__datatype_close_cb;
+    mds_ops[H5VL_GROUP_CREATE]  = H5VL__group_create_cb;
+    mds_ops[H5VL_GROUP_OPEN]    = H5VL__group_open_cb;
+    mds_ops[H5VL_GROUP_CLOSE]   = H5VL__group_close_cb;
     mds_ops[H5VL_ALLOC]         = H5VL__allocate_cb;
     mds_ops[H5VL_GET_EOA]       = H5VL__set_eoa_cb;
     mds_ops[H5VL_SET_EOA]       = H5VL__get_eoa_cb;
+
+    /* call the group interface intialization, because it hasn't been called yet */
+    if(H5G__init() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize group interface");
 
     /* turn off commsplitter to talk to the other processes */
     MPI_Pcontrol(0);
@@ -203,8 +214,6 @@ H5VL_mds_start(void)
 
         if((*mds_ops[op_type])(p, status.MPI_SOURCE) < 0) {
             printf("failed mds op\n");
-            sleep(2);
-            exit(0);
         }
 
         if(NULL != recv_buf)
@@ -928,6 +937,177 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__datatype_close_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__group_create_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__group_create_cb(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for group */
+    hid_t grp_id = FAIL; /* group id */
+    H5G_t *grp = NULL; /* New group's info */
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    H5G_loc_t loc; /* Object location to insert group into */
+    char *name = NULL; /* name of group (if named) */
+    hid_t gcpl_id = FAIL, gapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_group_create_params(p, &obj_id, &loc_params, &name, 
+                                        &gcpl_id, &gapl_id, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group create params");
+
+    /* Check group create parameters */
+    if(H5G_loc(obj_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
+
+    /* if name is NULL then this is from H5Gcreate_anon */
+    if(name == NULL) {
+        H5G_obj_create_t gcrt_info;         /* Information for group creation */
+
+        /* Set up group creation info */
+        gcrt_info.gcpl_id = gcpl_id;
+        gcrt_info.cache_type = H5G_NOTHING_CACHED;
+        HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
+
+        /* Create the new group & get its ID */
+        if(NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info, H5AC_dxpl_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");           
+    }
+    /* otherwise it's from H5Gcreate */
+    else {
+        /* Create the new group */
+        if(NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, H5AC_dxpl_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
+    }
+
+    /* Get an atom for the group */
+    if((grp_id = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle");
+
+done:
+    if(name == NULL) {
+        /* Release the group's object header, if it was created */
+        if(grp) {
+            H5O_loc_t *oloc;         /* Object location for group */
+
+            /* Get the new group's object location */
+            if(NULL == (oloc = H5G_oloc(grp)))
+                HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object location of group")
+
+            /* Decrement refcount on group's object header in memory */
+            if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
+         } /* end if */
+    }
+
+    if(SUCCEED == ret_value) {
+        /* Send the meta datagroup ID to the client */
+        if(MPI_SUCCESS != MPI_Send(&grp_id, sizeof(hid_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* send a failed message to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    if(name)
+        H5MM_xfree(name);
+
+    printf("MDS created group %d on file %d\n", grp_id, obj_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__group_create_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__group_open_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__group_open_cb(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for group */
+    hid_t grp_id = FAIL; /* group id */
+    H5G_t *grp = NULL; /* New group's info */
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    H5G_loc_t loc; /* Object location to insert group into */
+    char *name = NULL; /* name of group (if named) */
+    hid_t gapl_id = FAIL; /* plist IDs */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_group_open_params(p, &obj_id, &loc_params, &name, &gapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group open params");
+
+    /* Check group open parameters */
+    if(H5G_loc(obj_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
+
+    /* Open the group */
+    if((grp = H5G__open_name(&loc, name, gapl_id, H5AC_dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
+    if((grp_id = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENFILE, FAIL, "unable to create group id");
+
+done:
+    if(SUCCEED == ret_value) {
+        /* Send the meta datagroup ID to the client */
+        if(MPI_SUCCESS != MPI_Send(&grp_id, sizeof(hid_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* send a failed message to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    if(name)
+        H5MM_xfree(name);
+
+    printf("MDS opened group %d on file %d\n", grp_id, obj_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__group_open_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__group_close_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__group_close_cb(uint8_t *p, int source)
+{
+    hid_t grp_id = FAIL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    if(H5VL__decode_group_close_params(p, &grp_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group close params");
+
+    printf("MDS closing group %d\n", grp_id);
+
+    /* Check/fix arguments. */
+    if(H5I_GROUP != H5I_get_type(grp_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID");
+
+    /* Decrement reference count on atom.  When it reaches zero the group will be closed. */
+    if(H5I_dec_ref(grp_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "decrementing grp ID failed");
+
+done:
+    /* send status to client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__group_close_cb */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__allocate_cb

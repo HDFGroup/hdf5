@@ -100,16 +100,17 @@ static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_i
 static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
 static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_mds_file_close(void *file, hid_t req);
-#if 0
-static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 
 /* Group callbacks */
 static void *H5VL_mds_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
 static void *H5VL_mds_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t req);
-static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
+//static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_group_close(void *grp, hid_t req);
+
+#if 0
+static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 
 /* Link callbacks */
 static herr_t H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *obj, 
@@ -184,10 +185,10 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_file_close                  /* close */
     },
     {                                        /* group_cls */
-        NULL,//H5VL_mds_group_create,               /* create */
-        NULL,//H5VL_mds_group_open,                 /* open */
+        H5VL_mds_group_create,               /* create */
+        H5VL_mds_group_open,                 /* open */
         NULL,//H5VL_mds_group_get,                  /* get */
-        NULL,//H5VL_mds_group_close                 /* close */
+        H5VL_mds_group_close                 /* close */
     },
     {                                        /* link_cls */
         NULL,//H5VL_mds_link_create,                /* create */
@@ -676,7 +677,6 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t
     H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
     hid_t obj_id = obj->obj_id;
     void *send_buf = NULL;
-    uint8_t *p = NULL;
     size_t buf_size;
     herr_t ret_value = SUCCEED;                 /* Return value */
 
@@ -690,7 +690,7 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t
 
     /* determine the size of the buffer needed to encode the parameters */
     if(H5VL__encode_file_flush_params(send_buf, &buf_size, obj_id, scope) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
@@ -1150,7 +1150,6 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 {
     H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
     void            *send_buf = NULL;
-    uint8_t         *p = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
 
@@ -1164,7 +1163,7 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 
     /* encode dataset close params */
     if(H5VL__encode_dataset_close_params(send_buf, &buf_size, dset->common.obj_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode dataset close params")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode dataset close params")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
@@ -1242,6 +1241,8 @@ H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
 
     if(dtype->common.obj_id < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "MDS failed to commit datatype");
@@ -1418,7 +1419,7 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
 
     /* encode datatype close params */
     if(H5VL__encode_datatype_close_params(send_buf, &buf_size, dtype->common.obj_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype close params")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode datatype close params")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata file ID */
@@ -1438,4 +1439,188 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_datatype_close() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_group_create
+ *
+ * Purpose:	Sends a request to the MDS to create a group
+ *
+ * Return:	Success:	group object. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, 
+                      hid_t gapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the group */
+    H5VL_mds_group_t *grp = NULL; /* the group object that is created and passed to the user */
+    void           *send_buf = NULL; /* buffer where the group create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    H5P_genplist_t *plist;
+    hid_t          lcpl_id;
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
+
+    /* get creation properties */
+    if(H5P_get(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_group_create_params(NULL, &buf_size, obj->obj_id, loc_params, name, 
+                                        gcpl_id, gapl_id, lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_group_create_params(send_buf, &buf_size, obj->obj_id, loc_params, name, 
+                                        gcpl_id, gapl_id, lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode group create parameters");
+
+    /* allocate the group object that is returned to the user */
+    if(NULL == (grp = (H5VL_mds_group_t *)calloc(1, sizeof(H5VL_mds_group_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata group ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &(grp->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+    /* set common object parameters */
+    grp->common.obj_type = H5I_GROUP;
+    grp->common.raw_file = obj->raw_file;
+
+    ret_value = (void *)grp;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_group_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_group_open
+ *
+ * Purpose:	Sends a request to the MDS to open a group
+ *
+ * Return:	Success:	group object. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                                 hid_t gapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to open the group */
+    H5VL_mds_group_t *grp = NULL; /* the group object that is opend and passed to the user */
+    void           *send_buf = NULL; /* buffer where the group open request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_group_open_params(NULL, &buf_size, obj->obj_id, loc_params, name, gapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_group_open_params(send_buf, &buf_size, obj->obj_id, loc_params, name, gapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode group open parameters");
+
+    /* allocate the group object that is returned to the user */
+    if(NULL == (grp = (H5VL_mds_group_t *)calloc(1, sizeof(H5VL_mds_group_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata group ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &(grp->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+    /* set common object parameters */
+    grp->common.obj_type = H5I_GROUP;
+    grp->common.raw_file = obj->raw_file;
+
+    ret_value = (void *)grp;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_group_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_group_close
+ *
+ * Purpose:	Closes a group.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, group not closed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_group_close(void *obj, hid_t UNUSED req)
+{
+    H5VL_mds_group_t *grp = (H5VL_mds_group_t *)obj;
+    void            *send_buf = NULL;
+    size_t           buf_size;
+    herr_t           ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    buf_size = 1 /* request type */ + sizeof(hid_t) /* group id */;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode group close params */
+    if(H5VL__encode_group_close_params(send_buf, &buf_size, grp->common.obj_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode group close params")
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+    /* Free the group's memory structure */
+    H5MM_free(grp);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_group_close() */
 #endif /* H5_HAVE_PARALLEL */

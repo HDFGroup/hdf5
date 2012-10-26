@@ -335,6 +335,8 @@ H5VL__encode_file_create_params(void *buf, size_t *nalloc, const char *name, uns
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(nalloc);
+
     /* get property list sizes */
     if(H5P_FILE_CREATE_DEFAULT != fcpl_id) {
         if(NULL == (fcpl = (H5P_genplist_t *)H5I_object_verify(fcpl_id, H5I_GENPROP_LST)))
@@ -464,6 +466,8 @@ H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsig
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(nalloc);
+
     /* get property list sizes */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
         if(NULL == (fapl = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
@@ -558,9 +562,10 @@ H5VL__encode_file_flush_params(void *buf, size_t *nalloc, hid_t obj_id, H5F_scop
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t size = 0;
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(nalloc);
 
     if(NULL != p) {
         /* encode request type */
@@ -576,8 +581,7 @@ H5VL__encode_file_flush_params(void *buf, size_t *nalloc, hid_t obj_id, H5F_scop
     size = 2 + sizeof(int);
     *nalloc = size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__encode_file_flush_params() */
 
 /*-------------------------------------------------------------------------
@@ -587,9 +591,8 @@ herr_t
 H5VL__decode_file_flush_params(void *buf, hid_t *obj_id, H5F_scope_t *scope)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* the metadata file id */
     INT32DECODE(p, *obj_id);
@@ -597,8 +600,7 @@ H5VL__decode_file_flush_params(void *buf, hid_t *obj_id, H5F_scope_t *scope)
     /* decode the scope */
     *scope = (H5F_scope_t)*p++;
 
- done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__decode_file_flush_params() */
 
 /*-------------------------------------------------------------------------
@@ -609,9 +611,10 @@ H5VL__encode_file_close_params(void *buf, size_t *nalloc, hid_t obj_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t size = 0;
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(nalloc);
 
     if(NULL != p) {
         /* encode request type */
@@ -624,8 +627,7 @@ H5VL__encode_file_close_params(void *buf, size_t *nalloc, hid_t obj_id)
     size = 1 + sizeof(int);
     *nalloc = size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__encode_file_close_params() */
 
 /*-------------------------------------------------------------------------
@@ -635,15 +637,13 @@ herr_t
 H5VL__decode_file_close_params(void *buf, hid_t *file_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* the metadata file id */
     INT32DECODE(p, *file_id);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__decode_file_close_params() */
 
 /*-------------------------------------------------------------------------
@@ -662,6 +662,8 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
 
     /* get size for property lists to encode */
     if(H5P_DATASET_CREATE_DEFAULT != dcpl_id) {
@@ -876,6 +878,8 @@ H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_l
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(nalloc);
+
     /* get size for property lists to encode */
     if(H5P_DATASET_ACCESS_DEFAULT != dapl_id) {
         if(NULL == (dapl = (H5P_genplist_t *)H5I_object_verify(dapl_id, H5I_GENPROP_LST)))
@@ -986,9 +990,10 @@ H5VL__encode_dataset_close_params(void *buf, size_t *nalloc, hid_t dataset_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t size = 0;
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(nalloc);
 
     if(NULL != p) {
         /* encode request type */
@@ -1001,8 +1006,7 @@ H5VL__encode_dataset_close_params(void *buf, size_t *nalloc, hid_t dataset_id)
     size = 1 + sizeof(int);
     *nalloc = size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__encode_dataset_close_params() */
 
 /*-------------------------------------------------------------------------
@@ -1012,15 +1016,13 @@ herr_t
 H5VL__decode_dataset_close_params(void *buf, hid_t *dataset_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* the metadata dataset id */
     INT32DECODE(p, *dataset_id);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__decode_dataset_close_params() */
 
 /*-------------------------------------------------------------------------
@@ -1039,6 +1041,8 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
 
     /* get size for property lists to encode */
     if(H5P_DATATYPE_CREATE_DEFAULT != tcpl_id) {
@@ -1233,6 +1237,8 @@ H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(nalloc);
+
     /* get size for property lists to encode */
     if(H5P_DATATYPE_ACCESS_DEFAULT != tapl_id) {
         if(NULL == (tapl = (H5P_genplist_t *)H5I_object_verify(tapl_id, H5I_GENPROP_LST)))
@@ -1343,9 +1349,10 @@ H5VL__encode_datatype_close_params(void *buf, size_t *nalloc, hid_t datatype_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t size = 0;
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(nalloc);
 
     if(NULL != p) {
         /* encode request type */
@@ -1358,8 +1365,7 @@ H5VL__encode_datatype_close_params(void *buf, size_t *nalloc, hid_t datatype_id)
     size = 1 + sizeof(int);
     *nalloc = size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5VL__encode_datatype_close_params() */
 
 /*-------------------------------------------------------------------------
@@ -1369,16 +1375,351 @@ herr_t
 H5VL__decode_datatype_close_params(void *buf, hid_t *datatype_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* the metadata datatype id */
     INT32DECODE(p, *datatype_id);
 
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__decode_datatype_close_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_group_create_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_group_create_params(void *buf, size_t *nalloc, hid_t obj_id, 
+                                 H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id,
+                                 hid_t gapl_id, hid_t lcpl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t len = 0, gcpl_size = 0, gapl_size = 0, lcpl_size = 0, loc_size = 0;
+    H5P_genplist_t *gcpl = NULL, *gapl = NULL, *lcpl = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get size for property lists to encode */
+    if(H5P_GROUP_CREATE_DEFAULT != gcpl_id) {
+        if(NULL == (gcpl = (H5P_genplist_t *)H5I_object_verify(gcpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(gcpl, FALSE, NULL, &gcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+    if(H5P_GROUP_ACCESS_DEFAULT != gapl_id) {
+        if(NULL == (gapl = (H5P_genplist_t *)H5I_object_verify(gapl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(gapl, FALSE, NULL, &gapl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+    if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+        if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    /* get name size to encode */
+    if(NULL != name)
+        len = HDstrlen(name);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_GROUP_CREATE;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+        p += loc_size;
+
+        /* encode length of the group name and the actual group name */
+        UINT64ENCODE_VARLEN(p, len);
+        if(NULL != name)
+            HDmemcpy(p, (const uint8_t *)name, len);
+        p += len;
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, gcpl_size);
+        /* encode property lists if they are not default*/
+        if(gcpl_size) {
+            if((ret_value = H5P__encode(gcpl, FALSE, p, &gcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += gcpl_size;
+        }
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, gapl_size);
+        /* encode property lists if they are not default*/
+        if(gapl_size) {
+            if((ret_value = H5P__encode(gapl, FALSE, p, &gapl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += gapl_size;
+        }
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, lcpl_size);
+        /* encode property lists if they are not default*/
+        if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+            if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += lcpl_size;
+        }
+    }
+    size += (1 + sizeof(int32_t) + 
+             1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size + 
+             1 + H5V_limit_enc_size((uint64_t)len) + len + 
+             1 + H5V_limit_enc_size((uint64_t)gapl_size) + gapl_size + 
+             1 + H5V_limit_enc_size((uint64_t)gcpl_size) + gcpl_size + 
+             1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size);
+
+    *nalloc = size;
+
+ done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_group_create_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_group_create_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_group_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                 char **name, hid_t *gcpl_id, hid_t *gapl_id, hid_t *lcpl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* len of group name */
+    size_t gcpl_size = 0, gapl_size = 0, lcpl_size = 0, loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode length of the group name and the actual group name */
+    UINT64DECODE_VARLEN(p, len);
+    if(0 != len) {
+        *name = H5MM_xstrdup((const char *)(p));
+        (*name)[len] = '\0';
+        p += len;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, gcpl_size);
+    /* decode property lists if they are not default*/
+    if(gcpl_size) {
+        if((*gcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += gcpl_size;
+    }
+    else {
+        *gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, gapl_size);
+    /* decode property lists if they are not default*/
+    if(gapl_size) {
+        if((*gapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += gapl_size;
+    }
+    else {
+        *gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lcpl_size);
+    /* decode property lists if they are not default*/
+    if(lcpl_size) {
+        if((*lcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lcpl_size;
+    }
+    else {
+        *lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__decode_datatype_close_params() */
+} /* end H5VL__decode_group_create_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_group_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_group_open_params(void *buf, size_t *nalloc, hid_t obj_id, 
+                               H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t len = 0, gapl_size = 0, loc_size = 0;
+    H5P_genplist_t *gapl = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get size for property lists to encode */
+    if(H5P_GROUP_ACCESS_DEFAULT != gapl_id) {
+        if(NULL == (gapl = (H5P_genplist_t *)H5I_object_verify(gapl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(gapl, FALSE, NULL, &gapl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    /* get name size to encode */
+    if(NULL != name)
+        len = HDstrlen(name);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_GROUP_OPEN;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+        p += loc_size;
+
+        /* encode length of the group name and the actual group name */
+        UINT64ENCODE_VARLEN(p, len);
+        if(NULL != name)
+            HDmemcpy(p, (const uint8_t *)name, len);
+        p += len;
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, gapl_size);
+        /* encode property lists if they are not default*/
+        if(H5P_GROUP_ACCESS_DEFAULT != gapl_id) {
+            if((ret_value = H5P__encode(gapl, FALSE, p, &gapl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += gapl_size;
+        }
+    }
+    size += (1 + sizeof(int32_t) + 
+             1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size + 
+             1 + H5V_limit_enc_size((uint64_t)len) + len + 
+             1 + H5V_limit_enc_size((uint64_t)gapl_size) + gapl_size);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_group_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_group_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_group_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                  char **name, hid_t *gapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t len = 0; /* len of dataset name */
+    size_t gapl_size = 0, loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode length of the dataset name and the actual dataset name */
+    UINT64DECODE_VARLEN(p, len);
+    if(0 != len) {
+        *name = H5MM_xstrdup((const char *)(p));
+        (*name)[len] = '\0';
+        p += len;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, gapl_size);
+    /* decode property lists if they are not default*/
+    if(gapl_size) {
+        if((*gapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += gapl_size;
+    }
+    else {
+        *gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    }
+
+ done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_group_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_group_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_group_close_params(void *buf, size_t *nalloc, hid_t group_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(nalloc);
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_GROUP_CLOSE;
+
+        /* encode the object id */
+        INT32ENCODE(p, group_id);
+    }
+
+    size = 1 + sizeof(int);
+    *nalloc = size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__encode_group_close_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_group_close_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_group_close_params(void *buf, hid_t *group_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* the metadata group id */
+    INT32DECODE(p, *group_id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__decode_group_close_params() */
 
 #if 0
 /*-------------------------------------------------------------------------

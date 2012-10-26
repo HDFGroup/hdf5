@@ -63,6 +63,10 @@ typedef struct H5VL_mds_dtype_t {
     H5T_t *dtype; /* the uncommitted datatype struct for the client */
 }H5VL_mds_dtype_t;
 
+typedef struct H5VL_mds_group_t {
+    H5VL_mds_object_t common;  /* common stuff, must be first  */
+} H5VL_mds_group_t;
+
 H5_DLL herr_t H5VL_mds_start(void);
 H5_DLL hid_t H5VL_mds_register(H5I_type_t type, void *obj, hbool_t app_ref);
 

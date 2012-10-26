@@ -2894,6 +2894,12 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *nalloc)
                     break;
                 }
             case H5D_CHUNKED:
+                {
+                    *p++ = (uint8_t)layout.storage.u.chunk.idx_type;
+                    /* B-tree address */
+                    UINT64ENCODE(p, layout.storage.u.chunk.idx_addr);
+                    break;
+                }
             case H5D_COMPACT:
             default:
                 HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
@@ -2915,6 +2921,10 @@ H5D__encode_layout(H5O_layout_t layout, void *buf, size_t *nalloc)
                 break;
             }
         case H5D_CHUNKED:
+            {
+                size += 1 + sizeof(uint64_t);
+                break;
+            }
         case H5D_COMPACT:
          default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");
@@ -2961,7 +2971,7 @@ H5D__decode_layout(const void *buf, H5O_layout_t *layout)
 
         H5_DECODE_UNSIGNED(p, layout->u.chunk.ndims);
         UINT32DECODE(p, layout->u.chunk.size);
-        UINT32DECODE(p, layout->u.chunk.nchunks);
+        UINT64DECODE(p, layout->u.chunk.nchunks);
 
         for(u = 0; u < layout->u.chunk.ndims; u++) {
             UINT32DECODE(p, layout->u.chunk.dim[u]);
@@ -2980,6 +2990,12 @@ H5D__decode_layout(const void *buf, H5O_layout_t *layout)
                 break;
             }
         case H5D_CHUNKED:
+            {
+                layout->storage.u.chunk.idx_type = (H5D_chunk_index_t)*p++;
+                /* B-tree address */
+                UINT64DECODE(p, layout->storage.u.chunk.idx_addr);
+                break;
+            }
         case H5D_COMPACT:
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "layout type not supported");

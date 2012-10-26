@@ -82,7 +82,7 @@
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5G_init_interface
+#define H5_INTERFACE_INIT_FUNC	H5G__init_pub_interface
 
 
 /***********/
@@ -141,7 +141,6 @@ static const H5I_class_t H5I_GROUP_CLS[1] = {{
     (H5I_free2_t)H5G_close_group /* Callback routine for closing auxilary objects of this class */
 }};
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__init
@@ -170,7 +169,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_init_interface
+ * Function:	H5G__init_pub_interface
  *
  * Purpose:	Initializes the H5G interface.
  *
@@ -189,9 +188,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_init_interface(void)
+H5G__init_pub_interface(void)
 {
-    herr_t          ret_value = SUCCEED;  /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -201,7 +200,7 @@ H5G_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_init_interface() */
+} /* end H5G__init_pub_interface() */
 
 
 /*-------------------------------------------------------------------------
