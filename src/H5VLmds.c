@@ -67,16 +67,15 @@
 static void *H5VL_mds_fapl_copy(const void *_old_fa);
 static herr_t H5VL_mds_fapl_free(void *_fa);
 
-#if 0
 /* Atrribute callbacks */
 static void *H5VL_mds_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
 static void *H5VL_mds_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
-static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
-static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
-static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
+//static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
+//static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
+//static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
+//static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
 static herr_t H5VL_mds_attr_close(void *attr, hid_t req);
-#endif
+
 /* Datatype callbacks */
 static void *H5VL_mds_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
 static void *H5VL_mds_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
@@ -152,13 +151,13 @@ static H5VL_class_t H5VL_mds_g = {
     H5VL_mds_fapl_copy,			     /*fapl_copy */
     H5VL_mds_fapl_free, 		     /*fapl_free */
     {                                        /* attribute_cls */
-        NULL,//H5VL_mds_attr_create,                /* create */
-        NULL,//H5VL_mds_attr_open,                  /* open */
+        H5VL_mds_attr_create,                /* create */
+        H5VL_mds_attr_open,                  /* open */
         NULL,//H5VL_mds_attr_read,                  /* read */
         NULL,//H5VL_mds_attr_write,                 /* write */
         NULL,//H5VL_mds_attr_get,                   /* get */
         NULL,//H5VL_mds_attr_remove,                /* remove */
-        NULL,//H5VL_mds_attr_close                  /* close */
+        H5VL_mds_attr_close                  /* close */
     },
     {                                        /* datatype_cls */
         H5VL_mds_datatype_commit,            /* commit */
@@ -756,6 +755,284 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_create
+ *
+ * Purpose:	Sends a request to the MDS to create a attr
+ *
+ * Return:	Success:	attr object. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t acpl_id, 
+                     hid_t aapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the attr */
+    H5VL_mds_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
+    H5A_t          *new_attr = NULL; /* the lighweight attr struct used to hold the attr's metadata */
+    void           *send_buf = NULL; /* buffer where the attr create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    H5P_genplist_t *plist;
+    H5T_t          *dt = NULL, *dt1 = NULL;
+    H5VL_mds_dtype_t *type = NULL;
+    H5S_t          *space = NULL;
+    hid_t          type_id, space_id;
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the acpl plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
+    /* get datatype, dataspace, and lcpl IDs that were added in the acpl at the API layer */
+    if(H5P_get(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for datatype id");
+    if(H5P_get(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id");
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_attr_create_params(NULL, &buf_size, obj->obj_id, loc_params, name, 
+                                       acpl_id, aapl_id, type_id, space_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_attr_create_params(send_buf, &buf_size, obj->obj_id, loc_params, name, 
+                                       acpl_id, aapl_id, type_id, space_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode attr create parameters");
+
+    /* allocate the attr object that is returned to the user */
+    if(NULL == (attr = (H5VL_mds_attr_t *)calloc(1, sizeof(H5VL_mds_attr_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata attribute ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &(attr->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a type");
+    /* Get the actual datatype object if this is a named datatype */
+    if(NULL == (type = (H5VL_mds_dtype_t *)H5T_get_named_type(dt)))
+        dt1 = dt;
+    else
+        dt1 = type->dtype;
+
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data space");
+
+    /* create the "lightweight" client attr */
+    if(NULL == (new_attr = H5A__mdc_create(name, dt1, space, acpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "failed to create client attr object");
+
+    new_attr->oloc.file = obj->raw_file;
+    /* set the attr struct in the high level object */
+    attr->attr = new_attr;
+
+    /* set common object parameters */
+    attr->common.obj_type = H5I_ATTR;
+    attr->common.raw_file = obj->raw_file;
+
+    ret_value = (void *)attr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_attr_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_open
+ *
+ * Purpose:	Sends a request to the MDS to open a attr
+ *
+ * Return:	Success:	attr object. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                   hid_t aapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the attr */
+    H5VL_mds_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
+    H5A_t          *new_attr = NULL; /* the lighweight attr struct used to hold the attr's metadata */
+    void           *send_buf = NULL; /* buffer where the attr create request is encoded and sent to the mds */
+    size_t         buf_size = 0; /* size of send_buf */
+    int            incoming_msg_size; /* incoming buffer size for MDS returned attr */
+    void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    MPI_Status     status;
+    uint8_t        *p; /* pointer into recv_buf; used for decoding */
+    hid_t          acpl_id=H5P_ATTRIBUTE_CREATE_DEFAULT;
+    H5T_t          *type = NULL;
+    H5S_t          *space = NULL;
+    size_t         type_size, space_size, acpl_size;
+    void           *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_attr_open_params(NULL, &buf_size, obj->obj_id, loc_params, name, aapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_attr_open_params(send_buf, &buf_size, obj->obj_id, loc_params, name, aapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, NULL, "unable to encode attr open parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                               MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
+
+    /* allocate the attr object that is returned to the user */
+    if(NULL == (attr = (H5VL_mds_attr_t *)calloc(1, sizeof(H5VL_mds_attr_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
+    MPI_Pcontrol(1);
+
+    p = (uint8_t *)recv_buf;
+
+    /* decode the attr ID at the MDS */
+    INT32DECODE(p, attr->common.obj_id);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, acpl_size);
+    /* decode property lists if they are not default*/
+    if(acpl_size) {
+        if((acpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "unable to decode property list");
+        p += acpl_size;
+    }
+
+    /* decode the type size */
+    UINT64DECODE_VARLEN(p, type_size);
+    if(type_size) {
+        /* decode the datatype */
+        if(NULL == (type = H5T_decode((unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
+        p += type_size;
+    }
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    if(space_size) {
+        /* decode the dataspace */
+        if(NULL == (space = H5S_decode((unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "unable to decode dataspace");
+        p += space_size;
+    }
+
+    /* create the "lightweight" client attr */
+    if(NULL == (new_attr = H5A__mdc_create(name, type, space, acpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "failed to create client attr object");
+
+    new_attr->oloc.file = obj->raw_file;
+    /* set the attr struct in the high level object */
+    attr->attr = new_attr;
+
+    /* set common object parameters */
+    attr->common.obj_type = H5I_ATTR;
+    attr->common.raw_file = obj->raw_file;
+
+    H5MM_free(send_buf);
+    H5MM_free(recv_buf);
+    ret_value = (void *)attr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_attr_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_close
+ *
+ * Purpose:	Closes a attr.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, attr not closed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_mds_attr_close(void *obj, hid_t UNUSED req)
+{
+    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)obj;
+    void            *send_buf = NULL;
+    size_t           buf_size;
+    herr_t           ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    buf_size = 1 /* request type */ + sizeof(int) /* attr id */;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode attr close params */
+    if(H5VL__encode_attr_close_params(send_buf, &buf_size, attr->common.obj_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode attr close params")
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+    if(H5A__mdc_close(attr->attr) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute");
+
+    H5MM_free(attr);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_attr_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_mds_dataset_create
  *
  * Purpose:	Sends a request to the MDS to create a dataset
@@ -863,6 +1140,23 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     /* Set the dataset's I/O operations */
     if(H5D__layout_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
+
+#if 0
+    {
+        unsigned u;
+        //H5O_layout_t layout = dataset->shared->layout;
+
+        printf("type %d version %d\n", layout.type, layout.version);
+        printf("ndims %d size %d, nchunks %llu\n", layout.u.chunk.ndims,
+               layout.u.chunk.size, layout.u.chunk.nchunks);
+        for(u = 0; u < layout.u.chunk.ndims; u++) {
+            printf("%d: dim %d chunk %llu, down_chunk %llu\n", u, layout.u.chunk.dim[u],
+                   layout.u.chunk.chunks[u], layout.u.chunk.down_chunks[u]);
+        }
+        printf("idx type %d  address %llu\n", layout.storage.u.chunk.idx_type, 
+               layout.storage.u.chunk.idx_addr);
+    }
+#endif
 
     new_dset->oloc.file = obj->raw_file;
     /* set the dataset struct in the high level object */
@@ -1021,6 +1315,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_open() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_mds_dataset_read

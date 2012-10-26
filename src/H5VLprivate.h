@@ -39,6 +39,11 @@ typedef enum H5VL_op_type_t {
     H5VL_FILE_OPEN,
     H5VL_FILE_FLUSH,
     H5VL_FILE_CLOSE,
+    H5VL_ATTR_CREATE,
+    H5VL_ATTR_OPEN,
+    H5VL_ATTR_READ,
+    H5VL_ATTR_WRITE,
+    H5VL_ATTR_CLOSE,
     H5VL_DSET_CREATE,
     H5VL_DSET_OPEN,
     H5VL_DSET_READ,
@@ -155,6 +160,12 @@ H5_DLL herr_t H5VL__encode_file_flush_params(void *buf, size_t *nalloc, hid_t ob
 H5_DLL herr_t H5VL__decode_file_flush_params(void *buf, hid_t *obj_id, H5F_scope_t *scope);
 H5_DLL herr_t H5VL__encode_file_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_file_close_params(void *buf, hid_t *obj_id);
+H5_DLL herr_t H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t acpl_id, hid_t aapl_id, hid_t type_id, hid_t space_id);
+H5_DLL herr_t H5VL__decode_attr_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *acpl_id, hid_t *aapl_id, hid_t *type_id, hid_t *space_id);
+H5_DLL herr_t H5VL__encode_attr_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t aapl_id);
+H5_DLL herr_t H5VL__decode_attr_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *aapl_id);
+H5_DLL herr_t H5VL__encode_attr_close_params(void *buf, size_t *nalloc, hid_t obj_id);
+H5_DLL herr_t H5VL__decode_attr_close_params(void *buf, hid_t *obj_id);
 H5_DLL herr_t H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t type_id, hid_t space_id, hid_t lcpl_id);
 H5_DLL herr_t H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dcpl_id, hid_t *dapl_id, hid_t *type_id, hid_t *space_id, hid_t *lcpl_id);
 H5_DLL herr_t H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id);
@@ -173,4 +184,73 @@ H5_DLL herr_t H5VL__encode_group_open_params(void *buf, size_t *nalloc, hid_t ob
 H5_DLL herr_t H5VL__decode_group_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *gapl_id);
 H5_DLL herr_t H5VL__encode_group_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_group_close_params(void *buf, hid_t *obj_id);
+
+
+/* Atrribute callbacks */
+void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
+void *H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
+herr_t H5VL_native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
+herr_t H5VL_native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
+herr_t H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
+herr_t H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
+herr_t H5VL_native_attr_close(void *attr, hid_t req);
+
+/* Datatype callbacks */
+void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
+void *H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
+ssize_t H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t req);
+herr_t H5VL_native_datatype_close(void *dt, hid_t req);
+
+/* Dataset callbacks */
+void *H5VL_native_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
+void *H5VL_native_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
+herr_t H5VL_native_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
+                                       hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
+herr_t H5VL_native_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
+                                        hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
+herr_t H5VL_native_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
+herr_t H5VL_native_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
+herr_t H5VL_native_dataset_close(void *dset, hid_t req);
+
+/* File callbacks */
+void *H5VL_native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
+void *H5VL_native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
+herr_t H5VL_native_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
+herr_t H5VL_native_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
+herr_t H5VL_native_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
+herr_t H5VL_native_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
+herr_t H5VL_native_file_close(void *file, hid_t req);
+
+/* Group callbacks */
+void *H5VL_native_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
+void *H5VL_native_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t req);
+herr_t H5VL_native_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
+herr_t H5VL_native_group_close(void *grp, hid_t req);
+
+/* Link callbacks */
+herr_t H5VL_native_link_create(H5VL_link_create_type_t create_type, void *obj, 
+                                      H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+herr_t H5VL_native_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
+                                    void *dst_obj, H5VL_loc_params_t loc_params2,
+                                    hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+herr_t H5VL_native_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+                                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                                       H5L_iterate_t op, void *op_data, hid_t req);
+herr_t H5VL_native_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
+herr_t H5VL_native_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+
+/* Object callbacks */
+void *H5VL_native_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t req);
+herr_t H5VL_native_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
+                                      void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
+                                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+herr_t H5VL_native_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+                                       H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
+//herr_t H5VL_native_object_lookup(hid_t loc_id, H5VL_loc_type_t lookup_type, void **location, hid_t req, va_list arguments);
+//herr_t H5VL_native_object_free_loc(void *location, hid_t req);
+herr_t H5VL_native_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, va_list arguments);
+herr_t H5VL_native_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
+herr_t H5VL_native_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
+herr_t H5VL_native_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+
 #endif /* _H5VLprivate_H */

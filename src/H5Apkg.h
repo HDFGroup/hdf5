@@ -187,6 +187,7 @@ H5_DLLVAR const H5B2_class_t H5A_BT2_CORDER[1];
 H5_DLL herr_t H5A_init(void);
 H5_DLL H5A_t *H5A_create(const H5G_loc_t *loc, const char *name,
     const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
+H5_DLL H5A_t *H5A__mdc_create(const char *name, H5T_t *type, H5S_t *space, hid_t acpl_id);
 H5_DLL H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name,
     const char *attr_name, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL H5A_t *H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name,
@@ -199,6 +200,7 @@ H5_DLL hid_t H5A_get_space(H5A_t *attr);
 H5_DLL hid_t H5A_get_create_plist(H5A_t* attr);
 H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
+H5_DLL herr_t H5A__mdc_close(H5A_t *attr);
 H5_DLL htri_t H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo);
 H5_DLL herr_t H5A_set_version(const H5F_t *f, H5A_t *attr);
 H5_DLL herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);

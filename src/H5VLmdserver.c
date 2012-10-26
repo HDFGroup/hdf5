@@ -88,6 +88,9 @@ static herr_t H5VL__file_create_cb(uint8_t *p, int source);
 static herr_t H5VL__file_open_cb(uint8_t *p, int source);
 static herr_t H5VL__file_flush_cb(uint8_t *p, int source);
 static herr_t H5VL__file_close_cb(uint8_t *p, int source);
+static herr_t H5VL__attr_create_cb(uint8_t *p, int source);
+static herr_t H5VL__attr_open_cb(uint8_t *p, int source);
+static herr_t H5VL__attr_close_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_create_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_open_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_close_cb(uint8_t *p, int source);
@@ -165,6 +168,9 @@ H5VL_mds_start(void)
     mds_ops[H5VL_FILE_OPEN]     = H5VL__file_open_cb;
     mds_ops[H5VL_FILE_FLUSH]    = H5VL__file_flush_cb;
     mds_ops[H5VL_FILE_CLOSE]    = H5VL__file_close_cb;
+    mds_ops[H5VL_ATTR_CREATE]   = H5VL__attr_create_cb;
+    mds_ops[H5VL_ATTR_OPEN]     = H5VL__attr_open_cb;
+    mds_ops[H5VL_ATTR_CLOSE]    = H5VL__attr_close_cb;
     mds_ops[H5VL_DSET_CREATE]   = H5VL__dataset_create_cb;
     mds_ops[H5VL_DSET_OPEN]     = H5VL__dataset_open_cb;
     mds_ops[H5VL_DSET_CLOSE]    = H5VL__dataset_close_cb;
@@ -181,6 +187,9 @@ H5VL_mds_start(void)
     /* call the group interface intialization, because it hasn't been called yet */
     if(H5G__init() < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize group interface");
+    /* call the attribute interface intialization, because it hasn't been called yet */
+    if(H5A_init() < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize attribute interface");
 
     /* turn off commsplitter to talk to the other processes */
     MPI_Pcontrol(0);
@@ -438,6 +447,219 @@ done:
 } /* H5VL__file_close_cb */
 
 /*-------------------------------------------------------------------------
+* Function:	H5VL__attr_create_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__attr_create_cb(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for attr */
+    hid_t attr_id = FAIL; /* attr id */
+    H5A_t *attr = NULL; /* New attr's info */
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    char *name = NULL; /* name of attr (if named) */
+    hid_t acpl_id = FAIL, aapl_id = FAIL;
+    hid_t type_id; /* datatype for attr */
+    hid_t space_id; /* dataspace for attr */
+    H5P_genplist_t *plist;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_attr_create_params(p, &obj_id, &loc_params, &name, &acpl_id, &aapl_id,
+                                       &type_id, &space_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr create params");
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id");
+    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id");
+
+    if(NULL == (attr = (H5A_t *)H5VL_native_attr_create(H5I_object(obj_id), loc_params, name,
+                                                        acpl_id, aapl_id, -1)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute");
+
+    if((attr_id = H5VL_native_register(H5I_ATTR, attr, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENFILE, FAIL, "unable to create attr");
+
+done:
+    if(SUCCEED == ret_value) {
+        /* Send the meta datagroup ID to the client */
+        if(MPI_SUCCESS != MPI_Send(&attr_id, sizeof(hid_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* send a failed message to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    if(name)
+        H5MM_xfree(name);
+
+    printf("MDS created attr %d on object %d\n", attr_id, obj_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__attr_create_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__attr_open_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__attr_open_cb(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for attr */
+    hid_t attr_id = FAIL; /* attr id */
+    H5A_t *attr = NULL; /* New attr's info */
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    char *name = NULL; /* name of attr (if named) */
+    size_t acpl_size = 0, type_size = 0, space_size = 0;
+    H5P_genplist_t *acpl;
+    size_t buf_size = 0;
+    hid_t aapl_id = FAIL, acpl_id = FAIL; /* plist IDs */
+    void *send_buf = NULL; /* buffer to hold the attr id and layout to be sent to client */
+    uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_attr_open_params(p, &obj_id, &loc_params, &name, &aapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr open params");
+
+    if(NULL == (attr = (H5A_t *)H5VL_native_attr_open(H5I_object(obj_id), loc_params, name, 
+                                                      aapl_id, -1)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute");
+
+    if((attr_id = H5VL_native_register(H5I_ATTR, attr, FALSE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute atom");
+
+    /* START Encode metadata of the attr and send them to the client along with the ID */
+    if((acpl_id = H5A_get_create_plist(attr)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get creation property list for attr");
+
+    /* determine the size of the dcpl if it is not default */
+    if(H5P_ATTRIBUTE_CREATE_DEFAULT != acpl_id) {
+        if(NULL == (acpl = (H5P_genplist_t *)H5I_object_verify(acpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(acpl, FALSE, NULL, &acpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    if(NULL != attr->shared->dt) {
+        /* get Type size to encode */
+        if((ret_value = H5T_encode(attr->shared->dt, NULL, &type_size)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+    }
+
+    if(NULL != attr->shared->ds) {
+        /* get Dataspace size to encode */
+        if((ret_value = H5S_encode(attr->shared->ds, NULL, &space_size)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+    }
+
+    buf_size = sizeof(hid_t) + /* attr ID */
+        1 + H5V_limit_enc_size((uint64_t)acpl_size) + acpl_size +
+        1 + H5V_limit_enc_size((uint64_t)type_size) + type_size + 
+        1 + H5V_limit_enc_size((uint64_t)space_size) + space_size;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p1 = (uint8_t *)send_buf;
+
+    /* encode the object id */
+    INT32ENCODE(p1, attr_id);
+
+    /* encode the plist size */
+    UINT64ENCODE_VARLEN(p1, acpl_size);
+    /* encode property lists if they are not default*/
+    if(acpl_size) {
+        if((ret_value = H5P__encode(acpl, FALSE, p1, &acpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+        p1 += acpl_size;
+    }
+
+    /* encode the datatype size */
+    UINT64ENCODE_VARLEN(p1, type_size);
+    if(type_size) {
+        /* encode datatype */
+        if((ret_value = H5T_encode(attr->shared->dt, p1, &type_size)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+        p1 += type_size;
+    }
+
+    /* encode the dataspace size */
+    UINT64ENCODE_VARLEN(p1, space_size);
+    if(space_size) {
+        /* encode datatspace */
+        if((ret_value = H5S_encode(attr->shared->ds, p1, &space_size)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+        p1 += space_size;
+    }
+
+done:
+    if(SUCCEED == ret_value) {
+        /* Send the attr id & metadata to the client */
+        if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* Send failed to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    printf("MDS opened attr %d on file %d\n", attr_id, obj_id);
+    if(send_buf)
+        H5MM_free(send_buf);
+    if(name)
+        H5MM_xfree(name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__attr_open_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__attr_close_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__attr_close_cb(uint8_t *p, int source)
+{
+    hid_t attr_id = FAIL; /* attr id */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    if(H5VL__decode_attr_close_params(p, &attr_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr close params");
+
+    printf("MDS closing attr %d\n", attr_id);
+
+    /* Check/fix arguments. */
+    if(H5I_ATTR != H5I_get_type(attr_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a attr ID");
+
+    if(H5I_dec_ref(attr_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement count on attr ID");
+
+done:
+    /* send status to client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__attr_close_cb */
+
+/*-------------------------------------------------------------------------
 * Function:	H5VL__dataset_create_cb
 *------------------------------------------------------------------------- */
 static herr_t
@@ -488,7 +710,7 @@ H5VL__dataset_create_cb(uint8_t *p, int source)
     }
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create dataset");
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
 
     /* determine the buffer size needed to store the encoded layout of the dataset */ 
     if(FAIL == (ret_value = H5D__encode_layout(dset->shared->layout, NULL, &buf_size)))
@@ -589,7 +811,8 @@ H5VL__dataset_open_cb(uint8_t *p, int source)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset");
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create dataset");
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
+
     /* END open dataset */
 
     /* START Encode metadata of the dataset and send them to the client along with the ID */
@@ -862,7 +1085,7 @@ H5VL__datatype_open_cb(uint8_t *p, int source)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype");
 
     if((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENFILE, FAIL, "unable to create datatype");
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
 
     /* get Type size to encode */
     if((ret_value = H5T_encode(type, NULL, &type_size)) < 0)

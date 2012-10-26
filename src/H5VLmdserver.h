@@ -21,6 +21,7 @@
 #define _H5VLmdserver_H
 
 #include "H5private.h"          /* Generic Functions                    */
+#include "H5Aprivate.h"         /* Attributes                           */
 #include "H5Dprivate.h"         /* Datasets                             */
 #include "H5Fprivate.h"         /* File access                          */
 #include "H5Iprivate.h"         /* IDs                                  */
@@ -52,6 +53,11 @@ typedef struct H5VL_mds_file_t {
     H5VL_mds_object_t common; /* common stuff, must be first */
     H5F_t  *raw_file; /* the raw data file that is created by the client */
 } H5VL_mds_file_t;
+
+typedef struct H5VL_mds_attr_t {
+    H5VL_mds_object_t common;  /* common stuff, must be first  */
+    H5A_t *attr; /* the lightweight attribute struct created by the client */
+} H5VL_mds_attr_t;
 
 typedef struct H5VL_mds_dset_t {
     H5VL_mds_object_t common;  /* common stuff, must be first  */
