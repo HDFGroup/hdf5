@@ -569,11 +569,6 @@ Known Problems
   it is (see bug report #1279).  Quincey will make a plan for 1.10.
   (SLU - 2010/02/02)
 
-* MinGW has a missing libstdc++.dll.a library file and will not successfully link
-  C++ applications/tests. Do not use the enable-cxx configure option. Read all of
-  the INSTALL_MINGW.txt file for all restrictions.
-  (ADB - 2009/11/11)
-
 * The --enable-static-exec configure flag will only statically link libraries
   if the static version of that library is present. If only the shared version
   of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
