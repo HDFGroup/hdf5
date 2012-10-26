@@ -129,6 +129,11 @@ Bug Fixes since HDF5-1.8.9
     -------
     - Fixed a memory leak exposed when inserting/removing a property
       from a property list several times. HDFFV-8022. (MSC 2012/05/18)
+    - The file_image test will fail in the "initial file image and callbacks in
+      the core VFD" sub-test if the source directory is read-only as the test
+      fails to create its test files in the build directory. This has been
+      fixed. HDFFV-8009 (AKC - 2012/07/06)
+  
 
     Parallel Library
     ----------------
@@ -458,12 +463,6 @@ Known Problems
   ports (and probably gcc releases after that).
   (QAK - 2012/10/19)
 
-* The file_image test will fail in the "initial file image and callbacks in
-  the core VFD" sub-test if the source directory is read-only as the test
-  fails to create its test files in the build directory. This will be
-  resolved in a future release.
-  (AKC - 2012/05/05 - HDFFV-8009)
-  
 * The following h5dump test case fails in BG/P machines (and potentially other
   machines that use a command script to launch executables):
 
@@ -584,62 +583,15 @@ Known Problems
   executable is statically linked with just the HDF5 library.
   (MAM - 2009/11/04)
   
-* The PathScale MPI implementation, accessing a Panasas file system, would
-  cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file does not
-  exist. This is due to the MPI_File_open() call failing if the mode has
-  the MPI_MODE_EXCL bit set.
-  (AKC - 2009/08/11 - HDFFV-988)
- 
 * Parallel tests failed with 16 processes with data inconsistency at testphdf5
   / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO.
   (CMC - 2009/04/28)
 
-* For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh and
-  tools/h5copy/testh5copy.sh will fail some of its sub-tests. These sub-tests
-  are expected to fail and should exit with a non-zero code but the yod
-  command does not propagate the exit code of the executables. Yod always
-  returns 0 if it can launch the executable.  The test suite shell expects
-  a non-zero for this particular test, therefore it concludes the test has
-  failed when it receives 0 from yod.  Skip all the "failing" test for now
-  by changing them as following.
-
-  ======== Original tools/h5ls/testh5ls.sh =========
-  TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
-  ======== Change to ===============================
-  echo SKIP TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
-  ==================================================
-
-  ======== Original tools/h5copy/testh5copy.sh =========
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
-  H5LSTEST $FILEOUT
-  ======== Change to ===============================
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
-  echo SKIP H5LSTEST $FILEOUT
-  ==================================================
-  (AKC - 2008/11/10)
-  
-* For Red Storm, a Cray XT3 system, the yod command sometimes gives the
-  message,  "yod allocation delayed for node recovery".  This interferes with
-  test suites that do not expect to see this message.  See the section of "Red
-  Storm" in file INSTALL_parallel for a way to deal with this problem.
-  (AKC - 2008/05/28)
-
 * On an Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
   use -mp -O1 compilation flags to build the libraries. A higher level of 
   optimization causes failures in several HDF5 library tests. 
-
-* On mpich 1.2.5 and 1.2.6, if more than two processes contribute no IO and 
-  the application asks to do collective IO, we have found that when using 4 
-  processors, a simple collective write will sometimes be hung. This can be 
-  verified with t_mpi test under testpar.
 
 * A dataset created or rewritten with a v1.6.3 library or after cannot be read 
   with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
@@ -650,17 +602,3 @@ Known Problems
   before on little-endian system.  Library releases after 1.6.4 can still read 
   datasets created or rewritten with an HDF5 library of v1.6.2 or before.  
   (SLU - 2005/06/30)
-
-* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
-  messages like "INFO: 0031-XXX ...".  This is from the command `poe'.
-  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
-  and run the tests again.
-
-  The tests may fail with messages like "The socket name is already in use",  
-  but HDF5 does not use sockets.  This failure is due to problems with the 
-  poe command trying to set up the debug socket.  To resolve this problem, 
-  check to see whether there are many old /tmp/s.pedb.* files staying around.  
-  These are sockets used by the poe command and left behind due to failed 
-  commands.  First, ask your system administrator to clean them out.  
-  Lastly, request IBM to provide a means to run poe without the debug socket.
-  (AKC - 2004/12/08)
