@@ -249,7 +249,7 @@ Supported Platforms
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
                                       Version 12.1
-                                  MPICH mpich2-1.3.1 compiled with
+                                  MPICH mpich2-1.4.1p1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
     Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
@@ -264,7 +264,7 @@ Supported Platforms
                                   applications running on Intel(R) 64; 
                                       Version 12.1 (Build 20110811)
                                       Version 12.1 (Build 20120212)
-                                  MPICH mpich2-1.3.1 compiled with
+                                  MPICH mpich2-1.4.1p1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
     Linux 2.6.32-220.7.1.el6.ppc64 gcc (GCC) 4.4.6 20110731 (Red Hat 4.4.6-3) 
@@ -336,25 +336,25 @@ Tested Configuration Features Summary
           ( ) = footnote appears below second table
           <blank> = testing incomplete on this feature or platform 
 
-Platform                                 C         F90/   F90      C++   zlib  SZIP
-                                         parallel  F2003  parallel
-Solaris2.10 32-bit                         n        y      n        y     y     y
-Solaris2.10 64-bit                         n        y      n        y     y     y
-Windows 7                                  y        y      n        y     y     y
-Windows 7     x64                          y        y      n        y     y     y
-Mac OS X Snow Leopard 10.6.8 32-bit        n        y      n        y     y     n 
-Mac OS X Snow Leopard 10.6.8 64-bit        n        y      n        y     y     y
-Mac OS X Lion 10.7.3 32-bit                n        y      n        y     y     n
-Mac OS X Lion 10.7.3 64-bit                n        y      n        y     y     y
-Mac OS X Mountain Lion 10.8.1 64-bit       n        y      n        y     y     n
-AIX 5.3 32- and 64-bit                     y        y      y        y     y     y
-CentOS 5.5 Linux 2.6.18-308 i686 GNU (1)W  y        y(2)   y        y     y     y
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  W  n        y      n        y     y     y
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    W  n        y      n        y     y     y
-CentOS 5.5 Linux 2.6.18 x86_64 GNU (1)  W  y        y(3)   y        y     y     y
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    W  n        y      n        y     y     y
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      W  n        y      n        y     y     y
-Linux 2.6.32-220.7.1.el6.ppc64             n        y      n        y     y     y
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.10 32-bit                      n        y      n        y    y     y
+Solaris2.10 64-bit                      n        y      n        y    y     y
+Windows 7                               y        y      n        y    y     y
+Windows 7     x64                       y        y      n        y    y     y
+Mac OS X Snow Leopard 10.6.8 32-bit     n        y      n        y    y     n 
+Mac OS X Snow Leopard 10.6.8 64-bit     n        y      n        y    y     y
+Mac OS X Lion 10.7.3 32-bit             n        y      n        y    y     n
+Mac OS X Lion 10.7.3 64-bit             n        y      n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y      n        y    y     n
+AIX 5.3 32- and 64-bit                  y        y      y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y      y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y      n        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y      n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y      y        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y      n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y      n        y    y     y
+Linux 2.6.32-220.7.1.el6.ppc64          n        y      n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
@@ -369,17 +369,14 @@ Mac OS X Lion 10.7.3 32-bit                y       n         y         y
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
 AIX 5.3 32- and 64-bit                     n       n         n         y        
-CentOS 5.5 Linux 2.6.18-308 i686 GNU (1)W  y       y(2)      y         y        
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  W  y       y         y         n        
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    W  y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 GNU (1)  W  y       y         y         y        
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    W  y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      W  y       y         y         n        
+CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
 Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
 
-           (1) Fortran compiled with gfortran.
-           (2) With PGI and Absoft compilers.
-           (3) With PGI compiler for Fortran.
            (4) Using Visual Studio 2008 w/ Intel Fortran 10.1 (Cygwin shared libraries are not supported)
            (5) C and C++ shared libraries will not be built when Fortran is enabled.
     Compiler versions for each platform are listed in the preceding
