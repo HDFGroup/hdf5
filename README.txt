@@ -1,4 +1,4 @@
-HDF5 version 1.8.10 currently under development
+HDF5 version 1.8.10 released on 2012-10-26
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
