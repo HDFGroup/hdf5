@@ -5,8 +5,8 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.9 and 
-HDF5 1.8.10-*, and contains information on the platforms tested and 
-known problems in HDF5-1.8.10-*. 
+HDF5 1.8.10, and contains information on the platforms tested and 
+known problems in HDF5-1.8.10. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
@@ -338,23 +338,23 @@ Tested Configuration Features Summary
 
 Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
-Solaris2.10 32-bit                      n        y      n        y    y     y
-Solaris2.10 64-bit                      n        y      n        y    y     y
-Windows 7                               y        y      n        y    y     y
-Windows 7     x64                       y        y      n        y    y     y
-Mac OS X Snow Leopard 10.6.8 32-bit     n        y      n        y    y     n 
-Mac OS X Snow Leopard 10.6.8 64-bit     n        y      n        y    y     y
-Mac OS X Lion 10.7.3 32-bit             n        y      n        y    y     n
-Mac OS X Lion 10.7.3 64-bit             n        y      n        y    y     y
-Mac OS X Mountain Lion 10.8.1 64-bit    n        y      n        y    y     n
-AIX 5.3 32- and 64-bit                  y        y      y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y      y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y      y        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y      n        y    y     y
-Linux 2.6.32-220.7.1.el6.ppc64          n        y      n        y    y     y
+Solaris2.10 32-bit                      n        y/y    n        y    y     y
+Solaris2.10 64-bit                      n        y/n    n        y    y     y
+Windows 7                               y        y/n    n        y    y     y
+Windows 7     x64                       y        y/n    n        y    y     y
+Mac OS X Snow Leopard 10.6.8 32-bit     n        y/y    n        y    y     n 
+Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
+Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
+Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
+AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+Linux 2.6.32-220.7.1.el6.ppc64          n        y/n    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
@@ -377,10 +377,8 @@ CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n
 CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
 Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
 
-           (4) Using Visual Studio 2008 w/ Intel Fortran 10.1 (Cygwin shared libraries are not supported)
-           (5) C and C++ shared libraries will not be built when Fortran is enabled.
-    Compiler versions for each platform are listed in the preceding
-    "Supported Platforms" table.
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
 
 
 More Tested Platforms
