@@ -1538,6 +1538,70 @@ done:
 } /* end H5VL__decode_dataset_open_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_set_extent_encode__params
+ *------------------------------------------------------------------------- */
+H5_DLL herr_t 
+H5VL__encode_dataset_set_extent_params(void *buf, size_t *nalloc, hid_t obj_id, 
+                                       int rank, const hsize_t *esize)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(nalloc);
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_DSET_SET_EXTENT;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        /* encode the rank */
+        INT32ENCODE(p, rank);
+
+        for(i=0 ; i<rank ; i++)
+            UINT64ENCODE_VARLEN(p, esize[i])
+    }
+    size += 1 + sizeof(int32_t) * 2;
+    for(i=0 ; i<rank ; i++)
+        size += 1 + H5V_limit_enc_size((uint64_t)esize[i]);
+
+    *nalloc = size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__decode_dataset_set_extent_params() */
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_dataset_set_extent_encode__params
+ *------------------------------------------------------------------------- */
+H5_DLL herr_t 
+H5VL__decode_dataset_set_extent_params(void *buf, hid_t *obj_id, int *rank, hsize_t **size)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    int i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    /* decode the rank */
+    INT32DECODE(p, *rank);
+
+    if(NULL == (*size = (hsize_t *)H5MM_malloc(sizeof(hsize_t) * (*rank))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    for(i=0 ; i<*rank ; i++)
+        UINT64DECODE_VARLEN(p, (*size)[i])
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_dataset_set_extent_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_dataset_close_params
  *------------------------------------------------------------------------- */
 herr_t 

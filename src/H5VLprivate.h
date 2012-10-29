@@ -47,6 +47,7 @@ typedef enum H5VL_op_type_t {
     H5VL_ATTR_CLOSE,
     H5VL_DSET_CREATE,
     H5VL_DSET_OPEN,
+    H5VL_DSET_SET_EXTENT,
     H5VL_DSET_READ,
     H5VL_DSET_WRITE,
     H5VL_DSET_CLOSE,
@@ -180,6 +181,8 @@ H5_DLL herr_t H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_
 H5_DLL herr_t H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dcpl_id, hid_t *dapl_id, hid_t *type_id, hid_t *space_id, hid_t *lcpl_id);
 H5_DLL herr_t H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id);
 H5_DLL herr_t H5VL__decode_dataset_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dapl_id);
+H5_DLL herr_t H5VL__encode_dataset_set_extent_params(void *buf, size_t *nalloc, hid_t obj_id, int rank, const hsize_t *size);
+H5_DLL herr_t H5VL__decode_dataset_set_extent_params(void *buf, hid_t *obj_id, int *rank, hsize_t **size);
 H5_DLL herr_t H5VL__encode_dataset_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_dataset_close_params(void *buf, hid_t *obj_id);
 

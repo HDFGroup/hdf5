@@ -27,6 +27,7 @@
 #define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5R_PACKAGE		/*suppress error about including H5Rpkg	  */
+#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
@@ -54,6 +55,7 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Rpkg.h"		/* References   			*/
+#include "H5Spkg.h"		/* Dataspaces   			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
@@ -85,18 +87,20 @@ static herr_t H5VL_mds_datatype_close(void *dt, hid_t req);
 /* Dataset callbacks */
 static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
 static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
-static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 static herr_t H5VL_mds_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                     hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
 static herr_t H5VL_mds_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                      hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
-#if 0
 static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
-static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
-#endif
+//static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
+
 /* File callbacks */
 static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
 static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
+//static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
+//static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
+//static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_mds_file_close(void *file, hid_t req);
 
@@ -107,9 +111,6 @@ static void *H5VL_mds_group_open(void *obj, H5VL_loc_params_t loc_params, const 
 static herr_t H5VL_mds_group_close(void *grp, hid_t req);
 
 #if 0
-static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 
 /* Link callbacks */
 static herr_t H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *obj, 
@@ -170,7 +171,7 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_dataset_open,               /* open */
         H5VL_mds_dataset_read,               /* read */
         H5VL_mds_dataset_write,              /* write */
-        NULL,//H5VL_mds_dataset_set_extent,         /* set extent */
+        H5VL_mds_dataset_set_extent,         /* set extent */
         NULL,//H5VL_mds_dataset_get,                /* get */
         H5VL_mds_dataset_close               /* close */
     },
@@ -1111,7 +1112,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t UNUSEDreq)
+H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t UNUSED req)
 {
     H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
     void            *send_buf = NULL;
@@ -1593,6 +1594,57 @@ H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_dataset_set_extent
+ *
+ * Purpose:	Set Extent of dataset
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
+{
+    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    void            *send_buf = NULL;
+    size_t           buf_size;
+    int              rank = dset->dset->shared->space->extent.rank;
+    herr_t           ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_dataset_set_extent_params(NULL, &buf_size, dset->common.obj_id, rank, size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_dataset_set_extent_params(send_buf, &buf_size, dset->common.obj_id, rank, size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode dataset set_extent parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_dataset_set_extent() */
 
 
 /*-------------------------------------------------------------------------

@@ -96,6 +96,7 @@ static herr_t H5VL__attr_remove_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_close_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_create_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_open_cb(uint8_t *p, int source);
+static herr_t H5VL__dataset_set_extent_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_close_cb(uint8_t *p, int source);
 static herr_t H5VL__datatype_commit_cb(uint8_t *p, int source);
 static herr_t H5VL__datatype_open_cb(uint8_t *p, int source);
@@ -179,6 +180,7 @@ H5VL_mds_start(void)
     mds_ops[H5VL_ATTR_CLOSE]    = H5VL__attr_close_cb;
     mds_ops[H5VL_DSET_CREATE]   = H5VL__dataset_create_cb;
     mds_ops[H5VL_DSET_OPEN]     = H5VL__dataset_open_cb;
+    mds_ops[H5VL_DSET_SET_EXTENT] = H5VL__dataset_set_extent_cb;
     mds_ops[H5VL_DSET_CLOSE]    = H5VL__dataset_close_cb;
     mds_ops[H5VL_DTYPE_COMMIT]  = H5VL__datatype_commit_cb;
     mds_ops[H5VL_DTYPE_OPEN]    = H5VL__datatype_open_cb;
@@ -955,16 +957,36 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__dataset_open_cb */
 
-#if 0
-case H5VL_MDS_DSET_WRITE:
+/*-------------------------------------------------------------------------
+* Function:	H5VL__dataset_set_extent_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__dataset_set_extent_cb(uint8_t *p, int source)
 {
-    ;
-} /* end H5VL_MDS_DSET_WRITE */
-case H5VL_MDS_DSET_READ:
-{
-    ;
-} /* end H5VL_MDS_DSET_READ */
-#endif
+    hid_t dset_id = FAIL; /* dset id */
+    hsize_t *size = NULL;
+    int rank;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_dataset_set_extent_params(p, &dset_id, &rank, &size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset set_extent params");
+
+    /* Set_Extent the dataset through the native VOL */
+    if(H5VL_native_dataset_set_extent(H5I_object_verify(dset_id, H5I_DATASET), size, 
+                                      H5_REQUEST_NULL) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set_extent dataset");
+
+done:
+    /* Send failed to the client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    printf("MDS set_extent dataset %d\n", dset_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__dataset_set_extent_cb */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__dataset_close_cb
