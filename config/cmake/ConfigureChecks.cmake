@@ -413,6 +413,7 @@ CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    H5_HAVE_NETINET_IN_H)
 # The linux-lfs option is deprecated.
 SET (LINUX_LFS 0)
 
+SET (HDF5_EXTRA_C_FLAGS)
 SET (HDF5_EXTRA_FLAGS)
 IF (NOT WINDOWS)
   # Linux Specific flags
@@ -422,7 +423,9 @@ IF (NOT WINDOWS)
   # correctly.
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  SET (HDF5_EXTRA_FLAGS -D_POSIX_C_SOURCE=199506L -D_BSD_SOURCE)
+  SET (HDF5_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=199506L)
+  SET (HDF5_EXTRA_FLAGS -D_BSD_SOURCE)
+  
   OPTION (HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   IF (HDF5_ENABLE_LARGE_FILE)
     SET (msg "Performing TEST_LFS_WORKS")

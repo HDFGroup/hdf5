@@ -22,6 +22,7 @@
 #include "H5IdComponent.h"
 #include "H5DataSpace.h"
 #include "H5PropList.h"
+#include "H5Location.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
 #include "H5Attribute.h"

@@ -66,7 +66,6 @@
 #define H5D_XFER_VFL_ID_NAME            "vfl_id"        /* File driver ID */
 #define H5D_XFER_VFL_INFO_NAME          "vfl_info"      /* File driver info */
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME "vec_size"      /* Hyperslab vector size */
-#ifdef H5_HAVE_PARALLEL
 #define H5D_XFER_IO_XFER_MODE_NAME      "io_xfer_mode"  /* I/O transfer mode */
 #define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME "mpio_collective_opt" /* Optimization of MPI-IO transfer mode */
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME "mpio_chunk_opt_hard"
@@ -76,7 +75,6 @@
 #define H5D_MPIO_ACTUAL_IO_MODE_NAME    "actual_io_mode"
 #define H5D_MPIO_LOCAL_NO_COLLECTIVE_CAUSE_NAME "local_no_collective_cause"  /* cause of broken collective I/O in each process */
 #define H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME "global_no_collective_cause"  /* cause of broken collective I/O in all processes */
-#endif /* H5_HAVE_PARALLEL */
 #define H5D_XFER_EDC_NAME               "err_detect"    /* EDC */
 #define H5D_XFER_FILTER_CB_NAME         "filter_cb"     /* Filter callback function */
 #define H5D_XFER_CONV_CB_NAME           "type_conv_cb"  /* Type conversion callback function */

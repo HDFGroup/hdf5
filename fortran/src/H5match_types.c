@@ -533,13 +533,35 @@ int main(void)
 
   /* double_f */
 #if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_16_KIND
-    writeFloatToFiles("Fortran_DOUBLE", "double_f", 16, H5_FORTRAN_HAS_DOUBLE_NATIVE_16_KIND);
+    if(H5_C_HAS_REAL_NATIVE_16 != 0) { /* Check if C has 16 byte floats */
+      writeFloatToFiles("Fortran_DOUBLE", "double_f", 16, H5_FORTRAN_HAS_DOUBLE_NATIVE_16_KIND);
+    } else {
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_8_KIND /* Fall back to 8 byte floats */
+    writeFloatToFiles("Fortran_DOUBLE", "double_f", 8, H5_FORTRAN_HAS_REAL_NATIVE_8_KIND);
+    }
+#elif defined H5_FORTRAN_HAS_REAL_NATIVE_4_KIND  /* Fall back to 4 byte floats */
+    writeFloatToFiles("Fortran_DOUBLE", "double_f", 4, H5_FORTRAN_HAS_REAL_NATIVE_4_KIND);
+    }
+#else
+    /* Error: couldn't find a size for double_f when fortran has 16 byte reals */
+    return -1;
+    }
+#endif
+
 #elif defined H5_FORTRAN_HAS_DOUBLE_NATIVE_8_KIND
     writeFloatToFiles("Fortran_DOUBLE", "double_f", 8, H5_FORTRAN_HAS_DOUBLE_NATIVE_8_KIND);
 #else
     /* Error: couldn't find a size for real_f */
     return -1;
 #endif
+
+  /* Need the buffer size for the fortran derive type 'hdset_reg_ref_t_f03'
+   * in order to be interoperable with C's structure, the C buffer size
+   * H5R_DSET_REG_REF_BUF_SIZE is (sizeof(haddr_t)+4)
+   */
+    
+    fprintf(fort_header, "        INTEGER, PARAMETER :: H5R_DSET_REG_REF_BUF_SIZE_F = %u\n", H5_SIZEOF_HADDR_T + 4 );
+
 
   /* Close files */
   endCfile();

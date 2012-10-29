@@ -9,13 +9,11 @@ items:
  AUTHOR 
  CREATION DATE
  MODIFICATION HISTORY
- HISTORY 
- INPUTS 
+ HISTORY
  ARGUMENTS
  OPTIONS 
  PARAMETERS
  SWITCHES
- OUTPUTS 
  SIDE EFFECTS
  RESULT
  RETURN VALUE 
@@ -41,12 +39,77 @@ items:
  USED BY
  PARENTS
  COMMANDS
- SOURCE
- CONTAINS SUBROUTINES
+ SOURCE 
+ INPUTS
+ OUTPUTS 
  OPTIONAL PARAMETERS
+ CONTAINS SUBROUTINES
  FILE
+ Fortran2003 Interface:
+ Fortran90 Interface:
+ Fortran2003 Derived Type:
+ Outputs:
+ Inputs:
+ Optional parameters:
+ Components:
 ignore items:
+ NAME
  COPYRIGHT
+ SYNOPSIS
+ USAGE 
+ FUNCTION
+ DESCRIPTION
+ PURPOSE
+ AUTHOR 
+ CREATION DATE
+ MODIFICATION HISTORY
+ HISTORY
+ ARGUMENTS
+ OPTIONS 
+ PARAMETERS
+ SWITCHES
+ SIDE EFFECTS
+ RESULT
+ RETURN VALUE 
+ EXAMPLE
+ NOTES
+ DIAGNOSTICS 
+ WARNINGS 
+ ERRORS
+ BUGS
+ TODO
+ IDEAS 
+ PORTABILITY
+ SEE ALSO 
+ METHODS
+ NEW METHODS
+ ATTRIBUTES
+ NEW ATTRIBUTES
+ TAGS
+ DERIVED FROM
+ DERIVED BY 
+ USES
+ CHILDREN 
+ USED BY
+ PARENTS
+ COMMANDS
+ CONTAINS SUBROUTINES
+ FILE
+item order:
+ Fortran90 Interface:
+ Fortran2003 Interface:
+ Inputs:
+ Outputs:
+ Optional parameters:
+ Fortran2003 Derived Type:
+ Components:
+source items:
+ Fortran90 Interface:
+ Fortran2003 Interface:
+ Fortran2003 Derived Type:
+ SOURCE
+
+
 headertypes:
  s Subroutines robo_subroutines
 options:
@@ -60,14 +123,19 @@ options:
     --sections
     --sectionnameonly
     --documenttitle "HDF5 FORTRAN Developer's Guide"
-    --cmode		
+    --footless
+    --headless
+    --one_file_per_header
 ignore files:
     .svn
     *~
     *.o
     *e
     *.mod
-accept files:
+    *_F90.f90
     *.c
+accept files:
+    *_F03.f90
+    *_F90.f90
     *.f90
     *.h

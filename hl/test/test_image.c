@@ -676,7 +676,7 @@ static int test_generate(void)
         goto out;
 
     /* Indicate success */
-    retval = 0;
+    return 0;
 
     /* error zone, gracefully close */
 out:

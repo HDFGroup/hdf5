@@ -2,6 +2,11 @@ cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_TEST)
 
 #-----------------------------------------------------------------------------
+# Apply Definitions to compiler in this directory and below
+#-----------------------------------------------------------------------------
+ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+
+#-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
 SET (TEST_LIB_SRCS
@@ -71,6 +76,47 @@ FOREACH (ref_file ${HDF5_REFERENCE_FILES})
       ARGS       ${HDF5_TEST_SOURCE_DIR}/testfiles/${ref_file} ${dest} -l3
   )
 ENDFOREACH (ref_file ${HDF5_REFERENCE_FILES})
+
+# --------------------------------------------------------------------
+# Copy test files from test/testfiles/plist_files dir to test dir
+# --------------------------------------------------------------------
+SET (HDF5_REFERENCE_PLIST_FILES
+    acpl_be
+    acpl_le
+    dapl_be
+    dapl_le
+    dcpl_be
+    dcpl_le
+    dxpl_be
+    dxpl_le
+    fapl_be
+    fapl_le
+    fcpl_be
+    fcpl_le
+    gcpl_be
+    gcpl_le
+    lapl_be
+    lapl_le
+    lcpl_be
+    lcpl_le
+    ocpl_be
+    ocpl_le
+    ocpypl_be
+    ocpypl_le
+    strcpl_be
+    strcpl_le
+)
+
+FOREACH (plistfile ${HDF5_REFERENCE_PLIST_FILES})
+  SET (dest "${PROJECT_BINARY_DIR}/${plistfile}")
+  #MESSAGE (STATUS " Copying ${plistfile} to ${dset}")
+  ADD_CUSTOM_COMMAND (
+      TARGET     ${HDF5_TEST_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different ${HDF5_TEST_SOURCE_DIR}/testfiles/plist_files/${plistfile} ${dest}
+  )
+ENDFOREACH (plistfile ${HDF5_REFERENCE_PLIST_FILES})
 
 # --------------------------------------------------------------------
 #-- Copy all the HDF5 files from the test directory into the source directory
@@ -309,6 +355,8 @@ SET (H5_TESTS
     testmeta
     #links_env
     file_image
+    enc_dec_plist
+    enc_dec_plist_with_endianess
 )
 
 FOREACH (test ${H5_TESTS})
@@ -633,6 +681,7 @@ IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
       gen_specmetaread
       gen_sizes_lheap
       gen_file_image
+      gen_plist
   )
 
   FOREACH (gen ${H5_GENERATORS})

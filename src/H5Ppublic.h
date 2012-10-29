@@ -113,6 +113,8 @@ typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, vo
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
+typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
+typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
@@ -229,6 +231,8 @@ H5_DLL herr_t H5Pinsert2(hid_t plist_id, const char *name, size_t size,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pset(hid_t plist_id, const char *name, void *value);
 H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
+H5_DLL herr_t H5Pencode(hid_t plist_id, void *buf, size_t *nalloc);
+H5_DLL hid_t  H5Pdecode(const void *buf);
 H5_DLL herr_t H5Pget_size(hid_t id, const char *name, size_t *size);
 H5_DLL herr_t H5Pget_nprops(hid_t id, size_t *nprops);
 H5_DLL hid_t H5Pget_class(hid_t plist_id);
@@ -412,7 +416,7 @@ H5_DLL herr_t H5Pget_type_conv_cb(hid_t dxpl_id, H5T_conv_except_func_t *op, voi
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Pget_mpio_actual_chunk_opt_mode(hid_t plist_id, H5D_mpio_actual_chunk_opt_mode_t *actual_chunk_opt_mode);
 H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode_t *actual_io_mode);
-H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, H5D_mpio_no_collective_cause_t *local_no_collective_cause, H5D_mpio_no_collective_cause_t *global_no_collective_cause);
+H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause, uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Link creation property list (LCPL) routines */

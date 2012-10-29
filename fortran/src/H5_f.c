@@ -398,7 +398,11 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags, int
     h5d_flags[19] = (int_f)H5D_CHUNK_CACHE_NSLOTS_DEFAULT;
     h5d_flags[20] = (int_f)H5D_CHUNK_CACHE_NBYTES_DEFAULT;
     h5d_flags[21] = (int_f)H5D_CHUNK_CACHE_W0_DEFAULT;
-
+    h5d_flags[22] = (int_f)H5D_MPIO_NO_COLLECTIVE;
+    h5d_flags[23] = (int_f)H5D_MPIO_CHUNK_INDEPENDENT;
+    h5d_flags[24] = (int_f)H5D_MPIO_CHUNK_COLLECTIVE;
+    h5d_flags[25] = (int_f)H5D_MPIO_CHUNK_MIXED;
+    h5d_flags[26] = (int_f)H5D_MPIO_CONTIGUOUS_COLLECTIVE;
 /*
  *  H5E flags
  */

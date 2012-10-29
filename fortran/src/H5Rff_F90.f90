@@ -72,7 +72,72 @@ MODULE H5R_PROVISIONAL
 
   END INTERFACE
 
+  INTERFACE h5rget_region_f
+
+     MODULE PROCEDURE h5rget_region_region_f
+
+  END INTERFACE
+
+
 CONTAINS
+
+
+!****s* H5R/h5rget_region_region_f
+!
+! NAME
+!  h5rget_region_region_f
+!
+! PURPOSE
+!  Retrieves a dataspace with the specified region selected
+!
+! INPUTS
+!  dset_id 	 - identifier of the dataset containing
+!                  reference to the regions
+!  ref 	         - reference to open
+! OUTPUTS
+!  space_id 	 - dataspace identifier
+!  hdferr 	 - Returns 0 if successful and -1 if fails
+! AUTHOR
+!  Elena Pourmal
+!  August 12, 1999
+!
+! HISTORY 	
+!  Explicit Fortran interfaces were added for
+!  called C functions (it is needed for Windows
+!  port).  February 28, 2001
+!
+! NOTES
+!  This is a module procedure for the h5rget_region_f subroutine.
+!
+! SOURCE
+  SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
+    TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref ! Dataset region reference
+    INTEGER(HID_T), INTENT(OUT) :: space_id    ! Space identifier
+    INTEGER, INTENT(OUT) :: hdferr             ! Error code
+!*****
+    INTEGER :: ref_f(REF_REG_BUF_LEN)          ! Local buffer to pass reference
+
+    INTERFACE
+       INTEGER FUNCTION h5rget_region_region_c(dset_id, ref_f, space_id)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5RGET_REGION_REGION_C':: h5rget_region_region_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dset_id
+         !              INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
+         INTEGER :: ref_f(REF_REG_BUF_LEN)
+         INTEGER(HID_T), INTENT(OUT) :: space_id
+       END FUNCTION h5rget_region_region_c
+    END INTERFACE
+
+    ref_f = ref%ref
+    hdferr = h5rget_region_region_c(dset_id, ref_f, space_id )
+
+  END SUBROUTINE h5rget_region_region_f
+
+
 
 !****s* H5R (F90)/h5rcreate_object_f
 !

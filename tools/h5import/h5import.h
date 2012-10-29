@@ -191,43 +191,8 @@ void  usage(char *);
 void  setDefaultValues(struct Input *in, int count);
 void  help(char *);
 
-static int  gtoken(char *s);
-static int  process(struct Options *opt);
-static int  processConfigurationFile(char *infile, struct Input *in);
-static int  mapKeywordToIndex(char *key);
-static int  parsePathInfo(struct path_info *path, char *strm);
-static int  parseDimensions(struct Input *in, char *strm);
-static int  getInputSize(struct Input *in, int ival);
-static int  getInputClass(struct Input *in, char * strm);
-static int  getInputClassType(struct Input *in, char * strm);
-static int  InputClassStrToInt(char *temp);
-static int  getRank(struct Input *in, FILE *strm);
-static int  getDimensionSizes(struct Input *in, FILE *strm);
-static int  getOutputSize(struct Input *in, FILE *strm);
-static int  getOutputClass(struct Input *in, FILE *strm);
-static int  OutputClassStrToInt(char *temp);
-static int  getOutputArchitecture(struct Input *in, FILE *strm);
-static int  OutputArchStrToInt(char *temp);
-static int  getOutputByteOrder(struct Input *in, FILE *strm);
-static int  OutputByteOrderStrToInt(char *temp);
-static int  getChunkedDimensionSizes(struct Input *in, FILE *strm);
-static int  getCompressionType(struct Input *in, FILE *strm);
-static int  CompressionTypeStrToInt(char *temp);
-static int  getCompressionParameter(struct Input *in, FILE *strm);
-static int  getExternalFilename(struct Input *in, FILE *strm);
-static int  getMaximumDimensionSizes(struct Input *in, FILE *strm);
-static int  processDataFile(char *infile, struct Input *in, hid_t file_id);
-static int  readIntegerData(FILE *strm, struct Input *in);
-static int  readFloatData(FILE *strm, struct Input *in);
-static int  allocateIntegerStorage(struct Input *in);
-static int  allocateFloatStorage(struct Input *in);
 hid_t       createOutputDataType(struct Input *in);
 hid_t       createInputDataType(struct Input *in);
-static int  readUIntegerData(FILE *strm, struct Input *in);
-static int  allocateUIntegerStorage(struct Input *in);
-static int  validateConfigurationParameters(struct Input *in);
-static int  processStrData(FILE *strm, struct Input *in, hid_t file_id);
-static int  processStrHDFData(FILE *strm, struct Input *in, hid_t file_id);
 
 #endif  /* H5IMPORT_H__ */
 

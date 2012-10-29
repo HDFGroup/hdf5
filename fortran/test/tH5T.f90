@@ -86,8 +86,8 @@
      CHARACTER(LEN=2), DIMENSION(dimsize)      :: char_member_out ! Buffer to read data out
      INTEGER, DIMENSION(dimsize)          :: int_member
      INTEGER, DIMENSION(dimsize)          :: int_member_out
-     DOUBLE PRECISION, DIMENSION(dimsize) :: double_member
-     DOUBLE PRECISION, DIMENSION(dimsize) :: double_member_out
+     REAL(KIND=Fortran_DOUBLE), DIMENSION(dimsize) :: double_member
+     REAL(KIND=Fortran_DOUBLE), DIMENSION(dimsize) :: double_member_out
      REAL, DIMENSION(dimsize)             :: real_member
      REAL, DIMENSION(dimsize)             :: real_member_out
      INTEGER :: i
