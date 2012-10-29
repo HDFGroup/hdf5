@@ -90,6 +90,9 @@ static herr_t H5VL__file_flush_cb(uint8_t *p, int source);
 static herr_t H5VL__file_close_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_create_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_open_cb(uint8_t *p, int source);
+static herr_t H5VL__attr_read_cb(uint8_t *p, int source);
+static herr_t H5VL__attr_write_cb(uint8_t *p, int source);
+static herr_t H5VL__attr_remove_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_close_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_create_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_open_cb(uint8_t *p, int source);
@@ -170,6 +173,9 @@ H5VL_mds_start(void)
     mds_ops[H5VL_FILE_CLOSE]    = H5VL__file_close_cb;
     mds_ops[H5VL_ATTR_CREATE]   = H5VL__attr_create_cb;
     mds_ops[H5VL_ATTR_OPEN]     = H5VL__attr_open_cb;
+    mds_ops[H5VL_ATTR_READ]     = H5VL__attr_read_cb;
+    mds_ops[H5VL_ATTR_WRITE]    = H5VL__attr_write_cb;
+    mds_ops[H5VL_ATTR_REMOVE]   = H5VL__attr_remove_cb;
     mds_ops[H5VL_ATTR_CLOSE]    = H5VL__attr_close_cb;
     mds_ops[H5VL_DSET_CREATE]   = H5VL__dataset_create_cb;
     mds_ops[H5VL_DSET_OPEN]     = H5VL__dataset_open_cb;
@@ -625,6 +631,117 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_open_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__attr_read_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__attr_read_cb(uint8_t *p, int source)
+{
+    hid_t attr_id = FAIL; /* attr id */
+    hid_t type_id;
+    H5A_t *attr = NULL; /* New attr's info */
+    size_t buf_size = 0;
+    void *buf = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_attr_read_params(p, &attr_id, &type_id, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr read params");
+
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier");
+
+    if(NULL == (buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    if(H5VL_native_attr_read(attr, type_id, buf, -1) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
+
+done:
+    if(SUCCEED == ret_value) {
+        /* Send the attr id & metadata to the client */
+        if(MPI_SUCCESS != MPI_Send(buf, (int)buf_size, MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* Send failed to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    printf("MDS read attr %d\n", attr_id);
+    if(buf)
+        H5MM_free(buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__attr_read_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__attr_write_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__attr_write_cb(uint8_t *p, int source)
+{
+    hid_t attr_id = FAIL; /* attr id */
+    hid_t type_id;
+    H5A_t *attr = NULL; /* New attr's info */
+    size_t buf_size = 0;
+    void *buf = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_attr_write_params(p, &attr_id, &type_id, &buf, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr write params");
+
+    if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier");
+
+    if(H5VL_native_attr_write(attr, type_id, (const void *)buf, -1) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute");
+
+done:
+    /* Send failed to the client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    printf("MDS write attr %d\n", attr_id);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__attr_write_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__attr_remove_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__attr_remove_cb(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for attr */
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    char *name = NULL; /* name of attr (if named) */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_attr_remove_params(p, &obj_id, &loc_params, &name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr remove params");
+
+    if(H5VL_native_attr_remove(H5I_object(obj_id), loc_params, name, -1) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove attribute");
+
+done:
+    /* send status to client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__attr_remove_cb */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__attr_close_cb

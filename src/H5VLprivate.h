@@ -43,6 +43,7 @@ typedef enum H5VL_op_type_t {
     H5VL_ATTR_OPEN,
     H5VL_ATTR_READ,
     H5VL_ATTR_WRITE,
+    H5VL_ATTR_REMOVE,
     H5VL_ATTR_CLOSE,
     H5VL_DSET_CREATE,
     H5VL_DSET_OPEN,
@@ -152,6 +153,7 @@ H5_DLL H5F_t *H5VL_native_get_file(void *obj, H5I_type_t type);
 /* encode & decode prototypes */
 H5_DLL herr_t H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *size);
 H5_DLL herr_t H5VL__decode_loc_params(const void *buf, H5VL_loc_params_t *loc_params);
+
 H5_DLL herr_t H5VL__encode_file_create_params(void *buf, size_t *nalloc, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 H5_DLL herr_t H5VL__decode_file_create_params(void *buf, char **name, unsigned *flags, hid_t *fcpl_id, hid_t *fapl_id);
 H5_DLL herr_t H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsigned flags, hid_t fapl_id);
@@ -160,24 +162,34 @@ H5_DLL herr_t H5VL__encode_file_flush_params(void *buf, size_t *nalloc, hid_t ob
 H5_DLL herr_t H5VL__decode_file_flush_params(void *buf, hid_t *obj_id, H5F_scope_t *scope);
 H5_DLL herr_t H5VL__encode_file_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_file_close_params(void *buf, hid_t *obj_id);
+
 H5_DLL herr_t H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t acpl_id, hid_t aapl_id, hid_t type_id, hid_t space_id);
 H5_DLL herr_t H5VL__decode_attr_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *acpl_id, hid_t *aapl_id, hid_t *type_id, hid_t *space_id);
 H5_DLL herr_t H5VL__encode_attr_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t aapl_id);
 H5_DLL herr_t H5VL__decode_attr_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *aapl_id);
+H5_DLL herr_t H5VL__encode_attr_read_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t type_id, size_t buf_size);
+H5_DLL herr_t H5VL__decode_attr_read_params(void *buf, hid_t *obj_id, hid_t *type_id, size_t *buf_size);
+H5_DLL herr_t H5VL__encode_attr_write_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t type_id, const void *attr_buf, size_t buf_size);
+H5_DLL herr_t H5VL__decode_attr_write_params(void *buf, hid_t *obj_id, hid_t *type_id, void **attr_buf, size_t *buf_size);
+H5_DLL herr_t H5VL__encode_attr_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name);
+H5_DLL herr_t H5VL__decode_attr_remove_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name);
 H5_DLL herr_t H5VL__encode_attr_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_attr_close_params(void *buf, hid_t *obj_id);
+
 H5_DLL herr_t H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t type_id, hid_t space_id, hid_t lcpl_id);
 H5_DLL herr_t H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dcpl_id, hid_t *dapl_id, hid_t *type_id, hid_t *space_id, hid_t *lcpl_id);
 H5_DLL herr_t H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id);
 H5_DLL herr_t H5VL__decode_dataset_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *dapl_id);
 H5_DLL herr_t H5VL__encode_dataset_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_dataset_close_params(void *buf, hid_t *obj_id);
+
 H5_DLL herr_t H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
 H5_DLL herr_t H5VL__decode_datatype_commit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *type_id, hid_t *lcpl_id, hid_t *tcpl_id, hid_t *tapl_id);
 H5_DLL herr_t H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id);
 H5_DLL herr_t H5VL__decode_datatype_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *tapl_id);
 H5_DLL herr_t H5VL__encode_datatype_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_datatype_close_params(void *buf, hid_t *obj_id);
+
 H5_DLL herr_t H5VL__encode_group_create_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t lcpl_id);
 H5_DLL herr_t H5VL__decode_group_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name, hid_t *gcpl_id, hid_t *gapl_id, hid_t *lcpl_id);
 H5_DLL herr_t H5VL__encode_group_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id);

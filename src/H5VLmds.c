@@ -70,10 +70,10 @@ static herr_t H5VL_mds_fapl_free(void *_fa);
 /* Atrribute callbacks */
 static void *H5VL_mds_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
 static void *H5VL_mds_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
-//static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
-//static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
+static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
+static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
 //static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-//static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
+static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
 static herr_t H5VL_mds_attr_close(void *attr, hid_t req);
 
 /* Datatype callbacks */
@@ -153,10 +153,10 @@ static H5VL_class_t H5VL_mds_g = {
     {                                        /* attribute_cls */
         H5VL_mds_attr_create,                /* create */
         H5VL_mds_attr_open,                  /* open */
-        NULL,//H5VL_mds_attr_read,                  /* read */
-        NULL,//H5VL_mds_attr_write,                 /* write */
+        H5VL_mds_attr_read,                  /* read */
+        H5VL_mds_attr_write,                 /* write */
         NULL,//H5VL_mds_attr_get,                   /* get */
-        NULL,//H5VL_mds_attr_remove,                /* remove */
+        H5VL_mds_attr_remove,                /* remove */
         H5VL_mds_attr_close                  /* close */
     },
     {                                        /* datatype_cls */
@@ -977,6 +977,172 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_attr_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_read
+ *
+ * Purpose:	Reads in data from attribute.
+ *
+ *              Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_mds_attr_read(void *obj, hid_t dtype_id, void *buf, hid_t UNUSED req)
+{
+    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)obj;
+    void            *send_buf = NULL;
+    size_t           buf_size;
+    size_t	     dst_type_size;	/* size of destination type */ 
+    hssize_t	     snelmts;		/* elements in attribute */
+    size_t	     nelmts;		/* elements in attribute*/
+    herr_t           ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    dst_type_size = H5T_GET_SIZE((H5T_t *)H5I_object(dtype_id));
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->attr->shared->ds)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid");
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_attr_read_params(NULL, &buf_size, attr->common.obj_id, dtype_id, 
+                                     dst_type_size * nelmts) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_attr_read_params(send_buf, &buf_size, attr->common.obj_id, dtype_id,
+                                     dst_type_size * nelmts) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr read parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and receive back the attribute data */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   buf, (int)(dst_type_size * nelmts), MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send and receive message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_attr_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_write
+ *
+ * Purpose:	Writes in data from attribute.
+ *
+ *              Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_mds_attr_write(void *obj, hid_t dtype_id, const void *buf, hid_t UNUSED req)
+{
+    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)obj;
+    void            *send_buf = NULL;
+    size_t           buf_size;
+    size_t	     dst_type_size;	/* size of destination type */ 
+    hssize_t	     snelmts;		/* elements in attribute */
+    size_t	     nelmts;		/* elements in attribute*/
+    herr_t           ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    dst_type_size = H5T_GET_SIZE((H5T_t *)H5I_object(dtype_id));
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->attr->shared->ds)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid");
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_attr_write_params(NULL, &buf_size, attr->common.obj_id, dtype_id, 
+                                      buf, dst_type_size * nelmts) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_attr_write_params(send_buf, &buf_size, attr->common.obj_id, dtype_id,
+                                      buf, dst_type_size * nelmts) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr write parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and receive back the attribute data */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t),  MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send and receive message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_remove
+ *
+ * Purpose:	Removes a attr.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, attr not removed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t UNUSEDreq)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    void            *send_buf = NULL;
+    size_t           buf_size;
+    herr_t           ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_attr_remove_params(NULL, &buf_size, obj->obj_id, loc_params, name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_attr_remove_params(send_buf, &buf_size, obj->obj_id, loc_params, name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr remove parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_attr_remove() */
 
 
 /*-------------------------------------------------------------------------
