@@ -670,7 +670,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t scope, 
+H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, 
                     hid_t UNUSED req)
 {
     H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
@@ -681,15 +681,17 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t UNUSED loc_params, H5F_scope_t
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    buf_size = 1 /* request type */ + sizeof(int) /* object id */ + 1 /* scope */;
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_file_flush_params(NULL, &buf_size, obj_id, loc_params, scope) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed")
 
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    /* determine the size of the buffer needed to encode the parameters */
-    if(H5VL__encode_file_flush_params(send_buf, &buf_size, obj_id, scope) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed")
+    /* encode flush parameters */
+    if(H5VL__encode_file_flush_params(send_buf, &buf_size, obj_id, loc_params, scope) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode file flush parameters")
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */

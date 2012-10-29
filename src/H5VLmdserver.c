@@ -263,11 +263,9 @@ H5VL__file_create_cb(uint8_t *p, int source)
     if(H5P_set_fapl_mds(fapl_id, mds_filename, temp_fapl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
-    /* create the metadata file locally */
-    if(NULL == (new_file = H5F_open(mds_filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    /* call the native plugin file create callback*/
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, fapl_id, -1)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
-
-    new_file->id_exists = TRUE;
 
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
@@ -316,12 +314,9 @@ H5VL__file_open_cb(uint8_t *p, int source)
     if(H5P_set_fapl_mds(fapl_id, mds_filename, temp_fapl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
-    /* create the metadata file locally */
-    if(NULL == (new_file = H5F_open(mds_filename, flags, H5P_FILE_CREATE_DEFAULT, 
-                                    fapl_id, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
-
-    new_file->id_exists = TRUE;
+    /* call the native plugin file open callback*/
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, fapl_id, -1)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
@@ -353,39 +348,18 @@ static herr_t
 H5VL__file_flush_cb(uint8_t *p, int source)
 {
     hid_t obj_id; /* metadata object ID */
-    H5F_t *f = NULL; /* metadata file struct */
     H5F_scope_t scope;
+    H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL__decode_file_flush_params(p, &obj_id, &scope) < 0)
+    if(H5VL__decode_file_flush_params(p, &obj_id, &loc_params, &scope) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file flush params");
 
-    if(NULL == (f = H5VL_native_get_file(H5I_object(obj_id), H5I_get_type(obj_id))))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
-
-    /* Flush the file */
-    /*
-     * Nothing to do if the file is read only.	This determination is
-     * made at the shared open(2) flags level, implying that opening a
-     * file twice, once for read-only and once for read-write, and then
-     * calling H5Fflush() with the read-only handle, still causes data
-     * to be flushed.
-     */
-    if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-        /* Flush other files, depending on scope */
-        if(H5F_SCOPE_GLOBAL == scope) {
-            /* Call the flush routine for mounted file hierarchies */
-            if((ret_value = H5F_flush_mounts(f, H5AC_dxpl_id)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy");
-        } /* end if */
-        else {
-            /* Call the flush routine, for this file */
-            if((ret_value = H5F_flush(f, H5AC_dxpl_id, FALSE)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information");
-        } /* end else */
-    } /* end if */
+    /* call the native plugin file create callback*/
+    if(H5VL_native_file_flush(H5I_object(obj_id), loc_params, scope, -1) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
     /* send status to client */
@@ -418,31 +392,12 @@ H5VL__file_close_cb(uint8_t *p, int source)
     /* Decrement reference count on atom.  When it reaches zero the file will be closed. */
     if(H5I_dec_ref(file_id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed");
+
 #if 0
-    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID");
-
-    /* Flush file if this is the last reference to this id and we have write
-     * intent, unless it will be flushed by the "shared" file being closed.
-     * This is only necessary to replicate previous behaviour, and could be
-     * disabled by an option/property to improve performance. */
-    if((f->shared->nrefs > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
-        /* get the file ID corresponding to the H5F_t struct */
-        if((file_id = H5I_get_id(f, H5I_FILE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "invalid atom");
-        /* get the number of references outstanding for this file ID */
-        if((nref = H5I_get_ref(file_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count");
-        if(nref == 1)
-            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache");
-    } /* end if */
-
-    /* close the file */
-    if((ret_value = H5F_close(f)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
+    /* call the native plugin file create callback*/
+    if(H5VL_native_file_close(H5I_object(file_id), -1) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 #endif
-
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
@@ -786,12 +741,11 @@ H5VL__dataset_create_cb(uint8_t *p, int source)
     hid_t dset_id = FAIL; /* dset id */
     H5D_t *dset = NULL; /* New dataset's info */
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
-    H5G_loc_t loc; /* Object location to insert dataset into */
     char *name = NULL; /* name of dataset (if named) */
     hid_t dcpl_id = FAIL, dapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
     hid_t type_id; /* datatype for dataset */
     hid_t space_id; /* dataspace for dataset */
-    const H5S_t *space; /* Dataspace for dataset */
+    H5P_genplist_t  *plist;
     void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
     size_t buf_size = 0; /* send_buf size */
     uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
@@ -803,28 +757,22 @@ H5VL__dataset_create_cb(uint8_t *p, int source)
                                           &type_id, &space_id, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset create params");
 
-    /* Check dataset create parameters */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
-    if(H5I_DATATYPE != H5I_get_type(type_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID");
-    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID");
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
-    /* H5Dcreate_anon */
-    if(NULL == name) {
-        /* build and open the new dataset */
-        if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, 
-                                       H5AC_dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset");
-    }
-    /* H5Dcreate2 */
-    else {
-        /* Create the new dataset & get its ID */
-        if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, lcpl_id, 
-                                             dcpl_id, dapl_id, H5AC_dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset");
-    }
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_DSET_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id");
+    if(H5P_set(plist, H5VL_DSET_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id");
+    if(H5P_set(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id");
+
+    /* Create the dataset through the native VOL */
+    if(NULL == (dset = (H5D_t *)H5VL_native_dataset_create(H5I_object(obj_id), loc_params, name, 
+                                                           dcpl_id, dapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
@@ -883,12 +831,6 @@ H5VL__dataset_open_cb(uint8_t *p, int source)
     H5D_t *dset = NULL; /* New dataset's info */
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
     char *name = NULL; /* name of dataset (if named) */
-    H5G_loc_t loc; /* Object location of group */
-    H5G_loc_t dset_loc; /* Object location of dataset */
-    H5G_name_t path; /* Dataset group hier. path */
-    H5O_loc_t oloc; /* Dataset object location */
-    H5O_type_t obj_type; /* Type of object at location */
-    hbool_t loc_found = FALSE; /* Location at 'name' found */
     size_t dcpl_size = 0, type_size = 0, space_size = 0, layout_size = 0;
     H5P_genplist_t *dcpl;
     size_t buf_size = 0;
@@ -902,30 +844,10 @@ H5VL__dataset_open_cb(uint8_t *p, int source)
     if(H5VL__decode_dataset_open_params(p, &obj_id, &loc_params, &name, &dapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset open params");
 
-    /* START open dataset */
-    /* Check dataset create parameters */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
-
-    /* Set up dataset location to fill in */
-    dset_loc.oloc = &oloc;
-    dset_loc.path = &path;
-    H5G_loc_reset(&dset_loc);
-
-    /* Find the dataset object */
-    if(H5G_loc_find(&loc, name, &dset_loc, dapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found");
-    loc_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, &obj_type, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type");
-    if(obj_type != H5O_TYPE_DATASET)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset");
-
-    /* Open the dataset */
-    if(NULL == (dset = H5D_open(&dset_loc, dapl_id, H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset");
+    /* Open the dataset through the native VOL */
+    if(NULL == (dset = (H5D_t *)H5VL_native_dataset_open(H5I_object(obj_id), loc_params, name, 
+                                                         dapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
@@ -1157,13 +1079,6 @@ H5VL__datatype_open_cb(uint8_t *p, int source)
     hid_t type_id; /* datatype id */
     hid_t tapl_id = FAIL;
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
-    H5G_loc_t loc; /* Object location to insert dataset into */
-    H5G_name_t   path;            	/* Datatype group hier. path */
-    H5O_loc_t    oloc;            	/* Datatype object location */
-    H5O_type_t   obj_type;              /* Type of object at location */
-    H5G_loc_t    type_loc;              /* Group object for datatype */
-    hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     char *name = NULL; /* name of dataset (if named) */
     size_t type_size = 0, buf_size = 0;
     void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
@@ -1175,31 +1090,10 @@ H5VL__datatype_open_cb(uint8_t *p, int source)
     if(H5VL__decode_datatype_open_params(p, &obj_id, &loc_params, &name, &tapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset create params");
 
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
-
-    /* Set up datatype location to fill in */
-    type_loc.oloc = &oloc;
-    type_loc.path = &path;
-    H5G_loc_reset(&type_loc);
-
-    /*
-     * Find the named datatype object header and read the datatype message
-     * from it.
-     */
-    if(H5G_loc_find(&loc, name, &type_loc/*out*/, tapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found");
-    obj_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&oloc, &obj_type, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object type");
-    if(obj_type != H5O_TYPE_NAMED_DATATYPE)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype");
-
-    /* Open it */
-    if(NULL == (type = H5T_open(&type_loc, dxpl_id)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype");
+    /* Open the datatype through the native VOL */
+    if(NULL == (type = (H5T_t *)H5VL_native_datatype_open(H5I_object(obj_id), loc_params, name, 
+                                                          tapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     if((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
@@ -1288,61 +1182,34 @@ H5VL__group_create_cb(uint8_t *p, int source)
     hid_t grp_id = FAIL; /* group id */
     H5G_t *grp = NULL; /* New group's info */
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
-    H5G_loc_t loc; /* Object location to insert group into */
     char *name = NULL; /* name of group (if named) */
+    H5P_genplist_t  *plist;            /* Property list pointer */
     hid_t gcpl_id = FAIL, gapl_id = FAIL, lcpl_id = FAIL; /* plist IDs */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL__decode_group_create_params(p, &obj_id, &loc_params, &name, 
-                                        &gcpl_id, &gapl_id, &lcpl_id) < 0)
+    if(H5VL__decode_group_create_params(p, &obj_id, &loc_params, &name, &gcpl_id, &gapl_id, 
+                                        &lcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group create params");
 
-    /* Check group create parameters */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* if name is NULL then this is from H5Gcreate_anon */
-    if(name == NULL) {
-        H5G_obj_create_t gcrt_info;         /* Information for group creation */
+    if(H5P_set(plist, H5VL_GRP_LCPL_ID, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
 
-        /* Set up group creation info */
-        gcrt_info.gcpl_id = gcpl_id;
-        gcrt_info.cache_type = H5G_NOTHING_CACHED;
-        HDmemset(&gcrt_info.cache, 0, sizeof(gcrt_info.cache));
-
-        /* Create the new group & get its ID */
-        if(NULL == (grp = H5G__create(loc.oloc->file, &gcrt_info, H5AC_dxpl_id)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");           
-    }
-    /* otherwise it's from H5Gcreate */
-    else {
-        /* Create the new group */
-        if(NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, H5AC_dxpl_id)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group");
-    }
+    /* Create the group through the native VOL */
+    if(NULL == (grp = (H5G_t *)H5VL_native_group_create(H5I_object(obj_id), loc_params, name, 
+                                                        gcpl_id, gapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
     if((grp_id = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle");
 
 done:
-    if(name == NULL) {
-        /* Release the group's object header, if it was created */
-        if(grp) {
-            H5O_loc_t *oloc;         /* Object location for group */
-
-            /* Get the new group's object location */
-            if(NULL == (oloc = H5G_oloc(grp)))
-                HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object location of group")
-
-            /* Decrement refcount on group's object header in memory */
-            if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
-         } /* end if */
-    }
-
     if(SUCCEED == ret_value) {
         /* Send the meta datagroup ID to the client */
         if(MPI_SUCCESS != MPI_Send(&grp_id, sizeof(hid_t), MPI_BYTE, source, 
@@ -1371,9 +1238,8 @@ H5VL__group_open_cb(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for group */
     hid_t grp_id = FAIL; /* group id */
-    H5G_t *grp = NULL; /* New group's info */
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
-    H5G_loc_t loc; /* Object location to insert group into */
+    H5G_t *grp = NULL;
     char *name = NULL; /* name of group (if named) */
     hid_t gapl_id = FAIL; /* plist IDs */
     herr_t ret_value = SUCCEED;
@@ -1383,16 +1249,13 @@ H5VL__group_open_cb(uint8_t *p, int source)
     if(H5VL__decode_group_open_params(p, &obj_id, &loc_params, &name, &gapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group open params");
 
-    /* Check group open parameters */
-    if(H5G_loc(obj_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object");
-
-    /* Open the group */
-    if((grp = H5G__open_name(&loc, name, gapl_id, H5AC_dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+    /* Open the group through the native VOL */
+    if(NULL == (grp = (H5G_t *)H5VL_native_group_open(H5I_object(obj_id), loc_params, name, 
+                                                      gapl_id, H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group")
 
     if((grp_id = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENFILE, FAIL, "unable to create group id");
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle");
 
 done:
     if(SUCCEED == ret_value) {
