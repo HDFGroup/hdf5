@@ -258,8 +258,10 @@ coll_chunk5(void)
 /*-------------------------------------------------------------------------
  * Function:	coll_chunk6
  *
- * Purpose:	Wrapper to test the collective chunk IO for regular JOINT
-                selection with at least number of 2*mpi_size chunks
+ * Purpose:	Test direct request for multi-chunk-io.
+ *          Wrapper to test the collective chunk IO for regular JOINT
+ *          selection with at least number of 2*mpi_size chunks
+ *          Test for direct to Multi Chunk I/O.
  *
  * Return:	Success:	0
  *
@@ -489,6 +491,12 @@ coll_chunk10(void)
  *
  *		Failure:	-1
  *
+ * Modifications:
+ *   Remove invalid temporary property checkings for API_LINK_HARD and
+ *   API_LINK_TRUE cases.
+ * Programmer: Jonathan Kim
+ * Date: 2012-10-10
+ *
  * Programmer:	Unknown
  *		July 12th, 2004
  *
@@ -634,11 +642,6 @@ coll_chunktest(const char* filename,
                            NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
 
-               prop_value = H5D_XFER_COLL_CHUNK_FIX;
-               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
-                           NULL, NULL, NULL, NULL, NULL, NULL);
-               VRFY((status >= 0),"testing property list inserted succeeded");
-
             break;
 
             case API_MULTI_HARD:
@@ -651,11 +654,6 @@ coll_chunktest(const char* filename,
             case API_LINK_TRUE:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;
                status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
-                           NULL, NULL, NULL, NULL, NULL, NULL);
-               VRFY((status >= 0),"testing property list inserted succeeded");
-
-               prop_value = H5D_XFER_COLL_CHUNK_FIX;
-               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI_OPT, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
                            NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
 
@@ -699,25 +697,17 @@ coll_chunktest(const char* filename,
             case API_LINK_HARD:
                status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,&prop_value);
                VRFY((status >= 0),"testing property list get succeeded");
-               if(prop_value !=0){/*double check if the option is switched to multiple chunk internally.*/
-                 status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_TO_MULTI, &prop_value);
-                 VRFY((status >= 0),"testing property list get succeeded");
-                 VRFY((prop_value == 1),"API to set LINK COLLECTIVE IO without optimization succeeded");
-               }
+               VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO directly succeeded");
             break;
             case API_MULTI_HARD:
                status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,&prop_value);
                VRFY((status >= 0),"testing property list get succeeded");
-               VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO without optimization succeeded");
+               VRFY((prop_value == 0),"API to set MULTI-CHUNK COLLECTIVE IO optimization succeeded");
             break;
             case API_LINK_TRUE:
                status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,&prop_value);
                VRFY((status >= 0),"testing property list get succeeded");
-               if(prop_value !=0){/*double check if the option is switched to multiple chunk internally.*/
-                 status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_TO_MULTI_OPT, &prop_value);
-                 VRFY((status >= 0),"testing property list get succeeded");
-                 VRFY((prop_value == 1),"API to set LINK COLLECTIVE IO without optimization succeeded");
-               }
+               VRFY((prop_value == 0),"API to set LINK COLLECTIVE IO succeeded");
             break;
             case API_LINK_FALSE:
                status = H5Pget(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,&prop_value);
