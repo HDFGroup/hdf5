@@ -75,6 +75,7 @@ herr_t
 H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
 {
     size_t plist_size = 0;
+    H5P_genplist_t *plist = NULL;
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t len = 0;
     size_t size = 0;
@@ -91,41 +92,44 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
             break;
         case H5VL_OBJECT_BY_NAME:
             /* get length of name */
-            len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+            len = HDstrlen(loc_params.loc_data.loc_by_name.name) + 1;
 
             /* get size of property list */
-            if(H5P_DEFAULT != loc_params.loc_data.loc_by_name.plist_id)
-                if((ret_value = H5Pencode(loc_params.loc_data.loc_by_name.plist_id, 
-                                          NULL, &plist_size)) < 0)
+            if(H5P_DEFAULT != loc_params.loc_data.loc_by_name.plist_id) {
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(loc_params.loc_data.loc_by_name.plist_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(H5P__encode(plist, FALSE, NULL, &plist_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-
+            }
             size += (1 + H5V_limit_enc_size((uint64_t)len) + len + 
-                      1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
+                     1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
             break;
         case H5VL_OBJECT_BY_IDX:
             /* get length of name */
-            len = HDstrlen(loc_params.loc_data.loc_by_idx.name);
+            len = HDstrlen(loc_params.loc_data.loc_by_idx.name) + 1;
 
             /* get size of property list */
-            if(H5P_DEFAULT != loc_params.loc_data.loc_by_idx.plist_id)
-                if((ret_value = H5Pencode(loc_params.loc_data.loc_by_idx.plist_id,
-                                          NULL, &plist_size)) < 0)
+            if(H5P_DEFAULT != loc_params.loc_data.loc_by_idx.plist_id) {
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(loc_params.loc_data.loc_by_idx.plist_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(H5P__encode(plist, FALSE, NULL, &plist_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-
+            }
             size += (1 + H5V_limit_enc_size((uint64_t)len) + len + 2 + 
-                      1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size + 
-                      1 + H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_idx.n));
+                     1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size + 
+                     1 + H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_idx.n));
             break;
         case H5VL_OBJECT_BY_ADDR:
             size += 1 + H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_addr.addr);
             break;
         case H5VL_OBJECT_BY_REF:
             /* get size of property list */
-            if(H5P_DEFAULT != loc_params.loc_data.loc_by_ref.plist_id)
-                if((ret_value = H5Pencode(loc_params.loc_data.loc_by_ref.plist_id,
-                                          NULL, &plist_size)) < 0)
+            if(H5P_DEFAULT != loc_params.loc_data.loc_by_ref.plist_id) {
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(loc_params.loc_data.loc_by_ref.plist_id, H5I_GENPROP_LST)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(H5P__encode(plist, FALSE, NULL, &plist_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-
+            }
             size += (1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
             break;
         default:
@@ -142,20 +146,16 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
                 break;
             case H5VL_OBJECT_BY_NAME:
                 {
-                    /* get length of name */
-                    len = HDstrlen(loc_params.loc_data.loc_by_name.name);
-
                     /* encode length of name and name */
                     UINT64ENCODE_VARLEN(p, len);
-                    HDmemcpy(p, (const uint8_t *)loc_params.loc_data.loc_by_name.name, len);
+                    HDstrcpy((char *)p, loc_params.loc_data.loc_by_name.name);
                     p += len;
 
                     /* encode the plist size */
                     UINT64ENCODE_VARLEN(p, plist_size);
                     /* encode property lists if they are not default*/
-                    if(H5P_DEFAULT != loc_params.loc_data.loc_by_name.plist_id) {
-                        if((ret_value = H5Pencode(loc_params.loc_data.loc_by_name.plist_id, p, 
-                                                  &plist_size)) < 0)
+                    if(plist_size) {
+                        if(H5P__encode(plist, FALSE, p, &plist_size) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                         p += plist_size;
                     }
@@ -163,12 +163,9 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
                 }
             case H5VL_OBJECT_BY_IDX:
                 {
-                    /* get length of name */
-                    len = HDstrlen(loc_params.loc_data.loc_by_idx.name);
-
                     /* encode length of name and name */
                     UINT64ENCODE_VARLEN(p, len);
-                    HDmemcpy(p, (const uint8_t *)loc_params.loc_data.loc_by_idx.name, len);
+                    HDstrcpy((char *)p, loc_params.loc_data.loc_by_idx.name);
                     p += len;
 
                     *p++ = (uint8_t)loc_params.loc_data.loc_by_idx.idx_type;
@@ -178,9 +175,8 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
                     /* encode the plist size */
                     UINT64ENCODE_VARLEN(p, plist_size);
                     /* encode property lists if they are not default*/
-                    if(H5P_DEFAULT != loc_params.loc_data.loc_by_idx.plist_id) {
-                        if((ret_value = H5Pencode(loc_params.loc_data.loc_by_idx.plist_id, p, 
-                                                  &plist_size)) < 0)
+                    if(plist_size) {
+                        if(H5P__encode(plist, FALSE, p, &plist_size) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                         p += plist_size;
                     }
@@ -198,9 +194,8 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
                     /* encode the plist size */
                     UINT64ENCODE_VARLEN(p, plist_size);
                     /* encode property lists if they are not default*/
-                    if(H5P_DEFAULT != loc_params.loc_data.loc_by_ref.plist_id) {
-                        if((ret_value = H5Pencode(loc_params.loc_data.loc_by_ref.plist_id, p, 
-                                                  &plist_size)) < 0)
+                    if(plist_size) {
+                        if(H5P__encode(plist, FALSE, p, &plist_size) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
                         p += plist_size;
                     }
@@ -273,7 +268,6 @@ H5VL__decode_loc_params(const void *buf, H5VL_loc_params_t *loc_params)
             /* get length of name */
             UINT64DECODE_VARLEN(p, len);
             loc_params->loc_data.loc_by_idx.name = H5MM_xstrdup((const char *)(p));
-            //HDmemcpy(p, (uint8_t *)(loc_params->loc_data.loc_by_idx.name), len);
             p += len;
 
             loc_params->loc_data.loc_by_idx.idx_type = (H5_index_t)*p++;
@@ -351,7 +345,7 @@ H5VL__encode_file_create_params(void *buf, size_t *nalloc, const char *name, uns
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
-    len = HDstrlen(name);
+    len = HDstrlen(name) + 1;
 
     if(NULL != p) {
         /* encode request type */
@@ -360,7 +354,7 @@ H5VL__encode_file_create_params(void *buf, size_t *nalloc, const char *name, uns
         /* encode length of name and name */
         UINT64ENCODE_VARLEN(p, len);
 
-        HDmemcpy(p, (const uint8_t *)name, len);
+        HDstrcpy((char *)p, name);
         p += len;
 
         /* encode create flags */
@@ -412,7 +406,6 @@ H5VL__decode_file_create_params(void *buf, char **mds_filename, unsigned *flags,
     /* decode length of name and name */
     UINT64DECODE_VARLEN(p, len);
     name = H5MM_xstrdup((const char *)(p));
-    name[len] = '\0';
     p += len;
 
     /* generate the MDS file name by adding a .md extension to the file name */
@@ -476,7 +469,7 @@ H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsig
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
-    len = HDstrlen(name);
+    len = HDstrlen(name) + 1;
 
     if(NULL != p) {
         /* encode request type */
@@ -484,7 +477,7 @@ H5VL__encode_file_open_params(void *buf, size_t *nalloc, const char *name, unsig
 
         /* encode length of name and name */
         UINT64ENCODE_VARLEN(p, len);
-        HDmemcpy(p, (const uint8_t *)name, len);
+        HDstrcpy((char *)p, name);
         p += len;
 
         /* encode open flags */
@@ -526,7 +519,6 @@ H5VL__decode_file_open_params(void *buf, char **mds_filename, unsigned *flags, h
     /* decode length of name and name */
     UINT64DECODE_VARLEN(p, len);
     name = H5MM_xstrdup((const char *)(p));
-    name[len] = '\0';
     p += len;
 
     /* generate the MDS file name by adding a .md extension to the file name */
@@ -708,7 +700,7 @@ H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -730,7 +722,7 @@ H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode length of the attr name and the actual attr name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the plist size */
@@ -798,7 +790,6 @@ H5VL__decode_attr_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -850,7 +841,7 @@ H5VL__encode_attr_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -871,8 +862,8 @@ H5VL__encode_attr_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_
 
         /* encode length of the attr name and the actual attr name */
         UINT64ENCODE_VARLEN(p, len);
-        if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+        if(NULL != name && len)
+            HDstrcpy((char *)p, name);
         p += len;
     }
     size += (1 + sizeof(int32_t) + 
@@ -880,7 +871,6 @@ H5VL__encode_attr_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_
              1 + H5V_limit_enc_size((uint64_t)len) + len);
 
     *nalloc = size;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__encode_attr_open_params() */
@@ -903,6 +893,7 @@ H5VL__decode_attr_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_p
     INT32DECODE(p, *obj_id);
 
     UINT64DECODE_VARLEN(p, loc_size);
+
     /* decode the location parameters */
     if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
@@ -910,9 +901,9 @@ H5VL__decode_attr_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_p
 
     /* decode length of the attr name and the actual attr name */
     UINT64DECODE_VARLEN(p, len);
+
     if(0 != len) {
-        *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
+        *name = H5MM_strdup((const char *)(p));
         p += len;
     }
 
@@ -1088,7 +1079,7 @@ H5VL__encode_attr_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_lo
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -1110,7 +1101,7 @@ H5VL__encode_attr_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_lo
         /* encode length of the attr name and the actual attr name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
     }
     size += (1 + sizeof(int32_t) + 
@@ -1149,7 +1140,6 @@ H5VL__decode_attr_remove_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -1250,7 +1240,7 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -1272,7 +1262,7 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode length of the dataset name and the actual dataset name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the plist size */
@@ -1360,7 +1350,6 @@ H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -1445,7 +1434,7 @@ H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_l
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -1467,7 +1456,7 @@ H5VL__encode_dataset_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_l
         /* encode length of the dataset name and the actual dataset name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the plist size */
@@ -1517,7 +1506,6 @@ H5VL__decode_dataset_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *lo
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -1689,7 +1677,7 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -1711,7 +1699,7 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode length of the datatype name and the actual datatype name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the datatype size */
@@ -1790,7 +1778,6 @@ H5VL__decode_datatype_commit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t 
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -1868,7 +1855,7 @@ H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -1890,7 +1877,7 @@ H5VL__encode_datatype_open_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode length of the datatype name and the actual datatype name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the plist size */
@@ -1940,7 +1927,6 @@ H5VL__decode_datatype_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *l
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -2043,7 +2029,7 @@ H5VL__encode_group_create_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -2065,7 +2051,7 @@ H5VL__encode_group_create_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode length of the group name and the actual group name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the plist size */
@@ -2135,7 +2121,6 @@ H5VL__decode_group_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *lo
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -2205,7 +2190,7 @@ H5VL__encode_group_open_params(void *buf, size_t *nalloc, hid_t obj_id,
 
     /* get name size to encode */
     if(NULL != name)
-        len = HDstrlen(name);
+        len = HDstrlen(name) + 1;
 
     /* get loc params size to encode */
     if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
@@ -2227,7 +2212,7 @@ H5VL__encode_group_open_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode length of the group name and the actual group name */
         UINT64ENCODE_VARLEN(p, len);
         if(NULL != name)
-            HDmemcpy(p, (const uint8_t *)name, len);
+            HDstrcpy((char *)p, name);
         p += len;
 
         /* encode the plist size */
@@ -2277,7 +2262,6 @@ H5VL__decode_group_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_
     UINT64DECODE_VARLEN(p, len);
     if(0 != len) {
         *name = H5MM_xstrdup((const char *)(p));
-        (*name)[len] = '\0';
         p += len;
     }
 
@@ -2340,6 +2324,455 @@ H5VL__decode_group_close_params(void *buf, hid_t *group_id)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__decode_group_close_params() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_link_create_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_link_create_params(void *buf, size_t *nalloc, H5VL_link_create_type_t create_type,
+                                hid_t obj_id, H5VL_loc_params_t loc_params, hid_t lcpl_id, 
+                                hid_t lapl_id, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    va_list arguments;             /* argument list passed from the API call */
+    size_t lcpl_size = 0, lapl_size = 0, loc_size = 0;
+    H5P_genplist_t *lcpl = NULL, *lapl = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    /* get size for property lists to encode */
+    if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+        if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+    if(H5P_LINK_ACCESS_DEFAULT != lapl_id) {
+        if(NULL == (lapl = (H5P_genplist_t *)H5I_object_verify(lapl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(lapl, FALSE, NULL, &lapl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+    /* common stuff between all link create types */
+    size += 2 + sizeof(int32_t) +
+        1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size + 
+        1 + H5V_limit_enc_size((uint64_t)lapl_size) + lapl_size + 
+        1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_LINK_CREATE;
+
+        /* encode the link create type */
+        *p++ = (uint8_t)create_type;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size;
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, lcpl_size);
+        /* encode property lists if they are not default*/
+        if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+            if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += lcpl_size;
+        }
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, lapl_size);
+        /* encode property lists if they are not default*/
+        if(lapl_size) {
+            if((ret_value = H5P__encode(lapl, FALSE, p, &lapl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += lapl_size;
+        }
+    }
+
+    va_start (arguments, lapl_id);
+    switch (create_type) {
+        case H5VL_LINK_CREATE_HARD:
+            {
+                hid_t cur_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t cur_params = va_arg (arguments, H5VL_loc_params_t);
+                size_t cur_loc_size = 0;
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(cur_params, NULL, &cur_loc_size)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                size += sizeof(int32_t) + 1 + H5V_limit_enc_size((uint64_t)cur_loc_size) + cur_loc_size;
+
+                if (NULL != p) {
+                    /* encode the object id */
+                    INT32ENCODE(p, cur_id);
+
+                    UINT64ENCODE_VARLEN(p, loc_size);
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(cur_params, p, &cur_loc_size)) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+                    p += cur_loc_size;
+                }
+
+                break;
+            }
+        case H5VL_LINK_CREATE_SOFT:
+            {
+                char *name = va_arg (arguments, char *);
+                size_t len = 0;
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name) + 1;
+
+                size += 1 + H5V_limit_enc_size((uint64_t)len) + len;
+
+                if (NULL != p) {
+                    /* encode length of the link name and the actual link name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != name)
+                        HDstrcpy((char *)p, name);
+                    p += len;
+                }
+                break;
+            }
+        case H5VL_LINK_CREATE_UD:
+            {
+                H5L_type_t link_type = va_arg (arguments, H5L_type_t);
+                void *udata = va_arg (arguments, void *);
+                size_t udata_size = va_arg (arguments, size_t);
+
+                size += 2 + H5V_limit_enc_size((uint64_t)udata_size) + udata_size;
+
+                if (NULL != p) {
+                    *p++ = (uint8_t)link_type;
+                    UINT64ENCODE_VARLEN(p, udata_size);
+                    if(udata)
+                        HDmemcpy(p, (const uint8_t *)udata, udata_size);
+                    p += udata_size;
+                }
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "invalid link creation call");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_link_create_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_link_create_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_link_create_params(void *buf, H5VL_link_create_type_t *create_type, hid_t *obj_id, 
+                                H5VL_loc_params_t *loc_params, hid_t *lcpl_id, hid_t *lapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t lapl_size = 0, lcpl_size = 0, loc_size = 0;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    *create_type = (H5VL_link_create_type_t)*p++;
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lcpl_size);
+    /* decode property lists if they are not default*/
+    if(lcpl_size) {
+        if((*lcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lcpl_size;
+    }
+    else {
+        *lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lapl_size);
+    /* decode property lists if they are not default*/
+    if(lapl_size) {
+        if((*lapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lapl_size;
+    }
+    else {
+        *lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    }
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(*lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    switch (*create_type) {
+        case H5VL_LINK_CREATE_HARD:
+            {
+                hid_t cur_id;
+                H5VL_loc_params_t cur_loc_params;
+                void *cur_obj = NULL; /* pointer to the target location object */
+                size_t cur_loc_size = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, cur_id);
+
+                UINT64DECODE_VARLEN(p, cur_loc_size);
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, &cur_loc_params)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+                p += cur_loc_size;
+
+                if(H5L_SAME_LOC != cur_id) {
+                    if(NULL == (cur_obj = (void *)H5I_object(cur_id)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
+                }
+
+                /* set creation properties */
+                if(H5P_set(plist, H5VL_LINK_TARGET, &cur_obj) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id");
+                if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &cur_loc_params) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target name");
+
+                break;
+            }
+        case H5VL_LINK_CREATE_SOFT:
+            {
+                char *name;
+                size_t len = 0;
+
+                /* decode length of the link target name and the actual link target_name */
+                UINT64DECODE_VARLEN(p, len);
+                if(0 != len) {
+                    name = H5MM_xstrdup((const char *)(p));
+                    p += len;
+                }
+
+                /* set creation properties */
+                if(H5P_set(plist, H5VL_LINK_TARGET_NAME, &name) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
+
+                break;
+            }
+        case H5VL_LINK_CREATE_UD:
+            {
+                H5L_type_t link_type;
+                void *udata;
+                size_t udata_size;
+
+                link_type = (H5L_type_t)*p++;
+
+                /* decode the length of udata */
+                UINT64DECODE_VARLEN(p, udata_size);
+
+                /* allocate udata buffer and copy data into it */
+                if(0 != udata_size) {
+                    if(NULL == (udata = H5MM_malloc(udata_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                    HDmemcpy(udata, (const uint8_t *)p, udata_size);                    
+                    p += udata_size;
+                }
+
+                /* set creation properties */
+                if(H5P_set(plist, H5VL_LINK_TYPE, &link_type) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist");
+                if(H5P_set(plist, H5VL_LINK_UDATA, &udata) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist");
+                if(H5P_set(plist, H5VL_LINK_UDATA_SIZE, &udata_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist");
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "invalid link creation call")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_link_create_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_link_move_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_link_move_params(void *buf, size_t *nalloc, hid_t src_id, H5VL_loc_params_t loc_params1, 
+                              hid_t dst_id, H5VL_loc_params_t loc_params2, hbool_t copy_flag,
+                              hid_t lcpl_id, hid_t lapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t lcpl_size = 0, lapl_size = 0, loc_size1 = 0, loc_size2 = 0;
+    H5P_genplist_t *lcpl = NULL, *lapl = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params1, NULL, &loc_size1)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params2, NULL, &loc_size2)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    /* get size for property lists to encode */
+    if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+        if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+    if(H5P_LINK_ACCESS_DEFAULT != lapl_id) {
+        if(NULL == (lapl = (H5P_genplist_t *)H5I_object_verify(lapl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(lapl, FALSE, NULL, &lapl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    /* common stuff between all link move types */
+    size += 1 + 2*sizeof(int32_t) + sizeof(unsigned) + 
+        1 + H5V_limit_enc_size((uint64_t)loc_size1) + loc_size1 + 
+        1 + H5V_limit_enc_size((uint64_t)loc_size2) + loc_size2 + 
+        1 + H5V_limit_enc_size((uint64_t)lapl_size) + lapl_size + 
+        1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_LINK_MOVE;
+
+        /* encode the object id */
+        INT32ENCODE(p, src_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size1);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params1, p, &loc_size1)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size1;
+
+        /* encode the object id */
+        INT32ENCODE(p, dst_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size2);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params2, p, &loc_size2)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size2;
+
+        /* encode the copy flag */
+        H5_ENCODE_UNSIGNED(p, copy_flag);
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, lcpl_size);
+        /* encode property lists if they are not default*/
+        if(lcpl_size) {
+            if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += lcpl_size;
+        }
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, lapl_size);
+        /* encode property lists if they are not default*/
+        if(lapl_size) {
+            if((ret_value = H5P__encode(lapl, FALSE, p, &lapl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += lapl_size;
+        }
+    }
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_link_move_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_link_move_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_link_move_params(void *buf, hid_t *src_id, H5VL_loc_params_t *loc_params1, 
+                              hid_t *dst_id, H5VL_loc_params_t *loc_params2, hbool_t *copy_flag,
+                              hid_t *lcpl_id, hid_t *lapl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t lapl_size = 0, lcpl_size = 0, loc_size1 = 0, loc_size2 = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *src_id);
+
+    UINT64DECODE_VARLEN(p, loc_size1);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params1)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size1;
+
+    /* decode the object id */
+    INT32DECODE(p, *dst_id);
+
+    UINT64DECODE_VARLEN(p, loc_size2);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params2)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size2;
+
+    /* deocde open flag */
+    H5_DECODE_UNSIGNED(p, *copy_flag);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lcpl_size);
+    /* decode property lists if they are not default*/
+    if(lcpl_size) {
+        if((*lcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lcpl_size;
+    }
+    else {
+        *lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lapl_size);
+    /* decode property lists if they are not default*/
+    if(lapl_size) {
+        if((*lapl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lapl_size;
+    }
+    else {
+        *lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_link_move_params() */
+
 #if 0
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode__params
@@ -2374,6 +2807,4 @@ H5VL__decode__params(void *buf, )
  done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode__params() */
-
-
 #endif

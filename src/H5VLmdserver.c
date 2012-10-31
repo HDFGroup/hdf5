@@ -27,10 +27,7 @@
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-#define H5L_PACKAGE		/*suppress error about including H5Lpkg   */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-#define H5R_PACKAGE		/*suppress error about including H5Rpkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
@@ -52,18 +49,12 @@
 #include "H5FDmds.h"            /* MDS file driver      		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Gprivate.h"		/* Groups		  		*/
-#include "H5HGprivate.h"	/* Global Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lprivate.h"         /* links                                */
-#include "H5Lpkg.h"             /* links headers			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-#include "H5Rpkg.h"		/* References   			*/
 #include "H5Sprivate.h" 	/* Dataspaces                      	*/
-#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tpkg.h"		/* Datatypes				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
@@ -104,6 +95,8 @@ static herr_t H5VL__datatype_close_cb(uint8_t *p, int source);
 static herr_t H5VL__group_create_cb(uint8_t *p, int source);
 static herr_t H5VL__group_open_cb(uint8_t *p, int source);
 static herr_t H5VL__group_close_cb(uint8_t *p, int source);
+static herr_t H5VL__link_create_cb(uint8_t *p, int source);
+static herr_t H5VL__link_move_cb(uint8_t *p, int source);
 static herr_t H5VL__allocate_cb(uint8_t *p, int source);
 static herr_t H5VL__set_eoa_cb(uint8_t *p, int source);
 static herr_t H5VL__get_eoa_cb(uint8_t *p, int source);
@@ -188,6 +181,8 @@ H5VL_mds_start(void)
     mds_ops[H5VL_GROUP_CREATE]  = H5VL__group_create_cb;
     mds_ops[H5VL_GROUP_OPEN]    = H5VL__group_open_cb;
     mds_ops[H5VL_GROUP_CLOSE]   = H5VL__group_close_cb;
+    mds_ops[H5VL_LINK_CREATE]   = H5VL__link_create_cb;
+    mds_ops[H5VL_LINK_MOVE]     = H5VL__link_move_cb;
     mds_ops[H5VL_ALLOC]         = H5VL__allocate_cb;
     mds_ops[H5VL_GET_EOA]       = H5VL__set_eoa_cb;
     mds_ops[H5VL_SET_EOA]       = H5VL__get_eoa_cb;
@@ -1333,6 +1328,75 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__group_close_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__link_create_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__link_create_cb(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for link */
+    void *obj;
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    hid_t lcpl_id = FAIL, lapl_id = FAIL;
+    H5VL_link_create_type_t create_type;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_link_create_params(p, &create_type, &obj_id, &loc_params, &lcpl_id, &lapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link create params");
+
+    if(H5L_SAME_LOC == obj_id)
+        obj = NULL;
+    else
+        obj = H5I_object(obj_id);
+
+    /* Create the link through the native VOL */
+    if(H5VL_native_link_create(create_type, obj, loc_params, lcpl_id, lapl_id, H5_REQUEST_NULL) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link");
+
+done:
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    printf("MDS created link from %d\n", obj_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__link_create_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__link_move_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__link_move_cb(uint8_t *p, int source)
+{
+    hid_t src_id;
+    hid_t dst_id;
+    H5VL_loc_params_t loc_params1;
+    H5VL_loc_params_t loc_params2;
+    hbool_t copy_flag;
+    hid_t lcpl_id = FAIL, lapl_id = FAIL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_link_move_params(p, &src_id, &loc_params1, &dst_id, &loc_params2, 
+                                     &copy_flag, &lcpl_id, &lapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link move params");
+
+    if(H5VL_native_link_move(H5I_object(src_id), loc_params1, H5I_object(dst_id), loc_params2,
+                             copy_flag, lcpl_id, lapl_id, H5_REQUEST_NULL) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to move link");
+
+done:
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    printf("MDS moved from %d to %d\n", src_id, dst_id);
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__link_move_cb */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__allocate_cb

@@ -110,14 +110,13 @@ static void *H5VL_mds_group_open(void *obj, H5VL_loc_params_t loc_params, const 
 //static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_group_close(void *grp, hid_t req);
 
-#if 0
-
 /* Link callbacks */
 static herr_t H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *obj, 
                                       H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 static herr_t H5VL_mds_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                     void *dst_obj, H5VL_loc_params_t loc_params2,
                                     hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+#if 0
 static herr_t H5VL_mds_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
                                        H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
                                        H5L_iterate_t op, void *op_data, hid_t req);
@@ -191,11 +190,11 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_group_close                 /* close */
     },
     {                                        /* link_cls */
-        NULL,//H5VL_mds_link_create,                /* create */
-        NULL,//H5VL_mds_link_move,                  /* move */
+        H5VL_mds_link_create,                /* create */
+        H5VL_mds_link_move,                  /* move */
         NULL,//H5VL_mds_link_iterate,               /* iterate */
         NULL,//H5VL_mds_link_get,                   /* get */
-        NULL,//H5VL_mds_link_remove                 /* remove */
+        NULL//H5VL_mds_link_remove                 /* remove */
     },
     {                                        /* object_cls */
         NULL,//H5VL_mds_object_open,                /* open */
@@ -2138,4 +2137,205 @@ H5VL_mds_group_close(void *obj, hid_t UNUSED req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_group_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_link_create
+ *
+ * Purpose:	Creates an hard/soft/UD/external links.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_params_t loc_params,
+                     hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the group */
+    H5P_genplist_t  *plist;                     /* Property list pointer */
+    void            *send_buf = NULL;
+    size_t           buf_size = 0;
+    herr_t           ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    switch (create_type) {
+        case H5VL_LINK_CREATE_HARD:
+            {
+                hid_t id, cur_id;
+                H5VL_mds_object_t *cur_obj;
+                H5VL_loc_params_t cur_params;
+
+                /* object is H5L_SAME_LOC */
+                if(NULL == obj)
+                    id = H5L_SAME_LOC;
+                else
+                    id = obj->obj_id;
+
+                if(H5P_get(plist, H5VL_LINK_TARGET, &cur_obj) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current location id");
+                if(H5P_get(plist, H5VL_LINK_TARGET_LOC_PARAMS, &cur_params) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for current name");
+
+                /* object is H5L_SAME_LOC */
+                if(NULL == cur_obj)
+                    cur_id = H5L_SAME_LOC;
+                else
+                    cur_id = cur_obj->obj_id;
+
+                /* determine the size of the buffer needed to encode the parameters */
+                if(H5VL__encode_link_create_params(NULL, &buf_size, create_type, id, loc_params, 
+                                                   lcpl_id, lapl_id, cur_id, cur_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* encode the parameters */
+                if(H5VL__encode_link_create_params(send_buf, &buf_size, create_type, id, loc_params, 
+                                                   lcpl_id, lapl_id, cur_id, cur_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode link create hard params");
+
+                break;
+            }
+        case H5VL_LINK_CREATE_SOFT:
+            {
+                char        *target_name;
+
+                if(H5P_get(plist, H5VL_LINK_TARGET_NAME, &target_name) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for targe name")
+
+                /* determine the size of the buffer needed to encode the parameters */
+                if(H5VL__encode_link_create_params(NULL, &buf_size, create_type, obj->obj_id, 
+                                                   loc_params, lcpl_id, lapl_id, target_name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* encode the parameters */
+                if(H5VL__encode_link_create_params(send_buf, &buf_size, create_type, obj->obj_id, 
+                                                   loc_params, lcpl_id, lapl_id, target_name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode link create soft params");
+
+                break;
+            }
+        case H5VL_LINK_CREATE_UD:
+            {
+                H5L_type_t link_type;
+                void *udata;
+                size_t udata_size;
+
+                if(H5P_get(plist, H5VL_LINK_TYPE, &link_type) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for link type");
+                if(H5P_get(plist, H5VL_LINK_UDATA, &udata) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata");
+                if(H5P_get(plist, H5VL_LINK_UDATA_SIZE, &udata_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for udata size");
+
+                /* determine the size of the buffer needed to encode the parameters */
+                if(H5VL__encode_link_create_params(NULL, &buf_size, create_type, obj->obj_id, 
+                                                   loc_params, lcpl_id, lapl_id,
+                                                   link_type, udata, udata_size) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* encode the parameters */
+                if(H5VL__encode_link_create_params(send_buf, &buf_size, create_type, obj->obj_id, 
+                                                   loc_params, lcpl_id, lapl_id,
+                                                   link_type, udata, udata_size) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode link create UD params");
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "invalid link creation call")
+    }
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_link_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_link_move
+ *
+ * Purpose:	Renames an object within an HDF5 file and moves it to a new
+ *              group.  The original name SRC is unlinked from the group graph
+ *              and then inserted with the new name DST (which can specify a
+ *              new path for the object) as an atomic operation. The names
+ *              are interpreted relative to SRC_LOC_ID and
+ *              DST_LOC_ID, which are either file IDs or group ID.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_link_move(void *_src_obj, H5VL_loc_params_t loc_params1, 
+                   void *_dst_obj, H5VL_loc_params_t loc_params2,
+                   hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *src_obj = (H5VL_mds_object_t *)_src_obj;
+    H5VL_mds_object_t *dst_obj = (H5VL_mds_object_t *)_dst_obj;
+    void            *send_buf = NULL;
+    size_t           buf_size = 0;
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_link_move_params(NULL, &buf_size, src_obj->obj_id, loc_params1, 
+                                     dst_obj->obj_id, loc_params2, copy_flag, lcpl_id, lapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_link_move_params(send_buf, &buf_size, src_obj->obj_id, loc_params1, 
+                                     dst_obj->obj_id, loc_params2, copy_flag, lcpl_id, lapl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode link move parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata link ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_link_move() */
+
 #endif /* H5_HAVE_PARALLEL */
