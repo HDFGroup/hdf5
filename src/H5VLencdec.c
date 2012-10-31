@@ -2773,6 +2773,74 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode_link_move_params() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_link_remove_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_link_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t loc_size = 0;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    /* common stuff between all link remove types */
+    size += 1 + sizeof(int32_t) +
+        1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_LINK_REMOVE;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size;
+    }
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_link_remove_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_link_remove_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_link_remove_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_link_remove_params() */
+
 #if 0
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode__params

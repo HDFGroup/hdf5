@@ -97,6 +97,7 @@ static herr_t H5VL__group_open_cb(uint8_t *p, int source);
 static herr_t H5VL__group_close_cb(uint8_t *p, int source);
 static herr_t H5VL__link_create_cb(uint8_t *p, int source);
 static herr_t H5VL__link_move_cb(uint8_t *p, int source);
+static herr_t H5VL__link_remove_cb(uint8_t *p, int source);
 static herr_t H5VL__allocate_cb(uint8_t *p, int source);
 static herr_t H5VL__set_eoa_cb(uint8_t *p, int source);
 static herr_t H5VL__get_eoa_cb(uint8_t *p, int source);
@@ -183,6 +184,7 @@ H5VL_mds_start(void)
     mds_ops[H5VL_GROUP_CLOSE]   = H5VL__group_close_cb;
     mds_ops[H5VL_LINK_CREATE]   = H5VL__link_create_cb;
     mds_ops[H5VL_LINK_MOVE]     = H5VL__link_move_cb;
+    mds_ops[H5VL_LINK_REMOVE]   = H5VL__link_remove_cb;
     mds_ops[H5VL_ALLOC]         = H5VL__allocate_cb;
     mds_ops[H5VL_GET_EOA]       = H5VL__set_eoa_cb;
     mds_ops[H5VL_SET_EOA]       = H5VL__get_eoa_cb;
@@ -204,7 +206,7 @@ H5VL_mds_start(void)
         uint8_t *p;     /* Current pointer into buffer */
         H5VL_op_type_t op_type;
 
-        printf("MDS Process Waiting\n");
+        //printf("MDS Process Waiting\n");
         /* probe for a message from a client */
         if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
@@ -283,7 +285,6 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
-    printf("MDS created file %d\n", file_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__file_create_cb */
 
@@ -334,7 +335,6 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
-    printf("MDS opened file %d\n", file_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__file_open_cb */
 
@@ -363,8 +363,6 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-
-    printf("MDS flushed file on object %d\n", obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__file_flush_cb */
 
@@ -400,7 +398,6 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-    printf("MDS closed file %d\n", file_id);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__file_close_cb */
 
@@ -460,8 +457,6 @@ done:
 
     if(name)
         H5MM_xfree(name);
-
-    printf("MDS created attr %d on object %d\n", attr_id, obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__attr_create_cb */
 
@@ -575,7 +570,6 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    printf("MDS opened attr %d on file %d\n", attr_id, obj_id);
     if(send_buf)
         H5MM_free(send_buf);
     if(name)
@@ -625,7 +619,6 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    printf("MDS read attr %d\n", attr_id);
     if(buf)
         H5MM_free(buf);
 
@@ -661,8 +654,6 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-
-    printf("MDS write attr %d\n", attr_id);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_write_cb */
@@ -709,8 +700,6 @@ H5VL__attr_close_cb(uint8_t *p, int source)
     /* decode the object id */
     if(H5VL__decode_attr_close_params(p, &attr_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr close params");
-
-    printf("MDS closing attr %d\n", attr_id);
 
     /* Check/fix arguments. */
     if(H5I_ATTR != H5I_get_type(attr_id))
@@ -813,7 +802,7 @@ done:
         H5MM_free(send_buf);
     if(name)
         H5MM_xfree(name);
-    printf("MDS created dataset %d on file %d\n", dset_id, obj_id);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__dataset_create_cb */
 
@@ -943,7 +932,6 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    printf("MDS opened dataset %d on file %d\n", dset_id, obj_id);
     if(send_buf)
         H5MM_free(send_buf);
     if(name)
@@ -979,7 +967,6 @@ done:
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
-    printf("MDS set_extent dataset %d\n", dset_id);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__dataset_set_extent_cb */
 
@@ -997,8 +984,6 @@ H5VL__dataset_close_cb(uint8_t *p, int source)
     /* decode the object id */
     if(H5VL__decode_dataset_close_params(p, &dset_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset close params");
-
-    printf("MDS closing dataset %d\n", dset_id);
 
     /* Check/fix arguments. */
     if(H5I_DATASET != H5I_get_type(dset_id))
@@ -1081,7 +1066,6 @@ done:
     }
     if(name)
         H5MM_xfree(name);
-    printf("MDS created datatype %d on file %d\n", type_id, obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__datatype_commit_cb */
 
@@ -1153,7 +1137,6 @@ done:
         H5MM_free(send_buf);
     if(name)
         H5MM_xfree(name);
-    printf("MDS opened datatype %d on file %d\n", type_id, obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__datatype_open_cb */
 
@@ -1172,7 +1155,6 @@ H5VL__datatype_close_cb(uint8_t *p, int source)
     /* decode the object id */
     if(H5VL__decode_datatype_close_params(p, &type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode datatype close params");
-    printf("MDS closing datatype %d\n", type_id);
 
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID");
@@ -1243,7 +1225,6 @@ done:
     if(name)
         H5MM_xfree(name);
 
-    printf("MDS created group %d on file %d\n", grp_id, obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__group_create_cb */
 
@@ -1291,7 +1272,6 @@ done:
     if(name)
         H5MM_xfree(name);
 
-    printf("MDS opened group %d on file %d\n", grp_id, obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__group_open_cb */
 
@@ -1309,8 +1289,6 @@ H5VL__group_close_cb(uint8_t *p, int source)
     /* decode the object id */
     if(H5VL__decode_group_close_params(p, &grp_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group close params");
-
-    printf("MDS closing group %d\n", grp_id);
 
     /* Check/fix arguments. */
     if(H5I_GROUP != H5I_get_type(grp_id))
@@ -1361,7 +1339,6 @@ done:
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
-    printf("MDS created link from %d\n", obj_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_create_cb */
 
@@ -1394,9 +1371,34 @@ done:
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
-    printf("MDS moved from %d to %d\n", src_id, dst_id);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_move_cb */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__link_remove_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__link_remove_cb(uint8_t *p, int source)
+{
+    hid_t obj_id;
+    H5VL_loc_params_t loc_params;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_link_remove_params(p, &obj_id, &loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link remove params");
+
+    if(H5VL_native_link_remove(H5I_object(obj_id), loc_params, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link");
+
+done:
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__link_remove_cb */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__allocate_cb

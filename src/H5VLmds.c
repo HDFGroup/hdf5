@@ -116,12 +116,13 @@ static herr_t H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *ob
 static herr_t H5VL_mds_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                     void *dst_obj, H5VL_loc_params_t loc_params2,
                                     hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+static herr_t H5VL_mds_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
 #if 0
 static herr_t H5VL_mds_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
                                        H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
                                        H5L_iterate_t op, void *op_data, hid_t req);
 static herr_t H5VL_mds_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+
 
 /* Object callbacks */
 static void *H5VL_mds_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t req);
@@ -194,7 +195,7 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_link_move,                  /* move */
         NULL,//H5VL_mds_link_iterate,               /* iterate */
         NULL,//H5VL_mds_link_get,                   /* get */
-        NULL//H5VL_mds_link_remove                 /* remove */
+        H5VL_mds_link_remove                 /* remove */
     },
     {                                        /* object_cls */
         NULL,//H5VL_mds_object_open,                /* open */
@@ -2337,5 +2338,59 @@ H5VL_mds_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_link_move() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_link_remove
+ *
+ * Purpose:	Removes the specified NAME from the group graph and
+ *		decrements the link count for the object to which NAME
+ *		points.  If the link count reaches zero then all file-space
+ *		associated with the object will be reclaimed (but if the
+ *		object is open, then the reclamation of the file space is
+ *		delayed until all handles to the object are closed).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_mds_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    void            *send_buf = NULL;
+    size_t           buf_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_link_remove_params(NULL, &buf_size, obj->obj_id, loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_link_remove_params(send_buf, &buf_size, obj->obj_id, loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode link remove parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata link ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_link_remove() */
 
 #endif /* H5_HAVE_PARALLEL */
