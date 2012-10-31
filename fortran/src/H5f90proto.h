@@ -84,7 +84,7 @@ typedef struct H5O_info_t_f {
 #define nh5fflush_c               H5_FC_FUNC_(h5fflush_c, H5FFLUSH_C)
 #define nh5fclose_c               H5_FC_FUNC_(h5fclose_c, H5FCLOSE_C)
 #define nh5fopen_c                H5_FC_FUNC_(h5fopen_c, H5FOPEN_C)
-#define nh5fis_hdf5_c             H5_FC_FUNC_(h5fis_hdf5_c, H5FIS_HDF5_C)
+#define nh5fis_accessible_c       H5_FC_FUNC_(h5fis_accessible_c, H5FIS_ACCESSIBLE_C)
 #define nh5fmount_c               H5_FC_FUNC_(h5fmount_c, H5FMOUNT_C)
 #define nh5funmount_c             H5_FC_FUNC_(h5funmount_c, H5FUNMOUNT_C)
 #define nh5freopen_c              H5_FC_FUNC_(h5freopen_c, H5FREOPEN_C)
@@ -98,7 +98,7 @@ typedef struct H5O_info_t_f {
 
 H5_FCDLL int_f nh5fcreate_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hid_t_f *acc_prp, hid_t_f *file_id);
 H5_FCDLL int_f nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_t_f *file_id);
-H5_FCDLL int_f nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag);
+H5_FCDLL int_f nh5fis_accessible_c (_fcd name, int_f *namelen, hid_t_f *acc_prp, int_f *flag);
 H5_FCDLL int_f nh5fclose_c (hid_t_f *file_id);
 H5_FCDLL int_f nh5fmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hid_t_f *acc_prp);
 H5_FCDLL int_f nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen);

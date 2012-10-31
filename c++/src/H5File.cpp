@@ -147,38 +147,43 @@ H5File::H5File(const H5File& original) : H5Location(original)
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::isHdf5
-///\brief	Determines whether a file in HDF5 format. (Static)
+// Function:	H5File::isAccessible
+///\brief	Determines whether a file is accessible by the fapl. (Static)
 ///\param	name - IN: Name of the file
-///\return	true if the file is in HDF5 format, and false, otherwise
+///\param	access_plist - IN: File access property list.  Default to
+///		FileCreatPropList::DEFAULT
+///\return	true if the file is accessible, and false, otherwise
 ///\exception	H5::FileIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool H5File::isHdf5(const char* name)
+bool H5File::isAccessible(const char* name, const FileAccPropList& access_plist)
 {
-   // Calls C routine H5Fis_hdf5 to determine whether the file is in
+   // Calls C routine H5Fis_accessible to determine whether the file is in
    // HDF5 format.  It returns positive value, 0, or negative value
-   htri_t ret_value = H5Fis_hdf5( name );
+   hid_t access_plist_id = access_plist.getId();
+   htri_t ret_value = H5Fis_accessible( name, access_plist_id );
    if( ret_value > 0 )
       return true;
    else if( ret_value == 0 )
       return false;
-   else // Raise exception when H5Fis_hdf5 returns a negative value
+   else // Raise exception when H5Fis_accessible returns a negative value
    {
-      throw FileIException("H5File::isHdf5", "H5Fis_hdf5 returned negative value");
+      throw FileIException("H5File::isAccessible", "H5Fis_accessible returned negative value");
    }
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5File::isHdf5
+// Function:	H5File::isAccessible
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It takes an \c H5std_string for \a name. (Static)
 ///\param	name - IN: Name of the file - \c H5std_string
+///\param	access_plist - IN: File access property list.  Default to
+///		FileCreatPropList::DEFAULT
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool H5File::isHdf5(const H5std_string& name )
+bool H5File::isAccessible(const H5std_string& name, const FileAccPropList& access_plist )
 {
-   return( isHdf5( name.c_str()) );
+   return( isAccessible(name.c_str(), access_plist) );
 }
 
 //--------------------------------------------------------------------------

@@ -188,15 +188,15 @@
           !
           !test whether files are in hdf5 format
           !
-          CALL h5fis_hdf5_f(fix_filename1, status, error)
-               CALL check("h5fis_hdf5_f",error,total_error)
+          CALL h5fis_accessible_f(fix_filename1, status, error)
+               CALL check("h5fis_accessible_f",error,total_error)
           IF ( .NOT. status ) THEN
               write(*,*) "File ", fix_filename1, " is not in hdf5 format"
               stop
           END IF
 
-          CALL h5fis_hdf5_f(fix_filename2, status, error)
-               CALL check("h5fis_hdf5_f",error,total_error)
+          CALL h5fis_accessible_f(fix_filename2, status, error)
+               CALL check("h5fis_accessible_f",error,total_error)
           IF ( .NOT. status ) THEN
               write(*,*) "File ", fix_filename2, " is not in hdf5 format"
               stop

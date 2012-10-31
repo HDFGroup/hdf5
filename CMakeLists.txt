@@ -916,7 +916,7 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake @ONLY
   )
   INSTALL (
-      FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF5_PACKAGE_EXT}-config-version.cmake
+      FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-config-version.cmake
       DESTINATION ${HDF5_INSTALL_CMAKE_DIR}/${HDF5_PACKAGE}
       COMPONENT configinstall
   )

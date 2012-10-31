@@ -494,19 +494,21 @@ CONTAINS
 
   END SUBROUTINE h5fget_access_plist_f
 
-!****s* H5F/h5fis_hdf5_f
+!****s* H5F/h5fis_accessible_f
 !
 ! NAME
-!  h5fis_hdf5_f
+!  h5fis_accessible_f
 !
 ! PURPOSE
-!  Determines whether a file is in the HDF5 format.
+!  Determines whether a file is accessible with the fapl.
 !
 ! INPUTS
 !  name 	 - name of the file to check
 ! OUTPUTS
-!  status 	 - indicates if file is and HDF5 file
+!  status 	 - indicates if file is accessible
 !  hdferr 	 - Returns 0 if successful and -1 if fails
+! OPTIONAL PARAMETERS
+!  access_prp 	 - file access property list identifier
 ! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
@@ -517,36 +519,43 @@ CONTAINS
 !  port).  February 28, 2001
 !
 ! SOURCE
-  SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
+  SUBROUTINE h5fis_accessible_f(name, status, hdferr, access_prp)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
     LOGICAL, INTENT(OUT) :: status         ! Indicates if file
                                            ! is an HDF5 file
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+                                           ! File access property list
+                                           ! identifier
 !*****
     INTEGER :: namelen ! Length of the name character string
+    INTEGER(HID_T) :: access_prp_default
     INTEGER :: flag    ! "TRUE/FALSE" flag from C routine
                        ! to define status value.
 
     INTERFACE
-       INTEGER FUNCTION h5fis_hdf5_c(name, namelen, flag)
+       INTEGER FUNCTION h5fis_accessible_c(name, namelen, access_prp_default, flag)
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5FIS_HDF5_C':: h5fis_hdf5_c
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5FIS_ACCESSIBLE_C':: h5fis_accessible_c
          !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER :: namelen
+         INTEGER(HID_T), INTENT(IN) :: access_prp_default
          INTEGER :: flag
-       END FUNCTION h5fis_hdf5_c
+       END FUNCTION h5fis_accessible_c
     END INTERFACE
 
     namelen = LEN_TRIM(name)
-    hdferr = h5fis_hdf5_c(name, namelen, flag)
+    access_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(access_prp))   access_prp_default   = access_prp
+    hdferr = h5fis_accessible_c(name, namelen, access_prp_default, flag)
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
 
-  END SUBROUTINE h5fis_hdf5_f
+  END SUBROUTINE h5fis_accessible_f
 !****s* H5F/h5fclose_f
 !
 ! NAME

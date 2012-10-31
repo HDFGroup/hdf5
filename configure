@@ -771,8 +771,6 @@ ac_ct_CC
 LDFLAGS
 CFLAGS
 CC
-HDF5_USE_SHLIB
-H5BLD_STATIC
 UNAME_INFO
 enable_static
 enable_shared
@@ -3998,13 +3996,6 @@ $as_echo "done" >&6; }
 
 
  UNAME_INFO=`uname -a`
-
-## Define symbol variables to allow h5cc.in and its companions to determine
-## whether static libraries are built or not.  When they are not built, the
-## compile scripts should use shared libraries by default
-
- H5BLD_STATIC=yes
-
 
 ## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
@@ -31092,14 +31083,6 @@ fi
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
 ##
-
-## If $enable_static = "no", set HDF5_USE_SHLIB to "yes" so that the compile
-## scripts will default to use shared libraries instead of defaulting to
-## use static libraries.  Otherwise they fail because the static libraries
-## don't exist.
-if test "X$enable_static" = "Xno"; then
-  HDF5_USE_SHLIB="yes"
-fi
 
 ## The directory search list
  SEARCH='$(srcdir) $(top_builddir)/src $(top_srcdir)/src'

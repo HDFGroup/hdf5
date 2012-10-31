@@ -250,7 +250,7 @@ main (int argc, const char *argv[])
         leave (EXIT_FAILURE);
     }
 
-    testval = H5Fis_hdf5 (ub_file);
+    testval = H5Fis_accessible (ub_file, H5P_DEFAULT);
 
     if (testval > 0) {
         error_msg("-u <user_file> cannot be HDF5 file, but it appears to be an HDF5 file.\n");
@@ -264,7 +264,7 @@ main (int argc, const char *argv[])
         leave (EXIT_FAILURE);
     }
 
-    testval = H5Fis_hdf5 (input_file);
+    testval = H5Fis_accessible (input_file, H5P_DEFAULT);
 
     if (testval <= 0) {
         error_msg("Input HDF5 file \"%s\" is not HDF5 format.\n", input_file);

@@ -2657,7 +2657,7 @@ test_misc15(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
-    ret = H5Fis_hdf5(MISC15_FILE);
+    ret = H5Fis_accessible(MISC15_FILE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Fis_hdf5");
 
     file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);

@@ -100,6 +100,9 @@ New Features
 
     Library:
     --------
+    - The library now supports the data conversion from enumeration to numeric
+      (integer and floating-point number) datatypes. See Issue 8221.
+      (SLU - 2012/10/23)  
     - The data sieve buffer size was for all the datasets in the file.  It
       could waste memory if any dataset size is smaller than the sieve buffer
       size.  Now the library picks the smaller one between the dataset size
@@ -188,6 +191,8 @@ New Features
     Fortran Library:
     ----------------
 
+    - Added parallel routine H5Pget_mpio_actual_io_mode_f (MSB - 2012/09/27)
+
     - Added for the C API the Fortran wrapper:
        h5ocopy_f (MSB - 2012/03/22)
 
@@ -231,6 +236,7 @@ New Features
             h5pset_chunk_cache_f
             h5pget_chunk_cache_f 
           (MSB - 2009/04/17)
+
 
 
     C++ Library:
@@ -718,8 +724,21 @@ Bug Fixes since HDF5-1.8.0 release
         with other Fortran functions; cleaned the code from debug statements.
         (EIP - 2012/06/23)
 
+      - Fixed problem writing/reading control characters to a dataset; writing
+        a string containing: alerts, backspace, carriage_return, form_feed,
+        horizontal_tab, vertical_tab, new_line is now tested and working.
+        (MSB - 2012/09/01)
+
+      - Corrected the integer type of H5S_UNLIMITED_F to HSIZE_T (MSB - 2012/09/01)
+
+      - Corrected the number of continuation lines in the src files
+        to be less then 32 lines for F95 compliance. (MSB - 2012/10/01)
+
     Tools
     -----
+        - h5diff: Improved speed when comparing HDF5 files with lots of
+          attributes. Much slower performance was identified with release version 
+          from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
         - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
           source file contains chunked dataset and a chunk dim is bigger than 
           the dataset dim. Another issue is that the command changed max dims
@@ -947,6 +966,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+
+      - Fixed problem with H5TBdelete_record destroying all data following the deletion
+        of a row. (MSB- 2012/7/26)
+
+      - Fixed H5LTget_attribute_string not closing an object identifier when an 
+        error occurs. (MSB- 2012/7/21)
+
       - Fixed the H5LTdtype_to_text function.  It had some memory problems when
         dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
 
@@ -1034,14 +1060,12 @@ Platforms Tested
                                   xlf90 12.1.0.6
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
-    (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
-                                  gcc 4.6.1 20110422
+    (loyalty)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
     FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
-    (freedom)                     g++ 4.2.1 [FreeBSD] 20070719
-                                  gcc 4.6.1 20110422
+    (freedom)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
@@ -1118,7 +1142,7 @@ SunOS5.10 32-bit                   n        y      n        y     y     y
 Windows 7                          y        y      n        y     y     y
 Windows 7 x64                      y        y      n        y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
-FreeBSD 8.2 32- and 64-bit         n        x      n        x     y     y
+FreeBSD 8.2 32- and 64-bit         n        y      n        y     y     y
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
 RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
 RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
@@ -1134,7 +1158,6 @@ SuSe Linux 2.6.5
 Alpha OpenVMS 7.3.2                n        y      n        y     n     n
 
 
-
 Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
@@ -1144,7 +1167,7 @@ Windows XP x64                      y        y(3)      y         y        n
 Windows Vista                       y        y(3)      y         y        y
 Windows Vista x64                   y        y(3)      y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
-FreeBSD 8.2 32- and 64-bit          y        x         x         y        y
+FreeBSD 8.2 32- and 64-bit          y        y         y         y        y
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
 RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
 RHEL4 2.6.9 i686 PGI              W y        y         y         x        n
@@ -1170,6 +1193,11 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The C++ and FORTRAN bindings are not currently working on FreeBSD with the
+  native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
+  ports (and probably gcc releases after that).
+  (QAK - 2012/10/19)
+
 * The data conversion test dt_arith.c has failures (segmentation fault) from
   "long double" to other datatypes during hard conversion when the library
   is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
