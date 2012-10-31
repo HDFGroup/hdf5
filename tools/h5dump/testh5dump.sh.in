@@ -683,15 +683,13 @@ TOOLTEST packedbits.ddl --enable-error-stack packedbits.h5
 # test for compound signed/unsigned datasets
 TOOLTEST tcmpdintsize.ddl --enable-error-stack tcmpdintsize.h5
 # test for signed/unsigned scalar datasets
-# TODO: failed on mac with intel compiler. (Allen will work on it)
-#TOOLTEST tscalarintsize.ddl --enable-error-stack tscalarintsize.h5
+TOOLTEST tscalarintsize.ddl --enable-error-stack tscalarintsize.h5
 # test for signed/unsigned attributes
 TOOLTEST tattrintsize.ddl --enable-error-stack tattrintsize.h5
 # test for compound signed/unsigned attributes
 TOOLTEST tcmpdattrintsize.ddl --enable-error-stack tcmpdattrintsize.h5
 # test for signed/unsigned scalar attributes
-# TODO: failed on mac with intel compiler. (Allen will work on it)
-#TOOLTEST tscalarattrintsize.ddl --enable-error-stack tscalarattrintsize.h5
+TOOLTEST tscalarattrintsize.ddl --enable-error-stack tscalarattrintsize.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl --enable-error-stack tgroup.h5
 # test for displaying the selected groups

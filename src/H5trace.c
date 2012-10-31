@@ -612,10 +612,6 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5D_MPIO_MULTI_CHUNK");
                                     break;
 
-                                case H5D_MPIO_MULTI_CHUNK_NO_OPT:
-                                    fprintf(out, "H5D_MPIO_MULTI_CHUNK_NO_OPT");
-                                    break;
-
                                 default:
                                     fprintf(out, "%ld", (long)chunk_opt_mode);
                                     break;

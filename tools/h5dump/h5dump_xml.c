@@ -3761,7 +3761,8 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     /* Print information about storage layout */
     if (H5D_CHUNKED == H5Pget_layout(dcpl)) {
         maxdims = H5Sget_simple_extent_ndims(space);
-        chsize = (hsize_t *) HDmalloc(maxdims * sizeof(hsize_t));
+        HDassert(maxdims >= 0);
+        chsize = (hsize_t *)HDmalloc((size_t)maxdims * sizeof(hsize_t));
         ctx.indent_level++;
         dump_indent += COL;
 

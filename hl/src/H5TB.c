@@ -1301,7 +1301,6 @@ herr_t H5TBdelete_record( hid_t loc_id,
                          hsize_t start,
                          hsize_t nrecords )
 {
-
     hsize_t  nfields;
     hsize_t  ntotal_records;
     hsize_t  read_start;
@@ -1316,8 +1315,8 @@ herr_t H5TBdelete_record( hid_t loc_id,
     hsize_t  mem_size[1];
     unsigned char *tmp_buf=NULL;
     size_t   src_size;
-    size_t   *src_offset;
-    size_t   *src_sizes;
+    size_t   *src_offset = NULL;
+    size_t   *src_sizes = NULL;
     hsize_t  dims[1];
 
     /*-------------------------------------------------------------------------
@@ -1327,23 +1326,20 @@ herr_t H5TBdelete_record( hid_t loc_id,
 
     /* get the number of records and fields  */
     if (H5TBget_table_info ( loc_id, dset_name, &nfields, &ntotal_records ) < 0)
-        return -1;
+        goto out;
 
-    src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
-    src_sizes = (size_t *)malloc((size_t)nfields * sizeof(size_t));
-
-    if (src_offset == NULL )
-        return -1;
-    if (src_sizes == NULL )
-        return -1;
+    if(NULL == (src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+        goto out;
+    if(NULL == (src_sizes = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+        goto out;
 
     /* get field info */
     if (H5TBget_field_info( loc_id, dset_name, NULL, src_sizes, src_offset, &src_size ) < 0)
-        return -1;
+        goto out;
 
     /* open the dataset. */
     if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
+        goto out;
 
     /*-------------------------------------------------------------------------
     * read the records after the deleted one(s)
@@ -1355,14 +1351,12 @@ herr_t H5TBdelete_record( hid_t loc_id,
 
     if ( read_nrecords )
     {
-        tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, src_size );
-
-        if (tmp_buf == NULL )
-            return -1;
+        if(NULL == (tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, src_size )))
+            goto out;
 
         /* read the records after the deleted one(s) */
         if (H5TBread_records( loc_id, dset_name, read_start, read_nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
-            return -1;
+            goto out;
 
         /*-------------------------------------------------------------------------
         * write the records in another position
@@ -1418,31 +1412,34 @@ herr_t H5TBdelete_record( hid_t loc_id,
 
     /* close dataset */
     if (H5Dclose( did ) < 0)
-        return -1;
+        goto out;
 
-    if (tmp_buf !=NULL)
-        free( tmp_buf );
-    free( src_offset );
-    free( src_sizes );
-
+    if(tmp_buf)
+        free(tmp_buf);
+    if(src_offset)
+        free(src_offset);
+    if(src_sizes)
+        free(src_sizes);
 
     return 0;
 
     /* error zone */
 out:
-
-    if (tmp_buf !=NULL )
-        free( tmp_buf );
+    if(tmp_buf)
+        free(tmp_buf);
+    if(src_offset)
+        free(src_offset);
+    if(src_sizes)
+        free(src_sizes);
     H5E_BEGIN_TRY
     {
         H5Tclose(mem_type_id);
         H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
+        H5Sclose(m_sid);
     } H5E_END_TRY;
     return -1;
-
-
 }
 
 /*-------------------------------------------------------------------------
@@ -1641,10 +1638,10 @@ herr_t H5TBadd_records_from( hid_t loc_id,
     hsize_t  mem_size[1];
     hsize_t  nfields;
     hsize_t  ntotal_records;
-    unsigned char *tmp_buf;
+    unsigned char *tmp_buf = NULL;
     size_t   src_size;
-    size_t   *src_offset;
-    size_t   *src_sizes;
+    size_t   *src_offset = NULL;
+    size_t   *src_sizes = NULL;
 
     /*-------------------------------------------------------------------------
     * first we get information about type size and offsets on disk
@@ -1653,17 +1650,16 @@ herr_t H5TBadd_records_from( hid_t loc_id,
 
     /* get the number of records and fields  */
     if (H5TBget_table_info ( loc_id, dset_name1, &nfields, &ntotal_records ) < 0)
-        return -1;
+        goto out;
 
-    src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
-    src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t));
-
-    if (src_offset == NULL )
-        return -1;
+    if(NULL == (src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+        goto out;
+    if(NULL == (src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t))))
+        goto out;
 
     /* get field info */
     if (H5TBget_field_info( loc_id, dset_name1, NULL, src_sizes, src_offset, &src_size ) < 0)
-        return -1;
+        goto out;
 
     /*-------------------------------------------------------------------------
     * Get information about the first table and read it
@@ -1672,7 +1668,7 @@ herr_t H5TBadd_records_from( hid_t loc_id,
 
     /* open the 1st dataset. */
     if ((did_1 = H5Dopen2(loc_id, dset_name1, H5P_DEFAULT)) < 0)
-        return -1;
+        goto out;
 
     /* get the datatype */
     if ((tid_1 = H5Dget_type( did_1 )) < 0)
@@ -1686,7 +1682,8 @@ herr_t H5TBadd_records_from( hid_t loc_id,
     if (( type_size1 = H5Tget_size( tid_1 )) == 0 )
         goto out;
 
-    tmp_buf = (unsigned char *)calloc((size_t)nrecords, type_size1 );
+    if(NULL == (tmp_buf = (unsigned char *)calloc((size_t)nrecords, type_size1 )))
+        goto out;
 
     /* define a hyperslab in the dataset of the size of the records */
     offset[0] = start1;
@@ -1719,18 +1716,27 @@ herr_t H5TBadd_records_from( hid_t loc_id,
     if (H5Sclose( sid_1 ) < 0)
         goto out;
     if (H5Tclose( tid_1 ) < 0)
-        return -1;
+        goto out;
     if (H5Dclose( did_1 ) < 0)
-        return -1;
+        goto out;
 
-    free( tmp_buf );
-    free( src_offset );
-    free( src_sizes );
+    if(tmp_buf)
+        free(tmp_buf);
+    if(src_offset)
+        free(src_offset);
+    if(src_sizes)
+        free(src_sizes);
 
     return 0;
 
     /* error zone */
 out:
+    if(tmp_buf)
+        free(tmp_buf);
+    if(src_offset)
+        free(src_offset);
+    if(src_sizes)
+        free(src_sizes);
     H5E_BEGIN_TRY
     {
         H5Dclose(did_1);
@@ -3379,7 +3385,7 @@ int H5TB_find_field( const char *field, const char *field_list )
     {
         ptrdiff_t count = end - start;
 
-        if(HDstrncmp(start, field, count) == 0 && count == HDstrlen(field) )
+        if(HDstrncmp(start, field, (size_t)count) == 0 && (size_t)count == HDstrlen(field) )
             return 1;
         start = end + 1;
     }

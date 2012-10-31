@@ -985,7 +985,7 @@ static void test_attr_delete()
 	verify_val(num_attrs, 1, "H5File::getNumAttrs", __LINE__, __FILE__);
 
 	// Verify the name of the only file attribute left
-	Attribute fattr = fid1.openAttribute((uint)0);
+	Attribute fattr = fid1.openAttribute((unsigned)0);
 	H5std_string attr_name = fattr.getName();
 	verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 	fattr.close();
