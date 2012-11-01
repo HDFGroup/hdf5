@@ -392,12 +392,11 @@ done:
  * Function:	H5VL__decode_file_create_params
  *------------------------------------------------------------------------- */
 herr_t 
-H5VL__decode_file_create_params(void *buf, char **mds_filename, unsigned *flags, 
+H5VL__decode_file_create_params(void *buf, char **name, unsigned *flags, 
                                 hid_t *fcpl_id, hid_t *fapl_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t len = 0; /* length of name (decoded) */
-    char *name = NULL;
     size_t fcpl_size = 0, fapl_size = 0; /* plist sizes */
     herr_t ret_value = SUCCEED;
 
@@ -405,12 +404,8 @@ H5VL__decode_file_create_params(void *buf, char **mds_filename, unsigned *flags,
 
     /* decode length of name and name */
     UINT64DECODE_VARLEN(p, len);
-    name = H5MM_xstrdup((const char *)(p));
+    *name = H5MM_xstrdup((const char *)(p));
     p += len;
-
-    /* generate the MDS file name by adding a .md extension to the file name */
-    *mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 4));
-    sprintf(*mds_filename, "%s.md", name);
 
     /* deocde create flags */
     H5_DECODE_UNSIGNED(p, *flags);
@@ -439,8 +434,6 @@ H5VL__decode_file_create_params(void *buf, char **mds_filename, unsigned *flags,
         *fapl_id = H5P_FILE_ACCESS_DEFAULT;
     }
 
-    if(name)
-        H5MM_xfree(name);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode_file_create_params() */
@@ -506,11 +499,10 @@ done:
  * Function:	H5VL__decode_file_open_params
  *------------------------------------------------------------------------- */
 herr_t 
-H5VL__decode_file_open_params(void *buf, char **mds_filename, unsigned *flags, hid_t *fapl_id)
+H5VL__decode_file_open_params(void *buf, char **name, unsigned *flags, hid_t *fapl_id)
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t len = 0; /* length of name (decoded) */
-    char *name = NULL;
     size_t fapl_size = 0; /* plist sizes */
     herr_t ret_value = SUCCEED;
 
@@ -518,12 +510,8 @@ H5VL__decode_file_open_params(void *buf, char **mds_filename, unsigned *flags, h
 
     /* decode length of name and name */
     UINT64DECODE_VARLEN(p, len);
-    name = H5MM_xstrdup((const char *)(p));
+    *name = H5MM_xstrdup((const char *)(p));
     p += len;
-
-    /* generate the MDS file name by adding a .md extension to the file name */
-    *mds_filename = (char *)H5MM_malloc (sizeof(char) * (len + 4));
-    sprintf(*mds_filename, "%s.md", name);
 
     /* deocde open flags */
     H5_DECODE_UNSIGNED(p, *flags);
@@ -540,8 +528,6 @@ H5VL__decode_file_open_params(void *buf, char **mds_filename, unsigned *flags, h
         *fapl_id = H5P_FILE_ACCESS_DEFAULT;
     }
 
-    if(name)
-        H5MM_xfree(name);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode_file_open_params() */

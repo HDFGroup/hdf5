@@ -141,6 +141,8 @@ static herr_t H5VL_mds_object_close(void *obj, H5VL_loc_params_t loc_params, hid
 typedef struct H5VL_mds_fapl_t {
     MPI_Comm		comm;		/*communicator			*/
     MPI_Info		info;		/*file information		*/
+    char                *raw_ext;
+    char                *meta_ext;
 } H5VL_mds_fapl_t;
 
 static H5VL_class_t H5VL_mds_g = {
@@ -334,14 +336,17 @@ H5VL_mds_fapl_copy(const void *_old_fa)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (new_fa = (H5VL_mds_fapl_t *)H5MM_malloc(sizeof(H5VL_mds_fapl_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the general information */
     HDmemcpy(new_fa, old_fa, sizeof(H5VL_mds_fapl_t));
 
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
-	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
+	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
+
+    new_fa->raw_ext = HDstrdup(old_fa->raw_ext);
+    new_fa->meta_ext = HDstrdup(old_fa->meta_ext);
     ret_value = new_fa;
 
 done:
@@ -380,6 +385,8 @@ H5VL_mds_fapl_free(void *_fa)
     /* Free the internal communicator and INFO object */
     assert(MPI_COMM_NULL!=fa->comm);
     H5FD_mpi_comm_info_free(&fa->comm, &fa->info);
+    H5MM_xfree(fa->raw_ext);
+    H5MM_xfree(fa->meta_ext);
     H5MM_xfree(fa);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -400,7 +407,7 @@ H5VL_mds_fapl_free(void *_fa)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_mds(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
+H5Pset_fapl_mds(hid_t fapl_id, char *raw_ext, char *meta_ext, MPI_Comm comm, MPI_Info info)
 {
     H5VL_mds_fapl_t    fa;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -421,6 +428,8 @@ H5Pset_fapl_mds(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     /* Initialize driver specific properties */
     fa.comm = comm;
     fa.info = info;
+    fa.raw_ext = raw_ext;
+    fa.meta_ext = meta_ext;
     /*
     fa.meta_name = meta_name;
     fa.meta_fapl_id = meta_fapl_id;
@@ -462,6 +471,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     H5F_t *new_file = NULL;
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
     H5VL_mds_file_t *file = NULL;
+    char *raw_name = NULL;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -485,8 +495,15 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     /* the first process in the communicator will tell the MDS process to create the metadata file */
     if (0 == my_rank) {
+        char *meta_name = NULL;
+
+        /* generate the meta data file name by adding the meta data extension to the user file name */
+        if(NULL == (meta_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->meta_ext) + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        sprintf(meta_name, "%s%s", name, fa->meta_ext);
+
         /* determine the size of the buffer needed to encode the parameters */
-        if(H5VL__encode_file_create_params(NULL, &buf_size, name, flags, fcpl_id, fapl_id) < 0)
+        if(H5VL__encode_file_create_params(NULL, &buf_size, meta_name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
 
         /* allocate the buffer for encoding the parameters */
@@ -494,7 +511,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* encode the parameters */
-        if(H5VL__encode_file_create_params(send_buf, &buf_size, name, flags, fcpl_id, fapl_id) < 0)
+        if(H5VL__encode_file_create_params(send_buf, &buf_size, meta_name, flags, fcpl_id, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file create parameters")
 
         MPI_Pcontrol(0);
@@ -504,7 +521,9 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
                                        MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
         MPI_Pcontrol(1);
-        H5MM_free(send_buf);
+
+        H5MM_xfree(send_buf);
+        H5MM_xfree(meta_name);
     }
 
     /* Process 0 Bcasts the metadata file ID to other processes if there are any */
@@ -517,11 +536,17 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* set the underlying VFD for clients (MDC)*/
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
-    if(H5P_set_fapl_mdc(fapl_id, name, temp_fapl, mds_file) < 0)
+
+    /* generate the raw data file name by adding the raw data extension to the user file name */
+    if(NULL == (raw_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->raw_ext) + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    sprintf(raw_name, "%s%s", name, fa->raw_ext);
+
+    if(H5P_set_fapl_mdc(fapl_id, raw_name, temp_fapl, mds_file) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Create the raw data file */ 
-    if(NULL == (new_file = H5F_mdc_open(name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_mdc_open(raw_name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
 
     /* set the file space manager to use the VFD */
@@ -543,6 +568,8 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->common.raw_file = new_file;
 
     ret_value = (void *)file;
+
+    H5MM_xfree(raw_name);
 done:
     if(NULL == ret_value && new_file) 
         if(H5F_close(new_file) < 0)
@@ -577,6 +604,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     H5F_t *new_file = NULL;
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
     H5VL_mds_file_t *file = NULL;
+    char *raw_name = NULL;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -591,8 +619,15 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
 
     /* the first process in the communicator will tell the MDS process to open the metadata file */
     if (0 == my_rank) {
+        char *meta_name = NULL;
+
+        /* generate the meta data file name by adding the meta data extension to the user file name */
+        if(NULL == (meta_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->meta_ext) + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        sprintf(meta_name, "%s%s", name, fa->meta_ext);
+
         /* determine the size of the buffer needed to encode the parameters */
-        if(H5VL__encode_file_open_params(NULL, &buf_size, name, flags, fapl_id) < 0)
+        if(H5VL__encode_file_open_params(NULL, &buf_size, meta_name, flags, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
 
         /* allocate the buffer for encoding the parameters */
@@ -600,7 +635,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* encode the parameters */
-        if(H5VL__encode_file_open_params(send_buf, &buf_size, name, flags, fapl_id) < 0)
+        if(H5VL__encode_file_open_params(send_buf, &buf_size, meta_name, flags, fapl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file open parameters")
 
         MPI_Pcontrol(0);
@@ -610,7 +645,9 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
                                        MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
         MPI_Pcontrol(1);
-        H5MM_free(send_buf);
+
+        H5MM_xfree(send_buf);
+        H5MM_xfree(meta_name);
     }
 
     /* Process 0 Bcasts the metadata file ID to other processes if there are any */
@@ -620,14 +657,19 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     }
     HDassert(mds_file);
 
+    /* generate the raw data file name by adding the raw data extension to the user file name */
+    if(NULL == (raw_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->raw_ext) + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    sprintf(raw_name, "%s%s", name, fa->raw_ext);
+
     /* set the underlying VFD for clients (MDC)*/
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
-    if(H5P_set_fapl_mdc(fapl_id, name, temp_fapl, mds_file) < 0)
+    if(H5P_set_fapl_mdc(fapl_id, raw_name, temp_fapl, mds_file) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Open the raw data file */ 
-    if(NULL == (new_file = H5F_mdc_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_mdc_open(raw_name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
     /* set the file space manager to use the VFD */
@@ -649,6 +691,8 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     file->common.raw_file = new_file;
 
     ret_value = (void *)file;
+
+    H5MM_xfree(raw_name);
 done:
     if(NULL == ret_value && new_file) 
         if(H5F_close(new_file) < 0)
