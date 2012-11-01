@@ -192,7 +192,7 @@ static const H5FD_class_t H5FD_sec2_g = {
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     NULL,                                       /* coordinate           */
-    H5FD_FLMAP_SINGLE 				/*fl_map		*/
+    H5FD_FLMAP_DICHOTOMY                        /*fl_map                */
 };
 
 /* Declare a free list to manage the H5FD_sec2_t struct */

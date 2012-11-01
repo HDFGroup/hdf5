@@ -233,23 +233,23 @@ usage(const char *prog)
     HDfflush(rawoutstream);
     HDfprintf(rawoutstream, "usage: %s [OPTIONS] files\n", prog);
     HDfprintf(rawoutstream, "  OPTIONS\n");
-    HDfprintf(rawoutstream, "     -h, --help           Print a usage message and exit\n");
-    HDfprintf(rawoutstream, "     -n, --contents       Print a list of the file contents and exit\n");
+    HDfprintf(rawoutstream, "     -h,   --help         Print a usage message and exit\n");
+    HDfprintf(rawoutstream, "     -n,   --contents     Print a list of the file contents and exit\n");
     HDfprintf(rawoutstream, "                          Optional value 1 also prints attributes.\n");
-    HDfprintf(rawoutstream, "     -B, --superblock     Print the content of the super block\n");
-    HDfprintf(rawoutstream, "     -H, --header         Print the header only; no data is displayed\n");
-    HDfprintf(rawoutstream, "     -A, --onlyattr       Print the header and value of attributes\n");
-    HDfprintf(rawoutstream, "     -i, --object-ids     Print the object ids\n");
-    HDfprintf(rawoutstream, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
-    HDfprintf(rawoutstream, "     -e, --escape         Escape non printing characters\n");
-    HDfprintf(rawoutstream, "     -V, --version        Print version number and exit\n");
+    HDfprintf(rawoutstream, "     -B,   --superblock   Print the content of the super block\n");
+    HDfprintf(rawoutstream, "     -H,   --header       Print the header only; no data is displayed\n");
+    HDfprintf(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
+    HDfprintf(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
+    HDfprintf(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
+    HDfprintf(rawoutstream, "     -e,   --escape       Escape non printing characters\n");
+    HDfprintf(rawoutstream, "     -V,   --version      Print version number and exit\n");
     HDfprintf(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
     HDfprintf(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
     HDfprintf(rawoutstream, "                          slash with a preceding backslash (\\).\n");
     HDfprintf(rawoutstream, "                          (See example section below.)\n");
     HDfprintf(rawoutstream, "     -d P, --dataset=P    Print the specified dataset\n");
-    HDfprintf(rawoutstream, "     -y, --noindex        Do not print array indices with the data\n");
-    HDfprintf(rawoutstream, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
+    HDfprintf(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
+    HDfprintf(rawoutstream, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
     HDfprintf(rawoutstream, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     HDfprintf(rawoutstream, "     -g P, --group=P      Print the specified group and all members\n");
     HDfprintf(rawoutstream, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
@@ -270,17 +270,17 @@ usage(const char *prog)
   "                          the data value and length is the number of bits of\n"
   "                          the mask.\n"
   );
-    HDfprintf(rawoutstream, "     -R, --region         Print dataset pointed by region references\n");
-    HDfprintf(rawoutstream, "     -x, --xml            Output in XML using Schema\n");
-    HDfprintf(rawoutstream, "     -u, --use-dtd        Output in XML using DTD\n");
+    HDfprintf(rawoutstream, "     -R,   --region       Print dataset pointed by region references\n");
+    HDfprintf(rawoutstream, "     -x,   --xml          Output in XML using Schema\n");
+    HDfprintf(rawoutstream, "     -u,   --use-dtd      Output in XML using DTD\n");
     HDfprintf(rawoutstream, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
-    HDfprintf(rawoutstream, "     -X S, --xml-ns=S      (XML Schema) Use qualified names n the XML\n");
+    HDfprintf(rawoutstream, "     -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML\n");
     HDfprintf(rawoutstream, "                          \":\": no namespace, default: \"hdf5:\"\n");
     HDfprintf(rawoutstream, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
     HDfprintf(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
     HDfprintf(rawoutstream, "                          occur.\n");
     HDfprintf(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
-    HDfprintf(rawoutstream, "                          of \"[\" in datset names.\n");
+    HDfprintf(rawoutstream, "                          of \"[\" in dataset names.\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
     HDfprintf(rawoutstream, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -294,7 +294,8 @@ usage(const char *prog)
     HDfprintf(rawoutstream, "      -c COUNT,  --count=COUNT    Number of blocks to include in selection\n");
     HDfprintf(rawoutstream, "      -k BLOCK,  --block=BLOCK    Size of block in hyperslab\n");
     HDfprintf(rawoutstream, "  START, COUNT, STRIDE, and BLOCK - is a list of integers the number of which are equal to the\n");
-    HDfprintf(rawoutstream, "        number of dimensions in the dataspace being queried\n");
+    HDfprintf(rawoutstream, "      number of dimensions in the dataspace being queried\n");
+    HDfprintf(rawoutstream, "      (Alternate compact form of subsetting is described in the Reference Manual)\n");
     HDfprintf(rawoutstream, "\n");
     HDfprintf(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values\n");
     HDfprintf(rawoutstream, "      are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
@@ -931,7 +932,7 @@ parse_mask_list(const char *h_list)
 static void
 free_handler(struct handler_t *hand, int len)
 {
-    register int i;
+    int i;
     
     if(hand) {
         for (i = 0; i < len; i++) {
@@ -996,7 +997,7 @@ parse_command_line(int argc, const char *argv[])
 
     /* this will be plenty big enough to hold the info */
     if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
-            goto error;
+        goto error;
     }
 
     /* parse command line options */
@@ -1053,7 +1054,7 @@ parse_start:
             break;
         case 'w':
             h5tools_nCols = HDatoi(opt_arg);
-            if (h5tools_nCols==0) {
+            if (h5tools_nCols <= 0) {
                 h5tools_nCols = 65535;
             }
             last_was_dset = FALSE;
@@ -1292,7 +1293,7 @@ parse_start:
                     if (s->count.data) {
                         HDfree(s->count.data);
                         s->count.data = NULL;
-                }
+                    }
                     parse_hsize_list(opt_arg, &s->count);
                     break;
                 case 'k':
@@ -1355,6 +1356,7 @@ error:
 
     return hand;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -1422,6 +1424,7 @@ main(int argc, const char *argv[])
 
     /* Initialize h5tools lib */
     h5tools_init();
+
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
@@ -1448,28 +1451,28 @@ main(int argc, const char *argv[])
                     "to display selected objects");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (display_bb) {
             error_msg("option \"%s\" not available for XML\n", "--boot-block");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (display_oid == 1) {
             error_msg("option \"%s\" not available for XML\n", "--object-ids");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (display_char == TRUE) {
             error_msg("option \"%s\" not available for XML\n", "--string");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
-        } 
+        }
         else if (usingdasho) {
             error_msg("option \"%s\" not available for XML\n", "--output");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-    } 
+    }
     else {
         if (xml_dtd_uri) {
             warn_msg("option \"%s\" only applies with XML: %s\n", "--xml-dtd", xml_dtd_uri);

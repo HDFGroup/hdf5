@@ -544,6 +544,10 @@ H5_DLL herr_t H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *buf, void *bkg,
                             hid_t dset_xfer_plist);
+H5_DLL herr_t H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
+			    size_t nelmts, size_t buf_stride,
+                            size_t bkg_stride, void *buf, void *bkg,
+                            hid_t dset_xfer_plist);
 H5_DLL herr_t H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 			    size_t nelmts, size_t buf_stride,
                             size_t bkg_stride, void *buf, void *bkg,

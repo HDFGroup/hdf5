@@ -693,7 +693,8 @@ H5_DLL herr_t H5D__chunk_collective_write(H5D_io_info_t *io_info,
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info,
     const H5S_t *file_space, const H5S_t *mem_space,
-    const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm);
+    const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
+    H5P_genplist_t *dx_plist);
 
 #endif /* H5_HAVE_PARALLEL */
 

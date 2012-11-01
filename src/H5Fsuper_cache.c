@@ -746,13 +746,15 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
             H5F_addr_encode(f, &p, sblock->ext_addr);
 
             /* Encode the end-of-file address. Note that at this point in time,
-            the EOF value itself may not be reflective of the file's size, as
-            we will eventually truncate the file to match the EOA value. As
-            such, use the EOA value in its place, knowing that the current EOF
-            value will ultimately match it. */
+             * the EOF value itself may not be reflective of the file's size, as
+             * we will eventually truncate the file to match the EOA value. As
+             * such, use the EOA value in its place, knowing that the current EOF
+             * value will ultimately match it. */
             if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
             H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
+
+            /* Encode the driver informaton block address */
 
             /* Encode the driver informaton block address */
             H5F_addr_encode(f, &p, sblock->driver_addr);
@@ -813,9 +815,9 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
 
             /* Encode the end-of-file address if the file will not be truncated
                at file close */
-            if(((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_ALL)) ||
-               ((H5F_AVOID_TRUNCATE(f)==H5F_AVOID_TRUNCATE_EXTEND) &&
-                (H5FD_get_eof(f->shared->lf)<H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))) {
+            if(((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_ALL)) ||
+                    ((H5F_AVOID_TRUNCATE(f) == H5F_AVOID_TRUNCATE_EXTEND) &&
+                    (H5FD_get_eof(f->shared->lf) < H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)))) {
                 /* If we're avoiding truncating the file, then we need to
                  * store the file's size in the superblock. We will only be
                  * in this routine in this case when all other metadata
@@ -827,27 +829,28 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
                  * querying it. We will be flushing collectively. */
                 if(H5F_accum_flush(f, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
-                if (H5FD_flush(f->shared->lf, dxpl_id, FALSE) <0)
+                if(H5FD_flush(f->shared->lf, dxpl_id, FALSE) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 #ifdef H5_HAVE_PARALLEL
                 if(H5FD_coordinate(f->shared->lf, dxpl_id, H5FD_COORD_EOF) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level coordinate failed")
 #endif
-                if (HADDR_UNDEF == (rel_eof = H5FD_get_eof(f->shared->lf)))
+                if(HADDR_UNDEF == (rel_eof = H5FD_get_eof(f->shared->lf)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
-                if ( rel_eof == 0 )
+                if(rel_eof == 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "flushing a superblock to an empty file?!?!")
                 H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
-            } else {
+            } /* end if */
+            else {
                 /* Otherwise, at this point in time, the EOF value itself may
-                not be reflective of the file's size, since we'll eventually
-                truncate it to match the EOA value. As such, use the EOA value
-                in its place, knowing that the current EOF value will
-                ultimately match it. */
-                if ((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                 * not be reflective of the file's size, since we'll eventually
+                 * truncate it to match the EOA value. As such, use the EOA value
+                 * in its place, knowing that the current EOF value will
+                 * ultimately match it. */
+                if((rel_eof = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
                 H5F_addr_encode(f, &p, (rel_eof + sblock->base_addr));
-            } /* end if */
+            } /* end else */
 
             /* Retrieve information for root group */
             if(NULL == (root_oloc = H5G_oloc(f->shared->root_grp)))
@@ -880,31 +883,34 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t UNUSED addr,
         /* Check for newer version of superblock format & superblock extension */
         if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 && H5F_addr_defined(sblock->ext_addr)) {
             H5O_loc_t 	ext_loc;        /* "Object location" for superblock extension */
-            htri_t      status;         /* Status for message existing */
+            htri_t      exists;         /* Status for message existing */
 
             /* Open the superblock extension's object header */
             if(H5F_super_ext_open(f, sblock->ext_addr, &ext_loc) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
 
             /* Check for the 'EOA' message */
-            if((status = H5O_msg_exists(&ext_loc, H5O_EOA_ID, dxpl_id)) < 0)
+            if((exists = H5O_msg_exists(&ext_loc, H5O_EOA_ID, dxpl_id)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to read object header")
-            if(status) {
+            if(exists) {
                 H5O_eoa_t eoa_msg;
 
-                if ((eoa_msg.eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
+                /* Get the current EOA */
+                if((eoa_msg.eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER)) == HADDR_UNDEF)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
         
+                /* Set the message flag */
                 eoa_msg.avoid_truncate = f->shared->avoid_truncate;
 
                 /* If the 'EOA' message is the same as the 'EOF' message, then
-                older versions of HDF5 can read the file provided they just
-                ignore this EOA message, so we write it with the 'mark if 
-                unknown' flag. However, if the two values differ, then
-                older versions will be unable to correctly predict if the file
-                has been truncated, so we write this message with a 'fail if 
-                unknown' flag'. */
-                if (eoa_msg.eoa == rel_eof) {
+                 * older versions of HDF5 can read the file provided they just
+                 * ignore this EOA message, so we write it with the 'mark if 
+                 * unknown' flag. However, if the two values differ, then
+                 * older versions will be unable to correctly predict if the file
+                 * has been truncated, so we write this message with a 'fail if 
+                 * unknown' flag'.
+                 */
+                if(eoa_msg.eoa == rel_eof) {
                     if(H5O_msg_write(&ext_loc, H5O_EOA_ID, H5O_MSG_FLAG_MARK_IF_UNKNOWN, H5O_UPDATE_TIME, &eoa_msg, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
                 } /* end if */

@@ -306,7 +306,7 @@ H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F
         if(fspace->sinfo->dirty) {
             if(fspace->serial_sect_count > 0) {
                 /* Check if we need to allocate space for  section info */
-                if(!H5F_addr_defined(fspace->sect_addr)) {
+                if(H5F_IS_TMP_ADDR(f, fspace->sect_addr) || !H5F_addr_defined(fspace->sect_addr)) {
                     /* Sanity check */
                     HDassert(fspace->sect_size > 0);
 
@@ -884,6 +884,32 @@ H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
         HDassert((size_t)(p - buf) == sinfo->fspace->sect_size);
         HDassert(sinfo->fspace->sect_size <= sinfo->fspace->alloc_sect_size);
 
+        /* Check for section info at temporary address */
+        if(H5F_IS_TMP_ADDR(f, sinfo->fspace->sect_addr)) {
+            /* Sanity check */
+            HDassert(sinfo->fspace->sect_size > 0);
+            HDassert(H5F_addr_eq(sinfo->fspace->sect_addr, addr));
+
+            /* Allocate space for the section info in file */
+            if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, sinfo->fspace->sect_size)))
+                HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections")
+            sinfo->fspace->alloc_sect_size = (size_t)sinfo->fspace->sect_size;
+
+            /* Sanity check */
+            HDassert(!H5F_addr_eq(sinfo->fspace->sect_addr, addr));
+
+            /* Let the metadata cache know the section info moved */
+            if(H5AC_move_entry(f, H5AC_FSPACE_SINFO, sinfo->fspace->sect_addr, addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move indirect block")
+
+            /* Update the internal address for the section info */
+            sinfo->fspace->sect_addr = addr;
+
+            /* Mark free space header as dirty */
+            if(H5AC_mark_entry_dirty(sinfo->fspace) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+        } /* end if */
+
         /* Write buffer to disk */
         if(H5F_block_write(f, H5FD_MEM_FSPACE_SINFO, sinfo->fspace->sect_addr, (size_t)sinfo->fspace->sect_size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space sections to disk")
@@ -936,8 +962,9 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
 
         /* Release the space on disk */
         /* (XXX: Nasty usage of internal DXPL value! -QAK) */
-        if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, H5AC_dxpl_id, sinfo->cache_info.addr, (hsize_t)sinfo->fspace->alloc_sect_size) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space section info")
+        if(!H5F_IS_TMP_ADDR(f, sinfo->cache_info.addr))
+            if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, H5AC_dxpl_id, sinfo->cache_info.addr, (hsize_t)sinfo->fspace->alloc_sect_size) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space section info")
     } /* end if */
 
     /* Destroy free space info */

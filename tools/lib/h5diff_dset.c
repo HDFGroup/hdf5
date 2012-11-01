@@ -368,26 +368,10 @@ hsize_t diff_datasetid( hid_t did1,
         */
         h5difftrace("upgrade the smaller memory size?\n");
 
-        if(m_size1 != m_size2) {
-            h5difftrace("m_size1 != m_size2\n");
-            if(m_size1 < m_size2) {
-                H5Tclose(m_tid1);
-
-                if((m_tid1 = h5tools_get_native_type(f_tid2)) < 0)
-                    goto error;
-
-                m_size1 = H5Tget_size(m_tid1);
-            } /* end if */
-            else {
-                H5Tclose(m_tid2);
-
-                if((m_tid2 = h5tools_get_native_type(f_tid1)) < 0)
-                    goto error;
-
-                m_size2 = H5Tget_size(m_tid2);
-            } /* end else */
-        } /* end if */
-        HDassert(m_size1 == m_size2);
+        if (FAIL == match_up_memsize (f_tid1, f_tid2,
+                                      &m_tid1, &m_tid2, 
+                                      &m_size1, &m_size2))
+            goto error;
 
         /* print names */
         if(obj1_name)
@@ -523,14 +507,6 @@ hsize_t diff_datasetid( hid_t did1,
         } /* hyperslab read */
     } /*can_compare*/
 
-    /*-------------------------------------------------------------------------
-     * compare attributes
-     * the if condition refers to cases when the dataset is a referenced object
-     *-------------------------------------------------------------------------
-     */
-    h5difftrace("compare attributes?\n");
-    if(obj1_name)
-        nfound += diff_attr(did1,did2,obj1_name,obj2_name,options);
 
     /*-------------------------------------------------------------------------
      * close

@@ -23,7 +23,7 @@ include $(top_srcdir)/config/commence.am
 
 # Compile parallel fortran examples only if parallel is enabled
 if BUILD_PARALLEL_CONDITIONAL
-   TEST_PROG_PARA=
+   EXAMPLE_PROG_PARA=
 endif
 
 # These are the programs that 'make all' or 'make tests' will build and
@@ -31,7 +31,7 @@ endif
 # be run.
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
-TEST_PROG=exlite ex_ds1
+EXAMPLE_PROG=exlite ex_ds1
 
 # List files to be installed here
 INSTALL_FILES= exlite.f90 ex_ds1.f90

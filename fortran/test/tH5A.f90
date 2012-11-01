@@ -100,7 +100,7 @@
      CHARACTER(LEN=35), DIMENSION(2) ::  aread_data ! Buffer to put read back
                                                ! string attr data
      CHARACTER ::  attr_character_data = 'A'
-     DOUBLE PRECISION,  DIMENSION(1) ::  attr_double_data = 3.459
+     REAL(KIND=Fortran_DOUBLE),  DIMENSION(1) ::  attr_double_data = 3.459
      REAL,         DIMENSION(1) ::  attr_real_data = 4.0
      INTEGER,      DIMENSION(1) ::  attr_integer_data = 5
      INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
@@ -109,7 +109,7 @@
      CHARACTER :: aread_character_data ! variable to put read back Character attr data
      INTEGER, DIMENSION(1)  :: aread_integer_data ! variable to put read back integer attr data
      INTEGER, DIMENSION(1)  :: aread_null_data = 7 ! variable to put read back null attr data
-     DOUBLE PRECISION, DIMENSION(1)   :: aread_double_data ! variable to put read back double attr data
+     REAL(KIND=Fortran_DOUBLE), DIMENSION(1)   :: aread_double_data ! variable to put read back double attr data
      REAL, DIMENSION(1)  :: aread_real_data ! variable to put read back real attr data
 
      !

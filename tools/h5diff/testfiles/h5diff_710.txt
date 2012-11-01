@@ -17,6 +17,7 @@ group  : </> and </>
 Attributes status:  0 common, 0 only in obj1, 0 only in obj2
 
 dataset: </dset> and </dset>
+0 differences found
    obj1   obj2
  --------------------------------------
     x           float2         
@@ -29,7 +30,6 @@ position        integer1 of </dset> integer1 of </dset> difference
 ------------------------------------------------------------
 [ 0 ]          1               2               1              
 [ 1 ]          2               3               1              
-2 differences found
 2 differences found
 
 group  : </g> and </g>

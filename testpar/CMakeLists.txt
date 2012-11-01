@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_TEST_PAR)
 
+#-----------------------------------------------------------------------------
+# Apply Definitions to compiler in this directory and below
+#-----------------------------------------------------------------------------
+ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+
 INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )
 #-----------------------------------------------------------------------------
@@ -18,6 +23,7 @@ SET (testphdf5_SRCS
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_span_tree.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_chunk_alloc.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_filter_read.c
+    ${HDF5_TEST_PAR_SOURCE_DIR}/t_prop.c
 )
 
 #-- Adding test for testhdf5

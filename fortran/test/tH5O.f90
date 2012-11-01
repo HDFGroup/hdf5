@@ -35,15 +35,8 @@ SUBROUTINE test_h5o(cleanup, total_error)
   INTEGER, INTENT(OUT) :: total_error
   INTEGER :: error
 
-  ! /* Output message about test being performed */
-  ! WRITE(*,*) "Testing Objects"
-
-!!$  test_h5o_open();		/* Test generic OPEN FUNCTION */
-!!$  test_h5o_open_by_addr();	/* Test opening objects by address */
-!!$  test_h5o_close();		/* Test generic CLOSE FUNCTION */
-!!$  test_h5o_refcount();        /* Test incrementing and decrementing reference count */
-  CALL test_h5o_plist(total_error)           ! /* Test object creation properties */
-  CALL test_h5o_link(total_error) ! /* Test object link routine */
+  CALL test_h5o_plist(total_error) ! Test object creation properties
+  CALL test_h5o_link(total_error) ! Test object link routine
 
   IF(cleanup) CALL h5_cleanup_f("TestFile", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
@@ -100,6 +93,19 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER(HSIZE_T), DIMENSION(1:1)    :: dims2 = (/dim0/) ! size read/write buffer
   INTEGER         , DIMENSION(1:dim0) :: wdata2, &  ! Write buffer 
                                          rdata2     ! Read buffer
+  LOGICAL :: link_exists
+  CHARACTER(LEN=8)  :: chr_exact
+  CHARACTER(LEN=10) :: chr_lg
+  INTEGER(size_t) :: nlinks
+  INTEGER(HID_T) :: plist = -1
+
+  CHARACTER(LEN=20) :: dset_comment = "dataset comment"
+  CHARACTER(LEN=13) :: grp_comment = "group comment"
+  CHARACTER(LEN=10) :: comment_sm ! to small comment sized buffer
+  CHARACTER(LEN=15) :: comment ! exact comment sized buffer
+  CHARACTER(LEN=20) :: comment_lg ! large comment sized buffer
+  INTEGER(HSSIZE_T) :: comment_size
+  INTEGER(SIZE_T)   :: comment_size2
 
   !  Initialize the raw data 
   DO i = 1, TEST6_DIM1
@@ -131,8 +137,6 @@ SUBROUTINE test_h5o_link(total_error)
   CALL H5Pset_libver_bounds_f(fapl_id, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
   CALL check("H5Pset_libver_bounds_f",error, total_error)
 
-!!$ ret = H5Pset_libver_bounds(fapl_id, (new_format ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST);
-
   !  Create a new HDF5 file 
   CALL H5Fcreate_f(TEST_FILENAME, H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl_id)
   CALL check("H5Fcreate_f", error, total_error)
@@ -155,10 +159,9 @@ SUBROUTINE test_h5o_link(total_error)
   !  Create a dataset with no name using the committed datatype
   CALL H5Dcreate_anon_f(file_id, type_id, space_id, dset_id, error ) ! using no optional parameters
   CALL check("H5Dcreate_anon_f",error,total_error)
-
-
+  !
   !  Verify that we can write to and read from the dataset 
-
+  !
   !  Write the data to the dataset 
 
 !EP  CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wdata, dims, error, &
@@ -199,7 +202,6 @@ SUBROUTINE test_h5o_link(total_error)
   CALL h5tclose_f(type_id, error)
   CALL check("h5tclose_f", error, total_error)
 
-
   !  Re-open datatype using new link 
   CALL H5Topen_f(group_id, "datatype", type_id, error)
   CALL check("h5topen_f", error, total_error)
@@ -208,12 +210,10 @@ SUBROUTINE test_h5o_link(total_error)
   CALL H5Olink_f(group_id, file_id, "/group", error)
   CALL check("H5Olink_f", error, total_error)
 
-
   CALL h5gclose_f(group_id, error)
   CALL check("h5gclose_f",error,total_error)
 
   !  Open dataset through root group and verify its data 
-
   CALL H5Dopen_f(file_id, "/group/inter_group/dataset", dset_id, error)
   CALL check("test_lcpl.h5dopen_f", error, total_error)
 
@@ -235,7 +235,6 @@ SUBROUTINE test_h5o_link(total_error)
   CALL check("h5dclose_f",error,total_error)
   CALL h5tclose_f(type_id, error)
   CALL check("h5tclose_f",error,total_error)
-
 
   !  Close remaining IDs 
   CALL h5sclose_f(space_id, error)
@@ -264,16 +263,214 @@ SUBROUTINE test_h5o_link(total_error)
   CALL check("h5gcreate_f", error, total_error)
   CALL h5gcreate_f(file_id,"/G1/G2/G3",group_id,error)
   CALL check("h5gcreate_f", error, total_error)
+
+  ! Try putting a comment on the group /G1/G2/G3 by name
+  CALL h5oset_comment_by_name_f(file_id, "/G1/G2/G3", grp_comment, error)
+  CALL check("h5oset_comment_by_name_f", error, total_error)
+
+  comment_lg = ' '
+
+  CALL h5oget_comment_by_name_f(file_id, "/G1/G2/G3", comment_lg, error) 
+  CALL check("h5oget_comment_by_name_f", error, total_error)
+
+  IF(comment_lg(1:13).NE.grp_comment)THEN
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+  IF(comment_lg(14:20).NE.'       ')THEN ! make sure no NULL terminator
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+
+  ! Try putting a comment on the group /G1/G2/G3 by name with trailing blanks
+
+  CALL h5oset_comment_by_name_f(file_id, "/G1/G2/G3"//'  ', grp_comment, error)
+  CALL check("h5oset_comment_by_name_f", error, total_error)
+
+  comment_lg = ' '
+
+  CALL h5oget_comment_by_name_f(file_id, "/G1/G2/G3"//'  ', comment_lg, error) 
+  CALL check("h5oget_comment_by_name_f", error, total_error)
+
+  IF(comment_lg(1:13).NE.grp_comment)THEN
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+  IF(comment_lg(14:20).NE.'       ')THEN ! make sure no NULL terminator
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+
   !
   ! Create the dataset
   !
   CALL h5dcreate_f(group_id, dataset, H5T_STD_I32LE, space_id, dset_id, error)
   CALL check("h5dcreate_f", error, total_error)
+
+  ! Putting a comment on the dataset
+  CALL h5oset_comment_f(dset_id, dset_comment, error)
+  CALL check("h5oset_comment_f", error, total_error)
+
+  ! Try reading into a buffer that is the correct size
+
+  CALL h5oget_comment_f(dset_id, comment, error) 
+  CALL check("h5oget_comment_f", error, total_error)
+
+  IF(comment(1:15).NE.dset_comment(1:15))THEN
+     CALL check("h5oget_comment_f", -1, total_error)
+  ENDIF
+
+  ! Try reading into a buffer that is to small
+
+  CALL h5oget_comment_f(dset_id, comment_sm, error) 
+  CALL check("h5oget_comment_f", error, total_error)
+
+  IF(comment_sm(1:10).NE.dset_comment(1:10))THEN
+     CALL check("h5oget_comment_f", -1, total_error)
+  ENDIF 
+
+ ! Try reading into a buffer that is larger then needed
+
+  comment_lg = ' '
+
+  CALL h5oget_comment_f(dset_id, comment_lg, error) 
+  CALL check("h5oget_comment_f", error, total_error)
+
+  IF(comment_lg(1:15).NE.dset_comment)THEN
+     CALL check("h5oget_comment_f", -1, total_error)
+  ENDIF
+  IF(comment_lg(16:20).NE.'     ')THEN ! make sure no NULL terminator
+     CALL check("h5oget_comment_f", -1, total_error)
+  ENDIF
+  !
+  ! Check optional parameter
+  !
+  CALL h5oget_comment_f(dset_id, comment_lg, error, comment_size) 
+  CALL check("h5oget_comment_f", error, total_error)
+
+  IF( comment_size.NE.15)THEN
+     CALL check("h5oget_comment_f", -1, total_error)
+  ENDIF
+
+  ! CHECK h5oget_comment_by_name_f
+
+  ! Try reading into a buffer that is the correct size
+
+  CALL h5oget_comment_by_name_f(dset_id, ".", comment, error) 
+  CALL check("h5oget_comment_by_name_f", error, total_error)
+
+  IF(comment(1:15).NE.dset_comment(1:15))THEN
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+
+  ! Try with trailing blanks in the name
+
+  CALL h5oget_comment_by_name_f(dset_id, ".     ", comment, error) 
+  CALL check("h5oget_comment_by_name_f", error, total_error)
+
+  IF(comment(1:15).NE.dset_comment(1:15))THEN
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+
+  !
+  ! Check optional parameter
+  !
+  CALL h5oget_comment_by_name_f(dset_id, ".     ", comment_lg, error, comment_size2) 
+  CALL check("h5oget_comment_by_name_f", error, total_error)
+
+  IF( comment_size2.NE.15)THEN
+     CALL check("h5oget_comment_by_name_f", -1, total_error)
+  ENDIF
+
   !
   ! Write the data to the dataset.
   !
   CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wdata2, dims2, error)
   CALL check("h5dwrite_f", error, total_error)
+
+  ! *************************
+  ! CHECK H5OEXISTS_BY_NAME_F
+  ! *************************
+
+  ! Create a soft link to /G1
+  CALL h5lcreate_soft_f("/G1", file_id, "/G1_LINK", error)
+  CALL check("h5lcreate_soft_f", error, total_error)
+
+
+  ! Create a soft link to /G1000, does not exist
+  CALL h5lcreate_soft_f("/G1000", file_id, "/G1_FALSE", error)
+  CALL check("h5lcreate_soft_f", error, total_error)
+
+  ! Create a soft link to /G1_LINK
+  CALL h5lcreate_soft_f("/G1_FALSE", file_id, "/G2_FALSE", error)
+  CALL check("h5lcreate_soft_f", error, total_error)
+
+  ! See if the link exists
+  CALL h5oexists_by_name_f(file_id,"/G1_LINK", link_exists, error)
+  CALL check("h5oexists_by_name_f", error, total_error)
+
+  ! Object should exist
+  IF(.NOT.link_exists)THEN
+     CALL check("h5oexists_by_name_f", -1, total_error)
+  ENDIF
+
+  chr_exact = "/G1_LINK"
+  ! See if the link exists
+  CALL h5oexists_by_name_f(file_id,chr_exact, link_exists, error, H5P_DEFAULT_F)
+  CALL check("h5oexists_by_name_f", error, total_error)
+
+  ! Object should exist
+  IF(.NOT.link_exists)THEN
+     CALL check("h5oexists_by_name_f", -1, total_error)
+  ENDIF
+
+  chr_lg = "/G1_LINK"
+  ! See if the link exists
+  CALL h5oexists_by_name_f(file_id,chr_lg, link_exists, error, H5P_DEFAULT_F)
+  CALL check("h5oexists_by_name_f", error, total_error)
+
+  ! Object should exist
+  IF(.NOT.link_exists)THEN
+     CALL check("h5oexists_by_name_f", -1, total_error)
+  ENDIF
+
+  chr_lg = "/G1_LINK  "
+  ! See if the link exists
+  CALL h5oexists_by_name_f(file_id,chr_lg, link_exists, error, H5P_DEFAULT_F)
+  CALL check("h5oexists_by_name_f", error, total_error)
+
+  ! Object should exist
+  IF(.NOT.link_exists)THEN
+     CALL check("h5oexists_by_name_f", -1, total_error)
+  ENDIF
+
+  ! See if the link exists
+  CALL h5oexists_by_name_f(file_id,"/G1_FALSE", link_exists, error)
+  CALL check("h5oexists_by_name_f", error, total_error)
+
+  ! Object should not exist
+  IF(link_exists)THEN
+     CALL check("h5oexists_by_name_f", -1, total_error)
+  ENDIF
+
+  ! Check optional parameter
+
+  CALL h5pcreate_f(H5P_LINK_ACCESS_F,plist,error)
+  CALL check("h5pcreate_f",error,total_error)
+
+  nlinks = 2
+  CALL h5pset_nlinks_f(plist, nlinks, error)
+  CALL check("h5pset_nlinks_f", error, total_error)
+  ! Ensure that nlinks was set successfully
+  nlinks = 0
+  CALL h5pget_nlinks_f(plist, nlinks, error)
+  CALL check("h5pget_nlinks_f",error,total_error)
+  CALL VERIFY("h5pget_nlinks_f", INT(nlinks), 2, total_error)
+
+  ! See if the link exists
+  CALL h5oexists_by_name_f(file_id,"/G1_LINK", link_exists, error, plist)
+  CALL check("h5oexists_by_name_f", error, total_error)
+
+  ! Object should exist
+  IF(.not.link_exists)THEN
+     CALL check("h5oexists_by_name_f", -1, total_error)
+  ENDIF
   !
   ! Close and release resources.
   !
@@ -283,6 +480,14 @@ SUBROUTINE test_h5o_link(total_error)
   CALL check("h5sclose_f", error, total_error)
   CALL h5gclose_f(group_id, error)
   CALL check("h5gclose_f", error, total_error)
+
+  ! Test opening an object by index, note 
+  CALL h5oopen_by_idx_f(file_id, "/G1/G2/G3", H5_INDEX_NAME_F, H5_ITER_INC_F, 0_hsize_t, group_id, error)
+  CALL check("h5oopen_by_idx_f", error, total_error)
+
+  CALL h5oclose_f(group_id, error)
+  CALL check("h5gclose_f", error, total_error)
+
   !
   ! create property to pass copy options
   !
@@ -324,7 +529,7 @@ SUBROUTINE test_h5o_link(total_error)
   CALL h5tcopy_f(H5T_NATIVE_INTEGER, tid, error)
   CALL check("h5tcopy_f", error, total_error)
 
-    ! create named datatype
+  ! create named datatype
   CALL h5tcommit_f(file_id, NAME_DATATYPE_SIMPLE, tid, error)
   CALL check("h5tcommit_f", error, total_error)
 
@@ -346,8 +551,7 @@ SUBROUTINE test_h5o_link(total_error)
   ! Compare the datatypes
   CALL h5tequal_f(tid, tid2, flag, error)
   IF(.NOT.flag)THEN
-     WRITE(*,*) "h5ocopy_f FAILED" 
-     total_error = total_error + 1
+     CALL check("h5ocopy_f FAILED", -1, total_error)
   ENDIF
 
   ! close the destination datatype
@@ -436,7 +640,6 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
   CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
-
   ! Create a group, dataset, and committed datatype within the file,
   ! using the respective type of creation property lists.
   ! 
@@ -472,7 +675,6 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL h5sclose_f(dspace, error)
   CALL check("h5sclose_f",error,total_error)
 
-
   !  Close current creation property lists 
   CALL h5pclose_f(gcpl,error)
   CALL check("h5pclose_f", error, total_error)
@@ -482,7 +684,6 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL check("h5pclose_f", error, total_error)
 
   !  Retrieve each object's creation property list 
-
   CALL H5Gget_create_plist_f(grp, gcpl, error)
   CALL check("H5Gget_create_plist", error, total_error)
 
@@ -491,7 +692,6 @@ SUBROUTINE test_h5o_plist(total_error)
 
   CALL H5Dget_create_plist_f(dset, dcpl, error)
   CALL check("H5Dget_create_plist_f", error, total_error)
-
 
   !  Retrieve attribute phase change values on each creation property list and verify 
   CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
@@ -509,9 +709,7 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
   CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
-
   ! Close current objects 
-
   CALL h5pclose_f(gcpl,error)
   CALL check("h5pclose_f", error, total_error)
   CALL h5pclose_f(dcpl,error)
@@ -552,7 +750,6 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL H5Dget_create_plist_f(dset, dcpl, error)
   CALL check("H5Dget_create_plist_f", error, total_error)
 
-
   !  Retrieve attribute phase change values on each creation property list and verify 
   CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_attr_phase_change_f", error, total_error)
@@ -569,9 +766,7 @@ SUBROUTINE test_h5o_plist(total_error)
   CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
   CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
 
-
   !  Close current objects 
-
   CALL h5pclose_f(gcpl,error)
   CALL check("h5pclose_f", error, total_error)
   CALL h5pclose_f(dcpl,error)

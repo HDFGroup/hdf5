@@ -328,6 +328,10 @@ HDfprintf(stderr, "%s: section {%a, %Hu}, shrinks file, eoa = %a\n", FUNC, sect-
         HGOTO_DONE(TRUE)
     } /* end if */
     else {
+        /* Shrinking can't occur if the 'eoa_shrink_only' flag is set and we're not shrinking the EOA */
+        if(udata->allow_eoa_shrink_only)
+            HGOTO_DONE(FALSE)
+
         /* Check if this section is allowed to merge with metadata aggregation block */
         if(udata->f->shared->fs_aggr_merge[udata->alloc_type] & H5F_FS_MERGE_METADATA) {
             htri_t status;              /* Status from aggregator adjoin */

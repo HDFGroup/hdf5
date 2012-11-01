@@ -20,6 +20,8 @@
 #  Added $FILEN variables for file names
 #   
 
+srcdir=@srcdir@
+
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 USE_FILTER_SHUFFLE="@USE_FILTER_SHUFFLE@"
@@ -53,15 +55,10 @@ H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP
 nerrors=0
 verbose=yes
 
-# The build (current) directory might be different than the source directory.
-#
-if test -z "$srcdir"; then
-   srcdir=.
-fi
-
 # source dirs
 SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
@@ -820,6 +817,27 @@ VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CONTI
 # should remain as original layout (chunk)
 TOOLTEST_MAIN h5repack_layout3.h5 -l chunk_unlimit1:COMPA
 VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CHUNK
+
+#--------------------------------------------------------------------------
+# Test -f for some specific cases. Chunked dataset with unlimited max dims.
+# (HDFFV-8012)
+#--------------------------------------------------------------------------
+# - should not fail 
+# - should not change max dims from unlimit
+
+# chunk dim is bigger than dataset dim. ( dset size < 64k )
+TOOLTEST_MAIN h5repack_layout3.h5 -f chunk_unlimit1:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 H5S_UNLIMITED
+# chunk dim is bigger than dataset dim. ( dset size > 64k )
+TOOLTEST_MAIN h5repack_layout3.h5 -f chunk_unlimit2:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit2 H5S_UNLIMITED
+
+# chunk dims are smaller than dataset dims. ( dset size < 64k )
+TOOLTEST_MAIN h5repack_layout3.h5  -f chunk_unlimit3:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit3 H5S_UNLIMITED
+
+# file input - should not fail
+TOOLTEST h5repack_layout3.h5 -f NONE
 
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will

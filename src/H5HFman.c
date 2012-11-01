@@ -218,6 +218,44 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5HF_man_get_obj_len
+ *
+ * Purpose:     Get the size of a managed heap object
+ *
+ * Return:      SUCCEED (Can't fail)
+ *
+ * Programmer:  Dana Robinson (derobins@hdfgroup.org)
+ *              August 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
+{
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj_len_p);
+    
+    /* Skip over the flag byte */
+    id++;
+
+    /* Skip over object offset */
+    id += hdr->heap_off_size;
+
+    /* Retrieve the entry length */
+    UINT64DECODE_VAR(id, *obj_len_p, hdr->heap_len_size);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_man_get_obj_len() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_man_op_real
  *
  * Purpose:	Internal routine to perform an operation on a managed heap

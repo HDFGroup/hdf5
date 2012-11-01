@@ -227,7 +227,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     NULL,                       /* lock         */
     NULL,                       /* unlock       */
     NULL,                       /* coordinate   */
-    H5FD_FLMAP_SINGLE           /* fl_map       */
+    H5FD_FLMAP_DICHOTOMY	/* fl_map       */
 };
 
 

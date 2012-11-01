@@ -439,14 +439,8 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
 
     /* Check type of object in heap */
     if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
-        /* Skip over the flag byte */
-        id++;
-
-        /* Skip over object offset */
-        id += fh->hdr->heap_off_size;
-
-        /* Retrieve the entry length */
-        UINT64DECODE_VAR(id, *obj_len_p, fh->hdr->heap_len_size);
+        if(H5HF_man_get_obj_len(fh->hdr, id, obj_len_p) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'managed' object's length")
     } /* end if */
     else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
         if(H5HF_huge_get_obj_len(fh->hdr, dxpl_id, id, obj_len_p) < 0)
@@ -457,8 +451,8 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
     } /* end if */
     else {
-HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
-HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
 done:

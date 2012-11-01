@@ -59,7 +59,7 @@ typedef struct {
 typedef struct {
     H5P_iterate_int_t cb_func;  /* Iterator callback */
     void *udata;                /* Iterator callback pointer */
-    H5P_genplist_t *plist;      /* Property list pointer */
+    const H5P_genplist_t *plist;      /* Property list pointer */
     H5SL_t *seen;               /* Skip list to hold names of properties already seen */
     int *curr_idx_ptr;          /* Pointer to current iteration index */
     int prev_idx;               /* Previous iteration index */
@@ -72,6 +72,12 @@ typedef struct {
     int *curr_idx_ptr;          /* Pointer to current iteration index */
     int prev_idx;               /* Previous iteration index */
 } H5P_iter_pclass_ud_t;
+
+/* Typedef for property list comparison callback */
+typedef struct {
+    const H5P_genplist_t *plist2;       /* Pointer to second property list */
+    int cmp_value;              /* Value from property comparison */
+} H5P_plist_cmp_ud_t;
 
 
 /********************/
@@ -964,7 +970,7 @@ done:
     Internal routine to create a new property
  USAGE
     H5P_genprop_t *H5P_create_prop(name,size,type,value,prp_create,prp_set,
-            prp_get,prp_delete,prp_close)
+                                   prp_get,prp_delete,prp_close, prp_encode, prp_decode)
         const char *name;       IN: Name of property to register
         size_t size;            IN: Size of property in bytes
         H5P_prop_within_t type; IN: Type of object the property will be inserted into
@@ -973,6 +979,8 @@ done:
                                     creation callback
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
+        H5P_prp_encode_func_t prp_encode; IN: Function pointer to property encode
+        H5P_prp_decode_func_t prp_decode; IN: Function pointer to property decode
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
         H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
         H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
@@ -990,9 +998,10 @@ done:
 --------------------------------------------------------------------------*/
 static H5P_genprop_t *
 H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
-    const void *value,
-    H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
-    H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
+    const void *value, H5P_prp_create_func_t prp_create,
+    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_encode_func_t prp_encode, H5P_prp_decode_func_t prp_decode,
+    H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
     H5P_prp_close_func_t prp_close)
 {
@@ -1028,6 +1037,8 @@ H5P_create_prop(const char *name, size_t size, H5P_prop_within_t type,
     prop->create = prp_create;
     prop->set = prp_set;
     prop->get = prp_get;
+    prop->encode = prp_encode;
+    prop->decode = prp_decode;
     prop->del = prp_delete;
     prop->copy = prp_copy;
     /* Use custom comparison routine if available, otherwise default to memcmp() */
@@ -1101,7 +1112,7 @@ done:
     Internal routine to check for a property in a property list's skip list
  USAGE
     H5P_genprop_t *H5P_find_prop(plist, name)
-        H5P_genplist_t *plist;  IN: Pointer to property list to check
+        const H5P_genplist_t *plist;  IN: Pointer to property list to check
         const char *name;       IN: Name of property to check for
  RETURNS
     Returns pointer to property on success, NULL on failure.
@@ -1113,7 +1124,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5P_genprop_t *
-H5P__find_prop_plist(H5P_genplist_t *plist, const char *name)
+H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
 
@@ -1776,7 +1787,8 @@ done:
  PURPOSE
     Internal routine to register a new property in a property list class.
  USAGE
-    herr_t H5P_register_real(class, name, size, default, prp_create, prp_set, prp_get, prp_close)
+    herr_t H5P_register_real(class, name, size, default, prp_create, prp_set, 
+                             prp_get, prp_close, prp_encode, prp_decode)
         H5P_genclass_t *class;  IN: Property list class to modify
         const char *name;       IN: Name of property to register
         size_t size;            IN: Size of property in bytes
@@ -1786,6 +1798,8 @@ done:
                                     creation callback
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
+        H5P_prp_encode_func_t prp_encode; IN: Function pointer to property encode
+        H5P_prp_decode_func_t prp_decode; IN: Function pointer to property decode
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
         H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
         H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
@@ -1905,6 +1919,33 @@ done:
     'close' routine returns a negative value, the property list close
     routine returns an error value but the property list is still closed.
 
+        The 'encode' callback is called when a property list with this
+    property is being encoded.  H5P_prp_encode_func_t is defined as:
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        void *value, void *plist, uint8_t **buf);
+    where the parameters to the callback function are:
+        void *f;            IN: A fake file structure used to encode.
+        size_t *size;       IN/OUT: The size of the buffer to encode the property.
+        void *value;        IN: The value of the property being encoded.
+        void *plist;        IN: The property list structure.
+        uint8_t **buf;      OUT: The buffer that holds the encoded property;
+    The 'encode' routine returns the size needed to encode the property value
+    if the buffer passed in is NULL or the size is zero. Otherwise it encodes 
+    the property value into binary in buf.
+
+        The 'decode' callback is called when a property list with this
+    property is being decoded.  H5P_prp_encode_func_t is defined as:
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        void *value, void *plist, uint8_t **buf);
+    where the parameters to the callback function are:
+        void *f;            IN: A fake file structure used to decode.
+        size_t *size;       IN: UNUSED
+        void *value;        IN: UNUSED
+        void *plist;        IN: The property list structure.
+        uint8_t **buf;      IN: The buffer that holds the binary encoded property;
+    The 'decode' routine decodes the binary buffer passed in and transforms it into
+    corresponding property values that are set in the property list passed in.
+
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
         The 'set' callback function may be useful to range check the value being
@@ -1926,8 +1967,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5P_register_real(H5P_genclass_t *pclass, const char *name, size_t size,
-    const void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
-    H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
+    const void *def_value, H5P_prp_create_func_t prp_create,
+    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_encode_func_t prp_encode, H5P_prp_decode_func_t prp_decode,
+    H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
     H5P_prp_close_func_t prp_close)
 {
@@ -1947,7 +1990,9 @@ H5P_register_real(H5P_genclass_t *pclass, const char *name, size_t size,
         HGOTO_ERROR(H5E_PLIST, H5E_EXISTS, FAIL, "property already exists")
 
     /* Create property object from parameters */
-    if(NULL == (new_prop = H5P_create_prop(name, size, H5P_PROP_WITHIN_CLASS, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close)))
+    if(NULL == (new_prop = H5P_create_prop(name, size, H5P_PROP_WITHIN_CLASS, 
+            def_value, prp_create, prp_set, prp_get, prp_encode, prp_decode,
+            prp_delete, prp_copy, prp_cmp, prp_close)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property")
 
     /* Insert property into property list class */
@@ -1985,6 +2030,8 @@ done:
                                     creation callback
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
+        H5P_prp_encode_func_t prp_encode; IN: Function pointer to property encode
+        H5P_prp_decode_func_t prp_decode; IN: Function pointer to property decode
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
         H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
         H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
@@ -2049,6 +2096,33 @@ done:
     will be returned to the calling function.  If the 'get' routine returns a
     negative value, the property value is returned and the property list get
     routine returns an error value.
+
+        The 'encode' callback is called when a property list with this
+    property is being encoded.  H5P_prp_encode_func_t is defined as:
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        void *value, void *plist, uint8_t **buf);
+    where the parameters to the callback function are:
+        void *f;            IN: A fake file structure used to encode.
+        size_t *size;       IN/OUT: The size of the buffer to encode the property.
+        void *value;        IN: The value of the property being encoded.
+        void *plist;        IN: The property list structure.
+        uint8_t **buf;      OUT: The buffer that holds the encoded property;
+    The 'encode' routine returns the size needed to encode the property value
+    if the buffer passed in is NULL or the size is zero. Otherwise it encodes 
+    the property value into binary in buf.
+
+        The 'decode' callback is called when a property list with this
+    property is being decoded.  H5P_prp_encode_func_t is defined as:
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        void *value, void *plist, uint8_t **buf);
+    where the parameters to the callback function are:
+        void *f;            IN: A fake file structure used to decode.
+        size_t *size;       IN: UNUSED
+        void *value;        IN: UNUSED
+        void *plist;        IN: The property list structure.
+        uint8_t **buf;      IN: The buffer that holds the binary encoded property;
+    The 'decode' routine decodes the binary buffer passed in and transforms it into
+    corresponding property values that are set in the property list passed in.
 
         The 'delete' callback is called when a property is deleted from a
     property list.  H5P_prp_del_func_t is defined as:
@@ -2125,8 +2199,10 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5P_register(H5P_genclass_t **ppclass, const char *name, size_t size,
-    const void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
-    H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
+    const void *def_value, H5P_prp_create_func_t prp_create,
+    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_encode_func_t prp_encode, H5P_prp_decode_func_t prp_decode,
+    H5P_prp_delete_func_t prp_delete,
     H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
     H5P_prp_close_func_t prp_close)
 {
@@ -2180,7 +2256,8 @@ H5P_register(H5P_genclass_t **ppclass, const char *name, size_t size,
     } /* end if */
 
     /* Really register the property in the class */
-    if(H5P_register_real(pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close) < 0)
+    if(H5P_register_real(pclass, name, size, def_value, prp_create, prp_set, prp_get, 
+            prp_encode, prp_decode, prp_delete, prp_copy, prp_cmp, prp_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't register property")
 
     /* Update pointer to pointer to class, if a new one was generated */
@@ -2202,13 +2279,16 @@ done:
  PURPOSE
     Internal routine to insert a new property in a property list.
  USAGE
-    herr_t H5P_insert(plist, name, size, value, prp_set, prp_get, prp_close)
+    herr_t H5P_insert(plist, name, size, value, prp_set, prp_get, prp_close, 
+                      prp_encode, prp_decode)
         H5P_genplist_t *plist;  IN: Property list to add property to
         const char *name;       IN: Name of property to add
         size_t size;            IN: Size of property in bytes
         void *value;            IN: Pointer to the value for the property
         H5P_prp_set_func_t prp_set; IN: Function pointer to property set callback
         H5P_prp_get_func_t prp_get; IN: Function pointer to property get callback
+        H5P_prp_encode_func_t prp_encode; IN: Function pointer to property encode
+        H5P_prp_decode_func_t prp_decode; IN: Function pointer to property decode
         H5P_prp_delete_func_t prp_delete; IN: Function pointer to property delete callback
         H5P_prp_copy_func_t prp_copy; IN: Function pointer to property copy callback
         H5P_prp_compare_func_t prp_cmp; IN: Function pointer to property compare callback
@@ -2257,6 +2337,33 @@ done:
     will be returned to the calling function.  If the 'get' routine returns a
     negative value, the property value is returned and the property list get
     routine returns an error value.
+
+        The 'encode' callback is called when a property list with this
+    property is being encoded.  H5P_prp_encode_func_t is defined as:
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        void *value, void *plist, uint8_t **buf);
+    where the parameters to the callback function are:
+        void *f;            IN: A fake file structure used to encode.
+        size_t *size;       IN/OUT: The size of the buffer to encode the property.
+        void *value;        IN: The value of the property being encoded.
+        void *plist;        IN: The property list structure.
+        uint8_t **buf;      OUT: The buffer that holds the encoded property;
+    The 'encode' routine returns the size needed to encode the property value
+    if the buffer passed in is NULL or the size is zero. Otherwise it encodes 
+    the property value into binary in buf.
+
+        The 'decode' callback is called when a property list with this
+    property is being decoded.  H5P_prp_encode_func_t is defined as:
+        typedef herr_t (*H5P_prp_encode_func_t)(void *f, size_t *size, 
+        void *value, void *plist, uint8_t **buf);
+    where the parameters to the callback function are:
+        void *f;            IN: A fake file structure used to decode.
+        size_t *size;       IN: UNUSED
+        void *value;        IN: UNUSED
+        void *plist;        IN: The property list structure.
+        uint8_t **buf;      IN: The buffer that holds the binary encoded property;
+    The 'decode' routine decodes the binary buffer passed in and transforms it into
+    corresponding property values that are set in the property list passed in.
 
         The 'delete' callback is called when a property is deleted from a
     property list.  H5P_prp_del_func_t is defined as:
@@ -2338,6 +2445,7 @@ done:
 herr_t
 H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_encode_func_t prp_encode, H5P_prp_decode_func_t prp_decode,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close)
 {
@@ -2385,7 +2493,9 @@ H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     /* Ok to add to property list */
 
     /* Create property object from parameters */
-    if(NULL == (new_prop = H5P_create_prop(name, size, H5P_PROP_WITHIN_LIST, value, NULL, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close)))
+    if(NULL == (new_prop = H5P_create_prop(name, size, H5P_PROP_WITHIN_LIST, value, NULL, 
+            prp_set, prp_get, prp_encode, prp_decode, prp_delete, prp_copy, 
+            prp_cmp, prp_close)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "Can't create property")
 
     /* Insert property into property list class */
@@ -2572,7 +2682,7 @@ done:
     Internal routine to query the existance of a property in a property list.
  USAGE
     herr_t H5P_exist_plist(plist, name)
-        H5P_genplist_t *plist;  IN: Property list to check
+        const H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to check for
  RETURNS
     Success: Positive if the property exists in the property list, zero
@@ -2587,7 +2697,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5P_exist_plist(H5P_genplist_t *plist, const char *name)
+H5P_exist_plist(const H5P_genplist_t *plist, const char *name)
 {
     htri_t ret_value = FAIL;     /* return value */
 
@@ -2687,7 +2797,7 @@ done:
     Internal routine to query the size of a property in a property list.
  USAGE
     herr_t H5P_get_size_plist(plist, name)
-        H5P_genplist_t *plist;  IN: Property list to check
+        const H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
         size_t *size;           OUT: Size of property
  RETURNS
@@ -2703,7 +2813,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
+H5P_get_size_plist(const H5P_genplist_t *plist, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=SUCCEED;      /* return value */
@@ -2944,6 +3054,16 @@ H5P_cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2)
     if(prop1->get != NULL && prop2->get == NULL) HGOTO_DONE(1);
     if(prop1->get != prop2->get) HGOTO_DONE(-1);
 
+    /* Check if they both have the same 'encode' callback */
+    if(prop1->encode == NULL && prop2->encode != NULL) HGOTO_DONE(-1);
+    if(prop1->encode != NULL && prop2->encode == NULL) HGOTO_DONE(1);
+    if(prop1->encode != prop2->encode) HGOTO_DONE(-1);
+
+    /* Check if they both have the same 'decode' callback */
+    if(prop1->decode == NULL && prop2->decode != NULL) HGOTO_DONE(-1);
+    if(prop1->decode != NULL && prop2->decode == NULL) HGOTO_DONE(1);
+    if(prop1->decode != prop2->decode) HGOTO_DONE(-1);
+
     /* Check if they both have the same 'delete' callback */
     if(prop1->del == NULL && prop2->del != NULL) HGOTO_DONE(-1);
     if(prop1->del != NULL && prop2->del == NULL) HGOTO_DONE(1);
@@ -3086,105 +3206,141 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_cmp_plist
+    H5P__cmp_plist_cb
  PURPOSE
-    Internal routine to compare two generic property lists
+    Internal callback routine when iterating over properties in property list
+    to compare them for equality
  USAGE
-    int H5P_cmp_plist(plist1, plist2)
-        H5P_genplist_t *plist1;    IN: 1st property list to compare
-        H5P_genplist_t *plist2;    IN: 2nd property list to compare
+    int H5P__cmp_plist_cb(prop, udata)
+        H5P_genprop_t *prop;        IN: Pointer to the property
+        void *udata;                IN/OUT: Pointer to iteration data from user
  RETURNS
-    Success: negative if list1 "less" than list2, positive if list1 "greater"
-        than list2, zero if list1 is "equal" to list2
-    Failure: can't fail
+    Success: Returns whether to continue (H5_ITER_CONT) or stop (H5_ITER_STOP)
+            iterating over the property lists.
+    Failure: Negative value (H5_ITER_ERROR)
  DESCRIPTION
-        This function compares two generic property lists together to see if
-    they are the same list.
-
+    This routine compares a property from one property list (the one being
+    iterated over, to a property from the second property list (which is
+    looked up).  Iteration is stopped if the comparison is non-equal.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-int
-H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2)
+static int
+H5P__cmp_plist_cb(H5P_genprop_t *prop, void *_udata)
 {
-    H5SL_node_t *tnode1, *tnode2;       /* Temporary pointer to property nodes */
-    int cmp_value;                      /* Value from comparison */
-    int ret_value = 0;                  /* return value */
+    H5P_plist_cmp_ud_t *udata = (H5P_plist_cmp_ud_t *)_udata;   /* Pointer to user data */
+    htri_t prop2_exist;                 /* Whether the property exists in the second property list */
+    int ret_value = H5_ITER_CONT;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(prop);
+    HDassert(udata);
+
+    /* Check if the property exists in the second property list */
+    if((prop2_exist = H5P_exist_plist(udata->plist2, prop->name)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5_ITER_ERROR, "can't lookup existance of property?")
+    if(prop2_exist) {
+        const H5P_genprop_t *prop2;         /* Pointer to property in second plist */
+
+        /* Look up same property in second property list */
+        if(NULL == (prop2 = H5P__find_prop_plist(udata->plist2, prop->name)))
+            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5_ITER_ERROR, "property doesn't exist")
+
+        /* Compare the two properties */
+        if((udata->cmp_value = H5P_cmp_prop(prop, prop2)) != 0)
+            HGOTO_DONE(H5_ITER_STOP);
+    } /* end if */
+    else {
+        /* Property exists in first list, but not second */
+        udata->cmp_value = 1;
+        HGOTO_DONE(H5_ITER_STOP);
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__cmp_plist_cb() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_cmp_plist
+ PURPOSE
+    Internal routine to compare two generic property lists
+ USAGE
+    herr_t H5P_cmp_plist(plist1, plist2, cmp_ret)
+        H5P_genplist_t *plist1;    IN: 1st property list to compare
+        H5P_genplist_t *plist2;    IN: 2nd property list to compare
+        int *cmp_ret;              OUT: Comparison value for two property lists
+                                        Negative if list1 "less" than list2,
+                                        positive if list1 "greater" than list2,
+                                        zero if list1 is "equal" to list2
+ RETURNS
+    Success: non-negative value
+    Failure: negative value
+ DESCRIPTION
+        This function compares two generic property lists together to see if
+    they are equal.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2,
+    int *cmp_ret)
+{
+    H5P_plist_cmp_ud_t udata;   /* User data for callback */
+    int idx = 0;                /* Index of property to begin with */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(plist1);
     HDassert(plist2);
+    HDassert(cmp_ret);
 
     /* Check the number of properties */
-    if(plist1->nprops < plist2->nprops) HGOTO_DONE(-1);
-    if(plist1->nprops > plist2->nprops) HGOTO_DONE(1);
+    if(plist1->nprops < plist2->nprops) {
+        *cmp_ret = -1;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
+    if(plist1->nprops > plist2->nprops) {
+        *cmp_ret = 1;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
 
     /* Check whether they've been initialized */
-    if(plist1->class_init < plist2->class_init) HGOTO_DONE(-1);
-    if(plist1->class_init > plist2->class_init) HGOTO_DONE(1);
-
-    /* Check for identical deleted properties */
-    if(H5SL_count(plist1->del) > 0) {
-        /* Check for no deleted properties in plist2 */
-        if(H5SL_count(plist2->del) == 0) HGOTO_DONE(1);
-
-        tnode1 = H5SL_first(plist1->del);
-        tnode2 = H5SL_first(plist2->del);
-        while(tnode1 || tnode2) {
-            const char *name1, *name2;   /* Name for node */
-
-            /* Check if they both have properties in this node */
-            if(tnode1 == NULL && tnode2 != NULL) HGOTO_DONE(-1);
-            if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
-
-            /* Compare the two deleted properties */
-            name1 = (const char *)H5SL_item(tnode1);
-            name2 = (const char *)H5SL_item(tnode2);
-            if((cmp_value = HDstrcmp(name1, name2)) != 0)
-                HGOTO_DONE(cmp_value);
-
-            /* Advance the pointers */
-            tnode1 = H5SL_next(tnode1);
-            tnode2 = H5SL_next(tnode2);
-        } /* end while */
+    if(plist1->class_init < plist2->class_init) {
+        *cmp_ret = -1;
+        HGOTO_DONE(SUCCEED);
     } /* end if */
-    else
-        if(H5SL_count(plist2->del) > 0) HGOTO_DONE (-1);
-
-    /* Cycle through the changed properties and compare them also */
-    if(H5SL_count(plist1->props) > 0) {
-        /* Check for no changed properties in plist2 */
-        if(H5SL_count(plist2->props) == 0) HGOTO_DONE(1);
-
-        tnode1 = H5SL_first(plist1->props);
-        tnode2 = H5SL_first(plist2->props);
-        while(tnode1 || tnode2) {
-            H5P_genprop_t *prop1, *prop2;   /* Property for node */
-
-            /* Check if they both have properties in this node */
-            if(tnode1 == NULL && tnode2 != NULL) HGOTO_DONE(-1);
-            if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
-
-            /* Compare the two properties */
-            prop1 = (H5P_genprop_t *)H5SL_item(tnode1);
-            prop2 = (H5P_genprop_t *)H5SL_item(tnode2);
-            if((cmp_value = H5P_cmp_prop(prop1, prop2)) != 0)
-                HGOTO_DONE(cmp_value);
-
-            /* Advance the pointers */
-            tnode1 = H5SL_next(tnode1);
-            tnode2 = H5SL_next(tnode2);
-        } /* end while */
+    if(plist1->class_init > plist2->class_init) {
+        *cmp_ret = 1;
+        HGOTO_DONE(SUCCEED);
     } /* end if */
-    else
-        if(H5SL_count(plist2->props)>0) HGOTO_DONE (-1);
+
+    /* Set up iterator callback info */
+    udata.cmp_value = 0;
+    udata.plist2 = plist2;
+
+    /* Iterate over properties in first property list */
+    if((ret_value = H5P_iterate_plist(plist1, TRUE, &idx, H5P__cmp_plist_cb, &udata)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over list")
+    if(ret_value != 0) {
+        *cmp_ret = udata.cmp_value;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
 
     /* Check the parent classes */
-    if((cmp_value = H5P_cmp_class(plist1->pclass, plist2->pclass)) != 0)
-        HGOTO_DONE(cmp_value);
+    if((*cmp_ret = H5P_cmp_class(plist1->pclass, plist2->pclass)) != 0)
+        HGOTO_DONE(SUCCEED);
+
+    /* Property lists must be equal, set comparison value to 0 */
+    *cmp_ret = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3363,7 +3519,7 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
     char *key = (char *)_key;                           /* Pointer to the property's name */
     H5P_iter_plist_ud_t *udata = (H5P_iter_plist_ud_t *)_udata;     /* Pointer to user data */
-    int ret_value = 0;                                  /* Return value */
+    int ret_value = H5_ITER_CONT;                       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3382,9 +3538,9 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     /* Increment the current index */
     (*udata->curr_idx_ptr)++;
 
-    /* Add property name to "seen" list */
+    /* Add property name to 'seen' list */
     if(H5SL_insert(udata->seen, key, key) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into seen skip list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert property into 'seen' skip list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3417,7 +3573,7 @@ H5P__iterate_plist_pclass_cb(void *_item, void *_key, void *_udata)
     H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
     char *key = (char *)_key;                           /* Pointer to the property's name */
     H5P_iter_plist_ud_t *udata = (H5P_iter_plist_ud_t *)_udata;     /* Pointer to user data */
-    int ret_value = 0;                                  /* Return value */
+    int ret_value = H5_ITER_CONT;                       /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3662,7 +3818,7 @@ H5P_iterate_pclass(const H5P_genclass_t *pclass, int *idx,
     int curr_idx = 0;           /* Current iteration index */
     int ret_value = 0;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(pclass);
@@ -4228,7 +4384,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
 
         /* Create property object from parameters */
         if(NULL == (new_prop = H5P_create_prop(prop->name, prop->size, H5P_PROP_WITHIN_LIST, prop->value,
-                prop->create, prop->set, prop->get,
+                prop->create, prop->set, prop->get, prop->encode, prop->decode,
                 prop->del, prop->copy, prop->cmp, prop->close)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL,"Can't create property")
 
@@ -4320,7 +4476,7 @@ H5P_copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name)
     /* Register the property into the destination */
     orig_dst_pclass = dst_pclass;
     if(H5P_register(&dst_pclass, name, prop->size, prop->value, prop->create, prop->set, prop->get,
-            prop->del, prop->copy, prop->cmp, prop->close) < 0)
+            prop->encode, prop->decode, prop->del, prop->copy, prop->cmp, prop->close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTDELETE, FAIL, "unable to remove property")
 
     /* Check if the property class changed and needs to be substituted in the ID */
@@ -4828,4 +4984,122 @@ H5P_close_class(void *_pclass)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_close_class() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__new_plist_of_type
+ *
+ * Purpose:        Create a new property list, of a given type
+ *
+ * Return:	   Success:	ID of new property list
+ *		   Failure:	Negative
+ *
+ * Programmer:     Quincey Koziol
+ *                 Thursday, August 2, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5P__new_plist_of_type(H5P_plist_type_t type)
+{
+    H5P_genclass_t *pclass;     /* Class of property list to create */
+    hid_t class_id;             /* ID of class to create */
+    hid_t ret_value;            /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDcompile_assert(H5P_TYPE_LINK_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
+
+    /* Check arguments */
+    if(type == H5P_TYPE_USER)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't create user property list");
+    if(type == H5P_TYPE_ROOT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "shouldn't be creating root class property list");
+
+    /* Instantiate a property list of the proper type */
+    switch(type) {
+        case H5P_TYPE_OBJECT_CREATE:
+            class_id = H5P_CLS_OBJECT_CREATE_g;
+            break;
+
+        case H5P_TYPE_FILE_CREATE:
+            class_id = H5P_CLS_FILE_CREATE_g;
+            break;
+
+        case H5P_TYPE_FILE_ACCESS:
+            class_id = H5P_CLS_FILE_ACCESS_g;
+            break;
+
+        case H5P_TYPE_DATASET_CREATE:
+            class_id = H5P_CLS_DATASET_CREATE_g;
+            break;
+
+        case H5P_TYPE_DATASET_ACCESS:
+            class_id = H5P_CLS_DATASET_ACCESS_g;
+            break;
+
+        case H5P_TYPE_DATASET_XFER:
+            class_id = H5P_CLS_DATASET_XFER_g;
+            break;
+
+        case H5P_TYPE_FILE_MOUNT:
+            class_id = H5P_CLS_FILE_MOUNT_g;
+            break;
+
+        case H5P_TYPE_GROUP_CREATE:
+            class_id = H5P_CLS_GROUP_CREATE_g;
+            break;
+
+        case H5P_TYPE_GROUP_ACCESS:
+            class_id = H5P_CLS_GROUP_ACCESS_g;
+            break;
+
+        case H5P_TYPE_DATATYPE_CREATE:
+            class_id = H5P_CLS_DATATYPE_CREATE_g;
+            break;
+
+        case H5P_TYPE_DATATYPE_ACCESS:
+            class_id = H5P_CLS_DATATYPE_ACCESS_g;
+            break;
+
+        case H5P_TYPE_STRING_CREATE:
+            class_id = H5P_CLS_STRING_CREATE_g;
+            break;
+
+        case H5P_TYPE_ATTRIBUTE_CREATE:
+            class_id = H5P_CLS_ATTRIBUTE_CREATE_g;
+            break;
+
+        case H5P_TYPE_OBJECT_COPY:
+            class_id = H5P_CLS_OBJECT_COPY_g;
+            break;
+
+        case H5P_TYPE_LINK_CREATE:
+            class_id = H5P_CLS_LINK_CREATE_g;
+            break;
+
+        case H5P_TYPE_LINK_ACCESS:
+            class_id = H5P_CLS_LINK_ACCESS_g;
+            break;
+
+        case H5P_TYPE_USER:     /* shut compiler warnings up */
+        case H5P_TYPE_ROOT:
+        case H5P_TYPE_MAX_TYPE:
+        default:
+            HGOTO_ERROR(H5E_PLIST, H5E_BADRANGE, FAIL, "invalid property list type: %u\n", (unsigned)type);
+    } /* end switch */
+
+    /* Get the class object */
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object(class_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property class")
+
+    /* Create the new property list */
+    if((ret_value = H5P_create_id(pclass, TRUE)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__new_plist_of_type() */
 

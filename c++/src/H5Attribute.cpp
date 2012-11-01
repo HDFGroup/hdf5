@@ -385,6 +385,31 @@ hsize_t Attribute::getStorageSize() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	Attribute::flush
+///\brief	Flushes all buffers associated with a file specified by
+///		this attribute, to disk.
+///\param	scope - IN: Specifies the scope of the flushing action,
+///		which can be either of these values:
+///		\li \c H5F_SCOPE_GLOBAL - Flushes the entire virtual file
+///		\li \c H5F_SCOPE_LOCAL - Flushes only the specified file
+///\exception	H5::AttributeIException
+///\par Description
+///		This attribute is used to identify the file to be flushed.
+// Programmer	Binh-Minh Ribler - 2012
+// Modification
+//	Sep 2012 - BMR
+//		Duplicated from H5Location
+//--------------------------------------------------------------------------
+void Attribute::flush(H5F_scope_t scope) const
+{
+   herr_t ret_value = H5Fflush(getId(), scope);
+   if( ret_value < 0 )
+   {
+      throw AttributeIException("Attribute::flush", "H5Fflush failed");
+   }
+}
+
+//--------------------------------------------------------------------------
 // Function:    Attribute::getId
 // Purpose:     Get the id of this attribute
 // Description:

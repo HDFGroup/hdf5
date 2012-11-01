@@ -443,7 +443,7 @@ int main(int argc, char **argv)
 	"linked chunk collective IO without optimization",PARATESTFILE);
     AddTest((mpi_size < 3)? "-cchunk6" : "cchunk6",
 	coll_chunk6,NULL,
-	"multi-chunk collective IO without optimization",PARATESTFILE);
+	"multi-chunk collective IO with direct request",PARATESTFILE);
     AddTest((mpi_size < 3)? "-cchunk7" : "cchunk7",
 	coll_chunk7,NULL,
 	"linked chunk collective IO with optimization",PARATESTFILE);
@@ -508,6 +508,13 @@ int main(int argc, char **argv)
     AddTest("actualio", actual_io_mode_tests, NULL,
             "test actual io mode proprerty",
             PARATESTFILE);
+
+    AddTest("nocolcause", no_collective_cause_tests, NULL,
+            "test cause for broken collective io",
+            PARATESTFILE);
+
+    AddTest("edpl", test_plist_ed, NULL,
+	    "encode/decode Property Lists", NULL);
 
     if((mpi_size < 2) && MAINPROCESS) {
         printf("File Image Ops daisy chain test needs at least 2 processes.\n");

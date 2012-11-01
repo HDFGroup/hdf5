@@ -46,16 +46,14 @@ H5F_sfile_node_t *H5F_sfile_head_g = NULL;
  *
  * Purpose:	Sanity checking that shared file list is empty
  *
- * Return:	SUCCEED/FAIL
+ * Return:	none (void)
  *
  * Programmer:	Quincey Koziol
  *              Monday, July 25, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-herr_t
+void
 H5F_sfile_assert_num(unsigned n)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -83,7 +81,7 @@ H5F_sfile_assert_num(unsigned n)
         HDassert(count == n);
     } /* end else */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI_VOID
 } /* H5F_sfile_assert_num() */
 
 

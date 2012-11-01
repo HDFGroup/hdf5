@@ -2523,12 +2523,12 @@ none_selection_chunk(void)
  *                  H5D_mpi_chunk_collective_io, processes disagree. The root reports
  *                  collective, the rest report independent I/O
  *
- *              TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_COL:
- *                  H5D_mpi_chunk_collective_io_no_opt, each process reports collective I/O
- *
- *              TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE:
- *                  H5D_mpi_chunk_collective_io_no_opt, processes disagree
- *                  (collective and mixed I/O)
+ *              TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND:
+ *                  Same test TEST_ACTUAL_IO_MULTI_CHUNK_IND. 
+ *                  Set directly go to multi-chunk-io without num threshold calc.
+ *              TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL:
+ *                  Same test TEST_ACTUAL_IO_MULTI_CHUNK_COL.
+ *                  Set directly go to multi-chunk-io without num threshold calc.
  *
  *              TEST_ACTUAL_IO_LINK_CHUNK:
  *                  H5D_link_chunk_collective_io, processes report linked chunk I/O
@@ -2547,10 +2547,17 @@ none_selection_chunk(void)
  *                  (The most complex case that works on all builds) and then performs
  *                  an independent read and write with the same dxpls.
  *
- *          It may seem like TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_IND and 
- *          TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX have been accidentally
- *          left out. This is intentional; the other test cases sufficiently
- *          cover all cases for Multi Chunk No Opt I/O.
+ *          Note: DIRECT_MULTI_CHUNK_MIX and DIRECT_MULTI_CHUNK_MIX_DISAGREE
+ *          is not needed as they are covered by DIRECT_CHUNK_MIX and
+ *          MULTI_CHUNK_MIX_DISAGREE cases. _DIRECT_ cases are only for testing 
+ *          path way to multi-chunk-io by H5FD_MPIO_CHUNK_MULTI_IO insted of num-threshold.
+ *
+ * Modification:
+ *  - Refctore to remove multi-chunk-without-opimization test and update for 
+ *    testing direct to multi-chunk-io 
+ * Programmer: Jonathan Kim
+ * Date: 2012-10-10
+ *
  * 
  * Programmer: Jacob Gruber
  * Date: 2011-04-06
@@ -2565,8 +2572,8 @@ test_actual_io_mode(int selection_mode) {
     H5D_mpio_actual_io_mode_t   actual_io_mode_expected = -1;
     const char  * filename;
     const char  * test_name;
-    hbool_t     multi_chunk_no_opt;
-    hbool_t     multi_chunk_with_opt;
+    hbool_t     direct_multi_chunk_io;
+    hbool_t     multi_chunk_io;
     hbool_t     is_chunked;
     hbool_t     is_collective;
     int         mpi_size = -1; 
@@ -2593,18 +2600,18 @@ test_actual_io_mode(int selection_mode) {
     hsize_t     count[RANK];
     hsize_t     block[RANK];
     hbool_t     use_gpfs = FALSE;
+    char message[256];
     herr_t      ret;
    
     /* Set up some flags to make some future if statements slightly more readable */
-    multi_chunk_no_opt = (
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_IND ||
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_COL ||
-        selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE );
+    direct_multi_chunk_io = (
+        selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND ||
+        selection_mode == TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL );
     
     /* Note: RESET performs the same tests as MULTI_CHUNK_MIX_DISAGREE and then
      * tests independent I/O
      */
-    multi_chunk_with_opt = (
+    multi_chunk_io = (
         selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_IND ||
         selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_COL ||
         selection_mode == TEST_ACTUAL_IO_MULTI_CHUNK_MIX ||
@@ -2673,6 +2680,7 @@ test_actual_io_mode(int selection_mode) {
         
         /* Independent I/O with optimization */
         case TEST_ACTUAL_IO_MULTI_CHUNK_IND:
+        case TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND:
             /* Since the dataset is chunked by row and each process selects a row,
              * each process  writes to a different chunk. This forces all I/O to be
              * independent.
@@ -2686,6 +2694,7 @@ test_actual_io_mode(int selection_mode) {
 
         /* Collective I/O with optimization */
         case TEST_ACTUAL_IO_MULTI_CHUNK_COL:
+        case TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL:
             /* The dataset is chunked by rows, so each process takes a column which
              * spans all chunks. Since the processes write non-overlapping regular
              * selections to each chunk, the operation is purely collective.
@@ -2779,39 +2788,6 @@ test_actual_io_mode(int selection_mode) {
             
             break; 
 
-        /* Collective I/O without optimization */
-        case TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_COL:
-            /* The dataset is chunked by rows, so when each process takes a column, its
-             * selection spans all chunks. Since no process writes more chunks than any
-             * other, colective I/O is never broken. */ 
-            slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-                
-            test_name = "Multi Chunk No Opt - Collective";
-            actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK_NO_OPT;
-            actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
-            break;
-       
-
-        /* Mixed I/O without optimization with disagreement */
-        case TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE:
-            /* Each process takes a column, but the root's column is shortened so that
-             * it only reads the first chunk. Since all the other processes are writing
-             * to more chunks, they will break collective after the first chunk.
-             */
-            slab_set(mpi_rank, mpi_size, start, count, stride, block, BYCOL);
-            if(mpi_rank == 0) 
-                  block[0] = block[0] / mpi_size;
-                
-            test_name = "Multi Chunk No Opt - Mixed (Disagreement)";
-            actual_chunk_opt_mode_expected = H5D_MPIO_MULTI_CHUNK_NO_OPT;
-
-            if(mpi_rank == 0)
-                actual_io_mode_expected = H5D_MPIO_CHUNK_COLLECTIVE;
-            else
-                actual_io_mode_expected = H5D_MPIO_CHUNK_MIXED;
-
-            break;
-        
         /* Linked Chunk I/O */
         case TEST_ACTUAL_IO_LINK_CHUNK:        
             /* Nothing special; link chunk I/O is forced in the dxpl settings. */
@@ -2887,20 +2863,25 @@ test_actual_io_mode(int selection_mode) {
         ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
         VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
         
-        /* Set the threshold number of processes per chunk for link chunk I/O
-         * to twice mpi_size. This will prevent the threshold from ever being
-         * met, thus forcing multi chunk io instead of link chunk io.
+        /* Set the threshold number of processes per chunk to twice mpi_size. 
+         * This will prevent the threshold from ever being met, thus forcing 
+         * multi chunk io instead of link chunk io.
+         * This is via deault.
          */
-        if(multi_chunk_with_opt) {
+        if(multi_chunk_io) {
+            /* force multi-chunk-io by threshold */
             ret = H5Pset_dxpl_mpio_chunk_opt_num(dxpl_write, (unsigned) mpi_size*2);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio_chunk_opt_num succeeded");
 
+            /* set this to manipulate testing senario about allocating processes
+             * to chunks */
             ret = H5Pset_dxpl_mpio_chunk_opt_ratio(dxpl_write, (unsigned) 99);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio_chunk_opt_ratio succeeded");
         }
 
-        /* Request multi chunk I/O without optimization */
-        if(multi_chunk_no_opt) {
+        /* Set directly go to multi-chunk-io without threshold calc. */
+        if(direct_multi_chunk_io) {
+            /* set for multi chunk io by property*/
             ret = H5Pset_dxpl_mpio_chunk_opt(dxpl_write, H5FD_MPIO_CHUNK_MULTI_IO);
             VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
         }
@@ -2943,7 +2924,6 @@ test_actual_io_mode(int selection_mode) {
     
     /* Test values */
     if(actual_chunk_opt_mode_expected != (unsigned) -1 && actual_io_mode_expected != (unsigned) -1) {
-        char message[100];
         sprintf(message, "Actual Chunk Opt Mode has the correct value for %s.\n",test_name);
         VRFY((actual_chunk_opt_mode_write == actual_chunk_opt_mode_expected), message);
         sprintf(message, "Actual IO Mode has the correct value for %s.\n",test_name);
@@ -3027,6 +3007,9 @@ actual_io_mode_tests(void) {
     
     test_actual_io_mode(TEST_ACTUAL_IO_NO_COLLECTIVE);
     
+    /* 
+     * Test multi-chunk-io via proc_num threshold
+     */
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_IND);
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_COL);
     
@@ -3038,13 +3021,692 @@ actual_io_mode_tests(void) {
     
     test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_MIX_DISAGREE);
 
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_COL);
-    test_actual_io_mode(TEST_ACTUAL_IO_MULTI_CHUNK_NO_OPT_MIX_DISAGREE);
+    /* 
+     * Test multi-chunk-io via setting direct property
+     */
+    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_IND);
+    test_actual_io_mode(TEST_ACTUAL_IO_DIRECT_MULTI_CHUNK_COL);
 
     test_actual_io_mode(TEST_ACTUAL_IO_LINK_CHUNK);
     test_actual_io_mode(TEST_ACTUAL_IO_CONTIGUOUS);
  
     test_actual_io_mode(TEST_ACTUAL_IO_RESET);
+    return;
+}
+
+/* 
+ * Function: test_no_collective_cause_mode
+ *
+ * Purpose: 
+ *    tests cases for broken collective I/O and checks that the 
+ *    H5Pget_mpio_no_collective_cause properties in the DXPL have the correct values.
+ *
+ * Input:   
+ *    selection_mode: various mode to cause broken collective I/O
+ *    Note: Originally, each TEST case is supposed to be used alone.
+ *          After some discussion, this is updated to take multiple TEST cases
+ *          with '|'.  However there is no error check for any of combined 
+ *          test cases, so a tester is responsible to understand and feed
+ *          proper combination of TESTs if needed.
+ *
+ *          
+ *       TEST_COLLECTIVE:
+ *         Test for regular collective I/O without cause of breaking.
+ *         Just to test normal behavior.
+ *       
+ *       TEST_SET_INDEPENDENT:
+ *         Test for Independent I/O as the cause of breaking collective I/O.
+ *
+ *       TEST_DATATYPE_CONVERSION:
+ *         Test for Data Type Conversion as the cause of breaking collective I/O.
+ *
+ *       TEST_DATA_TRANSFORMS:
+ *         Test for Data Transfrom feature as the cause of breaking collective I/O.
+ *
+ *       TEST_SET_MPIPOSIX:
+ *         Test for MPI Posix as the cause of breaking collective I/O.
+ *
+ *       TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES:
+ *         Test for NULL dataspace as the cause of breaking collective I/O.
+ *         
+ *       TEST_POINT_SELECTIONS:
+ *         Test for selecting elements of dataspce as the cause of breaking collective I/O.
+ *
+ *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT:
+ *         Test for Compact layout as the cause of breaking collective I/O.
+ *
+ *       TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL:
+ *         Test for Externl-File storage as the cause of breaking collective I/O.
+ *
+ *       TEST_FILTERS:
+ *         Test for using filter (checksum) as the cause of breaking collective I/O.
+ *         Note: TEST_FILTERS mode will not work until H5Dcreate and H5write is supported for mpio and filter feature. Use test_no_collective_cause_mode_filter() function instead.  
+ *
+ * 
+ * Programmer: Jonathan Kim
+ * Date: Aug, 2012
+ */
+#define DSET_NOCOLCAUSE "nocolcause"
+#define NELM          2
+#define FILE_EXTERNAL "nocolcause_extern.data"
+#undef H5_HAVE_FILTER_FLETCHER32
+static void 
+test_no_collective_cause_mode(int selection_mode) 
+{
+    uint32_t no_collective_cause_local_write = 0;
+    uint32_t no_collective_cause_local_read = 0;
+    uint32_t no_collective_cause_local_expected = 0;
+    uint32_t no_collective_cause_global_write = 0;
+    uint32_t no_collective_cause_global_read = 0;
+    uint32_t no_collective_cause_global_expected = 0;
+    hsize_t coord[NELM][RANK];
+
+    const char  * filename;
+    const char  * test_name;
+    hbool_t     is_chunked=1;
+    hbool_t     is_independent=0;
+    int         mpi_size = -1; 
+    int         mpi_rank = -1;
+    int         length;
+    int         * buffer;
+    int         i;
+    MPI_Comm    mpi_comm = MPI_COMM_NULL;
+    MPI_Info    mpi_info = MPI_INFO_NULL;
+    hid_t       fid = -1;
+    hid_t       sid = -1;
+    hid_t       dataset = -1;
+    hid_t       data_type = H5T_NATIVE_INT;
+    hid_t       fapl = -1;
+    hid_t       dcpl = -1;
+    hid_t       dxpl_write = -1;
+    hid_t       dxpl_read = -1;
+    hsize_t     dims[RANK];
+    hid_t       mem_space = -1;
+    hid_t       file_space = -1;
+    hsize_t     chunk_dims[RANK];
+    hbool_t     use_gpfs = FALSE;
+    herr_t      ret;
+#ifdef H5_HAVE_FILTER_FLETCHER32            
+    H5Z_filter_t filter_info;
+#endif    
+    /* set to global value as default */
+    int l_facc_type = facc_type;   
+    char message[256];
+
+    /* Set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    HDassert(mpi_size >= 1);
+
+    mpi_comm = MPI_COMM_WORLD;
+    mpi_info = MPI_INFO_NULL;
+
+    /* Create the dataset creation plist */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl >= 0), "dataset creation plist created successfully");
+
+    if (selection_mode & TEST_SET_MPIPOSIX) {
+        l_facc_type = FACC_MPIPOSIX;
+    }
+    else {
+        if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT) {
+            ret = H5Pset_layout (dcpl, H5D_COMPACT);
+            VRFY((ret >= 0),"set COMPACT layout succeeded");
+            is_chunked = 0;
+        }
+
+        if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL) {
+            ret = H5Pset_external (dcpl, FILE_EXTERNAL, (off_t) 0, H5F_UNLIMITED);
+            VRFY((ret >= 0),"set EXTERNAL file layout succeeded");
+            is_chunked = 0;
+        }
+
+#ifdef H5_HAVE_FILTER_FLETCHER32
+        if (selection_mode & TEST_FILTERS) {
+            ret = H5Zfilter_avail(H5Z_FILTER_FLETCHER32);
+            VRFY ((ret >=0 ), "Fletcher32 filter is available.\n");
+
+            ret = H5Zget_filter_info (H5Z_FILTER_FLETCHER32, &filter_info);
+            VRFY ( ( (filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) || (filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED) ) , "Fletcher32 filter encoding and decoding available.\n");
+
+            ret = H5Pset_fletcher32(dcpl);
+            VRFY((ret >= 0),"set filter (flecher32) succeeded");
+        }
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
+    }
+
+    if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
+        sid = H5Screate(H5S_NULL);
+        VRFY((sid >= 0), "H5Screate_simple succeeded");
+        is_chunked = 0;
+    }
+    else {
+        /* Create the basic Space */    
+        dims[0] = dim0;
+        dims[1] = dim1;
+        sid = H5Screate_simple (RANK, dims, NULL);
+        VRFY((sid >= 0), "H5Screate_simple succeeded");
+    }
+    
+
+    filename = (const char *)GetTestParameters();
+    HDassert(filename != NULL);
+
+    /* Setup the file access template */
+    fapl = create_faccess_plist(mpi_comm, mpi_info, l_facc_type, use_gpfs);
+    VRFY((fapl >= 0), "create_faccess_plist() succeeded");
+
+    /* Create the file */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* If we are not testing contiguous datasets */
+    if(is_chunked) {
+        /* Set up chunk information.  */
+        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[1] = dims[1];
+        ret = H5Pset_chunk(dcpl, 2, chunk_dims);
+        VRFY((ret >= 0),"chunk creation property list succeeded");
+    }
+
+
+    /* Create the dataset */
+    dataset = H5Dcreate2(fid, "nocolcause", data_type, sid, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
+
+
+    /* 
+     * Set expected causes and some tweaks based on the type of test 
+     */
+    if (selection_mode & TEST_DATATYPE_CONVERSION) {
+        test_name = "Broken Collective I/O - Datatype Conversion";
+        no_collective_cause_local_expected |= H5D_MPIO_DATATYPE_CONVERSION;
+        no_collective_cause_global_expected |= H5D_MPIO_DATATYPE_CONVERSION;
+        /* set different sign to trigger type conversion */
+        data_type = H5T_NATIVE_UINT; 
+    }
+
+    if (selection_mode & TEST_DATA_TRANSFORMS) {
+        test_name = "Broken Collective I/O - DATA Transfroms";
+        no_collective_cause_local_expected |= H5D_MPIO_DATA_TRANSFORMS;
+        no_collective_cause_global_expected |= H5D_MPIO_DATA_TRANSFORMS;
+    }
+
+    if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES) {
+        test_name = "Broken Collective I/O - No Simple or Scalar DataSpace";
+        no_collective_cause_local_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
+        no_collective_cause_global_expected |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
+    }
+
+    if (selection_mode & TEST_POINT_SELECTIONS ) {
+        test_name = "Broken Collective I/O - Point Selection";
+        no_collective_cause_local_expected |= H5D_MPIO_POINT_SELECTIONS;
+        no_collective_cause_global_expected |= H5D_MPIO_POINT_SELECTIONS;
+    }
+
+    if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT ||
+        selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL) {
+        test_name = "Broken Collective I/O - No CONTI or CHUNKED Dataset";
+        no_collective_cause_local_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+        no_collective_cause_global_expected |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+    }
+
+#ifdef H5_HAVE_FILTER_FLETCHER32            
+    if (selection_mode & TEST_FILTERS) {
+        test_name = "Broken Collective I/O - Filter is required";
+        no_collective_cause_local_expected |= H5D_MPIO_FILTERS;
+        no_collective_cause_global_expected |= H5D_MPIO_FILTERS;
+    }
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
+
+    if (selection_mode & TEST_SET_MPIPOSIX) {
+        test_name = "Broken Collective I/O - MPIO POSIX";
+        no_collective_cause_local_expected |= H5D_MPIO_SET_MPIPOSIX;
+        no_collective_cause_global_expected |= H5D_MPIO_SET_MPIPOSIX;
+    }
+
+    if (selection_mode & TEST_COLLECTIVE) {
+        test_name = "Broken Collective I/O - Not Broken";
+        no_collective_cause_local_expected = H5D_MPIO_COLLECTIVE;
+        no_collective_cause_global_expected = H5D_MPIO_COLLECTIVE;
+    }
+
+    if (selection_mode & TEST_SET_INDEPENDENT) {
+        test_name = "Broken Collective I/O - Independent";
+        no_collective_cause_local_expected = H5D_MPIO_SET_INDEPENDENT;
+        no_collective_cause_global_expected = H5D_MPIO_SET_INDEPENDENT;
+        /* switch to independent io */
+        is_independent = 1;
+    }
+
+    /* Add MPIPOSIX cause to expected cause if MPI_POSIX driver is in use '-p'.
+     * Exception to the independent cause.*/
+    if (facc_type == FACC_MPIPOSIX && !(selection_mode & TEST_SET_INDEPENDENT)) {
+        no_collective_cause_local_expected |= H5D_MPIO_SET_MPIPOSIX;
+        no_collective_cause_global_expected |= H5D_MPIO_SET_MPIPOSIX;
+    }
+
+    /* use all spaces for certain tests */
+    if (selection_mode & TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES ||
+        selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL) {
+        file_space = H5S_ALL;
+        mem_space = H5S_ALL;
+    }
+    else {
+        /* Get the file dataspace */
+        file_space = H5Dget_space(dataset);
+        VRFY((file_space >= 0), "H5Dget_space succeeded");
+
+        /* Create the memory dataspace */
+        mem_space = H5Screate_simple (RANK, dims, NULL);
+        VRFY((mem_space >= 0), "mem_space created");
+    }
+
+    if (selection_mode & TEST_POINT_SELECTIONS) {
+        coord[0][0] = 0; coord[0][1] = 0;
+        coord[1][0] = 1; coord[1][1] = 1;
+        ret = H5Sselect_elements (file_space, H5S_SELECT_SET, NELM, (const hsize_t *)coord);
+        VRFY((ret >= 0), "H5Sselect_elements succeeded");
+
+        ret = H5Sselect_elements (mem_space, H5S_SELECT_SET, NELM, (const hsize_t *)coord);
+        VRFY((ret >= 0), "H5Sselect_elements succeeded");
+    }
+
+
+    /* Get the number of elements in the selection */
+    length = dim0 * dim1;
+
+    /* Allocate and initialize the buffer */
+    buffer = (int *)HDmalloc(sizeof(int) * length);
+    VRFY((buffer != NULL), "malloc of buffer succeeded"); 
+    for(i = 0; i < length; i++) 
+        buffer[i] = i;
+
+    /* Set up the dxpl for the write */
+    dxpl_write = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_write >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
+    
+    if(is_independent) {
+        /* Set Independent I/O */
+        ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_INDEPENDENT);
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    }
+    else {
+        /* Set Collective I/O */
+        ret = H5Pset_dxpl_mpio(dxpl_write, H5FD_MPIO_COLLECTIVE);
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+        
+    }
+
+    if (selection_mode & TEST_DATA_TRANSFORMS) {
+        ret = H5Pset_data_transform (dxpl_write, "x+1"); 
+        VRFY((ret >= 0), "H5Pset_data_transform succeeded");
+    }
+
+    /*---------------------
+     * Test Write access
+     *---------------------*/ 
+
+    /* Write */
+    ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl_write, buffer);
+    if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
+    VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
+
+
+    /* Get the cause of broken collective I/O */
+    ret = H5Pget_mpio_no_collective_cause (dxpl_write, &no_collective_cause_local_write, &no_collective_cause_global_write);
+    VRFY((ret >= 0), "retriving no collective cause succeeded" );
+
+
+    /*---------------------
+     * Test Read access
+     *---------------------*/ 
+
+    /* Make a copy of the dxpl to test the read operation */
+    dxpl_read = H5Pcopy(dxpl_write);
+    VRFY((dxpl_read >= 0), "H5Pcopy succeeded");
+
+    /* Read */
+    ret = H5Dread(dataset, data_type, mem_space, file_space, dxpl_read, buffer);
+
+    if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
+    VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
+   
+    /* Get the cause of broken collective I/O */
+    ret = H5Pget_mpio_no_collective_cause (dxpl_read, &no_collective_cause_local_read, &no_collective_cause_global_read);
+    VRFY((ret >= 0), "retriving no collective cause succeeded" );
+
+    /* Check write vs read */
+    VRFY((no_collective_cause_local_read == no_collective_cause_local_write),
+        "reading and writing are the same for local cause of Broken Collective I/O");
+    VRFY((no_collective_cause_global_read == no_collective_cause_global_write),
+        "reading and writing are the same for global cause of Broken Collective I/O");
+    
+    /* Test values */
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
+
+    /* Release some resources */
+    if (sid)
+        H5Sclose(sid);
+    if (fapl)
+        H5Pclose(fapl);
+    if (dcpl)
+        H5Pclose(dcpl);
+    if (dxpl_write)
+        H5Pclose(dxpl_write);
+    if (dxpl_read)
+        H5Pclose(dxpl_read);
+    if (dataset)
+        H5Dclose(dataset);
+    if (mem_space)
+        H5Sclose(mem_space);
+    if (file_space)
+        H5Sclose(file_space);
+    if (fid)
+        H5Fclose(fid);
+    HDfree(buffer);
+
+    /* clean up external file */
+    if (selection_mode & TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL)
+        HDremove(FILE_EXTERNAL);
+
+    return;
+}
+
+
+/* 
+ * Function: test_no_collective_cause_mode_filter
+ *
+ * Purpose: 
+ *    Test specific for using filter as a caus of broken collective I/O and 
+ *    checks that the H5Pget_mpio_no_collective_cause properties in the DXPL
+ *    have the correct values.
+ *
+ * NOTE: 
+ *    This is a temprary function. 
+ *    test_no_collective_cause_mode(TEST_FILTERS) will replace this when
+ *    H5Dcreate and H5write support for mpio and filter feature.
+ *
+ * Input:   
+ *     TEST_FILTERS_READ:
+ *       Test for using filter (checksum) as the cause of breaking collective I/O.
+ * 
+ * Programmer: Jonathan Kim
+ * Date: Aug, 2012
+ */
+static void 
+test_no_collective_cause_mode_filter(int selection_mode) 
+{
+    uint32_t no_collective_cause_local_read = 0;
+    uint32_t no_collective_cause_local_expected = 0;
+    uint32_t no_collective_cause_global_read = 0;
+    uint32_t no_collective_cause_global_expected = 0;
+
+    const char  * filename;
+    const char  * test_name;
+    hbool_t     is_chunked=1;
+    int         mpi_size = -1; 
+    int         mpi_rank = -1;
+    int         length;
+    int         * buffer;
+    int         i;
+    MPI_Comm    mpi_comm = MPI_COMM_NULL;
+    MPI_Info    mpi_info = MPI_INFO_NULL;
+    hid_t       fid = -1;
+    hid_t       sid = -1;
+    hid_t       dataset = -1;
+    hid_t       data_type = H5T_NATIVE_INT;
+    hid_t       fapl_write = -1;
+    hid_t       fapl_read = -1;
+    hid_t       dcpl = -1;
+    hid_t       dxpl = -1;
+    hsize_t     dims[RANK];
+    hid_t       mem_space = -1;
+    hid_t       file_space = -1;
+    hsize_t     chunk_dims[RANK];
+    hbool_t     use_gpfs = FALSE;
+    herr_t      ret;
+#ifdef H5_HAVE_FILTER_FLETCHER32            
+    H5Z_filter_t filter_info;
+#endif    
+    char message[256];
+
+    /* Set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    
+    HDassert(mpi_size >= 1);
+
+    mpi_comm = MPI_COMM_WORLD;
+    mpi_info = MPI_INFO_NULL;
+
+    /* Create the dataset creation plist */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((dcpl >= 0), "dataset creation plist created successfully");
+
+    if (selection_mode == TEST_FILTERS_READ )  {
+#ifdef H5_HAVE_FILTER_FLETCHER32            
+            ret = H5Zfilter_avail(H5Z_FILTER_FLETCHER32);
+            VRFY ((ret >=0 ), "Fletcher32 filter is available.\n");
+
+            ret = H5Zget_filter_info (H5Z_FILTER_FLETCHER32, (unsigned int *) &filter_info);
+            VRFY ( ( (filter_info & H5Z_FILTER_CONFIG_ENCODE_ENABLED) || (filter_info & H5Z_FILTER_CONFIG_DECODE_ENABLED) ) , "Fletcher32 filter encoding and decoding available.\n");
+
+            ret = H5Pset_fletcher32(dcpl);
+            VRFY((ret >= 0),"set filter (flecher32) succeeded");
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
+    }
+    else  {
+        VRFY(0, "Unexpected mode, only test for TEST_FILTERS_READ.");
+    }
+
+    /* Create the basic Space */    
+    dims[0] = dim0;
+    dims[1] = dim1;
+    sid = H5Screate_simple (RANK, dims, NULL);
+    VRFY((sid >= 0), "H5Screate_simple succeeded");
+    
+
+    filename = (const char *)GetTestParameters();
+    HDassert(filename != NULL);
+
+    /* Setup the file access template */
+    fapl_write = create_faccess_plist(mpi_comm, mpi_info, FACC_DEFAULT, use_gpfs);
+    VRFY((fapl_write >= 0), "create_faccess_plist() succeeded");
+
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_write);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* If we are not testing contiguous datasets */
+    if(is_chunked) {
+        /* Set up chunk information.  */
+        chunk_dims[0] = dims[0]/mpi_size;
+        chunk_dims[1] = dims[1];
+        ret = H5Pset_chunk(dcpl, 2, chunk_dims);
+        VRFY((ret >= 0),"chunk creation property list succeeded");
+    }
+
+
+    /* Create the dataset */
+    dataset = H5Dcreate2(fid, DSET_NOCOLCAUSE, data_type, sid, H5P_DEFAULT,
+            dcpl, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dcreate2() dataset succeeded");
+
+#ifdef H5_HAVE_FILTER_FLETCHER32            
+    /* Set expected cause */
+    test_name = "Broken Collective I/O - Filter is required";
+    no_collective_cause_local_expected = H5D_MPIO_FILTERS;
+    no_collective_cause_global_expected = H5D_MPIO_FILTERS;
+#endif
+
+    /* Ignore above expected cause and reset cause to MPIPOSIX if 
+     * the MPI_POSIX driver is in use.*/
+    if (facc_type == FACC_MPIPOSIX) {
+        no_collective_cause_local_expected = H5D_MPIO_SET_MPIPOSIX;
+        no_collective_cause_global_expected = H5D_MPIO_SET_MPIPOSIX;
+    }
+
+    /* Get the file dataspace */
+    file_space = H5Dget_space(dataset);
+    VRFY((file_space >= 0), "H5Dget_space succeeded");
+
+    /* Create the memory dataspace */
+    mem_space = H5Screate_simple (RANK, dims, NULL);
+    VRFY((mem_space >= 0), "mem_space created");
+
+    /* Get the number of elements in the selection */
+    length = dim0 * dim1;
+
+    /* Allocate and initialize the buffer */
+    buffer = (int *)HDmalloc(sizeof(int) * length);
+    VRFY((buffer != NULL), "malloc of buffer succeeded"); 
+    for(i = 0; i < length; i++) 
+        buffer[i] = i;
+
+    /* Set up the dxpl for the write */
+    dxpl = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl >= 0), "H5Pcreate(H5P_DATASET_XFER) succeeded");
+    
+    if (selection_mode == TEST_FILTERS_READ)  {
+        /* To test read in collective I/O mode , write in independent mode 
+         * because write fails with mpio + filter */
+        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_INDEPENDENT);
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    }
+    else  {
+        /* To test write in collective I/O mode. */
+        ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+        VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+    }
+        
+
+    /* Write */
+    ret = H5Dwrite(dataset, data_type, mem_space, file_space, dxpl, buffer);
+
+    if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
+    VRFY((ret >= 0), "H5Dwrite() dataset multichunk write succeeded");
+
+
+    /* Make a copy of the dxpl to test the read operation */
+    dxpl = H5Pcopy(dxpl);
+    VRFY((dxpl >= 0), "H5Pcopy succeeded");
+
+    if (dataset)
+        H5Dclose(dataset);
+    if (fapl_write)
+        H5Pclose(fapl_write);
+    if (fid)
+        H5Fclose(fid);
+
+
+    /*---------------------
+     * Test Read access
+     *---------------------*/
+
+    /* Setup the file access template */
+    fapl_read = create_faccess_plist(mpi_comm, mpi_info, facc_type, use_gpfs);
+    VRFY((fapl_read >= 0), "create_faccess_plist() succeeded");
+
+    fid = H5Fopen (filename, H5F_ACC_RDONLY, fapl_read);
+    dataset = H5Dopen (fid, DSET_NOCOLCAUSE, H5P_DEFAULT);
+
+    /* Set collective I/O properties in the dxpl. */
+    ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    /* Read */
+    ret = H5Dread(dataset, data_type, mem_space, file_space, dxpl, buffer);
+
+    if(ret < 0) H5Eprint2(H5E_DEFAULT, stdout);
+    VRFY((ret >= 0), "H5Dread() dataset multichunk read succeeded");
+   
+    /* Get the cause of broken collective I/O */
+    ret = H5Pget_mpio_no_collective_cause (dxpl, &no_collective_cause_local_read, &no_collective_cause_global_read);
+    VRFY((ret >= 0), "retriving no collective cause succeeded" );
+
+    /* Test values */
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_local_read == (uint32_t)no_collective_cause_local_expected), message);
+    memset (message, 0, sizeof (message));
+    sprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n",test_name);
+    VRFY((no_collective_cause_global_read == (uint32_t)no_collective_cause_global_expected), message);
+
+    /* Release some resources */
+    if (sid)
+        H5Sclose(sid);
+    if (fapl_read)
+        H5Pclose(fapl_read);
+    if (dcpl)
+        H5Pclose(dcpl);
+    if (dxpl)
+        H5Pclose(dxpl);
+    if (dataset)
+        H5Dclose(dataset);
+    if (mem_space)
+        H5Sclose(mem_space);
+    if (file_space)
+        H5Sclose(file_space);
+    if (fid)
+        H5Fclose(fid);
+    HDfree(buffer);
+    return;
+}
+
+/* Function: no_collective_cause_tests
+ *
+ * Purpose: Tests cases for broken collective IO. 
+ *
+ * Programmer: Jonathan Kim
+ * Date: Aug, 2012
+ */
+void 
+no_collective_cause_tests(void) 
+{
+    int mpi_size = -1;
+    int mpi_rank = -1;
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_rank);
+
+    /* 
+     * Test individual cause 
+     */
+    test_no_collective_cause_mode (TEST_COLLECTIVE);
+    test_no_collective_cause_mode (TEST_SET_INDEPENDENT);
+    test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION);
+    test_no_collective_cause_mode (TEST_DATA_TRANSFORMS);
+    test_no_collective_cause_mode (TEST_SET_MPIPOSIX);
+    test_no_collective_cause_mode (TEST_NOT_SIMPLE_OR_SCALAR_DATASPACES);
+    test_no_collective_cause_mode (TEST_POINT_SELECTIONS);
+    test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
+    test_no_collective_cause_mode (TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
+#ifdef H5_HAVE_FILTER_FLETCHER32            
+   /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and 
+    * H5Dwrite is ready for mpio + filter feature.
+    */
+    /* test_no_collective_cause_mode (TEST_FILTERS); */
+    test_no_collective_cause_mode_filter (TEST_FILTERS_READ);
+#endif    
+
+    /* 
+     * Test combined causes 
+     */
+    test_no_collective_cause_mode (TEST_SET_MPIPOSIX | TEST_DATATYPE_CONVERSION);
+    test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS);
+    test_no_collective_cause_mode (TEST_DATATYPE_CONVERSION | TEST_DATA_TRANSFORMS | TEST_POINT_SELECTIONS);
+
     return;
 }
 

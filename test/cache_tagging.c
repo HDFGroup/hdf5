@@ -1628,6 +1628,8 @@ error:
  *              March 3, 2010
  *
  * Modifications:
+ *	Vailin Choi; July 2012
+ *	Add verify_tag() calls because H5FD_FLMAP_DICHOTOMY is now the default free-list mapping.
  *
  *-------------------------------------------------------------------------
  */
@@ -1751,7 +1753,12 @@ check_attribute_rename_tags(hid_t fcpl, int type)
         /* verify shared header message stored as a list */
         if ( verify_tag(fid, H5AC_SOHM_LIST_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
-        /* verify free space header */
+        /* 
+	 * 3 calls to verify_tag() for verifying free space: 
+	 *   one freespace header tag for H5FD_MEM_DRAW manager, 
+	 *   one freespace header tag for H5FD_MEM_SUPER manager 
+         */
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
 
         /* verify btree header and leaf node belonging to group */
@@ -1794,6 +1801,8 @@ error:
  *              March 3, 2010
  *
  * Modifications:
+ *	Vailin Choi; July 2012
+ *	Add verify_tag() call because H5FD_FLMAP_DICHOTOMY is now the default free-list mapping.
  *
  *-------------------------------------------------------------------------
  */
@@ -1896,7 +1905,12 @@ check_attribute_delete_tags(hid_t fcpl, int type)
         /* verify shared header message master table */
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
-        /* verify free space */
+        /* 
+	 * 2 calls to verify_tag() for verifying free space: 
+	 *   one freespace header tag for H5FD_MEM_DRAW manager,
+	 *   one freespace header tag for H5FD_MEM_SUPER manager 
+	 */
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
 
     } /* end if */

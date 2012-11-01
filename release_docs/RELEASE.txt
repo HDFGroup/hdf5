@@ -1,4 +1,4 @@
-HDF5 version 1.9.125 currently under development
+HDF5 version 1.9.132 currently under development
 ================================================================================
 
 
@@ -39,6 +39,13 @@ New Features
 
     Configuration:
     -------------
+    - Fixed AIX Fortran compiler flags to use appropriate settings for
+      debugging, profiling, optimization situations. HDFFV-8069. (AKC
+      2012/09/27)
+    - Updated to latest autotools and changed all hard *.sh scripts to
+      configure managed *.sh.in files. Removed overloading of autotools
+      TESTS variable by examples and tests. Renamed configure.in to
+      configure.ac. (ADB - 2012/08/23 - HDFFV-8129)
     - Added code to display the version information of XL fortran and C++
       in the summary of configure. (AKC - 2012/02/28 - HDFFV-7793)
     - Configure now generates Makefiles that build in "silent make mode"
@@ -93,6 +100,9 @@ New Features
 
     Library:
     --------
+    - The library now supports the data conversion from enumeration to numeric
+      (integer and floating-point number) datatypes. See Issue 8221.
+      (SLU - 2012/10/23)  
     - The data sieve buffer size was for all the datasets in the file.  It
       could waste memory if any dataset size is smaller than the sieve buffer
       size.  Now the library picks the smaller one between the dataset size
@@ -163,6 +173,9 @@ New Features
 
     Parallel Library:
     -----------------
+    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
+      why the collective I/O was broken during read/write IO access. 
+      (JKM - 2012/08/30 HDFFV-8143)
     - Special Collective IO (IO when some processes do not contribute to the
       IO) and Complex Derived Datatype MPI functionalities are no longer
       conditionally enabled in the library by configure. They are always
@@ -177,6 +190,8 @@ New Features
 
     Fortran Library:
     ----------------
+
+    - Added parallel routine H5Pget_mpio_actual_io_mode_f (MSB - 2012/09/27)
 
     - Added for the C API the Fortran wrapper:
        h5ocopy_f (MSB - 2012/03/22)
@@ -221,6 +236,7 @@ New Features
             h5pset_chunk_cache_f
             h5pget_chunk_cache_f 
           (MSB - 2009/04/17)
+
 
 
     C++ Library:
@@ -691,6 +707,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - Removed program perform/benchpar from the enable-build-all list. The
+	program will be retired or moved to another location. HDFFV-8156
+	(AKC 2012/10/01)
+      - Retired program perform/mpi-perf. Its purpose has been incorporated
+	into h5perf before. (AKC 2012/09/20)
       - ifdefs added to tests around include unistd.h and function to simulate
         getlogin() on Windows. 
         (ADB - 2011/08/15)
@@ -703,8 +724,37 @@ Bug Fixes since HDF5-1.8.0 release
         with other Fortran functions; cleaned the code from debug statements.
         (EIP - 2012/06/23)
 
+      - Fixed problem writing/reading control characters to a dataset; writing
+        a string containing: alerts, backspace, carriage_return, form_feed,
+        horizontal_tab, vertical_tab, new_line is now tested and working.
+        (MSB - 2012/09/01)
+
+      - Corrected the integer type of H5S_UNLIMITED_F to HSIZE_T (MSB - 2012/09/01)
+
+      - Corrected the number of continuation lines in the src files
+        to be less then 32 lines for F95 compliance. (MSB - 2012/10/01)
+
     Tools
     -----
+        - h5diff: Improved speed when comparing HDF5 files with lots of
+          attributes. Much slower performance was identified with release version 
+          from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
+        - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
+          source file contains chunked dataset and a chunk dim is bigger than 
+          the dataset dim. Another issue is that the command changed max dims
+          if chunk dim is smaller than the dataset dim.
+          These issue occurred when dataset size is smaller than 64k (compact
+          size limit)  Fixed both.
+          HDFFV-8012 (JKM 2012/09/24)
+        - h5diff: Fixed not to accumulate attribute difference to dataset
+          difference in verbose mode (-v, -r), which caused incorrect 
+          difference between dataset and group/datatype object if attribute 
+          exist with any differences. This also lead to fix inconsistent
+          format indicating difference between dataset and group/datatype
+          object. HDFFV-5919 (JKM 2012/09/05)
+        - h5diff: Fixed the incorrect result when comparing attribute data 
+          values and the data type has same class but different size.
+          HDFFV-7942  (JKM 2012/08/15)
         - ph5diff: Fixed intermittent hang issue on a certain operation in 
           parallel mode. It was detected by daily test for comparing 
           non-comparable objects, but it could have occurred in other 
@@ -916,6 +966,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+
+      - Fixed problem with H5TBdelete_record destroying all data following the deletion
+        of a row. (MSB- 2012/7/26)
+
+      - Fixed H5LTget_attribute_string not closing an object identifier when an 
+        error occurs. (MSB- 2012/7/21)
+
       - Fixed the H5LTdtype_to_text function.  It had some memory problems when
         dealing with some complicated data types. HDFFVI-7701 (SLU - 2011/10/19)
 
@@ -1003,14 +1060,12 @@ Platforms Tested
                                   xlf90 12.1.0.6
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
-    (loyalty)                     g++ 4.2.1 [FreeBSD] 20070719
-                                  gcc 4.6.1 20110422
+    (loyalty)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
     FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
-    (freedom)                     g++ 4.2.1 [FreeBSD] 20070719
-                                  gcc 4.6.1 20110422
+    (freedom)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
@@ -1054,22 +1109,14 @@ Platforms Tested
                                   Sun Fortran 95 8.4 SunOS_sparc Patch
 128231-06
                                   Sun C++ 5.10 SunOS_sparc 128228-11
- 
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
-          
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 11.1
-                                  Visual Studio 2010
-                                  Cygwin(1.7.7 native gcc(4.3.4) compiler and gfortran)
 
-    Windows Vista                 Visual Studio 2008 w/ Intel Fortran 11.1
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
-    Windows Vista x64             Visual Studio 2008 w/ Intel Fortran 11.1
-
-    Windows 7                     Visual Studio 2010
-
-    Windows 7 x64                 Visual Studio 2010
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -1092,12 +1139,10 @@ Platform                          C        F90    F90      C++   zlib  SZIP
                                   parallel        parallel
 SunOS5.10 64-bit                   n        y      n        y     y     y
 SunOS5.10 32-bit                   n        y      n        y     y     y
-Windows XP                         n        y(3)   n(3)     y     y     y
-Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        y(3)   n(3)     y     y     y
-Windows Vista x64                  n        y(3)   n(3)     y     y     y
+Windows 7                          y        y      n        y     y     y
+Windows 7 x64                      y        y      n        y     y     y
 Mac OS X 10.5 Intel                n        y      n        y     y     y
-FreeBSD 8.2 32- and 64-bit         n        x      n        x     y     y
+FreeBSD 8.2 32- and 64-bit         n        y      n        y     y     y
 RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
 RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
 RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
@@ -1113,7 +1158,6 @@ SuSe Linux 2.6.5
 Alpha OpenVMS 7.3.2                n        y      n        y     n     n
 
 
-
 Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
@@ -1123,7 +1167,7 @@ Windows XP x64                      y        y(3)      y         y        n
 Windows Vista                       y        y(3)      y         y        y
 Windows Vista x64                   y        y(3)      y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
-FreeBSD 8.2 32- and 64-bit          y        x         x         y        y
+FreeBSD 8.2 32- and 64-bit          y        y         y         y        y
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
 RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
 RHEL4 2.6.9 i686 PGI              W y        y         y         x        n
@@ -1149,6 +1193,11 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The C++ and FORTRAN bindings are not currently working on FreeBSD with the
+  native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
+  ports (and probably gcc releases after that).
+  (QAK - 2012/10/19)
+
 * The data conversion test dt_arith.c has failures (segmentation fault) from
   "long double" to other datatypes during hard conversion when the library
   is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
