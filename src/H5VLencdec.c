@@ -2551,11 +2551,35 @@ H5VL__encode_group_get_params(void *buf, size_t *nalloc, H5VL_group_get_t get_ty
                     *p++ = (uint8_t)get_type;
                     /* encode the object id */
                     INT32ENCODE(p, obj_id);
-                
                 }
+                break;
             }
         case H5VL_GROUP_GET_INFO:
             {
+                hid_t obj_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                size_t loc_size = 0;
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                size += 2 + sizeof(int32_t) + 
+                    1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_GROUP_GET;
+                    /* encode get type */
+                    *p++ = (uint8_t)get_type;
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+                    UINT64ENCODE_VARLEN(p, loc_size);
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+                    p += loc_size;
+                }
                 break;
             }
         default:
@@ -2592,6 +2616,18 @@ H5VL__decode_group_get_params(void *buf, H5VL_group_get_t get_type, ...)
             }
         case H5VL_GROUP_GET_INFO:
             {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5VL_loc_params_t *loc_params = va_arg (arguments, H5VL_loc_params_t *);
+                size_t loc_size = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+
+                UINT64DECODE_VARLEN(p, loc_size);
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+                p += loc_size;
                 break;
             }
         default:

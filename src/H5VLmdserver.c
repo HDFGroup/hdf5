@@ -1531,11 +1531,44 @@ H5VL__group_get_cb(uint8_t *p, int source)
 
                 H5Pclose(gcpl_id);
                 break;
-                break;
             }
         /* H5Gget_info */
         case H5VL_GROUP_GET_INFO:
             {
+                hid_t obj_id;
+                H5VL_loc_params_t loc_params;
+                void *send_buf = NULL;
+                H5G_info_t ginfo;
+                size_t buf_size = 0; /* send_buf size */
+                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+                /* decode params */
+                if(H5VL__decode_group_get_params(p, get_type, &obj_id, &loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group get params");
+
+                /* get value through the native plugin */
+                if(H5VL__temp_group_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, loc_params,
+                                        &ginfo) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to dget groupibute info");
+
+                buf_size = 1 + sizeof(unsigned) + sizeof(int64_t) +
+                    1 + H5V_limit_enc_size((uint64_t)ginfo.nlinks);
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                *p1++ = (uint8_t)ginfo.storage_type;
+                UINT64ENCODE_VARLEN(p1, ginfo.nlinks);
+                INT64ENCODE(p1, ginfo.max_corder);
+                H5_ENCODE_UNSIGNED(p1, ginfo.mounted);
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                H5MM_xfree(send_buf);
                 break;
             }
         default:

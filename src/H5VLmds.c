@@ -1362,7 +1362,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
             {
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
                 H5A_info_t *ainfo = va_arg (arguments, H5A_info_t *);
-                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                H5VL_mds_object_t *obj = (H5VL_mds_attr_t *)_obj;
                 void *send_buf = NULL;
                 size_t buf_size;
                 void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
@@ -1372,7 +1372,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type || H5VL_OBJECT_BY_IDX == loc_params.type) {
                     /* determine the size of the buffer needed to encode the parameters */
-                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, attr->common.obj_id,
+                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, obj->obj_id,
                                                     loc_params) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
 
@@ -1381,7 +1381,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* encode the parameters */
-                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, attr->common.obj_id,
+                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, obj->obj_id,
                                                     loc_params) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr get parameters");
                 }
@@ -1389,7 +1389,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                     char *attr_name = va_arg (arguments, char *);
 
                     /* determine the size of the buffer needed to encode the parameters */
-                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, attr->common.obj_id, 
+                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, obj->obj_id, 
                                                     loc_params, attr_name) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
 
@@ -1398,7 +1398,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* encode the parameters */
-                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, attr->common.obj_id, 
+                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, obj->obj_id, 
                                                     loc_params, attr_name) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr get parameters");
                 }
@@ -2618,6 +2618,63 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
         /* H5Gget_info */
         case H5VL_GROUP_GET_INFO:
             {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                H5G_info_t *ginfo = va_arg (arguments, H5G_info_t *);
+                H5VL_mds_object_t *obj = (H5VL_mds_attr_t *)_obj;
+                void *send_buf = NULL;
+                size_t buf_size;
+                void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+                int incoming_msg_size; /* incoming buffer size for MDS returned buffer */
+                uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */
+                MPI_Status status;
+
+                /* determine the size of the buffer needed to encode the parameters */
+                if(H5VL__encode_group_get_params(NULL, &buf_size, get_type, obj->obj_id, 
+                                                 loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* encode the parameters */
+                if(H5VL__encode_group_get_params(send_buf, &buf_size, get_type, obj->obj_id,
+                                                 loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode group get parameters");
+
+                MPI_Pcontrol(0);
+                /* send the request to the MDS process and recieve the return value */
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_free(send_buf);
+
+                /* probe for a message from the mds */
+                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+                /* get the incoming message size from the probe result */
+                if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+                /* allocate the receive buffer */
+                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* receive the actual message */
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+                MPI_Pcontrol(1);
+
+                p = (uint8_t *)recv_buf;
+
+                ginfo->storage_type = (H5G_storage_type_t)*p++;
+                UINT64DECODE_VARLEN(p, ginfo->nlinks);
+                INT64DECODE(p, ginfo->max_corder);
+                H5_DECODE_UNSIGNED(p, ginfo->mounted);
+
+                H5MM_free(recv_buf);
                 break;
             }
         default:
