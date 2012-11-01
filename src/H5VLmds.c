@@ -74,7 +74,7 @@ static void *H5VL_mds_attr_create(void *obj, H5VL_loc_params_t loc_params, const
 static void *H5VL_mds_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
 static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
 static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
-//static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
 static herr_t H5VL_mds_attr_close(void *attr, hid_t req);
 
@@ -92,7 +92,7 @@ static herr_t H5VL_mds_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_spa
 static herr_t H5VL_mds_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                      hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
 static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
-//static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 
 /* File callbacks */
@@ -156,7 +156,7 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_attr_open,                  /* open */
         H5VL_mds_attr_read,                  /* read */
         H5VL_mds_attr_write,                 /* write */
-        NULL,//H5VL_mds_attr_get,                   /* get */
+        H5VL_mds_attr_get,                   /* get */
         H5VL_mds_attr_remove,                /* remove */
         H5VL_mds_attr_close                  /* close */
     },
@@ -172,7 +172,7 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_dataset_read,               /* read */
         H5VL_mds_dataset_write,              /* write */
         H5VL_mds_dataset_set_extent,         /* set extent */
-        NULL,//H5VL_mds_dataset_get,                /* get */
+        H5VL_mds_dataset_get,                /* get */
         H5VL_mds_dataset_close               /* close */
     },
     {                                        /* file_cls */
@@ -1149,6 +1149,270 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_attr_get
+ *
+ * Purpose:	Gets certain information about an attribute
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_list arguments)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Aexists/exists_by_name */
+        case H5VL_ATTR_EXISTS:
+            {
+                H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+                H5VL_loc_params_t loc_params  = va_arg (arguments, H5VL_loc_params_t);
+                char *attr_name      = va_arg (arguments, char *);
+                htri_t *ret       = va_arg (arguments, htri_t *);
+                void *send_buf = NULL;
+                size_t buf_size;
+
+                /* determine the size of the buffer needed to encode the parameters */
+                if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, obj->obj_id, loc_params, 
+                                                attr_name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* encode the parameters */
+                if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, obj->obj_id, loc_params, 
+                                                attr_name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr get parameters");
+
+                MPI_Pcontrol(0);
+                /* send the request to the MDS process and recieve the return value */
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                               MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
+                MPI_Pcontrol(1);
+
+                H5MM_free(send_buf);
+
+                break;
+            }
+        /* H5Aget_space */
+        case H5VL_ATTR_GET_SPACE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+
+                if((*ret_id = H5A_get_space(attr->attr)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of attribute")
+                break;
+            }
+        /* H5Aget_type */
+        case H5VL_ATTR_GET_TYPE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+
+                if((*ret_id = H5A_get_type(attr->attr)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of attribute")
+                break;
+            }
+        /* H5Aget_create_plist */
+        case H5VL_ATTR_GET_ACPL:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+
+                if((*ret_id = H5A_get_create_plist(attr->attr)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for attr")
+
+                break;
+            }
+        /* H5Aget_name */
+        case H5VL_ATTR_GET_NAME:
+            {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                size_t	size = va_arg (arguments, size_t);
+                char    *buf = va_arg (arguments, char *);
+                ssize_t	*ret_val = va_arg (arguments, ssize_t *);
+
+                /* if the attribute is opened and we are calling H5Aget_name, then no need to go
+                 * to the mds, because the name is local
+                 */
+                if(H5VL_OBJECT_BY_SELF == loc_params.type) {
+                    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                    /* Call private function in turn */
+                    if(0 > (*ret_val = H5A_get_name(attr->attr, size, buf)))
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get attribute name")
+                }
+                /* otherwise we need to go to the MDS, because the attribute is not opened yet */
+                else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
+                    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+                    void *send_buf = NULL;
+                    size_t buf_size;
+                    void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+                    int incoming_msg_size; /* incoming buffer size for MDS returned buffer */
+                    uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */
+                    MPI_Status status;
+
+                    /* determine the size of the buffer needed to encode the parameters */
+                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, obj->obj_id, 
+                                                    loc_params, size) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                    /* allocate the buffer for encoding the parameters */
+                    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                    /* encode the parameters */
+                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, obj->obj_id, 
+                                                    loc_params, size) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr get parameters");
+
+                    MPI_Pcontrol(0);
+                    /* send the request to the MDS process and recieve the return value */
+                    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                    H5MM_free(send_buf);
+
+                    /* probe for a message from the mds */
+                    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+                    /* get the incoming message size from the probe result */
+                    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+                    /* allocate the receive buffer */
+                    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                    /* receive the actual message */
+                    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+                    MPI_Pcontrol(1);
+
+                    p = (uint8_t *)recv_buf;
+
+                    INT64DECODE(p, *ret_val);
+                    if(buf && size)
+                        HDstrcpy(buf, (char *)p);
+                    p += size;
+
+                    H5MM_free(recv_buf);
+                }
+                break;
+            }
+        /* H5Aget_info */
+        case H5VL_ATTR_GET_INFO:
+            {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                H5A_info_t *ainfo = va_arg (arguments, H5A_info_t *);
+                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                void *send_buf = NULL;
+                size_t buf_size;
+                void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+                int incoming_msg_size; /* incoming buffer size for MDS returned buffer */
+                uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */
+                MPI_Status status;
+
+                if(H5VL_OBJECT_BY_SELF == loc_params.type || H5VL_OBJECT_BY_IDX == loc_params.type) {
+                    /* determine the size of the buffer needed to encode the parameters */
+                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, attr->common.obj_id,
+                                                    loc_params) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                    /* allocate the buffer for encoding the parameters */
+                    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                    /* encode the parameters */
+                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, attr->common.obj_id,
+                                                    loc_params) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr get parameters");
+                }
+                else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
+                    char *attr_name = va_arg (arguments, char *);
+
+                    /* determine the size of the buffer needed to encode the parameters */
+                    if(H5VL__encode_attr_get_params(NULL, &buf_size, get_type, attr->common.obj_id, 
+                                                    loc_params, attr_name) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to determine buffer size needed");
+
+                    /* allocate the buffer for encoding the parameters */
+                    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                    /* encode the parameters */
+                    if(H5VL__encode_attr_get_params(send_buf, &buf_size, get_type, attr->common.obj_id, 
+                                                    loc_params, attr_name) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode attr get parameters");
+                }
+
+                MPI_Pcontrol(0);
+                /* send the request to the MDS process and recieve the return value */
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_free(send_buf);
+
+                /* probe for a message from the mds */
+                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+                /* get the incoming message size from the probe result */
+                if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+                /* allocate the receive buffer */
+                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* receive the actual message */
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+                MPI_Pcontrol(1);
+
+                p = (uint8_t *)recv_buf;
+
+                H5_DECODE_UNSIGNED(p, ainfo->corder_valid);
+                UINT32DECODE(p, ainfo->corder);
+                ainfo->cset = (H5T_cset_t)*p++;
+                UINT64DECODE_VARLEN(p, ainfo->data_size);
+
+                H5MM_free(recv_buf);
+                break;
+            }
+        case H5VL_ATTR_GET_STORAGE_SIZE:
+            {
+                hsize_t *ret = va_arg (arguments, hsize_t *);
+                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+
+                /* Set return value */
+                *ret = attr->attr->shared->data_size;
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_attr_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_mds_attr_close
  *
  * Purpose:	Closes a attr.
@@ -1645,6 +1909,143 @@ H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_set_extent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_dataset_get
+ *
+ * Purpose:	Gets certain information about a dataset
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t UNUSED req, va_list arguments)
+{
+    H5VL_mds_dset_t *dataset = (H5VL_mds_dset_t *)obj;
+    H5D_t       *dset = dataset->dset;
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Dget_space */
+        case H5VL_DATASET_GET_SPACE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((*ret_id = H5D_get_space(dset)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of dataset")
+
+                break;
+            }
+            /* H5Dget_space_statuc */
+        case H5VL_DATASET_GET_SPACE_STATUS:
+            {
+                H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
+
+                /* Read data space address and return */
+                if(H5D__get_space_status(dset, allocation, H5AC_ind_dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
+
+                break;
+            }
+            /* H5Dget_type */
+        case H5VL_DATASET_GET_TYPE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((*ret_id = H5D_get_type(dset)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+
+                break;
+            }
+            /* H5Dget_create_plist */
+        case H5VL_DATASET_GET_DCPL:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+                hid_t    dcpl_id;
+
+                dcpl_id = dset->shared->dcpl_id;
+
+                if(dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
+                    if(H5I_inc_ref(dcpl_id, FALSE) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, FAIL, "can't increment default DCPL ID");
+                    *ret_id = dcpl_id;
+                }
+                else {
+                    H5P_genplist_t  *plist;
+
+                    /* Get the property list */
+                    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+                    *ret_id = H5P_copy_plist(plist, FALSE);
+                } /* end else */
+                break;
+            }
+            /* H5Dget_access_plist */
+        case H5VL_DATASET_GET_DAPL:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((*ret_id = H5D_get_access_plist(dset)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get access property list for dataset")
+
+                break;
+            }
+            /* H5Dget_storage_size */
+        case H5VL_DATASET_GET_STORAGE_SIZE:
+            {
+                hsize_t *ret = va_arg (arguments, hsize_t *);
+
+                /* Set return value */
+                if(H5D__get_storage_size(dset, H5AC_ind_dxpl_id, ret) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
+                break;
+            }
+            /* H5Dget_offset */
+        case H5VL_DATASET_GET_OFFSET:
+            {
+                haddr_t *ret = va_arg (arguments, haddr_t *);
+
+                switch(dset->shared->layout.type) {
+                    case H5D_CHUNKED:
+                    case H5D_COMPACT:
+                        break;
+
+                    case H5D_CONTIGUOUS:
+                        /* If dataspace hasn't been allocated or dataset is stored in
+                         * an external file, the value will be HADDR_UNDEF. */
+                        if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
+                            /* Return the absolute dataset offset from the beginning of file. */
+                            *ret = dset->shared->layout.storage.u.contig.addr;
+                        break;
+
+                    case H5D_LAYOUT_ERROR:
+                    case H5D_NLAYOUTS:
+                    default:
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type");
+                } /*lint !e788 All appropriate cases are covered */
+
+                /* Set return value */
+                *ret = H5D__get_offset(dset);
+                if(!H5F_addr_defined(*ret))
+                    *ret = HADDR_UNDEF;
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_dataset_get() */
 
 
 /*-------------------------------------------------------------------------

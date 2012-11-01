@@ -1062,6 +1062,260 @@ done:
 } /* end H5VL__decode_attr_write_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_attr_get_encode__params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_attr_get_params(void *buf, size_t *nalloc, H5VL_attr_get_t get_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    va_list arguments;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    va_start (arguments, get_type);
+    switch (get_type) {
+        case H5VL_ATTR_EXISTS:
+            {
+                hid_t obj_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                char *name = va_arg (arguments, char *);
+                size_t len = 0, loc_size = 0;
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name) + 1;
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                size += 2 + sizeof(int32_t) + 
+                    1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size + 
+                    1 + H5V_limit_enc_size((uint64_t)len) + len;
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_ATTR_GET;
+                    /* encode get type */
+                    *p++ = (uint8_t)get_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    UINT64ENCODE_VARLEN(p, loc_size);
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+                    p += loc_size;
+
+                    /* encode length of the attr name and the actual attr name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != name)
+                        HDstrcpy((char *)p, name);
+                    p += len;
+                }
+                break;
+            }
+        case H5VL_ATTR_GET_NAME:
+            {
+                hid_t obj_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                size_t buf_size = va_arg (arguments, size_t);
+                size_t loc_size = 0;
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                size += 2 + sizeof(int32_t) + 
+                    1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size + 
+                    1 + H5V_limit_enc_size((uint64_t)buf_size);
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_ATTR_GET;
+                    /* encode get type */
+                    *p++ = (uint8_t)get_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    UINT64ENCODE_VARLEN(p, loc_size);
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+                    p += loc_size;
+
+                    /* encode length of the attr name and the actual attr name */
+                    UINT64ENCODE_VARLEN(p, buf_size);
+                }
+                break;
+            }
+        case H5VL_ATTR_GET_INFO:
+            {
+                hid_t obj_id = va_arg (arguments, hid_t);
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                size_t loc_size = 0, len = 0;
+                char *name = NULL;
+
+                /* get loc params size to encode */
+                if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+                size += 2 + sizeof(int32_t) + 
+                    1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+
+                if(H5VL_OBJECT_BY_NAME == loc_params.type) {
+                    name = va_arg (arguments, char *);
+                    /* get name size to encode */
+                    if(NULL != name)
+                        len = HDstrlen(name) + 1;
+                    size += 1 + H5V_limit_enc_size((uint64_t)len) + len;
+                }
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_ATTR_GET;
+                    /* encode get type */
+                    *p++ = (uint8_t)get_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    UINT64ENCODE_VARLEN(p, loc_size);
+                    /* encode the location parameters */
+                    if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+                        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+                    p += loc_size;
+
+                    if(H5VL_OBJECT_BY_NAME == loc_params.type) {
+                        /* encode length of the attr name and the actual attr name */
+                        UINT64ENCODE_VARLEN(p, len);
+                        if(NULL != name)
+                            HDstrcpy((char *)p, name);
+                        p += len;
+                    }
+                }
+                break;
+            }
+        case H5VL_ATTR_GET_SPACE:
+        case H5VL_ATTR_GET_TYPE:
+        case H5VL_ATTR_GET_ACPL:
+        case H5VL_ATTR_GET_STORAGE_SIZE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_attr_get_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_attr_get_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_attr_get_params(void *buf, H5VL_attr_get_t get_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    va_list arguments;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    va_start (arguments, get_type);
+    switch (get_type) {
+        case H5VL_ATTR_EXISTS:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5VL_loc_params_t *loc_params = va_arg (arguments, H5VL_loc_params_t *);
+                char **name = va_arg (arguments, char **);
+                size_t len = 0, loc_size = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+
+                UINT64DECODE_VARLEN(p, loc_size);
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+                p += loc_size;
+
+                /* decode length of the attr name and the actual attr name */
+                UINT64DECODE_VARLEN(p, len);
+                if(0 != len) {
+                    *name = H5MM_xstrdup((const char *)(p));
+                    p += len;
+                }
+                break;
+            }
+        case H5VL_ATTR_GET_NAME:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5VL_loc_params_t *loc_params = va_arg (arguments, H5VL_loc_params_t *);
+                size_t *size =  va_arg (arguments, size_t*);
+                size_t loc_size = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+
+                UINT64DECODE_VARLEN(p, loc_size);
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+                p += loc_size;
+
+                UINT64DECODE_VARLEN(p, *size);
+
+                break;
+            }
+        case H5VL_ATTR_GET_INFO:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5VL_loc_params_t *loc_params = va_arg (arguments, H5VL_loc_params_t *);
+                size_t loc_size = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+
+                UINT64DECODE_VARLEN(p, loc_size);
+                /* decode the location parameters */
+                if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+                p += loc_size;
+
+                if(H5VL_OBJECT_BY_NAME == loc_params->type) {
+                    char **name = va_arg (arguments, char **);
+                    size_t len = 0;
+
+                    /* decode length of the attr name and the actual attr name */
+                    UINT64DECODE_VARLEN(p, len);
+                    if(0 != len) {
+                        *name = H5MM_xstrdup((const char *)(p));
+                        p += len;
+                    }
+                }
+                break;
+            }
+        case H5VL_ATTR_GET_SPACE:
+        case H5VL_ATTR_GET_TYPE:
+        case H5VL_ATTR_GET_ACPL:
+        case H5VL_ATTR_GET_STORAGE_SIZE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr");
+    }
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_attr_get_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_attr_remove_encode__params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -1256,7 +1510,7 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
         UINT64ENCODE_VARLEN(p, loc_size);
         /* encode the location parameters */
         if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
         p += loc_size;
 
         /* encode length of the dataset name and the actual dataset name */

@@ -44,12 +44,14 @@ typedef enum H5VL_op_type_t {
     H5VL_ATTR_READ,
     H5VL_ATTR_WRITE,
     H5VL_ATTR_REMOVE,
+    H5VL_ATTR_GET,
     H5VL_ATTR_CLOSE,
     H5VL_DSET_CREATE,
     H5VL_DSET_OPEN,
     H5VL_DSET_SET_EXTENT,
     H5VL_DSET_READ,
     H5VL_DSET_WRITE,
+    H5VL_DSET_GET,
     H5VL_DSET_CLOSE,
     H5VL_DTYPE_COMMIT,
     H5VL_DTYPE_OPEN,
@@ -177,6 +179,8 @@ H5_DLL herr_t H5VL__encode_attr_write_params(void *buf, size_t *nalloc, hid_t ob
 H5_DLL herr_t H5VL__decode_attr_write_params(void *buf, hid_t *obj_id, hid_t *type_id, void **attr_buf, size_t *buf_size);
 H5_DLL herr_t H5VL__encode_attr_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, const char *name);
 H5_DLL herr_t H5VL__decode_attr_remove_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, char **name);
+H5_DLL herr_t H5VL__encode_attr_get_params(void *buf, size_t *nalloc, H5VL_attr_get_t get_type, ...);
+H5_DLL herr_t H5VL__decode_attr_get_params(void *buf, H5VL_attr_get_t get_type, ...);
 H5_DLL herr_t H5VL__encode_attr_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_attr_close_params(void *buf, hid_t *obj_id);
 
