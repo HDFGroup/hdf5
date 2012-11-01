@@ -481,7 +481,7 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
      * default value. But if the file access property list was zero then use
      * the default value instead.
      */
-    file->increment = (fa->increment>0) ?  fa->increment : H5FD_CORE_INCREMENT;
+    file->increment = (fa->increment > 0) ? fa->increment : H5FD_CORE_INCREMENT;
 
     /* If save data in backing store. */
     file->backing_store = fa->backing_store;
