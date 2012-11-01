@@ -600,8 +600,8 @@ H5FD_mpiposix_open(const char *name, unsigned flags, hid_t fapl_id,
         fa = &_fa;
     } /* end if */
     else {
-        fa = H5P_get_driver_info(plist);
-        HDassert(fa);
+        if(NULL == (fa = (const H5FD_mpiposix_fapl_t *)H5P_get_driver_info(plist)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
     } /* end else */
 
     /* Duplicate the communicator for use by this file. */

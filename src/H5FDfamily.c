@@ -675,8 +675,8 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-        fa = (H5FD_family_fapl_t *)H5P_get_driver_info(plist);
-        HDassert(fa);
+        if(NULL == (fa = (H5FD_family_fapl_t *)H5P_get_driver_info(plist)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
         /* Check for new family file size. It's used by h5repart only. */
         if(H5P_exist_plist(plist, H5F_ACS_FAMILY_NEWSIZE_NAME) > 0) {

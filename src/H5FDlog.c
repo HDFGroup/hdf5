@@ -527,8 +527,8 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Get the driver specific information */
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    fa = (H5FD_log_fapl_t *)H5P_get_driver_info(plist);
-    HDassert(fa);
+    if(NULL == (fa = (H5FD_log_fapl_t *)H5P_get_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
 
 #ifdef H5_HAVE_GETTIMEOFDAY
     if(fa->flags & H5FD_LOG_TIME_OPEN)
@@ -642,9 +642,9 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
 #ifdef H5_HAVE_GETTIMEOFDAY
         if(file->fa.flags & H5FD_LOG_TIME_OPEN)
-            HDfprintf(file->logfp, "Open took: (%f s)\n", (double)open_timeval_diff.tv_sec + ((double)open_timeval_diff.tv_usec / (double)1000000.0));
+            HDfprintf(file->logfp, "Open took: (%f s)\n", (double)open_timeval_diff.tv_sec + ((double)open_timeval_diff.tv_usec / (double)1000000.0f));
         if(file->fa.flags & H5FD_LOG_TIME_STAT)
-            HDfprintf(file->logfp, "Stat took: (%f s)\n", (double)stat_timeval_diff.tv_sec + ((double)stat_timeval_diff.tv_usec / (double)1000000.0));
+            HDfprintf(file->logfp, "Stat took: (%f s)\n", (double)stat_timeval_diff.tv_sec + ((double)stat_timeval_diff.tv_usec / (double)1000000.0f));
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
     } /* end if */
@@ -732,7 +732,7 @@ H5FD_log_close(H5FD_t *_file)
                  timeval_diff.tv_usec += 1000000;
                  timeval_diff.tv_sec--;
              } /* end if */
-            HDfprintf(file->logfp, "Close took: (%f s)\n", (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0));
+            HDfprintf(file->logfp, "Close took: (%f s)\n", (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0f));
         } /* end if */
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
@@ -1193,7 +1193,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr
                     timeval_diff.tv_usec += 1000000;
                     timeval_diff.tv_sec--;
                 } /* end if */
-                time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0);
+                time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0f);
                 HDfprintf(file->logfp, " (%f s)\n", time_diff);
 
                 /* Add to total seek time */
@@ -1282,7 +1282,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr
                 timeval_diff.tv_usec += 1000000;
                 timeval_diff.tv_sec--;
             } /* end if */
-            time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0);
+            time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0f);
             HDfprintf(file->logfp, " (%f s)\n", time_diff);
 
             /* Add to total read time */
@@ -1399,7 +1399,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
                     timeval_diff.tv_usec += 1000000;
                     timeval_diff.tv_sec--;
                 } /* end if */
-                time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0);
+                time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0f);
                 HDfprintf(file->logfp, " (%f s)\n", time_diff);
 
                 /* Add to total seek time */
@@ -1485,7 +1485,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
                 timeval_diff.tv_usec += 1000000;
                 timeval_diff.tv_sec--;
             } /* end if */
-            time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0);
+            time_diff = (double)timeval_diff.tv_sec + ((double)timeval_diff.tv_usec / (double)1000000.0f);
             HDfprintf(file->logfp, " (%f s)\n", time_diff);
 
             /* Add to total write time */

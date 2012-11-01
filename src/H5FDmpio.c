@@ -1009,17 +1009,17 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_get_driver(plist)) {
-  _fa.comm = MPI_COMM_SELF; /*default*/
-  _fa.info = MPI_INFO_NULL; /*default*/
-  fa = &_fa;
+        _fa.comm = MPI_COMM_SELF; /*default*/
+        _fa.info = MPI_INFO_NULL; /*default*/
+        fa = &_fa;
     } else {
-  fa = (const H5FD_mpio_fapl_t *)H5P_get_driver_info(plist);
-  assert(fa);
+        if(NULL == (fa = (const H5FD_mpio_fapl_t *)H5P_get_driver_info(plist)))
+	    HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
     }
 
     /* Duplicate communicator and Info object for use by this file. */
     if (FAIL==H5FD_mpi_comm_info_dup(fa->comm, fa->info, &comm_dup, &info_dup))
-  HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
     /* convert HDF5 flags to MPI-IO flags */
     /* some combinations are illegal; let MPI-IO figure it out */
