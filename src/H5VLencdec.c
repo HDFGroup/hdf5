@@ -2522,6 +2522,88 @@ H5VL__decode_group_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_
 } /* end H5VL__decode_group_open_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_group_get_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_group_get_params(void *buf, size_t *nalloc, H5VL_group_get_t get_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    va_list arguments;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    va_start (arguments, get_type);
+    switch (get_type) {
+        case H5VL_GROUP_GET_GCPL:
+            {
+                hid_t obj_id = va_arg (arguments, hid_t);
+
+                size += 2 + sizeof(int32_t);
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_GROUP_GET;
+                    /* encode get type */
+                    *p++ = (uint8_t)get_type;
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+                
+                }
+            }
+        case H5VL_GROUP_GET_INFO:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_group_get_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_group_get_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_group_get_params(void *buf, H5VL_group_get_t get_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    va_list arguments;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    va_start (arguments, get_type);
+    switch (get_type) {
+        case H5VL_GROUP_GET_GCPL:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+                break;
+            }
+        case H5VL_GROUP_GET_INFO:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group");
+    }
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_group_get_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_group_close_params
  *------------------------------------------------------------------------- */
 herr_t 

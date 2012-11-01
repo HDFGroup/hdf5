@@ -107,7 +107,7 @@ static herr_t H5VL_mds_file_close(void *file, hid_t req);
 /* Group callbacks */
 static void *H5VL_mds_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
 static void *H5VL_mds_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t req);
-//static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_group_close(void *grp, hid_t req);
 
 /* Link callbacks */
@@ -189,7 +189,7 @@ static H5VL_class_t H5VL_mds_g = {
     {                                        /* group_cls */
         H5VL_mds_group_create,               /* create */
         H5VL_mds_group_open,                 /* open */
-        NULL,//H5VL_mds_group_get,                  /* get */
+        H5VL_mds_group_get,                  /* get */
         H5VL_mds_group_close                 /* close */
     },
     {                                        /* link_cls */
@@ -2532,6 +2532,101 @@ static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_group_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_group_get
+ *
+ * Purpose:	Gets certain information about an group
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_list arguments)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Gget_create_plist */
+        case H5VL_GROUP_GET_GCPL:
+            {
+                hid_t *new_gcpl_id = va_arg (arguments, hid_t *);
+                H5VL_mds_group_t *grp = (H5VL_mds_group_t *)_obj;
+                void           *send_buf = NULL; /* buffer where the datatype create request is encoded and sent to the mds */
+                size_t         buf_size = 0; /* size of send_buf */
+                int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
+                void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+                MPI_Status     status;
+                size_t         gcpl_size = 0;
+                uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
+
+                buf_size = 2 + sizeof(int32_t);
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* determine the size of the buffer needed to encode the parameters */
+                if(H5VL__encode_group_get_params(send_buf, &buf_size, H5VL_GROUP_GET_GCPL, 
+                                                 grp->common.obj_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed");
+
+                MPI_Pcontrol(0);
+                /* send the request to the MDS process */
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                /* probe for a message from the mds */
+                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+
+                /* get the incoming message size from the probe result */
+                if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+                /* allocate the receive buffer */
+                recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+
+                /* receive the actual message */
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+                MPI_Pcontrol(1);
+
+                p = (uint8_t *)recv_buf;
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, gcpl_size);
+                /* decode property lists if they are not default*/
+                if(gcpl_size) {
+                    if((*new_gcpl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += gcpl_size;
+                }
+                else
+                    *new_gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+                break;
+            }
+        /* H5Gget_info */
+        case H5VL_GROUP_GET_INFO:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_group_get() */
 
 
 /*-------------------------------------------------------------------------

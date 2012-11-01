@@ -96,6 +96,7 @@ static herr_t H5VL__datatype_open_cb(uint8_t *p, int source);
 static herr_t H5VL__datatype_close_cb(uint8_t *p, int source);
 static herr_t H5VL__group_create_cb(uint8_t *p, int source);
 static herr_t H5VL__group_open_cb(uint8_t *p, int source);
+static herr_t H5VL__group_get_cb(uint8_t *p, int source);
 static herr_t H5VL__group_close_cb(uint8_t *p, int source);
 static herr_t H5VL__link_create_cb(uint8_t *p, int source);
 static herr_t H5VL__link_move_cb(uint8_t *p, int source);
@@ -107,6 +108,7 @@ static herr_t H5VL__get_eoa_cb(uint8_t *p, int source);
 typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 
 static herr_t H5VL__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...);
+static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...);
 
 /*********************/
 /* Package Variables */
@@ -187,6 +189,7 @@ H5VL_mds_start(void)
     mds_ops[H5VL_DTYPE_CLOSE]     = H5VL__datatype_close_cb;
     mds_ops[H5VL_GROUP_CREATE]    = H5VL__group_create_cb;
     mds_ops[H5VL_GROUP_OPEN]      = H5VL__group_open_cb;
+    mds_ops[H5VL_GROUP_GET]       = H5VL__group_get_cb;
     mds_ops[H5VL_GROUP_CLOSE]     = H5VL__group_close_cb;
     mds_ops[H5VL_LINK_CREATE]     = H5VL__link_create_cb;
     mds_ops[H5VL_LINK_MOVE]       = H5VL__link_move_cb;
@@ -1467,6 +1470,89 @@ done:
 }/* H5VL__group_open_cb */
 
 /*-------------------------------------------------------------------------
+* Function:	H5VL__group_get_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__group_get_cb(uint8_t *p, int source)
+{
+    H5VL_group_get_t get_type = -1;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    get_type = (H5VL_group_get_t)*p++;
+
+    switch(get_type) {
+        /* H5Gget_info */
+        case H5VL_GROUP_GET_GCPL:
+            {
+                hid_t obj_id;
+                hid_t gcpl_id;
+                void *send_buf = NULL;
+                size_t buf_size = 0, gcpl_size = 0;
+                uint8_t *p1;     /* Current pointer into buffer */
+                H5P_genplist_t *gcpl = NULL;
+
+                /* decode params */
+                if(H5VL__decode_group_get_params(p, get_type, &obj_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group get params");
+
+                /* get value through the native plugin */
+                if(H5VL__temp_group_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, &gcpl_id) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists");
+
+                /* get size for property lists to encode */
+                if(H5P_GROUP_CREATE_DEFAULT != gcpl_id) {
+                    if(NULL == (gcpl = (H5P_genplist_t *)H5I_object_verify(gcpl_id, H5I_GENPROP_LST)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                    if((ret_value = H5P__encode(gcpl, FALSE, NULL, &gcpl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                }
+
+                buf_size = 1 + H5V_limit_enc_size((uint64_t)gcpl_size) + gcpl_size;
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the plist size */
+                UINT64ENCODE_VARLEN(p1, gcpl_size);
+                /* encode property lists if they are not default*/
+                if(gcpl_size) {
+                    if((ret_value = H5P__encode(gcpl, FALSE, p1, &gcpl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                    p1 += gcpl_size;
+                }
+
+                /* send query value to client */
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5Pclose(gcpl_id);
+                break;
+                break;
+            }
+        /* H5Gget_info */
+        case H5VL_GROUP_GET_INFO:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group");
+    }
+
+done:
+    if(SUCCEED != ret_value) {
+        /* send status to client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__group_get_cb */
+
+/*-------------------------------------------------------------------------
 * Function:	H5VL__group_close_cb
 *------------------------------------------------------------------------- */
 static herr_t
@@ -1780,5 +1866,24 @@ H5VL__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__temp_attr_get() */
+
+/*
+ * Just a temporary routine to create a var_args to pass through the native MDS get routine
+ */
+static herr_t
+H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    va_start (arguments, req);
+    if(H5VL_native_group_get(obj, get_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__temp_group_get() */
 
 #endif /* H5_HAVE_PARALLEL */
