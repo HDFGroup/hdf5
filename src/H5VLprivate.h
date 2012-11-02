@@ -62,6 +62,7 @@ typedef enum H5VL_op_type_t {
     H5VL_GROUP_CLOSE,
     H5VL_LINK_CREATE,
     H5VL_LINK_MOVE,
+    H5VL_LINK_GET,
     H5VL_LINK_REMOVE,
     H5VL_ALLOC,
     H5VL_GET_EOA,
@@ -214,6 +215,8 @@ H5_DLL herr_t H5VL__encode_link_create_params(void *buf, size_t *nalloc, H5VL_li
 H5_DLL herr_t H5VL__decode_link_create_params(void *buf, H5VL_link_create_type_t *create_type, hid_t *obj_id, H5VL_loc_params_t *loc_params, hid_t *lcpl_id, hid_t *lapl_id);
 H5_DLL herr_t H5VL__encode_link_move_params(void *buf, size_t *nalloc, hid_t src_id, H5VL_loc_params_t loc_params1, hid_t dst_id, H5VL_loc_params_t loc_params2, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5VL__decode_link_move_params(void *buf, hid_t *src_id, H5VL_loc_params_t *loc_params1, hid_t *dst_id, H5VL_loc_params_t *loc_params2, hbool_t *copy_flag, hid_t *lcpl_id, hid_t *lapl_id);
+H5_DLL herr_t H5VL__encode_link_get_params(void *buf, size_t *nalloc, H5VL_link_get_t get_type, ...);
+H5_DLL herr_t H5VL__decode_link_get_params(void *buf, H5VL_link_get_t get_type, ...);
 H5_DLL herr_t H5VL__encode_link_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params);
 H5_DLL herr_t H5VL__decode_link_remove_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params);
 

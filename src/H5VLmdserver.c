@@ -100,6 +100,7 @@ static herr_t H5VL__group_get_cb(uint8_t *p, int source);
 static herr_t H5VL__group_close_cb(uint8_t *p, int source);
 static herr_t H5VL__link_create_cb(uint8_t *p, int source);
 static herr_t H5VL__link_move_cb(uint8_t *p, int source);
+static herr_t H5VL__link_get_cb(uint8_t *p, int source);
 static herr_t H5VL__link_remove_cb(uint8_t *p, int source);
 static herr_t H5VL__allocate_cb(uint8_t *p, int source);
 static herr_t H5VL__set_eoa_cb(uint8_t *p, int source);
@@ -109,6 +110,7 @@ typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 
 static herr_t H5VL__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...);
+static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
 
 /*********************/
 /* Package Variables */
@@ -193,6 +195,7 @@ H5VL_mds_start(void)
     mds_ops[H5VL_GROUP_CLOSE]     = H5VL__group_close_cb;
     mds_ops[H5VL_LINK_CREATE]     = H5VL__link_create_cb;
     mds_ops[H5VL_LINK_MOVE]       = H5VL__link_move_cb;
+    mds_ops[H5VL_LINK_GET]        = H5VL__link_get_cb;
     mds_ops[H5VL_LINK_REMOVE]     = H5VL__link_remove_cb;
     mds_ops[H5VL_ALLOC]           = H5VL__allocate_cb;
     mds_ops[H5VL_GET_EOA]         = H5VL__set_eoa_cb;
@@ -1685,6 +1688,190 @@ done:
 }/* H5VL__link_move_cb */
 
 /*-------------------------------------------------------------------------
+* Function:	H5VL__link_get_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__link_get_cb(uint8_t *p, int source)
+{
+    H5VL_link_get_t get_type = -1;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    get_type = (H5VL_link_get_t)*p++;
+
+    switch(get_type) {
+        case H5VL_LINK_EXISTS:
+            {
+                hid_t obj_id;
+                H5VL_loc_params_t loc_params;
+                htri_t ret;
+
+                /* decode params */
+                if(H5VL__decode_link_get_params(p, get_type, &obj_id, &loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link get params");
+
+                /* get value through the native plugin */
+                if(H5VL__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                                       &ret) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine if link exists");
+
+                /* send query value to client */
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(htri_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        case H5VL_LINK_GET_INFO:
+            {
+                hid_t obj_id;
+                H5VL_loc_params_t loc_params;
+                void *send_buf = NULL;
+                H5L_info_t linfo;
+                size_t buf_size = 0; /* send_buf size */
+                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+                /* decode params */
+                if(H5VL__decode_link_get_params(p, get_type, &obj_id, &loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link get params");
+
+                /* get info through the native plugin */
+                if(H5VL__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                                       &linfo) < 0)
+                        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to dget link info");
+
+                buf_size = 1 + sizeof(unsigned) + sizeof(int64_t) + 1;
+
+                if(linfo.type == H5L_TYPE_HARD) {
+                    buf_size += 1 + H5V_limit_enc_size((uint64_t)linfo.u.address);
+                }
+                else if (linfo.type == H5L_TYPE_SOFT || linfo.type == H5L_TYPE_EXTERNAL ||
+                         (linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX)) {
+                    buf_size += 1 + H5V_limit_enc_size((uint64_t)linfo.u.val_size);
+                }
+                else
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "invalid link type");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                *p1++ = (uint8_t)linfo.type;
+                H5_ENCODE_UNSIGNED(p1, linfo.corder_valid);
+                INT64ENCODE(p1, linfo.corder);
+                *p1++ = (uint8_t)linfo.cset;
+
+                if(linfo.type == H5L_TYPE_HARD) {
+                    UINT64ENCODE_VARLEN(p1, linfo.u.address);
+                }
+                else if (linfo.type == H5L_TYPE_SOFT || linfo.type == H5L_TYPE_EXTERNAL ||
+                         (linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX)) {
+                    UINT64ENCODE_VARLEN(p1, linfo.u.val_size);
+                }
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                H5MM_xfree(send_buf);
+                break;
+            }
+        case H5VL_LINK_GET_NAME:
+            {
+                hid_t obj_id;
+                H5VL_loc_params_t loc_params;
+                char *name = NULL;
+                size_t size;
+                ssize_t ret = 0;
+                void *send_buf = NULL;
+                size_t buf_size = 0; /* send_buf size */
+                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+                /* decode params */
+                if(H5VL__decode_link_get_params(p, get_type, &obj_id, &loc_params, &size) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link get params");
+
+                if(size) {
+                    /* allocate the buffer for the link name if the size > 0 */
+                    if(NULL == (name = (char *)H5MM_malloc(size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                }
+
+                /* get value through the native plugin */
+                if(H5VL__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                                       name, size, &ret) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine link name");
+
+                buf_size = sizeof(int64_t) + size;
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the actual size of the linkibute name, which may be different than the 
+                   size of the name buffer being sent */
+                INT64ENCODE(p1, ret);
+
+                /* encode length of the buffer and the buffer containing part of or all the link name*/
+                if(size && name)
+                    HDstrcpy((char *)p1, name);
+                p1 += size;
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(send_buf);
+                H5MM_xfree(name);
+                break;
+            }
+        case H5VL_LINK_GET_VAL:
+            {
+                hid_t obj_id;
+                H5VL_loc_params_t loc_params;
+                void *val = NULL;
+                size_t size;
+
+                /* decode params */
+                if(H5VL__decode_link_get_params(p, get_type, &obj_id, &loc_params, &size) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link get params");
+
+                if(size) {
+                    /* allocate the buffer for the link val if the size > 0 */
+                    if(NULL == (val = H5MM_malloc(size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                }
+
+                /* get value through the native plugin */
+                if(H5VL__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                                       val, size) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine link val");
+
+                if(MPI_SUCCESS != MPI_Send(val, (int)size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(val);
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from link");
+    }
+
+done:
+    if(SUCCEED != ret_value) {
+        /* send status to client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__link_get_cb */
+
+/*-------------------------------------------------------------------------
 * Function:	H5VL__link_remove_cb
 *------------------------------------------------------------------------- */
 static herr_t
@@ -1918,5 +2105,24 @@ H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__temp_group_get() */
+
+/*
+ * Just a temporary routine to create a var_args to pass through the native MDS get routine
+ */
+static herr_t
+H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    va_start (arguments, req);
+    if(H5VL_native_link_get(obj, loc_params, get_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__temp_link_get() */
 
 #endif /* H5_HAVE_PARALLEL */
