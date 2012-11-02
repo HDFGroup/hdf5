@@ -251,7 +251,7 @@ H5P_set_fapl_mds(hid_t fapl_id, const char *name, hid_t plist_id)
     } END_MEMBERS;
 #endif
 
-    if(H5P_DEFAULT != plist_id)
+    if(H5P_FILE_ACCESS_DEFAULT != plist_id || H5P_DEFAULT != plist_id)
         fa.memb_fapl = plist_id;
     else
         fa.memb_fapl = H5Pcreate(H5P_FILE_ACCESS);

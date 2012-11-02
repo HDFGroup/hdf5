@@ -179,7 +179,7 @@ H5VL_mds_start(void)
     mds_ops[H5VL_ATTR_READ]       = H5VL__attr_read_cb;
     mds_ops[H5VL_ATTR_WRITE]      = H5VL__attr_write_cb;
     mds_ops[H5VL_ATTR_REMOVE]     = H5VL__attr_remove_cb;
-    mds_ops[H5VL_ATTR_GET]      = H5VL__attr_get_cb;
+    mds_ops[H5VL_ATTR_GET]        = H5VL__attr_get_cb;
     mds_ops[H5VL_ATTR_CLOSE]      = H5VL__attr_close_cb;
     mds_ops[H5VL_DSET_CREATE]     = H5VL__dataset_create_cb;
     mds_ops[H5VL_DSET_OPEN]       = H5VL__dataset_open_cb;
@@ -271,11 +271,12 @@ H5VL__file_create_cb(uint8_t *p, int source)
 
     /* set the underlying MDS VFD */
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5P_set_fapl_mds(fapl_id, mds_filename, temp_fapl) < 0)
+    if(H5P_set_fapl_mds(temp_fapl, mds_filename, fapl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
     /* call the native plugin file create callback*/
-    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, fapl_id, -1)))
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, 
+                                                            temp_fapl, -1)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)

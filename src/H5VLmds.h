@@ -34,7 +34,7 @@ extern "C" {
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5VL_class_t *H5VL_mds_init(void);
-H5_DLL herr_t H5Pset_fapl_mds(hid_t fapl_id, char *raw_ext, char *meta_ext, MPI_Comm comm, MPI_Info info);
+H5_DLL herr_t H5Pset_fapl_mds(hid_t fapl_id, char *raw_ext, hid_t raw_fapl, char *meta_ext, hid_t meta_fapl, MPI_Comm comm, MPI_Info info);
 #endif /* H5_HAVE_PARALLEL */
 
 #ifdef __cplusplus

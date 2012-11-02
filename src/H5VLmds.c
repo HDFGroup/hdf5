@@ -141,7 +141,9 @@ typedef struct H5VL_mds_fapl_t {
     MPI_Comm		comm;		/*communicator			*/
     MPI_Info		info;		/*file information		*/
     char                *raw_ext;
+    hid_t               raw_fapl;
     char                *meta_ext;
+    hid_t               meta_fapl;
 } H5VL_mds_fapl_t;
 
 static H5VL_class_t H5VL_mds_g = {
@@ -328,9 +330,10 @@ done:
 static void *
 H5VL_mds_fapl_copy(const void *_old_fa)
 {
-    void		  *ret_value = NULL;
+    void                  *obj = NULL; /* fapl object for copying */
     const H5VL_mds_fapl_t *old_fa = (const H5VL_mds_fapl_t*)_old_fa;
     H5VL_mds_fapl_t	  *new_fa = NULL;
+    void		  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -344,8 +347,22 @@ H5VL_mds_fapl_copy(const void *_old_fa)
     if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
+    /* duplicate the raw and meta file extensions */
     new_fa->raw_ext = HDstrdup(old_fa->raw_ext);
     new_fa->meta_ext = HDstrdup(old_fa->meta_ext);
+
+    /* copy the fapl for raw data */
+    if(NULL == (obj = (H5P_genplist_t *)H5I_object_verify(old_fa->raw_fapl, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+    if((new_fa->raw_fapl = H5P_copy_plist((H5P_genplist_t *)obj, TRUE)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property list");
+
+    /* copy the fapl for meta data */
+    if(NULL == (obj = (H5P_genplist_t *)H5I_object_verify(old_fa->meta_fapl, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+    if((new_fa->meta_fapl = H5P_copy_plist((H5P_genplist_t *)obj, TRUE)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property list");
+
     ret_value = new_fa;
 
 done:
@@ -377,17 +394,28 @@ H5VL_mds_fapl_free(void *_fa)
     herr_t		ret_value = SUCCEED;
     H5VL_mds_fapl_t	*fa = (H5VL_mds_fapl_t*)_fa;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     assert(fa);
 
     /* Free the internal communicator and INFO object */
     assert(MPI_COMM_NULL!=fa->comm);
     H5FD_mpi_comm_info_free(&fa->comm, &fa->info);
+
+    /* Close the property lists */
+    if(H5I_dec_app_ref(fa->raw_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    if(H5I_dec_app_ref(fa->meta_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+
+    /* free the extensions */
     H5MM_xfree(fa->raw_ext);
     H5MM_xfree(fa->meta_ext);
+
+    /* free the struct */
     H5MM_xfree(fa);
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_fapl_free() */
 
@@ -406,7 +434,8 @@ H5VL_mds_fapl_free(void *_fa)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_mds(hid_t fapl_id, char *raw_ext, char *meta_ext, MPI_Comm comm, MPI_Info info)
+H5Pset_fapl_mds(hid_t fapl_id, char *raw_ext, hid_t raw_fapl, char *meta_ext, hid_t meta_fapl,
+                MPI_Comm comm, MPI_Info info)
 {
     H5VL_mds_fapl_t    fa;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -423,18 +452,25 @@ H5Pset_fapl_mds(hid_t fapl_id, char *raw_ext, char *meta_ext, MPI_Comm comm, MPI
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
     if(MPI_COMM_NULL == comm)
 	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
+    if(H5P_DEFAULT == raw_fapl)
+        raw_fapl = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(raw_fapl, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+    if(H5P_DEFAULT == meta_fapl)
+        meta_fapl = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(meta_fapl, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
     /* Initialize driver specific properties */
     fa.comm = comm;
     fa.info = info;
     fa.raw_ext = raw_ext;
     fa.meta_ext = meta_ext;
-    /*
-    fa.meta_name = meta_name;
-    fa.meta_fapl_id = meta_fapl_id;
-    fa.raw_name = raw_name;
-    fa.raw_fapl_id = raw_fapl_id;
-    */
+    fa.raw_fapl = raw_fapl;
+    fa.meta_fapl = meta_fapl;
+
     /* duplication is done during setting. */
     ret_value = H5P_set_vol(plist, &H5VL_mds_g, &fa);
 
@@ -463,7 +499,6 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 {
     void *send_buf;
     size_t buf_size;
-    hid_t temp_fapl; /* the fapl created here for the underlying VFD for clients */
     H5VL_mds_fapl_t *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     int my_rank, my_size;
@@ -497,12 +532,12 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         char *meta_name = NULL;
 
         /* generate the meta data file name by adding the meta data extension to the user file name */
-        if(NULL == (meta_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->meta_ext) + 1)))
+        if(NULL == (meta_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->meta_ext) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
         sprintf(meta_name, "%s%s", name, fa->meta_ext);
 
         /* determine the size of the buffer needed to encode the parameters */
-        if(H5VL__encode_file_create_params(NULL, &buf_size, meta_name, flags, fcpl_id, fapl_id) < 0)
+        if(H5VL__encode_file_create_params(NULL, &buf_size, meta_name, flags, fcpl_id, fa->meta_fapl) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed")
 
         /* allocate the buffer for encoding the parameters */
@@ -510,7 +545,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* encode the parameters */
-        if(H5VL__encode_file_create_params(send_buf, &buf_size, meta_name, flags, fcpl_id, fapl_id) < 0)
+        if(H5VL__encode_file_create_params(send_buf, &buf_size, meta_name, flags, fcpl_id, fa->meta_fapl) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file create parameters")
 
         MPI_Pcontrol(0);
@@ -533,15 +568,15 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     HDassert(mds_file);
 
     /* set the underlying VFD for clients (MDC)*/
-    temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
+    //temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
+    //H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
 
     /* generate the raw data file name by adding the raw data extension to the user file name */
-    if(NULL == (raw_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->raw_ext) + 1)))
+    if(NULL == (raw_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->raw_ext) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     sprintf(raw_name, "%s%s", name, fa->raw_ext);
 
-    if(H5P_set_fapl_mdc(fapl_id, raw_name, temp_fapl, mds_file) < 0)
+    if(H5P_set_fapl_mdc(fapl_id, raw_name, fa->raw_fapl, mds_file) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Create the raw data file */ 
@@ -621,7 +656,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
         char *meta_name = NULL;
 
         /* generate the meta data file name by adding the meta data extension to the user file name */
-        if(NULL == (meta_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->meta_ext) + 1)))
+        if(NULL == (meta_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->meta_ext) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
         sprintf(meta_name, "%s%s", name, fa->meta_ext);
 
@@ -657,7 +692,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     HDassert(mds_file);
 
     /* generate the raw data file name by adding the raw data extension to the user file name */
-    if(NULL == (raw_name = (char *)H5MM_malloc (strlen(name) + strlen(fa->raw_ext) + 1)))
+    if(NULL == (raw_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->raw_ext) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     sprintf(raw_name, "%s%s", name, fa->raw_ext);
 
@@ -1968,7 +2003,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
 {
     H5VL_mds_dset_t *dataset = (H5VL_mds_dset_t *)obj;
     H5D_t       *dset = dataset->dset;
@@ -1976,6 +2011,10 @@ H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t UNUSED req, v
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if(H5VL_native_dataset_get((void *)dset, get_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
+
+#if 0
     switch (get_type) {
         /* H5Dget_space */
         case H5VL_DATASET_GET_SPACE:
@@ -2085,6 +2124,7 @@ H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t UNUSED req, v
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
     }
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
