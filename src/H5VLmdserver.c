@@ -322,11 +322,11 @@ H5VL__file_open_cb(uint8_t *p, int source)
 
     /* set the underlying MDS VFD */
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5P_set_fapl_mds(fapl_id, mds_filename, temp_fapl) < 0)
+    if(H5P_set_fapl_mds(temp_fapl, mds_filename, fapl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
     /* call the native plugin file open callback*/
-    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, fapl_id, -1)))
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, temp_fapl, -1)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)

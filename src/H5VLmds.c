@@ -631,7 +631,6 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
 {
     void *send_buf;
     size_t buf_size;
-    hid_t temp_fapl; /* the fapl opend here for the underlying VFD for clients */
     H5VL_mds_fapl_t *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
     int my_rank, my_size;
@@ -696,10 +695,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     sprintf(raw_name, "%s%s", name, fa->raw_ext);
 
-    /* set the underlying VFD for clients (MDC)*/
-    temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
-    if(H5P_set_fapl_mdc(fapl_id, raw_name, temp_fapl, mds_file) < 0)
+    if(H5P_set_fapl_mdc(fapl_id, raw_name, fa->raw_fapl, mds_file) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Open the raw data file */ 
