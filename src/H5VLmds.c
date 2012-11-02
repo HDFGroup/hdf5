@@ -1776,18 +1776,25 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
     if(type_size) {
-        /* decode the datatype */
-        if((type_id = H5Tdecode((unsigned char *)p)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+        /* Register the type and return the ID */
+        if((type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
         p += type_size;
     }
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
     if(space_size) {
-        /* decode the dataspace */
-        if((space_id = H5Sdecode((unsigned char *)p)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "unable to decode dataspace");
+        H5S_t *ds = NULL;
+        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
+        /* Register the type and return the ID */
+        if((space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, NULL, "unable to register dataspace");
         p += space_size;
     }
 

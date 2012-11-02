@@ -793,16 +793,28 @@ H5VL__decode_attr_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc
 
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
-    /* decode the datatype */
-    if((*type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    {
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    }
     p += type_size;
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
     /* decode the dataspace */
-    if((*space_id = H5Sdecode((const void *)p)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
+    {
+        H5S_t *ds = NULL;
+        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+    }
     p += space_size;
 
  done:
@@ -958,8 +970,15 @@ H5VL__decode_attr_read_params(void *buf, hid_t *obj_id, hid_t *type_id, size_t *
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
     /* decode the datatype */
-    if((*type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    {
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    }
     p += type_size;
 
     /* decode the read buffer size */
@@ -1035,8 +1054,15 @@ H5VL__decode_attr_write_params(void *buf, hid_t *obj_id, hid_t *type_id,
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
     /* decode the datatype */
-    if((*type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    {
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    }
     p += type_size;
 
     /* decode the write buffer size */
@@ -1632,15 +1658,28 @@ H5VL__decode_dataset_create_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
     /* decode the datatype */
-    if((*type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    {
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    }
     p += type_size;
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
     /* decode the dataspace */
-    if((*space_id = H5Sdecode((const void *)p)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "unable to decode dataspace");
+    {
+        H5S_t *ds = NULL;
+        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+    }
     p += space_size;
 
  done:
@@ -2024,8 +2063,15 @@ H5VL__decode_datatype_commit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t 
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
     /* decode the datatype */
-    if((*type_id = H5Tdecode(p)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode datatype");
+    {
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((*type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    }
     p += type_size;
 
     /* decode the plist size */
