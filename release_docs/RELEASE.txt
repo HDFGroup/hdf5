@@ -1193,6 +1193,25 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It
+  complains with this message:
+      "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
+  
+  The reason is that __func__ is a predefined identifier in C99 standard.  The
+  HDF5 C library uses it in H5private.h.  The test ttypes.cpp includes
+  H5private.h (H5Tpkg.h<-H5Fprivate.h<-H5Vprivate.h<-H5private.h).  Sun's 5.9 
+  C++ compiler doesn't support __func__, thus fails to compile the C++ test.
+  But 5.11 C++ compiler does.  To check whether your Sun C++ compiler knows this 
+  identifier, try to compile the following simple C++ program:
+      #include<stdio.h>
+
+      int main(void)
+      {
+          printf("%s\n", __func__);
+          return 0;
+      }
+  (SLU - 2012/11/5)
+
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
