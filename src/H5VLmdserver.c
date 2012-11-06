@@ -198,8 +198,8 @@ H5VL_mds_start(void)
     mds_ops[H5VL_LINK_GET]        = H5VL__link_get_cb;
     mds_ops[H5VL_LINK_REMOVE]     = H5VL__link_remove_cb;
     mds_ops[H5VL_ALLOC]           = H5VL__allocate_cb;
-    mds_ops[H5VL_GET_EOA]         = H5VL__set_eoa_cb;
-    mds_ops[H5VL_SET_EOA]         = H5VL__get_eoa_cb;
+    mds_ops[H5VL_GET_EOA]         = H5VL__get_eoa_cb;
+    mds_ops[H5VL_SET_EOA]         = H5VL__set_eoa_cb;
 
     /* call the group interface intialization, because it hasn't been called yet */
     if(H5G__init() < 0)

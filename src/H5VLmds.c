@@ -638,6 +638,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
     H5VL_mds_file_t *file = NULL;
     char *raw_name = NULL;
+    haddr_t eof = HADDR_UNDEF;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -704,8 +705,15 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
 
     /* set the file space manager to use the VFD */
     new_file->shared->fs_strategy = H5F_FILE_SPACE_VFD;
-
     new_file->id_exists = TRUE;
+
+    /* Need to create file superblock */
+    if(0 == my_rank) {
+        eof = H5FD_get_eof(new_file->shared->lf);
+        if(H5FD_set_eoa(new_file->shared->lf, H5FD_MEM_DRAW, eof) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to set EOA for RAW file");
+    }
+    MPI_Barrier(fa->comm);
 
     /* allocate the file object that is returned to the user */
     if(NULL == (file = (H5VL_mds_file_t *)calloc(1, sizeof(H5VL_mds_file_t))))

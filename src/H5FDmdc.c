@@ -84,7 +84,6 @@ static haddr_t H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsi
 static haddr_t H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_mdc_get_eof(const H5FD_t *_file);
-static herr_t  H5FD_mdc_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_mdc_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
                             size_t size, void *buf);
 static herr_t H5FD_mdc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
@@ -510,7 +509,7 @@ H5FD_mdc_close(H5FD_t *_file)
 
         /* encode file close params */
         if(H5VL__encode_file_close_params(send_buf, &buf_size, file->mdfile_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode file close params")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode file close params")
 
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the metadata file ID */
@@ -684,7 +683,7 @@ H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-        buf_size = 1 /* request type*/ + sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t);
+    buf_size = 1 /* request type*/ + sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t);
 
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
@@ -756,7 +755,6 @@ H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 
     /* encode request type */
     *p++ = (uint8_t)H5VL_SET_EOA;
-
     /* encode the object id */
     INT32ENCODE(p, file->mdfile_id);
     /* VFD memory type */
@@ -767,7 +765,7 @@ H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     MPI_Pcontrol(0);
     /* send the EOA set request & recieve the set confirmation*/
     if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(int), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
     MPI_Pcontrol(1);
@@ -800,40 +798,16 @@ static haddr_t
 H5FD_mdc_get_eof(const H5FD_t *_file)
 {
     const H5FD_mdc_t	*file = (const H5FD_mdc_t*)_file;
+    haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(H5FDget_eof(file->memb))
+    ret_value = H5FDget_eof(file->memb);
+    HDassert(HADDR_UNDEF != ret_value);
+
+    FUNC_LEAVE_NOAPI(ret_value + HADDR_MAX/2)
 }
 
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:       H5FD_mdc_get_handle
- *
- * Purpose:        Returns the file handle of MDC file driver.
- *
- * Returns:        Non-negative if succeed or negative if fails.
- *
- * Programmer:	   Mohamad Chaarawi
- *                 September, 2012
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
-*/
-static herr_t
-H5FD_mdc_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
-{
-    H5FD_mdc_t         *file = (H5FD_mdc_t *)_file;
-    
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(file_handle);
-
-    FUNC_LEAVE_NOAPI(H5FDget_handle(file->memb, fapl, file_handle))
-}
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mdc_read
@@ -860,7 +834,7 @@ H5FD_mdc_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_
 
     HDassert(type == H5FD_MEM_DRAW);
 
-    FUNC_LEAVE_NOAPI(H5FDread(file->memb, type, dxpl_id, addr, size, buf))
+    FUNC_LEAVE_NOAPI(H5FDread(file->memb, type, dxpl_id, addr - HADDR_MAX/2, size, buf))
 }
 
 
@@ -889,7 +863,7 @@ H5FD_mdc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     HDassert(type == H5FD_MEM_DRAW);
 
-    FUNC_LEAVE_NOAPI(H5FDwrite(file->memb, type, dxpl_id, addr, size, buf))
+    FUNC_LEAVE_NOAPI(H5FDwrite(file->memb, type, dxpl_id, addr - HADDR_MAX/2, size, buf))
 } /* end H5FD_mdc_write() */
 
 

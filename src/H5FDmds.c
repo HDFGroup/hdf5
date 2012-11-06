@@ -58,18 +58,16 @@ static hid_t H5FD_MDS_g = 0;
  */
 typedef struct H5FD_mds_t {
     H5FD_t	pub;		/*public stuff, must be first		*/
-    H5FD_t	*memb;	                   /*member pointer		*/
-    //haddr_t     memb_eoa[H5FD_MEM_NTYPES]; /*EOA for individual files   */
-    haddr_t     raw_eoa; /*EOA for individual files   */
+    H5FD_t	*memb;	        /*member pointer		*/
+    haddr_t     raw_eoa;        /*EOA for RAW data file   */
 } H5FD_mds_t;
 
 /* MDS specific file access properties */
 typedef struct H5FD_mds_fapl_t {
-    //H5FD_mem_t	memb_map[H5FD_MEM_NTYPES]; /* memory usage map		*/
-    H5FD_mem_t	memb_map[2]; /* memory usage map		*/
+    //H5FD_mem_t	memb_map[2];               /* memory usage map		*/
+    //haddr_t	memb_addr[2];              /* starting addr     	*/
     hid_t	memb_fapl;                 /* underlying fapl    	*/
     char	*memb_name;                /* metadata file name	*/
-    haddr_t	memb_addr;                 /* starting addr     	*/
 } H5FD_mds_fapl_t;
 
 /* Private Prototypes */
@@ -86,7 +84,6 @@ static herr_t H5FD_mds_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_mds_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_mds_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_mds_get_eof(const H5FD_t *_file);
-static herr_t  H5FD_mds_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_mds_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             size_t size, void *buf);
 static herr_t H5FD_mds_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
@@ -243,20 +240,12 @@ H5P_set_fapl_mds(hid_t fapl_id, const char *name, hid_t plist_id)
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
 
-#if 0
-    /* Initialize */
-    ALL_MEMBERS(mt) {
-	/* Treat global heap as raw data, not metadata */
-	fa.memb_map[mt] = ((mt == H5FD_MEM_DRAW || mt == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : H5FD_MEM_SUPER);
-    } END_MEMBERS;
-#endif
-
     if(H5P_FILE_ACCESS_DEFAULT != plist_id || H5P_DEFAULT != plist_id)
         fa.memb_fapl = plist_id;
     else
         fa.memb_fapl = H5Pcreate(H5P_FILE_ACCESS);
     fa.memb_name = H5MM_strdup(name);
-    fa.memb_addr = 0;
+    //fa.memb_addr = 0;
 
     ret_value= H5P_set_driver(plist, H5FD_MDS, &fa);
 
@@ -491,7 +480,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mds_query(const H5FD_t *_file, unsigned long *flags /* out */)
+H5FD_mds_query(const H5FD_t UNUSED *_file, unsigned long *flags /* out */)
 {
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -564,11 +553,13 @@ H5FD_mds_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 
     if (H5FD_MEM_DRAW != type) {
         if(HADDR_UNDEF == (ret_value = H5FDget_eoa(file->memb, type)))
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, HADDR_UNDEF, "BAD EOA")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, HADDR_UNDEF, "BAD EOA");
+        //printf("MDS GET EOA METATYPE %d, eoa = %llu\n", type, ret_value);
     }
     else {
-        ret_value = file->raw_eoa;
+        ret_value = file->raw_eoa + HADDR_MAX/2;
         HDassert(HADDR_UNDEF != file->raw_eoa);
+        //printf("MDS GET EOA RAW %d, eoa = %llu\n", type, file->raw_eoa);
     }
 
 done:
@@ -602,10 +593,12 @@ H5FD_mds_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 
     if (H5FD_MEM_DRAW != type) {
         if((ret_value = H5FDset_eoa(file->memb, type, eoa)) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't set member EOA")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't set member EOA");
+        //printf("MDS set EOA METATYPE %d, eoa = %llu\n", type, eoa);
     }
     else {
-        file->raw_eoa = eoa;
+        file->raw_eoa = eoa - HADDR_MAX/2;
+        //printf("MDS set EOA RAW %d, eoa = %llu\n", type, file->raw_eoa);
     }
 
 done:
@@ -632,40 +625,15 @@ static haddr_t
 H5FD_mds_get_eof(const H5FD_t *_file)
 {
     const H5FD_mds_t	*file = (const H5FD_mds_t*)_file;
+    haddr_t ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI(H5FDget_eof(file->memb))
+    ret_value = H5FDget_eof(file->memb);
+    HDassert(HADDR_UNDEF != ret_value);
+
+    FUNC_LEAVE_NOAPI(ret_value)
 }
-
-#if 0
-
-/*-------------------------------------------------------------------------
- * Function:       H5FD_mds_get_handle
- *
- * Purpose:        Returns the file handle of MDS file driver.
- *
- * Returns:        Non-negative if succeed or negative if fails.
- *
- * Programmer:     Raymond Lu
- *                 Sept. 16, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
-*/
-static herr_t
-H5FD_mds_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
-{
-    H5FD_mds_t         *file = (H5FD_mds_t *)_file;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(file_handle);
-
-    FUNC_LEAVE_NOAPI(H5FDget_handle(file->memb, fapl, file_handle))
-}
-#endif
 
 
 /*-------------------------------------------------------------------------
