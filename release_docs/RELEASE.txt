@@ -1110,12 +1110,10 @@ Platforms Tested
 128231-06
                                   Sun C++ 5.10 SunOS_sparc 128228-11
 
-    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+    Windows 7                     Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
-    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+    Windows 7 x64                 Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
 
     MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
@@ -1162,10 +1160,8 @@ Platform                          Shared   Shared    Shared    static-  Thread-
                                   C libs   F90 libs  C++ libs  exec     safe
 SunOS 5.10 32-bit                   y        y         y         x        y
 SunOS 5.10 64-bit                   y        y         y         x        y
-Windows XP                          y        y(3)      y         y        n
-Windows XP x64                      y        y(3)      y         y        n
-Windows Vista                       y        y(3)      y         y        y
-Windows Vista x64                   y        y(3)      y         y        y
+Windows 7                           y        y         y         y        y
+Windows 7 x64                       y        y         y         y        y
 Mac OS X 10.5 Intel                 y        y         y         x        n
 FreeBSD 8.2 32- and 64-bit          y        y         y         y        y
 RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
