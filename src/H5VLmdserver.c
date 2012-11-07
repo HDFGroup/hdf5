@@ -46,6 +46,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
+#include "H5FDmulti.h"          /* MULTI-based file drivers		*/
 #include "H5FDmds.h"            /* MDS file driver      		*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Gprivate.h"		/* Groups		  		*/
@@ -111,6 +112,7 @@ typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 static herr_t H5VL__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
+static herr_t H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
 
 /*********************/
 /* Package Variables */
@@ -259,30 +261,88 @@ H5VL__file_create_cb(uint8_t *p, int source)
     char *mds_filename = NULL; /* name of the metadata file (generated from name) */
     unsigned flags; /* access flags */
     hid_t fcpl_id = FAIL, fapl_id = FAIL; /* plist IDs */
-    hid_t temp_fapl; /* fapl used for underlying MDS VFD */
+    hid_t temp_fapl; /* stub fapl for raw data file that maintains EOA */
+    hid_t split_fapl = FAIL; /* split fapl for container */
     H5F_t *new_file = NULL; /* struct for MDS file */
     hid_t file_id = FAIL; /* ID of MDS file */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* decode the file creation parameters */
     if(H5VL__decode_file_create_params(p, &mds_filename, &flags, &fcpl_id, &fapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file create params");
 
-    /* set the underlying MDS VFD */
+    /* Create a split fapl with the decoded fapl used for the metadata file access and
+       a stub fapl (temp_fapl) used for raw data file to manage the EOA */
+    split_fapl = H5Pcreate(H5P_FILE_ACCESS);
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5P_set_fapl_mds(temp_fapl, mds_filename, fapl_id) < 0)
+    if(H5P_set_fapl_mds(temp_fapl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
+    /* set up the split multi VFD info */
+    {
+        H5FD_mem_t	memb_map[H5FD_MEM_NTYPES];
+        hid_t		memb_fapl[H5FD_MEM_NTYPES];
+        const char	*memb_name[H5FD_MEM_NTYPES];
+        haddr_t		memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t      mt;
+
+        /* Initialize */
+        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+            /* Treat global heap as raw data, not metadata */
+            memb_map[mt] = ((mt == H5FD_MEM_DRAW || mt == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : H5FD_MEM_SUPER);
+            memb_fapl[mt] = -1;
+            memb_name[mt] = NULL;
+            memb_addr[mt] = HADDR_UNDEF;
+        }
+
+        /* The file access properties */
+        memb_fapl[H5FD_MEM_SUPER] = fapl_id;
+        memb_fapl[H5FD_MEM_DRAW] = temp_fapl;
+
+        /* file names */
+        memb_name[H5FD_MEM_SUPER] = mds_filename;
+        memb_name[H5FD_MEM_DRAW] = "who cares";
+
+        /* The sizes */
+        memb_addr[H5FD_MEM_SUPER] = 0;
+        memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
+        H5Pset_fapl_multi(split_fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE);
+    }
+
+    /* reset the feature flags for the split file driver, because the default ones will not work with
+       the MDS plugin */
+    {
+        H5FD_class_t	*driver;                /* VFD for file */
+        hid_t               driver_id = -1;         /* VFD ID */
+        H5P_genplist_t      *plist;                 /* Property list pointer */
+
+        /* Get file access property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(split_fapl)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        /* Get the VFD to open the file with */
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+        /* Get driver info */
+        if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver ID in file access property list");
+        driver->query = &H5VL_multi_query;
+    }
+
     /* call the native plugin file create callback*/
-    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, 
-                                                            temp_fapl, -1)))
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, split_fapl, -1)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
+    /* register atom for file */
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
+    if(H5I_dec_app_ref(split_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    if(H5I_dec_app_ref(temp_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
     if(mds_filename)
         H5MM_xfree(mds_filename);
 
@@ -310,29 +370,89 @@ H5VL__file_open_cb(uint8_t *p, int source)
     char *mds_filename = NULL; /* name of the metadata file (generated from name) */
     unsigned flags; /* access flags */
     hid_t fapl_id = FAIL; /* plist IDs */
-    hid_t temp_fapl; /* fapl used for underlying MDS VFD */
+    hid_t temp_fapl; /* stub fapl for raw data file that maintains EOA */
+    hid_t split_fapl = FAIL; /* split fapl for container */
     H5F_t *new_file = NULL; /* struct for MDS file */
     hid_t file_id; /* ID of MDS file */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* decode the file open parameters */
     if(H5VL__decode_file_open_params(p, &mds_filename, &flags, &fapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file open params");
 
-    /* set the underlying MDS VFD */
+    /* Create a split fapl with the decoded fapl used for the metadata file access and
+       a stub fapl (temp_fapl) used for raw data file to manage the EOA */
+    split_fapl = H5Pcreate(H5P_FILE_ACCESS);
     temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    if(H5P_set_fapl_mds(temp_fapl, mds_filename, fapl_id) < 0)
+    if(H5P_set_fapl_mds(temp_fapl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set MDS plist");
 
+    /* set up the split multi VFD info */
+    {
+        H5FD_mem_t	memb_map[H5FD_MEM_NTYPES];
+        hid_t		memb_fapl[H5FD_MEM_NTYPES];
+        const char	*memb_name[H5FD_MEM_NTYPES];
+        haddr_t		memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t      mt;
+
+        /* Initialize */
+        for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+            /* Treat global heap as raw data, not metadata */
+            memb_map[mt] = ((mt == H5FD_MEM_DRAW || mt == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : H5FD_MEM_SUPER);
+            //memb_map[mt] = ((mt == H5FD_MEM_DRAW) ? H5FD_MEM_DRAW : H5FD_MEM_SUPER);
+            memb_fapl[mt] = -1;
+            memb_name[mt] = NULL;
+            memb_addr[mt] = HADDR_UNDEF;
+        }
+
+        /* The file access properties */
+        memb_fapl[H5FD_MEM_SUPER] = fapl_id;
+        memb_fapl[H5FD_MEM_DRAW] = temp_fapl;
+
+        /* file names */
+        memb_name[H5FD_MEM_SUPER] = mds_filename;
+        memb_name[H5FD_MEM_DRAW] = "who cares";
+
+        /* The sizes */
+        memb_addr[H5FD_MEM_SUPER] = 0;
+        memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
+        H5Pset_fapl_multi(split_fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE);
+    }
+
+    /* reset the feature flags for the split file driver, because the default ones will not work with
+       the MDS plugin */
+    {
+        H5FD_class_t	*driver;                /* VFD for file */
+        hid_t               driver_id = -1;         /* VFD ID */
+        H5P_genplist_t      *plist;                 /* Property list pointer */
+
+        /* Get file access property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(split_fapl)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+        /* Get the VFD to open the file with */
+        if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+        /* Get driver info */
+        if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver ID in file access property list");
+        driver->query = &H5VL_multi_query;
+    }
+
     /* call the native plugin file open callback*/
-    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, temp_fapl, -1)))
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, split_fapl, -1)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
+    /* register atom for file */
     if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
+    if(H5I_dec_app_ref(split_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    if(H5I_dec_app_ref(temp_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
     if(mds_filename)
         H5MM_xfree(mds_filename);
 
@@ -1143,7 +1263,7 @@ done:
 * Function:	H5VL__dataset_get_cb
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__dataset_get_cb(uint8_t *p, int source)
+H5VL__dataset_get_cb(uint8_t *p, int UNUSED source)
 {
     H5VL_dataset_get_t get_type = -1;
     herr_t ret_value = SUCCEED;
@@ -2125,5 +2245,21 @@ H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__temp_link_get() */
+
+static herr_t 
+H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
+{
+    /* Shut compiler up */
+    _f=_f;
+
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags = 0;
+        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_ALLOCATE_EARLY;
+    } /* end if */
+
+    return(0);
+} /* end H5VL_multi_query() */
 
 #endif /* H5_HAVE_PARALLEL */

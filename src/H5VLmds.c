@@ -146,6 +146,13 @@ typedef struct H5VL_mds_fapl_t {
     hid_t               meta_fapl;
 } H5VL_mds_fapl_t;
 
+/* Declare a free list to manage the MDS object structs */
+H5FL_DEFINE(H5VL_mds_file_t);
+H5FL_DEFINE(H5VL_mds_attr_t);
+H5FL_DEFINE(H5VL_mds_dset_t);
+H5FL_DEFINE(H5VL_mds_dtype_t);
+H5FL_DEFINE(H5VL_mds_group_t);
+
 static H5VL_class_t H5VL_mds_g = {
     MDS,
     "mds",				     /* name */
@@ -567,10 +574,6 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     }
     HDassert(mds_file);
 
-    /* set the underlying VFD for clients (MDC)*/
-    //temp_fapl = H5Pcreate(H5P_FILE_ACCESS);
-    //H5Pset_fapl_mpio(temp_fapl, fa->comm, fa->info);
-
     /* generate the raw data file name by adding the raw data extension to the user file name */
     if(NULL == (raw_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->raw_ext) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
@@ -589,12 +592,8 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     new_file->id_exists = TRUE;
 
     /* allocate the file object that is returned to the user */
-    if(NULL == (file = (H5VL_mds_file_t *)calloc(1, sizeof(H5VL_mds_file_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* store the metadata file ID in the local raw data file struct 
-    H5FD_mdc_set_mdfile(new_file, mds_file);
-    */
+    if(NULL == (file = H5FL_CALLOC(H5VL_mds_file_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate MDS file struct");
 
     /* create the file object that is passed to the API layer */
     file->common.obj_type = H5I_FILE; 
@@ -638,7 +637,6 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
     H5VL_mds_file_t *file = NULL;
     char *raw_name = NULL;
-    haddr_t eof = HADDR_UNDEF;
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -707,21 +705,9 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     new_file->shared->fs_strategy = H5F_FILE_SPACE_VFD;
     new_file->id_exists = TRUE;
 
-    /* Need to create file superblock */
-    if(0 == my_rank) {
-        eof = H5FD_get_eof(new_file->shared->lf);
-        if(H5FD_set_eoa(new_file->shared->lf, H5FD_MEM_DRAW, eof) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to set EOA for RAW file");
-    }
-    MPI_Barrier(fa->comm);
-
     /* allocate the file object that is returned to the user */
-    if(NULL == (file = (H5VL_mds_file_t *)calloc(1, sizeof(H5VL_mds_file_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* store the metadata file ID in the local raw data file struct 
-    H5FD_mdc_set_mdfile(new_file, mds_file);
-    */
+    if(NULL == (file = H5FL_CALLOC(H5VL_mds_file_t)))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate MDS file struct");
 
     /* open the file object that is passed to the API layer */
     file->common.obj_type = H5I_FILE; 
@@ -832,7 +818,7 @@ H5VL_mds_file_close(void *obj, hid_t UNUSED req)
     if((ret_value = H5F_close(f)) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
 
-    H5MM_free(file);
+    file = H5FL_FREE(H5VL_mds_file_t, file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -895,8 +881,8 @@ H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode attr create parameters");
 
     /* allocate the attr object that is returned to the user */
-    if(NULL == (attr = (H5VL_mds_attr_t *)calloc(1, sizeof(H5VL_mds_attr_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (attr = H5FL_CALLOC(H5VL_mds_attr_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata attribute ID */
@@ -991,8 +977,8 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
     /* allocate the attr object that is returned to the user */
-    if(NULL == (attr = (H5VL_mds_attr_t *)calloc(1, sizeof(H5VL_mds_attr_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (attr = H5FL_CALLOC(H5VL_mds_attr_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
     if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
@@ -1540,7 +1526,7 @@ H5VL_mds_attr_close(void *obj, hid_t UNUSED req)
     if(H5A__mdc_close(attr->attr) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute");
 
-    H5MM_free(attr);
+    attr = H5FL_FREE(H5VL_mds_attr_t, attr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1615,8 +1601,8 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     H5MM_free(send_buf);
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (dset = H5FL_CALLOC(H5VL_mds_dset_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
     if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
@@ -1662,6 +1648,9 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         //H5O_layout_t layout = dataset->shared->layout;
 
         printf("type %d version %d\n", layout.type, layout.version);
+        printf("size %d addr %llu\n", layout.storage.u.contig.size, 
+               layout.storage.u.contig.addr - HADDR_MAX/2);
+        /*
         printf("ndims %d size %d, nchunks %llu\n", layout.u.chunk.ndims,
                layout.u.chunk.size, layout.u.chunk.nchunks);
         for(u = 0; u < layout.u.chunk.ndims; u++) {
@@ -1670,6 +1659,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         }
         printf("idx type %d  address %llu\n", layout.storage.u.chunk.idx_type, 
                layout.storage.u.chunk.idx_addr);
+        */
     }
 #endif
 
@@ -1743,8 +1733,8 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dset = (H5VL_mds_dset_t *)calloc(1, sizeof(H5VL_mds_dset_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (dset = H5FL_CALLOC(H5VL_mds_dset_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
     if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
@@ -2190,7 +2180,7 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
     //if(H5D_close(dset->dset) < 0)
     //HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset");
 
-    H5MM_free(dset);
+    dset = H5FL_FREE(H5VL_mds_dset_t, dset);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2241,8 +2231,8 @@ H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype commit parameters");
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dtype = (H5VL_mds_dtype_t *)calloc(1, sizeof(H5VL_mds_dtype_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (dtype = H5FL_CALLOC(H5VL_mds_dtype_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata datatype ID */
@@ -2314,18 +2304,14 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype open parameters");
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dtype = (H5VL_mds_dtype_t *)calloc(1, sizeof(H5VL_mds_dtype_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (dtype = H5FL_CALLOC(H5VL_mds_dtype_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
-
-    /* allocate the dataset object that is returned to the user */
-    if(NULL == (dtype = (H5VL_mds_dtype_t *)calloc(1, sizeof(H5VL_mds_dtype_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* probe for a message from the mds */
     if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
@@ -2443,7 +2429,7 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype")
 
     H5MM_free(send_buf);
-    H5MM_free(dtype);
+    dtype = H5FL_FREE(H5VL_mds_dtype_t, dtype);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2500,8 +2486,8 @@ H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode group create parameters");
 
     /* allocate the group object that is returned to the user */
-    if(NULL == (grp = (H5VL_mds_group_t *)calloc(1, sizeof(H5VL_mds_group_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata group ID */
@@ -2561,8 +2547,8 @@ static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode group open parameters");
 
     /* allocate the group object that is returned to the user */
-    if(NULL == (grp = (H5VL_mds_group_t *)calloc(1, sizeof(H5VL_mds_group_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata group ID */
@@ -2780,7 +2766,7 @@ H5VL_mds_group_close(void *obj, hid_t UNUSED req)
     H5MM_free(send_buf);
 
     /* Free the group's memory structure */
-    H5MM_free(grp);
+    grp = H5FL_FREE(H5VL_mds_group_t, grp);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
