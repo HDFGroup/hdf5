@@ -296,7 +296,7 @@ H5FL_BLK_DEFINE_STATIC(chunk);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, unsigned filters, hsize_t *offset, 
+H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsize_t *offset, 
          size_t data_size, const void *buf)
 {
     const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */

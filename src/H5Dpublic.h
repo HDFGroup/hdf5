@@ -34,6 +34,12 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
 #define H5D_CHUNK_CACHE_W0_DEFAULT          -1.
 
+/* Property names for H5LTDdirect_chunk_write */   
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME	        "direct_chunk_flag"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME	"direct_chunk_filters"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME		"direct_chunk_offset"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME	"direct_chunk_datasize"
+ 
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -118,7 +124,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
-H5_DLL herr_t H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, unsigned filters, hsize_t *offset, 
+H5_DLL herr_t H5PSIdirect_write(hid_t dset_id, hid_t dxpl_id, uint32_t filters, hsize_t *offset, 
                          size_t data_size, const void *buf);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
             H5D_operator_t op, void *operator_data);
