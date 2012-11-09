@@ -2233,11 +2233,18 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
                [
   echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
   $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
-  echo "./a.out :" > conftest.sh
+case "`uname`" in
+  CYGWIN*)
+    echo "./a.exe :" > conftest.sh
+    ;;
+  *)
+    echo "./a.out :" > conftest.sh
+    ;;
+esac
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
-  rm a.out
+  rm -f a.out a.exe
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then
