@@ -40,7 +40,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-
+#include "H5VLmdserver.h"	/* MDS server private			*/
 
 /****************/
 /* Local Macros */
@@ -272,6 +272,7 @@ static const void *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF;          /* Defaul
 static herr_t
 H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 {
+    hid_t mds_dset_id = FAIL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -399,6 +400,11 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE, &H5D_def_ftype_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the type ID property*/
+    if(H5P_register_real(pclass, H5VL_DSET_MDS_ID, sizeof(hid_t), &mds_dset_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 

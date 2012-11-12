@@ -1597,7 +1597,6 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
-
     H5MM_free(send_buf);
 
     /* allocate the dataset object that is returned to the user */
@@ -1612,7 +1611,8 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
@@ -1642,15 +1642,15 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(H5D__layout_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
 
+    /* reset the chunk ops to use the stub client ops */
+    new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+
 #if 0
     {
         unsigned u;
         //H5O_layout_t layout = dataset->shared->layout;
 
         printf("type %d version %d\n", layout.type, layout.version);
-        printf("size %d addr %llu\n", layout.storage.u.contig.size, 
-               layout.storage.u.contig.addr - HADDR_MAX/2);
-        /*
         printf("ndims %d size %d, nchunks %llu\n", layout.u.chunk.ndims,
                layout.u.chunk.size, layout.u.chunk.nchunks);
         for(u = 0; u < layout.u.chunk.ndims; u++) {
@@ -1659,7 +1659,6 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         }
         printf("idx type %d  address %llu\n", layout.storage.u.chunk.idx_type, 
                layout.storage.u.chunk.idx_addr);
-        */
     }
 #endif
 
@@ -1811,6 +1810,8 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* Set the dataset's I/O operations */
     if(H5D__layout_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
+    /* reset the chunk ops to use the stub client ops */
+    new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
 
     new_dset->oloc.file = obj->raw_file;
     /* set the dataset struct in the high level object */
@@ -1847,9 +1848,10 @@ H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
                       hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t UNUSED req)
 {
     H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
-    //hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
+    hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
+    H5P_genplist_t *plist = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1874,6 +1876,14 @@ H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 
     if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* set the ID of the dataset at the MDS in the XFER property */
+    if(H5P_set(plist, H5VL_DSET_MDS_ID, &dset_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for mds dataset id");
 
     /* read raw data */
     if(H5D__mdc_read(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
@@ -1902,9 +1912,10 @@ H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
 {
     H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
-    //hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
+    hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
+    H5P_genplist_t *plist = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1929,6 +1940,14 @@ H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 
     if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* set the ID of the dataset at the MDS in the XFER property */
+    if(H5P_set(plist, H5VL_DSET_MDS_ID, &dset_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for mds dataset id");
 
     /* write raw data */
     if(H5D__mdc_write(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)

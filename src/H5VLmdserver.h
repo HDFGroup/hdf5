@@ -36,6 +36,9 @@
 #define H5VL_MDS_LISTEN_TAG 352
 #define H5VL_MDS_SEND_TAG   356
 
+/* MDS specific Dataset tansfer private properties */
+#define H5VL_DSET_MDS_ID        "mds_dataset_id"
+
 /* the object structure of the MDS VOL plugin */
 typedef struct H5VL_mds_object_t {
     H5I_type_t obj_type;

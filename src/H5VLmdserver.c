@@ -87,6 +87,8 @@ static herr_t H5VL__attr_write_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_remove_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_get_cb(uint8_t *p, int source);
 static herr_t H5VL__attr_close_cb(uint8_t *p, int source);
+static herr_t H5VL__chunk_insert(uint8_t *p, int source);
+static herr_t H5VL__chunk_get_addr(uint8_t *p, int source);
 static herr_t H5VL__dataset_create_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_open_cb(uint8_t *p, int source);
 static herr_t H5VL__dataset_set_extent_cb(uint8_t *p, int source);
@@ -183,6 +185,8 @@ H5VL_mds_start(void)
     mds_ops[H5VL_ATTR_REMOVE]     = H5VL__attr_remove_cb;
     mds_ops[H5VL_ATTR_GET]        = H5VL__attr_get_cb;
     mds_ops[H5VL_ATTR_CLOSE]      = H5VL__attr_close_cb;
+    mds_ops[H5VL_CHUNK_INSERT]    = H5VL__chunk_insert;
+    mds_ops[H5VL_CHUNK_GET_ADDR]  = H5VL__chunk_get_addr;
     mds_ops[H5VL_DSET_CREATE]     = H5VL__dataset_create_cb;
     mds_ops[H5VL_DSET_OPEN]       = H5VL__dataset_open_cb;
     mds_ops[H5VL_DSET_SET_EXTENT] = H5VL__dataset_set_extent_cb;
@@ -1050,7 +1054,7 @@ H5VL__dataset_create_cb(uint8_t *p, int source)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom");
 
     /* determine the buffer size needed to store the encoded layout of the dataset */ 
     if(FAIL == (ret_value = H5D__encode_layout(dset->shared->layout, NULL, &buf_size)))
@@ -2189,6 +2193,212 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_MDS_SET_EOA */
 
+/*-------------------------------------------------------------------------
+* Function:	H5VL__chunk_insert
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__chunk_insert(uint8_t *p, int source)
+{
+    hid_t dset_id; /* metadata file ID */
+    H5D_t *dset = NULL;
+    H5D_chunk_ud_t udata;
+    H5D_chk_idx_info_t idx_info;
+    void *send_buf;
+    size_t buf_size = 0, dxpl_size = 0;
+    uint8_t *p1;
+    unsigned u;
+    hsize_t *offsets;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* the metadata file id */
+    INT32DECODE(p, dset_id);
+
+    /* get the dataset object */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Initialize the query information about the chunk we are looking for */
+    udata.common.layout = &(dset->shared->layout.u.chunk);
+    udata.common.storage = &(dset->shared->layout.storage.u.chunk);
+    udata.common.rdcc = &(dset->shared->cache.chunk);
+
+    /* decode udata */
+    H5_DECODE_UNSIGNED(p, udata.idx_hint);
+    UINT32DECODE(p, udata.nbytes);
+    H5_DECODE_UNSIGNED(p, udata.filter_mask);
+    UINT64DECODE_VARLEN(p, udata.addr);
+
+    if(NULL == (offsets = (hsize_t *)H5MM_malloc(sizeof(hsize_t) * idx_info.layout->ndims)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    for(u = 0; u < idx_info.layout->ndims; u++)
+        UINT64DECODE_VARLEN(p, offsets[u]);
+
+    udata.common.offset = offsets;
+
+    /* decode the index address */
+    UINT64DECODE_VARLEN(p, idx_info.storage->idx_addr);
+
+    /* decode the dxpl size */
+    UINT64DECODE_VARLEN(p, dxpl_size);
+    /* decode property lists if they are not default*/
+    if(dxpl_size) {
+        if((idx_info.dxpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dxpl_size;
+    }
+    else
+        idx_info.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+
+    /* apply cache tag to dxpl */
+    if(H5AC_tag(idx_info.dxpl_id, dset->oloc.addr, NULL) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag");
+
+    /* Create the chunk */
+    if((dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk");
+
+    buf_size = sizeof(unsigned)*2 + sizeof(uint32_t) +
+        1 + H5V_limit_enc_size((uint64_t)(udata.addr));
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p1 = (uint8_t *)send_buf;
+
+    /* encode udata */
+    H5_ENCODE_UNSIGNED(p1, udata.idx_hint);
+    UINT32ENCODE(p1, udata.nbytes);
+    H5_ENCODE_UNSIGNED(p1, udata.filter_mask);
+    UINT64ENCODE_VARLEN(p1, udata.addr);
+
+done:
+    H5MM_free(offsets);
+
+    /* Send the confirmation to the client */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__chunk_insert */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__chunk_get_addr
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__chunk_get_addr(uint8_t *p, int source)
+{
+    hid_t dset_id; /* metadata file ID */
+    H5D_t *dset = NULL;
+    H5D_chunk_ud_t udata;
+    H5D_chk_idx_info_t idx_info;
+    void *send_buf;
+    size_t buf_size = 0, dxpl_size = 0;
+    uint8_t *p1;
+    unsigned u;
+    hsize_t *offsets;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* the metadata file id */
+    INT32DECODE(p, dset_id);
+
+    /* get the dataset object */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* Initialize the query information about the chunk we are looking for */
+    udata.common.layout = &(dset->shared->layout.u.chunk);
+    udata.common.storage = &(dset->shared->layout.storage.u.chunk);
+    udata.common.rdcc = &(dset->shared->cache.chunk);
+
+    /* decode udata */
+    H5_DECODE_UNSIGNED(p, udata.idx_hint);
+    UINT32DECODE(p, udata.nbytes);
+    H5_DECODE_UNSIGNED(p, udata.filter_mask);
+    UINT64DECODE_VARLEN(p, udata.addr);
+
+    if(NULL == (offsets = (hsize_t *)H5MM_malloc(sizeof(hsize_t) * idx_info.layout->ndims)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    for(u = 0; u < idx_info.layout->ndims; u++)
+        UINT64DECODE_VARLEN(p, offsets[u]);
+
+    udata.common.offset = offsets;
+
+    /* decode the index address */
+    UINT64DECODE_VARLEN(p, idx_info.storage->idx_addr);
+
+    /* decode the dxpl size */
+    UINT64DECODE_VARLEN(p, dxpl_size);
+    /* decode property lists if they are not default*/
+    if(dxpl_size) {
+        if((idx_info.dxpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dxpl_size;
+    }
+    else
+        idx_info.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+
+    /* apply cache tag to dxpl */
+    if(H5AC_tag(idx_info.dxpl_id, dset->oloc.addr, NULL) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag");
+
+    /* Create the chunk */
+    if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, &udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query chunk address");
+
+    buf_size = sizeof(unsigned)*2 + sizeof(uint32_t) +
+        1 + H5V_limit_enc_size((uint64_t)(udata.addr));
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p1 = (uint8_t *)send_buf;
+
+    /* encode udata */
+    H5_ENCODE_UNSIGNED(p1, udata.idx_hint);
+    UINT32ENCODE(p1, udata.nbytes);
+    H5_ENCODE_UNSIGNED(p1, udata.filter_mask);
+    UINT64ENCODE_VARLEN(p1, udata.addr);
+
+done:
+    H5MM_free(offsets);
+
+    if(SUCCEED == ret_value) {
+        /* Send the confirmation to the client */
+        if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* send a failed message to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__chunk_get_addr */
+
 /*
  * Just a temporary routine to create a var_args to pass through the native MDS get routine
  */
@@ -2255,7 +2465,6 @@ H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
         *flags |= H5FD_FEAT_ALLOCATE_EARLY;
     } /* end if */
 

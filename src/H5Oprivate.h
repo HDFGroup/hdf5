@@ -395,12 +395,18 @@ typedef struct H5O_storage_chunk_btree_t {
     H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
 } H5O_storage_chunk_btree_t;
 
+typedef struct H5O_storage_chunk_client_t {
+    haddr_t     dset_ohdr_addr;         /* File address dataset's object header */
+    hid_t       mdfile_id;
+} H5O_storage_chunk_client_t;
+
 typedef struct H5O_storage_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     haddr_t	idx_addr;		/* File address of chunk index       */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
+        H5O_storage_chunk_client_t client; /* Information for a metadata client index   */
     } u;
 } H5O_storage_chunk_t;
 
