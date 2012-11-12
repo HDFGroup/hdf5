@@ -39,6 +39,7 @@
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 #include "H5VLmdserver.h"	/* MDS server private			*/
 
+#ifdef H5_HAVE_PARALLEL
 /****************/
 /* Local Macros */
 /****************/
@@ -52,6 +53,11 @@
 /********************/
 
 
+static herr_t H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_ud_t *udata);
+static herr_t H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_ud_t *udata);
+#if 0
 /* iterator callbacks */
 static int H5D__client_idx_iterate_cb(H5F_t *f, hid_t dxpl_id, const void *left_key,
     haddr_t addr, const void *right_key, void *_udata);
@@ -61,10 +67,7 @@ static herr_t H5D__client_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D__client_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__client_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
-static herr_t H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
+
 static int H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
 static herr_t H5D__client_idx_remove(const H5D_chk_idx_info_t *idx_info,
@@ -80,7 +83,7 @@ static herr_t H5D__client_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_
 static herr_t H5D__client_idx_dump(const H5O_storage_chunk_t *storage,
     FILE *stream);
 static herr_t H5D__client_idx_dest(const H5D_chk_idx_info_t *idx_info);
-
+#endif
 
 /*********************/
 /* Package Variables */
@@ -88,21 +91,21 @@ static herr_t H5D__client_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* v1 B-tree indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_CLIENT[1] = {{
-    H5D__client_idx_init,
-    H5D__client_idx_create,
-    H5D__client_idx_is_space_alloc,
+    NULL,
+    NULL,
+    NULL,
     H5D__client_idx_insert,
     H5D__client_idx_get_addr,
     NULL,
-    H5D__client_idx_iterate,
-    H5D__client_idx_remove,
-    H5D__client_idx_delete,
-    H5D__client_idx_copy_setup,
-    H5D__client_idx_copy_shutdown,
-    H5D__client_idx_size,
-    H5D__client_idx_reset,
-    H5D__client_idx_dump,
-    H5D__client_idx_dest
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
 }};
 
 
@@ -114,108 +117,6 @@ const H5D_chunk_ops_t H5D_COPS_CLIENT[1] = {{
 /* Local Variables */
 /*******************/
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__client_idx_init
- *
- * Purpose:	Initialize the indexing information for a dataset.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              November  8, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__client_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *space,
-    haddr_t dset_ohdr_addr)
-{
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(dset_ohdr_addr));
-
-    //idx_info->storage->u.client.dset_ohdr_addr = dset_ohdr_addr;
-    //idx_info->storage->u.client.mdfile_id = ((H5FD_mdc_t *)(idx_info->f->shared->lf))->mdfile_id;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__client_idx_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__client_idx_create
- *
- * Purpose:	Creates a new indexed-storage B-tree and initializes the
- *		layout struct with information about the storage.  The
- *		struct should be immediately written to the object header.
- *
- *		This function must be called before passing LAYOUT to any of
- *		the other indexed storage functions!
- *
- * Return:	Non-negative on success (with the LAYOUT argument initialized
- *		and ready to write to an object header). Negative on failure.
- *
- * Programmer:	Mohamad Chaarawi
- *		November  8, 2012
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__client_idx_create(const H5D_chk_idx_info_t *idx_info)
-{
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Check args */
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__client_idx_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__client_idx_is_space_alloc
- *
- * Purpose:	Query if space is allocated for index method
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *		November  8, 2012
- *
- *-------------------------------------------------------------------------
- */
-static hbool_t
-H5D__client_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
-{
-    hbool_t ret_value;          /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Check args */
-    HDassert(storage);
-
-    /* Set return value */
-    ret_value = TRUE;//(hbool_t)H5F_addr_defined(storage->idx_addr);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__client_idx_is_space_alloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -467,6 +368,110 @@ H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__client_idx_get_addr() */
+
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__client_idx_init
+ *
+ * Purpose:	Initialize the indexing information for a dataset.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              November  8, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__client_idx_init(const H5D_chk_idx_info_t *idx_info, const H5S_t UNUSED *space,
+    haddr_t dset_ohdr_addr)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(dset_ohdr_addr));
+
+    //idx_info->storage->u.client.dset_ohdr_addr = dset_ohdr_addr;
+    //idx_info->storage->u.client.mdfile_id = ((H5FD_mdc_t *)(idx_info->f->shared->lf))->mdfile_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__client_idx_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__client_idx_create
+ *
+ * Purpose:	Creates a new indexed-storage B-tree and initializes the
+ *		layout struct with information about the storage.  The
+ *		struct should be immediately written to the object header.
+ *
+ *		This function must be called before passing LAYOUT to any of
+ *		the other indexed storage functions!
+ *
+ * Return:	Non-negative on success (with the LAYOUT argument initialized
+ *		and ready to write to an object header). Negative on failure.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		November  8, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__client_idx_create(const H5D_chk_idx_info_t *idx_info)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
+    HDassert(!H5F_addr_defined(idx_info->storage->idx_addr));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__client_idx_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__client_idx_is_space_alloc
+ *
+ * Purpose:	Query if space is allocated for index method
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		November  8, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+H5D__client_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
+{
+    hbool_t ret_value;          /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check args */
+    HDassert(storage);
+
+    /* Set return value */
+    ret_value = TRUE;//(hbool_t)H5F_addr_defined(storage->idx_addr);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__client_idx_is_space_alloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -801,3 +806,5 @@ H5D_client_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_client_debug() */
+#endif
+#endif /* H5_HAVE_PARALLEL */
