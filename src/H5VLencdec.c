@@ -662,6 +662,8 @@ H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id,
     size_t len = 0, acpl_size = 0;
     size_t type_size = 0, space_size = 0, loc_size = 0;
     H5P_genplist_t *acpl = NULL;
+    H5S_t *dspace = NULL;
+    H5T_t *dtype = NULL;
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -677,12 +679,16 @@ H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id,
     }
 
     /* get Type size to encode */
-    if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+    if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if(H5T_encode(dtype, NULL, &type_size) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     /* get Dataspace size to encode */
-    if((ret_value = H5Sencode(space_id, NULL, &space_size)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+    if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(H5S_encode(dspace, NULL, &space_size)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
     /* get name size to encode */
     if(NULL != name)
@@ -723,14 +729,14 @@ H5VL__encode_attr_create_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode the datatype size */
         UINT64ENCODE_VARLEN(p, type_size);
         /* encode datatype */
-        if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
+        if((ret_value = H5T_encode(dtype, p, &type_size)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
         p += type_size;
 
         /* encode the dataspace size */
         UINT64ENCODE_VARLEN(p, space_size);
         /* encode datatspace */
-        if((ret_value = H5Sencode(space_id, p, &space_size)) < 0)
+        if((ret_value = H5S_encode(dspace, p, &space_size)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
         p += space_size;
     }
@@ -917,6 +923,7 @@ H5VL__encode_attr_read_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t typ
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t size = 0, type_size;
+    H5T_t *dtype = NULL;
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -924,8 +931,10 @@ H5VL__encode_attr_read_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t typ
     HDassert(nalloc);
 
     /* get Type size to encode */
-    if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+    if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if(H5T_encode(dtype, NULL, &type_size) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     if(NULL != p) {
         /* encode request type */
@@ -937,7 +946,7 @@ H5VL__encode_attr_read_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t typ
         /* encode the datatype size */
         UINT64ENCODE_VARLEN(p, type_size);
         /* encode datatype */
-        if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
+        if((ret_value = H5T_encode(dtype, p, &type_size)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
         p += type_size;
 
@@ -997,6 +1006,7 @@ H5VL__encode_attr_write_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t ty
 {
     uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
     size_t size = 0, type_size;
+    H5T_t *dtype = NULL;
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1004,8 +1014,10 @@ H5VL__encode_attr_write_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t ty
     HDassert(nalloc);
 
     /* get Type size to encode */
-    if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+    if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if(H5T_encode(dtype, NULL, &type_size) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     if(NULL != p) {
         /* encode request type */
@@ -1017,7 +1029,7 @@ H5VL__encode_attr_write_params(void *buf, size_t *nalloc, hid_t obj_id, hid_t ty
         /* encode the datatype size */
         UINT64ENCODE_VARLEN(p, type_size);
         /* encode datatype */
-        if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
+        if((ret_value = H5T_encode(dtype, p, &type_size)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
         p += type_size;
 
@@ -1470,6 +1482,8 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
     size_t len = 0, dcpl_size = 0, dapl_size = 0, lcpl_size = 0;
     size_t type_size = 0, space_size = 0, loc_size = 0;
     H5P_genplist_t *dcpl = NULL, *dapl = NULL, *lcpl = NULL;
+    H5S_t *dspace = NULL;
+    H5T_t *dtype = NULL;
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1497,12 +1511,16 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
     }
 
     /* get Type size to encode */
-    if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+    if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if(H5T_encode(dtype, NULL, &type_size) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     /* get Dataspace size to encode */
-    if((ret_value = H5Sencode(space_id, NULL, &space_size)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+    if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(H5S_encode(dspace, NULL, &space_size)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
     /* get name size to encode */
     if(NULL != name)
@@ -1561,14 +1579,14 @@ H5VL__encode_dataset_create_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode the datatype size */
         UINT64ENCODE_VARLEN(p, type_size);
         /* encode datatype */
-        if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
+        if((ret_value = H5T_encode(dtype, p, &type_size)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
         p += type_size;
 
         /* encode the dataspace size */
         UINT64ENCODE_VARLEN(p, space_size);
         /* encode datatspace */
-        if((ret_value = H5Sencode(space_id, p, &space_size)) < 0)
+        if((ret_value = H5S_encode(dspace, p, &space_size)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
         p += space_size;
     }
@@ -1924,6 +1942,7 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
     size_t len = 0, tcpl_size = 0, tapl_size = 0, lcpl_size = 0;
     size_t type_size = 0, loc_size = 0;
     H5P_genplist_t *tcpl = NULL, *tapl = NULL, *lcpl = NULL;
+    H5T_t *dtype = NULL;
     herr_t  ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1951,8 +1970,10 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
     }
 
     /* get Type size to encode */
-    if((ret_value = H5Tencode(type_id, NULL, &type_size)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+    if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+    if(H5T_encode(dtype, NULL, &type_size) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     /* get name size to encode */
     if(NULL != name)
@@ -1984,7 +2005,7 @@ H5VL__encode_datatype_commit_params(void *buf, size_t *nalloc, hid_t obj_id,
         /* encode the datatype size */
         UINT64ENCODE_VARLEN(p, type_size);
         /* encode datatype */
-        if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
+        if((ret_value = H5T_encode(dtype, p, &type_size)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
         p += type_size;
 
