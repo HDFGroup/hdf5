@@ -39,6 +39,8 @@
 /* MDS specific Dataset tansfer private properties */
 #define H5VL_DSET_MDS_ID        "mds_dataset_id"
 
+#define H5VL_MDS_LINK_ITERATE 1
+
 /* the object structure of the MDS VOL plugin */
 typedef struct H5VL_mds_object_t {
     H5I_type_t obj_type;

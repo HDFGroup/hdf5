@@ -103,6 +103,7 @@ static herr_t H5VL__group_get_cb(uint8_t *p, int source);
 static herr_t H5VL__group_close_cb(uint8_t *p, int source);
 static herr_t H5VL__link_create_cb(uint8_t *p, int source);
 static herr_t H5VL__link_move_cb(uint8_t *p, int source);
+static herr_t H5VL__link_iterate_cb(uint8_t *p, int source);
 static herr_t H5VL__link_get_cb(uint8_t *p, int source);
 static herr_t H5VL__link_remove_cb(uint8_t *p, int source);
 static herr_t H5VL__allocate_cb(uint8_t *p, int source);
@@ -115,7 +116,7 @@ static herr_t H5VL__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req
 static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
 static herr_t H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
-
+static int link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data);
 /*********************/
 /* Package Variables */
 /*********************/
@@ -201,6 +202,7 @@ H5VL_mds_start(void)
     mds_ops[H5VL_GROUP_CLOSE]     = H5VL__group_close_cb;
     mds_ops[H5VL_LINK_CREATE]     = H5VL__link_create_cb;
     mds_ops[H5VL_LINK_MOVE]       = H5VL__link_move_cb;
+    mds_ops[H5VL_LINK_ITERATE]    = H5VL__link_iterate_cb;
     mds_ops[H5VL_LINK_GET]        = H5VL__link_get_cb;
     mds_ops[H5VL_LINK_REMOVE]     = H5VL__link_remove_cb;
     mds_ops[H5VL_ALLOC]           = H5VL__allocate_cb;
@@ -245,7 +247,7 @@ H5VL_mds_start(void)
         op_type = (H5VL_op_type_t)*p++;
 
         if((*mds_ops[op_type])(p, status.MPI_SOURCE) < 0) {
-            printf("failed mds op\n");
+            printf("failed mds op: %d\n", op_type);
         }
 
         if(NULL != recv_buf)
@@ -1811,6 +1813,118 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_move_cb */
+
+static int
+link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data)
+{
+    int source = *((int *)op_data);
+    void *send_buf = NULL;
+    size_t buf_size = 0; /* send_buf size */
+    uint8_t *p = NULL; /* temporary pointer into send_buf for encoding */
+    size_t len = 0;
+    int ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get name size to encode */
+    if(NULL != link_name)
+        len = HDstrlen(link_name) + 1;
+
+    /* calculate size of buffer needed */
+    buf_size = 2*sizeof(int32_t) + 1 + H5V_limit_enc_size((uint64_t)len) + len +
+        2 + sizeof(unsigned) + sizeof(int64_t);
+    if(linfo->type == H5L_TYPE_HARD) {
+        buf_size += 1 + H5V_limit_enc_size((uint64_t)linfo->u.address);
+    }
+    else if (linfo->type == H5L_TYPE_SOFT || linfo->type == H5L_TYPE_EXTERNAL ||
+             (linfo->type >= H5L_TYPE_UD_MIN && linfo->type <= H5L_TYPE_MAX)) {
+        buf_size += 1 + H5V_limit_enc_size((uint64_t)linfo->u.val_size);
+    }
+    else
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "invalid link type");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p = (uint8_t *)send_buf;
+
+    /* encode a flag that this message is for the client to call the user callback on
+       and not for the client to finish iteration */
+    INT32ENCODE(p, H5VL_MDS_LINK_ITERATE);
+
+    /* encode the group id */
+    INT32ENCODE(p, group_id);
+
+    /* encode length of the link name and the actual link name */
+    UINT64ENCODE_VARLEN(p, len);
+    if(NULL != link_name && len != 0)
+        HDstrcpy((char *)p, link_name);
+    p += len;
+
+    /* encode Link info struct */
+    *p++ = (uint8_t)linfo->type;
+    H5_ENCODE_UNSIGNED(p, linfo->corder_valid);
+    INT64ENCODE(p, linfo->corder);
+    *p++ = (uint8_t)linfo->cset;
+    if(linfo->type == H5L_TYPE_HARD) {
+        UINT64ENCODE_VARLEN(p, linfo->u.address);
+    }
+    else if (linfo->type == H5L_TYPE_SOFT || linfo->type == H5L_TYPE_EXTERNAL ||
+             (linfo->type >= H5L_TYPE_UD_MIN && linfo->type <= H5L_TYPE_MAX)) {
+        UINT64ENCODE_VARLEN(p, linfo->u.val_size);
+    }
+
+    /* send the callback data back to the client and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5VL_MDS_SEND_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, source, H5VL_MDS_LISTEN_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__link_iterate_cb
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__link_iterate_cb(uint8_t *p, int source)
+{
+    hid_t obj_id;
+    H5VL_loc_params_t loc_params;
+    hbool_t recursive;
+    H5_index_t idx_type;
+    H5_iter_order_t order;
+    hsize_t *idx = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_link_iterate_params(p, &obj_id, &loc_params, &recursive, &idx_type, 
+                                        &order, &idx) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link iterate params");
+
+    if(H5VL_native_link_iterate(H5I_object(obj_id), loc_params, recursive, idx_type, order, idx,
+                                link_iterate_cb, &source, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed");
+
+done:
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    if(NULL != idx) {
+        if(MPI_SUCCESS != MPI_Send(idx, sizeof(hsize_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    H5MM_xfree(idx);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__link_iterate_cb */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__link_get_cb

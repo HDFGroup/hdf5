@@ -2579,8 +2579,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5VL_native_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-                                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, 
-                                       H5L_iterate_t op, void *op_data, hid_t UNUSED req)
+                                H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, 
+                                H5L_iterate_t op, void *op_data, hid_t UNUSED req)
 {
     H5G_loc_t	loc;
     herr_t ret_value;           /* Return value */

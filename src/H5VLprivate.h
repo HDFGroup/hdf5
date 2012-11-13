@@ -35,7 +35,7 @@
 
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
-    H5VL_FILE_CREATE,
+    H5VL_FILE_CREATE = 1,
     H5VL_FILE_OPEN,
     H5VL_FILE_FLUSH,
     H5VL_FILE_CLOSE,
@@ -64,6 +64,7 @@ typedef enum H5VL_op_type_t {
     H5VL_GROUP_CLOSE,
     H5VL_LINK_CREATE,
     H5VL_LINK_MOVE,
+    H5VL_LINK_ITERATE,
     H5VL_LINK_GET,
     H5VL_LINK_REMOVE,
     H5VL_ALLOC,
@@ -217,6 +218,8 @@ H5_DLL herr_t H5VL__encode_link_create_params(void *buf, size_t *nalloc, H5VL_li
 H5_DLL herr_t H5VL__decode_link_create_params(void *buf, H5VL_link_create_type_t *create_type, hid_t *obj_id, H5VL_loc_params_t *loc_params, hid_t *lcpl_id, hid_t *lapl_id);
 H5_DLL herr_t H5VL__encode_link_move_params(void *buf, size_t *nalloc, hid_t src_id, H5VL_loc_params_t loc_params1, hid_t dst_id, H5VL_loc_params_t loc_params2, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5VL__decode_link_move_params(void *buf, hid_t *src_id, H5VL_loc_params_t *loc_params1, hid_t *dst_id, H5VL_loc_params_t *loc_params2, hbool_t *copy_flag, hid_t *lcpl_id, hid_t *lapl_id);
+H5_DLL herr_t H5VL__encode_link_iterate_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx);
+H5_DLL herr_t H5VL__decode_link_iterate_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, hbool_t *recursive, H5_index_t *idx_type, H5_iter_order_t *order, hsize_t **idx);
 H5_DLL herr_t H5VL__encode_link_get_params(void *buf, size_t *nalloc, H5VL_link_get_t get_type, ...);
 H5_DLL herr_t H5VL__decode_link_get_params(void *buf, H5VL_link_get_t get_type, ...);
 H5_DLL herr_t H5VL__encode_link_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params);

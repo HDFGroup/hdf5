@@ -116,9 +116,9 @@ static herr_t H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *ob
 static herr_t H5VL_mds_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                     void *dst_obj, H5VL_loc_params_t loc_params2,
                                     hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
-//static herr_t H5VL_mds_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-//H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-//H5L_iterate_t op, void *op_data, hid_t req);
+static herr_t H5VL_mds_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+                                    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                                    H5L_iterate_t op, void *op_data, hid_t req);
 static herr_t H5VL_mds_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
 
@@ -203,7 +203,7 @@ static H5VL_class_t H5VL_mds_g = {
     {                                        /* link_cls */
         H5VL_mds_link_create,                /* create */
         H5VL_mds_link_move,                  /* move */
-        NULL,//H5VL_mds_link_iterate,               /* iterate */
+        H5VL_mds_link_iterate,               /* iterate */
         H5VL_mds_link_get,                   /* get */
         H5VL_mds_link_remove                 /* remove */
     },
@@ -2990,6 +2990,151 @@ H5VL_mds_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_link_move() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_link_iterate
+ *
+ * Purpose:	Iterates through links in a group
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
+                                    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                                    H5L_iterate_t op, void *op_data, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    void            *send_buf = NULL;
+    size_t           buf_size = 0;
+    herr_t ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_link_iterate_params(NULL, &buf_size, obj->obj_id, loc_params, recursive, 
+                                        idx_type, order, idx) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_link_iterate_params(send_buf, &buf_size, obj->obj_id, loc_params, recursive, 
+                                        idx_type, order, idx) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode link iterate parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    H5MM_free(send_buf);
+    MPI_Pcontrol(1);
+
+    while (1) {
+        H5VL_mds_group_t *grp = NULL;
+        hid_t group_id;
+        char *name = NULL;
+        H5L_info_t linfo;
+        MPI_Status status;
+        void *recv_buf = NULL;
+        int incoming_msg_size = 0;
+        size_t len = 0;
+        int ret;
+        uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */        
+
+        MPI_Pcontrol(0);
+        /* probe for a message from the mds */
+        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+        /* get the incoming message size from the probe result */
+        if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+        /* allocate the receive buffer */
+        if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+        /* receive the actual message */
+        if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+        MPI_Pcontrol(1);
+
+        p = (uint8_t *)recv_buf;
+
+        INT32DECODE(p, ret_value);
+
+        if(ret_value == SUCCEED || ret_value == FAIL) {
+            H5MM_free(recv_buf);
+            if(NULL != idx) {
+                if(MPI_SUCCESS != MPI_Recv(idx, sizeof(hsize_t), MPI_BYTE, MDS_RANK, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+            }
+            break;
+        }
+
+        /* allocate the group object that is used for the user callback */
+        if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate MDS object struct");
+
+        /* set common object parameters */
+        grp->common.obj_type = H5I_GROUP;
+        grp->common.raw_file = obj->raw_file;
+        INT32DECODE(p, grp->common.obj_id);
+
+        /* create a user id for the group with the MDS vol plugin attached to it */
+        if((group_id = H5VL_mds_register(H5I_GROUP, grp, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle");
+
+        /* decode length of the link name and the actual link name */
+        UINT64DECODE_VARLEN(p, len);
+        if(0 != len) {
+            name = H5MM_xstrdup((const char *)(p));
+            p += len;
+        }
+
+        linfo.type = (H5L_type_t)*p++;
+        H5_DECODE_UNSIGNED(p, linfo.corder_valid);
+        INT64DECODE(p, linfo.corder);
+        linfo.cset = (H5T_cset_t)*p++;
+
+        if(linfo.type == H5L_TYPE_HARD) {
+            UINT64DECODE_VARLEN(p, linfo.u.address);
+        }
+        else if (linfo.type == H5L_TYPE_SOFT || linfo.type == H5L_TYPE_EXTERNAL ||
+                 (linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX)) {
+            UINT64DECODE_VARLEN(p, linfo.u.val_size);
+        }
+        else
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "invalid link type");
+
+        H5MM_free(recv_buf);
+
+        ret = op(group_id, name, &linfo, op_data);
+
+        MPI_Pcontrol(0);
+        /* send the request to the MDS process and recieve the return value */
+        if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+        MPI_Pcontrol(1);
+
+        /* Free the group's memory structure */
+        grp = H5FL_FREE(H5VL_mds_group_t, grp);
+        H5MM_xfree(name);
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_link_iterate() */
 
 
 /*-------------------------------------------------------------------------

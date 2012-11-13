@@ -3178,6 +3178,107 @@ done:
 } /* end H5VL__decode_link_move_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_link_iterate_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_link_iterate_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, 
+                                 hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, 
+                                 hsize_t *idx)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t loc_size = 0;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    /* common stuff between all link iterate types */
+    size += 4 + sizeof(int32_t) + sizeof(unsigned) + 
+        1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+    if(NULL != idx)
+        size += 1 + H5V_limit_enc_size((uint64_t)(*idx));
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_LINK_ITERATE;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size;
+
+        H5_ENCODE_UNSIGNED(p, recursive);
+        *p++ = (uint8_t)idx_type;
+        *p++ = (uint8_t)order;
+
+        if(NULL != idx) {
+            *p++ = (uint8_t)1;
+            UINT64ENCODE_VARLEN(p, *idx);
+        }
+        else {
+            *p++ = (uint8_t)0;
+        }
+    }
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_link_iterate_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_link_iterate_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_link_iterate_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                 hbool_t *recursive, H5_index_t *idx_type, H5_iter_order_t *order, 
+                                 hsize_t **idx)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t loc_size = 0;
+    uint8_t flag;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    H5_DECODE_UNSIGNED(p, *recursive);
+    *idx_type = (H5_index_t)*p++;
+    *order = (H5_iter_order_t)*p++;
+
+    flag = (uint8_t)*p++;
+    if(1 == flag) {
+        *idx = (hsize_t *)H5MM_malloc(sizeof(hsize_t));
+        UINT64DECODE_VARLEN(p, **idx);
+    }
+    else if (0 == flag)
+        *idx = NULL;
+    else
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode idx flag");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_link_iterate_params() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_link_get_params
  *------------------------------------------------------------------------- */
 herr_t 
