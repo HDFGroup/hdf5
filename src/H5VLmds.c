@@ -981,7 +981,7 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -992,7 +992,7 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
-    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                 H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
@@ -1354,7 +1354,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                     H5MM_free(send_buf);
 
                     /* probe for a message from the mds */
-                    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                     /* get the incoming message size from the probe result */
                     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1365,7 +1365,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                     /* receive the actual message */
-                    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                                 H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                     MPI_Pcontrol(1);
@@ -1436,7 +1436,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                 H5MM_free(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1447,7 +1447,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
-                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                             H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
@@ -1604,7 +1604,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1615,7 +1615,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
-    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                 H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
@@ -1736,7 +1736,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1747,7 +1747,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
-    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                 H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
@@ -2333,7 +2333,7 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
 
     /* get the incoming message size from the probe result */
@@ -2344,7 +2344,7 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     recv_buf = (void *)H5MM_malloc (incoming_msg_size);
 
     /* receive the actual message */
-    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                 H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
@@ -2640,7 +2640,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
 
                 /* get the incoming message size from the probe result */
@@ -2651,7 +2651,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 recv_buf = (void *)H5MM_malloc (incoming_msg_size);
 
                 /* receive the actual message */
-                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                             H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
@@ -2706,7 +2706,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 H5MM_free(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -2717,7 +2717,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
-                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                             H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
@@ -3221,7 +3221,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 H5MM_free(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -3232,7 +3232,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
-                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                             H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
@@ -3291,7 +3291,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 H5MM_free(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -3302,7 +3302,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
-                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
+                if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
                                             H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);

@@ -31,11 +31,11 @@
 /****************************/
 #define H5_REQUEST_NULL -1
 
-#define H5VL_NUM_OPS 50
+#define H5VL_NUM_OPS 33
 
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
-    H5VL_FILE_CREATE = 1,
+    H5VL_FILE_CREATE = 0,
     H5VL_FILE_OPEN,
     H5VL_FILE_FLUSH,
     H5VL_FILE_CLOSE,
@@ -51,8 +51,6 @@ typedef enum H5VL_op_type_t {
     H5VL_DSET_CREATE,
     H5VL_DSET_OPEN,
     H5VL_DSET_SET_EXTENT,
-    H5VL_DSET_READ,
-    H5VL_DSET_WRITE,
     H5VL_DSET_GET,
     H5VL_DSET_CLOSE,
     H5VL_DTYPE_COMMIT,

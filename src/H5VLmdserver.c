@@ -76,39 +76,39 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5VL__file_create_cb(uint8_t *p, int source);
-static herr_t H5VL__file_open_cb(uint8_t *p, int source);
-static herr_t H5VL__file_flush_cb(uint8_t *p, int source);
-static herr_t H5VL__file_close_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_create_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_open_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_read_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_write_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_remove_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_get_cb(uint8_t *p, int source);
-static herr_t H5VL__attr_close_cb(uint8_t *p, int source);
+static herr_t H5VL__file_create_func(uint8_t *p, int source);
+static herr_t H5VL__file_open_func(uint8_t *p, int source);
+static herr_t H5VL__file_flush_func(uint8_t *p, int source);
+static herr_t H5VL__file_close_func(uint8_t *p, int source);
+static herr_t H5VL__attr_create_func(uint8_t *p, int source);
+static herr_t H5VL__attr_open_func(uint8_t *p, int source);
+static herr_t H5VL__attr_read_func(uint8_t *p, int source);
+static herr_t H5VL__attr_write_func(uint8_t *p, int source);
+static herr_t H5VL__attr_remove_func(uint8_t *p, int source);
+static herr_t H5VL__attr_get_func(uint8_t *p, int source);
+static herr_t H5VL__attr_close_func(uint8_t *p, int source);
 static herr_t H5VL__chunk_insert(uint8_t *p, int source);
 static herr_t H5VL__chunk_get_addr(uint8_t *p, int source);
-static herr_t H5VL__dataset_create_cb(uint8_t *p, int source);
-static herr_t H5VL__dataset_open_cb(uint8_t *p, int source);
-static herr_t H5VL__dataset_set_extent_cb(uint8_t *p, int source);
-static herr_t H5VL__dataset_get_cb(uint8_t *p, int source);
-static herr_t H5VL__dataset_close_cb(uint8_t *p, int source);
-static herr_t H5VL__datatype_commit_cb(uint8_t *p, int source);
-static herr_t H5VL__datatype_open_cb(uint8_t *p, int source);
-static herr_t H5VL__datatype_close_cb(uint8_t *p, int source);
-static herr_t H5VL__group_create_cb(uint8_t *p, int source);
-static herr_t H5VL__group_open_cb(uint8_t *p, int source);
-static herr_t H5VL__group_get_cb(uint8_t *p, int source);
-static herr_t H5VL__group_close_cb(uint8_t *p, int source);
-static herr_t H5VL__link_create_cb(uint8_t *p, int source);
-static herr_t H5VL__link_move_cb(uint8_t *p, int source);
-static herr_t H5VL__link_iterate_cb(uint8_t *p, int source);
-static herr_t H5VL__link_get_cb(uint8_t *p, int source);
-static herr_t H5VL__link_remove_cb(uint8_t *p, int source);
-static herr_t H5VL__allocate_cb(uint8_t *p, int source);
-static herr_t H5VL__set_eoa_cb(uint8_t *p, int source);
-static herr_t H5VL__get_eoa_cb(uint8_t *p, int source);
+static herr_t H5VL__dataset_create_func(uint8_t *p, int source);
+static herr_t H5VL__dataset_open_func(uint8_t *p, int source);
+static herr_t H5VL__dataset_set_extent_func(uint8_t *p, int source);
+static herr_t H5VL__dataset_get_func(uint8_t *p, int source);
+static herr_t H5VL__dataset_close_func(uint8_t *p, int source);
+static herr_t H5VL__datatype_commit_func(uint8_t *p, int source);
+static herr_t H5VL__datatype_open_func(uint8_t *p, int source);
+static herr_t H5VL__datatype_close_func(uint8_t *p, int source);
+static herr_t H5VL__group_create_func(uint8_t *p, int source);
+static herr_t H5VL__group_open_func(uint8_t *p, int source);
+static herr_t H5VL__group_get_func(uint8_t *p, int source);
+static herr_t H5VL__group_close_func(uint8_t *p, int source);
+static herr_t H5VL__link_create_func(uint8_t *p, int source);
+static herr_t H5VL__link_move_func(uint8_t *p, int source);
+static herr_t H5VL__link_iterate_func(uint8_t *p, int source);
+static herr_t H5VL__link_get_func(uint8_t *p, int source);
+static herr_t H5VL__link_remove_func(uint8_t *p, int source);
+static herr_t H5VL__allocate_func(uint8_t *p, int source);
+static herr_t H5VL__set_eoa_func(uint8_t *p, int source);
+static herr_t H5VL__get_eoa_func(uint8_t *p, int source);
 
 typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 
@@ -117,6 +117,43 @@ static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t r
 static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
 static herr_t H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
 static int link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data);
+
+static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
+    H5VL__file_create_func,
+    H5VL__file_open_func,
+    H5VL__file_flush_func,
+    H5VL__file_close_func,
+    H5VL__attr_create_func,
+    H5VL__attr_open_func,
+    H5VL__attr_read_func,
+    H5VL__attr_write_func,
+    H5VL__attr_remove_func,
+    H5VL__attr_get_func,
+    H5VL__attr_close_func,
+    H5VL__chunk_insert,
+    H5VL__chunk_get_addr,
+    H5VL__dataset_create_func,
+    H5VL__dataset_open_func,
+    H5VL__dataset_set_extent_func,
+    H5VL__dataset_get_func,
+    H5VL__dataset_close_func,
+    H5VL__datatype_commit_func,
+    H5VL__datatype_open_func,
+    H5VL__datatype_close_func,
+    H5VL__group_create_func,
+    H5VL__group_open_func,
+    H5VL__group_get_func,
+    H5VL__group_close_func,
+    H5VL__link_create_func,
+    H5VL__link_move_func,
+    H5VL__link_iterate_func,
+    H5VL__link_get_func,
+    H5VL__link_remove_func,
+    H5VL__allocate_func,
+    H5VL__get_eoa_func,
+    H5VL__set_eoa_func
+};
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -171,43 +208,8 @@ herr_t
 H5VL_mds_start(void)
 {
     herr_t ret_value = SUCCEED;
-    H5VL_mds_op mds_ops[H5VL_NUM_OPS];
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    mds_ops[H5VL_FILE_CREATE]     = H5VL__file_create_cb;
-    mds_ops[H5VL_FILE_OPEN]       = H5VL__file_open_cb;
-    mds_ops[H5VL_FILE_FLUSH]      = H5VL__file_flush_cb;
-    mds_ops[H5VL_FILE_CLOSE]      = H5VL__file_close_cb;
-    mds_ops[H5VL_ATTR_CREATE]     = H5VL__attr_create_cb;
-    mds_ops[H5VL_ATTR_OPEN]       = H5VL__attr_open_cb;
-    mds_ops[H5VL_ATTR_READ]       = H5VL__attr_read_cb;
-    mds_ops[H5VL_ATTR_WRITE]      = H5VL__attr_write_cb;
-    mds_ops[H5VL_ATTR_REMOVE]     = H5VL__attr_remove_cb;
-    mds_ops[H5VL_ATTR_GET]        = H5VL__attr_get_cb;
-    mds_ops[H5VL_ATTR_CLOSE]      = H5VL__attr_close_cb;
-    mds_ops[H5VL_CHUNK_INSERT]    = H5VL__chunk_insert;
-    mds_ops[H5VL_CHUNK_GET_ADDR]  = H5VL__chunk_get_addr;
-    mds_ops[H5VL_DSET_CREATE]     = H5VL__dataset_create_cb;
-    mds_ops[H5VL_DSET_OPEN]       = H5VL__dataset_open_cb;
-    mds_ops[H5VL_DSET_SET_EXTENT] = H5VL__dataset_set_extent_cb;
-    mds_ops[H5VL_DSET_GET]        = H5VL__dataset_get_cb;
-    mds_ops[H5VL_DSET_CLOSE]      = H5VL__dataset_close_cb;
-    mds_ops[H5VL_DTYPE_COMMIT]    = H5VL__datatype_commit_cb;
-    mds_ops[H5VL_DTYPE_OPEN]      = H5VL__datatype_open_cb;
-    mds_ops[H5VL_DTYPE_CLOSE]     = H5VL__datatype_close_cb;
-    mds_ops[H5VL_GROUP_CREATE]    = H5VL__group_create_cb;
-    mds_ops[H5VL_GROUP_OPEN]      = H5VL__group_open_cb;
-    mds_ops[H5VL_GROUP_GET]       = H5VL__group_get_cb;
-    mds_ops[H5VL_GROUP_CLOSE]     = H5VL__group_close_cb;
-    mds_ops[H5VL_LINK_CREATE]     = H5VL__link_create_cb;
-    mds_ops[H5VL_LINK_MOVE]       = H5VL__link_move_cb;
-    mds_ops[H5VL_LINK_ITERATE]    = H5VL__link_iterate_cb;
-    mds_ops[H5VL_LINK_GET]        = H5VL__link_get_cb;
-    mds_ops[H5VL_LINK_REMOVE]     = H5VL__link_remove_cb;
-    mds_ops[H5VL_ALLOC]           = H5VL__allocate_cb;
-    mds_ops[H5VL_GET_EOA]         = H5VL__get_eoa_cb;
-    mds_ops[H5VL_SET_EOA]         = H5VL__set_eoa_cb;
 
     /* call the group interface intialization, because it hasn't been called yet */
     if(H5G__init() < 0)
@@ -259,10 +261,10 @@ done:
 } /* end H5VLmds_start() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL__file_create_cb
+ * Function:	H5VL__file_create_func
  *------------------------------------------------------------------------- */
 static herr_t
-H5VL__file_create_cb(uint8_t *p, int source)
+H5VL__file_create_func(uint8_t *p, int source)
 {
     char *mds_filename = NULL; /* name of the metadata file (generated from name) */
     unsigned flags; /* access flags */
@@ -365,13 +367,13 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__file_create_cb */
+}/* H5VL__file_create_func */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL__file_open_cb
+ * Function:	H5VL__file_open_func
  *------------------------------------------------------------------------- */
 static herr_t
-H5VL__file_open_cb(uint8_t *p, int source)
+H5VL__file_open_func(uint8_t *p, int source)
 {
     char *mds_filename = NULL; /* name of the metadata file (generated from name) */
     unsigned flags; /* access flags */
@@ -475,13 +477,13 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__file_open_cb */
+}/* H5VL__file_open_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__file_flush_cb
+* Function:	H5VL__file_flush_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__file_flush_cb(uint8_t *p, int source)
+H5VL__file_flush_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* metadata object ID */
     H5F_scope_t scope;
@@ -503,13 +505,13 @@ done:
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__file_flush_cb */
+} /* H5VL__file_flush_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__file_close_cb
+* Function:	H5VL__file_close_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__file_close_cb(uint8_t *p, int source)
+H5VL__file_close_func(uint8_t *p, int source)
 {
     hid_t file_id; /* metadata file ID */
     herr_t ret_value = SUCCEED;
@@ -538,13 +540,13 @@ done:
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__file_close_cb */
+} /* H5VL__file_close_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_create_cb
+* Function:	H5VL__attr_create_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_create_cb(uint8_t *p, int source)
+H5VL__attr_create_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for attr */
     hid_t attr_id = FAIL; /* attr id */
@@ -597,13 +599,13 @@ done:
     if(name)
         H5MM_xfree(name);
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__attr_create_cb */
+}/* H5VL__attr_create_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_open_cb
+* Function:	H5VL__attr_open_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_open_cb(uint8_t *p, int source)
+H5VL__attr_open_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for attr */
     hid_t attr_id = FAIL; /* attr id */
@@ -715,13 +717,13 @@ done:
         H5MM_xfree(name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__attr_open_cb */
+} /* H5VL__attr_open_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_read_cb
+* Function:	H5VL__attr_read_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_read_cb(uint8_t *p, int source)
+H5VL__attr_read_func(uint8_t *p, int source)
 {
     hid_t attr_id = FAIL; /* attr id */
     hid_t type_id;
@@ -762,13 +764,13 @@ done:
         H5MM_free(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__attr_read_cb */
+} /* H5VL__attr_read_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_write_cb
+* Function:	H5VL__attr_write_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_write_cb(uint8_t *p, int source)
+H5VL__attr_write_func(uint8_t *p, int source)
 {
     hid_t attr_id = FAIL; /* attr id */
     hid_t type_id;
@@ -795,13 +797,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__attr_write_cb */
+} /* H5VL__attr_write_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_remove_cb
+* Function:	H5VL__attr_remove_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_remove_cb(uint8_t *p, int source)
+H5VL__attr_remove_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for attr */
     H5VL_loc_params_t loc_params; /* location parameters for obj_id */
@@ -823,13 +825,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__attr_remove_cb */
+} /* H5VL__attr_remove_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_get_cb
+* Function:	H5VL__attr_get_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_get_cb(uint8_t *p, int source)
+H5VL__attr_get_func(uint8_t *p, int source)
 {
     H5VL_attr_get_t get_type = -1;
     herr_t ret_value = SUCCEED;
@@ -979,13 +981,13 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__attr_get_cb */
+} /* H5VL__attr_get_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__attr_close_cb
+* Function:	H5VL__attr_close_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__attr_close_cb(uint8_t *p, int source)
+H5VL__attr_close_func(uint8_t *p, int source)
 {
     hid_t attr_id = FAIL; /* attr id */
     herr_t ret_value = SUCCEED;
@@ -1010,13 +1012,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__attr_close_cb */
+} /* H5VL__attr_close_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__dataset_create_cb
+* Function:	H5VL__dataset_create_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__dataset_create_cb(uint8_t *p, int source)
+H5VL__dataset_create_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for dataset */
     hid_t dset_id = FAIL; /* dset id */
@@ -1099,13 +1101,13 @@ done:
         H5MM_xfree(name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__dataset_create_cb */
+}/* H5VL__dataset_create_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__dataset_open_cb
+* Function:	H5VL__dataset_open_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__dataset_open_cb(uint8_t *p, int source)
+H5VL__dataset_open_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for dataset */
     hid_t dset_id = FAIL; /* dset id */
@@ -1233,13 +1235,13 @@ done:
         H5MM_xfree(name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__dataset_open_cb */
+} /* H5VL__dataset_open_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__dataset_set_extent_cb
+* Function:	H5VL__dataset_set_extent_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__dataset_set_extent_cb(uint8_t *p, int source)
+H5VL__dataset_set_extent_func(uint8_t *p, int source)
 {
     hid_t dset_id = FAIL; /* dset id */
     hsize_t *size = NULL;
@@ -1263,13 +1265,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__dataset_set_extent_cb */
+} /* H5VL__dataset_set_extent_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__dataset_get_cb
+* Function:	H5VL__dataset_get_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__dataset_get_cb(uint8_t *p, int UNUSED source)
+H5VL__dataset_get_func(uint8_t *p, int UNUSED source)
 {
     H5VL_dataset_get_t get_type = -1;
     herr_t ret_value = SUCCEED;
@@ -1292,13 +1294,13 @@ H5VL__dataset_get_cb(uint8_t *p, int UNUSED source)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__dataset_get_cb */
+} /* H5VL__dataset_get_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__dataset_close_cb
+* Function:	H5VL__dataset_close_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__dataset_close_cb(uint8_t *p, int source)
+H5VL__dataset_close_func(uint8_t *p, int source)
 {
     hid_t dset_id = FAIL; /* dset id */
     herr_t ret_value = SUCCEED;
@@ -1323,13 +1325,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__dataset_close_cb */
+} /* H5VL__dataset_close_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__datatype_commit_cb
+* Function:	H5VL__datatype_commit_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__datatype_commit_cb(uint8_t *p, int source)
+H5VL__datatype_commit_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for dataset */
     H5T_t *type = NULL; /* New dataset's info */
@@ -1391,13 +1393,13 @@ done:
     if(name)
         H5MM_xfree(name);
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__datatype_commit_cb */
+}/* H5VL__datatype_commit_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__datatype_open_cb
+* Function:	H5VL__datatype_open_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__datatype_open_cb(uint8_t *p, int source)
+H5VL__datatype_open_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for dataset */
     H5T_t *type = NULL; /* New datatype */
@@ -1462,13 +1464,13 @@ done:
     if(name)
         H5MM_xfree(name);
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__datatype_open_cb */
+}/* H5VL__datatype_open_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__datatype_close_cb
+* Function:	H5VL__datatype_close_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__datatype_close_cb(uint8_t *p, int source)
+H5VL__datatype_close_func(uint8_t *p, int source)
 {
     hid_t type_id = FAIL;
     H5T_t *dt = NULL;
@@ -1493,13 +1495,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__datatype_close_cb */
+} /* H5VL__datatype_close_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__group_create_cb
+* Function:	H5VL__group_create_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__group_create_cb(uint8_t *p, int source)
+H5VL__group_create_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for group */
     hid_t grp_id = FAIL; /* group id */
@@ -1550,13 +1552,13 @@ done:
         H5MM_xfree(name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__group_create_cb */
+}/* H5VL__group_create_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__group_open_cb
+* Function:	H5VL__group_open_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__group_open_cb(uint8_t *p, int source)
+H5VL__group_open_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for group */
     hid_t grp_id = FAIL; /* group id */
@@ -1597,13 +1599,13 @@ done:
         H5MM_xfree(name);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__group_open_cb */
+}/* H5VL__group_open_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__group_get_cb
+* Function:	H5VL__group_get_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__group_get_cb(uint8_t *p, int source)
+H5VL__group_get_func(uint8_t *p, int source)
 {
     H5VL_group_get_t get_type = -1;
     herr_t ret_value = SUCCEED;
@@ -1713,13 +1715,13 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__group_get_cb */
+} /* H5VL__group_get_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__group_close_cb
+* Function:	H5VL__group_close_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__group_close_cb(uint8_t *p, int source)
+H5VL__group_close_func(uint8_t *p, int source)
 {
     hid_t grp_id = FAIL;
     herr_t ret_value = SUCCEED;
@@ -1745,13 +1747,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__group_close_cb */
+} /* H5VL__group_close_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__link_create_cb
+* Function:	H5VL__link_create_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__link_create_cb(uint8_t *p, int source)
+H5VL__link_create_func(uint8_t *p, int source)
 {
     hid_t obj_id; /* id of location for link */
     void *obj;
@@ -1780,13 +1782,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__link_create_cb */
+}/* H5VL__link_create_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__link_move_cb
+* Function:	H5VL__link_move_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__link_move_cb(uint8_t *p, int source)
+H5VL__link_move_func(uint8_t *p, int source)
 {
     hid_t src_id;
     hid_t dst_id;
@@ -1812,7 +1814,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__link_move_cb */
+}/* H5VL__link_move_func */
 
 static int
 link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data)
@@ -1888,10 +1890,10 @@ done:
 }
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__link_iterate_cb
+* Function:	H5VL__link_iterate_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__link_iterate_cb(uint8_t *p, int source)
+H5VL__link_iterate_func(uint8_t *p, int source)
 {
     hid_t obj_id;
     H5VL_loc_params_t loc_params;
@@ -1924,13 +1926,13 @@ done:
     H5MM_xfree(idx);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__link_iterate_cb */
+}/* H5VL__link_iterate_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__link_get_cb
+* Function:	H5VL__link_get_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__link_get_cb(uint8_t *p, int source)
+H5VL__link_get_func(uint8_t *p, int source)
 {
     H5VL_link_get_t get_type = -1;
     herr_t ret_value = SUCCEED;
@@ -2108,13 +2110,13 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5VL__link_get_cb */
+} /* H5VL__link_get_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__link_remove_cb
+* Function:	H5VL__link_remove_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__link_remove_cb(uint8_t *p, int source)
+H5VL__link_remove_func(uint8_t *p, int source)
 {
     hid_t obj_id;
     H5VL_loc_params_t loc_params;
@@ -2134,13 +2136,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-}/* H5VL__link_remove_cb */
+}/* H5VL__link_remove_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__allocate_cb
+* Function:	H5VL__allocate_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__allocate_cb(uint8_t *p, int source)
+H5VL__allocate_func(uint8_t *p, int source)
 {
     hid_t file_id; /* metadata file ID */
     H5F_t *file = NULL; /* metadata file struct */
@@ -2226,13 +2228,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__allocate_cb */
+} /* end H5VL__allocate_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__get_eoa_cb
+* Function:	H5VL__get_eoa_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__get_eoa_cb(uint8_t *p, int source)
+H5VL__get_eoa_func(uint8_t *p, int source)
 {
     hid_t file_id; /* metadata file ID */
     H5F_t *file = NULL; /* metadata file struct */
@@ -2266,13 +2268,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__get_eoa_cb */
+} /* end H5VL__get_eoa_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5VL__set_eoa_cb
+* Function:	H5VL__set_eoa_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5VL__set_eoa_cb(uint8_t *p, int source)
+H5VL__set_eoa_func(uint8_t *p, int source)
 {
     hid_t file_id; /* metadata file ID */
     H5F_t *file = NULL; /* metadata file struct */
