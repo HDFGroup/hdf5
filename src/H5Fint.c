@@ -35,6 +35,7 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLnative.h" 	/* Native Plugin                        */
+#include "H5VLmdserver.h" 	/* MDS Plugin private                   */
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
@@ -1179,193 +1180,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_raw_open
- *
- * Purpose:	Opens (or creates) a file. This function is the same as H5F_open
- *              except that it opens a raw data file, meaning no metadata is 
- *              read/written in that file (superblock, root group, etc...
- *
- * Return:	Success:	A new file pointer.
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		October 2012
- *
- *-------------------------------------------------------------------------
- */
-H5F_t *
-H5F_mdc_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-    hid_t dxpl_id)
-{
-    H5F_t              *file = NULL;        /*the success return value      */
-    H5F_file_t         *shared = NULL;      /*shared part of `file'         */
-    H5FD_t             *lf = NULL;          /*file driver part of `shared'  */
-    unsigned            tent_flags;         /*tentative flags               */
-    H5FD_class_t       *drvr;               /*file driver class info        */
-    H5P_genplist_t     *a_plist;            /*file access property list     */
-    H5F_close_degree_t  fc_degree;          /*file close degree             */
-    H5F_t              *ret_value;          /*actual return value           */
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    /*
-     * If the driver has a `cmp' method then the driver is capable of
-     * determining when two file handles refer to the same file and the
-     * library can insure that when the application opens a file twice
-     * that the two handles coordinate their operations appropriately.
-     * Otherwise it is the application's responsibility to never open the
-     * same file more than once at a time.
-     */
-    if(NULL == (drvr = H5FD_get_class(fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
-
-    /*
-     * Opening a file is a two step process. First we try to open the
-     * file in a way which doesn't affect its state (like not truncating
-     * or creating it) so we can compare it with files that are already
-     * open. If that fails then we try again with the full set of flags
-     * (only if they're different than the original failed attempt).
-     * However, if the file driver can't distinquish between files then
-     * there's no reason to open the file tentatively because it's the
-     * application's responsibility to prevent this situation (there's no
-     * way for us to detect it here anyway).
-     */
-    if(drvr->cmp)
-	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
-    else
-	tent_flags = flags;
-
-    if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-	if(tent_flags == flags) {
-#ifndef H5_USING_MEMCHECKER
-            time_t mytime = HDtime(NULL);
-
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
-#else /* H5_USING_MEMCHECKER */
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
-#endif /* H5_USING_MEMCHECKER */
-        } /* end if */
-        H5E_clear_stack(NULL);
-	tent_flags = flags;
-	if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
-#ifndef H5_USING_MEMCHECKER
-            time_t mytime = HDtime(NULL);
-
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
-#else /* H5_USING_MEMCHECKER */
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
-#endif /* H5_USING_MEMCHECKER */
-        } /* end if */
-    } /* end if */
-
-    /* Is the file already open? */
-    if((shared = H5F_sfile_search(lf)) != NULL) {
-	/*
-	 * The file is already open, so use that one instead of the one we
-	 * just opened. We only one one H5FD_t* per file so one doesn't
-	 * confuse the other.  But fail if this request was to truncate the
-	 * file (since we can't do that while the file is open), or if the
-	 * request was to create a non-existent file (since the file already
-	 * exists), or if the new request adds write access (since the
-	 * readers don't expect the file to change under them).
-	 */
-	if(H5FD_close(lf) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
-	if(flags & H5F_ACC_TRUNC)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to truncate a file which is already open")
-	if(flags & H5F_ACC_EXCL)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file exists")
-	if((flags & H5F_ACC_RDWR) && 0 == (shared->flags & H5F_ACC_RDWR))
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
-
-        /* Allocate new "high-level" file struct */
-        if((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
-    } /* end if */
-    else {
-        /* Check if tentative open was good enough */
-        if(flags != tent_flags) {
-            /*
-             * This file is not yet open by the library and the flags we used to
-             * open it are different than the desired flags. Close the tentative
-             * file and open it for real.
-             */
-            if(H5FD_close(lf) < 0) {
-                file = NULL; /*to prevent destruction of wrong file*/
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
-            } /* end if */
-            if(NULL == (lf = H5FD_open(name, flags, fapl_id, HADDR_UNDEF))) {
-                file = NULL; /*to prevent destruction of wrong file*/
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-            } /* end if */
-        } /* end if */
-
-        if(NULL == (file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
-        file->shared->flags = flags;
-    } /* end else */
-
-    /* Short cuts */
-    shared = file->shared;
-    lf = shared->lf;
-
-    /*
-     * The intent at the top level file struct are not necessarily the same as
-     * the flags at the bottom.	 The top level describes how the file can be
-     * accessed through the HDF5 library.  The bottom level describes how the
-     * file can be accessed through the C library.
-     */
-    file->intent = flags;
-    file->open_name = H5MM_xstrdup(name);
-
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
-
-    /*
-     * Decide the file close degree.  If it's the first time to open the
-     * file, set the degree to access property list value; if it's the
-     * second time or later, verify the access property list value matches
-     * the degree in shared file structure.
-     */
-    if(H5P_get(a_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree")
-
-    if(shared->nrefs == 1) {
-        if(fc_degree == H5F_CLOSE_DEFAULT)
-            shared->fc_degree = lf->cls->fc_degree;
-        else
-            shared->fc_degree = fc_degree;
-    } else if(shared->nrefs > 1) {
-        if(fc_degree == H5F_CLOSE_DEFAULT && shared->fc_degree != lf->cls->fc_degree)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
-        if(fc_degree != H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
-    } /* end if */
-
-    /* Formulate the absolute path for later search of target file for external links */
-    if(H5_build_extpath(name, &file->extpath) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
-
-    /* Formulate the actual file name, after following symlinks, etc. */
-    if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
-
-    /* Success */
-    ret_value = file;
-
-done:
-    if(!ret_value && file)
-        if(H5F_dest(file, dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_raw_open() */
-#endif /* H5_HAVE_PARALLEL */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_flush
@@ -2315,3 +2129,433 @@ H5F_get_id(H5F_t *file, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_id() */
+
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_raw_open
+ *
+ * Purpose:	Opens (or creates) a file. This function is the same as H5F_open
+ *              except that it opens a raw data file, meaning no metadata is 
+ *              read/written in that file (superblock, root group, etc...
+ *
+ * Return:	Success:	A new file pointer.
+ *		Failure:	NULL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		October 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5F_mdc_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+    hid_t dxpl_id)
+{
+    H5F_t              *file = NULL;        /*the success return value      */
+    H5F_file_t         *shared = NULL;      /*shared part of `file'         */
+    H5FD_t             *lf = NULL;          /*file driver part of `shared'  */
+    unsigned            tent_flags;         /*tentative flags               */
+    H5FD_class_t       *drvr;               /*file driver class info        */
+    H5P_genplist_t     *a_plist;            /*file access property list     */
+    H5F_close_degree_t  fc_degree;          /*file close degree             */
+    H5F_t              *ret_value;          /*actual return value           */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /*
+     * If the driver has a `cmp' method then the driver is capable of
+     * determining when two file handles refer to the same file and the
+     * library can insure that when the application opens a file twice
+     * that the two handles coordinate their operations appropriately.
+     * Otherwise it is the application's responsibility to never open the
+     * same file more than once at a time.
+     */
+    if(NULL == (drvr = H5FD_get_class(fapl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
+
+    /*
+     * Opening a file is a two step process. First we try to open the
+     * file in a way which doesn't affect its state (like not truncating
+     * or creating it) so we can compare it with files that are already
+     * open. If that fails then we try again with the full set of flags
+     * (only if they're different than the original failed attempt).
+     * However, if the file driver can't distinquish between files then
+     * there's no reason to open the file tentatively because it's the
+     * application's responsibility to prevent this situation (there's no
+     * way for us to detect it here anyway).
+     */
+    if(drvr->cmp)
+	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
+    else
+	tent_flags = flags;
+
+    if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+	if(tent_flags == flags) {
+#ifndef H5_USING_MEMCHECKER
+            time_t mytime = HDtime(NULL);
+
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
+#else /* H5_USING_MEMCHECKER */
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
+#endif /* H5_USING_MEMCHECKER */
+        } /* end if */
+        H5E_clear_stack(NULL);
+	tent_flags = flags;
+	if(NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+#ifndef H5_USING_MEMCHECKER
+            time_t mytime = HDtime(NULL);
+
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: time = %s, name = '%s', tent_flags = %x", HDctime(&mytime), name, tent_flags)
+#else /* H5_USING_MEMCHECKER */
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x", name, tent_flags)
+#endif /* H5_USING_MEMCHECKER */
+        } /* end if */
+    } /* end if */
+
+    /* Is the file already open? */
+    if((shared = H5F_sfile_search(lf)) != NULL) {
+	/*
+	 * The file is already open, so use that one instead of the one we
+	 * just opened. We only one one H5FD_t* per file so one doesn't
+	 * confuse the other.  But fail if this request was to truncate the
+	 * file (since we can't do that while the file is open), or if the
+	 * request was to create a non-existent file (since the file already
+	 * exists), or if the new request adds write access (since the
+	 * readers don't expect the file to change under them).
+	 */
+	if(H5FD_close(lf) < 0)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
+	if(flags & H5F_ACC_TRUNC)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to truncate a file which is already open")
+	if(flags & H5F_ACC_EXCL)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file exists")
+	if((flags & H5F_ACC_RDWR) && 0 == (shared->flags & H5F_ACC_RDWR))
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
+
+        /* Allocate new "high-level" file struct */
+        if((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
+    } /* end if */
+    else {
+        /* Check if tentative open was good enough */
+        if(flags != tent_flags) {
+            /*
+             * This file is not yet open by the library and the flags we used to
+             * open it are different than the desired flags. Close the tentative
+             * file and open it for real.
+             */
+            if(H5FD_close(lf) < 0) {
+                file = NULL; /*to prevent destruction of wrong file*/
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
+            } /* end if */
+            if(NULL == (lf = H5FD_open(name, flags, fapl_id, HADDR_UNDEF))) {
+                file = NULL; /*to prevent destruction of wrong file*/
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
+            } /* end if */
+        } /* end if */
+
+        if(NULL == (file = H5F_new(NULL, fcpl_id, fapl_id, lf)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create new file object")
+        file->shared->flags = flags;
+    } /* end else */
+
+    /* Short cuts */
+    shared = file->shared;
+    lf = shared->lf;
+
+    /*
+     * The intent at the top level file struct are not necessarily the same as
+     * the flags at the bottom.	 The top level describes how the file can be
+     * accessed through the HDF5 library.  The bottom level describes how the
+     * file can be accessed through the C library.
+     */
+    file->intent = flags;
+    file->open_name = H5MM_xstrdup(name);
+
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
+    /*
+     * Decide the file close degree.  If it's the first time to open the
+     * file, set the degree to access property list value; if it's the
+     * second time or later, verify the access property list value matches
+     * the degree in shared file structure.
+     */
+    if(H5P_get(a_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file close degree")
+
+    if(shared->nrefs == 1) {
+        if(fc_degree == H5F_CLOSE_DEFAULT)
+            shared->fc_degree = lf->cls->fc_degree;
+        else
+            shared->fc_degree = fc_degree;
+    } else if(shared->nrefs > 1) {
+        if(fc_degree == H5F_CLOSE_DEFAULT && shared->fc_degree != lf->cls->fc_degree)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
+        if(fc_degree != H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
+    } /* end if */
+
+    /* Formulate the absolute path for later search of target file for external links */
+    if(H5_build_extpath(name, &file->extpath) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
+
+    /* Formulate the actual file name, after following symlinks, etc. */
+    if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
+
+    /* Success */
+    ret_value = file;
+
+done:
+    if(!ret_value && file)
+        if(H5F_dest(file, dxpl_id, FALSE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_raw_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__mdc_get_obj_count
+ *
+ * Purpose:	Private function return the number of opened object IDs
+ *		(files, datasets, groups, datatypes) in the same file.
+ *
+ * Return:      SUCCEED on success, FAIL on failure.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__mdc_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr)
+{
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(obj_id_count_ptr);
+
+    /* Perform the query */
+    if((ret_value = H5F__mdc_get_objects(f, types, 0, NULL, app_ref, obj_id_count_ptr)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_objects failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__mdc_get_obj_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__mdc_get_obj_ids
+ *
+ * Purpose:     Private function to return a list of opened object IDs.
+ *
+ * Return:      Non-negative on success; can't fail.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__mdc_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr)
+{
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(obj_id_count_ptr);
+
+    /* Perform the query */
+    if((ret_value = H5F__mdc_get_objects(f, types, max_objs, oid_list, app_ref, obj_id_count_ptr)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_objects failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__mdc_get_obj_ids() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5F__mdc_get_objects
+ *
+ * Purpose:	This function is called by H5F__mdc_get_obj_count or
+ *		H5F__mdc_get_obj_ids to get number of object IDs and/or a
+ *		list of opened object IDs (in return value).
+ * Return:	Non-negative on success; Can't fail.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5F__mdc_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr)
+{
+    size_t obj_id_count=0;      /* Number of open IDs */
+    H5F_olist_t olist;          /* Structure to hold search results */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(obj_id_count_ptr);
+
+    /* Set up search information */
+    olist.obj_id_list  = (max_index==0 ? NULL : obj_id_list);
+    olist.obj_id_count = &obj_id_count;
+    olist.list_index   = 0;
+    olist.max_index   = max_index;
+
+    /* Determine if we are searching for local or global objects */
+    if(types & H5F_OBJ_LOCAL) {
+        olist.file_info.local = TRUE;
+        olist.file_info.ptr.file = f;
+    } /* end if */
+    else {
+        olist.file_info.local = FALSE;
+        olist.file_info.ptr.shared = f ? f->shared : NULL;
+    } /* end else */
+
+    /* Iterate through file IDs to count the number, and put their
+     * IDs on the object list.  */
+    if(types & H5F_OBJ_FILE) {
+        olist.obj_type = H5I_FILE;
+        if(H5I_iterate(H5I_FILE, H5F__mdc_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
+    } /* end if */
+
+    /* Search through dataset IDs to count number of datasets, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_DATASET) {
+        olist.obj_type = H5I_DATASET;
+        if(H5I_iterate(H5I_DATASET, H5F__mdc_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
+    } /* end if */
+
+    /* Search through group IDs to count number of groups, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_GROUP) {
+        olist.obj_type = H5I_GROUP;
+        if(H5I_iterate(H5I_GROUP, H5F__mdc_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
+    } /* end if */
+
+    /* Search through datatype IDs to count number of named datatypes, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_DATATYPE) {
+        olist.obj_type = H5I_DATATYPE;
+        if(H5I_iterate(H5I_DATATYPE, H5F__mdc_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
+    } /* end if */
+
+    /* Search through attribute IDs to count number of attributes, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_ATTR) {
+        olist.obj_type = H5I_ATTR;
+        if(H5I_iterate(H5I_ATTR, H5F__mdc_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
+    } /* end if */
+
+    /* Set the number of objects currently open */
+    *obj_id_count_ptr = obj_id_count;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__mdc_get_objects() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__mdc_get_objects_cb
+ *
+ * Purpose:	H5F_get_objects' callback function.  It verifies if an
+ * 		object is in the file, and either count it or put its ID
+ *		on the list.
+ *
+ * Return:      TRUE if the array of object IDs is filled up.
+ *              FALSE otherwise.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5F__mdc_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
+{
+    H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
+    H5F_t *f = ((H5VL_mds_object_t *)obj_ptr)->raw_file;
+    int ret_value = FALSE;    /* Return value */
+    
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(obj_ptr);
+    HDassert(olist);
+
+    /* Count file IDs */
+    if(olist->obj_type == H5I_FILE) {
+        if((olist->file_info.local &&
+            (!olist->file_info.ptr.file || (olist->file_info.ptr.file && f == olist->file_info.ptr.file) ))
+           ||  (!olist->file_info.local &&
+                ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && f->shared == olist->file_info.ptr.shared) ))) {
+            /* Add the object's ID to the ID list, if appropriate */
+            if(olist->obj_id_list) {
+                olist->obj_id_list[olist->list_index] = obj_id;
+		olist->list_index++;
+	    }
+
+            /* Increment the number of open objects */
+	    if(olist->obj_id_count)
+	    	(*olist->obj_id_count)++;
+
+            /* Check if we've filled up the array.  Return TRUE only if
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
+             * preset to FALSE) because H5I_iterate needs the return value of 
+ 	     * FALSE to continue the iteration. */
+            if(olist->max_index>0 && olist->list_index>=olist->max_index)
+                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
+	}
+    } /* end if */
+    else { /* either count opened object IDs or put the IDs on the list */
+        if(olist->obj_type == H5I_DATATYPE) {
+            H5VL_mds_object_t *dt = NULL;
+
+            if(NULL != (dt = (H5VL_mds_object_t *)H5T_get_named_type((H5T_t *)obj_ptr)))
+                f = dt->raw_file;
+        }
+        if((olist->file_info.local &&
+            ( (!olist->file_info.ptr.file && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
+              || (!olist->file_info.ptr.file && olist->obj_type != H5I_DATATYPE)
+              || (f == olist->file_info.ptr.file)))
+           || (!olist->file_info.local &&
+               ((!olist->file_info.ptr.shared && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
+                || (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE)
+                || (f && f->shared == olist->file_info.ptr.shared)))) {
+            /* Add the object's ID to the ID list, if appropriate */
+            if(olist->obj_id_list) {
+            	olist->obj_id_list[olist->list_index] = obj_id;
+		olist->list_index++;
+	    } /* end if */
+
+            /* Increment the number of open objects */
+	    if(olist->obj_id_count)
+            	(*olist->obj_id_count)++;
+
+            /* Check if we've filled up the array.  Return TRUE only if
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
+             * preset to FALSE) because H5I_iterate needs the return value of 
+	     * FALSE to continue iterating. */
+            if(olist->max_index>0 && olist->list_index>=olist->max_index)
+                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
+    	} /* end if */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__mdc_get_objects_cb() */
+
+#endif /* H5_HAVE_PARALLEL */

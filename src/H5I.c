@@ -1503,6 +1503,55 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5I_dec_ref_no_free
+ *
+ * Purpose:	Decrements the number of references outstanding for an ID.
+ *              This routine will not call the free function of the ref count
+ *              reaches 0.
+ *
+ * Return:	Success:	New reference count.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5I_dec_ref_no_free(hid_t id)
+{
+    H5I_type_t		type;		/*type the object is in*/
+    H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
+    H5I_id_info_t	*id_ptr;	/*ptr to the new ID	*/
+    int ret_value;                      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(id >= 0);
+
+    /* Check arguments */
+    type = H5I_TYPE(id);
+    if(type <= H5I_BADID || type >= H5I_next_type)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+    type_ptr = H5I_id_type_list_g[type];
+    if(NULL == type_ptr || type_ptr->count <= 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
+
+    /* General lookup of the ID */
+    if(NULL == (id_ptr = H5I_find_id(id)))
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID")
+
+    --(id_ptr->count);
+    --(id_ptr->app_count);
+    ret_value = (int)id_ptr->count;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5I_dec_ref_no_free() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5I_dec_app_ref
  *
  * Purpose:	H5I_dec_ref wrapper for case of modifying the application ref.

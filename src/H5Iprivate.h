@@ -86,6 +86,7 @@ H5_DLL herr_t H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, 
 H5_DLL int H5I_get_ref(hid_t id, hbool_t app_ref);
 H5_DLL int H5I_inc_ref(hid_t id, hbool_t app_ref);
 H5_DLL int H5I_dec_ref(hid_t id);
+H5_DLL int H5I_dec_ref_no_free(hid_t id);
 H5_DLL int H5I_dec_app_ref(hid_t id);
 H5_DLL int H5I_dec_app_ref_always_close(hid_t id);
 H5_DLL int H5I_inc_type_ref(H5I_type_t type);

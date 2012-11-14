@@ -574,6 +574,10 @@ H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5F_t *H5F_mdc_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5F__mdc_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL herr_t H5F__mdc_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL herr_t H5F__mdc_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
+H5_DLL int H5F__mdc_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5F_close(H5F_t *f);
 H5_DLL herr_t H5F_try_close(H5F_t *f);

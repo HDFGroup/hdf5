@@ -98,9 +98,9 @@ static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
 /* File callbacks */
 static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
 static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
-//static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-//static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
-//static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
+static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_mds_file_close(void *file, hid_t req);
 
@@ -189,9 +189,9 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_file_create,                /* create */
         H5VL_mds_file_open,                  /* open */
         H5VL_mds_file_flush,                 /* flush */
-        NULL,//H5VL_mds_file_get,                   /* get */
-        NULL,//H5VL_mds_file_misc,                  /* misc */
-        NULL,//H5VL_mds_file_optional,              /* optional */
+        H5VL_mds_file_get,                   /* get */
+        H5VL_mds_file_misc,                  /* misc */
+        H5VL_mds_file_optional,              /* optional */
         H5VL_mds_file_close                  /* close */
     },
     {                                        /* group_cls */
@@ -599,6 +599,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->common.obj_type = H5I_FILE; 
     file->common.obj_id = mds_file;
     file->common.raw_file = new_file;
+    file->common.file = file;
 
     ret_value = (void *)file;
 
@@ -713,6 +714,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     file->common.obj_type = H5I_FILE; 
     file->common.obj_id = mds_file;
     file->common.raw_file = new_file;
+    file->common.file = file;
 
     ret_value = (void *)file;
 
@@ -782,6 +784,331 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_file_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_file_get
+ *
+ * Purpose:	Gets certain data about a file
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5F_t *f = obj->raw_file;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Fget_access_plist */
+        case H5VL_FILE_GET_FAPL:
+            {
+                H5P_genplist_t *new_plist;              /* New property list */
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5F_get_access_plist(f, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+
+                if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+                /* Set the VOL class in the property list - we don't
+                   have a VOL info for the mds plugin */
+                if(H5P_set(new_plist, H5F_ACS_VOL_NAME, &H5VL_mds_g) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file VOL plugin")
+                break;
+            }
+        /* H5Fget_create_plist */
+        case H5VL_FILE_GET_FCPL:
+            {
+                H5P_genplist_t *plist;      /* Property list */
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+                /* Create the property list object to return */
+                if((*plist_id = H5P_copy_plist(plist, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
+
+                break;
+            }
+        /* H5Fget_obj_count */
+        case H5VL_FILE_GET_OBJ_COUNT:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+                size_t  obj_count = 0;      /* Number of opened objects */
+
+                /* Perform the query */
+                if(H5F__mdc_get_obj_count(f, types, TRUE, &obj_count) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                break;
+            }
+        /* H5Fget_obj_ids */
+        case H5VL_FILE_GET_OBJ_IDS:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                size_t max_objs = va_arg (arguments, size_t);
+                hid_t *oid_list = va_arg (arguments, hid_t *);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+                size_t  obj_count = 0;      /* Number of opened objects */
+
+                /* Perform the query */
+                if(H5F__mdc_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                break;
+            }
+        /* H5Fget_intent */
+        case H5VL_FILE_GET_INTENT:
+            {
+                unsigned *ret = va_arg (arguments, unsigned *);
+
+                /* HDF5 uses some flags internally that users don't know about.
+                 * Simplify things for them so that they only get either H5F_ACC_RDWR
+                 * or H5F_ACC_RDONLY.
+                 */
+                if(H5F_INTENT(f) & H5F_ACC_RDWR)
+                    *ret = H5F_ACC_RDWR;
+                else
+                    *ret = H5F_ACC_RDONLY;
+                break;
+            }
+        /* H5Fget_name */
+        case H5VL_FILE_GET_NAME:
+            {
+                H5I_type_t type = va_arg (arguments, H5I_type_t);
+                size_t     size = va_arg (arguments, size_t);
+                char      *name = va_arg (arguments, char *);
+                ssize_t   *ret  = va_arg (arguments, ssize_t *);
+                size_t     len;
+
+                len = HDstrlen(H5F_OPEN_NAME(f));
+
+                if(name) {
+                    HDstrncpy(name, H5F_OPEN_NAME(f), MIN(len + 1,size));
+                    if(len >= size)
+                        name[size-1]='\0';
+                } /* end if */
+
+                /* Set the return value for the API call */
+                *ret = (ssize_t)len;
+                break;
+            }
+        /* H5I_get_file_id */
+        case H5VL_OBJECT_GET_FILE:
+            {
+
+                H5I_type_t type = va_arg (arguments, H5I_type_t);
+                void      **ret = va_arg (arguments, void **);
+
+                f->id_exists = TRUE;
+                *ret = (void*)f;
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
+    } /* end switch */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_file_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_file_misc
+ *
+ * Purpose:	Perform an operation
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (misc_type) {
+        /* H5Fmount */
+        case H5VL_FILE_MOUNT:
+            {
+                break;
+            }
+        /* H5Fmount */
+        case H5VL_FILE_UNMOUNT:
+            {
+                break;
+            }
+        /* H5Fis_accessible */
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_file_misc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_file_optional
+ *
+ * Purpose:	Perform a plugin specific operation on a mds file
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNUSED req, va_list arguments)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5F_t *f = obj->raw_file;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (optional_type) {
+        /* H5Fget_filesize */
+        case H5VL_FILE_GET_SIZE:
+            {
+                haddr_t    eof;                     /* End of file address */
+                hsize_t    *ret = va_arg (arguments, hsize_t *);
+
+                /* Go get the actual file size */
+                if(HADDR_UNDEF == (eof = H5FDget_eof(f->shared->lf)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+                *ret = (hsize_t)eof;
+                break;
+            }
+        /* H5Fget_file_image */
+        case H5VL_FILE_GET_FILE_IMAGE:
+            {
+                void       *buf_ptr   = va_arg (arguments, void *);
+                ssize_t    *ret       = va_arg (arguments, ssize_t *);
+                size_t      buf_len   = va_arg (arguments, size_t );
+
+                break;
+            }
+        /* H5Fget_freespace */
+        case H5VL_FILE_GET_FREE_SPACE:
+            {
+                hsize_t	tot_space;	/* Amount of free space in the file */
+                hssize_t    *ret = va_arg (arguments, hssize_t *);
+
+                break;
+            }
+        case H5VL_FILE_GET_FREE_SECTIONS:
+            {
+                H5F_sect_info_t *sect_info = va_arg (arguments, H5F_sect_info_t *);
+                ssize_t         *ret       = va_arg (arguments, ssize_t *);
+                H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
+                size_t          nsects     = va_arg (arguments, size_t);
+
+                break;
+            }
+        /* H5Fget_info2 */
+        case H5VL_FILE_GET_INFO:
+            {
+                H5I_type_t  type   = va_arg (arguments, H5I_type_t);
+                H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
+
+                break;
+            }
+        /* H5Fget_mdc_config */
+        case H5VL_FILE_GET_MDC_CONF:
+            {
+                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+
+                break;
+            }
+        /* H5Fget_mdc_hit_rate */
+        case H5VL_FILE_GET_MDC_HR:
+            {
+                double *hit_rate_ptr = va_arg (arguments, double *);
+
+                break;
+            }
+        /* H5Fget_mdc_size */
+        case H5VL_FILE_GET_MDC_SIZE:
+            {
+                size_t *max_size_ptr        = va_arg (arguments, size_t *);
+                size_t *min_clean_size_ptr  = va_arg (arguments, size_t *);
+                size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
+                int    *cur_num_entries_ptr = va_arg (arguments, int *); 
+                int32_t cur_num_entries;
+
+                break;
+            }
+        /* H5Fget_vfd_handle */
+        case H5VL_FILE_GET_VFD_HANDLE:
+            {
+                void **file_handle = va_arg (arguments, void **);
+                hid_t  fapl        = va_arg (arguments, hid_t);
+
+                break;
+            }
+        /* H5Fclear_elink_file_cache */
+        case H5VL_FILE_CLEAR_ELINK_CACHE:
+            {
+                break;
+            }
+        /* H5Freopen */
+        case H5VL_FILE_REOPEN:
+            {
+                void   **ret = va_arg (arguments, void **);
+                H5F_t  *new_file = NULL;
+
+                break;
+            }
+        /* H5Freset_mdc_hit_rate_stats */
+        case H5VL_FILE_RESET_MDC_HIT_RATE:
+            {
+                break;
+            }
+        case H5VL_FILE_SET_MDC_CONFIG:
+            {
+                H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_file_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -916,6 +1243,7 @@ H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     /* set common object parameters */
     attr->common.obj_type = H5I_ATTR;
     attr->common.raw_file = obj->raw_file;
+    attr->common.file = obj->file;
 
     ret_value = (void *)attr;
 
@@ -1040,6 +1368,7 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     /* set common object parameters */
     attr->common.obj_type = H5I_ATTR;
     attr->common.raw_file = obj->raw_file;
+    attr->common.file = obj->file;
 
     H5MM_free(send_buf);
     H5MM_free(recv_buf);
@@ -1669,6 +1998,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     /* set common object parameters */
     dset->common.obj_type = H5I_DATASET;
     dset->common.raw_file = obj->raw_file;
+    dset->common.file = obj->file;
 
     H5MM_free(recv_buf);
     ret_value = (void *)dset;
@@ -1820,6 +2150,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* set common object parameters */
     dset->common.obj_type = H5I_DATASET;
     dset->common.raw_file = obj->raw_file;
+    dset->common.file = obj->file;
 
     H5MM_free(send_buf);
     H5MM_free(recv_buf);
@@ -2269,6 +2600,7 @@ H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     /* set common object parameters */
     dtype->common.obj_type = H5I_DATATYPE;
     dtype->common.raw_file = obj->raw_file;
+    dtype->common.file = obj->file;
 
     if(NULL == (dtype->dtype = H5T_copy(dt, H5T_COPY_TRANSIENT)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy");
@@ -2362,6 +2694,7 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     /* set common object parameters */
     dtype->common.obj_type = H5I_DATATYPE;
     dtype->common.raw_file = obj->raw_file;
+    dtype->common.file = obj->file;
 
     ret_value = (void *)dtype;
 
@@ -2521,6 +2854,7 @@ H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* set common object parameters */
     grp->common.obj_type = H5I_GROUP;
     grp->common.raw_file = obj->raw_file;
+    grp->common.file = obj->file;
 
     ret_value = (void *)grp;
 
@@ -2582,6 +2916,7 @@ static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const
     /* set common object parameters */
     grp->common.obj_type = H5I_GROUP;
     grp->common.raw_file = obj->raw_file;
+    grp->common.file = obj->file;
 
     ret_value = (void *)grp;
 done:
@@ -3049,6 +3384,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
         size_t len = 0;
         int ret;
         uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */        
+        H5VL_t *vol_plugin = NULL;
 
         MPI_Pcontrol(0);
         /* probe for a message from the mds */
@@ -3119,14 +3455,26 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         H5MM_free(recv_buf);
 
+        /* execute the user iterate callback */
         ret = op(group_id, name, &linfo, op_data);
 
+        /* send result to MDS */
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the return value */
         if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
                                    H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
         MPI_Pcontrol(1);
+
+        /* decrement the ref count on the group ID but do not call the free method, because that 
+         * will send a close request to the MDS. The MDS will already have closed this group at
+         * its side part of the native iterate implementation. We only need to free the aux struct */
+        if(H5I_dec_ref_no_free(group_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on group ID");
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(group_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+        H5MM_xfree(vol_plugin->container_name);
+        H5MM_xfree(vol_plugin);
 
         /* Free the group's memory structure */
         grp = H5FL_FREE(H5VL_mds_group_t, grp);

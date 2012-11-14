@@ -41,22 +41,19 @@
 
 #define H5VL_MDS_LINK_ITERATE 1
 
+/* forward declaration of file struct */
+struct H5VL_mds_file_t;
+
 /* the object structure of the MDS VOL plugin */
 typedef struct H5VL_mds_object_t {
     H5I_type_t obj_type;
-    hid_t      obj_id; /* the ID of the object that is created at the MDS side */
-    H5F_t      *raw_file; /* the raw data file that this object belongs to */
-    /*
-    union {
-        struct H5VL_mds_file_t file;
-        struct H5VL_mds_dset_t dset;
-    }u;
-    */
+    hid_t obj_id; /* the ID of the object that is created at the MDS side */
+    H5F_t *raw_file; /* the raw data file that is created by the client */
+    struct H5VL_mds_file_t *file; /* the file struct that this object belongs to */
 } H5VL_mds_object_t;
 
 typedef struct H5VL_mds_file_t {
     H5VL_mds_object_t common; /* common stuff, must be first */
-    H5F_t  *raw_file; /* the raw data file that is created by the client */
 } H5VL_mds_file_t;
 
 typedef struct H5VL_mds_attr_t {
