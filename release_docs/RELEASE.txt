@@ -46,8 +46,9 @@ CONTENTS
 - New Features
 - Support for New Platforms, Languages, and Compilers
 - Bug Fixes since HDF5-1.8.10
-- Platforms Tested
+- Supported Platforms
 - Supported Configuration Features Summary
+- More Tested Platforms
 - Known Problems
 
 
@@ -129,23 +130,11 @@ Bug Fixes since HDF5-1.8.10
     ------
     - None
 
-Platforms Tested
-================
-The following platforms and compilers have been tested for this release.
-
+Supported Platforms
+===================
     AIX 5.3                       xlc 10.1.0.5
     (NASA G-ADA)                  xlC 10.1.0.5
                                   xlf90 12.1.0.6
-
-    FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
-    (loyalty)                     gcc 4.6.1 20110422
-                                  g++ 4.6.1 20110422
-                                  gfortran 4.6.1 20110422
-
-    FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
-    (freedom)                     gcc 4.6.1 20110422
-                                  g++ 4.6.1 20110422
-                                  gfortran 4.6.1 20110422
 
     Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
@@ -185,7 +174,7 @@ The following platforms and compilers have been tested for this release.
 
     IBM Blue Gene/P               XL C for Blue Gene/P, bgxlc V9.0
     (LLNL uDawn)                  XL C++ for Blue Gene/P, bgxlC V9.0
-                                  XL Fortran for Blue Gene/P, bgxlf0 V11.1
+                                  XL Fortran for Blue Gene/P, bgxlf90 V11.1
 
     SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
     (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
@@ -193,17 +182,6 @@ The following platforms and compilers have been tested for this release.
                                   Sun C 5.11 SunOS_sparc
                                   Sun Fortran 95 8.5 SunOS_sparc
                                   Sun C++ 5.11 SunOS_sparc
-
-    SGI Altix UV                  Intel(R) C, Fortran Compilers
-    SGI ProPack 7 Linux               Version 11.1 20100806
-    2.6.32.24-0.2.1.2230.2.PTF-   SGI MPT 2.02
-    default #1 SMP                
-    (NCSA ember)
-
-    Dell NVIDIA Cluster           Intel(R) C, Fortran Compilers
-    Red Hat Enterprise Linux 6        Version 12.0.4 20110427
-    2.6.32-131.4.1.el6.x86_64     mvapich2 1.7rc1-intel-12.0.4
-    (NCSA forge)
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
 
@@ -219,29 +197,100 @@ The following platforms and compilers have been tested for this release.
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
 
-    Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
-    Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
-    Intel 64-bit                      (Apple Inc. build 5666) (dot 3)
-    (fred)                        GNU Fortran (GCC) 4.6.2 20111019 (prerelease)
+    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    (fred)                        gfortran GNU Fortran (GCC) 4.6.2
                                   Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
-    Mac OS X Snow Leopard 10.6.8  i686-apple-darwin10-gcc-4.2.1 (GCC) 4.2.1 (gcc)
-    Darwin Kernel Version 10.8.0  i686-apple-darwin10-g++-4.2.1 (GCC) 4.2.1 (g++)
-    Intel 32-bit                      (Apple Inc. build 5666) (dot 3)
-    (tejeda)                      GNU Fortran (GCC) 4.6.1 (gfortran)
-                                  Intel C (icc), Fortran (ifort), C++ (icpc)
+    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Intel 32-bit                  gfortran GNU Fortran (GCC) 4.6.1
+    (tejeda)                      Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1.0.038 Build 20110811
 
-    Mac OS X Lion 10.7.3          GCC 4.2.1 gcc
-    32- and 64-bit                GNU Fortran (GCC) 4.6.1 gfortran
-    (duck)                        GCC 4.2.1. g++
+    Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
+    32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
+    (duck)                        gfortran GNU Fortran (GCC) 4.6.2
 
-    Mac OS X Mountain Lion 10.8.1 GCC 4.2.1 gcc
-    (owl)			  GNU Fortran (GCC) 4.6.1 gfortran
-                                  GCC 4.2.1. g++
-				  Apple clang version 4.0 (cc)
-				  Apple clang version 4.0 (c++)
+    Mac OS X Mountain Lion 10.8.1 cc Apple clang version 4.0 from Xcode 4.5.1
+    (owl)                         c++ Apple clang version 4.0 from Xcode 4.5.1
+				  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.5.1
+				  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.5.1
+    			          gfortran GNU Fortran (GCC) 4.6.2
+
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested 
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform 
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.10 32-bit                      n        y/y    n        y    y     y
+Solaris2.10 64-bit                      n        y/n    n        y    y     y
+Windows 7                               y        y/n    n        y    y     y
+Windows 7     x64                       y        y/n    n        y    y     y
+Mac OS X Snow Leopard 10.6.8 32-bit     n        y/y    n        y    y     n 
+Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
+Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
+Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
+AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+Linux 2.6.32-220.7.1.el6.ppc64          n        y/n    n        y    y     y
+
+
+Platform                                 Shared  Shared    Shared    Thread-  
+                                         C libs  F90 libs  C++ libs  safe     
+Solaris2.10 32-bit                         y       y         y         y        
+Solaris2.10 64-bit                         n       n         n         n        
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
+Mac OS X Snow Leopard 10.6.8 32-bit        y       n         y         n        
+Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
+Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
+Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
+Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
+AIX 5.3 32- and 64-bit                     n       n         n         y        
+CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
+Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following platforms are not supported but have been tested for this release.
+
+    FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
+    (loyalty)                     gcc 4.6.1 20110422
+                                  g++ 4.6.1 20110422
+                                  gfortran 4.6.1 20110422
+
+    FreeBSD 8.2-STABLE amd64      gcc 4.2.1 [FreeBSD] 20070719
+    (freedom)                     gcc 4.6.1 20110422
+                                  g++ 4.6.1 20110422
+                                  gfortran 4.6.1 20110422
 
     Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
@@ -284,78 +333,10 @@ The following platforms and compilers have been tested for this release.
                                   (cmake and autotools)
                                   (Use optimization level -O1)
     
-    Cray Linux Environment (CLE)  PrgEnv-pgi 2.2.74
-    hopper.nersc.gov              pgcc 11.9-0 64-bit target on x86-64 Linux -tp k8e
-                                  pgf90 11.9-0 64-bit target on x86-64 Linux -tp k8e
-                                  pgCC 11.9-0 64-bit target on x86-64 Linux -tp k8e
-    
-
-Tested Configuration Features Summary
-=====================================
-
-    In the tables below
-          y   = tested 
-          n   = not tested in this release
-          C   = Cluster
-          W   = Workstation
-          x   = not working in this release
-          dna = does not apply
-          ( ) = footnote appears below second table
-          <blank> = testing incomplete on this feature or platform 
-
-Platform                              C        F90    F90      C++   zlib  SZIP
-                                      parallel        parallel
-Solaris2.10 32-bit                      n        y      n        y    y     y
-Solaris2.10 64-bit                      n        y      n        y    y     y
-Windows 7                               y        y      n        y    y     y
-Windows 7     x64                       y        y      n        y    y     y
-Mac OS X Snow Leopard 10.6.8 32-bit     n        y      n        y    y     n 
-Mac OS X Snow Leopard 10.6.8 64-bit     n        y      n        y    y     y
-Mac OS X Lion 10.7.3 32-bit             n        y      n        y    y     n
-Mac OS X Lion 10.7.3 64-bit             n        y      n        y    y     y
-Mac OS X Mountain Lion 10.8.1 64-bit    n        y      n        y    y     n
-AIX 5.3 32- and 64-bit                  y        y      y        y    y     y
-FreeBSD 8.2-STABLE 32&64 bit            n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y      y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y      y        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y      n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y      n        y    y     y
-Linux 2.6.32-220.7.1.el6.ppc64          n        y      n        y    y     y
-SGI ProPack 7 Linux 2.6.32.24           y        y      y        y    y     y
-Red Hat Enterprise Linux 6              y        y      y        y    y     y
-CLE hopper.nersc.gov                    y        y      y        y    y     n
-
-
-Platform                                 Shared  Shared    Shared    Thread-  
-                                         C libs  F90 libs  C++ libs  safe     
-Solaris2.10 32-bit                         y       y         y         y        
-Solaris2.10 64-bit                         n       n         n         n        
-Windows 7                                  y       y         y         y
-Windows 7 x64                              y       y         y         y
-Mac OS X Snow Leopard 10.6.8 32-bit        y       n         y         n        
-Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
-Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
-Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
-Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
-AIX 5.3 32- and 64-bit                     n       n         n         y        
-FreeBSD 8.2-STABLE 32&64 bit               y       y         y         y        
-CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
-CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
-CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
-CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
-Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
-SGI ProPack 7 Linux 2.6.32.24              y       y         y         n 
-Red Hat Enterprise Linux 6                 y       y         y         n
-CLE hopper.nersc.gov                       n       n         n         n
-
-           (4) Using Visual Studio 2008 w/ Intel Fortran 10.1 (Cygwin shared libraries are not supported)
-           (5) C and C++ shared libraries will not be built when Fortran is enabled.
-    Compiler versions for each platform are listed in the preceding
-    "Platforms Tested" table.
+    Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
+    hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgf90 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgCC 12.5-0 64-bit target on x86-64 Linux -tp shanghai
 
 
 Known Problems
@@ -379,25 +360,20 @@ Known Problems
       }
   (SLU - 2012/11/5)
 
+* The following h5stat test case fails in BG/P machines (and potentially other
+  machines that display extra output if an MPI task returns with a non-zero
+  code.)
+    Testing h5stat notexist.h5
+  
+  The test actually runs and passes as expected. It is the extra output from
+  the MPI process that causes the test script to fail. This will be fixed
+  in the next release.  (AKC - 2012/10/25 - HDFFV-8233)
+
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
   ports (and probably gcc releases after that).
   (QAK - 2012/10/19)
 
-* The data conversion test dt_arith.c has failures (segmentation fault) from
-  "long double" to other datatypes during hard conversion when the library
-  is built with the default GCC 4.2.1 on Mac Lion system.  It only happens 
-  with optimization (-O3, -O2, and -O1).  Some newer versions of GCC do not
-  have this problem.  Users should disable optimization or try newer version
-  of GCC.
-  (SLU - 2012/06/12 - HDFFV-8017)
-
-* The file_image test will fail in the "initial file image and callbacks in
-  the core VFD" sub-test if the source directory is read-only as the test
-  fails to create its test files in the build directory. This will be
-  resolved in a future release.
-  (AKC - 2012/05/05 - HDFFV-8009)
-  
 * The following h5dump test case fails in BG/P machines (and potentially other
   machines that use a command script to launch executables):
 
@@ -434,7 +410,7 @@ Known Problems
   64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
   10.7.0.  The STDIO VFD test has been disabled while we investigate and
   a fix should appear in a future release.
-  (DER - 2011/10/14)
+  (DER - 2011/10/14 - HDFFV-8235)
 
 * h5diff can report inconsistent results when comparing datasets of enum type
   that contain invalid values.  This is due to how enum types are handled in
@@ -504,11 +480,6 @@ Known Problems
   it is (see bug report #1279).  Quincey will make a plan for 1.10.
   (SLU - 2010/02/02)
 
-* MinGW has a missing libstdc++.dll.a library file and will not successfully link
-  C++ applications/tests. Do not use the enable-cxx configure option. Read all of
-  the INSTALL_MINGW.txt file for all restrictions.
-  (ADB - 2009/11/11)
-
 * The --enable-static-exec configure flag will only statically link libraries
   if the static version of that library is present. If only the shared version
   of a library exists (i.e., most system libraries on Solaris, AIX, and Mac,
@@ -518,62 +489,15 @@ Known Problems
   executable is statically linked with just the HDF5 library.
   (MAM - 2009/11/04)
   
-* The PathScale MPI implementation, accessing a Panasas file system, would
-  cause H5Fcreate() with H5F_ACC_EXCL to fail even when the file does not
-  exist. This is due to the MPI_File_open() call failing if the mode has
-  the MPI_MODE_EXCL bit set.
-  (AKC - 2009/08/11 - HDFFV-988)
- 
 * Parallel tests failed with 16 processes with data inconsistency at testphdf5
   / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
   with MPI IO.
   (CMC - 2009/04/28)
 
-* For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh and
-  tools/h5copy/testh5copy.sh will fail some of its sub-tests. These sub-tests
-  are expected to fail and should exit with a non-zero code but the yod
-  command does not propagate the exit code of the executables. Yod always
-  returns 0 if it can launch the executable.  The test suite shell expects
-  a non-zero for this particular test, therefore it concludes the test has
-  failed when it receives 0 from yod.  Skip all the "failing" test for now
-  by changing them as following.
-
-  ======== Original tools/h5ls/testh5ls.sh =========
-  TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
-  ======== Change to ===============================
-  echo SKIP TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
-  ==================================================
-
-  ======== Original tools/h5copy/testh5copy.sh =========
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-  TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
-  H5LSTEST $FILEOUT
-  ======== Change to ===============================
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-  echo SKIP TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
-  echo SKIP H5LSTEST $FILEOUT
-  ==================================================
-  (AKC - 2008/11/10)
-  
-* For Red Storm, a Cray XT3 system, the yod command sometimes gives the
-  message,  "yod allocation delayed for node recovery".  This interferes with
-  test suites that do not expect to see this message.  See the section of "Red
-  Storm" in file INSTALL_parallel for a way to deal with this problem.
-  (AKC - 2008/05/28)
-
 * On an Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
   use -mp -O1 compilation flags to build the libraries. A higher level of 
   optimization causes failures in several HDF5 library tests. 
-
-* On mpich 1.2.5 and 1.2.6, if more than two processes contribute no IO and 
-  the application asks to do collective IO, we have found that when using 4 
-  processors, a simple collective write will sometimes be hung. This can be 
-  verified with t_mpi test under testpar.
 
 * A dataset created or rewritten with a v1.6.3 library or after cannot be read 
   with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
@@ -584,17 +508,3 @@ Known Problems
   before on little-endian system.  Library releases after 1.6.4 can still read 
   datasets created or rewritten with an HDF5 library of v1.6.2 or before.  
   (SLU - 2005/06/30)
-
-* On IBM AIX systems, parallel HDF5 mode will fail some tests with error
-  messages like "INFO: 0031-XXX ...".  This is from the command `poe'.
-  Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
-  and run the tests again.
-
-  The tests may fail with messages like "The socket name is already in use",  
-  but HDF5 does not use sockets.  This failure is due to problems with the 
-  poe command trying to set up the debug socket.  To resolve this problem, 
-  check to see whether there are many old /tmp/s.pedb.* files staying around.  
-  These are sockets used by the poe command and left behind due to failed 
-  commands.  First, ask your system administrator to clean them out.  
-  Lastly, request IBM to provide a means to run poe without the debug socket.
-  (AKC - 2004/12/08)
