@@ -30,7 +30,9 @@ CONTENTS
 - New Features
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.8.0
-- Platforms Tested
+- Supported Platforms
+- Tested Configuration Features Summary
+- More Tested Platforms
 - Known Problems
 
 
@@ -1052,12 +1054,157 @@ Bug Fixes since HDF5-1.8.0 release
 
 
 
-Platforms Tested
-================
-
+Supported Platforms
+===================
     AIX 5.3                       xlc 10.1.0.5
     (NASA G-ADA)                  xlC 10.1.0.5
                                   xlf90 12.1.0.6
+
+    Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP i686 i686 i386         compilers for 32-bit applications;
+    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-52)
+                                      Version 4.6.3
+                                  PGI C, Fortran, C++ Compilers for 32-bit
+                                  applications;
+                                      Version 11.9-0
+                                  Intel(R) C, C++, Fortran Compiler for 32-bit
+                                  applications;
+                                      Version 12.1
+                                  MPICH mpich2-1.4.1p1 compiled with
+                                      gcc 4.1.2 and gfortran 4.1.2
+
+    Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers for 32-bit applications;
+    (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-52)
+                                      Version 4.6.3
+                                  PGI C, Fortran, C++ for 64-bit target on 
+                                  x86-64;
+                                      Version 11.9-0 
+                                      Version 12.5-0
+                                  Intel(R) C, C++, Fortran Compilers for 
+                                  applications running on Intel(R) 64; 
+                                      Version 12.1 (Build 20110811)
+                                      Version 12.1 (Build 20120212)
+                                  MPICH mpich2-1.4.1p1 compiled with
+                                      gcc 4.1.2 and gfortran 4.1.2
+
+    Linux 2.6.32-220.7.1.el6.ppc64 gcc (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
+    (ostrich)                     GNU Fortran (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
+
+    Linux 2.6.32-220.23.1.1chaos  Intel C, C++, Fortran Compilers
+    ch5.x86_64 GNU/Linux              Version 12.1.5.339
+    (LLNL Aztec)
+
+    IBM Blue Gene/P               XL C for Blue Gene/P, bgxlc V9.0
+    (LLNL uDawn)                  XL C++ for Blue Gene/P, bgxlC V9.0
+                                  XL Fortran for Blue Gene/P, bgxlf90 V11.1
+
+    SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
+    (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
+                                  Sun C++ 5.9 Sun OS_sparc Patch 124863-26
+                                  Sun C 5.11 SunOS_sparc
+                                  Sun Fortran 95 8.5 SunOS_sparc
+                                  Sun C++ 5.11 SunOS_sparc
+
+    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+
+    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
+
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
+                                  (cmake and autotools)
+
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+                                  Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
+                                  (cmake and autotools)
+
+    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    (fred)                        gfortran GNU Fortran (GCC) 4.6.2
+                                  Intel C (icc), Fortran (ifort), C++ (icpc)
+                                      12.1.0.038 Build 20110811
+
+    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
+    Intel 32-bit                  gfortran GNU Fortran (GCC) 4.6.1
+    (tejeda)                      Intel C (icc), Fortran (ifort), C++ (icpc)
+                                      12.1.0.038 Build 20110811
+
+    Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
+    32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
+    (duck)                        gfortran GNU Fortran (GCC) 4.6.2
+
+    Mac OS X Mountain Lion 10.8.1 cc Apple clang version 4.0 from Xcode 4.5.1
+    (owl)                         c++ Apple clang version 4.0 from Xcode 4.5.1
+				  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.5.1
+				  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.5.1
+    			          gfortran GNU Fortran (GCC) 4.6.2
+
+
+Tested Configuration Features Summary
+=====================================
+
+    In the tables below
+          y   = tested 
+          n   = not tested in this release
+          C   = Cluster
+          W   = Workstation
+          x   = not working in this release
+          dna = does not apply
+          ( ) = footnote appears below second table
+          <blank> = testing incomplete on this feature or platform 
+
+Platform                              C         F90/   F90      C++  zlib  SZIP
+                                      parallel  F2003  parallel
+Solaris2.10 32-bit                      n        y/y    n        y    y     y
+Solaris2.10 64-bit                      n        y/n    n        y    y     y
+Windows 7                               y        y/n    n        y    y     y
+Windows 7     x64                       y        y/n    n        y    y     y
+Mac OS X Snow Leopard 10.6.8 32-bit     n        y/y    n        y    y     n 
+Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
+Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
+Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
+AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+Linux 2.6.32-220.7.1.el6.ppc64          n        y/n    n        y    y     y
+
+
+Platform                                 Shared  Shared    Shared    Thread-  
+                                         C libs  F90 libs  C++ libs  safe     
+Solaris2.10 32-bit                         y       y         y         y        
+Solaris2.10 64-bit                         n       n         n         n        
+Windows 7                                  y       y         y         y
+Windows 7 x64                              y       y         y         y
+Mac OS X Snow Leopard 10.6.8 32-bit        y       n         y         n        
+Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
+Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
+Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
+Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
+AIX 5.3 32- and 64-bit                     n       n         n         y        
+CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
+Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
+
+Compiler versions for each platform are listed in the preceding
+"Supported Platforms" table.
+
+
+More Tested Platforms
+=====================
+The following platforms are not supported but have been tested for this release.
 
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     gcc 4.6.1 20110422
@@ -1069,122 +1216,51 @@ Platforms Tested
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Linux 2.6.18-194.3.1.el5PAE   gcc (GCC) 4.1.2 and 4.4.2
-    #1 SMP i686 i686 i386         GNU Fortran (GCC) 4.1.2 20080704
-    (jam)                             (Red Hat 4.1.2-48) and 4.4.2
-                                  PGI C, Fortran, C++ 10.4-0 32-bit
-                                  PGI C, Fortran, C++ 10.6-0 32-bit
-                                  Intel(R) C Compiler for 32-bit
-                                      applications, Version 11.1
-                                  Intel(R) C++ Compiler for 32-bit
-                                      applications, Version 11.1
-                                  Intel(R) Fortran Compiler for 32-bit
-                                      applications, Version 11.1
-                                  MPICH mpich2-1.3.1 compiled with
-                                      gcc 4.1.2 and gfortran 4.1.2
+    Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
+                                  gcc (Debian 4.4.5-8) 4.4.5
+                                  GNU Fortran (Debian 4.4.5-8) 4.4.5
+                                  (cmake and autotools)
 
-    Linux 2.6.18-238.12.1.el5     gcc 4.1.2 and 4.4.2
-    #1 SMP x86_64 GNU/Linux       GNU Fortran (GCC) 4.1.2 20080704
-    (koala)                           (Red Hat 4.1.2-46) and 4.4.2
-                                      tested for both 32- and 64-bit binaries
-                                  Intel(R) C, C++, Fortran Compilers for
-                                      applications running on Intel(R) 64,
-                                      Version 11.1.
-                                  PGI C, Fortran, C++ Version 9.0-4
-                                      for 64-bit target on x86-64
-                                  MPICH mpich2-1.3.1 compiled with
-                                      gcc 4.1.2 and gfortran 4.1.2
+    Debian6.0.3 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
+                                  gcc (Debian 4.4.5-8) 4.4.5
+                                  GNU Fortran (Debian 4.4.5-8) 4.4.5
+                                  (cmake and autotools)
 
-    SGI ProPack 7 Linux           Intel(R) C++ Version 11.1 20100806
-    2.6.32.19-0.3.1.1982.0.PTF-   Intel(R) Fortran Version 11.1 20100806
-    default #1 SMP                SGI MPT 2.01
-    SGI Altix UV
-    (NCSA ember)
+    Fedora17 3.5.2-1.fc17.i6866 #1 SMP i686 i686 i386 GNU/Linux
+                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  (cmake and autotools)
 
-    SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
-    (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch
-127000-13
-                                  Sun C++ 5.9 Sun OS_sparc Patch 124863-62
-                                  Sun C 5.10 SunOS_sparc Patch 141861-07
-                                  Sun Fortran 95 8.4 SunOS_sparc Patch
-128231-06
-                                  Sun C++ 5.10 SunOS_sparc 128228-11
+    Fedora17 3.5.2-1.fc17.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+                                  (cmake and autotools)
 
-    Windows 7                     Visual Studio 2010 w/ Intel Fortran 12 (cmake)
-                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
+    SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.1
+                                  GNU Fortran (SUSE Linux) 4.7.1
+                                  (cmake and autotools)
 
-    Windows 7 x64                 Visual Studio 2010 w/ Intel Fortran 12 (cmake)
-                                  Cygwin(1.7.9 native gcc(4.5.3) compiler and gfortran)
+    SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.1
+                                  GNU Fortran (SUSE Linux) 4.7.1 
+                                  (cmake and autotools)
 
-    MAC OS  10.5 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
-                                  G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
-                                  GNU Fortran (GCC) 4.3.0 20070810
-    Alpha Open VMS 7.3
+    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  (cmake and autotools)
 
-
-Supported Configuration Features Summary
-========================================
-
-    In the tables below
-          y   = tested and supported
-          n   = not supported or not tested in this release
-          x   = not working in this release
-          ( ) = footnote appears below second table
-          <blank> = testing incomplete on this feature or platform
-          W or C indicates workstation or cluster, respectively.
-
-Platform                          C        F90    F90      C++   zlib  SZIP
-                                  parallel        parallel
-SunOS5.10 64-bit                   n        y      n        y     y     y
-SunOS5.10 32-bit                   n        y      n        y     y     y
-Windows 7                          y        y      n        y     y     y
-Windows 7 x64                      y        y      n        y     y     y
-Mac OS X 10.5 Intel                n        y      n        y     y     y
-FreeBSD 8.2 32- and 64-bit         n        y      n        y     y     y
-RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
-RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
-RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
-SuSe Linux 2.6.16 x86_64 GNU (5) W y(2)     y      n        y     y     y
-SuSe Linux 2.6.16 x86_64 Int (5) W n        y      n        y     n     n
-SuSe Linux 2.6.16 x86_64 PGI (5) W n        y      n        y     n     n
-RHL9 Linux 2.4 Xeon Lustre Intel C n        y      n        y     y     n
-RHEL3 Linux 2.4 Xeon Intel       W n        y      n        n     y     n
-RHEL4 Linux 2.6 Xeon Lustre Int  C n        y      n        y     y     n
-SuSE Linux 2.4 ia64 Intel        C y(1)     y      y        y     y     y
-SuSe Linux 2.6.5
-       SGI Altix ia64 Intel      C n        y      n        y     n     y
-Alpha OpenVMS 7.3.2                n        y      n        y     n     n
-
-
-Platform                          Shared   Shared    Shared    static-  Thread-
-                                  C libs   F90 libs  C++ libs  exec     safe
-SunOS 5.10 32-bit                   y        y         y         x        y
-SunOS 5.10 64-bit                   y        y         y         x        y
-Windows 7                           y        y         y         y        y
-Windows 7 x64                       y        y         y         y        y
-Mac OS X 10.5 Intel                 y        y         y         x        n
-FreeBSD 8.2 32- and 64-bit          y        y         y         y        y
-RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
-RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
-RHEL4 2.6.9 i686 PGI              W y        y         y         x        n
-SuSE Linux 2.6.16 x86_64 GNU (5)  W y        y         y         x        y
-SuSE Linux 2.6.16 x86_64 Intel(5) W y        y         y         x        n
-SuSE Linux 2.6.16 x86_64 PGI(5)   W y        y         y         x        n
-RHL9 Linux 2.4 Xeon Lustre Intel  C y        y         y         x        n
-RHEL3 Linux 2.4 Xeon Intel        W y        n         n         x        n
-RHEL4 Linux 2.6 Xeon Lustre Intel C y        y         y         x        n
-SuSE Linux 2.4 ia64 Intel         C y        y         y         x        n
-SuSe Linux 2.6.5
-           SGI Altix ia64 Intel   C n        n         n         x        n
-
-    Notes: (1)  Using mpich 1.2.6.
-           (2) Using mpich2 1.0.6.
-           (3) Using Visual Studio 2008 (Cygwin shared libraries are not supported)
-           (4) With PGI and Absoft compilers.
-           (5) AMD Opteron x86_64
-    Compiler versions for each platform are listed in the preceding
-    "Platforms Tested" table.
-
+    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+                                  (cmake and autotools)
+                                  (Use optimization level -O1)
+    
+    Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
+    hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgf90 12.5-0 64-bit target on x86-64 Linux -tp shanghai
+                                  pgCC 12.5-0 64-bit target on x86-64 Linux -tp shanghai
 
 
 Known Problems
