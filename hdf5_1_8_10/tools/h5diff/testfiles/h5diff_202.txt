@@ -1,0 +1,2 @@
+Not comparable: </g2/dset2> is of class H5T_FLOAT and </g2/dset3> is of class H5T_INTEGER
+EXIT CODE: 0

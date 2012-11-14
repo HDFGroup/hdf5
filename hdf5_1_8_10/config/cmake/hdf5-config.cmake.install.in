@@ -1,0 +1,73 @@
+#-----------------------------------------------------------------------------
+# HDF5 Config file for compiling against hdf5 install directory
+#-----------------------------------------------------------------------------
+GET_FILENAME_COMPONENT (SELF_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+GET_FILENAME_COMPONENT(_IMPORT_PREFIX "${SELF_DIR}" PATH)
+GET_FILENAME_COMPONENT(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
+IF (NOT WIN32)
+  GET_FILENAME_COMPONENT(_IMPORT_PREFIX "${_IMPORT_PREFIX}" PATH)
+ENDIF (NOT WIN32)
+
+#-----------------------------------------------------------------------------
+# User Options
+#-----------------------------------------------------------------------------
+SET (HDF5_ENABLE_PARALLEL @HDF5_ENABLE_PARALLEL@)
+SET (HDF5_BUILD_FORTRAN   @HDF5_BUILD_FORTRAN@)
+SET (HDF5_ENABLE_F2003    @HDF5_ENABLE_F2003@)
+SET (HDF5_BUILD_CPP_LIB   @HDF5_BUILD_CPP_LIB@)
+SET (HDF5_BUILD_TOOLS     @HDF5_BUILD_TOOLS@)
+SET (HDF5_BUILD_HL_LIB    @HDF5_BUILD_HL_LIB@)
+SET (HDF5_ENABLE_Z_LIB_SUPPORT @HDF5_ENABLE_Z_LIB_SUPPORT@)
+SET (HDF5_ENABLE_SZIP_SUPPORT  @HDF5_ENABLE_SZIP_SUPPORT@)
+SET (HDF5_ENABLE_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
+SET (HDF5_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
+SET (HDF5_PACKAGE_EXTLIBS      @HDF5_PACKAGE_EXTLIBS@)
+
+#-----------------------------------------------------------------------------
+# Directories
+#-----------------------------------------------------------------------------
+SET (HDF5_INCLUDE_DIR "${_IMPORT_PREFIX}/include" )
+
+IF (HDF5_BUILD_FORTRAN)
+  SET (HDF5_INCLUDE_DIR_FORTRAN "${_IMPORT_PREFIX}/include/fortran" )
+ENDIF (HDF5_BUILD_FORTRAN)
+  
+IF (HDF5_BUILD_CPP_LIB)
+  SET (HDF5_INCLUDE_DIR_CPP "${_IMPORT_PREFIX}/include/cpp" )
+ENDIF (HDF5_BUILD_CPP_LIB)
+
+IF (HDF5_BUILD_HL_LIB)
+  SET (HDF5_INCLUDE_DIR_HL "${_IMPORT_PREFIX}/include/hl" )
+ENDIF (HDF5_BUILD_HL_LIB)
+
+IF (HDF5_BUILD_HL_LIB AND HDF5_BUILD_CPP_LIB)
+  SET (HDF5_INCLUDE_DIR_HL_CPP "${_IMPORT_PREFIX}/include/hl/cpp" )
+ENDIF (HDF5_BUILD_HL_LIB AND HDF5_BUILD_CPP_LIB)
+
+IF (HDF5_BUILD_TOOLS)
+  SET (HDF5_INCLUDE_DIR_TOOLS "${_IMPORT_PREFIX}/include" )
+  SET (HDF5_TOOLS_DIR "${_IMPORT_PREFIX}/bin" )
+ENDIF (HDF5_BUILD_TOOLS)
+
+#-----------------------------------------------------------------------------
+# Version Strings
+#-----------------------------------------------------------------------------
+SET (HDF5_VERSION_STRING @HDF5_VERSION_STRING@)
+SET (HDF5_VERSION_MAJOR  @HDF5_VERSION_MAJOR@)
+SET (HDF5_VERSION_MINOR  @HDF5_VERSION_MINOR@)
+
+#-----------------------------------------------------------------------------
+# Don't include targets if this file is being picked up by another
+# project which has already built hdf5 as a subproject
+#-----------------------------------------------------------------------------
+IF (NOT TARGET "@HDF5_PACKAGE@")
+  IF (HDF5_ENABLE_Z_LIB_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "zlib")
+    INCLUDE (${SELF_DIR}/../ZLIB/@ZLIB_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+  ENDIF (HDF5_ENABLE_Z_LIB_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "zlib")
+  IF (HDF5_ENABLE_SZIP_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "szip")
+    INCLUDE (${SELF_DIR}/../SZIP/@SZIP_PACKAGE_NAME@@HDF_PACKAGE_EXT@-targets.cmake)
+  ENDIF (HDF5_ENABLE_SZIP_SUPPORT AND HDF5_PACKAGE_EXTLIBS AND NOT TARGET "szip")
+  INCLUDE (${SELF_DIR}/@HDF5_PACKAGE@@HDF_PACKAGE_EXT@-targets.cmake)
+  SET (HDF5_LIBRARIES "@HDF5_LIBRARIES_TO_EXPORT@")
+ENDIF (NOT TARGET "@HDF5_PACKAGE@")
+

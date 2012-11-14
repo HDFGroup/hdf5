@@ -1,0 +1,24 @@
+usage: h5jam -i <in_file.h5> -u <in_user_file> [-o <out_file.h5>] [--clobber]
+
+Adds user block to front of an HDF5 file and creates a new concatenated file.
+
+OPTIONS
+  -i in_file.h5    Specifies the input HDF5 file.
+  -u in_user_file  Specifies the file to be inserted into the user block.
+                   Can be any file format except an HDF5 format.
+  -o out_file.h5   Specifies the output HDF5 file.
+                   If not specified, the user block will be concatenated in
+                   place to the input HDF5 file.
+  --clobber        Wipes out any existing user block before concatenating
+                   the given user block.
+                   The size of the new user block will be the larger of;
+                    - the size of existing user block in the input HDF5 file
+                    - the size of user block required by new input user file
+                   (size = 512 x 2N,  N is positive integer.)
+
+  -h               Prints a usage message and exits.
+  -V               Prints the HDF5 library version and exits.
+
+Exit Status:
+   0   Succeeded.
+   >0  An error occurred.

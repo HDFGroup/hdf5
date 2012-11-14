@@ -1,0 +1,16 @@
+
+***********************************************************************
+*            HDF5 Build and Install Instructions for Windows          *
+*                         (Full Version)                              *
+***********************************************************************
+
+We now recommend that users build, test and install HDF5 using CMake.
+
+Instructions for building and testing HDF5 using CMake can be found in
+the CMake.txt file found in this folder.
+
+The old solutions and projects found in the windows\ folder will be
+maintained for legacy users until HDF5 1.10.
+
+The old INSTALL_Windows documentation can be found in the 
+obsolete_windows_docs\ folder located with this document.

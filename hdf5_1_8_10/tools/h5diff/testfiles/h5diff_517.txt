@@ -1,0 +1,18 @@
+
+group1   group2
+---------------------------------------
+    x      x                   
+    x      x    /g2            
+    x           /g2/g3         
+    x           /g2/g3/dset1   
+    x           /g2/g3/g4      
+    x           /g2/g3/g4/dset2
+
+group  : </g1> and </g1>
+0 differences found
+Not comparable: </g1/g2> is of type H5G_GROUP and </g1/g2> is of type H5G_UDLINK
+--------------------------------
+Some objects are not comparable
+--------------------------------
+Use -c for a list of objects without details of differences.
+EXIT CODE: 1
