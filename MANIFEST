@@ -1481,6 +1481,8 @@
 ./tools/testfiles/tscalarattrintsize.h5
 ./tools/testfiles/tscalarintsize.ddl
 ./tools/testfiles/tscalarintsize.h5
+./tools/testfiles/tscalarstring.ddl
+./tools/testfiles/tscalarstring.h5
 ./tools/testfiles/tscaleoffset.ddl
 ./tools/testfiles/tslink-1.ddl
 ./tools/testfiles/tslink-2.ddl

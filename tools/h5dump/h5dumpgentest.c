@@ -104,6 +104,7 @@
 #define FILE72  "tnestedcmpddt.h5"
 #define FILE73  "tscalarintsize.h5"
 #define FILE74  "tscalarattrintsize.h5"
+#define FILE75  "tscalarstring.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -8118,7 +8119,7 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
 /*-------------------------------------------------------------------------
  * Function:    gent_intscalars
  *
- * Purpose:     Generate a file to be used in the h5dump tests.
+ * Purpose:     Generate a file to be used in the h5dump scalar tests.
  *   Four datasets of 1, 2, 4 and 8 bytes of unsigned int types are created.
  *   Four more datasets of 1, 2, 4 and 8 bytes of signed int types are created.
  *   Fill them with raw data such that no bit will be all zero in a dataset.
@@ -8313,9 +8314,9 @@ gent_intscalars(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    gent_attr_packedbits
+ * Function:    gent_attr_intscalars
  *
- * Purpose:     Generate a file to be used in the h5dump packed bits tests.
+ * Purpose:     Generate a file to be used in the h5dump attribute scalar tests.
  *   Four attributes of 1, 2, 4 and 8 bytes of unsigned int types are created.
  *   Four more datasets of 1, 2, 4 and 8 bytes of signed int types are created.
  *   Fill them with raw data such that no bit will be all zero in a dataset.
@@ -8514,6 +8515,58 @@ gent_attr_intscalars(void)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    gent_string_scalars
+ *
+ * Purpose:     Generate a file to be used in the h5dump string scalar tests.
+ *   A dataset of string types are created.
+ *   An attribute of string types are created.
+ *   Fill them with raw data such that no bit will be all zero in a dataset.
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_string_scalars(void)
+{
+    hid_t fid, attr, dataset, space, tid, root;
+    hsize_t dims[2];
+    char  string[F73_XDIM][F73_YDIM8];
+    unsigned int i, j;
+
+    fid = H5Fcreate(FILE75, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
+
+    /* string scalar */
+    dims[0] = F73_XDIM; dims[1] = F73_YDIM8;
+    space = H5Screate(H5S_SCALAR);
+    tid = H5Tcopy(H5T_C_S1);
+    H5Tset_size(tid, F73_XDIM * F73_YDIM8);
+
+    memset(string, ' ', F73_XDIM * F73_YDIM8);
+    for(i = 0; i < dims[0]; i++) {
+        string[i][0] = 'A' + i;
+        for(j = 1; j < dims[1]; j++) {
+            string[i][j] = string[i][j-1] + 1;
+        }
+    }
+    string[i][j] = 0;
+
+    /* Dataset of string scalar */
+    dataset = H5Dcreate2(fid, "the_str", tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, string);
+    H5Dclose(dataset);
+
+    /* attribute of string scalar */
+    attr = H5Acreate2(root, "attr_str", tid, space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, tid, string);
+
+    H5Sclose(space);
+    H5Aclose(attr);
+
+    H5Gclose(root);
+    H5Fclose(fid);
+}
+
+/*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
@@ -8597,6 +8650,7 @@ int main(void)
     gent_nested_compound_dt();
     gent_intscalars();
     gent_attr_intscalars();
+    gent_string_scalars();
 
     return 0;
 }
