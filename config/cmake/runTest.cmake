@@ -108,16 +108,30 @@ IF (NOT TEST_SKIP_COMPARE)
   ENDIF (WIN32 AND NOT MINGW)
 
   # now compare the output with the reference
-  EXECUTE_PROCESS (
-      COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
-      RESULT_VARIABLE TEST_RESULT
-  )
+  SET (TEST_RESULT 0)
+  FILE (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
+  LIST (LENGTH test_act len_act)
+  FILE (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} test_ref)
+  LIST (LENGTH test_ref len_ref)
+  MATH (EXPR _FP_LEN "${len_ref} - 1")
+  FOREACH (line RANGE 0 ${_FP_LEN})
+    LIST (GET test_act ${line} str_act)
+    LIST (GET test_ref ${line} str_ref)
+    STRING (COMPARE NOTEQUAL ${str_act} ${str_ref} str_res)
+    IF (${str_res})
+      SET (TEST_RESULT 1)
+      MESSAGE ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}")
+    ENDIF (${str_res})
+  ENDFOREACH (line RANGE 0 ${_FP_LEN})
+  IF (NOT ${len_act} STREQUAL ${len_ref})
+    SET (TEST_RESULT 1)
+  ENDIF (NOT ${len_act} STREQUAL ${len_ref})
 
   MESSAGE (STATUS "COMPARE Result: ${TEST_RESULT}")
 
   # again, if return value is !=0 scream and shout
   IF (NOT ${TEST_RESULT} STREQUAL 0)
-    MESSAGE (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not match ${TEST_REFERENCE}")
+    MESSAGE (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
   ENDIF (NOT ${TEST_RESULT} STREQUAL 0)
   
   IF (TEST_ERRREF)
@@ -127,16 +141,30 @@ IF (NOT TEST_SKIP_COMPARE)
     ENDIF (WIN32 AND NOT MINGW)
 
     # now compare the error output with the error reference
-    EXECUTE_PROCESS (
-        COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
-        RESULT_VARIABLE TEST_RESULT
-    )
+    SET (TEST_RESULT 0)
+    FILE (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT}.err test_act)
+    LIST (LENGTH test_act len_act)
+    FILE (STRINGS ${TEST_FOLDER}/${TEST_ERRREF} test_ref)
+    LIST (LENGTH test_ref len_ref)
+    MATH (EXPR _FP_LEN "${len_ref} - 1")
+    FOREACH (line RANGE 0 ${_FP_LEN})
+      LIST (GET test_act ${line} str_act)
+      LIST (GET test_ref ${line} str_ref)
+      STRING (COMPARE NOTEQUAL ${str_act} ${str_ref} str_res)
+      IF (${str_res})
+        SET (TEST_RESULT 1)
+        MESSAGE ("line = ${line}\n***ACTUAL: ${str_act}\n****REFER: ${str_ref}")
+      ENDIF (${str_res})
+    ENDFOREACH (line RANGE 0 ${_FP_LEN})
+    IF (NOT ${len_act} STREQUAL ${len_ref})
+      SET (TEST_RESULT 1)
+    ENDIF (NOT ${len_act} STREQUAL ${len_ref})
 
     MESSAGE (STATUS "COMPARE Result: ${TEST_RESULT}")
 
     # again, if return value is !=0 scream and shout
     IF (NOT ${TEST_RESULT} STREQUAL 0)
-      MESSAGE (FATAL_ERROR "Failed: The error output of ${TEST_PROGRAM} did not match ${TEST_ERRREF}")
+      MESSAGE (FATAL_ERROR "Failed: The error output of ${TEST_OUTPUT}.err did not match ${TEST_ERRREF}")
     ENDIF (NOT ${TEST_RESULT} STREQUAL 0)
   ENDIF (TEST_ERRREF)
 ENDIF (NOT TEST_SKIP_COMPARE)
