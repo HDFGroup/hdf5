@@ -8547,7 +8547,7 @@ gent_string_scalars(void)
             string[i][j] = string[i][j-1] + 1;
         }
     }
-    string[i][j] = 0;
+    string[dims[0]-1][dims[1]-1] = 0;
 
     /* Dataset of string scalar */
     dataset = H5Dcreate2(fid, "the_str", tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
