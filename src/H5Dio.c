@@ -899,8 +899,9 @@ H5D__mdc_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel");
 
     /* Collective access is not permissible without a MPI based VFD */
-    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE)
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based driver only");
+    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
+            !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
 
     /* Initialize dataspace information */
     if(!file_space)
