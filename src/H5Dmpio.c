@@ -488,7 +488,12 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    /* This is an incorrect sanity check, because there could be VFDs that are built on top of the 
+       MPI-I/O VFD that will do collective I/O, however those drivers do not have the same ID as the
+       MPIO VFD - MSC disabling this check for now 
+
+       HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    */
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
     /* Call generic internal collective I/O routine */
@@ -535,7 +540,12 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    /* This is an incorrect sanity check, because there could be VFDs that are built on top of the 
+       MPI-I/O VFD that will do collective I/O, however those drivers do not have the same ID as the
+       MPIO VFD - MSC disabling this check for now 
+
+       HDassert(IS_H5FD_MPIO(io_info->dset->oloc.file));
+    */
     HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
 
     /* Call generic internal collective I/O routine */
