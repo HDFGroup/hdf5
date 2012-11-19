@@ -315,7 +315,7 @@ typedef struct H5VL_class_t {
  */
 struct H5VL_t {
     const H5VL_class_t *cls;            /*constant class info       */
-    const char         *container_name; /* name of the underlying storage container */
+    char         *container_name;       /* name of the underlying storage container */
     unsigned long       feature_flags;  /* VOL Driver feature Flags */
     int                 nrefs;          /* number of references by objects using this struct */
 };

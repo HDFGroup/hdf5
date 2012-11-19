@@ -31,13 +31,15 @@
 /****************************/
 #define H5_REQUEST_NULL -1
 
-#define H5VL_NUM_OPS 33
+#define H5VL_NUM_OPS 35
 
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
     H5VL_FILE_CREATE = 0,
     H5VL_FILE_OPEN,
     H5VL_FILE_FLUSH,
+    H5VL_FILE_MISC,
+    H5VL_FILE_OPTIONAL,
     H5VL_FILE_CLOSE,
     H5VL_ATTR_CREATE,
     H5VL_ATTR_OPEN,
@@ -169,6 +171,10 @@ H5_DLL herr_t H5VL__encode_file_open_params(void *buf, size_t *nalloc, const cha
 H5_DLL herr_t H5VL__decode_file_open_params(void *buf, char **name, unsigned *flags, hid_t *fapl_id);
 H5_DLL herr_t H5VL__encode_file_flush_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, H5F_scope_t scope);
 H5_DLL herr_t H5VL__decode_file_flush_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, H5F_scope_t *scope);
+H5_DLL herr_t H5VL__encode_file_misc_params(void *buf, size_t *nalloc, H5VL_file_misc_t misc_type, ...);
+H5_DLL herr_t H5VL__decode_file_misc_params(void *buf, H5VL_file_misc_t misc_type, ...);
+H5_DLL herr_t H5VL__encode_file_optional_params(void *buf, size_t *nalloc, H5VL_file_optional_t optional_type, ...);
+H5_DLL herr_t H5VL__decode_file_optional_params(void *buf, H5VL_file_optional_t optional_type, ...);
 H5_DLL herr_t H5VL__encode_file_close_params(void *buf, size_t *nalloc, hid_t obj_id);
 H5_DLL herr_t H5VL__decode_file_close_params(void *buf, hid_t *obj_id);
 

@@ -54,6 +54,7 @@ typedef struct H5VL_mds_object_t {
 
 typedef struct H5VL_mds_file_t {
     H5VL_mds_object_t common; /* common stuff, must be first */
+    char *name; /* name of the container */
 } H5VL_mds_file_t;
 
 typedef struct H5VL_mds_attr_t {

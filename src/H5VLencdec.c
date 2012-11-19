@@ -607,6 +607,369 @@ done:
 } /* end H5VL__decode_file_flush_params() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_file_misc_encode__params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_file_misc_params(void *buf, size_t *nalloc, H5VL_file_misc_t misc_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    va_list arguments;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    va_start (arguments, misc_type);
+    switch (misc_type) {
+        case H5VL_FILE_MOUNT:
+            {
+                hid_t obj_id           = va_arg (arguments, hid_t);
+                H5I_type_t type        = va_arg (arguments, H5I_type_t);
+                const char *name       = va_arg (arguments, const char *);
+                hid_t child            = va_arg (arguments, hid_t);
+                hid_t plist_id         = va_arg (arguments, hid_t);
+                H5P_genplist_t *plist = NULL;
+                size_t len = 0, plist_size = 0;
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name) + 1;
+
+                /* get size for property lists to encode */
+                if(H5P_FILE_MOUNT_DEFAULT != plist_id) {
+                    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                    if((ret_value = H5P__encode(plist, FALSE, NULL, &plist_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                }
+
+                size += 3 + 2*sizeof(int32_t) + 
+                    1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size + 
+                    1 + H5V_limit_enc_size((uint64_t)len) + len;
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_FILE_MISC;
+                    /* encode get type */
+                    *p++ = (uint8_t)misc_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    /* encode object type */
+                    *p++ = (uint8_t)type;
+
+                    /* encode length of the name and the actual name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != name)
+                        HDstrcpy((char *)p, name);
+                    p += len;
+
+                    /* encode the child id */
+                    INT32ENCODE(p, child);
+
+                    /* encode the plist size */
+                    UINT64ENCODE_VARLEN(p, plist_size);
+                    /* encode property lists if they are not default*/
+                    if(plist_size) {
+                        if((ret_value = H5P__encode(plist, FALSE, p, &plist_size)) < 0)
+                            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                        p += plist_size;
+                    }
+                }
+                break;
+            }
+        case H5VL_FILE_UNMOUNT:
+            {
+                hid_t obj_id           = va_arg (arguments, hid_t);
+                H5I_type_t type        = va_arg (arguments, H5I_type_t);
+                const char *name       = va_arg (arguments, const char *);
+                size_t len = 0;
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name) + 1;
+
+                size += 3 + sizeof(int32_t) + 
+                    1 + H5V_limit_enc_size((uint64_t)len) + len;
+
+                if(NULL != p) {
+                    /* encode request type */
+                    *p++ = (uint8_t)H5VL_FILE_MISC;
+                    /* encode get type */
+                    *p++ = (uint8_t)misc_type;
+
+                    /* encode the object id */
+                    INT32ENCODE(p, obj_id);
+
+                    /* encode object type */
+                    *p++ = (uint8_t)type;
+
+                    /* encode length of the name and the actual name */
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != name)
+                        HDstrcpy((char *)p, name);
+                    p += len;
+                }
+                break;
+            }
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_file_misc_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_file_misc_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_file_misc_params(void *buf, H5VL_file_misc_t misc_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    va_list arguments;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    va_start (arguments, misc_type);
+    switch (misc_type) {
+        case H5VL_FILE_MOUNT:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5I_type_t *type = va_arg (arguments, H5I_type_t *);
+                char **name = va_arg (arguments, char **);
+                hid_t *child = va_arg (arguments, hid_t *);
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+                size_t len = 0, plist_size = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+
+                *type = (H5I_type_t)*p++;
+
+                /* decode length of the name and the actual name */
+                UINT64DECODE_VARLEN(p, len);
+                if(0 != len) {
+                    *name = H5MM_xstrdup((const char *)(p));
+                    p += len;
+                }
+
+                /* decode the child id */
+                INT32DECODE(p, *child);
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, plist_size);
+                /* decode property list if not default*/
+                if(plist_size) {
+                    if((*plist_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+                    p += plist_size;
+                }
+                else {
+                    *plist_id = H5P_FILE_MOUNT_DEFAULT;
+                }
+                break;
+            }
+        case H5VL_FILE_UNMOUNT:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5I_type_t *type = va_arg (arguments, H5I_type_t *);
+                char **name = va_arg (arguments, char **);
+                size_t len = 0;
+
+                /* decode the object id */
+                INT32DECODE(p, *obj_id);
+
+                *type = (H5I_type_t)*p++;
+
+                /* decode length of the name and the actual name */
+                UINT64DECODE_VARLEN(p, len);
+                if(0 != len) {
+                    *name = H5MM_xstrdup((const char *)(p));
+                    p += len;
+                }
+                break;
+            }
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from attr");
+    }
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_file_misc_params() */
+#if 0
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_file_optional_encode__params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_file_optional_params(void *buf, size_t *nalloc, H5VL_file_optional_t optional_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    va_list arguments;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    va_start (arguments, optional_type);
+    switch (optional_type) {
+        case H5VL_FILE_GET_FREE_SPACE:
+        case H5VL_FILE_GET_MDC_CONF:
+        case H5VL_FILE_GET_MDC_HR:
+        case H5VL_FILE_GET_MDC_SIZE:
+        case H5VL_FILE_CLEAR_ELINK_CACHE:
+        case H5VL_FILE_RESET_MDC_HIT_RATE:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+
+                INT32DECODE(p, *obj_id);
+
+                break;
+            }
+        case H5VL_FILE_GET_FREE_SECTIONS:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5F_mem_t *type = va_arg (arguments, H5F_mem_t *);
+                size_t *nsects = va_arg (arguments, size_t *);
+                uint8_t *flag = va_arg (arguments, uint8_t *);
+
+                INT32DECODE(p, *obj_id);
+                *type = (H5F_mem_t)*p++;
+                UINT64DECODE_VARLEN(p, *nsects);
+                *flag = *p++;
+
+                break;
+            }
+        case H5VL_FILE_GET_INFO:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5I_type_t *type = va_arg (arguments, H5I_type_t *);
+
+                INT32DECODE(p, *obj_id);
+                *type = (H5I_type_t)*p++;
+
+                break;
+            }
+        /* H5Freopen */
+        case H5VL_FILE_REOPEN:
+            {
+                break;
+            }
+        case H5VL_FILE_SET_MDC_CONFIG:
+            {
+                H5AC_cache_config_t config_ptr;
+
+                break;
+            }
+        case H5VL_FILE_GET_VFD_HANDLE:
+        case H5VL_FILE_GET_SIZE:
+        case H5VL_FILE_GET_FILE_IMAGE:
+
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't encode this routine");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_file_optional_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_file_optional_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_file_optional_params(void *buf, H5VL_file_optional_t optional_type, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    va_list arguments;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    va_start (arguments, optional_type);
+    switch (optional_type) {
+        case H5VL_FILE_GET_FREE_SPACE:
+        case H5VL_FILE_GET_MDC_CONF:
+        case H5VL_FILE_GET_MDC_HR:
+        case H5VL_FILE_GET_MDC_SIZE:
+        case H5VL_FILE_CLEAR_ELINK_CACHE:
+        case H5VL_FILE_RESET_MDC_HIT_RATE:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+
+                INT32DECODE(p, *obj_id);
+
+                break;
+            }
+        case H5VL_FILE_GET_FREE_SECTIONS:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5F_mem_t *type = va_arg (arguments, H5F_mem_t *);
+                size_t *nsects = va_arg (arguments, size_t *);
+                uint8_t *flag = va_arg (arguments, uint8_t *);
+
+                INT32DECODE(p, *obj_id);
+                *type = (H5F_mem_t)*p++;
+                UINT64DECODE_VARLEN(p, *nsects);
+                *flag = *p++;
+
+                break;
+            }
+        case H5VL_FILE_GET_INFO:
+            {
+                hid_t *obj_id = va_arg (arguments, hid_t *);
+                H5I_type_t *type = va_arg (arguments, H5I_type_t *);
+
+                INT32DECODE(p, *obj_id);
+                *type = (H5I_type_t)*p++;
+
+                break;
+            }
+        /* H5Freopen */
+        case H5VL_FILE_REOPEN:
+            {
+                break;
+            }
+        case H5VL_FILE_SET_MDC_CONFIG:
+            {
+                H5AC_cache_config_t config_ptr;
+
+                break;
+            }
+        case H5VL_FILE_GET_VFD_HANDLE:
+        case H5VL_FILE_GET_SIZE:
+        case H5VL_FILE_GET_FILE_IMAGE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't decode params for this routine");
+    }
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_file_optional_params() */
+#endif
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL__encode_file_close_params
  *------------------------------------------------------------------------- */
 herr_t 

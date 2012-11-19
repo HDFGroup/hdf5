@@ -2080,6 +2080,7 @@ H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t U
                 H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
 
                 f = (H5F_t *)obj;
+
                 /* set the resize configuration  */
                 if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC_set_cache_auto_resize_config() failed.")

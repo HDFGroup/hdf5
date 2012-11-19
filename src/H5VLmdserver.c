@@ -79,6 +79,8 @@
 static herr_t H5VL__file_create_func(uint8_t *p, int source);
 static herr_t H5VL__file_open_func(uint8_t *p, int source);
 static herr_t H5VL__file_flush_func(uint8_t *p, int source);
+static herr_t H5VL__file_misc_func(uint8_t *p, int source);
+static herr_t H5VL__file_optional_func(uint8_t *p, int source);
 static herr_t H5VL__file_close_func(uint8_t *p, int source);
 static herr_t H5VL__attr_create_func(uint8_t *p, int source);
 static herr_t H5VL__attr_open_func(uint8_t *p, int source);
@@ -115,6 +117,8 @@ typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 static herr_t H5VL__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
+static herr_t H5VL__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...);
+static herr_t H5VL__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t req, ...);
 static herr_t H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
 static int link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data);
 
@@ -122,6 +126,8 @@ static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
     H5VL__file_create_func,
     H5VL__file_open_func,
     H5VL__file_flush_func,
+    H5VL__file_misc_func,
+    H5VL__file_optional_func,
     H5VL__file_close_func,
     H5VL__attr_create_func,
     H5VL__attr_open_func,
@@ -228,7 +234,6 @@ H5VL_mds_start(void)
         uint8_t *p;     /* Current pointer into buffer */
         H5VL_op_type_t op_type;
 
-        //printf("MDS Process Waiting\n");
         /* probe for a message from a client */
         if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
@@ -506,6 +511,393 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__file_flush_func */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__file_misc_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__file_misc_func(uint8_t *p, int source)
+{
+    H5VL_file_misc_t misc_type = -1;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    misc_type = (H5VL_file_misc_t)*p++;
+
+    switch(misc_type) {
+        case H5VL_FILE_MOUNT:
+            {
+                hid_t obj_id, child_id;
+                char *name = NULL;
+                H5I_type_t type;
+                hid_t plist_id;
+
+                /* decode params */
+                if(H5VL__decode_file_misc_params(p, misc_type, &obj_id, &type, &name, &child_id, 
+                                                 &plist_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr get params");
+
+                /* get value through the native plugin */
+                ret_value = H5VL__temp_file_misc(H5I_object(obj_id), misc_type, H5_REQUEST_NULL, type, name,
+                                           H5I_object(child_id), plist_id);
+
+                if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(name);
+                break;
+            }
+        case H5VL_FILE_UNMOUNT:
+            {
+                hid_t obj_id;
+                H5I_type_t type;
+                char *name = NULL;
+
+                /* decode params */
+                if(H5VL__decode_file_misc_params(p, misc_type, &obj_id, &type, &name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr get params");
+
+                /* get value through the native plugin */
+                ret_value = H5VL__temp_file_misc(H5I_object(obj_id), misc_type, H5_REQUEST_NULL, 
+                                                 type, name);
+
+                if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(name);
+                break;
+            }
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on file");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__file_misc_func */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__file_optional_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__file_optional_func(uint8_t *p, int source)
+{
+    H5VL_file_optional_t optional_type = -1;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    optional_type = (H5VL_file_optional_t)*p++;
+
+    switch(optional_type) {
+        case H5VL_FILE_GET_FREE_SPACE:
+            {
+                hid_t obj_id;
+                hssize_t ret;
+
+                INT32DECODE(p, obj_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL, &ret) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file");
+
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        case H5VL_FILE_GET_FREE_SECTIONS:
+            {
+                hid_t obj_id;
+                H5F_mem_t type;
+                size_t nsects;
+                uint8_t flag;
+                H5F_sect_info_t *sect_info = NULL;
+                ssize_t ret;
+                void *send_buf = NULL;
+                size_t buf_size = 0;
+                uint8_t *p1 = NULL;
+
+                INT32DECODE(p, obj_id);
+                type = (H5F_mem_t)*p++;
+                UINT64DECODE_VARLEN(p, nsects);
+                flag = *p++;
+
+                if(1==flag)
+                    /* allocate section info array */
+                    if(NULL == (sect_info = (H5F_sect_info_t *)H5MM_malloc(nsects * sizeof(H5F_sect_info_t))))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL, 
+                                            sect_info, &ret, type, nsects) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free sections for file");
+
+                buf_size = sizeof(int64_t);
+                if(sect_info != NULL) {
+                    unsigned u;
+                    for(u=0 ; u<nsects ; u++) {
+                        buf_size += 1 + H5V_limit_enc_size((uint64_t)sect_info[u].addr) + 
+                            1 + H5V_limit_enc_size((uint64_t)sect_info[u].size);
+                    }
+                }
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+                INT64ENCODE(p1, ret);
+                if(sect_info != NULL) {
+                    unsigned u;
+                    for(u=0 ; u<nsects ; u++) {
+                        UINT64ENCODE_VARLEN(p1, sect_info[u].addr);
+                        UINT64ENCODE_VARLEN(p1, sect_info[u].size);
+                    }
+                }
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                H5MM_free(send_buf);
+                H5MM_xfree(sect_info);
+                break;
+            }
+        case H5VL_FILE_GET_INFO:
+            {
+                hid_t obj_id;
+                H5I_type_t type;
+                H5F_info2_t finfo;
+                void *send_buf = NULL;
+                size_t buf_size = 0;
+                uint8_t *p1 = NULL;
+
+                INT32DECODE(p, obj_id);
+                type = (H5I_type_t)*p++;
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL, 
+                                            type, &finfo) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file info");
+
+                buf_size += sizeof(unsigned) * 3;
+                buf_size += 1 + H5V_limit_enc_size((uint64_t)finfo.super.super_size) +
+                    1 + H5V_limit_enc_size((uint64_t)finfo.super.super_ext_size) +
+                    1 + H5V_limit_enc_size((uint64_t)finfo.free.meta_size) +
+                    1 + H5V_limit_enc_size((uint64_t)finfo.free.tot_space) +
+                    1 + H5V_limit_enc_size((uint64_t)finfo.sohm.hdr_size) +
+                    1 + H5V_limit_enc_size((uint64_t)finfo.sohm.msgs_info.index_size) +
+                    1 + H5V_limit_enc_size((uint64_t)finfo.sohm.msgs_info.heap_size);
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                H5_ENCODE_UNSIGNED(p1, finfo.super.version);
+                UINT64ENCODE_VARLEN(p1, finfo.super.super_size);
+                UINT64ENCODE_VARLEN(p1, finfo.super.super_ext_size);
+                H5_ENCODE_UNSIGNED(p1, finfo.free.version);
+                UINT64ENCODE_VARLEN(p1, finfo.free.meta_size);
+                UINT64ENCODE_VARLEN(p1, finfo.free.tot_space);
+                H5_ENCODE_UNSIGNED(p1, finfo.sohm.version);
+                UINT64ENCODE_VARLEN(p1, finfo.sohm.hdr_size);
+                UINT64ENCODE_VARLEN(p1, finfo.sohm.msgs_info.index_size);
+                UINT64ENCODE_VARLEN(p1, finfo.sohm.msgs_info.heap_size);
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                H5MM_free(send_buf);
+                break;
+            }
+        /* H5Fget_mdc_config */
+        case H5VL_FILE_GET_MDC_CONF:
+            {
+                H5AC_cache_config_t config_ptr;
+                hid_t file_id;
+                void *send_buf = NULL;
+                size_t buf_size = 0;
+                uint8_t *p1 = NULL;
+
+                INT32DECODE(p, config_ptr.version);
+                INT32DECODE(p, file_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(file_id), optional_type, H5_REQUEST_NULL, 
+                                            &config_ptr) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get cache configuration");
+
+                if(H5P__facc_cache_config_enc(&config_ptr, (void **)(&p1), &buf_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode cache config");
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                if(H5P__facc_cache_config_enc(&config_ptr, (void **)(&p1), &buf_size) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode cache config");
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                H5MM_free(send_buf);                
+                break;
+            }
+        /* H5Fget_mdc_hit_rate */
+        case H5VL_FILE_GET_MDC_HR:
+            {
+                double ret;
+                hid_t obj_id;
+
+                INT32DECODE(p, obj_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL, &ret) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(double), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        /* H5Fget_mdc_size */
+        case H5VL_FILE_GET_MDC_SIZE:
+            {
+                size_t max_size_ptr;
+                size_t min_clean_size_ptr;
+                size_t cur_size_ptr;
+                int    cur_num_entries_ptr;
+                hid_t file_id;
+                void *send_buf = NULL;
+                size_t buf_size = 0;
+                uint8_t *p1 = NULL;
+
+                INT32DECODE(p, file_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(file_id), optional_type, H5_REQUEST_NULL, 
+                                            &max_size_ptr, &min_clean_size_ptr, &cur_size_ptr,
+                                            &cur_num_entries_ptr) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get cache configuration");
+
+                buf_size = sizeof(int32_t) +
+                    1 + H5V_limit_enc_size((uint64_t)max_size_ptr) +
+                    1 + H5V_limit_enc_size((uint64_t)min_clean_size_ptr) +
+                    1 + H5V_limit_enc_size((uint64_t)cur_size_ptr);
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                UINT64ENCODE_VARLEN(p1, max_size_ptr);
+                UINT64ENCODE_VARLEN(p1, min_clean_size_ptr);
+                UINT64ENCODE_VARLEN(p1, cur_size_ptr);
+                INT32ENCODE(p1, cur_num_entries_ptr);
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                H5MM_free(send_buf);                
+
+                break;
+            }
+        /* H5Fclear_elink_file_cache */
+        case H5VL_FILE_CLEAR_ELINK_CACHE:
+            {
+                hid_t obj_id;
+
+                INT32DECODE(p, obj_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to clear elink cache")
+
+                if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        /* H5Freopen */
+        case H5VL_FILE_REOPEN:
+            {
+                hid_t obj_id, file_id;
+                H5F_t *new_file = NULL;
+
+                INT32DECODE(p, obj_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL,
+                                            &new_file) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to reopen file");
+
+                /* register atom for file */
+                if((file_id = H5VL_native_register(H5I_FILE, new_file, FALSE)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
+
+                /* Send the meta data file ID to the client */
+                if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        /* H5Freset_mdc_hit_rate_stats */
+        case H5VL_FILE_RESET_MDC_HIT_RATE:
+            {
+                hid_t obj_id;
+
+                INT32DECODE(p, obj_id);
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to reset mdc hot rate")
+
+                if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        case H5VL_FILE_SET_MDC_CONFIG:
+            {
+                H5AC_cache_config_t config_ptr;
+                hid_t obj_id;
+
+                INT32DECODE(p, obj_id);
+
+                if(H5P__facc_cache_config_dec((const void **)(&p), &config_ptr) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to decode cache config");
+
+                /* get value through the native plugin */
+                if(H5VL__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL,
+                                            &config_ptr) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to set MDC config")
+
+                if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+                break;
+            }
+        case H5VL_FILE_GET_VFD_HANDLE:
+        case H5VL_FILE_GET_SIZE:
+        case H5VL_FILE_GET_FILE_IMAGE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on file");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__file_optional_func */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__file_close_func
@@ -2571,6 +2963,44 @@ H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__temp_link_get() */
+
+/*
+ * Just a temporary routine to create a var_args to pass through the native MDS file misc routine
+ */
+static herr_t
+H5VL__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    va_start (arguments, req);
+    if(H5VL_native_file_misc(obj, misc_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__temp_file_misc() */
+
+/*
+ * Just a temporary routine to create a var_args to pass through the native MDS file optional routine
+ */
+static herr_t
+H5VL__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    va_start (arguments, req);
+    if(H5VL_native_file_optional(obj, optional_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__temp_file_optional() */
 
 static herr_t 
 H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)

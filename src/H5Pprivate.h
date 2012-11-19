@@ -133,5 +133,9 @@ H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, H5T_t *type,
     void *value, hid_t dxpl_id);
 
+/* private FAPL routines to encode/decode cache config struct */
+H5_DLL herr_t H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size);
+H5_DLL herr_t H5P__facc_cache_config_dec(const void **_pp, void *value);
+
 #endif /* _H5Pprivate_H */
 

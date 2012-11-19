@@ -197,8 +197,6 @@ static herr_t H5P_file_image_info_copy(const char *name, size_t size, void *valu
 static herr_t H5P_file_image_info_close(const char *name, size_t size, void *value);
 
 /* encode & decode callbacks */
-static herr_t H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size);
-static herr_t H5P__facc_cache_config_dec(const void **_pp, void *value);
 static int H5P__facc_cache_config_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_fclose_degree_dec(const void **pp, void *value);
@@ -2803,7 +2801,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 {
     const H5AC_cache_config_t *config = (const H5AC_cache_config_t *)value; /* Create local aliases for values */
@@ -2948,7 +2946,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5P__facc_cache_config_dec(const void **_pp, void *_value)
 {
     H5AC_cache_config_t *config = (H5AC_cache_config_t *)_value;
