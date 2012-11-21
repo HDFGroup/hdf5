@@ -111,6 +111,8 @@ static herr_t H5VL__link_remove_func(uint8_t *p, int source);
 static herr_t H5VL__object_open_func(uint8_t *p, int source);
 static herr_t H5VL__object_copy_func(uint8_t *p, int source);
 static herr_t H5VL__object_visit_func(uint8_t *p, int source);
+static herr_t H5VL__object_misc_func(uint8_t *p, int source);
+static herr_t H5VL__object_get_func(uint8_t *p, int source);
 static herr_t H5VL__allocate_func(uint8_t *p, int source);
 static herr_t H5VL__set_eoa_func(uint8_t *p, int source);
 static herr_t H5VL__get_eoa_func(uint8_t *p, int source);
@@ -122,6 +124,8 @@ static herr_t H5VL__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t r
 static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
 static herr_t H5VL__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...);
 static herr_t H5VL__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t req, ...);
+static herr_t H5VL__temp_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, ...);
+static herr_t H5VL__temp_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, ...);
 static herr_t H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
 
 static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
@@ -160,6 +164,8 @@ static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
     H5VL__object_open_func,
     H5VL__object_copy_func,
     H5VL__object_visit_func,
+    H5VL__object_misc_func,
+    H5VL__object_get_func,
     H5VL__allocate_func,
     H5VL__get_eoa_func,
     H5VL__set_eoa_func
@@ -1272,7 +1278,6 @@ H5VL__attr_get_func(uint8_t *p, int source)
                 void *send_buf = NULL;
                 size_t buf_size = 0; /* send_buf size */
                 uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
-
 
                 /* decode params */
                 if(H5VL__decode_attr_get_params(p, get_type, &obj_id, &loc_params, &size) < 0)
@@ -2863,6 +2868,230 @@ done:
 }/* H5VL__object_visit_func */
 
 /*-------------------------------------------------------------------------
+* Function:	H5VL__object_misc_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__object_misc_func(uint8_t *p, int source)
+{
+    H5VL_object_misc_t misc_type = -1;
+    hid_t obj_id;
+    H5VL_loc_params_t loc_params;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    misc_type = (H5VL_object_misc_t)*p++;
+
+    switch(misc_type) {
+        case H5VL_ATTR_RENAME:
+            {
+                const char *old_name;
+                const char *new_name;
+
+                /* decode params */
+                if(H5VL__decode_object_misc_params(p, misc_type, &obj_id, &loc_params,
+                                                   &old_name, &new_name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object misc params");
+
+                /* perform operation through native plugin */
+                if(H5VL__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, H5_REQUEST_NULL,
+                                          old_name, new_name) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to rename attribute");
+                break;
+            }
+        case H5VL_OBJECT_CHANGE_REF_COUNT:
+            {
+                int *update_ref;
+
+                /* decode params */
+                if(H5VL__decode_object_misc_params(p, misc_type, &obj_id, &loc_params,
+                                                   &update_ref) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object misc params");
+
+                /* perform operation through native plugin */
+                if(H5VL__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, H5_REQUEST_NULL,
+                                          update_ref) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to change ref count");
+                break;
+            }
+        case H5VL_OBJECT_SET_COMMENT:
+            {
+                const char *comment;
+
+                /* decode params */
+                if(H5VL__decode_object_misc_params(p, misc_type, &obj_id, &loc_params,
+                                                   &comment) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object misc params");
+
+                /* perform operation through native plugin */
+                if(H5VL__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, H5_REQUEST_NULL,
+                                          comment) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to set comment");
+                break;
+            }
+        case H5VL_REF_CREATE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type");
+    }
+
+done:
+    /* send status to client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__object_misc_func */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__object_get_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__object_get_func(uint8_t *p, int source)
+{
+    H5VL_object_get_t get_type = -1;
+    hid_t obj_id;
+    H5VL_loc_params_t loc_params;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    get_type = (H5VL_object_get_t)*p++;
+
+    switch(get_type) {
+        case H5VL_OBJECT_EXISTS:
+            {
+                htri_t ret;
+
+                /* decode params */
+                if(H5VL__decode_object_get_params(p, get_type, &obj_id, &loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object get params");
+                printf("HERE %d\n", obj_id);
+                /* perform operation through native plugin */
+                if(H5VL__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL, 
+                                         &ret) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to determine if object exists");
+
+                /* send query value to client */
+                if(MPI_SUCCESS != MPI_Send(&ret, sizeof(htri_t), MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                break;
+            }
+        case H5VL_OBJECT_GET_INFO:
+            {
+                H5O_info_t obj_info;
+                size_t info_size = 0;
+                size_t buf_size = 0;
+                void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
+                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+                /* decode params */
+                if(H5VL__decode_object_get_params(p, get_type, &obj_id, &loc_params) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object get params");
+
+                /* perform operation through native plugin */
+                if(H5VL__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL, 
+                                         &obj_info) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object info");
+
+                /* determine the buffer size needed to store the encoded info struct */ 
+                if(FAIL == H5O__encode_info(&obj_info, NULL, &info_size))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode object info");
+
+                buf_size += 1 + H5V_limit_enc_size((uint64_t)info_size) + info_size;
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the info size */
+                UINT64ENCODE_VARLEN(p1, info_size);
+                if(info_size) {
+                    /* encode info of the object */ 
+                    if(FAIL == H5O__encode_info(&obj_info, p1, &info_size))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode object info");
+                    p1 += info_size;
+                }
+
+                /* Send the dataset id & metadata to the client */
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(send_buf);
+                break;
+            }
+        case H5VL_OBJECT_GET_COMMENT:
+            {
+                char *comment;
+                size_t size;
+                ssize_t ret = 0;
+                void *send_buf = NULL;
+                size_t buf_size = 0; /* send_buf size */
+                uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+                /* decode params */
+                if(H5VL__decode_object_get_params(p, get_type, &obj_id, &loc_params, &size) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object get params");
+
+                if(size) {
+                    /* allocate the buffer for the link comment if the size > 0 */
+                    if(NULL == (comment = (char *)H5MM_malloc(size)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+                }
+
+                /* get value through the native plugin */
+                if(H5VL__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                                         comment, size, &ret) < 0)
+                    HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine link comment");
+
+                buf_size = sizeof(int64_t) + size;
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the actual size of the comment, which may be different than the 
+                   size of the comment buffer being sent */
+                INT64ENCODE(p1, ret);
+
+                /* encode length of the buffer and the buffer containing part of or all the comment*/
+                if(size && comment)
+                    HDstrcpy((char *)p1, comment);
+                p1 += size;
+
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                    HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(send_buf);
+                H5MM_xfree(comment);
+                break;
+            }
+        case H5VL_REF_GET_REGION:
+        case H5VL_REF_GET_TYPE:
+        case H5VL_REF_GET_NAME:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
+    }
+
+done:
+    if(SUCCEED != ret_value) {
+        /* send status to client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5VL__object_get_func */
+
+/*-------------------------------------------------------------------------
 * Function:	H5VL__allocate_func
 *------------------------------------------------------------------------- */
 static herr_t
@@ -3333,6 +3562,46 @@ H5VL__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t re
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__temp_file_optional() */
+
+/*
+ * Just a temporary routine to create a var_args to pass through the native MDS object misc routine
+ */
+static herr_t
+H5VL__temp_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, 
+                       hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    va_start (arguments, req);
+    if(H5VL_native_object_misc(obj, loc_params, misc_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__temp_object_misc() */
+
+/*
+ * Just a temporary routine to create a var_args to pass through the native MDS object get routine
+ */
+static herr_t
+H5VL__temp_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
+                      hid_t req, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    va_start (arguments, req);
+    if(H5VL_native_object_get(obj, loc_params, get_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__temp_object_get() */
 
 static herr_t 
 H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */)

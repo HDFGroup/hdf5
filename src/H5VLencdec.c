@@ -4214,6 +4214,309 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode_object_visit_params() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_object_misc_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_object_misc_params(void *buf, size_t *nalloc, H5VL_object_misc_t misc_type, 
+                                hid_t obj_id, H5VL_loc_params_t loc_params, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0, loc_size = 0;
+    va_list arguments;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    size += 2 + sizeof(int32_t) +
+        1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_OBJECT_MISC;
+        /* encode misc type */
+        *p++ = (uint8_t)misc_type;
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size;
+    }
+
+    va_start (arguments, loc_params);
+    switch (misc_type) {
+        case H5VL_ATTR_RENAME:
+            {
+                char *old_name = va_arg (arguments, char *);
+                char *new_name = va_arg (arguments, char *);
+                size_t len1 = 0, len2 = 0;
+
+                /* get old name size to encode */
+                if(NULL != old_name)
+                    len1 = HDstrlen(old_name) + 1;
+
+                /* get new name size to encode */
+                if(NULL != new_name)
+                    len2 = HDstrlen(new_name) + 1;
+
+                size += 1 + H5V_limit_enc_size((uint64_t)len1) + len1 +
+                    1 + H5V_limit_enc_size((uint64_t)len2) + len2;
+
+                if(NULL != p) {
+                    UINT64ENCODE_VARLEN(p, len1);
+                    if(NULL != old_name)
+                        HDstrcpy((char *)p, old_name);
+                    p += len1;
+
+                    UINT64ENCODE_VARLEN(p, len2);
+                    if(NULL != new_name)
+                        HDstrcpy((char *)p, new_name);
+                    p += len2;
+                }
+                break;
+            }
+        case H5VL_OBJECT_CHANGE_REF_COUNT:
+            {
+                int update_ref  = va_arg (arguments, int);
+
+                size += sizeof(int32_t);
+                if(NULL != p) {
+                    INT32ENCODE(p, update_ref);
+                }
+                break;
+            }
+        case H5VL_OBJECT_SET_COMMENT:
+            {
+                char *comment = va_arg (arguments, char *);
+                size_t len = 0;
+
+                /* get comment size to encode */
+                if(NULL != comment)
+                    len = HDstrlen(comment) + 1;
+
+                size += 1 + H5V_limit_enc_size((uint64_t)len) + len;
+
+                if(NULL != p) {
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(NULL != comment)
+                        HDstrcpy((char *)p, comment);
+                    p += len;
+                }
+                break;
+            }
+        case H5VL_REF_CREATE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_object_misc_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_object_misc_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_object_misc_params(void *buf, H5VL_object_misc_t misc_type, hid_t *obj_id,
+                                H5VL_loc_params_t *loc_params, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    va_list arguments;
+    size_t loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    va_start (arguments, loc_params);
+    switch (misc_type) {
+        case H5VL_ATTR_RENAME:
+            {
+                char **old_name = va_arg (arguments, char **);
+                char **new_name = va_arg (arguments, char **);
+                size_t len1 = 0, len2 = 0;
+
+                /* decode length of the old name and the actual old_name */
+                UINT64DECODE_VARLEN(p, len1);
+                if(len1) {
+                    *old_name = H5MM_xstrdup((const char *)(p));
+                    p += len1;
+                }
+
+                /* decode length of the new name and the actual new_name */
+                UINT64DECODE_VARLEN(p, len2);
+                if(len2) {
+                    *new_name = H5MM_xstrdup((const char *)(p));
+                    p += len2;
+                }
+
+                break;
+            }
+        case H5VL_OBJECT_CHANGE_REF_COUNT:
+            {
+                int *update_ref  = va_arg (arguments, int *);
+
+                INT32DECODE(p, *update_ref);
+                break;
+            }
+        case H5VL_OBJECT_SET_COMMENT:
+            {
+                char **comment = va_arg (arguments, char **);
+                size_t len = 0;
+
+                /* decode length of the new name and the actual comment */
+                UINT64DECODE_VARLEN(p, len);
+                if(len) {
+                    *comment = H5MM_xstrdup((const char *)(p));
+                    p += len;
+                }
+
+                break;
+            }
+        case H5VL_REF_CREATE:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
+    }
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_object_misc_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_object_get_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_object_get_params(void *buf, size_t *nalloc, H5VL_object_get_t get_type, 
+                               hid_t obj_id, H5VL_loc_params_t loc_params, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0, loc_size = 0;
+    va_list arguments;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    size += 2 + sizeof(int32_t) +
+        1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_OBJECT_GET;
+        /* encode get type */
+        *p++ = (uint8_t)get_type;
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size;
+    }
+
+    va_start (arguments, loc_params);
+    switch (get_type) {
+        case H5VL_OBJECT_EXISTS:
+        case H5VL_OBJECT_GET_INFO:
+            break;
+        case H5VL_OBJECT_GET_COMMENT:
+            {
+                size_t len = va_arg (arguments, size_t);
+
+                size += 1 + H5V_limit_enc_size((uint64_t)len);
+
+                if(NULL != p)
+                    UINT64ENCODE_VARLEN(p, len);
+                break;
+            }
+        case H5VL_REF_GET_REGION:
+        case H5VL_REF_GET_TYPE:
+        case H5VL_REF_GET_NAME:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
+    }
+    va_end (arguments);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_object_get_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_object_get_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_object_get_params(void *buf, H5VL_object_get_t get_type, hid_t *obj_id,
+                               H5VL_loc_params_t *loc_params, ...)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    va_list arguments;
+    size_t loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    va_start (arguments, loc_params);
+    switch (get_type) {
+        case H5VL_OBJECT_EXISTS:
+        case H5VL_OBJECT_GET_INFO:
+            break;
+        case H5VL_OBJECT_GET_COMMENT:
+            {
+                size_t *len = va_arg (arguments, size_t *);
+
+                UINT64DECODE_VARLEN(p, *len);
+                break;
+            }
+        case H5VL_REF_GET_REGION:
+        case H5VL_REF_GET_TYPE:
+        case H5VL_REF_GET_NAME:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
+    }
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_object_get_params() */
+
 #if 0
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode__params
