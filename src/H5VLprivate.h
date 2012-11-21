@@ -31,7 +31,7 @@
 /****************************/
 #define H5_REQUEST_NULL -1
 
-#define H5VL_NUM_OPS 35
+#define H5VL_NUM_OPS 38
 
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
@@ -67,6 +67,9 @@ typedef enum H5VL_op_type_t {
     H5VL_LINK_ITERATE,
     H5VL_LINK_GET,
     H5VL_LINK_REMOVE,
+    H5VL_OBJECT_OPEN,
+    H5VL_OBJECT_COPY,
+    H5VL_OBJECT_VISIT,
     H5VL_ALLOC,
     H5VL_GET_EOA,
     H5VL_SET_EOA
@@ -228,6 +231,13 @@ H5_DLL herr_t H5VL__encode_link_get_params(void *buf, size_t *nalloc, H5VL_link_
 H5_DLL herr_t H5VL__decode_link_get_params(void *buf, H5VL_link_get_t get_type, ...);
 H5_DLL herr_t H5VL__encode_link_remove_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params);
 H5_DLL herr_t H5VL__decode_link_remove_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params);
+
+H5_DLL herr_t H5VL__encode_object_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params);
+H5_DLL herr_t H5VL__decode_object_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params);
+H5_DLL herr_t H5VL__encode_object_copy_params(void *buf, size_t *nalloc, hid_t src_id, H5VL_loc_params_t loc_params1, const char *src_name, hid_t dst_id, H5VL_loc_params_t loc_params2, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
+H5_DLL herr_t H5VL__decode_object_copy_params(void *buf, hid_t *src_id, H5VL_loc_params_t *loc_params1, char **src_name, hid_t *dst_id, H5VL_loc_params_t *loc_params2, char **dst_name, hid_t *ocpypl_id, hid_t *lcpl_id);
+H5_DLL herr_t H5VL__encode_object_visit_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, H5_index_t idx_type, H5_iter_order_t order);
+H5_DLL herr_t H5VL__decode_object_visit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, H5_index_t *idx_type, H5_iter_order_t *order);
 
 /* Atrribute callbacks */
 void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);

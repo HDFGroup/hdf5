@@ -777,5 +777,8 @@ H5_DLL herr_t H5O_pline_set_latest_version(H5O_pline_t *pline);
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
+/* encode/decode public object info struct */
+H5_DLL herr_t H5O__encode_info(const H5O_info_t *info, void *buf, size_t *nalloc);
+H5_DLL herr_t H5O__decode_info(const void *buf, H5O_info_t *info);
 #endif /* _H5Oprivate_H */
 

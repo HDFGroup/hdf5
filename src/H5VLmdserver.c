@@ -108,6 +108,9 @@ static herr_t H5VL__link_move_func(uint8_t *p, int source);
 static herr_t H5VL__link_iterate_func(uint8_t *p, int source);
 static herr_t H5VL__link_get_func(uint8_t *p, int source);
 static herr_t H5VL__link_remove_func(uint8_t *p, int source);
+static herr_t H5VL__object_open_func(uint8_t *p, int source);
+static herr_t H5VL__object_copy_func(uint8_t *p, int source);
+static herr_t H5VL__object_visit_func(uint8_t *p, int source);
 static herr_t H5VL__allocate_func(uint8_t *p, int source);
 static herr_t H5VL__set_eoa_func(uint8_t *p, int source);
 static herr_t H5VL__get_eoa_func(uint8_t *p, int source);
@@ -120,7 +123,6 @@ static herr_t H5VL__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_
 static herr_t H5VL__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...);
 static herr_t H5VL__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t req, ...);
 static herr_t H5VL_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
-static int link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data);
 
 static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
     H5VL__file_create_func,
@@ -155,6 +157,9 @@ static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
     H5VL__link_iterate_func,
     H5VL__link_get_func,
     H5VL__link_remove_func,
+    H5VL__object_open_func,
+    H5VL__object_copy_func,
+    H5VL__object_visit_func,
     H5VL__allocate_func,
     H5VL__get_eoa_func,
     H5VL__set_eoa_func
@@ -1527,8 +1532,6 @@ H5VL__dataset_open_func(uint8_t *p, int source)
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
 
-    /* END open dataset */
-
     /* START Encode metadata of the dataset and send them to the client along with the ID */
     /* determine the size of the dcpl if it is not default */
     if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
@@ -1604,7 +1607,7 @@ H5VL__dataset_open_func(uint8_t *p, int source)
         /* encode layout of the dataset */ 
         if(FAIL == H5D__encode_layout(dset->shared->layout, p1, &layout_size))
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
-        //p1 += layout_size;
+        p1 += layout_size;
     }
 
 done:
@@ -2208,15 +2211,15 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_move_func */
 
-static int
-link_iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data)
+static herr_t
+H5L__iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, void *op_data)
 {
     int source = *((int *)op_data);
     void *send_buf = NULL;
     size_t buf_size = 0; /* send_buf size */
     uint8_t *p = NULL; /* temporary pointer into send_buf for encoding */
     size_t len = 0;
-    int ret_value;
+    herr_t ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2302,7 +2305,7 @@ H5VL__link_iterate_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link iterate params");
 
     if(H5VL_native_link_iterate(H5I_object(obj_id), loc_params, recursive, idx_type, order, idx,
-                                link_iterate_cb, &source, H5_REQUEST_NULL) < 0)
+                                H5L__iterate_cb, &source, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed");
 
 done:
@@ -2529,6 +2532,335 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_remove_func */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__object_open_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__object_open_func(uint8_t *p, int source)
+{
+    hid_t obj_id; /* id of location for object */
+    H5VL_loc_params_t loc_params; /* location parameters for obj_id */
+    void *object = NULL; /* The object that is opened by the native plugin */
+    H5I_type_t opened_type; /* the object type that was opened */
+    hid_t new_id = FAIL; /* MDS ID for the object opened */
+    size_t buf_size = 0;
+    void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
+    uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_object_open_params(p, &obj_id, &loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object open params");
+
+    /* Open the object through the native VOL */
+    if(NULL == (object = H5VL_native_object_open(H5I_object(obj_id), loc_params, &opened_type,
+                                                 H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
+    if((new_id = H5VL_native_register(opened_type, object, FALSE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+
+    switch(opened_type) {
+        case H5I_DATASET:
+            {
+                H5D_t *dset = (H5D_t *)object;
+                size_t dcpl_size = 0, type_size = 0, space_size = 0, layout_size = 0;
+                H5P_genplist_t *dcpl;
+
+                /* START Encode metadata of the dataset and send them to the client along with the ID */
+                /* determine the size of the dcpl if it is not default */
+                if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
+                    if(NULL == (dcpl = (H5P_genplist_t *)H5I_object_verify(dset->shared->dcpl_id, 
+                                                                           H5I_GENPROP_LST)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                    if((ret_value = H5P__encode(dcpl, FALSE, NULL, &dcpl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                }
+
+                if(NULL != dset->shared->type) {
+                    /* get Type size to encode */
+                    if((ret_value = H5T_encode(dset->shared->type, NULL, &type_size)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                }
+
+                if(NULL != dset->shared->space) {
+                    /* get Dataspace size to encode */
+                    if((ret_value = H5S_encode(dset->shared->space, NULL, &space_size)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+                }
+
+                /* determine the buffer size needed to store the encoded layout of the dataset */ 
+                if(FAIL == H5D__encode_layout(dset->shared->layout, NULL, &layout_size))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+
+                /* for the dataset ID */
+                buf_size = 1 + sizeof(hid_t) + /* dataset ID */
+                    1 + H5V_limit_enc_size((uint64_t)dcpl_size) + dcpl_size +
+                    1 + H5V_limit_enc_size((uint64_t)type_size) + type_size + 
+                    1 + H5V_limit_enc_size((uint64_t)space_size) + space_size + 
+                    1 + H5V_limit_enc_size((uint64_t)layout_size) + layout_size;
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the object id and type*/
+                INT32ENCODE(p1, new_id);
+                *p1++ = (uint8_t)opened_type;
+
+                /* encode the plist size */
+                UINT64ENCODE_VARLEN(p1, dcpl_size);
+                /* encode property lists if they are not default*/
+                if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
+                    if((ret_value = H5P__encode(dcpl, FALSE, p1, &dcpl_size)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+                    p1 += dcpl_size;
+                }
+
+                /* encode the datatype size */
+                UINT64ENCODE_VARLEN(p1, type_size);
+                if(type_size) {
+                    /* encode datatype */
+                    if((ret_value = H5T_encode(dset->shared->type, p1, &type_size)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                    p1 += type_size;
+                }
+
+                /* encode the dataspace size */
+                UINT64ENCODE_VARLEN(p1, space_size);
+                if(space_size) {
+                    /* encode datatspace */
+                    if((ret_value = H5S_encode(dset->shared->space, p1, &space_size)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+                    p1 += space_size;
+                }
+
+                /* encode the layout size */
+                UINT64ENCODE_VARLEN(p1, layout_size);
+                if(layout_size) {
+                    /* encode layout of the dataset */ 
+                    if(FAIL == H5D__encode_layout(dset->shared->layout, p1, &layout_size))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+                    p1 += layout_size;
+                }
+
+                break;
+            }
+        case H5I_DATATYPE:
+            {
+                H5T_t *type = (H5T_t *)object; /* New datatype */
+                size_t type_size = 0;
+
+                /* get Type size to encode */
+                if((ret_value = H5T_encode(type, NULL, &type_size)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+
+                buf_size = 1 + type_size + sizeof(hid_t);
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the object id and type*/
+                INT32ENCODE(p1, new_id);
+                *p1++ = (uint8_t)opened_type;
+
+                /* encode datatype */
+                if((ret_value = H5T_encode(type, p1, &type_size)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
+                p1 += type_size;
+
+                break;
+            }
+        case H5I_GROUP:
+            {
+                buf_size = 1 + sizeof(hid_t);
+
+                /* allocate the buffer for encoding the parameters */
+                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+                p1 = (uint8_t *)send_buf;
+
+                /* encode the object id and type*/
+                INT32ENCODE(p1, new_id);
+                *p1++ = (uint8_t)opened_type;
+
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object (dataset, group, or datatype)")
+        break;
+    }
+done:
+    if(SUCCEED == ret_value) {
+        /* Send the dataset id & metadata to the client */
+        if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* send a failed message to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+
+    H5MM_xfree(send_buf);
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__object_open_func */
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__object_copy_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__object_copy_func(uint8_t *p, int source)
+{
+    hid_t src_id;
+    hid_t dst_id;
+    H5VL_loc_params_t loc_params1;
+    H5VL_loc_params_t loc_params2;
+    char *src_name = NULL;
+    char *dst_name = NULL;
+    hid_t lcpl_id = FAIL, ocpypl_id = FAIL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_object_copy_params(p, &src_id, &loc_params1, &src_name,
+                                       &dst_id, &loc_params2, &dst_name,
+                                       &ocpypl_id, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object copy params");
+
+    if(H5VL_native_object_copy(H5I_object(src_id), loc_params1, src_name,
+                               H5I_object(dst_id), loc_params2, dst_name,
+                               ocpypl_id, lcpl_id, H5_REQUEST_NULL) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy object");
+
+done:
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    H5MM_xfree(src_name);
+    H5MM_xfree(dst_name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__object_copy_func */
+
+static herr_t
+H5O__visit_cb(hid_t obj_id, const char *name, const H5O_info_t *info, void *op_data)
+{
+    int source = *((int *)op_data);
+    void *send_buf = NULL;
+    size_t buf_size = 0, info_size = 0; /* send_buf size */
+    uint8_t *p = NULL; /* temporary pointer into send_buf for encoding */
+    size_t len = 0;
+    herr_t ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get name size to encode */
+    if(NULL != name)
+        len = HDstrlen(name) + 1;
+
+    /* determine the buffer size needed to store the encoded info struct */ 
+    if(FAIL == H5O__encode_info(info, NULL, &info_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode object info");
+
+    /* calculate size of buffer needed */
+    buf_size = 2*sizeof(int32_t) + 
+        1 + H5V_limit_enc_size((uint64_t)len) + len +
+        1 + H5V_limit_enc_size((uint64_t)info_size) + info_size;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p = (uint8_t *)send_buf;
+
+    /* encode a flag that this message is for the client to call the user callback on
+       and not for the client to finish iteration */
+    INT32ENCODE(p, H5VL_MDS_OBJECT_VISIT);
+
+    /* encode the object id */
+    INT32ENCODE(p, obj_id);
+
+    /* encode length of the link name and the actual link name */
+    UINT64ENCODE_VARLEN(p, len);
+    if(NULL != name && len != 0)
+        HDstrcpy((char *)p, name);
+    p += len;
+
+    /* encode the info size */
+    UINT64ENCODE_VARLEN(p, info_size);
+    if(info_size) {
+        /* encode info of the object */ 
+        if(FAIL == H5O__encode_info(info, p, &info_size))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode object info");
+        p += info_size;
+    }
+
+    /* send the callback data back to the client and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5VL_MDS_SEND_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, source, H5VL_MDS_LISTEN_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__object_visit_func
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__object_visit_func(uint8_t *p, int source)
+{
+    hid_t obj_id;
+    H5VL_loc_params_t loc_params;
+    H5_index_t idx_type;
+    H5_iter_order_t order;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL__decode_object_visit_params(p, &obj_id, &loc_params, &idx_type, &order) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object visit params");
+
+    if(H5VL_native_object_visit(H5I_object(obj_id), loc_params, idx_type, order, 
+                                H5O__visit_cb, &source, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visit failed");
+
+done:
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}/* H5VL__object_visit_func */
 
 /*-------------------------------------------------------------------------
 * Function:	H5VL__allocate_func

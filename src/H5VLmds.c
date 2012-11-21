@@ -122,14 +122,14 @@ static herr_t H5VL_mds_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbo
 static herr_t H5VL_mds_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
 
-#if 0
 /* Object callbacks */
 static void *H5VL_mds_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t req);
 static herr_t H5VL_mds_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
-                                      void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-                                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+                                   void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
+                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
 static herr_t H5VL_mds_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                                       H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
+                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
+#if 0
 static herr_t H5VL_mds_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
 static herr_t H5VL_mds_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
@@ -208,9 +208,9 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_link_remove                 /* remove */
     },
     {                                        /* object_cls */
-        NULL,//H5VL_mds_object_open,                /* open */
-        NULL,//H5VL_mds_object_copy,                /* copy */
-        NULL,//H5VL_mds_object_visit,               /* visit */
+        H5VL_mds_object_open,                /* open */
+        H5VL_mds_object_copy,                /* copy */
+        H5VL_mds_object_visit,               /* visit */
         NULL,//H5VL_mds_object_get,                 /* get */
         NULL,//H5VL_mds_object_misc,                /* misc */
         NULL,//H5VL_mds_object_optional,            /* optional */
@@ -3738,7 +3738,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_native_link_iterate
+ * Function:	H5VL_mds_link_iterate
  *
  * Purpose:	Iterates through links in a group
  *
@@ -3755,8 +3755,9 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
                                     H5L_iterate_t op, void *op_data, hid_t UNUSED req)
 {
     H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
-    void            *send_buf = NULL;
-    size_t           buf_size = 0;
+    void *send_buf = NULL;
+    size_t buf_size = 0;
+    hid_t temp_id;
     herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3783,9 +3784,12 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
     H5MM_free(send_buf);
     MPI_Pcontrol(1);
 
+    /* store the original object ID here since it will get replaced during iterations and restore it
+       after the iterations are done */
+    temp_id = obj->obj_id;
+
     while (1) {
-        H5VL_mds_group_t *grp = NULL;
-        hid_t group_id;
+        hid_t group_id = FAIL;
         char *name = NULL;
         H5L_info_t linfo;
         MPI_Status status;
@@ -3816,8 +3820,8 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         p = (uint8_t *)recv_buf;
 
+        /* decode the ret value from the server to see whether we need to continue iterating or stop */
         INT32DECODE(p, ret_value);
-
         if(ret_value == SUCCEED || ret_value == FAIL) {
             H5MM_free(recv_buf);
             if(NULL != idx) {
@@ -3828,18 +3832,8 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
             break;
         }
 
-        /* allocate the group object that is used for the user callback */
-        if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate MDS object struct");
-
-        /* set common object parameters */
-        grp->common.obj_type = H5I_GROUP;
-        grp->common.raw_file = obj->raw_file;
-        INT32DECODE(p, grp->common.obj_id);
-
-        /* create a user id for the group with the MDS vol plugin attached to it */
-        if((group_id = H5VL_mds_register(H5I_GROUP, grp, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle");
+        /* decode the server object id that is meant for the user callback */
+        INT32DECODE(p, obj->obj_id);
 
         /* decode length of the link name and the actual link name */
         UINT64DECODE_VARLEN(p, len);
@@ -3865,6 +3859,10 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         H5MM_free(recv_buf);
 
+        /* create a user id for the object passed in from the API layer */
+        if((group_id = H5VL_mds_register(H5I_GROUP, obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+
         /* execute the user iterate callback */
         ret = op(group_id, name, &linfo, op_data);
 
@@ -3886,14 +3884,13 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         H5MM_xfree(vol_plugin->container_name);
         H5MM_xfree(vol_plugin);
-
-        /* Free the group's memory structure */
-        grp = H5FL_FREE(H5VL_mds_group_t, grp);
         H5MM_xfree(name);
     }
+    obj->obj_id = temp_id;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_native_link_iterate() */
+} /* end H5VL_mds_link_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -4166,5 +4163,420 @@ H5VL_mds_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t UNUSED req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_link_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_object_open
+ *
+ * Purpose:	Opens a object inside MDS file.
+ *
+ * Return:	Success:	object id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params, 
+                                  H5I_type_t *opened_type, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to open the group */
+    void *send_buf = NULL; /* buffer where the group open request is encoded and sent to the mds */
+    size_t buf_size = 0; /* size of send_buf */
+    void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    int incoming_msg_size; /* incoming buffer size for MDS returned buffer */
+    uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */
+    MPI_Status status;
+    hid_t new_id; /* id of the object opened at the MDS side */
+    void *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_object_open_params(NULL, &buf_size, obj->obj_id, loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_object_open_params(send_buf, &buf_size, obj->obj_id, loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode object open parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata object ID */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                               MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
+
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
+                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
+    MPI_Pcontrol(1);
+
+    p = (uint8_t *)recv_buf;
+
+    INT32DECODE(p, new_id);
+    *opened_type = (H5I_type_t)*p++;
+
+    switch(*opened_type) {
+        case H5I_DATASET:
+            {
+                H5VL_mds_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+                H5D_t *new_dset = NULL; /* the lighweight dataset struct used to hold the dataset's metadata */
+                hid_t type_id=FAIL, space_id=FAIL, dcpl_id=H5P_DATASET_CREATE_DEFAULT;
+                H5O_layout_t layout; /* Dataset's layout information */
+                size_t type_size, space_size, dcpl_size, layout_size;
+
+                /* allocate the dataset object that is returned to the user */
+                if(NULL == (dset = H5FL_CALLOC(H5VL_mds_dset_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
+
+                /* decode the plist size */
+                UINT64DECODE_VARLEN(p, dcpl_size);
+                /* decode property lists if they are not default*/
+                if(dcpl_size) {
+                    if((dcpl_id = H5P__decode(p)) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, NULL, "unable to decode property list");
+                    p += dcpl_size;
+                }
+
+                /* decode the type size */
+                UINT64DECODE_VARLEN(p, type_size);
+                if(type_size) {
+                    H5T_t *dt;
+                    /* Create datatype by decoding buffer */
+                    if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object");
+                    /* Register the type and return the ID */
+                    if((type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register data type");
+                    p += type_size;
+                }
+
+                /* decode the space size */
+                UINT64DECODE_VARLEN(p, space_size);
+                if(space_size) {
+                    H5S_t *ds = NULL;
+                    if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
+                    /* Register the type and return the ID */
+                    if((space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, NULL, "unable to register dataspace");
+                    p += space_size;
+                }
+
+                /* decode the layout size */
+                UINT64DECODE_VARLEN(p, layout_size);
+                /* decode the dataset layout */
+                if(FAIL == H5D__decode_layout(p, &layout))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
+                p += layout_size;
+
+                /* Initialize the dataset object */
+                if(NULL == (new_dset = (H5D_t *)H5MM_malloc(sizeof(H5D_t))))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                /* create the "lightweight" client dataset */
+                if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, 
+                                                       dcpl_id, H5P_DATASET_ACCESS_DEFAULT)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
+
+                /* set the layout of the dataset */
+                new_dset->shared->layout = layout;
+                /* Set the dataset's I/O operations */
+                if(H5D__layout_set_io_ops(new_dset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
+                /* reset the chunk ops to use the stub client ops */
+                new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+
+                new_dset->oloc.file = obj->raw_file;
+
+                /* set the dataset struct in the high level object */
+                dset->dset = new_dset;
+
+                /* set common object parameters */
+                dset->common.obj_type = H5I_DATASET;
+                dset->common.raw_file = obj->raw_file;
+                dset->common.file = obj->file;
+                dset->common.obj_id = new_id;
+
+                ret_value = (void *)dset;
+                break;
+            }
+        case H5I_DATATYPE:
+            {
+                H5VL_mds_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+
+                /* allocate the dataset object that is returned to the user */
+                if(NULL == (dtype = H5FL_CALLOC(H5VL_mds_dtype_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
+
+                if(NULL == (dtype->dtype = H5T_decode((const unsigned char *)p)))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "unable to decode datatype");
+
+                /* set common object parameters */
+                dtype->common.obj_type = H5I_DATATYPE;
+                dtype->common.raw_file = obj->raw_file;
+                dtype->common.file = obj->file;
+                dtype->common.obj_id = new_id;
+
+                ret_value = (void *)dtype;
+                break;
+            }
+        case H5I_GROUP:
+            {
+                H5VL_mds_group_t *grp = NULL; /* the group object that is opend and passed to the user */
+
+                /* allocate the group object that is returned to the user */
+                if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
+
+                /* set common object parameters */
+                grp->common.obj_type = H5I_GROUP;
+                grp->common.raw_file = obj->raw_file;
+                grp->common.file = obj->file;
+                grp->common.obj_id = new_id;
+
+                ret_value = (void *)grp;
+                break;
+            }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, group, or datatype)")
+        break;
+    }
+
+    H5MM_free(send_buf);
+    H5MM_free(recv_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_object_open */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_object_copy
+ *
+ * Purpose:	Copys a object through the MDS plugin.
+ *
+ * Return:	Success:	postive. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_mds_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
+                     void *_dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
+                     hid_t ocpypl_id, hid_t lcpl_id, hid_t UNUSED req)
+{
+    H5VL_mds_object_t *src_obj = (H5VL_mds_object_t *)_src_obj;
+    H5VL_mds_object_t *dst_obj = (H5VL_mds_object_t *)_dst_obj;
+    void        *send_buf = NULL;
+    size_t      buf_size = 0;
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_object_copy_params(NULL, &buf_size, src_obj->obj_id, loc_params1, src_name,
+                                       dst_obj->obj_id, loc_params2, dst_name, 
+                                       ocpypl_id, lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_object_copy_params(send_buf, &buf_size, src_obj->obj_id, loc_params1, src_name,
+                                       dst_obj->obj_id, loc_params2, dst_name, 
+                                       ocpypl_id, lcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode link move parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the metadata link ID */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
+    MPI_Pcontrol(1);
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_object_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_mds_object_visit
+ *
+ * Purpose:	Iterates through all objects linked to an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
+                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
+                                    hid_t UNUSED req)
+{
+    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    void *send_buf = NULL;
+    size_t buf_size = 0;
+    hid_t temp_id;
+    herr_t ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine the size of the buffer needed to encode the parameters */
+    if(H5VL__encode_object_visit_params(NULL, &buf_size, obj->obj_id, loc_params, idx_type, order) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine buffer size needed");
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* encode the parameters */
+    if(H5VL__encode_object_visit_params(send_buf, &buf_size, obj->obj_id, loc_params, idx_type, order) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to encode link iterate parameters");
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    H5MM_free(send_buf);
+    MPI_Pcontrol(1);
+
+    /* store the original object ID here since it will get replaced during iterations and restore it
+       after the iterations are done */
+    temp_id = obj->obj_id;
+
+    while (1) {
+        hid_t new_id = FAIL;
+        char *name = NULL;
+        H5O_info_t info;
+        MPI_Status status;
+        void *recv_buf = NULL;
+        int incoming_msg_size = 0;
+        size_t len = 0, info_size = 0;
+        herr_t ret;
+        uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */        
+        H5VL_t *vol_plugin = NULL;
+
+        MPI_Pcontrol(0);
+        /* probe for a message from the mds */
+        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+        /* get the incoming message size from the probe result */
+        if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+        /* allocate the receive buffer */
+        if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+        /* receive the actual message */
+        if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+        MPI_Pcontrol(1);
+
+        p = (uint8_t *)recv_buf;
+
+        /* decode the ret value from the server to see whether we need to continue iterating or stop */
+        INT32DECODE(p, ret_value);
+        if(ret_value == SUCCEED || ret_value == FAIL) {
+            H5MM_free(recv_buf);
+            break;
+        }
+
+        /* decode the server object id that is meant for the user callback */
+        INT32DECODE(p, obj->obj_id);
+
+        /* decode length of the link name and the actual link name */
+        UINT64DECODE_VARLEN(p, len);
+        if(0 != len) {
+            name = H5MM_xstrdup((const char *)(p));
+            p += len;
+        }
+
+        UINT64DECODE_VARLEN(p, info_size);
+        if(info_size) {
+            /* decode info of the object */ 
+            if(FAIL == H5O__decode_info(p, &info))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to decode object info");
+            p += info_size;
+        }
+
+        H5MM_free(recv_buf);
+
+        /* create a user id for the object passed in from the API layer */
+        if((new_id = H5VL_mds_register(obj->obj_type, obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+
+        /* execute the user iterate callback */
+        ret = op(new_id, name, &info, op_data);
+
+        /* send result to MDS */
+        MPI_Pcontrol(0);
+        /* send the request to the MDS process and receive the return value */
+        if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+        MPI_Pcontrol(1);
+
+        /* decrement the ref count on the group ID but do not call the free method, because that 
+         * will send a close request to the MDS. The MDS will already have closed this group at
+         * its side part of the native iterate implementation. We only need to free the aux struct */
+        if(H5I_dec_ref_no_free(new_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on object ID");
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(new_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+
+        H5MM_xfree(vol_plugin->container_name);
+        H5MM_xfree(vol_plugin);
+        H5MM_xfree(name);
+    }
+    obj->obj_id = temp_id;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_mds_object_visit() */
 
 #endif /* H5_HAVE_PARALLEL */

@@ -1119,7 +1119,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
+H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t UNUSED dapl_id)
 {
     const H5T_t         *type, *dt;             /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
@@ -2841,15 +2841,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5D__encode_layout
  *
- * Purpose:        Callback routine which is called whenever the layout
- *                 property in the dataset creation property list is
- *                 encoded.
+ * Purpose:        Routine to encode the dataset layout.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
  * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
+ *                 October 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -2939,15 +2937,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:       H5D__decode_layout
  *
- * Purpose:        Callback routine which is called whenever the layout
- *                 property in the dataset creation property list is
- *                 decoded.
+ * Purpose:        Routine to decode the dataset layout.
  *
  * Return:	   Success:	Non-negative
  *		   Failure:	Negative
  *
  * Programmer:     Mohamad Chaarawi
- *                 Monday, October 10, 2011
+ *                 October 2012
  *
  *-------------------------------------------------------------------------
  */

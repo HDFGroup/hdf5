@@ -3884,6 +3884,336 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__decode_link_remove_params() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_object_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_object_open_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t loc_size = 0;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_OBJECT_OPEN;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");                    
+        p += loc_size;
+    }
+    size += (1 + sizeof(int32_t) + 
+             1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size);
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_object_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_object_open_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_object_open_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_object_open_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_object_copy_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_object_copy_params(void *buf, size_t *nalloc, 
+                                hid_t src_id, H5VL_loc_params_t loc_params1, const char *src_name,
+                                hid_t dst_id, H5VL_loc_params_t loc_params2, const char *dst_name,
+                                hid_t ocpypl_id, hid_t lcpl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t lcpl_size = 0, ocpypl_size = 0, loc_size1 = 0, loc_size2 = 0, len1 = 0, len2 = 0;
+    H5P_genplist_t *lcpl = NULL, *ocpypl = NULL;
+    herr_t  ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get source name size to encode */
+    if(NULL != src_name)
+        len1 = HDstrlen(src_name) + 1;
+
+    /* get dest name size to encode */
+    if(NULL != dst_name)
+        len2 = HDstrlen(dst_name) + 1;
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params1, NULL, &loc_size1)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params2, NULL, &loc_size2)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    /* get size for property lists to encode */
+    if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+        if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+    if(H5P_OBJECT_COPY_DEFAULT != ocpypl_id) {
+        if(NULL == (ocpypl = (H5P_genplist_t *)H5I_object_verify(ocpypl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(ocpypl, FALSE, NULL, &ocpypl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    /* common stuff between all link move types */
+    size += 1 + 2*sizeof(int32_t) + 
+        1 + H5V_limit_enc_size((uint64_t)len1) + len1 + 
+        1 + H5V_limit_enc_size((uint64_t)len2) + len2 + 
+        1 + H5V_limit_enc_size((uint64_t)loc_size1) + loc_size1 + 
+        1 + H5V_limit_enc_size((uint64_t)loc_size2) + loc_size2 + 
+        1 + H5V_limit_enc_size((uint64_t)ocpypl_size) + ocpypl_size + 
+        1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_OBJECT_COPY;
+
+        /* encode the object id */
+        INT32ENCODE(p, src_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size1);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params1, p, &loc_size1)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size1;
+
+        UINT64ENCODE_VARLEN(p, len1);
+        if(NULL != src_name)
+            HDstrcpy((char *)p, src_name);
+        p += len1;
+
+        /* encode the object id */
+        INT32ENCODE(p, dst_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size2);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params2, p, &loc_size2)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size2;
+
+        UINT64ENCODE_VARLEN(p, len2);
+        if(NULL != dst_name)
+            HDstrcpy((char *)p, dst_name);
+        p += len2;
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, lcpl_size);
+        /* encode property lists if they are not default*/
+        if(lcpl_size) {
+            if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += lcpl_size;
+        }
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p, ocpypl_size);
+        /* encode property lists if they are not default*/
+        if(ocpypl_size) {
+            if((ret_value = H5P__encode(ocpypl, FALSE, p, &ocpypl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p += ocpypl_size;
+        }
+    }
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_object_copy_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_object_copy_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_object_copy_params(void *buf, hid_t *src_id, H5VL_loc_params_t *loc_params1, char **src_name,
+                                hid_t *dst_id, H5VL_loc_params_t *loc_params2, char **dst_name,
+                                hid_t *ocpypl_id, hid_t *lcpl_id)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t ocpypl_size = 0, lcpl_size = 0, loc_size1 = 0, loc_size2 = 0, len1 = 0, len2 = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *src_id);
+
+    UINT64DECODE_VARLEN(p, loc_size1);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params1)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size1;
+
+    /* decode length of the src name and the actual src_name */
+    UINT64DECODE_VARLEN(p, len1);
+    if(len1) {
+        *src_name = H5MM_xstrdup((const char *)(p));
+        p += len1;
+    }
+
+    /* decode the object id */
+    INT32DECODE(p, *dst_id);
+
+    UINT64DECODE_VARLEN(p, loc_size2);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params2)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size2;
+
+    /* decode length of the dst name and the actual dst_name */
+    UINT64DECODE_VARLEN(p, len2);
+    if(len2) {
+        *dst_name = H5MM_xstrdup((const char *)(p));
+        p += len2;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, lcpl_size);
+    /* decode property lists if they are not default*/
+    if(lcpl_size) {
+        if((*lcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += lcpl_size;
+    }
+    else {
+        *lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    }
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, ocpypl_size);
+    /* decode property lists if they are not default*/
+    if(ocpypl_size) {
+        if((*ocpypl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += ocpypl_size;
+    }
+    else {
+        *ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_object_copy_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__encode_object_visit_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__encode_object_visit_params(void *buf, size_t *nalloc, hid_t obj_id, H5VL_loc_params_t loc_params, 
+                                 H5_index_t idx_type, H5_iter_order_t order)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    size_t loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(nalloc);
+
+    /* get loc params size to encode */
+    if((ret_value = H5VL__encode_loc_params(loc_params, NULL, &loc_size)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+
+    /* common stuff between all link iterate types */
+    size += 3 + sizeof(int32_t) + 
+        1 + H5V_limit_enc_size((uint64_t)loc_size) + loc_size;
+
+    if(NULL != p) {
+        /* encode request type */
+        *p++ = (uint8_t)H5VL_OBJECT_VISIT;
+
+        /* encode the object id */
+        INT32ENCODE(p, obj_id);
+
+        UINT64ENCODE_VARLEN(p, loc_size);
+        /* encode the location parameters */
+        if((ret_value = H5VL__encode_loc_params(loc_params, p, &loc_size)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "unable to encode VOL location param");
+        p += loc_size;
+
+        *p++ = (uint8_t)idx_type;
+        *p++ = (uint8_t)order;
+    }
+
+    *nalloc = size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__encode_object_visit_params() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__decode_object_visit_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL__decode_object_visit_params(void *buf, hid_t *obj_id, H5VL_loc_params_t *loc_params, 
+                                 H5_index_t *idx_type, H5_iter_order_t *order)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t loc_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* decode the object id */
+    INT32DECODE(p, *obj_id);
+
+    UINT64DECODE_VARLEN(p, loc_size);
+    /* decode the location parameters */
+    if((ret_value = H5VL__decode_loc_params(p, loc_params)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "unable to decode VOL location param");
+    p += loc_size;
+
+    *idx_type = (H5_index_t)*p++;
+    *order = (H5_iter_order_t)*p++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__decode_object_visit_params() */
+
 #if 0
 /*-------------------------------------------------------------------------
  * Function:	H5VL__encode__params

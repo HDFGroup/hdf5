@@ -1255,6 +1255,7 @@ H5Oclose(hid_t object_id)
         case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
+        case H5I_VOL:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -3494,9 +3495,9 @@ H5O_visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
         obj_type = H5I_get_type(obj_id);
         if(NULL == (temp_obj = H5I_remove(obj_id)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
-        /* Get an atom for the datatype */
+        /* Get an atom for the object */
         if((obj_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
     }
 #if 0
     /* if this is a named datatype, we need to create the two-fold datatype 
@@ -3763,3 +3764,131 @@ H5O_free(H5O_t *oh)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_free() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:       H5O__encode_info
+ *
+ * Purpose:        routine to encode the object info struct.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 November 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O__encode_info(const H5O_info_t *info, void *buf, size_t *nalloc)
+{
+    uint8_t *p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+    size_t size = 0;
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(info);
+
+    /* Sanity check */
+    if(NULL == nalloc)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad allocation size pointer")
+
+    if(NULL != p) {
+        UINT64ENCODE_VARLEN(p, info->fileno);
+        UINT64ENCODE_VARLEN(p, info->addr);
+        *p++ = (uint8_t)info->type;
+        H5_ENCODE_UNSIGNED(p, info->rc);
+        UINT64ENCODE_VARLEN(p, info->atime);
+        UINT64ENCODE_VARLEN(p, info->mtime);
+        UINT64ENCODE_VARLEN(p, info->ctime);
+        UINT64ENCODE_VARLEN(p, info->btime);
+        UINT64ENCODE_VARLEN(p, info->num_attrs);
+        H5_ENCODE_UNSIGNED(p, info->hdr.version);
+        H5_ENCODE_UNSIGNED(p, info->hdr.nmesgs);
+        H5_ENCODE_UNSIGNED(p, info->hdr.nchunks);
+        H5_ENCODE_UNSIGNED(p, info->hdr.flags);
+        UINT64ENCODE_VARLEN(p, info->hdr.space.total);
+        UINT64ENCODE_VARLEN(p, info->hdr.space.meta);
+        UINT64ENCODE_VARLEN(p, info->hdr.space.mesg);
+        UINT64ENCODE_VARLEN(p, info->hdr.space.free);
+        UINT64ENCODE_VARLEN(p, info->hdr.mesg.present);
+        UINT64ENCODE_VARLEN(p, info->hdr.mesg.shared);
+        UINT64ENCODE_VARLEN(p, info->meta_size.obj.index_size);
+        UINT64ENCODE_VARLEN(p, info->meta_size.obj.heap_size);
+        UINT64ENCODE_VARLEN(p, info->meta_size.attr.index_size);
+        UINT64ENCODE_VARLEN(p, info->meta_size.attr.heap_size);
+    }
+
+    size += 1 + 5*sizeof(unsigned) + 
+        1 + H5V_limit_enc_size((uint64_t)info->fileno) + 
+        1 + H5V_limit_enc_size((uint64_t)info->addr) + 
+        1 + H5V_limit_enc_size((uint64_t)info->atime) +
+        1 + H5V_limit_enc_size((uint64_t)info->mtime) + 
+        1 + H5V_limit_enc_size((uint64_t)info->ctime) + 
+        1 + H5V_limit_enc_size((uint64_t)info->btime) + 
+        1 + H5V_limit_enc_size((uint64_t)info->num_attrs) + 
+        1 + H5V_limit_enc_size((uint64_t)info->hdr.space.total) + 
+        1 + H5V_limit_enc_size((uint64_t)info->hdr.space.meta) + 
+        1 + H5V_limit_enc_size((uint64_t)info->hdr.space.mesg) + 
+        1 + H5V_limit_enc_size((uint64_t)info->hdr.space.free) + 
+        1 + H5V_limit_enc_size((uint64_t)info->hdr.mesg.present) + 
+        1 + H5V_limit_enc_size((uint64_t)info->hdr.mesg.shared) + 
+        1 + H5V_limit_enc_size((uint64_t)info->meta_size.obj.index_size) + 
+        1 + H5V_limit_enc_size((uint64_t)info->meta_size.obj.heap_size) + 
+        1 + H5V_limit_enc_size((uint64_t)info->meta_size.attr.index_size) + 
+        1 + H5V_limit_enc_size((uint64_t)info->meta_size.attr.heap_size);
+
+    *nalloc = size;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__encode_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5O__decode_info
+ *
+ * Purpose:        routine to decode the object info struct.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 November 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O__decode_info(const void *buf, H5O_info_t *info)
+{
+    const uint8_t *p = (const uint8_t *)buf;     /* Current pointer into buffer */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(info);
+
+    UINT64DECODE_VARLEN(p, info->fileno);
+    UINT64DECODE_VARLEN(p, info->addr);
+    info->type = (H5O_type_t)*p++;
+    H5_DECODE_UNSIGNED(p, info->rc);
+    UINT64DECODE_VARLEN(p, info->atime);
+    UINT64DECODE_VARLEN(p, info->mtime);
+    UINT64DECODE_VARLEN(p, info->ctime);
+    UINT64DECODE_VARLEN(p, info->btime);
+    UINT64DECODE_VARLEN(p, info->num_attrs);
+    H5_DECODE_UNSIGNED(p, info->hdr.version);
+    H5_DECODE_UNSIGNED(p, info->hdr.nmesgs);
+    H5_DECODE_UNSIGNED(p, info->hdr.nchunks);
+    H5_DECODE_UNSIGNED(p, info->hdr.flags);
+    UINT64DECODE_VARLEN(p, info->hdr.space.total);
+    UINT64DECODE_VARLEN(p, info->hdr.space.meta);
+    UINT64DECODE_VARLEN(p, info->hdr.space.mesg);
+    UINT64DECODE_VARLEN(p, info->hdr.space.free);
+    UINT64DECODE_VARLEN(p, info->hdr.mesg.present);
+    UINT64DECODE_VARLEN(p, info->hdr.mesg.shared);
+    UINT64DECODE_VARLEN(p, info->meta_size.obj.index_size);
+    UINT64DECODE_VARLEN(p, info->meta_size.obj.heap_size);
+    UINT64DECODE_VARLEN(p, info->meta_size.attr.index_size);
+    UINT64DECODE_VARLEN(p, info->meta_size.attr.heap_size);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O__decode_info() */

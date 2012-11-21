@@ -40,6 +40,7 @@
 #define H5VL_DSET_MDS_ID        "mds_dataset_id"
 
 #define H5VL_MDS_LINK_ITERATE 1
+#define H5VL_MDS_OBJECT_VISIT 2
 
 /* forward declaration of file struct */
 struct H5VL_mds_file_t;
