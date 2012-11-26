@@ -246,7 +246,6 @@
 ./fortran/examples/fileexample.f90
 ./fortran/examples/groupexample.f90
 ./fortran/examples/grpdsetexample.f90
-./fortran/examples/grpit.f90
 ./fortran/examples/grpsexample.f90
 ./fortran/examples/hyperslab.f90
 ./fortran/examples/mountexample.f90
