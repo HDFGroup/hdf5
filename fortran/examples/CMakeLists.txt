@@ -23,7 +23,6 @@ SET (examples
     grpdsetexample
     hyperslab
     selectele
-    grpit
     refobjexample
     refregexample
     mountexample
