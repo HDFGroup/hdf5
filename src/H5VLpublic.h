@@ -178,7 +178,7 @@ struct H5VL_loc_by_addr {
 
 struct H5VL_loc_by_ref {
     H5R_type_t ref_type;
-    const void *_ref;
+    void *_ref;
     hid_t plist_id;
 };
 

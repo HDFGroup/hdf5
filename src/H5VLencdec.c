@@ -123,6 +123,11 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
             size += 1 + H5V_limit_enc_size((uint64_t)loc_params.loc_data.loc_by_addr.addr);
             break;
         case H5VL_OBJECT_BY_REF:
+            if(loc_params.loc_data.loc_by_ref.ref_type == H5R_DATASET_REGION)
+                len = sizeof(hdset_reg_ref_t);
+            else if (loc_params.loc_data.loc_by_ref.ref_type == H5R_OBJECT)
+                len = sizeof(hobj_ref_t);
+
             /* get size of property list */
             if(H5P_DEFAULT != loc_params.loc_data.loc_by_ref.plist_id) {
                 if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(loc_params.loc_data.loc_by_ref.plist_id, H5I_GENPROP_LST)))
@@ -130,7 +135,10 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
                 if(H5P__encode(plist, FALSE, NULL, &plist_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
             }
-            size += (1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
+
+            size += 1 + 
+                (1 + H5V_limit_enc_size((uint64_t)len) + len) + 
+                (1 + H5V_limit_enc_size((uint64_t)plist_size) + plist_size);
             break;
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTENCODE, FAIL, "invalid location type");
@@ -190,6 +198,11 @@ H5VL__encode_loc_params(H5VL_loc_params_t loc_params, void *buf, size_t *nalloc)
             case H5VL_OBJECT_BY_REF:
                 {
                     *p++ = (uint8_t)loc_params.loc_data.loc_by_ref.ref_type;
+
+                    UINT64ENCODE_VARLEN(p, len);
+                    if(len)
+                        HDmemcpy(p, (const uint8_t *)loc_params.loc_data.loc_by_ref._ref, len);
+                    p += len;
 
                     /* encode the plist size */
                     UINT64ENCODE_VARLEN(p, plist_size);
@@ -293,6 +306,12 @@ H5VL__decode_loc_params(const void *buf, H5VL_loc_params_t *loc_params)
 
         case H5VL_OBJECT_BY_REF:
             loc_params->loc_data.loc_by_ref.ref_type = (H5R_type_t)*p++;
+
+            UINT64DECODE_VARLEN(p, len);
+
+            loc_params->loc_data.loc_by_ref._ref = HDmalloc(len);
+            HDmemcpy(loc_params->loc_data.loc_by_ref._ref, p, len);
+            p += len;
 
             /* decode the plist size */
             UINT64DECODE_VARLEN(p, plist_size);
@@ -4314,6 +4333,51 @@ H5VL__encode_object_misc_params(void *buf, size_t *nalloc, H5VL_object_misc_t mi
                 break;
             }
         case H5VL_REF_CREATE:
+            {
+                char *name = va_arg (arguments, char *);
+                H5R_type_t ref_type = va_arg (arguments, H5R_type_t);
+                hid_t space_id = va_arg (arguments, hid_t);
+                size_t len = 0, space_size = 0;
+                H5S_t *dspace = NULL;
+
+                /* get name size to encode */
+                if(NULL != name)
+                    len = HDstrlen(name) + 1;
+
+                /* get Dataspace size to encode */
+                if(space_id >= 0) {
+                    if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+                    if(H5S_encode(dspace, NULL, &space_size)<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+                }
+
+                size += 1 + 
+                    1+ H5V_limit_enc_size((uint64_t)len) + len + 
+                    1+ H5V_limit_enc_size((uint64_t)space_size) + space_size;
+
+                if(NULL != p) {
+                    /* encode the name size */
+                    UINT64ENCODE_VARLEN(p, len);
+                    /* encode the name */
+                    if(NULL != name)
+                        HDstrcpy((char *)p, name);
+                    p += len;
+
+                    /* encode ref_type */
+                    *p++ = (uint8_t)ref_type;
+
+                    /* encode the dataspace size */
+                    UINT64ENCODE_VARLEN(p, space_size);
+                    if (space_size) {
+                        /* encode datatspace */
+                        if((ret_value = H5S_encode(dspace, p, &space_size)) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+                        p += space_size;
+                    }
+                }
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
     }
@@ -4394,6 +4458,37 @@ H5VL__decode_object_misc_params(void *buf, H5VL_object_misc_t misc_type, hid_t *
                 break;
             }
         case H5VL_REF_CREATE:
+            {
+                char **name = va_arg (arguments, char **);
+                H5R_type_t *ref_type  = va_arg (arguments, H5R_type_t *);
+                hid_t *space_id  = va_arg (arguments, hid_t *);
+                size_t len = 0, space_size = 0;
+
+                /* decode length of the new name and the actual name */
+                UINT64DECODE_VARLEN(p, len);
+                if(len) {
+                    *name = H5MM_xstrdup((const char *)(p));
+                    p += len;
+                }
+
+                /* decode reference type */
+                *ref_type = (H5R_type_t)*p++;
+
+                /* decode the space size */
+                UINT64DECODE_VARLEN(p, space_size);
+                if(space_size) {
+                    H5S_t *ds = NULL;
+                    /* decode the dataspace */
+                    if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+                    /* Register the type and return the ID */
+                    if((*space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+                    p += space_size;
+                }
+
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
     }
@@ -4458,7 +4553,56 @@ H5VL__encode_object_get_params(void *buf, size_t *nalloc, H5VL_object_get_t get_
             }
         case H5VL_REF_GET_REGION:
         case H5VL_REF_GET_TYPE:
+            {
+                H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
+                const void  *ref     =  va_arg (arguments, const void *);
+                size_t ref_size = 0;
+
+                if(ref_type == H5R_DATASET_REGION)
+                    ref_size = sizeof(hdset_reg_ref_t);
+                else if (ref_type == H5R_OBJECT)
+                    ref_size = sizeof(hobj_ref_t);
+
+                size += 1 + 
+                    1 + H5V_limit_enc_size((uint64_t)ref_size) + ref_size;
+
+                if(NULL != p) {
+                    *p++ = (uint8_t)ref_type;
+                    UINT64ENCODE_VARLEN(p, ref_size);
+                    if(ref_size)
+                        HDmemcpy(p, (const uint8_t *)ref, ref_size);
+                    p += ref_size;
+                }
+
+                break;
+            }
         case H5VL_REF_GET_NAME:
+            {
+                H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
+                void        *ref     =  va_arg (arguments, void *);
+                size_t      buf_size = va_arg (arguments, size_t);
+                size_t ref_size = 0;
+
+                if(ref_type == H5R_DATASET_REGION)
+                    ref_size = sizeof(hdset_reg_ref_t);
+                else if (ref_type == H5R_OBJECT)
+                    ref_size = sizeof(hobj_ref_t);
+
+                size += 1 + 
+                    1 + H5V_limit_enc_size((uint64_t)ref_size) + ref_size +
+                    1 + H5V_limit_enc_size((uint64_t)buf_size);
+
+                if(NULL != p) {
+                    *p++ = (uint8_t)ref_type;
+                    UINT64ENCODE_VARLEN(p, ref_size);
+                    if(ref_size)
+                        HDmemcpy(p, (const uint8_t *)ref, ref_size);
+                    p += ref_size;
+                    UINT64ENCODE_VARLEN(p, buf_size);
+                }
+
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
     }
@@ -4507,7 +4651,38 @@ H5VL__decode_object_get_params(void *buf, H5VL_object_get_t get_type, hid_t *obj
             }
         case H5VL_REF_GET_REGION:
         case H5VL_REF_GET_TYPE:
+            {
+                H5R_type_t  *ref_type =  va_arg (arguments, H5R_type_t *);
+                void        **ref     =  va_arg (arguments, void **);
+                size_t ref_size = 0;
+
+                *ref_type = (H5R_type_t)*p++;
+
+                UINT64DECODE_VARLEN(p, ref_size);
+
+                *ref = HDmalloc(ref_size);
+                HDmemcpy(*ref, (const uint8_t *)p, ref_size);
+                p += ref_size;
+                break;
+            }
         case H5VL_REF_GET_NAME:
+            {
+                H5R_type_t  *ref_type = va_arg (arguments, H5R_type_t *);
+                void        **ref     = va_arg (arguments, void **);
+                size_t      *buf_size = va_arg (arguments, size_t *);
+                size_t ref_size = 0;
+
+                *ref_type = (H5R_type_t)*p++;
+
+                UINT64DECODE_VARLEN(p, ref_size);
+
+                *ref = HDmalloc(ref_size);
+                HDmemcpy(*ref, (const uint8_t *)p, ref_size);
+                p += ref_size;
+
+                UINT64DECODE_VARLEN(p, *buf_size);
+                break;
+            }
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't perform this type of operation on object");
     }
