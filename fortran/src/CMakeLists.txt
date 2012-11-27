@@ -2,6 +2,19 @@ cmake_minimum_required (VERSION 2.8.6)
 PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
+# configure def file for shared libs on windows
+IF (WIN32 AND NOT CYGWIN)
+  IF (BUILD_SHARED_LIBS)
+    IF (MSVC)
+      IF (NOT H5_HAVE_PARALLEL)
+        SET (H5_NOPAREXP ";")
+      ENDIF (NOT H5_HAVE_PARALLEL)
+      CONFIGURE_FILE (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
+    ENDIF (MSVC)
+  ENDIF (BUILD_SHARED_LIBS)
+ENDIF (WIN32 AND NOT CYGWIN)
+
+#-----------------------------------------------------------------------------
 # Setup the Fortran auto-detection utilities
 # H5test_kind(_SIZEOF).f90 used to generate H5fortran_detect.f90
 # H5fortran_detect.f90     used to generate H5fort_type_defines.h
@@ -208,11 +221,7 @@ IF (WIN32 AND NOT CYGWIN)
         BUILD_HDF5_DLL
     )
     IF (MSVC)
-      IF (H5_HAVE_PARALLEL)
-        SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/phdf5_fortrandll.def")
-      ELSE (H5_HAVE_PARALLEL)
-        SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def")
-      ENDIF (H5_HAVE_PARALLEL)
+      SET (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def")
     ENDIF (MSVC)
   ENDIF (BUILD_SHARED_LIBS)
   SET_PROPERTY (TARGET ${HDF5_F90_LIB_TARGET}

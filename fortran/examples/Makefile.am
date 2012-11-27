@@ -33,13 +33,13 @@ endif
 # compile them with the regular fortran compiler.
 
 EXAMPLE_PROG=dsetexample fileexample rwdsetexample attrexample groupexample \
-     grpsexample grpdsetexample hyperslab selectele grpit refobjexample  \
+     grpsexample grpdsetexample hyperslab selectele refobjexample  \
      refregexample mountexample compound
 
 # List files to be installed here
 INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90           \
      attrexample.f90 groupexample.f90 grpsexample.f90 grpdsetexample.f90  \
-     hyperslab.f90 selectele.f90 grpit.f90 refobjexample.f90              \
+     hyperslab.f90 selectele.f90 refobjexample.f90              \
      refregexample.f90 mountexample.f90  compound.f90 ph5example.f90
 INSTALL_SCRIPT_FILES = run-fortran-ex.sh
 
@@ -93,7 +93,6 @@ grpsexample: grpsexample.f90
 grpdsetexample: grpdsetexample.f90
 hyperslab: hyperslab.f90
 selectele: selectele.f90
-grpit: grpit.f90
 refobjexample: refobjexample.f90
 refregexample: refregexample.f90
 mountexample: mountexample.f90
