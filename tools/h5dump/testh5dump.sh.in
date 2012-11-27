@@ -145,6 +145,7 @@ $SRC_H5DUMP_TESTFILES/tordergr.h5
 $SRC_H5DUMP_TESTFILES/tsaf.h5
 $SRC_H5DUMP_TESTFILES/tscalarintsize.h5
 $SRC_H5DUMP_TESTFILES/tscalarattrintsize.h5
+$SRC_H5DUMP_TESTFILES/tscalarstring.h5
 $SRC_H5DUMP_TESTFILES/tslink.h5
 $SRC_H5DUMP_TESTFILES/tsplit_file-m.h5
 $SRC_H5DUMP_TESTFILES/tsplit_file-r.h5
@@ -281,6 +282,7 @@ $SRC_H5DUMP_TESTFILES/treference.ddl
 $SRC_H5DUMP_TESTFILES/tsaf.ddl
 $SRC_H5DUMP_TESTFILES/tscalarintsize.ddl
 $SRC_H5DUMP_TESTFILES/tscalarattrintsize.ddl
+$SRC_H5DUMP_TESTFILES/tscalarstring.ddl
 $SRC_H5DUMP_TESTFILES/tscaleoffset.ddl
 $SRC_H5DUMP_TESTFILES/tshuffle.ddl
 $SRC_H5DUMP_TESTFILES/tslink-1.ddl
@@ -690,6 +692,8 @@ TOOLTEST tattrintsize.ddl --enable-error-stack tattrintsize.h5
 TOOLTEST tcmpdattrintsize.ddl --enable-error-stack tcmpdattrintsize.h5
 # test for signed/unsigned scalar attributes
 TOOLTEST tscalarattrintsize.ddl --enable-error-stack tscalarattrintsize.h5
+# test for string scalar dataset attribute
+TOOLTEST tscalarstring.ddl --enable-error-stack tscalarstring.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl --enable-error-stack tgroup.h5
 # test for displaying the selected groups

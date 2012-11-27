@@ -1514,9 +1514,12 @@ H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         filter.cd_nelmts = (size_t)enc_value;
 
-        if(filter.cd_nelmts)
+        if(filter.cd_nelmts) {
             if(NULL == (filter.cd_values = (unsigned *)H5MM_malloc(sizeof(unsigned) * filter.cd_nelmts)))
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "memory allocation failed for cd_values")
+        } /* end if */
+        else
+            filter.cd_values = NULL;
 
         /* decode values */
         for(v = 0; v < filter.cd_nelmts; v++)
