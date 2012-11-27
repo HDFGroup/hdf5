@@ -2802,10 +2802,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
+H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *nalloc)
 {
     const H5AC_cache_config_t *config = (const H5AC_cache_config_t *)value; /* Create local aliases for values */
     uint8_t **pp = (uint8_t **)_pp;
+    size_t size = 0;
     unsigned enc_size;      /* Size of encoded property */
     uint64_t enc_value;         /* Property to encode */
 
@@ -2813,6 +2814,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
     /* Sanity check */
     HDassert(value);
+    HDassert(nalloc);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     if(NULL != *pp) {
@@ -2912,20 +2914,22 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
     /* Compute encoded size of variably-encoded values */
     enc_value = (uint64_t)config->initial_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    size += 1 + H5V_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    size += 1 + H5V_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->min_size;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    size += 1 + H5V_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_increment;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    size += 1 + H5V_limit_enc_size(enc_value);
     enc_value = (uint64_t)config->max_decrement;
-    *size += 1 + H5V_limit_enc_size(enc_value);
+    size += 1 + H5V_limit_enc_size(enc_value);
 
     /* Compute encoded size of fixed-size values */
-    *size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) +
+    size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) +
             (sizeof(int32_t) * 4) + sizeof(int64_t) +
             H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+
+    *nalloc = size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_config_enc() */
