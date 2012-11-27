@@ -324,8 +324,7 @@
 ./fortran/src/README
 ./fortran/src/README_DEVELOPEMENT   _DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
-./fortran/src/hdf5_fortrandll.def
-./fortran/src/phdf5_fortrandll.def
+./fortran/src/hdf5_fortrandll.def.in
 
 ./fortran/test/Makefile.am
 ./fortran/test/Makefile.in
