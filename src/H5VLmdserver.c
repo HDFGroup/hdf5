@@ -91,6 +91,7 @@ static herr_t H5VL__attr_get_func(uint8_t *p, int source);
 static herr_t H5VL__attr_close_func(uint8_t *p, int source);
 static herr_t H5VL__chunk_insert(uint8_t *p, int source);
 static herr_t H5VL__chunk_get_addr(uint8_t *p, int source);
+static herr_t H5VL__chunk_iterate(uint8_t *p, int source);
 static herr_t H5VL__dataset_create_func(uint8_t *p, int source);
 static herr_t H5VL__dataset_open_func(uint8_t *p, int source);
 static herr_t H5VL__dataset_set_extent_func(uint8_t *p, int source);
@@ -144,6 +145,7 @@ static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
     H5VL__attr_close_func,
     H5VL__chunk_insert,
     H5VL__chunk_get_addr,
+    H5VL__chunk_iterate,
     H5VL__dataset_create_func,
     H5VL__dataset_open_func,
     H5VL__dataset_set_extent_func,
@@ -3638,6 +3640,111 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_get_addr */
+
+static int
+H5D__chunk_iterate_cb(const H5D_chunk_rec_t *chunk_rec, void *op_data)
+{
+    int source = *((int *)op_data);
+    void *send_buf = NULL;
+    size_t buf_size = 0; /* send_buf size */
+    uint8_t *p = NULL; /* temporary pointer into send_buf for encoding */
+    unsigned u;
+    int ret_value = H5_ITER_CONT;     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* calculate size of buffer needed */
+    buf_size = sizeof(int32_t) + sizeof(uint32_t) + sizeof(unsigned) + 
+        1 + H5V_limit_enc_size((uint64_t)chunk_rec->chunk_addr);
+
+    for(u=0 ; u<H5O_LAYOUT_NDIMS; u++)
+        buf_size += 1 + H5V_limit_enc_size((uint64_t)chunk_rec->offset[u]);
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p = (uint8_t *)send_buf;
+
+    /* encode a flag that this message contains a chunk address and not a FAIL or DONE */
+    INT32ENCODE(p, H5VL_MDS_CHUNK_ITERATE);
+
+    UINT32ENCODE(p, chunk_rec->nbytes);
+    for(u=0 ; u<H5O_LAYOUT_NDIMS; u++)
+        UINT64ENCODE_VARLEN(p, chunk_rec->offset[u]);
+    H5_ENCODE_UNSIGNED(p, chunk_rec->filter_mask);    
+    UINT64ENCODE_VARLEN(p, chunk_rec->chunk_addr);
+
+    /* send the callback data back to the client and recieve the return value */
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5VL_MDS_SEND_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, source, H5VL_MDS_LISTEN_TAG,
+                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with client");
+
+    H5MM_free(send_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+* Function:	H5VL__chunk_iterate
+*------------------------------------------------------------------------- */
+static herr_t
+H5VL__chunk_iterate(uint8_t *p, int source)
+{
+    hid_t dset_id; /* metadata file ID */
+    H5D_t *dset = NULL;
+    H5D_chk_idx_info_t idx_info;
+    size_t dxpl_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* the metadata file id */
+    INT32DECODE(p, dset_id);
+
+    /* get the dataset object */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier");
+
+    /* Compose chunked index info struct */
+    idx_info.f = dset->oloc.file;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout.u.chunk;
+    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+
+    /* decode the index address */
+    UINT64DECODE_VARLEN(p, idx_info.storage->idx_addr);
+
+    /* decode the dxpl size */
+    UINT64DECODE_VARLEN(p, dxpl_size);
+    /* decode property lists if they are not default*/
+    if(dxpl_size) {
+        if((idx_info.dxpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dxpl_size;
+    }
+    else
+        idx_info.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+
+    /* apply cache tag to dxpl */
+    if(H5AC_tag(idx_info.dxpl_id, dset->oloc.addr, NULL) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag");
+
+    /* iterate */
+    if((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iterate_cb, 
+                                                           &source) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk iteration failed");
+
+done:
+    /* send a failed message to the client */
+    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__chunk_iterate */
 
 /*
  * Just a temporary routine to create a var_args to pass through the native MDS get routine

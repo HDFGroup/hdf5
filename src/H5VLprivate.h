@@ -31,7 +31,7 @@
 /****************************/
 #define H5_REQUEST_NULL -1
 
-#define H5VL_NUM_OPS 40
+#define H5VL_NUM_OPS 41
 
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
@@ -50,6 +50,7 @@ typedef enum H5VL_op_type_t {
     H5VL_ATTR_CLOSE,
     H5VL_CHUNK_INSERT,
     H5VL_CHUNK_GET_ADDR,
+    H5VL_CHUNK_ITERATE,
     H5VL_DSET_CREATE,
     H5VL_DSET_OPEN,
     H5VL_DSET_SET_EXTENT,

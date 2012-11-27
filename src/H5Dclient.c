@@ -57,19 +57,15 @@ static herr_t H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
+static int H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
 #if 0
-/* iterator callbacks */
-static int H5D__client_idx_iterate_cb(H5F_t *f, hid_t dxpl_id, const void *left_key,
-    haddr_t addr, const void *right_key, void *_udata);
-
 /* Chunked layout indexing callbacks */
 static herr_t H5D__client_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D__client_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__client_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 
-static int H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
 static herr_t H5D__client_idx_remove(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata);
 static herr_t H5D__client_idx_delete(const H5D_chk_idx_info_t *idx_info);
@@ -97,7 +93,7 @@ const H5D_chunk_ops_t H5D_COPS_CLIENT[1] = {{
     H5D__client_idx_insert,
     H5D__client_idx_get_addr,
     NULL,
-    NULL,
+    H5D__client_idx_iterate,
     NULL,
     NULL,
     NULL,
@@ -207,7 +203,7 @@ H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += dxpl_size;
     }
-    
+
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
@@ -369,6 +365,149 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__client_idx_get_addr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__client_idx_iterate
+ *
+ * Purpose:	Iterate over the chunks in an index, making a callback
+ *              for each one.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              November  8, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
+{
+    void *send_buf = NULL;
+    uint8_t *p = NULL;
+    H5P_genplist_t *dxpl = NULL;
+    hid_t mds_dset_id = FAIL;
+    size_t buf_size = 0, dxpl_size = 0;
+    int ret_value;              /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(idx_info->storage);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(chunk_cb);
+    HDassert(chunk_udata);
+
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(idx_info->dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    if(H5P_get(dxpl, H5VL_DSET_MDS_ID, &mds_dset_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
+
+    /* get size for property lists to encode */
+    if(H5P_DATASET_XFER_DEFAULT != idx_info->dxpl_id) {
+        if((ret_value = H5P__encode(dxpl, FALSE, NULL, &dxpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    buf_size = 1 + sizeof(hid_t) + 
+        1 + H5V_limit_enc_size((uint64_t)dxpl_size) + dxpl_size + 
+        1 + H5V_limit_enc_size((uint64_t)(idx_info->storage->idx_addr));
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p = (uint8_t *)send_buf;
+
+    /* encode request type */
+    *p++ = (uint8_t)H5VL_CHUNK_ITERATE;
+
+    /* encode the object id */
+    INT32ENCODE(p, mds_dset_id);
+
+    /* encode the index address */
+    UINT64ENCODE_VARLEN(p, idx_info->storage->idx_addr);
+
+    /* encode the plist size */
+    UINT64ENCODE_VARLEN(p, dxpl_size);
+    /* encode dxpl if not default*/
+    if(dxpl_size) {
+        if((ret_value = H5P__encode(dxpl, FALSE, p, &dxpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+        p += dxpl_size;
+    }
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    H5MM_free(send_buf);
+    MPI_Pcontrol(1);
+
+    while (1) {
+        MPI_Status status;
+        void *recv_buf = NULL;
+        int incoming_msg_size = 0;
+        int ret;
+        H5D_chunk_rec_t chunk_rec;
+        unsigned u;
+
+        MPI_Pcontrol(0);
+        /* probe for a message from the mds */
+        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+        /* get the incoming message size from the probe result */
+        if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+        /* allocate the receive buffer */
+        if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+        /* receive the actual message */
+        if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+        MPI_Pcontrol(1);
+
+        p = (uint8_t *)recv_buf;
+
+        /* decode the ret value from the server to see whether we need to continue iterating or stop */
+        INT32DECODE(p, ret_value);
+        if(ret_value == SUCCEED || ret_value == FAIL) {
+            H5MM_free(recv_buf);
+            break;
+        }
+        HDassert(ret_value == H5VL_MDS_CHUNK_ITERATE);
+
+        UINT32DECODE(p, chunk_rec.nbytes);
+        for(u=0 ; u<H5O_LAYOUT_NDIMS; u++)
+            UINT64DECODE_VARLEN(p, chunk_rec.offset[u]);
+        H5_DECODE_UNSIGNED(p, chunk_rec.filter_mask);    
+        UINT64DECODE_VARLEN(p, chunk_rec.chunk_addr);
+
+        H5MM_free(recv_buf);
+
+        /* execute the iterate callback */
+        ret = chunk_cb(&chunk_rec, chunk_udata);
+
+        /* send result to MDS */
+        MPI_Pcontrol(0);
+        /* send the request to the MDS process and recieve the return value */
+        if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
+                                   H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+        MPI_Pcontrol(1);
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__client_idx_iterate() */
+
 #if 0
 
 /*-------------------------------------------------------------------------
@@ -472,69 +611,6 @@ H5D__client_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__client_idx_is_space_alloc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__client_idx_iterate_cb
- *
- * Purpose:	Translate the B-tree specific chunk record into a generic
- *              form and make the callback to the generic chunk callback
- *              routine.
- *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Mohamad Chaarawi
- *              November  8, 2012
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static int
-H5D__client_idx_iterate_cb(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
-    const void *_lt_key, haddr_t addr, const void UNUSED *_rt_key,
-    void *_udata)
-{
-    int ret_value = SUCCEED;              /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__client_idx_iterate_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__client_idx_iterate
- *
- * Purpose:	Iterate over the chunks in an index, making a callback
- *              for each one.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              November  8, 2012
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
-{
-    int ret_value;              /* Return value */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    HDassert(idx_info);
-    HDassert(idx_info->f);
-    HDassert(idx_info->pline);
-    HDassert(idx_info->layout);
-    HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
-    HDassert(chunk_cb);
-    HDassert(chunk_udata);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__client_idx_iterate() */
 
 
 /*-------------------------------------------------------------------------
