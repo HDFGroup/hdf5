@@ -2043,3 +2043,61 @@ H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, h
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5VL__close_loc_params
+ *
+ * Purpose:        free location parameters in param struct
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi
+ *                 November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL__close_loc_params(H5VL_loc_params_t loc_params)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    switch(loc_params.type) {
+        case H5VL_OBJECT_BY_SELF:
+        case H5VL_OBJECT_BY_ADDR:
+            break;
+        case H5VL_OBJECT_BY_NAME:
+            H5MM_xfree(loc_params.loc_data.loc_by_name.name);
+            if(loc_params.loc_data.loc_by_name.plist_id &&
+               loc_params.loc_data.loc_by_name.plist_id != H5P_LINK_ACCESS_DEFAULT &&
+               loc_params.loc_data.loc_by_name.plist_id != H5P_DEFAULT &&
+               H5I_dec_ref(loc_params.loc_data.loc_by_name.plist_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+            break;
+        case H5VL_OBJECT_BY_IDX:
+            H5MM_xfree(loc_params.loc_data.loc_by_idx.name);
+            if(loc_params.loc_data.loc_by_idx.plist_id &&
+               loc_params.loc_data.loc_by_idx.plist_id != H5P_LINK_ACCESS_DEFAULT &&
+               loc_params.loc_data.loc_by_idx.plist_id != H5P_DEFAULT &&
+               H5I_dec_ref(loc_params.loc_data.loc_by_idx.plist_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+            break;
+        case H5VL_OBJECT_BY_REF:
+            HDfree(loc_params.loc_data.loc_by_ref._ref);
+            if(loc_params.loc_data.loc_by_ref.plist_id &&
+               loc_params.loc_data.loc_by_idx.plist_id != H5P_LINK_ACCESS_DEFAULT &&
+               loc_params.loc_data.loc_by_idx.plist_id != H5P_DATASET_ACCESS_DEFAULT &&
+               loc_params.loc_data.loc_by_ref.plist_id != H5P_DEFAULT &&
+               H5I_dec_ref(loc_params.loc_data.loc_by_ref.plist_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+            break;
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTFREE, FAIL, "invalid location type");
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__close_loc_params() */

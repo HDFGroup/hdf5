@@ -378,9 +378,9 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     if(H5I_dec_ref(split_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
     if(H5I_dec_ref(temp_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
     H5MM_xfree(mds_filename);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -487,9 +487,9 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     if(H5I_dec_ref(split_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
     if(H5I_dec_ref(temp_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
     H5MM_xfree(mds_filename);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -520,6 +520,10 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__file_flush_func */
 
@@ -1003,11 +1007,13 @@ done:
 
     H5MM_xfree(name);
     if(acpl_id && acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT && H5I_dec_ref(acpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(H5I_dec_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't close type");
     if(H5I_dec_ref(space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close dataspace");
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__attr_create_func */
@@ -1124,6 +1130,8 @@ done:
 
     H5MM_xfree(send_buf);
     H5MM_xfree(name);
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_open_func */
@@ -1171,7 +1179,7 @@ done:
 
     H5MM_xfree(buf);
     if(H5I_dec_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't close type");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_read_func */
@@ -1202,7 +1210,7 @@ H5VL__attr_write_func(uint8_t *p, int source)
 
 done:
     if(H5I_dec_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't close type");
     /* Send failed to the client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
@@ -1235,6 +1243,9 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_remove_func */
@@ -1274,6 +1285,8 @@ H5VL__attr_get_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 H5MM_xfree(attr_name);
                 break;
             }
@@ -1326,6 +1339,8 @@ H5VL__attr_get_func(uint8_t *p, int source)
 
                 H5MM_xfree(send_buf);
                 H5MM_xfree(name);
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         case H5VL_ATTR_GET_INFO:
@@ -1374,6 +1389,8 @@ H5VL__attr_get_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         case H5VL_ATTR_GET_SPACE:
@@ -1509,15 +1526,17 @@ done:
     H5MM_xfree(send_buf);
     H5MM_xfree(name);
     if(type_id && H5I_dec_ref(type_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't close type");
     if(space_id && H5I_dec_ref(space_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close space");
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close space");
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(dcpl_id && dcpl_id != H5P_DATASET_CREATE_DEFAULT && H5I_dec_ref(dcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(dapl_id && dapl_id != H5P_DATASET_ACCESS_DEFAULT && H5I_dec_ref(dapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__dataset_create_func */
@@ -1649,7 +1668,9 @@ done:
     H5MM_xfree(send_buf);
     H5MM_xfree(name);
     if(dapl_id && dapl_id != H5P_DATASET_ACCESS_DEFAULT && H5I_dec_ref(dapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__dataset_open_func */
@@ -1810,11 +1831,13 @@ done:
 
     H5MM_xfree(name);
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(tcpl_id && tcpl_id != H5P_DATATYPE_CREATE_DEFAULT && H5I_dec_ref(tcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(tapl_id && tapl_id != H5P_DATATYPE_ACCESS_DEFAULT && H5I_dec_ref(tapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__datatype_commit_func */
@@ -1886,7 +1909,9 @@ done:
     H5MM_xfree(send_buf);
     H5MM_xfree(name);
     if(tapl_id && tapl_id != H5P_DATATYPE_ACCESS_DEFAULT && H5I_dec_ref(tapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__datatype_open_func */
@@ -1976,11 +2001,13 @@ done:
     if(name)
         H5MM_xfree(name);
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(gcpl_id && gcpl_id != H5P_GROUP_CREATE_DEFAULT && H5I_dec_ref(gcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(gapl_id && gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5I_dec_ref(gapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__group_create_func */
@@ -2029,7 +2056,9 @@ done:
     if(name)
         H5MM_xfree(name);
     if(gapl_id && gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5I_dec_ref(gapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__group_open_func */
@@ -2135,6 +2164,8 @@ H5VL__group_get_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         default:
@@ -2216,9 +2247,11 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(lapl_id && lapl_id != H5P_LINK_ACCESS_DEFAULT && H5I_dec_ref(lapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_create_func */
@@ -2253,9 +2286,13 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(lapl_id && lapl_id != H5P_LINK_ACCESS_DEFAULT && H5I_dec_ref(lapl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params1) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
+    if(H5VL__close_loc_params(loc_params2) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_move_func */
@@ -2368,6 +2405,8 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     H5MM_xfree(idx);
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_iterate_func */
@@ -2405,6 +2444,9 @@ H5VL__link_get_func(uint8_t *p, int source)
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(htri_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         case H5VL_LINK_GET_INFO:
@@ -2460,6 +2502,8 @@ H5VL__link_get_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         case H5VL_LINK_GET_NAME:
@@ -2511,6 +2555,8 @@ H5VL__link_get_func(uint8_t *p, int source)
 
                 H5MM_xfree(send_buf);
                 H5MM_xfree(name);
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         case H5VL_LINK_GET_VAL:
@@ -2540,6 +2586,8 @@ H5VL__link_get_func(uint8_t *p, int source)
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(val);
+                if(H5VL__close_loc_params(loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
                 break;
             }
         default:
@@ -2578,6 +2626,9 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_remove_func */
@@ -2762,9 +2813,6 @@ H5VL__object_open_func(uint8_t *p, int source)
         break;
     }
 done:
-    if(loc_params.type == H5VL_OBJECT_BY_REF)
-        HDfree(loc_params.loc_data.loc_by_ref._ref);
-
     if(SUCCEED == ret_value) {
         /* Send the dataset id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
@@ -2778,6 +2826,8 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
     H5MM_xfree(send_buf);
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__object_open_func */
@@ -2817,9 +2867,13 @@ done:
     H5MM_xfree(src_name);
     H5MM_xfree(dst_name);
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
     if(ocpypl_id && ocpypl_id != H5P_OBJECT_COPY_DEFAULT && H5I_dec_ref(ocpypl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5VL__close_loc_params(loc_params1) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
+    if(H5VL__close_loc_params(loc_params2) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__object_copy_func */
@@ -2914,6 +2968,8 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__object_visit_func */
@@ -3027,7 +3083,7 @@ H5VL__object_misc_func(uint8_t *p, int source)
 
                 HDfree(ref);
                 if(space_id && H5I_dec_ref(space_id) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close dataspace");
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");
                 break;
             }
         default:
@@ -3035,6 +3091,9 @@ H5VL__object_misc_func(uint8_t *p, int source)
     }
 
 done:
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__object_misc_func */
 
@@ -3219,7 +3278,7 @@ H5VL__object_get_func(uint8_t *p, int source)
 
                 H5MM_xfree(send_buf);
                 if(H5I_dec_ref(space_id) < 0)
-                    HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "failed to close space ID");
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "failed to close space ID");
                 HDfree(ref);
                 break;
             }
@@ -3310,6 +3369,9 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
+    if(H5VL__close_loc_params(loc_params) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__object_get_func */
 
@@ -3581,7 +3643,7 @@ done:
     H5MM_xfree(offsets);
     if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
        H5I_dec_ref(idx_info.dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_insert */
@@ -3692,7 +3754,7 @@ done:
     H5MM_xfree(offsets);
     if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
        H5I_dec_ref(idx_info.dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_get_addr */
@@ -3801,7 +3863,7 @@ done:
 
     if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
        H5I_dec_ref(idx_info.dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_iterate */

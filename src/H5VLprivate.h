@@ -96,6 +96,7 @@ H5_DLL hid_t  H5VL_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL hid_t H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t app_ref);
 H5_DLL ssize_t H5VL_get_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL void *H5VL_get_object(hid_t id);
+H5_DLL herr_t H5VL__close_loc_params(H5VL_loc_params_t loc_params);
 H5_DLL herr_t H5VL_close(H5VL_class_t *vol_plugin);
 
 H5_DLL void *H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
