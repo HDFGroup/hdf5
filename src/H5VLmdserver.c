@@ -365,13 +365,6 @@ H5VL__file_create_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
-    if(H5I_dec_app_ref(split_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
-    if(H5I_dec_app_ref(temp_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
-    if(mds_filename)
-        H5MM_xfree(mds_filename);
-
     if(SUCCEED == ret_value) {
         /* Send the meta data file ID to the client */
         if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
@@ -384,6 +377,12 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
+    if(H5I_dec_ref(split_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    if(H5I_dec_ref(temp_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    H5MM_xfree(mds_filename);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__file_create_func */
 
@@ -475,13 +474,6 @@ H5VL__file_open_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
-    if(H5I_dec_app_ref(split_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
-    if(H5I_dec_app_ref(temp_fapl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
-    if(mds_filename)
-        H5MM_xfree(mds_filename);
-
     if(SUCCEED == ret_value) {
         /* Send the meta data file ID to the client */
         if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
@@ -494,6 +486,12 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
+    if(H5I_dec_ref(split_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    if(H5I_dec_ref(temp_fapl) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
+    H5MM_xfree(mds_filename);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__file_open_func */
 
@@ -559,6 +557,8 @@ H5VL__file_misc_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
+                if(plist_id != H5P_FILE_MOUNT_DEFAULT && H5I_dec_ref(plist_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
                 H5MM_xfree(name);
                 break;
             }
@@ -1001,8 +1001,14 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    if(name)
-        H5MM_xfree(name);
+    H5MM_xfree(name);
+    if(acpl_id && acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT && H5I_dec_ref(acpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5I_dec_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
+    if(H5I_dec_ref(space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close dataspace");
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__attr_create_func */
 
@@ -1116,10 +1122,8 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    if(send_buf)
-        H5MM_free(send_buf);
-    if(name)
-        H5MM_xfree(name);
+    H5MM_xfree(send_buf);
+    H5MM_xfree(name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_open_func */
@@ -1165,8 +1169,9 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    if(buf)
-        H5MM_free(buf);
+    H5MM_xfree(buf);
+    if(H5I_dec_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__attr_read_func */
@@ -1196,6 +1201,8 @@ H5VL__attr_write_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute");
 
 done:
+    if(H5I_dec_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
     /* Send failed to the client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
@@ -1499,10 +1506,18 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    if(send_buf)
-        H5MM_free(send_buf);
-    if(name)
-        H5MM_xfree(name);
+    H5MM_xfree(send_buf);
+    H5MM_xfree(name);
+    if(type_id && H5I_dec_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close type");
+    if(space_id && H5I_dec_ref(space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close space");
+    if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(dcpl_id && dcpl_id != H5P_DATASET_CREATE_DEFAULT && H5I_dec_ref(dcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(dapl_id && dapl_id != H5P_DATASET_ACCESS_DEFAULT && H5I_dec_ref(dapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__dataset_create_func */
@@ -1631,10 +1646,10 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    if(send_buf)
-        H5MM_free(send_buf);
-    if(name)
-        H5MM_xfree(name);
+    H5MM_xfree(send_buf);
+    H5MM_xfree(name);
+    if(dapl_id && dapl_id != H5P_DATASET_ACCESS_DEFAULT && H5I_dec_ref(dapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5VL__dataset_open_func */
@@ -1792,8 +1807,15 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
-    if(name)
-        H5MM_xfree(name);
+
+    H5MM_xfree(name);
+    if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(tcpl_id && tcpl_id != H5P_DATATYPE_CREATE_DEFAULT && H5I_dec_ref(tcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(tapl_id && tapl_id != H5P_DATATYPE_ACCESS_DEFAULT && H5I_dec_ref(tapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__datatype_commit_func */
 
@@ -1861,10 +1883,11 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
-    if(send_buf)
-        H5MM_free(send_buf);
-    if(name)
-        H5MM_xfree(name);
+    H5MM_xfree(send_buf);
+    H5MM_xfree(name);
+    if(tapl_id && tapl_id != H5P_DATATYPE_ACCESS_DEFAULT && H5I_dec_ref(tapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__datatype_open_func */
 
@@ -1952,6 +1975,12 @@ done:
 
     if(name)
         H5MM_xfree(name);
+    if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(gcpl_id && gcpl_id != H5P_GROUP_CREATE_DEFAULT && H5I_dec_ref(gcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(gapl_id && gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5I_dec_ref(gapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__group_create_func */
@@ -1999,6 +2028,8 @@ done:
 
     if(name)
         H5MM_xfree(name);
+    if(gapl_id && gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5I_dec_ref(gapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__group_open_func */
@@ -2063,7 +2094,8 @@ H5VL__group_get_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
-                H5Pclose(gcpl_id);
+                if(gcpl_id && gcpl_id != H5P_GROUP_CREATE_DEFAULT && H5I_dec_ref(gcpl_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
                 break;
             }
         /* H5Gget_info */
@@ -2183,6 +2215,11 @@ done:
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
+    if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(lapl_id && lapl_id != H5P_LINK_ACCESS_DEFAULT && H5I_dec_ref(lapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_create_func */
 
@@ -2214,6 +2251,11 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(lapl_id && lapl_id != H5P_LINK_ACCESS_DEFAULT && H5I_dec_ref(lapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__link_move_func */
@@ -2774,6 +2816,10 @@ done:
 
     H5MM_xfree(src_name);
     H5MM_xfree(dst_name);
+    if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(ocpypl_id && ocpypl_id != H5P_OBJECT_COPY_DEFAULT && H5I_dec_ref(ocpypl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 }/* H5VL__object_copy_func */
@@ -2978,7 +3024,10 @@ H5VL__object_misc_func(uint8_t *p, int source)
                 if(MPI_SUCCESS != MPI_Send(ref, (int)ref_size, MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ref pointer");
+
                 HDfree(ref);
+                if(space_id && H5I_dec_ref(space_id) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close dataspace");
                 break;
             }
         default:
@@ -3524,12 +3573,15 @@ H5VL__chunk_insert(uint8_t *p, int source)
     UINT64ENCODE_VARLEN(p1, udata.addr);
 
 done:
-    H5MM_free(offsets);
-
     /* Send the confirmation to the client */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    H5MM_xfree(offsets);
+    if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
+       H5I_dec_ref(idx_info.dxpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_insert */
@@ -3623,7 +3675,6 @@ H5VL__chunk_get_addr(uint8_t *p, int source)
     UINT64ENCODE_VARLEN(p1, udata.addr);
 
 done:
-    H5MM_free(offsets);
 
     if(SUCCEED == ret_value) {
         /* Send the confirmation to the client */
@@ -3637,6 +3688,11 @@ done:
                                    H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
+
+    H5MM_xfree(offsets);
+    if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
+       H5I_dec_ref(idx_info.dxpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_get_addr */
@@ -3742,6 +3798,10 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
+       H5I_dec_ref(idx_info.dxpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__chunk_iterate */
