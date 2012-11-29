@@ -1506,7 +1506,7 @@ done:
  * Function:	H5I_dec_ref_no_free
  *
  * Purpose:	Decrements the number of references outstanding for an ID.
- *              This routine will not call the free function of the ref count
+ *              This routine will not call the free function if the ref count
  *              reaches 0.
  *
  * Return:	Success:	New reference count.

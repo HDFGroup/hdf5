@@ -1784,11 +1784,11 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
 done:
     if(acpl_id && acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT && H5I_dec_ref(acpl_id) < 0)
-        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, NULL, "can't close plist");
     if(H5S_close(space) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't release dataspace info");
     if(H5T_close(type) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't close datatype");
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, NULL, "can't close datatype");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_attr_open() */
@@ -3788,7 +3788,6 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
         size_t len = 0;
         int ret;
         uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */        
-        H5VL_t *vol_plugin = NULL;
 
         MPI_Pcontrol(0);
         /* probe for a message from the mds */
@@ -3849,9 +3848,11 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         H5MM_free(recv_buf);
 
-        /* create a user id for the object passed in from the API layer */
-        if((group_id = H5VL_mds_register(H5I_GROUP, obj, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+        /* Get the group ID for the object */
+        if((group_id = H5I_get_id(obj, H5I_GROUP)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get group ID")
+        if(H5I_inc_ref(group_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
 
         /* execute the user iterate callback */
         ret = op(group_id, name, &linfo, op_data);
@@ -3869,11 +3870,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
          * its side part of the native iterate implementation. We only need to free the aux struct */
         if(H5I_dec_ref_no_free(group_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on group ID");
-        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(group_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
 
-        H5MM_xfree(vol_plugin->container_name);
-        H5MM_xfree(vol_plugin);
         H5MM_xfree(name);
     }
     obj->obj_id = temp_id;
@@ -4484,7 +4481,6 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
         size_t len = 0, info_size = 0;
         herr_t ret;
         uint8_t *p = NULL; /* pointer into recv_buf; used for decoding */
-        H5VL_t *vol_plugin = NULL;
 
         MPI_Pcontrol(0);
         /* probe for a message from the mds */
@@ -4533,9 +4529,11 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
 
         H5MM_free(recv_buf);
 
-        /* create a user id for the object passed in from the API layer */
-        if((new_id = H5VL_mds_register(obj->obj_type, obj, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+        /* Get the ID for the object */
+        if((new_id = H5I_get_id(obj, obj->obj_type)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get object ID")
+        if(H5I_inc_ref(new_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
 
         /* execute the user iterate callback */
         ret = op(new_id, name, &info, op_data);
@@ -4553,11 +4551,6 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
          * its side part of the native iterate implementation. We only need to free the aux struct */
         if(H5I_dec_ref_no_free(new_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement ref count on object ID");
-        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(new_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
-
-        H5MM_xfree(vol_plugin->container_name);
-        H5MM_xfree(vol_plugin);
         H5MM_xfree(name);
     }
     obj->obj_id = temp_id;
