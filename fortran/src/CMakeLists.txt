@@ -9,6 +9,9 @@ IF (WIN32 AND NOT CYGWIN)
       IF (NOT H5_HAVE_PARALLEL)
         SET (H5_NOPAREXP ";")
       ENDIF (NOT H5_HAVE_PARALLEL)
+      IF (NOT HDF5_ENABLE_F2003)
+        SET (H5_NOF03EXP ";")
+      ENDIF (NOT HDF5_ENABLE_F2003)
       CONFIGURE_FILE (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     ENDIF (MSVC)
   ENDIF (BUILD_SHARED_LIBS)
@@ -139,13 +142,13 @@ SET_TARGET_PROPERTIES (${HDF5_F90_C_LIB_TARGET} PROPERTIES LINKER_LANGUAGE C)
 #-----------------------------------------------------------------------------
 # Fortran 2003 standard
 #-----------------------------------------------------------------------------
-IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+IF (HDF5_ENABLE_F2003)
   # default real is 4 bytes, so include double signatures
   SET (F_STATUS "_F03")
-ELSE (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+ELSE (HDF5_ENABLE_F2003)
   # default real is 8 bytes, so exclude double signatures
   SET (F_STATUS "_F90")
-ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+ENDIF (HDF5_ENABLE_F2003)
 
 #-----------------------------------------------------------------------------
 # Fortran Real Size
