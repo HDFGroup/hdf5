@@ -182,6 +182,7 @@ H5_DLL herr_t H5D__mdc_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_
                             const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/);
 H5_DLL herr_t H5D__mdc_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                              const H5S_t *file_space, hid_t dxpl_id, const void *buf);
+H5_DLL herr_t H5D__mdc_close(H5D_t *dataset);
 #endif /*H5_HAVE_PARALLEL*/
 
 H5_DLL herr_t H5D__encode_layout(H5O_layout_t layout, void *p, size_t *size);

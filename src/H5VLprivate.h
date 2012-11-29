@@ -31,7 +31,7 @@
 /****************************/
 #define H5_REQUEST_NULL -1
 
-#define H5VL_NUM_OPS 41
+#define H5VL_NUM_OPS 42
 
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
@@ -75,7 +75,8 @@ typedef enum H5VL_op_type_t {
     H5VL_OBJECT_GET,
     H5VL_ALLOC,
     H5VL_GET_EOA,
-    H5VL_SET_EOA
+    H5VL_SET_EOA,
+    H5VL_DONE
 } H5VL_op_type_t;
 
 /*****************************/

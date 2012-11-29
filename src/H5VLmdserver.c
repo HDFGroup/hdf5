@@ -211,6 +211,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__mds_terminate_cb
+ *
+ * Purpose:	Callback routine that is registered with MPI_COMM_SELF that sends 
+ *              a request to the MDS server to indicate that this process called
+ *              MPI_Finalize and is quitting.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int 
+H5VL__mds_terminate_cb(MPI_Comm UNUSED comm, int UNUSED comm_keyval, void UNUSED *attribute_val, 
+                       void UNUSED *extra_state)
+{
+    H5VL_op_type_t req = H5VL_DONE;
+    int ret_value = MPI_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    MPI_Pcontrol(0);
+    /* send a message to the MDS process indicating that we called MPI_Finalize() */
+    if(MPI_SUCCESS != (ret_value = MPI_Send(&req, sizeof(int), MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                                            MPI_COMM_WORLD)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    MPI_Pcontrol(1);
+
+    H5_term_library();
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VLmds_start
  *
  * Purpose:	This is the API routine that the MDS process calls to start 
@@ -226,6 +263,8 @@ done:
 herr_t
 H5VL_mds_start(void)
 {
+    int counter = 0;
+    int num_procs;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -240,6 +279,10 @@ H5VL_mds_start(void)
     /* turn off commsplitter to talk to the other processes */
     MPI_Pcontrol(0);
 
+    /* get the number of processes in world */
+    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+    /* loop accepting requests from clients */
     while(1) {
         MPI_Status status;
         int incoming_msg_size;
@@ -266,12 +309,21 @@ H5VL_mds_start(void)
         p = (uint8_t *)recv_buf;
         op_type = (H5VL_op_type_t)*p++;
 
-        if((*mds_ops[op_type])(p, status.MPI_SOURCE) < 0) {
+        /* if the operation is actually a finished code from the client, then increment the 
+           clients_done counter. Then check if all clients are done, exit if so */
+        if(H5VL_DONE == op_type) {
+            counter ++;
+            if(counter == num_procs-1) {
+                H5MM_xfree(recv_buf);
+                H5_term_library();
+                MPI_Finalize();
+                break;
+            }
+        }
+        else if((*mds_ops[op_type])(p, status.MPI_SOURCE) < 0) {
             printf("failed mds op: %d\n", op_type);
         }
-
-        if(NULL != recv_buf)
-            H5MM_free(recv_buf);
+        H5MM_xfree(recv_buf);
     }
 
 done:
@@ -1754,6 +1806,7 @@ H5VL__dataset_close_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID");
 
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
+    //if(H5I_dec_ref(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID");
 
 done:
@@ -1923,7 +1976,6 @@ static herr_t
 H5VL__datatype_close_func(uint8_t *p, int source)
 {
     hid_t type_id = FAIL;
-    H5T_t *dt = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1932,11 +1984,8 @@ H5VL__datatype_close_func(uint8_t *p, int source)
     if(H5VL__decode_datatype_close_params(p, &type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode datatype close params");
 
-    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID");
-
-    if((ret_value = H5T_close(dt)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype")
+    if(H5I_dec_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype");
 
 done:
     /* send status to client */
@@ -2123,6 +2172,7 @@ H5VL__group_get_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
+                H5MM_xfree(send_buf);
                 if(gcpl_id && gcpl_id != H5P_GROUP_CREATE_DEFAULT && H5I_dec_ref(gcpl_id) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
                 break;
@@ -2245,6 +2295,55 @@ done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    switch(create_type) {
+        case H5VL_LINK_CREATE_HARD:
+            {
+                H5P_genplist_t *plist;
+                H5VL_loc_params_t cur_loc_params;
+
+                /* Get the plist structure */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+                    HDONE_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+                if(H5P_get(plist, H5VL_LINK_TARGET_LOC_PARAMS, &cur_loc_params) < 0)
+                    HDONE_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value");
+                if(H5VL__close_loc_params(cur_loc_params) < 0)
+                    HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
+                break;
+            }
+        case H5VL_LINK_CREATE_SOFT:
+            {
+                H5P_genplist_t *plist;
+                char *name;
+
+                /* Get the plist structure */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+                    HDONE_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+                if(H5P_get(plist, H5VL_LINK_TARGET_NAME, &name) < 0)
+                    HDONE_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name");
+
+                H5MM_xfree(name);
+                break;
+            }
+        case H5VL_LINK_CREATE_UD:
+            {
+                H5P_genplist_t *plist;
+                void *udata;
+
+                /* Get the plist structure */
+                if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+                    HDONE_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+                if(H5P_get(plist, H5VL_LINK_UDATA, &udata) < 0)
+                    HDONE_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value from plist");
+                H5MM_xfree(udata);
+                break;
+            }
+        default:
+            HDONE_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "invalid link creation call");
+    }
 
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
         HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
@@ -2992,8 +3091,8 @@ H5VL__object_misc_func(uint8_t *p, int source)
     switch(misc_type) {
         case H5VL_ATTR_RENAME:
             {
-                const char *old_name;
-                const char *new_name;
+                char *old_name;
+                char *new_name;
 
                 /* decode params */
                 if(H5VL__decode_object_misc_params(p, misc_type, &obj_id, &loc_params,
@@ -3009,11 +3108,14 @@ H5VL__object_misc_func(uint8_t *p, int source)
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(old_name);
+                H5MM_xfree(new_name);
                 break;
             }
         case H5VL_OBJECT_CHANGE_REF_COUNT:
             {
-                int *update_ref;
+                int update_ref;
 
                 /* decode params */
                 if(H5VL__decode_object_misc_params(p, misc_type, &obj_id, &loc_params,
@@ -3033,7 +3135,7 @@ H5VL__object_misc_func(uint8_t *p, int source)
             }
         case H5VL_OBJECT_SET_COMMENT:
             {
-                const char *comment;
+                char *comment;
 
                 /* decode params */
                 if(H5VL__decode_object_misc_params(p, misc_type, &obj_id, &loc_params,
@@ -3049,11 +3151,13 @@ H5VL__object_misc_func(uint8_t *p, int source)
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+                H5MM_xfree(comment);
                 break;
             }
         case H5VL_REF_CREATE:
             {
-                const char *name = NULL;
+                char *name = NULL;
                 H5R_type_t ref_type;
                 hid_t space_id = -1;
                 void *ref = NULL;
@@ -3081,6 +3185,7 @@ H5VL__object_misc_func(uint8_t *p, int source)
                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ref pointer");
 
+                H5MM_xfree(name);
                 HDfree(ref);
                 if(space_id && H5I_dec_ref(space_id) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace");

@@ -1446,6 +1446,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                 file->common.file = file;
 
                 *ret = (void *)file;
+                H5MM_xfree(send_buf);
                 break;
             }
         /* H5Freset_mdc_hit_rate_stats */
@@ -1782,6 +1783,13 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     ret_value = (void *)attr;
 
 done:
+    if(acpl_id && acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT && H5I_dec_ref(acpl_id) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    if(H5S_close(space) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info");
+    if(H5T_close(type) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't close datatype");
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_attr_open() */
 
@@ -2354,9 +2362,6 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(FAIL == H5D__decode_layout(p, &layout))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
 
-    /* Initialize the dataset object */
-    if(NULL == (new_dset = (H5D_t *)H5MM_malloc(sizeof(H5D_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     /* create the "lightweight" client dataset */
     if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
@@ -2524,9 +2529,6 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
     p += layout_size;
 
-    /* Initialize the dataset object */
-    if(NULL == (new_dset = (H5D_t *)H5MM_malloc(sizeof(H5D_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     /* create the "lightweight" client dataset */
     if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
@@ -2922,9 +2924,8 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
     H5MM_free(send_buf);
 
     /* Free the dataset's memory structure */
-    H5MM_free(dset->dset);
-    //if(H5D_close(dset->dset) < 0)
-    //HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset");
+    if(H5D__mdc_close(dset->dset) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset");
 
     dset = H5FL_FREE(H5VL_mds_dset_t, dset);
 
@@ -3399,6 +3400,9 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 }
                 else
                     *new_gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+
+                H5MM_xfree(send_buf);
+                H5MM_xfree(recv_buf);
                 break;
             }
         /* H5Gget_info */
@@ -4273,9 +4277,6 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
                 p += layout_size;
 
-                /* Initialize the dataset object */
-                if(NULL == (new_dset = (H5D_t *)H5MM_malloc(sizeof(H5D_t))))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
                 /* create the "lightweight" client dataset */
                 if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, 
                                                        dcpl_id, H5P_DATASET_ACCESS_DEFAULT)))

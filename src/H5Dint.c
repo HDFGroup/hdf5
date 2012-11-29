@@ -1200,6 +1200,65 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mdc_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__mdc_close
+ *
+ * Purpose:	closes lightweight client dataset
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		November 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__mdc_close(H5D_t *dataset)
+{
+    unsigned free_failed = FALSE;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check args */
+    HDassert(dataset);
+
+    /*
+     * Release datatype, dataspace and creation property list -- there isn't
+     * much we can do if one of these fails, so we just continue.
+     */
+    free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || 
+                             H5S_close(dataset->shared->space) < 0 ||
+                             H5I_dec_ref(dataset->shared->dcpl_id) < 0);
+
+
+    /*
+     * Free memory.  Before freeing the memory set the file pointer to NULL.
+     * We always check for a null file pointer in other H5D functions to be
+     * sure we're not accessing an already freed dataset (see the HDassert()
+     * above).
+     */
+    dataset->oloc.file = NULL;
+
+    dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
+
+   /* Release the dataset's path info */
+   if(H5G_name_free(&(dataset->path)) < 0)
+       free_failed = TRUE;
+
+    /* Free the dataset's memory structure */
+    dataset = H5FL_FREE(H5D_t, dataset);
+
+    /* Check if anything failed in the middle... */
+    if(free_failed)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free a component of the dataset, but the dataset was freed anyway.")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__mdc_close() */
+
 #endif /*H5_HAVE_PARALLEL*/
 
 

@@ -79,6 +79,7 @@ typedef struct H5VL_mds_group_t {
 } H5VL_mds_group_t;
 
 H5_DLL herr_t H5VL_mds_start(void);
+H5_DLL int H5VL__mds_terminate_cb(MPI_Comm UNUSED comm, int UNUSED comm_keyval, void UNUSED *attribute_val, void UNUSED *extra_state);
 H5_DLL hid_t H5VL_mds_register(H5I_type_t type, void *obj, hbool_t app_ref);
 
 #endif /* H5_HAVE_PARALLEL */

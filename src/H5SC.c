@@ -120,7 +120,14 @@ static int commsplitter_MPI_Init(int *argc, char ***argv)
     if(MDS_RANK == commsplitter_data.grank) {
         H5open();
         H5VL_mds_start();
-        exit(1);
+        exit(0);
+    }
+    else {
+        int key = 0;
+        int temp = 0;
+
+        MPI_Comm_create_keyval(MPI_NULL_COPY_FN, H5VL__mds_terminate_cb, &key, (void *)0);
+        MPI_Comm_set_attr(MPI_COMM_SELF, key, &temp);
     }
     return(rc);
 }
@@ -167,9 +174,15 @@ static int commsplitter_MPI_Init_thread(int *argc, char ***argv, int required, i
     if(MDS_RANK == commsplitter_data.grank) {
         H5open();
         H5VL_mds_start();
-        exit(1);
+        exit(0);
     }
+    else {
+        int key = 0;
+        int temp = 0;
 
+        MPI_Comm_create_keyval(MPI_NULL_COPY_FN, H5VL__mds_terminate_cb, &key, (void *)0);
+        MPI_Comm_set_attr(MPI_COMM_SELF, key, &temp);
+    }
     return(rc);
 }
 
@@ -203,8 +216,8 @@ static int commsplitter_MPI_Finalize(void)
     int rc = 0;
 
     commsplitter_data.enabled = 0;
+    MPI_Comm_free(&commsplitter_data.split_comm);
     rc = PMPI_Finalize();
-
     return(rc);
 }
 
