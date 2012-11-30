@@ -110,6 +110,12 @@ Bug Fixes since HDF5-1.8.10
 
     Tools
     -----
+    - The following h5stat test case failed in BG/P machines (and potentially
+      other machines that display extra output if an MPI task returns with a
+      non-zero code.)
+        Testing h5stat notexist.h5
+      The test script was fixed to ignore the extra output.  HDFFV-8233 (AKC
+      - 2012/11/30)
     - h5diff: Improved speed when comparing HDF5 files with lots of
       attributes. Much slower performance was identified with release version 
       from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
@@ -359,15 +365,6 @@ Known Problems
           return 0;
       }
   (SLU - 2012/11/5)
-
-* The following h5stat test case fails in BG/P machines (and potentially other
-  machines that display extra output if an MPI task returns with a non-zero
-  code.)
-    Testing h5stat notexist.h5
-  
-  The test actually runs and passes as expected. It is the extra output from
-  the MPI process that causes the test script to fail. This will be fixed
-  in the next release.  (AKC - 2012/10/25 - HDFFV-8233)
 
 * The C++ and FORTRAN bindings are not currently working on FreeBSD with the
   native release 8.2 compilers (4.2.1), but are working with gcc 4.6 from the
