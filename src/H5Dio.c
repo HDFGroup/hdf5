@@ -31,7 +31,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
-#include "H5VLmdserver.h"	/* MDS VOL plugins			*/
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */

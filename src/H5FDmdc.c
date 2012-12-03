@@ -36,10 +36,10 @@
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmdc.h"            /* MDC file driver       		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MDprivate.h"	/* MDS server private			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Ppkg.h"             /* Property lists                       */
-#include "H5VLmdserver.h"       /* MDS helper routines			*/
 
 #ifdef H5_HAVE_PARALLEL
 

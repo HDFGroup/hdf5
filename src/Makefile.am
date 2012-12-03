@@ -59,7 +59,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAstat.c H5FAtest.c \
-        H5VL.c H5VLint.c H5VLencdec.c H5VLnative.c H5VLmds.c H5VLmdserver.c  \
+        H5VL.c H5VLint.c H5VLencdec.c H5VLnative.c H5VLmds.c \
+        H5MDserver.c H5MDclient.c\
         H5SC.c \
         H5FD.c H5FDcore.c  \
         H5FDmdc.c H5FDmds.c  \

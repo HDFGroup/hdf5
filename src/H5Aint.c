@@ -288,89 +288,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__mdc_create
- *
- * Purpose:
- *      This creats a lightweight attribute at the client side. Used now on
- *      metadata clients
- *
- * Return: attribute structure on success, NULL on Failuer
- *
- * Programmer:	Mohamad Chaarawi
- *		October 2012
- *
- *-------------------------------------------------------------------------
- */
-H5A_t *
-H5A__mdc_create(const char *name, H5T_t *type, H5S_t *space, hid_t acpl_id)
-{
-    hssize_t	snelmts;	/* elements in attribute */
-    size_t	nelmts;		/* elements in attribute */
-    H5A_t	*attr = NULL;   /* Attribute created */
-    H5A_t	*ret_value = NULL;   /* Attribute created */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* check args */
-    HDassert(name);
-
-    /* Build the attribute information */
-    if(NULL == (attr = H5FL_CALLOC(H5A_t)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "memory allocation failed for attribute info")
-
-    if(NULL == (attr->shared = H5FL_CALLOC(H5A_shared_t)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "can't allocate shared attr structure")
-
-    /* If the creation property list is H5P_DEFAULT, use the default character encoding */
-    if(acpl_id == H5P_DEFAULT)
-        attr->shared->encoding = H5F_DEFAULT_CSET;
-    else {
-        H5P_genplist_t  *ac_plist;      /* ACPL Property list */
-
-        /* Get a local copy of the attribute creation property list */
-        if(NULL == (ac_plist = (H5P_genplist_t *)H5I_object(acpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
-
-        if(H5P_get(ac_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &(attr->shared->encoding)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get character encoding flag")
-    } /* end else */
-
-    /* Copy the attribute name */
-    attr->shared->name = H5MM_xstrdup(name);
-
-    /* Copy datatype */
-    if(NULL == (attr->shared->dt = H5T_copy(type, H5T_COPY_ALL)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared datatype info")
-
-    /* Copy the dataspace for the attribute */
-    attr->shared->ds = H5S_copy(space, FALSE, TRUE);
-
-    /* Check whether datatype is committed & increment ref count
-     * (to maintain ref. count incr/decr similarity with "shared message"
-     *      type of datatype sharing)
-     */
-    if(H5T_committed(attr->shared->dt)) {
-        /* Increment the reference count on the shared datatype */
-        if(H5T_link(attr->shared->dt, 1, H5AC_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, NULL, "unable to adjust shared datatype link count")
-    } /* end if */
-
-    /* Get # of elements for attribute's dataspace */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, NULL, "dataspace is invalid")
-    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
-
-    attr->shared->data_size = nelmts * H5T_GET_SIZE(attr->shared->dt);
-
-    attr->obj_opened = TRUE;
-
-    ret_value = attr;
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A__mdc_create() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5A_open_common
  *
  * Purpose:
@@ -1221,42 +1138,6 @@ H5A_close(H5A_t *attr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_close() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A__mdc_close
- *
- * Purpose:	Frees lightweight attribute.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              October 2012
- *-------------------------------------------------------------------------
- */
-herr_t
-H5A__mdc_close(H5A_t *attr)
-{
-    herr_t ret_value = SUCCEED;           /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(attr);
-    HDassert(attr->shared);
-
-    /* Free dynamicly allocated items */
-    if(H5A_free(attr) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release attribute info")
-
-    /* Destroy shared attribute struct */
-    attr->shared = H5FL_FREE(H5A_shared_t, attr->shared);
-
-    attr->shared = NULL;
-    attr = H5FL_FREE(H5A_t, attr);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__mdc_close() */
 
 
 /*-------------------------------------------------------------------------

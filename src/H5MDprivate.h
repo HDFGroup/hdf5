@@ -17,8 +17,8 @@
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              August, 2012
  */
-#ifndef _H5VLmdserver_H
-#define _H5VLmdserver_H
+#ifndef _H5MDprivate_H
+#define _H5MDprivate_H
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Aprivate.h"         /* Attributes                           */
@@ -78,10 +78,9 @@ typedef struct H5VL_mds_group_t {
     H5VL_mds_object_t common;  /* common stuff, must be first  */
 } H5VL_mds_group_t;
 
-H5_DLL herr_t H5VL_mds_start(void);
-H5_DLL int H5VL__mds_terminate_cb(MPI_Comm UNUSED comm, int UNUSED comm_keyval, void UNUSED *attribute_val, void UNUSED *extra_state);
-H5_DLL hid_t H5VL_mds_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL herr_t H5MD_start(void);
+H5_DLL int H5MD_server_terminate_cb(MPI_Comm UNUSED comm, int UNUSED comm_keyval, void UNUSED *attribute_val, void UNUSED *extra_state);
 
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5VLmdserver_H */
+#endif /* _H5MDprivate_H */

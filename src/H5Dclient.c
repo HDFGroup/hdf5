@@ -34,10 +34,10 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MDprivate.h"	/* MDS server private			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
-#include "H5VLmdserver.h"	/* MDS server private			*/
 
 #ifdef H5_HAVE_PARALLEL
 /****************/

@@ -59,11 +59,6 @@ typedef struct {
 
 /* General stuff */
 static herr_t H5D__get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
-static H5D_shared_t *H5D__new(hid_t dcpl_id, hbool_t creating,
-    hbool_t vl_type);
-static herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
-    const H5T_t *type);
-static herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
     hid_t dapl_id);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
@@ -536,14 +531,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5D_shared_t *
+H5D_shared_t *
 H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 {
     H5D_shared_t    *new_dset = NULL;   /* New dataset object */
     H5P_genplist_t  *plist;             /* Property list created */
     H5D_shared_t    *ret_value;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate new shared dataset structure */
     if(NULL == (new_dset = H5FL_MALLOC(H5D_shared_t)))
@@ -584,6 +579,33 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__dest
+ *
+ * Purpose:	Frees the shared dataset sturct
+ *
+ * Return:	Success: SUCCEED
+ *		Failure: FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		December, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__dest(H5D_shared_t *shared)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    shared = H5FL_FREE(H5D_shared_t, shared);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__dest() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__init_type
  *
  * Purpose:	Copy a datatype for a dataset's use, performing all the
@@ -597,7 +619,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
     htri_t relocatable;                 /* Flag whether the type is relocatable */
@@ -605,7 +627,7 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(file);
@@ -671,13 +693,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
 {
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checking */
     HDassert(file);
@@ -1100,166 +1122,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create() */
-
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__mdc_create
- *
- * Purpose:	This routine just creates a dataset struct that the client
- *              uses to access raw data in the raw data file.
- *
- * Return:	Success:	Pointer to a new dataset
- *
- *		Failure:	NULL
- *
- * Programmer:	Mohamad Chaarawi
- *		October 2012
- *
- *-------------------------------------------------------------------------
- */
-H5D_t *
-H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t UNUSED dapl_id)
-{
-    const H5T_t         *type, *dt;             /* Datatype for dataset */
-    H5D_t		*new_dset = NULL;
-    hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
-    H5G_loc_t           dset_loc;               /* Dataset location */
-    H5D_t		*ret_value;             /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* check args */
-    HDassert(file);
-    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
-    HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
-
-    /* Get the dataset's datatype */
-     if(NULL == (dt = (const H5T_t *)H5I_object(type_id)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-
-    /* Get the actual datatype object if this is a named datatype */
-    if(NULL == (type = (const H5T_t *)H5T_get_named_type(dt)))
-        type = dt;
-
-    /* Check if the datatype is "sensible" for use in a dataset */
-    if(H5T_is_sensible(type) != TRUE)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "datatype is not sensible")
-
-    /* Check if the datatype is/contains a VL-type */
-    if(H5T_detect_class(type, H5T_VLEN, FALSE))
-        has_vl_type = TRUE;
-
-    /* Initialize the dataset object */
-    if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Set up & reset dataset location */
-    dset_loc.oloc = &(new_dset->oloc);
-    dset_loc.path = &(new_dset->path);
-    H5G_loc_reset(&dset_loc);
-
-    /* Initialize the shared dataset space */
-    if(NULL == (new_dset->shared = H5D__new(dcpl_id, TRUE, has_vl_type)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Copy & initialize datatype for dataset */
-    if(H5D__init_type(file, new_dset, type_id, type) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
-
-    if(space_id) {
-        const H5S_t         *space = NULL;          /* Dataspace for dataset */
-
-        /* Get the dataset's dataspace */
-        if(NULL == (space = (const H5S_t *)H5I_object(space_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace")
-
-        /* Check if the dataspace has an extent set (or is NULL) */
-        if(!H5S_has_extent(space))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
-
-        /* Copy & initialize dataspace for dataset */
-        if(H5D__init_space(file, new_dset, space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy dataspace")
-    }
-
-    /* Set the dataset's checked_filters flag to enable writing */
-    new_dset->shared->checked_filters = TRUE;
-
-    /* Success */
-    ret_value = new_dset;
-
-done:
-    if(!ret_value && new_dset && new_dset->shared) {
-        if(new_dset->shared) {
-            new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
-        } /* end if */
-        new_dset->oloc.file = NULL;
-        new_dset = H5FL_FREE(H5D_t, new_dset);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mdc_create() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D__mdc_close
- *
- * Purpose:	closes lightweight client dataset
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *		November 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D__mdc_close(H5D_t *dataset)
-{
-    unsigned free_failed = FALSE;
-    herr_t ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* check args */
-    HDassert(dataset);
-
-    /*
-     * Release datatype, dataspace and creation property list -- there isn't
-     * much we can do if one of these fails, so we just continue.
-     */
-    free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || 
-                             H5S_close(dataset->shared->space) < 0 ||
-                             H5I_dec_ref(dataset->shared->dcpl_id) < 0);
-
-
-    /*
-     * Free memory.  Before freeing the memory set the file pointer to NULL.
-     * We always check for a null file pointer in other H5D functions to be
-     * sure we're not accessing an already freed dataset (see the HDassert()
-     * above).
-     */
-    dataset->oloc.file = NULL;
-
-    dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
-
-   /* Release the dataset's path info */
-   if(H5G_name_free(&(dataset->path)) < 0)
-       free_failed = TRUE;
-
-    /* Free the dataset's memory structure */
-    dataset = H5FL_FREE(H5D_t, dataset);
-
-    /* Check if anything failed in the middle... */
-    if(free_failed)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free a component of the dataset, but the dataset was freed anyway.")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mdc_close() */
-
-#endif /*H5_HAVE_PARALLEL*/
 
 
 /*

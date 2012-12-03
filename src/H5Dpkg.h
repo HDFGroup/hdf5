@@ -530,6 +530,10 @@ H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);
+H5_DLL H5D_shared_t *H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
+H5_DLL herr_t H5D__dest(H5D_shared_t *shared);
+H5_DLL herr_t H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
+H5_DLL herr_t H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 H5_DLL herr_t H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
 H5_DLL herr_t H5D__alloc_storage(H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc,

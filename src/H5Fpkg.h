@@ -299,6 +299,10 @@ H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
 H5_DLL herr_t H5F_init(void);
 H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
+H5_DLL H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+H5_DLL herr_t H5F_build_actual_name(const H5F_t *f, const struct H5P_genplist_t *fapl,
+                                    const char *name, char ** /*out*/ actual_name);
+H5_DLL herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
 
 /* File mount related routines */
 H5_DLL herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id, hid_t dxpl_id);

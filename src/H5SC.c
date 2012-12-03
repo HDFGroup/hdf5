@@ -25,7 +25,7 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5SCprivate.h"        /* comm splitter header                 */
-#include "H5VLmdserver.h"       /* MDS helper routines			*/
+#include "H5MDprivate.h"       /* MDS helper routines			*/
 
 commsplitter_t commsplitter_data;
 
@@ -119,14 +119,14 @@ static int commsplitter_MPI_Init(int *argc, char ***argv)
 
     if(MDS_RANK == commsplitter_data.grank) {
         H5open();
-        H5VL_mds_start();
+        H5MD_start();
         exit(0);
     }
     else {
         int key = 0;
         int temp = 0;
 
-        MPI_Comm_create_keyval(MPI_NULL_COPY_FN, H5VL__mds_terminate_cb, &key, (void *)0);
+        MPI_Comm_create_keyval(MPI_NULL_COPY_FN, H5MD_server_terminate_cb, &key, (void *)0);
         MPI_Comm_set_attr(MPI_COMM_SELF, key, &temp);
     }
     return(rc);
@@ -173,14 +173,14 @@ static int commsplitter_MPI_Init_thread(int *argc, char ***argv, int required, i
 
     if(MDS_RANK == commsplitter_data.grank) {
         H5open();
-        H5VL_mds_start();
+        H5MD_start();
         exit(0);
     }
     else {
         int key = 0;
         int temp = 0;
 
-        MPI_Comm_create_keyval(MPI_NULL_COPY_FN, H5VL__mds_terminate_cb, &key, (void *)0);
+        MPI_Comm_create_keyval(MPI_NULL_COPY_FN, H5MD_server_terminate_cb, &key, (void *)0);
         MPI_Comm_set_attr(MPI_COMM_SELF, key, &temp);
     }
     return(rc);

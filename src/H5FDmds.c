@@ -39,7 +39,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Ppkg.h"             /* Property lists                       */
-#include "H5VLmdserver.h"       /* MDS helper routines			*/
 
 #ifdef H5_HAVE_PARALLEL
 
