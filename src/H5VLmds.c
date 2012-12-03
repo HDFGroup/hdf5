@@ -144,11 +144,11 @@ typedef struct H5VL_mds_fapl_t {
 } H5VL_mds_fapl_t;
 
 /* Declare a free list to manage the MDS object structs */
-H5FL_DEFINE(H5VL_mds_file_t);
-H5FL_DEFINE(H5VL_mds_attr_t);
-H5FL_DEFINE(H5VL_mds_dset_t);
-H5FL_DEFINE(H5VL_mds_dtype_t);
-H5FL_DEFINE(H5VL_mds_group_t);
+H5FL_DEFINE(H5MD_file_t);
+H5FL_DEFINE(H5MD_attr_t);
+H5FL_DEFINE(H5MD_dset_t);
+H5FL_DEFINE(H5MD_dtype_t);
+H5FL_DEFINE(H5MD_group_t);
 
 static H5VL_class_t H5VL_mds_g = {
     MDS,
@@ -456,7 +456,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     int my_rank, my_size;
     H5F_t *new_file = NULL;
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
-    H5VL_mds_file_t *file = NULL;
+    H5MD_file_t *file = NULL;
     char *raw_name = NULL;
     void  *ret_value = NULL;
 
@@ -502,8 +502,8 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the metadata file ID */
-        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                       &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                       &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                        MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
         MPI_Pcontrol(1);
@@ -530,7 +530,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Create the raw data file */ 
-    if(NULL == (new_file = H5F_mdc_open(raw_name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5MD_file_open(raw_name, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
 
     /* set the file space manager to use the VFD */
@@ -538,7 +538,7 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     new_file->id_exists = TRUE;
 
     /* allocate the file object that is returned to the user */
-    if(NULL == (file = H5FL_CALLOC(H5VL_mds_file_t)))
+    if(NULL == (file = H5FL_CALLOC(H5MD_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate MDS file struct");
 
     /* create the file object that is passed to the API layer */
@@ -583,7 +583,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     int my_rank, my_size;
     H5F_t *new_file = NULL;
     hid_t mds_file; /* Metadata file ID recieved from the MDS */
-    H5VL_mds_file_t *file = NULL;
+    H5MD_file_t *file = NULL;
     char *raw_name = NULL;
     void  *ret_value = NULL;
 
@@ -620,8 +620,8 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
 
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the metadata file ID */
-        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                       &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                       &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                        MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message")
         MPI_Pcontrol(1);
@@ -648,7 +648,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, NULL, "failed to set MDC plist")
 
     /* Open the raw data file */ 
-    if(NULL == (new_file = H5F_mdc_open(raw_name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5MD_file_open(raw_name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
 
     /* set the file space manager to use the VFD */
@@ -656,7 +656,7 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     new_file->id_exists = TRUE;
 
     /* allocate the file object that is returned to the user */
-    if(NULL == (file = H5FL_CALLOC(H5VL_mds_file_t)))
+    if(NULL == (file = H5FL_CALLOC(H5MD_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate MDS file struct");
 
     /* open the file object that is passed to the API layer */
@@ -694,7 +694,7 @@ static herr_t
 H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, 
                     hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     hid_t obj_id = obj->obj_id;
     void *send_buf = NULL;
     size_t buf_size;
@@ -716,8 +716,8 @@ H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -752,7 +752,7 @@ done:
 herr_t
 H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     H5F_t *f = obj->raw_file;
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -801,7 +801,7 @@ H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_lis
                 size_t  obj_count = 0;      /* Number of opened objects */
 
                 /* Perform the query */
-                if(H5F__mdc_get_obj_count(f, types, TRUE, &obj_count) < 0)
+                if(H5MD_file_get_obj_count(f, types, TRUE, &obj_count) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
 
                 /* Set the return value */
@@ -818,7 +818,7 @@ H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_lis
                 size_t  obj_count = 0;      /* Number of opened objects */
 
                 /* Perform the query */
-                if(H5F__mdc_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
+                if(H5MD_file_get_obj_ids(f, types, max_objs, oid_list, TRUE, &obj_count) < 0)
                     HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_ids failed")
 
                 /* Set the return value */
@@ -867,7 +867,7 @@ H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_lis
 
                 H5I_type_t UNUSED type = va_arg (arguments, H5I_type_t);
                 void      **ret = va_arg (arguments, void **);
-                H5VL_mds_file_t *file = obj->file;
+                H5MD_file_t *file = obj->file;
 
                 f->id_exists = TRUE;
                 *ret = (void*)file;
@@ -897,7 +897,7 @@ done:
 herr_t
 H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
     size_t buf_size;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -910,7 +910,7 @@ H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_
             {
                 H5I_type_t type        = va_arg (arguments, H5I_type_t);
                 const char *name       = va_arg (arguments, const char *);
-                H5VL_mds_file_t *child = va_arg (arguments, H5VL_mds_file_t *);
+                H5MD_file_t *child = va_arg (arguments, H5MD_file_t *);
                 hid_t plist_id         = va_arg (arguments, hid_t);
 
                 /* determine the size of the buffer needed to encode the parameters */
@@ -929,8 +929,8 @@ H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -958,8 +958,8 @@ H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -973,10 +973,10 @@ H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_
                 hid_t fapl_id       = va_arg (arguments, hid_t);
                 const char *name    = va_arg (arguments, const char *);
                 htri_t     *ret     = va_arg (arguments, htri_t *);
-                H5VL_mds_file_t *file = NULL;
+                H5MD_file_t *file = NULL;
 
                 /* attempt to open the file through the MDS plugin */
-                if(NULL == (file = (H5VL_mds_file_t *)H5VL_mds_file_open(name, H5F_ACC_RDONLY, fapl_id,
+                if(NULL == (file = (H5MD_file_t *)H5VL_mds_file_open(name, H5F_ACC_RDONLY, fapl_id,
                                                                          H5_REQUEST_NULL)))
                     *ret = FALSE;
                 else
@@ -1012,7 +1012,7 @@ done:
 herr_t
 H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNUSED req, va_list arguments)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     size_t buf_size = 0;
     void *send_buf = NULL;
     int incoming_msg_size; /* incoming buffer size for MDS returned attr */
@@ -1056,8 +1056,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               ret, sizeof(int64_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               ret, sizeof(int64_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -1096,13 +1096,13 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                            MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1114,7 +1114,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -1153,13 +1153,13 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                            MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1171,7 +1171,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -1211,13 +1211,13 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                            MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1229,7 +1229,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -1260,8 +1260,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               hit_rate_ptr, sizeof(double), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               hit_rate_ptr, sizeof(double), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -1291,13 +1291,13 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+                if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                            MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1309,7 +1309,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -1340,8 +1340,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -1354,8 +1354,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
             {
                 void  **ret = va_arg (arguments, void **);
                 hid_t mds_file;
-                H5VL_mds_file_t *old_file = (H5VL_mds_file_t *)obj;
-                H5VL_mds_file_t *file = NULL;
+                H5MD_file_t *old_file = (H5MD_file_t *)obj;
+                H5MD_file_t *file = NULL;
                 H5F_t *new_file = NULL;
 
                 buf_size = 2 + sizeof(int32_t);
@@ -1372,8 +1372,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the metadata file ID */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &mds_file, sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 MPI_Pcontrol(1);
@@ -1387,7 +1387,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                 new_file->id_exists = TRUE;
 
                 /* allocate the file object that is returned to the user */
-                if(NULL == (file = H5FL_CALLOC(H5VL_mds_file_t)))
+                if(NULL == (file = H5FL_CALLOC(H5MD_file_t)))
                     HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate MDS file struct");
 
                 /* open the file object that is passed to the API layer */
@@ -1418,8 +1418,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -1452,8 +1452,8 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -1488,7 +1488,7 @@ done:
 static herr_t
 H5VL_mds_file_close(void *obj, hid_t UNUSED req)
 {
-    H5VL_mds_file_t *file = (H5VL_mds_file_t *)obj;
+    H5MD_file_t *file = (H5MD_file_t *)obj;
     H5F_t *f = file->common.raw_file;
     herr_t ret_value = SUCCEED;                 /* Return value */
 
@@ -1507,7 +1507,7 @@ H5VL_mds_file_close(void *obj, hid_t UNUSED req)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
 
     HDfree(file->name);
-    file = H5FL_FREE(H5VL_mds_file_t, file);
+    file = H5FL_FREE(H5MD_file_t, file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1531,14 +1531,14 @@ static void *
 H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t acpl_id, 
                      hid_t aapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the attr */
-    H5VL_mds_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the attr */
+    H5MD_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
     H5A_t          *new_attr = NULL; /* the lighweight attr struct used to hold the attr's metadata */
     void           *send_buf = NULL; /* buffer where the attr create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
     H5P_genplist_t *plist;
     H5T_t          *dt = NULL, *dt1 = NULL;
-    H5VL_mds_dtype_t *type = NULL;
+    H5MD_dtype_t *type = NULL;
     H5S_t          *space = NULL;
     hid_t          type_id, space_id;
     void           *ret_value;
@@ -1570,13 +1570,13 @@ H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode attr create parameters");
 
     /* allocate the attr object that is returned to the user */
-    if(NULL == (attr = H5FL_CALLOC(H5VL_mds_attr_t)))
+    if(NULL == (attr = H5FL_CALLOC(H5MD_attr_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata attribute ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &(attr->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &(attr->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -1586,7 +1586,7 @@ H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a type");
     /* Get the actual datatype object if this is a named datatype */
-    if(NULL == (type = (H5VL_mds_dtype_t *)H5T_get_named_type(dt)))
+    if(NULL == (type = (H5MD_dtype_t *)H5T_get_named_type(dt)))
         dt1 = dt;
     else
         dt1 = type->dtype;
@@ -1595,7 +1595,7 @@ H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data space");
 
     /* create the "lightweight" client attr */
-    if(NULL == (new_attr = H5A__mdc_create(name, dt1, space, acpl_id)))
+    if(NULL == (new_attr = H5MD_attr_create(name, dt1, space, acpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "failed to create client attr object");
 
     new_attr->oloc.file = obj->raw_file;
@@ -1631,8 +1631,8 @@ static void *
 H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
                    hid_t aapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the attr */
-    H5VL_mds_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the attr */
+    H5MD_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
     H5A_t          *new_attr = NULL; /* the lighweight attr struct used to hold the attr's metadata */
     void           *send_buf = NULL; /* buffer where the attr create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
@@ -1662,16 +1662,16 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
     /* allocate the attr object that is returned to the user */
-    if(NULL == (attr = H5FL_CALLOC(H5VL_mds_attr_t)))
+    if(NULL == (attr = H5FL_CALLOC(H5MD_attr_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -1683,7 +1683,7 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
 
@@ -1720,7 +1720,7 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     }
 
     /* create the "lightweight" client attr */
-    if(NULL == (new_attr = H5A__mdc_create(name, type, space, acpl_id)))
+    if(NULL == (new_attr = H5MD_attr_create(name, type, space, acpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "failed to create client attr object");
 
     new_attr->oloc.file = obj->raw_file;
@@ -1763,7 +1763,7 @@ done:
 static herr_t 
 H5VL_mds_attr_read(void *obj, hid_t dtype_id, void *buf, hid_t UNUSED req)
 {
-    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)obj;
+    H5MD_attr_t *attr = (H5MD_attr_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     size_t	     dst_type_size;	/* size of destination type */ 
@@ -1794,9 +1794,9 @@ H5VL_mds_attr_read(void *obj, hid_t dtype_id, void *buf, hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and receive back the attribute data */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                    buf, (int)(dst_type_size * nelmts), MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send and receive message");
     MPI_Pcontrol(1);
 
@@ -1821,7 +1821,7 @@ done:
 static herr_t 
 H5VL_mds_attr_write(void *obj, hid_t dtype_id, const void *buf, hid_t UNUSED req)
 {
-    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)obj;
+    H5MD_attr_t *attr = (H5MD_attr_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     size_t	     dst_type_size;	/* size of destination type */ 
@@ -1852,9 +1852,9 @@ H5VL_mds_attr_write(void *obj, hid_t dtype_id, const void *buf, hid_t UNUSED req
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and receive back the attribute data */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                    &ret_value, sizeof(herr_t),  MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send and receive message");
     MPI_Pcontrol(1);
 
@@ -1880,7 +1880,7 @@ done:
 static herr_t 
 H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
@@ -1901,8 +1901,8 @@ H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -1938,7 +1938,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
         /* H5Aexists/exists_by_name */
         case H5VL_ATTR_EXISTS:
             {
-                H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+                H5MD_object_t *obj = (H5MD_object_t *)_obj;
                 H5VL_loc_params_t loc_params  = va_arg (arguments, H5VL_loc_params_t);
                 char *attr_name      = va_arg (arguments, char *);
                 htri_t *ret       = va_arg (arguments, htri_t *);
@@ -1961,8 +1961,8 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -1975,7 +1975,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
         case H5VL_ATTR_GET_SPACE:
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
-                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                H5MD_attr_t *attr = (H5MD_attr_t *)_obj;
 
                 if((*ret_id = H5A_get_space(attr->attr)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of attribute")
@@ -1985,7 +1985,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
         case H5VL_ATTR_GET_TYPE:
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
-                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                H5MD_attr_t *attr = (H5MD_attr_t *)_obj;
 
                 if((*ret_id = H5A_get_type(attr->attr)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of attribute")
@@ -1995,7 +1995,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
         case H5VL_ATTR_GET_ACPL:
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
-                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                H5MD_attr_t *attr = (H5MD_attr_t *)_obj;
 
                 if((*ret_id = H5A_get_create_plist(attr->attr)) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get creation property list for attr")
@@ -2009,7 +2009,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                 size_t	size = va_arg (arguments, size_t);
                 char    *buf = va_arg (arguments, char *);
                 ssize_t	*ret_val = va_arg (arguments, ssize_t *);
-                H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+                H5MD_object_t *obj = (H5MD_object_t *)_obj;
                 void *send_buf = NULL;
                 size_t buf_size;
                 void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
@@ -2034,13 +2034,13 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -2052,7 +2052,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -2073,7 +2073,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
             {
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
                 H5A_info_t *ainfo = va_arg (arguments, H5A_info_t *);
-                H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+                H5MD_object_t *obj = (H5MD_object_t *)_obj;
                 void *send_buf = NULL;
                 size_t buf_size;
                 void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
@@ -2117,13 +2117,13 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -2135,7 +2135,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -2152,7 +2152,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
         case H5VL_ATTR_GET_STORAGE_SIZE:
             {
                 hsize_t *ret = va_arg (arguments, hsize_t *);
-                H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)_obj;
+                H5MD_attr_t *attr = (H5MD_attr_t *)_obj;
 
                 /* Set return value */
                 *ret = attr->attr->shared->data_size;
@@ -2183,7 +2183,7 @@ done:
 static herr_t
 H5VL_mds_attr_close(void *obj, hid_t UNUSED req)
 {
-    H5VL_mds_attr_t *attr = (H5VL_mds_attr_t *)obj;
+    H5MD_attr_t *attr = (H5MD_attr_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
@@ -2202,18 +2202,18 @@ H5VL_mds_attr_close(void *obj, hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
 
     H5MM_xfree(send_buf);
 
-    if(H5A__mdc_close(attr->attr) < 0)
+    if(H5MD_attr_close(attr->attr) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute");
 
-    attr = H5FL_FREE(H5VL_mds_attr_t, attr);
+    attr = H5FL_FREE(H5MD_attr_t, attr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2237,8 +2237,8 @@ static void *
 H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, 
                         hid_t dapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the dataset */
-    H5VL_mds_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the dataset */
+    H5MD_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
     H5D_t          *new_dset = NULL; /* the lighweight dataset struct used to hold the dataset's metadata */
     void           *send_buf = NULL; /* buffer where the dataset create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
@@ -2281,17 +2281,17 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
     H5MM_xfree(send_buf);
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dset = H5FL_CALLOC(H5VL_mds_dset_t)))
+    if(NULL == (dset = H5FL_CALLOC(H5MD_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -2303,7 +2303,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
 
@@ -2317,7 +2317,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
 
     /* create the "lightweight" client dataset */
-    if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
+    if(NULL == (new_dset = H5MD_dset_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
 
     /* set the layout of the dataset */
@@ -2380,8 +2380,8 @@ static void *
 H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
                       hid_t dapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the dataset */
-    H5VL_mds_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the dataset */
+    H5MD_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
     H5D_t          *new_dset = NULL; /* the lighweight dataset struct used to hold the dataset's metadata */
     void           *send_buf = NULL; /* buffer where the dataset create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
@@ -2412,16 +2412,16 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dset = H5FL_CALLOC(H5VL_mds_dset_t)))
+    if(NULL == (dset = H5FL_CALLOC(H5MD_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -2433,7 +2433,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
 
@@ -2484,7 +2484,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     p += layout_size;
 
     /* create the "lightweight" client dataset */
-    if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
+    if(NULL == (new_dset = H5MD_dset_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
 
     /* set the layout of the dataset */
@@ -2530,7 +2530,7 @@ static herr_t
 H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
                       hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t UNUSED req)
 {
-    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
@@ -2565,11 +2565,11 @@ H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* set the ID of the dataset at the MDS in the XFER property */
-    if(H5P_set(plist, H5VL_DSET_MDS_ID, &dset_id) < 0)
+    if(H5P_set(plist, H5MD_DSET_ID, &dset_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for mds dataset id");
 
     /* read raw data */
-    if(H5D__mdc_read(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+    if(H5MD_dset_read(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
 
 done:
@@ -2594,7 +2594,7 @@ static herr_t
 H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
 {
-    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
@@ -2629,11 +2629,11 @@ H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* set the ID of the dataset at the MDS in the XFER property */
-    if(H5P_set(plist, H5VL_DSET_MDS_ID, &dset_id) < 0)
+    if(H5P_set(plist, H5MD_DSET_ID, &dset_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for mds dataset id");
 
     /* write raw data */
-    if(H5D__mdc_write(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+    if(H5MD_dset_write(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data");
 
 done:
@@ -2657,7 +2657,7 @@ done:
 herr_t 
 H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
 {
-    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     int              rank = dset->dset->shared->space->extent.rank;
@@ -2679,8 +2679,8 @@ H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -2708,7 +2708,7 @@ done:
 herr_t
 H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
 {
-    H5VL_mds_dset_t *dataset = (H5VL_mds_dset_t *)obj;
+    H5MD_dset_t *dataset = (H5MD_dset_t *)obj;
     H5D_t       *dset = dataset->dset;
     herr_t       ret_value = SUCCEED;    /* Return value */
 
@@ -2850,7 +2850,7 @@ done:
 static herr_t
 H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 {
-    H5VL_mds_dset_t *dset = (H5VL_mds_dset_t *)obj;
+    H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
@@ -2869,8 +2869,8 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -2878,10 +2878,10 @@ H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
     H5MM_xfree(send_buf);
 
     /* Free the dataset's memory structure */
-    if(H5D__mdc_close(dset->dset) < 0)
+    if(H5MD_dset_close(dset->dset) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to close dataset");
 
-    dset = H5FL_FREE(H5VL_mds_dset_t, dset);
+    dset = H5FL_FREE(H5MD_dset_t, dset);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2905,8 +2905,8 @@ static void *
 H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
                          hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the datatype */
-    H5VL_mds_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the datatype */
+    H5MD_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
     H5T_t          *dt = NULL;
     void           *send_buf = NULL; /* buffer where the datatype create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
@@ -2932,13 +2932,13 @@ H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype commit parameters");
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dtype = H5FL_CALLOC(H5VL_mds_dtype_t)))
+    if(NULL == (dtype = H5FL_CALLOC(H5MD_dtype_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata datatype ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &(dtype->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &(dtype->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -2979,8 +2979,8 @@ static void *
 H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
                        hid_t tapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the datatype */
-    H5VL_mds_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the datatype */
+    H5MD_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
     void           *send_buf = NULL; /* buffer where the datatype create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
     int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
@@ -3006,17 +3006,17 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode datatype open parameters");
 
     /* allocate the dataset object that is returned to the user */
-    if(NULL == (dtype = H5FL_CALLOC(H5VL_mds_dtype_t)))
+    if(NULL == (dtype = H5FL_CALLOC(H5MD_dtype_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to send message");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
 
     /* get the incoming message size from the probe result */
@@ -3028,7 +3028,7 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
 
@@ -3070,7 +3070,7 @@ done:
 static ssize_t
 H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t UNUSED req)
 {
-    H5VL_mds_dtype_t *dtype = (H5VL_mds_dtype_t *)obj;
+    H5MD_dtype_t *dtype = (H5MD_dtype_t *)obj;
     H5T_t       *type = dtype->dtype;
     size_t       nalloc = size;
     ssize_t      ret_value = FAIL;
@@ -3103,7 +3103,7 @@ done:
 static herr_t
 H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
 {
-    H5VL_mds_dtype_t *dtype = (H5VL_mds_dtype_t *)obj;
+    H5MD_dtype_t *dtype = (H5MD_dtype_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
@@ -3122,8 +3122,8 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata file ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -3132,7 +3132,7 @@ H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close datatype")
 
     H5MM_xfree(send_buf);
-    dtype = H5FL_FREE(H5VL_mds_dtype_t, dtype);
+    dtype = H5FL_FREE(H5MD_dtype_t, dtype);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3156,8 +3156,8 @@ static void *
 H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, 
                       hid_t gapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the group */
-    H5VL_mds_group_t *grp = NULL; /* the group object that is created and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the group */
+    H5MD_group_t *grp = NULL; /* the group object that is created and passed to the user */
     void           *send_buf = NULL; /* buffer where the group create request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
     H5P_genplist_t *plist;
@@ -3189,13 +3189,13 @@ H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode group create parameters");
 
     /* allocate the group object that is returned to the user */
-    if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+    if(NULL == (grp = H5FL_CALLOC(H5MD_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata group ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &(grp->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &(grp->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -3230,8 +3230,8 @@ done:
 static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
                                  hid_t gapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to open the group */
-    H5VL_mds_group_t *grp = NULL; /* the group object that is opend and passed to the user */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to open the group */
+    H5MD_group_t *grp = NULL; /* the group object that is opend and passed to the user */
     void           *send_buf = NULL; /* buffer where the group open request is encoded and sent to the mds */
     size_t         buf_size = 0; /* size of send_buf */
     void           *ret_value;
@@ -3251,13 +3251,13 @@ static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to encode group open parameters");
 
     /* allocate the group object that is returned to the user */
-    if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+    if(NULL == (grp = H5FL_CALLOC(H5MD_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata group ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &(grp->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &(grp->common.obj_id), sizeof(hid_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -3300,7 +3300,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
         case H5VL_GROUP_GET_GCPL:
             {
                 hid_t *new_gcpl_id = va_arg (arguments, hid_t *);
-                H5VL_mds_group_t *grp = (H5VL_mds_group_t *)_obj;
+                H5MD_group_t *grp = (H5MD_group_t *)_obj;
                 void           *send_buf = NULL; /* buffer where the datatype create request is encoded and sent to the mds */
                 size_t         buf_size = 0; /* size of send_buf */
                 int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
@@ -3322,11 +3322,11 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
 
                 /* get the incoming message size from the probe result */
@@ -3338,7 +3338,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -3364,7 +3364,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
             {
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
                 H5G_info_t *ginfo = va_arg (arguments, H5G_info_t *);
-                H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+                H5MD_object_t *obj = (H5MD_object_t *)_obj;
                 void *send_buf = NULL;
                 size_t buf_size;
                 void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
@@ -3389,13 +3389,13 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -3407,7 +3407,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -3446,7 +3446,7 @@ done:
 static herr_t
 H5VL_mds_group_close(void *obj, hid_t UNUSED req)
 {
-    H5VL_mds_group_t *grp = (H5VL_mds_group_t *)obj;
+    H5MD_group_t *grp = (H5MD_group_t *)obj;
     void            *send_buf = NULL;
     size_t           buf_size;
     herr_t           ret_value = SUCCEED;                 /* Return value */
@@ -3465,8 +3465,8 @@ H5VL_mds_group_close(void *obj, hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -3474,7 +3474,7 @@ H5VL_mds_group_close(void *obj, hid_t UNUSED req)
     H5MM_xfree(send_buf);
 
     /* Free the group's memory structure */
-    grp = H5FL_FREE(H5VL_mds_group_t, grp);
+    grp = H5FL_FREE(H5MD_group_t, grp);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3497,7 +3497,7 @@ herr_t
 H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_params_t loc_params,
                      hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to create the group */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the group */
     H5P_genplist_t  *plist;                     /* Property list pointer */
     void            *send_buf = NULL;
     size_t           buf_size = 0;
@@ -3513,7 +3513,7 @@ H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
         case H5VL_LINK_CREATE_HARD:
             {
                 hid_t id, cur_id;
-                H5VL_mds_object_t *cur_obj;
+                H5MD_object_t *cur_obj;
                 H5VL_loc_params_t cur_params;
 
                 /* object is H5L_SAME_LOC */
@@ -3609,8 +3609,8 @@ H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -3644,8 +3644,8 @@ H5VL_mds_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
                    void *_dst_obj, H5VL_loc_params_t loc_params2,
                    hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *src_obj = (H5VL_mds_object_t *)_src_obj;
-    H5VL_mds_object_t *dst_obj = (H5VL_mds_object_t *)_dst_obj;
+    H5MD_object_t *src_obj = (H5MD_object_t *)_src_obj;
+    H5MD_object_t *dst_obj = (H5MD_object_t *)_dst_obj;
     void            *send_buf = NULL;
     size_t           buf_size = 0;
     herr_t      ret_value = SUCCEED;        /* Return value */
@@ -3668,8 +3668,8 @@ H5VL_mds_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata link ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -3698,7 +3698,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
                                     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
                                     H5L_iterate_t op, void *op_data, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
     size_t buf_size = 0;
     hid_t temp_id;
@@ -3723,7 +3723,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                               H5MD_LISTEN_TAG, MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     H5MM_xfree(send_buf);
     MPI_Pcontrol(1);
@@ -3745,7 +3745,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         MPI_Pcontrol(0);
         /* probe for a message from the mds */
-        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
         /* get the incoming message size from the probe result */
         if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -3757,7 +3757,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
 
         /* receive the actual message */
         if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
         MPI_Pcontrol(1);
 
@@ -3769,7 +3769,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
             H5MM_xfree(recv_buf);
             if(NULL != idx) {
                 if(MPI_SUCCESS != MPI_Recv(idx, sizeof(hsize_t), MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
             }
             break;
@@ -3815,7 +3815,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the return value */
         if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                   H5MD_LISTEN_TAG, MPI_COMM_WORLD))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
         MPI_Pcontrol(1);
 
@@ -3851,7 +3851,7 @@ herr_t
 H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, 
                   hid_t UNUSED req, va_list arguments)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
     size_t buf_size;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -3878,8 +3878,8 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -3912,13 +3912,13 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -3930,7 +3930,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -3982,13 +3982,13 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -4000,7 +4000,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -4036,8 +4036,8 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               buf, (int)size, MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               buf, (int)size, MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
                 MPI_Pcontrol(1);
@@ -4072,7 +4072,7 @@ done:
 herr_t 
 H5VL_mds_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void            *send_buf = NULL;
     size_t           buf_size = 0;
     herr_t ret_value = SUCCEED;
@@ -4093,8 +4093,8 @@ H5VL_mds_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata link ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -4122,7 +4122,7 @@ done:
 static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params, 
                                   H5I_type_t *opened_type, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj; /* location object to open the group */
+    H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to open the group */
     void *send_buf = NULL; /* buffer where the group open request is encoded and sent to the mds */
     size_t buf_size = 0; /* size of send_buf */
     void *recv_buf = NULL; /* buffer to hold incoming data from MDS */
@@ -4148,12 +4148,12 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata object ID */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to communicate with MDS server");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to probe for a message");
     /* get the incoming message size from the probe result */
     if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -4165,7 +4165,7 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message");
     MPI_Pcontrol(1);
 
@@ -4177,14 +4177,14 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
     switch(*opened_type) {
         case H5I_DATASET:
             {
-                H5VL_mds_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+                H5MD_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
                 H5D_t *new_dset = NULL; /* the lighweight dataset struct used to hold the dataset's metadata */
                 hid_t type_id=FAIL, space_id=FAIL, dcpl_id=H5P_DATASET_CREATE_DEFAULT;
                 H5O_layout_t layout; /* Dataset's layout information */
                 size_t type_size, space_size, dcpl_size, layout_size;
 
                 /* allocate the dataset object that is returned to the user */
-                if(NULL == (dset = H5FL_CALLOC(H5VL_mds_dset_t)))
+                if(NULL == (dset = H5FL_CALLOC(H5MD_dset_t)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
                 /* decode the plist size */
@@ -4229,7 +4229,7 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 p += layout_size;
 
                 /* create the "lightweight" client dataset */
-                if(NULL == (new_dset = H5D__mdc_create(obj->raw_file, type_id, space_id, 
+                if(NULL == (new_dset = H5MD_dset_create(obj->raw_file, type_id, space_id, 
                                                        dcpl_id, H5P_DATASET_ACCESS_DEFAULT)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
 
@@ -4257,10 +4257,10 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
             }
         case H5I_DATATYPE:
             {
-                H5VL_mds_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+                H5MD_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
 
                 /* allocate the dataset object that is returned to the user */
-                if(NULL == (dtype = H5FL_CALLOC(H5VL_mds_dtype_t)))
+                if(NULL == (dtype = H5FL_CALLOC(H5MD_dtype_t)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
                 if(NULL == (dtype->dtype = H5T_decode((const unsigned char *)p)))
@@ -4277,10 +4277,10 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
             }
         case H5I_GROUP:
             {
-                H5VL_mds_group_t *grp = NULL; /* the group object that is opend and passed to the user */
+                H5MD_group_t *grp = NULL; /* the group object that is opend and passed to the user */
 
                 /* allocate the group object that is returned to the user */
-                if(NULL == (grp = H5FL_CALLOC(H5VL_mds_group_t)))
+                if(NULL == (grp = H5FL_CALLOC(H5MD_group_t)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate MDS object struct");
 
                 /* set common object parameters */
@@ -4337,8 +4337,8 @@ H5VL_mds_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *
                      void *_dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
                      hid_t ocpypl_id, hid_t lcpl_id, hid_t UNUSED req)
 {
-    H5VL_mds_object_t *src_obj = (H5VL_mds_object_t *)_src_obj;
-    H5VL_mds_object_t *dst_obj = (H5VL_mds_object_t *)_dst_obj;
+    H5MD_object_t *src_obj = (H5MD_object_t *)_src_obj;
+    H5MD_object_t *dst_obj = (H5MD_object_t *)_dst_obj;
     void        *send_buf = NULL;
     size_t      buf_size = 0;
     herr_t      ret_value = SUCCEED;        /* Return value */
@@ -4363,8 +4363,8 @@ H5VL_mds_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata link ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
     MPI_Pcontrol(1);
@@ -4393,7 +4393,7 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
                                     H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
                                     hid_t UNUSED req)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
     size_t buf_size = 0;
     hid_t temp_id;
@@ -4416,7 +4416,7 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                               H5MD_LISTEN_TAG, MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     H5MM_xfree(send_buf);
     MPI_Pcontrol(1);
@@ -4438,7 +4438,7 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
 
         MPI_Pcontrol(0);
         /* probe for a message from the mds */
-        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
         /* get the incoming message size from the probe result */
         if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -4450,7 +4450,7 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
 
         /* receive the actual message */
         if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
         MPI_Pcontrol(1);
 
@@ -4496,7 +4496,7 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
         MPI_Pcontrol(0);
         /* send the request to the MDS process and receive the return value */
         if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                   H5MD_LISTEN_TAG, MPI_COMM_WORLD))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
         MPI_Pcontrol(1);
 
@@ -4531,7 +4531,7 @@ herr_t
 H5VL_mds_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, 
                      hid_t UNUSED req, va_list arguments)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
     size_t buf_size = 0;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -4561,8 +4561,8 @@ H5VL_mds_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -4591,8 +4591,8 @@ H5VL_mds_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -4621,8 +4621,8 @@ H5VL_mds_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -4659,8 +4659,8 @@ H5VL_mds_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               ref, (int)ref_size, MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               ref, (int)ref_size, MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -4727,7 +4727,7 @@ herr_t
 H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
                     hid_t UNUSED req, va_list arguments)
 {
-    H5VL_mds_object_t *obj = (H5VL_mds_object_t *)_obj;
+    H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
     size_t buf_size = 0;
     herr_t ret_value = SUCCEED;    /* Return value */
@@ -4754,8 +4754,8 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               ret, sizeof(htri_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -4788,12 +4788,12 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -4805,7 +4805,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -4850,13 +4850,13 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -4868,7 +4868,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -4912,13 +4912,13 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -4930,7 +4930,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 
@@ -4974,8 +4974,8 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
-                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                               obj_type, 1, MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+                if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                               obj_type, 1, MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
@@ -5013,13 +5013,13 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 MPI_Pcontrol(0);
                 /* send the request to the MDS process and recieve the return value */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                           H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                           H5MD_LISTEN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
 
                 /* probe for a message from the mds */
-                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
                 /* get the incoming message size from the probe result */
                 if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -5031,7 +5031,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                            H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                            H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
 

@@ -513,8 +513,8 @@ H5FD_mdc_close(H5FD_t *_file)
 
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the metadata file ID */
-        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                       &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+        if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                       &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                        MPI_COMM_WORLD, MPI_STATUS_IGNORE))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
         MPI_Pcontrol(1);
@@ -644,8 +644,8 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the metadata file ID */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(uint64_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(uint64_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to send message")
     MPI_Pcontrol(1);
@@ -701,12 +701,12 @@ H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     MPI_Pcontrol(0);
     /* send the EOA request */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                                H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                H5MD_LISTEN_TAG, MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to send message")
 
     /* recieve the current EOA */
     if(MPI_SUCCESS != MPI_Recv(&ret_value, sizeof(uint64_t), MPI_UINT64_T, MDS_RANK, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to receive message")
     MPI_Pcontrol(1);
 
@@ -764,8 +764,8 @@ H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 
     MPI_Pcontrol(0);
     /* send the EOA set request & recieve the set confirmation*/
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5VL_MDS_SEND_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
     MPI_Pcontrol(1);

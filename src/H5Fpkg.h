@@ -175,6 +175,22 @@ typedef struct H5F_mtab_t {
     H5F_mount_t		*child;	/* An array of mount records		*/
 } H5F_mtab_t;
 
+/* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
+typedef struct H5F_olist_t {
+    H5I_type_t obj_type;        /* Type of object to look for */
+    hid_t      *obj_id_list;    /* Pointer to the list of open IDs to return */
+    size_t     *obj_id_count;   /* Number of open IDs */
+    struct {
+        hbool_t local;          /* Set flag for "local" file searches */
+        union {
+            H5F_file_t *shared; /* Pointer to shared file to look inside */
+            const H5F_t *file;  /* Pointer to file to look inside */
+        } ptr;
+    } file_info;
+    size_t     list_index;      /* Current index in open ID array */
+    size_t     max_index;            /* Maximum # of IDs to put into array */
+} H5F_olist_t;
+
 /* Structure specifically to store superblock. This was originally
  * maintained entirely within H5F_file_t, but is now extracted
  * here because the superblock is now handled by the cache */

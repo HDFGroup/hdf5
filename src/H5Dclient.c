@@ -154,7 +154,7 @@ H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(idx_info->dxpl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    if(H5P_get(dxpl, H5VL_DSET_MDS_ID, &mds_dset_id) < 0)
+    if(H5P_get(dxpl, H5MD_DSET_ID, &mds_dset_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
 
     /* get size for property lists to encode */
@@ -206,12 +206,12 @@ H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
 
     /* get the incoming message size from the probe result */
@@ -223,7 +223,7 @@ H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
     MPI_Pcontrol(1);
     p1 = (uint8_t *)recv_buf;
@@ -281,7 +281,7 @@ H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(idx_info->dxpl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    if(H5P_get(dxpl, H5VL_DSET_MDS_ID, &mds_dset_id) < 0)
+    if(H5P_get(dxpl, H5MD_DSET_ID, &mds_dset_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
 
     /* get size for property lists to encode */
@@ -332,12 +332,12 @@ H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
-    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     /* probe for a message from the mds */
-    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+    if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
 
     /* get the incoming message size from the probe result */
@@ -349,7 +349,7 @@ H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
-                                H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
     MPI_Pcontrol(1);
     p1 = (uint8_t *)recv_buf;
@@ -404,7 +404,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(idx_info->dxpl_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
-    if(H5P_get(dxpl, H5VL_DSET_MDS_ID, &mds_dset_id) < 0)
+    if(H5P_get(dxpl, H5MD_DSET_ID, &mds_dset_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id")
 
     /* get size for property lists to encode */
@@ -444,7 +444,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     MPI_Pcontrol(0);
     /* send the request to the MDS process */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
-                               H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                               H5MD_LISTEN_TAG, MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     H5MM_free(send_buf);
     MPI_Pcontrol(1);
@@ -459,7 +459,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
         MPI_Pcontrol(0);
         /* probe for a message from the mds */
-        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+        if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
         /* get the incoming message size from the probe result */
         if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -471,7 +471,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
         /* receive the actual message */
         if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD, &status))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
         MPI_Pcontrol(1);
 
@@ -483,7 +483,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
             H5MM_free(recv_buf);
             break;
         }
-        HDassert(ret_value == H5VL_MDS_CHUNK_ITERATE);
+        HDassert(ret_value == H5MD_CONT);
 
         UINT32DECODE(p, chunk_rec.nbytes);
         for(u=0 ; u<H5O_LAYOUT_NDIMS; u++)
@@ -500,7 +500,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
         MPI_Pcontrol(0);
         /* send the request to the MDS process and recieve the return value */
         if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int), MPI_BYTE, MDS_RANK, 
-                                   H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD))
+                                   H5MD_LISTEN_TAG, MPI_COMM_WORLD))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
         MPI_Pcontrol(1);
     }

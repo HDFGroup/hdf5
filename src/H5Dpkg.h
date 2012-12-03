@@ -552,6 +552,21 @@ H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
 
+/* Setup/teardown routines for io*/
+H5_DLL herr_t H5D__ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, const H5D_type_info_t *type_info, H5D_storage_t *store,
+    H5D_io_info_t *io_info);
+H5_DLL herr_t H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t dxpl_id, hid_t mem_type_id, hbool_t do_write,
+    H5D_type_info_t *type_info);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
+    hid_t dxpl_id, const H5S_t *file_space, const H5S_t *mem_space,
+    const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm);
+H5_DLL herr_t H5D__ioinfo_term(H5D_io_info_t *io_info);
+#endif /* H5_HAVE_PARALLEL */
+H5_DLL herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
+
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,

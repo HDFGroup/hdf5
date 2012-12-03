@@ -30,9 +30,6 @@
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5MD_init_interface
-
 /***********/
 /* Headers */
 /***********/
@@ -186,28 +183,6 @@ static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
 /* Local Variables */
 /*******************/
 
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5MD_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5MD_init_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-
---------------------------------------------------------------------------*/
-static herr_t
-H5MD_init_interface(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MD_init_interface() */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5MD_server_terminate_cb
@@ -234,7 +209,7 @@ H5MD_server_terminate_cb(MPI_Comm UNUSED comm, int UNUSED comm_keyval, void UNUS
 
     MPI_Pcontrol(0);
     /* send a message to the MDS process indicating that we called MPI_Finalize() */
-    if(MPI_SUCCESS != (ret_value = MPI_Send(&req, sizeof(int), MPI_BYTE, MDS_RANK, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != (ret_value = MPI_Send(&req, sizeof(int), MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                             MPI_COMM_WORLD)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
@@ -290,7 +265,7 @@ H5MD_start(void)
         H5VL_op_type_t op_type;
 
         /* probe for a message from a client */
-        if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
+        if(MPI_SUCCESS != MPI_Probe(MPI_ANY_SOURCE, H5MD_LISTEN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
         /* get the incoming message size from the probe result */
         if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
@@ -302,7 +277,7 @@ H5MD_start(void)
 
         /* receive the actual message */
         if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
-                                    H5VL_MDS_LISTEN_TAG, MPI_COMM_WORLD, &status))
+                                    H5MD_LISTEN_TAG, MPI_COMM_WORLD, &status))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receivemessage");
 
         p = (uint8_t *)recv_buf;
@@ -419,13 +394,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the meta data file ID to the client */
         if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     if(H5I_dec_ref(split_fapl) < 0)
@@ -528,13 +503,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the meta data file ID to the client */
         if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     if(H5I_dec_ref(split_fapl) < 0)
@@ -569,7 +544,7 @@ H5MD__file_flush_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(H5VL__close_loc_params(loc_params) < 0)
@@ -609,7 +584,7 @@ H5MD__file_misc_func(uint8_t *p, int source)
                                            H5I_object(child_id), plist_id);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 if(plist_id != H5P_FILE_MOUNT_DEFAULT && H5I_dec_ref(plist_id) < 0)
@@ -632,7 +607,7 @@ H5MD__file_misc_func(uint8_t *p, int source)
                                                  type, name);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(name);
@@ -676,7 +651,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file");
 
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -731,7 +706,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 }
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_free(send_buf);
                 H5MM_xfree(sect_info);
@@ -781,7 +756,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 UINT64ENCODE_VARLEN(p1, finfo.sohm.msgs_info.heap_size);
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_free(send_buf);
                 break;
@@ -816,7 +791,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode cache config");
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_free(send_buf);                
                 break;
@@ -834,7 +809,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(double), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -875,7 +850,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 INT32ENCODE(p1, cur_num_entries_ptr);
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_free(send_buf);                
 
@@ -893,7 +868,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to clear elink cache")
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -916,7 +891,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* Send the meta data file ID to the client */
                 if(MPI_SUCCESS != MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -932,7 +907,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to reset mdc hot rate")
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -952,7 +927,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to set MDC config")
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -997,7 +972,7 @@ H5MD__file_close_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MD__file_close_func */
@@ -1046,13 +1021,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the meta datagroup ID to the client */
         if(MPI_SUCCESS != MPI_Send(&attr_id, sizeof(hid_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1169,13 +1144,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the attr id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* Send failed to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1218,13 +1193,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the attr id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* Send failed to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1264,7 +1239,7 @@ done:
         HDONE_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "can't close type");
     /* Send failed to the client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1292,7 +1267,7 @@ H5MD__attr_remove_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(H5VL__close_loc_params(loc_params) < 0)
@@ -1333,7 +1308,7 @@ H5MD__attr_get_func(uint8_t *p, int source)
 
                 /* send query value to client */
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(htri_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 if(H5VL__close_loc_params(loc_params) < 0)
@@ -1385,7 +1360,7 @@ H5MD__attr_get_func(uint8_t *p, int source)
                 p1 += size;
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -1437,7 +1412,7 @@ H5MD__attr_get_func(uint8_t *p, int source)
                 UINT64ENCODE_VARLEN(p1, ainfo.data_size);
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
                 if(H5VL__close_loc_params(loc_params) < 0)
@@ -1456,7 +1431,7 @@ done:
     if(SUCCEED != ret_value) {
         /* send status to client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1487,7 +1462,7 @@ H5MD__attr_close_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1564,13 +1539,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the dataset id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* Send the dataset id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1706,13 +1681,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the dataset id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* Send failed to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1750,7 +1725,7 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
 done:
     /* Send failed to the client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1811,7 +1786,7 @@ H5MD__dataset_close_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1871,13 +1846,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the meta data type ID to the client */
         if(MPI_SUCCESS != MPI_Send(&type_id, sizeof(hid_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1948,13 +1923,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the datatype id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* Send the failed to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -1989,7 +1964,7 @@ H5MD__datatype_close_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2036,13 +2011,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the meta datagroup ID to the client */
         if(MPI_SUCCESS != MPI_Send(&grp_id, sizeof(hid_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -2091,13 +2066,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the meta datagroup ID to the client */
         if(MPI_SUCCESS != MPI_Send(&grp_id, sizeof(hid_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -2168,7 +2143,7 @@ H5MD__group_get_func(uint8_t *p, int source)
 
                 /* send query value to client */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -2210,7 +2185,7 @@ H5MD__group_get_func(uint8_t *p, int source)
                 H5_ENCODE_UNSIGNED(p1, ginfo.mounted);
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
                 if(H5VL__close_loc_params(loc_params) < 0)
@@ -2225,7 +2200,7 @@ done:
     if(SUCCEED != ret_value) {
         /* send status to client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2257,7 +2232,7 @@ H5MD__group_close_func(uint8_t *p, int source)
 done:
     /* send status to client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2292,7 +2267,7 @@ H5MD__link_create_func(uint8_t *p, int source)
 
 done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     switch(create_type) {
@@ -2380,7 +2355,7 @@ H5MD__link_move_func(uint8_t *p, int source)
 
 done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(lcpl_id && lcpl_id != H5P_LINK_CREATE_DEFAULT && H5I_dec_ref(lcpl_id) < 0)
@@ -2432,7 +2407,7 @@ H5L__iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, 
 
     /* encode a flag that this message is for the client to call the user callback on
        and not for the client to finish iteration */
-    INT32ENCODE(p, H5VL_MDS_LINK_ITERATE);
+    INT32ENCODE(p, H5MD_CONT);
 
     /* encode the group id */
     INT32ENCODE(p, group_id);
@@ -2457,8 +2432,8 @@ H5L__iterate_cb(hid_t group_id, const char *link_name, const H5L_info_t *linfo, 
     }
 
     /* send the callback data back to the client and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5VL_MDS_SEND_TAG,
-                                   &ret_value, sizeof(int), MPI_BYTE, source, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5MD_RETURN_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, source, H5MD_LISTEN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
 
@@ -2494,12 +2469,12 @@ H5MD__link_iterate_func(uint8_t *p, int source)
 
 done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(NULL != idx) {
         if(MPI_SUCCESS != MPI_Send(idx, sizeof(hsize_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     H5MM_xfree(idx);
@@ -2540,7 +2515,7 @@ H5MD__link_get_func(uint8_t *p, int source)
 
                 /* send query value to client */
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(htri_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 if(H5VL__close_loc_params(loc_params) < 0)
@@ -2597,7 +2572,7 @@ H5MD__link_get_func(uint8_t *p, int source)
                 }
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 H5MM_xfree(send_buf);
                 if(H5VL__close_loc_params(loc_params) < 0)
@@ -2648,7 +2623,7 @@ H5MD__link_get_func(uint8_t *p, int source)
                 p1 += size;
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -2680,7 +2655,7 @@ H5MD__link_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine link val");
 
                 if(MPI_SUCCESS != MPI_Send(val, (int)size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(val);
@@ -2696,7 +2671,7 @@ done:
     if(SUCCEED != ret_value) {
         /* send status to client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2722,7 +2697,7 @@ H5MD__link_remove_func(uint8_t *p, int source)
 
 done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(H5VL__close_loc_params(loc_params) < 0)
@@ -2914,13 +2889,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the dataset id & metadata to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -2959,7 +2934,7 @@ H5MD__object_copy_func(uint8_t *p, int source)
 
 done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     H5MM_xfree(src_name);
@@ -3009,7 +2984,7 @@ H5O__visit_cb(hid_t obj_id, const char *name, const H5O_info_t *info, void *op_d
 
     /* encode a flag that this message is for the client to call the user callback on
        and not for the client to finish iteration */
-    INT32ENCODE(p, H5VL_MDS_OBJECT_VISIT);
+    INT32ENCODE(p, H5MD_CONT);
 
     /* encode the object id */
     INT32ENCODE(p, obj_id);
@@ -3030,8 +3005,8 @@ H5O__visit_cb(hid_t obj_id, const char *name, const H5O_info_t *info, void *op_d
     }
 
     /* send the callback data back to the client and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5VL_MDS_SEND_TAG,
-                                   &ret_value, sizeof(int), MPI_BYTE, source, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5MD_RETURN_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, source, H5MD_LISTEN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with MDS server");
 
@@ -3064,7 +3039,7 @@ H5MD__object_visit_func(uint8_t *p, int source)
 
 done:
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     if(H5VL__close_loc_params(loc_params) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Can't close loc_params");
@@ -3105,7 +3080,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* send status to client */
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(old_name);
@@ -3128,7 +3103,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* send status to client */
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 break;
             }
@@ -3148,7 +3123,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* send status to client */
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(comment);
@@ -3181,7 +3156,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* send reference pointer to client */
                 if(MPI_SUCCESS != MPI_Send(ref, (int)ref_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ref pointer");
 
                 H5MM_xfree(name);
@@ -3232,7 +3207,7 @@ H5MD__object_get_func(uint8_t *p, int source)
 
                 /* send query value to client */
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(htri_t), MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 break;
@@ -3277,7 +3252,7 @@ H5MD__object_get_func(uint8_t *p, int source)
 
                 /* Send the dataset id & metadata to the client */
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -3325,7 +3300,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                 p1 += size;
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -3377,7 +3352,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                     p1 += space_size;
                 }
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -3403,7 +3378,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine reference type");
 
                 if(MPI_SUCCESS != MPI_Send(&obj_type, 1, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 HDfree(ref);
@@ -3454,7 +3429,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                 p1 += size;
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                           H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                           H5MD_RETURN_TAG, MPI_COMM_WORLD))
                     HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
                 H5MM_xfree(send_buf);
@@ -3470,7 +3445,7 @@ done:
     if(SUCCEED != ret_value) {
         /* send status to client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     if(H5VL__close_loc_params(loc_params) < 0)
@@ -3565,7 +3540,7 @@ done:
 
     /* Send the haddr to the client */
     if(MPI_SUCCESS != MPI_Send(&return_addr, sizeof(uint64_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3605,7 +3580,7 @@ done:
 
     /* Send the haddr to the client */
     if(MPI_SUCCESS != MPI_Send(&eoa, sizeof(uint64_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3644,7 +3619,7 @@ H5MD__set_eoa_func(uint8_t *p, int source)
 done:
     /* Send the confirmation to the client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3741,7 +3716,7 @@ H5MD__chunk_insert(uint8_t *p, int source)
 done:
     /* Send the confirmation to the client */
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     H5MM_xfree(offsets);
@@ -3845,13 +3820,13 @@ done:
     if(SUCCEED == ret_value) {
         /* Send the confirmation to the client */
         if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     else {
         /* send a failed message to the client */
         if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                                   H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
 
@@ -3889,7 +3864,7 @@ H5D__chunk_iterate_cb(const H5D_chunk_rec_t *chunk_rec, void *op_data)
     p = (uint8_t *)send_buf;
 
     /* encode a flag that this message contains a chunk address and not a FAIL or DONE */
-    INT32ENCODE(p, H5VL_MDS_CHUNK_ITERATE);
+    INT32ENCODE(p, H5MD_CONT);
 
     UINT32ENCODE(p, chunk_rec->nbytes);
     for(u=0 ; u<H5O_LAYOUT_NDIMS; u++)
@@ -3898,8 +3873,8 @@ H5D__chunk_iterate_cb(const H5D_chunk_rec_t *chunk_rec, void *op_data)
     UINT64ENCODE_VARLEN(p, chunk_rec->chunk_addr);
 
     /* send the callback data back to the client and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5VL_MDS_SEND_TAG,
-                                   &ret_value, sizeof(int), MPI_BYTE, source, H5VL_MDS_LISTEN_TAG,
+    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, source, H5MD_RETURN_TAG,
+                                   &ret_value, sizeof(int), MPI_BYTE, source, H5MD_LISTEN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with client");
 
@@ -3962,7 +3937,7 @@ H5MD__chunk_iterate(uint8_t *p, int source)
 done:
     /* send a failed message to the client */
     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5VL_MDS_SEND_TAG, MPI_COMM_WORLD))
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
 
     if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 

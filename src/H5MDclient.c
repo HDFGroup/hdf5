@@ -31,6 +31,7 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MDprivate.h"        /* MDS operations			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
@@ -43,7 +44,7 @@ H5FL_DEFINE_STATIC(H5D_shared_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__mdc_create
+ * Function:	H5MD_attr_create
  *
  * Purpose:
  *      This creats a lightweight attribute at the client side. Used now on
@@ -57,7 +58,7 @@ H5FL_DEFINE_STATIC(H5D_shared_t);
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5A__mdc_create(const char *name, H5T_t *type, H5S_t *space, hid_t acpl_id)
+H5MD_attr_create(const char *name, H5T_t *type, H5S_t *space, hid_t acpl_id)
 {
     hssize_t	snelmts;	/* elements in attribute */
     size_t	nelmts;		/* elements in attribute */
@@ -122,11 +123,11 @@ H5A__mdc_create(const char *name, H5T_t *type, H5S_t *space, hid_t acpl_id)
     ret_value = attr;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5A__mdc_create() */
+} /* H5MD_attr_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A__mdc_close
+ * Function:	H5MD_attr_close
  *
  * Purpose:	Frees lightweight attribute.
  *
@@ -137,11 +138,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A__mdc_close(H5A_t *attr)
+H5MD_attr_close(H5A_t *attr)
 {
     herr_t ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(attr);
     HDassert(attr->shared);
@@ -158,11 +159,11 @@ H5A__mdc_close(H5A_t *attr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__mdc_close() */
+} /* end H5MD_attr_close() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__mdc_create
+ * Function:	H5MD_dset_create
  *
  * Purpose:	This routine just creates a dataset struct that the client
  *              uses to access raw data in the raw data file.
@@ -177,7 +178,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t UNUSED dapl_id)
+H5MD_dset_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t UNUSED dapl_id)
 {
     const H5T_t         *type, *dt;             /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
@@ -185,7 +186,7 @@ H5D__mdc_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     H5G_loc_t           dset_loc;               /* Dataset location */
     H5D_t		*ret_value;             /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(file);
@@ -257,11 +258,344 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mdc_create() */
+} /* end H5MD_dset_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__mdc_close
+ * Function:	H5MD_dset_read
+ *
+ * Purpose:	Reads (part of) a DATASET into application memory
+ *		BUF. This uses the lightweight MDS H5D_t struct.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MD_dset_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
+              const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
+{
+    H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
+    H5D_type_info_t type_info;          /* Datatype info for operation */
+    hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
+    H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
+                                        /* projection of the supplied mem_space to a new  */
+                                        /* data space with rank equal to that of          */
+                                        /* file_space.                                    */
+                                        /*                                                */
+                                        /* This field is only used if                     */
+                                        /* H5S_select_shape_same() returns TRUE when      */
+                                        /* comparing the mem_space and the data_space,    */
+                                        /* and the mem_space have different rank.         */
+                                        /*                                                */
+                                        /* Note that if this variable is used, the        */
+                                        /* projected mem space must be discarded at the   */
+                                        /* end of the function to avoid a memory leak.    */
+    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    hssize_t	snelmts;                /*total number of elmts	(signed) */
+    hsize_t	nelmts;                 /*total number of elmts	*/
+    hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
+    hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    herr_t	ret_value = SUCCEED;	/* Return value	*/
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(dataset && dataset->oloc.file);
+
+    if(!file_space)
+        file_space = dataset->shared->space;
+    if(!mem_space)
+        mem_space = file_space;
+    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dst dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+
+    /* Fill the DXPL cache values for later use */
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+    /* Set up datatype info for operation */
+    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+    type_info_init = TRUE;
+
+    /* Collective access is not permissible without a MPI based VFD */
+    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
+            !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
+
+    /* Make certain that the number of elements in each selection is the same */
+    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+    /* Make sure that both selections have their extents set */
+    if(!(H5S_has_extent(file_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+    if(!(H5S_has_extent(mem_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+
+    /* H5S_select_shape_same() has been modified to accept topologically identical
+     * selections with different rank as having the same shape (if the most 
+     * rapidly changing coordinates match up), but the I/O code still has 
+     * difficulties with the notion.
+     *
+     * To solve this, we check to see if H5S_select_shape_same() returns true, 
+     * and if the ranks of the mem and file spaces are different.  If the are, 
+     * construct a new mem space that is equivalent to the old mem space, and 
+     * use that instead.
+     *
+     * Note that in general, this requires us to touch up the memory buffer as 
+     * well.
+     */
+    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+            H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
+        void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
+                                /* to the beginning of the projected mem space.  */
+
+        /* Attempt to construct projected dataspace for memory dataspace */
+        if(H5S_select_construct_projection(mem_space, &projected_mem_space,
+                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.dst_type_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
+        HDassert(projected_mem_space);
+        HDassert(adj_buf);
+
+        /* Switch to using projected memory dataspace & adjusted buffer */
+        mem_space = projected_mem_space;
+        buf = adj_buf;
+    } /* end if */
+
+    /* Set up I/O operation */
+    io_info.op_type = H5D_IO_OP_READ;
+    io_info.u.rbuf = buf;
+    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
+
+    io_info_init = TRUE;
+
+    /* Call storage method's I/O initialization routine */
+    HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
+
+    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+    io_op_init = TRUE;
+
+    /* Adjust I/O info for any parallel I/O */
+    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
+
+    /* Invoke correct "high level" I/O routine */
+    if((*io_info.io_ops.multi_read)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    /* Shut down the I/O op information */
+    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    /* Shut down io_info struct */
+    if(io_info_init)
+        if(H5D__ioinfo_term(&io_info) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
+    /* Shut down datatype info for operation */
+    if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+
+    /* discard projected mem space if it was created */
+    if(NULL != projected_mem_space)
+        if(H5S_close(projected_mem_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MD_dset_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MD_dset_write
+ *
+ * Purpose:	Writes (part of) a DATASET to a file from application memory
+ *		BUF. This uses the lightweight MDS H5D_t struct.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		October 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MD_dset_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
+               const H5S_t *file_space, hid_t dxpl_id, const void *buf)
+{
+    H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
+    H5D_io_info_t io_info;              /* Dataset I/O info     */
+    H5D_type_info_t type_info;          /* Datatype info for operation */
+    hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
+    H5S_t * projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
+                                        /* projection of the supplied mem_space to a new  */
+                                        /* data space with rank equal to that of          */
+                                        /* file_space.                                    */
+                                        /*                                                */
+                                        /* This field is only used if                     */
+                                        /* H5S_select_shape_same() returns TRUE when      */
+                                        /* comparing the mem_space and the data_space,    */
+                                        /* and the mem_space have different rank.         */
+                                        /*                                                */
+                                        /* Note that if this variable is used, the        */
+                                        /* projected mem space must be discarded at the   */
+                                        /* end of the function to avoid a memory leak.    */
+    H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    hssize_t	snelmts;                /*total number of elmts	(signed) */
+    hsize_t	nelmts;                 /*total number of elmts	*/
+    hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
+    hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    H5F_t *file = dataset->oloc.file;
+    herr_t	ret_value = SUCCEED;	/* Return value	*/
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(dataset && file);
+
+    /* Check if we are allowed to write to this file */
+    if(0 == (H5F_INTENT(file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file");
+
+    /* Fill the DXPL cache values for later use */
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache");
+
+    /* Set up datatype info for operation */
+    if(H5D__typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info");
+    type_info_init = TRUE;
+
+    if(H5T_detect_class(type_info.mem_type, H5T_VLEN, FALSE) > 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing VL datatypes yet");
+
+    /* If MPI based VFD is used, no VL datatype support yet. */
+    /* This is because they use the global heap in the file and we don't */
+    /* support parallel access of that yet */
+    /* We should really use H5T_detect_class() here, but it will be difficult
+     * to detect the type of the reference if it is nested... -QAK
+     */
+    if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
+       H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet");
+
+    /* Can't write to chunked datasets with filters, in parallel */
+    if(dataset->shared->layout.type == H5D_CHUNKED &&
+       dataset->shared->dcpl_cache.pline.nused > 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel");
+
+    /* Collective access is not permissible without a MPI based VFD */
+    if(dxpl_cache->xfer_mode == H5FD_MPIO_COLLECTIVE && 
+            !(H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_HAS_MPI)))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "collective access for MPI-based drivers only")
+
+    /* Initialize dataspace information */
+    if(!file_space)
+        file_space = dataset->shared->space;
+    if(!mem_space)
+        mem_space = file_space;
+
+    /* H5S_select_shape_same() has been modified to accept topologically 
+     * identical selections with different rank as having the same shape 
+     * (if the most rapidly changing coordinates match up), but the I/O 
+     * code still has difficulties with the notion.
+     *
+     * To solve this, we check to see if H5S_select_shape_same() returns 
+     * true, and if the ranks of the mem and file spaces are different.  
+     * If the are, construct a new mem space that is equivalent to the 
+     * old mem space, and use that instead.
+     *
+     * Note that in general, this requires us to touch up the memory buffer 
+     * as well.
+     */
+    if(TRUE == H5S_select_shape_same(mem_space, file_space) &&
+            H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
+        void *adj_buf = NULL;   /* Pointer to the location in buf corresponding  */
+                                /* to the beginning of the projected mem space.  */
+
+        /* Attempt to construct projected dataspace for memory dataspace */
+        if(H5S_select_construct_projection(mem_space, &projected_mem_space,
+                (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf, type_info.src_type_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
+        HDassert(projected_mem_space);
+        HDassert(adj_buf);
+
+        /* Switch to using projected memory dataspace & adjusted buffer */
+        mem_space = projected_mem_space;
+        buf = adj_buf;
+    } /* end if */
+
+    if((snelmts = H5S_GET_SELECT_NPOINTS(mem_space)) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, hsize_t);
+
+    /* Make certain that the number of elements in each selection is the same */
+    if(nelmts != (hsize_t)H5S_GET_SELECT_NPOINTS(file_space))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src and dest data spaces have different sizes")
+
+    /* Make sure that both selections have their extents set */
+    if(!(H5S_has_extent(file_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file dataspace does not have extent set")
+    if(!(H5S_has_extent(mem_space)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "memory dataspace does not have extent set")
+
+    /* Set up I/O operation */
+    io_info.op_type = H5D_IO_OP_WRITE;
+    io_info.u.wbuf = buf;
+
+    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
+    io_info_init = TRUE;
+
+    /* Call storage method's I/O initialization routine */
+    HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
+    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+    io_op_init = TRUE;
+
+    /* Adjust I/O info for any parallel I/O */
+    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
+
+    /* Invoke correct "high level" I/O routine */
+    if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+done:
+    /* Shut down the I/O op information */
+    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+
+    /* Shut down io_info struct */
+    if(io_info_init && H5D__ioinfo_term(&io_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
+
+    /* Shut down datatype info for operation */
+    if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+
+    /* discard projected mem space if it was created */
+    if(NULL != projected_mem_space)
+        if(H5S_close(projected_mem_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MD_dset_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MD_dset_close
  *
  * Purpose:	closes lightweight client dataset
  *
@@ -273,12 +607,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__mdc_close(H5D_t *dataset)
+H5MD_dset_close(H5D_t *dataset)
 {
     unsigned free_failed = FALSE;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(dataset);
@@ -316,11 +650,11 @@ H5D__mdc_close(H5D_t *dataset)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__mdc_close() */
+} /* end H5MD_dset_close() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_raw_open
+ * Function:	H5MD_file_open
  *
  * Purpose:	Opens (or creates) a file. This function is the same as H5F_open
  *              except that it opens a raw data file, meaning no metadata is 
@@ -335,7 +669,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F_mdc_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+H5MD_file_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hid_t dxpl_id)
 {
     H5F_t              *file = NULL;        /*the success return value      */
@@ -347,7 +681,7 @@ H5F_mdc_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5F_close_degree_t  fc_degree;          /*file close degree             */
     H5F_t              *ret_value;          /*actual return value           */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /*
      * If the driver has a `cmp' method then the driver is capable of
@@ -501,6 +835,248 @@ done:
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_mdc_open() */
+} /* end H5MD_file_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MD_file_get_obj_count
+ *
+ * Purpose:	Private function return the number of opened object IDs
+ *		(files, datasets, groups, datatypes) in the same file.
+ *
+ * Return:      SUCCEED on success, FAIL on failure.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MD_file_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr)
+{
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(obj_id_count_ptr);
+
+    /* Perform the query */
+    if((ret_value = H5MD_file_get_objects(f, types, 0, NULL, app_ref, obj_id_count_ptr)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_objects failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MD_file_get_obj_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MD_file_get_obj_ids
+ *
+ * Purpose:     Private function to return a list of opened object IDs.
+ *
+ * Return:      Non-negative on success; can't fail.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MD_file_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref, size_t *obj_id_count_ptr)
+{
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(obj_id_count_ptr);
+
+    /* Perform the query */
+    if((ret_value = H5MD_file_get_objects(f, types, max_objs, oid_list, app_ref, obj_id_count_ptr)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_objects failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MD_file_get_obj_ids() */
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5MD_file_get_objects
+ *
+ * Purpose:	This function is called by H5MD_file_get_obj_count or
+ *		H5MD_file_get_obj_ids to get number of object IDs and/or a
+ *		list of opened object IDs (in return value).
+ * Return:	Non-negative on success; Can't fail.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5MD_file_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr)
+{
+    size_t obj_id_count=0;      /* Number of open IDs */
+    H5F_olist_t olist;          /* Structure to hold search results */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(obj_id_count_ptr);
+
+    /* Set up search information */
+    olist.obj_id_list  = (max_index==0 ? NULL : obj_id_list);
+    olist.obj_id_count = &obj_id_count;
+    olist.list_index   = 0;
+    olist.max_index   = max_index;
+
+    /* Determine if we are searching for local or global objects */
+    if(types & H5F_OBJ_LOCAL) {
+        olist.file_info.local = TRUE;
+        olist.file_info.ptr.file = f;
+    } /* end if */
+    else {
+        olist.file_info.local = FALSE;
+        olist.file_info.ptr.shared = f ? f->shared : NULL;
+    } /* end else */
+
+    /* Iterate through file IDs to count the number, and put their
+     * IDs on the object list.  */
+    if(types & H5F_OBJ_FILE) {
+        olist.obj_type = H5I_FILE;
+        if(H5I_iterate(H5I_FILE, H5MD_file_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(1)")
+    } /* end if */
+
+    /* Search through dataset IDs to count number of datasets, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_DATASET) {
+        olist.obj_type = H5I_DATASET;
+        if(H5I_iterate(H5I_DATASET, H5MD_file_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(2)")
+    } /* end if */
+
+    /* Search through group IDs to count number of groups, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_GROUP) {
+        olist.obj_type = H5I_GROUP;
+        if(H5I_iterate(H5I_GROUP, H5MD_file_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(3)")
+    } /* end if */
+
+    /* Search through datatype IDs to count number of named datatypes, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_DATATYPE) {
+        olist.obj_type = H5I_DATATYPE;
+        if(H5I_iterate(H5I_DATATYPE, H5MD_file_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(4)")
+    } /* end if */
+
+    /* Search through attribute IDs to count number of attributes, and put their
+     * IDs on the object list */
+    if(types & H5F_OBJ_ATTR) {
+        olist.obj_type = H5I_ATTR;
+        if(H5I_iterate(H5I_ATTR, H5MD_file_get_objects_cb, &olist, app_ref) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed(5)")
+    } /* end if */
+
+    /* Set the number of objects currently open */
+    *obj_id_count_ptr = obj_id_count;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MD_file_get_objects() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MD_file_get_objects_cb
+ *
+ * Purpose:	H5F_get_objects' callback function.  It verifies if an
+ * 		object is in the file, and either count it or put its ID
+ *		on the list.
+ *
+ * Return:      TRUE if the array of object IDs is filled up.
+ *              FALSE otherwise.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5MD_file_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
+{
+    H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
+    H5F_t *f = ((H5MD_object_t *)obj_ptr)->raw_file;
+    int ret_value = FALSE;    /* Return value */
+    
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(obj_ptr);
+    HDassert(olist);
+
+    /* Count file IDs */
+    if(olist->obj_type == H5I_FILE) {
+        if((olist->file_info.local &&
+            (!olist->file_info.ptr.file || (olist->file_info.ptr.file && f == olist->file_info.ptr.file) ))
+           ||  (!olist->file_info.local &&
+                ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && f->shared == olist->file_info.ptr.shared) ))) {
+            /* Add the object's ID to the ID list, if appropriate */
+            if(olist->obj_id_list) {
+                olist->obj_id_list[olist->list_index] = obj_id;
+		olist->list_index++;
+	    }
+
+            /* Increment the number of open objects */
+	    if(olist->obj_id_count)
+	    	(*olist->obj_id_count)++;
+
+            /* Check if we've filled up the array.  Return TRUE only if
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
+             * preset to FALSE) because H5I_iterate needs the return value of 
+ 	     * FALSE to continue the iteration. */
+            if(olist->max_index>0 && olist->list_index>=olist->max_index)
+                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
+	}
+    } /* end if */
+    else { /* either count opened object IDs or put the IDs on the list */
+        if(olist->obj_type == H5I_DATATYPE) {
+            H5MD_object_t *dt = NULL;
+
+            if(NULL != (dt = (H5MD_object_t *)H5T_get_named_type((H5T_t *)obj_ptr)))
+                f = dt->raw_file;
+        }
+        if((olist->file_info.local &&
+            ( (!olist->file_info.ptr.file && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
+              || (!olist->file_info.ptr.file && olist->obj_type != H5I_DATATYPE)
+              || (f == olist->file_info.ptr.file)))
+           || (!olist->file_info.local &&
+               ((!olist->file_info.ptr.shared && olist->obj_type == H5I_DATATYPE && H5T_is_immutable((H5T_t *)obj_ptr) == FALSE)
+                || (!olist->file_info.ptr.shared && olist->obj_type != H5I_DATATYPE)
+                || (f && f->shared == olist->file_info.ptr.shared)))) {
+            /* Add the object's ID to the ID list, if appropriate */
+            if(olist->obj_id_list) {
+            	olist->obj_id_list[olist->list_index] = obj_id;
+		olist->list_index++;
+	    } /* end if */
+
+            /* Increment the number of open objects */
+	    if(olist->obj_id_count)
+            	(*olist->obj_id_count)++;
+
+            /* Check if we've filled up the array.  Return TRUE only if
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is
+             * preset to FALSE) because H5I_iterate needs the return value of 
+	     * FALSE to continue iterating. */
+            if(olist->max_index>0 && olist->list_index>=olist->max_index)
+                HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
+    	} /* end if */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MD_file_get_objects_cb() */
 
 #endif /* H5_HAVE_PARALLEL */

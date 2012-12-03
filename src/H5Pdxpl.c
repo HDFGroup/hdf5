@@ -403,7 +403,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type ID property*/
-    if(H5P_register_real(pclass, H5VL_DSET_MDS_ID, sizeof(hid_t), &mds_dset_id, 
+    if(H5P_register_real(pclass, H5MD_DSET_ID, sizeof(hid_t), &mds_dset_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
