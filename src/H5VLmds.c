@@ -517,7 +517,9 @@ H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         if(MPI_SUCCESS != MPI_Bcast(&mds_file, sizeof(hid_t), MPI_BYTE, 0, fa->comm))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
     }
-    HDassert(mds_file);
+
+    if(mds_file < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "metadata file creation failed");
 
     /* generate the raw data file name by adding the raw data extension to the user file name */
     if(NULL == (raw_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->raw_ext) + 1)))
@@ -635,7 +637,8 @@ H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
         if(MPI_SUCCESS != MPI_Bcast(&mds_file, sizeof(hid_t), MPI_BYTE, 0, fa->comm))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to receive message")
     }
-    HDassert(mds_file);
+    if(mds_file < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "metadata file open failed");
 
     /* generate the raw data file name by adding the raw data extension to the user file name */
     if(NULL == (raw_name = (char *)H5MM_malloc (HDstrlen(name) + HDstrlen(fa->raw_ext) + 1)))
@@ -1109,7 +1112,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -1122,6 +1125,9 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
 
                 /* decode the return value */
                 INT64DECODE(p, *ret);
+                if(*ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get free sections for file");
+
                 if(1 == flag) {
                     unsigned u;
                     for(u=0 ; u<nsects ; u++) {
@@ -1166,7 +1172,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -1176,6 +1182,12 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                INT32DECODE(p, ret_value);
+                if(ret_value < 0) {
+                    H5MM_xfree(recv_buf);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get file info");
+                }
 
                 H5_DECODE_UNSIGNED(p, finfo->super.version);
                 UINT64DECODE_VARLEN(p, finfo->super.super_size);
@@ -1224,7 +1236,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -1234,6 +1246,12 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                INT32DECODE(p, ret_value);
+                if(ret_value < 0) {
+                    H5MM_xfree(recv_buf);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get mdc config");
+                }
 
                 if(H5P__facc_cache_config_dec((const void **)(&p), config_ptr) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to decode cache config");
@@ -1304,7 +1322,7 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -1314,6 +1332,12 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                INT32DECODE(p, ret_value);
+                if(ret_value < 0) {
+                    H5MM_xfree(recv_buf);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get mdc size");
+                }
 
                 UINT64DECODE_VARLEN(p, *max_size_ptr);
                 UINT64DECODE_VARLEN(p, *min_clean_size_ptr);
@@ -1377,6 +1401,9 @@ H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNU
                                                MPI_COMM_WORLD, MPI_STATUS_IGNORE))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
                 MPI_Pcontrol(1);
+
+                if(mds_file < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "metadata file open failed");
 
                 /* Open the raw data file */ 
                 if(NULL == (new_file = H5F_reopen(old_file->common.raw_file)))
@@ -1583,6 +1610,9 @@ H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
     H5MM_xfree(send_buf);
 
+    if(attr->common.obj_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "attribute creation failed");
+
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a type");
     /* Get the actual datatype object if this is a named datatype */
@@ -1678,7 +1708,7 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
@@ -1691,6 +1721,9 @@ H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
     /* decode the attr ID at the MDS */
     INT32DECODE(p, attr->common.obj_id);
+
+    if(attr->common.obj_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "attribute open failed");
 
     /* decode the plist size */
     UINT64DECODE_VARLEN(p, acpl_size);
@@ -1795,13 +1828,21 @@ H5VL_mds_attr_read(void *obj, hid_t dtype_id, void *buf, hid_t UNUSED req)
     MPI_Pcontrol(0);
     /* send the request to the MDS process and receive back the attribute data */
     if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
-                                   buf, (int)(dst_type_size * nelmts), MPI_BYTE, MDS_RANK, 
+                                   &ret_value, sizeof(int), MPI_BYTE, MDS_RANK, 
                                    H5MD_RETURN_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send and receive message");
     MPI_Pcontrol(1);
 
-    H5MM_xfree(send_buf);
+    if(SUCCEED == ret_value) {
+        MPI_Pcontrol(0);
+        /* receive the actual attribute value */
+        if(MPI_SUCCESS != MPI_Recv (buf, (int)(dst_type_size * nelmts), MPI_BYTE, MDS_RANK,
+                                    H5MD_RETURN_TAG, MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+        MPI_Pcontrol(1);
+    }
 done:
+    H5MM_xfree(send_buf);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_attr_read() */
 
@@ -1967,8 +2008,10 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send & receive message");
                 MPI_Pcontrol(1);
 
-                H5MM_xfree(send_buf);
+                if(*ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to determine if attribute exists");
 
+                H5MM_xfree(send_buf);
                 break;
             }
         /* H5Aget_space */
@@ -2047,7 +2090,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -2059,6 +2102,9 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                 p = (uint8_t *)recv_buf;
 
                 INT64DECODE(p, *ret_val);
+
+                if(*ret_val < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get attribute name");
 
                 if(buf && size)
                     HDstrcpy(buf, (char *)p);
@@ -2130,7 +2176,7 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -2138,6 +2184,12 @@ H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_lis
                                             H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
                 MPI_Pcontrol(1);
+
+                /* this means that the get request failed */
+                if(incoming_msg_size == sizeof(int32_t)) {
+                    INT32DECODE(p, ret_value);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get attribute info");
+                }
 
                 p = (uint8_t *)recv_buf;
 
@@ -2298,7 +2350,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
@@ -2311,6 +2363,9 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 
     /* decode the dataset ID at the MDS */
     INT32DECODE(p, dset->common.obj_id);
+
+    if(dset->common.obj_id < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create meta dataset object");
 
     /* decode the dataset layout */
     if(FAIL == H5D__decode_layout(p, &layout))
@@ -2428,7 +2483,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
@@ -2441,6 +2496,9 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     /* decode the dataset ID at the MDS */
     INT32DECODE(p, dset->common.obj_id);
+
+    if(dset->common.obj_id < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create meta dataset object");
 
     /* decode the plist size */
     UINT64DECODE_VARLEN(p, dcpl_size);
@@ -3024,7 +3082,8 @@ H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
@@ -3202,6 +3261,9 @@ H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     H5MM_xfree(send_buf);
 
+    if(grp->common.obj_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create meta group object");
+
     /* set common object parameters */
     grp->common.obj_type = H5I_GROUP;
     grp->common.raw_file = obj->raw_file;
@@ -3263,6 +3325,9 @@ static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const
     MPI_Pcontrol(1);
 
     H5MM_xfree(send_buf);
+
+    if(grp->common.obj_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to open meta group object");
 
     /* set common object parameters */
     grp->common.obj_type = H5I_GROUP;
@@ -3334,7 +3399,8 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
                 if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
@@ -3343,6 +3409,11 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                if(incoming_msg_size == sizeof(int32_t)) {
+                    INT32DECODE(p, ret_value);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get gcpl");
+                }
 
                 /* decode the plist size */
                 UINT64DECODE_VARLEN(p, gcpl_size);
@@ -3402,7 +3473,7 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -3412,6 +3483,11 @@ H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_l
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                if(incoming_msg_size == sizeof(int32_t)) {
+                    INT32DECODE(p, ret_value);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get gcpl");
+                }
 
                 ginfo->storage_type = (H5G_storage_type_t)*p++;
                 UINT64DECODE_VARLEN(p, ginfo->nlinks);
@@ -3752,7 +3828,7 @@ static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hb
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
         /* allocate the receive buffer */
-        if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* receive the actual message */
@@ -3885,6 +3961,8 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 MPI_Pcontrol(1);
 
                 H5MM_xfree(send_buf);
+                if(*ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to determine if link exists");
 
                 break;
             }
@@ -3925,7 +4003,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -3935,6 +4013,11 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                if(incoming_msg_size == sizeof(int32_t)) {
+                    INT32DECODE(p, ret_value);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get link info");
+                }
 
                 linfo->type = (H5L_type_t)*p++;
                 H5_DECODE_UNSIGNED(p, linfo->corder_valid);
@@ -3995,7 +4078,7 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -4007,6 +4090,9 @@ H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 p = (uint8_t *)recv_buf;
 
                 INT64DECODE(p, *ret);
+                if(*ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get name");
+
                 if(name && size)
                     HDstrcpy(name, (char *)p);
                 p += size;
@@ -4160,7 +4246,7 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* receive the actual message */
@@ -4172,6 +4258,10 @@ static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params,
     p = (uint8_t *)recv_buf;
 
     INT32DECODE(p, new_id);
+
+    if(new_id < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to open object at MDS");
+
     *opened_type = (H5I_type_t)*p++;
 
     switch(*opened_type) {
@@ -4445,7 +4535,7 @@ static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
         /* allocate the receive buffer */
-        if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* receive the actual message */
@@ -4800,7 +4890,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -4810,6 +4900,11 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 MPI_Pcontrol(1);
 
                 p = (uint8_t *)recv_buf;
+
+                if(incoming_msg_size == sizeof(int32_t)) {
+                    INT32DECODE(p, ret_value);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to get object info");
+                }
 
                 UINT64DECODE_VARLEN(p, info_size);
                 if(info_size) {
@@ -4863,7 +4958,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -4875,6 +4970,10 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 p = (uint8_t *)recv_buf;
 
                 INT64DECODE(p, *ret);
+
+                if(*ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to get object comment");
+
                 if(comment && size)
                     HDstrcpy(comment, (char *)p);
                 p += size;
@@ -4925,7 +5024,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
@@ -5026,7 +5125,7 @@ H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
                 /* allocate the receive buffer */
-                if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+                if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* receive the actual message */
