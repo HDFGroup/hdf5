@@ -30,7 +30,7 @@
 H5_HLDLL herr_t H5DO_write_chunk(hid_t dset_id, 
 			hid_t dxpl_id, 
 			uint32_t filters, 
-			hsize_t *offset, 
+			const hsize_t *offset, 
          		size_t data_size, 
 			const void *buf);
 

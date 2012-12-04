@@ -283,7 +283,7 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__direct_write
+ * Function:	H5D__chunk_direct_write
  *
  * Purpose:	Internal routine for H5PSIdirect_write to write a chunk 
  *              directly into the file.
@@ -310,7 +310,6 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
     H5FD_t *lf; 
     herr_t ret_value = SUCCEED; /* Return value */
 
-    /*FUNC_ENTER_PACKAGE*/
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     /* Allocate data space and initialize it if it hasn't been. */
@@ -382,7 +381,6 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsiz
 
 
 done:
-    /*FUNC_LEAVE_NOAPI(ret_value)*/
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 }
 

@@ -34,38 +34,53 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, hsize_t *offset, 
+H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
          size_t data_size, const void *buf)
 {
-    htri_t created_dxpl = FALSE;
-
-    if(dset_id < 0)
-        goto error;
-
-    if(!buf)
-        goto error;
+    hbool_t created_dxpl = FALSE;
+    herr_t  ret_value = SUCCEED;  /* Return value */
     
-    if(!offset)
-        goto error;
+    if(dset_id < 0) {
+        ret_value = FAIL;
+        goto done;
+    }
 
-    if(!data_size)
-        goto error;
+    if(!buf) {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if(!offset) {
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if(!data_size) {
+        ret_value = FAIL;
+        goto done;
+    }
 
     if(H5P_DEFAULT == dxpl_id) {
-	dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+	if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) {
+            ret_value = FAIL;
+            goto done;
+        }
+
         created_dxpl = TRUE;
     }
 
-    if(H5DO_write_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) < 0)
-        goto error;
-
-    if(created_dxpl) {
-        if(H5Pclose(dxpl_id) < 0)
-            goto error;
+    if(H5DO_write_chunk(dset_id, dxpl_id, filters, offset, data_size, buf) < 0) {
+        ret_value = FAIL;
+        goto done;
     }
 
-error:
-    return FAIL;
+done:
+    if(created_dxpl) {
+        if(H5Pclose(dxpl_id) < 0)
+            ret_value = FAIL;
+    }
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
@@ -82,30 +97,41 @@ error:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5DO_write_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, hsize_t *offset, 
+H5DO_write_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, 
          size_t data_size, const void *buf)
 {
-    htri_t do_direct_write = TRUE;
+    hbool_t do_direct_write = TRUE;
+    herr_t  ret_value = SUCCEED;  /* Return value */
 
-    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &do_direct_write) < 0)
-        goto error;
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &do_direct_write) < 0) {
+        ret_value = FAIL;
+        goto done;
+    }
 
-    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &filters) < 0)
-        goto error;
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &filters) < 0) {
+        ret_value = FAIL;
+        goto done;
+    }
 
-    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &offset) < 0)
-        goto error;
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &offset) < 0) {
+        ret_value = FAIL;
+        goto done;
+    }
 
-    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &data_size) < 0)
-        goto error;
+    if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &data_size) < 0) {
+        ret_value = FAIL;
+        goto done;
+    }
 
-    if(H5Dwrite(dset_id, 0, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
-        goto error;
+    if(H5Dwrite(dset_id, 0, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0) {
+        ret_value = FAIL;
+        goto done;
+    }
 
+done:
     do_direct_write = FALSE;
     if(H5Pset(dxpl_id, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &do_direct_write) < 0)
-        goto error;
+        ret_value = FAIL;
 
-error:
-    return FAIL;
+    return ret_value;
 }

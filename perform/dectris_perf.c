@@ -53,11 +53,11 @@ const char *FILENAME[] = {
 #define REG_NO_COMPRESS_DSET   "reg_no_compress_dset"
 #define RANK         3
 #define NX     100
-#define NY     1000
-#define NZ     250
+#define NY     2000
+#define NZ     3000
 #define CHUNK_NX     1 
-#define CHUNK_NY     1000
-#define CHUNK_NZ     250
+#define CHUNK_NY     2000
+#define CHUNK_NZ     3000
 
 #define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
 char        filename[1024];

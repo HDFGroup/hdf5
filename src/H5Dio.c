@@ -140,6 +140,10 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(NULL == dset->oloc.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if(mem_space_id < 0 || file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
@@ -252,10 +256,10 @@ H5D__pre_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5D_t		   *dset = NULL;
     H5P_genplist_t 	   *plist;      /* Property list pointer */
-    htri_t		    direct_write = FALSE;
+    hbool_t		    direct_write = FALSE;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -283,13 +287,12 @@ H5D__pre_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         hsize_t *direct_offset;
         size_t   direct_datasize = 0;
 	int      ndims = 0;
-	hsize_t *dims = NULL;
-	hsize_t *internal_offset = NULL;
+	hsize_t  dims[H5O_LAYOUT_NDIMS];
+	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
 	int      i;
 
         if(H5D_CHUNKED != dset->shared->layout.type)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
-
 
         if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &direct_filters) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting filter info for direct chunk write")
@@ -302,14 +305,7 @@ H5D__pre_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
 	/* The library's chunking code requires the offset terminates with a zero. So transfer the 
          * offset array to an internal offset array */ 
-	ndims = (int)H5S_GET_EXTENT_NDIMS(dset->shared->space);
-	if(NULL == (dims = (hsize_t *)H5MM_malloc(ndims*sizeof(hsize_t))))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for dimensions")
-
-	if(NULL == (internal_offset = (hsize_t *)H5MM_malloc((ndims+1)*sizeof(hsize_t))))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for offset")
-
-	if(H5S_get_simple_extent_dims(dset->shared->space, dims, NULL) < 0)
+	if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
 	    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
 
 	for(i=0; i<ndims; i++) {
@@ -334,6 +330,9 @@ H5D__pre_write(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	const H5S_t *mem_space = NULL;
 	const H5S_t *file_space = NULL;
 	char        fake_char;
+
+        if(mem_space_id < 0 || file_space_id < 0)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
 	if(H5S_ALL != mem_space_id) {
 	    if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
