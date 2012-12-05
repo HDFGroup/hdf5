@@ -53,11 +53,11 @@ const char *FILENAME[] = {
 #define REG_NO_COMPRESS_DSET   "reg_no_compress_dset"
 #define RANK         3
 #define NX     100
-#define NY     2000
-#define NZ     3000
+#define NY     1000
+#define NZ     250
 #define CHUNK_NX     1 
-#define CHUNK_NY     2000
-#define CHUNK_NZ     3000
+#define CHUNK_NY     1000
+#define CHUNK_NZ     250
 
 #define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001)+12)
 char        filename[1024];
@@ -87,7 +87,6 @@ void reportTime(struct timeval start, double mbytes)
         timeval_diff.tv_sec--;
     } /* end if */
 
-/*printf("mbytes=%lf, sec=%lf, usec=%lf\n", mbytes, (double)timeval_diff.tv_sec, (double)timeval_diff.tv_usec);*/
     printf("MBytes/second: %lf\n", (double)mbytes/((double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0)));        
 }
 
