@@ -1261,7 +1261,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      * way for us to detect it here anyway).
      */
     if(drvr->cmp)
-	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL|H5F_ACC_SYNC);
+	tent_flags = flags & ~(H5F_ACC_CREAT|H5F_ACC_TRUNC|H5F_ACC_EXCL);
     else
 	tent_flags = flags;
 
@@ -1464,9 +1464,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
     /* In this routine, we only accept the following flags:
-     *          H5F_ACC_SYNC, H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_DEBUG
+     *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_DEBUG
      */
-    if(flags & ~(H5F_ACC_SYNC | H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_DEBUG))
+    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_DEBUG))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
     /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
     if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))

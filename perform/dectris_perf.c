@@ -273,7 +273,7 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     gettimeofday(&timeval_start,NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
     if((dataset = H5Dopen(file, DIRECT_UNCOMPRESSED_DSET, H5P_DEFAULT)) < 0)
@@ -338,7 +338,7 @@ test_direct_write_compressed_data(hid_t fapl_id)
     gettimeofday(&timeval_start,NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
     if((dataset = H5Dopen(file, DIRECT_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
@@ -409,7 +409,7 @@ test_compressed_write(hid_t fapl_id)
     gettimeofday(&timeval_start,NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
     if((dataset = H5Dopen(file, REG_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
@@ -497,7 +497,7 @@ test_no_compress_write(hid_t fapl_id)
     gettimeofday(&timeval_start,NULL);
 
     /* Reopen the file and dataset */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SYNC, fapl_id)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
     if((dataset = H5Dopen(file, REG_NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
@@ -566,7 +566,7 @@ test_unix_write(void)
     TESTING("Write compressed data to a Unix file");
 
     /* create file*/
-    flag = O_WRONLY|O_SYNC;
+    flag = O_WRONLY;
 
     /* Start the timer */
     gettimeofday(&timeval_start,NULL);
