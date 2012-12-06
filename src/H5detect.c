@@ -120,7 +120,7 @@ static void print_results(int nd, detected_t *d, int na, malign_t *m);
 static void iprint(detected_t *);
 static int byte_cmp(int, const void *, const void *);
 static int bit_cmp(int, int *, volatile void *, volatile void *);
-static void fix_order(int, int, int, int *, const char **);
+static void fix_order(int, int, int *, const char **);
 static int imp_bit(int, int *, volatile void *, volatile void *);
 static unsigned long find_bias(int, int, int *, void *);
 static void precision (detected_t*);
@@ -293,7 +293,7 @@ precision (detected_t *d)
 #define DETECT_F(TYPE,VAR,INFO) {					      \
    volatile TYPE _v1, _v2, _v3;						      \
    unsigned char _buf1[sizeof(TYPE)], _buf3[sizeof(TYPE)];		      \
-   int _i, _j, _first = (-1), _last = (-1);				      \
+   int _i, _j, _last = (-1);						      \
    char *_mesg;								      \
 									      \
    memset(&INFO, 0, sizeof(INFO));					      \
@@ -315,15 +315,11 @@ precision (detected_t *d)
       memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));			      \
       _j = byte_cmp(sizeof(TYPE), &_buf3, &_buf1);			      \
       if(_j >= 0) {							      \
-	 if(0 == _i || INFO.perm[_i - 1] != _j) {			      \
-	    INFO.perm[_i] = _j;						      \
-	    _last = _i;							      \
-	    if(_first < 0)						      \
-                _first = _i;						      \
-	 }								      \
+          INFO.perm[_i] = _j;						      \
+          _last = _i;							      \
       }									      \
    }									      \
-   fix_order(sizeof(TYPE), _first, _last, INFO.perm, (const char**)&_mesg);   \
+   fix_order(sizeof(TYPE), _last, INFO.perm, (const char**)&_mesg);	      \
                                                                               \
    if(!strcmp(_mesg, "VAX"))                                                  \
       INFO.is_vax = TRUE;                                                     \
@@ -973,11 +969,11 @@ bit_cmp(int nbytes, int *perm, volatile void *_a, volatile void *_b)
  *-------------------------------------------------------------------------
  */
 static void
-fix_order(int n, int first, int last, int *perm, const char **mesg)
+fix_order(int n, int last, int *perm, const char **mesg)
 {
     int		i;
 
-    if (first + 1 < last) {
+    if (last > 1) {
 	/*
 	 * We have at least three points to consider.
 	 */
@@ -998,6 +994,9 @@ fix_order(int n, int first, int last, int *perm, const char **mesg)
 	} else {
 	    /*
 	     * Bi-endian machines like VAX.
+             * (NOTE: This is not an actual determination of the VAX-endianess.
+             *          It could have some other endianess and fall into this
+             *          case - JKM & QAK)
 	     */
 	    assert(0 == n % 2);
 	    if (mesg) *mesg = "VAX";

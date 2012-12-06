@@ -759,6 +759,11 @@ IF (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
   IF (HDF5_BUILD_FORTRAN)
     OPTION (HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF)
     INCLUDE (${HDF5_RESOURCES_DIR}/HDF5UseFortran.cmake)
+    IF (HDF5_ENABLE_F2003)
+      IF (NOT FORTRAN_HAVE_ISO_C_BINDING)
+        SET (HDF5_ENABLE_F2003 OFF)
+      ENDIF (NOT FORTRAN_HAVE_ISO_C_BINDING)
+    ENDIF (HDF5_ENABLE_F2003)
 
     # -----------------------------------------------------------------------
     # wrapper script variables

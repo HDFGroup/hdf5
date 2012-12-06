@@ -131,8 +131,7 @@ typedef enum H5D_mpio_actual_chunk_opt_mode_t {
      */
     H5D_MPIO_NO_CHUNK_OPTIMIZATION = 0,
     H5D_MPIO_LINK_CHUNK,
-    H5D_MPIO_MULTI_CHUNK,
-    H5D_MPIO_MULTI_CHUNK_NO_OPT
+    H5D_MPIO_MULTI_CHUNK
 }  H5D_mpio_actual_chunk_opt_mode_t;
 
 typedef enum H5D_mpio_actual_io_mode_t {

@@ -133,6 +133,9 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -145,6 +148,8 @@ TOOLTEST() {
    expect="$TESTDIR/$1"
    actual="$TESTDIR/`basename $1 .ddl`.out"
    actual_err="$TESTDIR/`basename $1 .ddl`.err"
+   actual_sav=${actual}-sav
+   actual_err_sav=${actual_err}-sav
    shift
 
    # Run test.
@@ -156,8 +161,13 @@ TOOLTEST() {
       cd $TESTDIR
       $RUNSERIAL $STAT_BIN $@
    ) >$actual 2>$actual_err
-   cat $actual_err >> $actual
 
+   # save actual and actual_err in case they are needed later.
+   cp $actual $actual_sav
+   STDOUT_FILTER $actual
+   cp $actual_err $actual_err_sav
+   STDERR_FILTER $actual_err
+   cat $actual_err >> $actual
 
    if [ ! -f $expect ]; then
     # Create the expect file if it doesn't yet exist.
@@ -174,7 +184,7 @@ TOOLTEST() {
 
    # Clean up output file
    if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
+      rm -f $actual $actual_err $actual_sav $actual_err_sav
    fi
 }
 
