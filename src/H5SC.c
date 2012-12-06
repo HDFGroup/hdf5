@@ -120,7 +120,7 @@ static int commsplitter_MPI_Init(int *argc, char ***argv)
     if(MDS_RANK == commsplitter_data.grank) {
         H5open();
         H5MD_start();
-        exit(0);
+        HDexit(0);
     }
     else {
         int key = 0;
@@ -174,7 +174,7 @@ static int commsplitter_MPI_Init_thread(int *argc, char ***argv, int required, i
     if(MDS_RANK == commsplitter_data.grank) {
         H5open();
         H5MD_start();
-        exit(0);
+        HDexit(0);
     }
     else {
         int key = 0;

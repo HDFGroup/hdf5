@@ -214,8 +214,6 @@ H5MD_server_terminate_cb(MPI_Comm UNUSED comm, int UNUSED comm_keyval, void UNUS
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     MPI_Pcontrol(1);
 
-    H5_term_library();
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -798,10 +796,8 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 if(H5P__facc_cache_config_enc(&config_ptr, (void **)(&p1), &buf_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode cache config");
 
-                buf_size += sizeof(int);
-
                 /* allocate the buffer for encoding the parameters */
-                if(NULL == (send_buf = H5MM_malloc(buf_size)))
+                if(NULL == (send_buf = H5MM_malloc(buf_size + sizeof(int))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 p1 = (uint8_t *)send_buf;
@@ -810,6 +806,8 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 if(H5P__facc_cache_config_enc(&config_ptr, (void **)(&p1), &buf_size) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode cache config");
+
+                buf_size += sizeof(int);
 
                 if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
                                            H5MD_RETURN_TAG, MPI_COMM_WORLD))
