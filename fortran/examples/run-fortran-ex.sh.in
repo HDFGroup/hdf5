@@ -70,20 +70,22 @@ RunTest()
 # Run tests
 if [ $? -eq 0 ]
 then
-    if (RunTest dsetexample &&\
-        rm dsetexample &&\
-        RunTest fileexample &&\
-        rm fileexample &&\
-        RunTest rwdsetexample &&\
-        rm rwdsetexample &&\
-        RunTest attrexample &&\
-        rm attrexample &&\
-        RunTest groupexample &&\
-        rm groupexample &&\
-        RunTest grpsexample &&\
-        rm grpsexample &&\
-        RunTest grpdsetexample &&\
-        rm grpdsetexample &&\
+    if (RunTest h5_crtdat &&\
+        rm h5_crtdat &&\
+        RunTest h5_extend &&\
+        rm h5_extend &&\
+        RunTest h5_rdwt &&\
+        rm h5_rdwt &&\
+        RunTest h5_crtatt &&\
+        rm h5_crtatt &&\
+        RunTest h5_crtgrp &&\
+        rm h5_crtgrp &&\
+        RunTest h5_crtgrpar &&\
+        rm h5_crtgrpar &&\
+        RunTest h5_crtgrpd &&\
+        rm h5_crtgrpd &&\
+        RunTest h5_subset &&\
+        rm h5_subset &&\
         RunTest hyperslab &&\
         rm hyperslab &&\
         RunTest selectele &&\
