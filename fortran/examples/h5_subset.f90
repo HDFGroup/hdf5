@@ -158,8 +158,7 @@ PROGRAM H5_SUBSET
        memspace, dataspace)
 
   data_dims(1:2) = (/dim0, dim1/)
-  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, data_dims, error, &
-       H5S_ALL_F, H5S_ALL_F)
+  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, data_dims, error)
 
   !
   ! Read entire dataset back 
