@@ -121,6 +121,15 @@
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
+./examples/h5_crtgrpd.c
+./examples/h5_subset.c
+./examples/h5_cmprss.c
+./examples/h5_rdwt.c
+./examples/h5_crtgrpar.c
+./examples/h5_extend.c
+./examples/h5_crtatt.c
+./examples/h5_crtgrp.c
+./examples/h5_crtdat.c
 ./examples/h5_drivers.c
 ./examples/h5_dtransform.c
 ./examples/h5_elink_unix2win.c

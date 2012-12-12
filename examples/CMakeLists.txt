@@ -10,6 +10,15 @@ ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
 # Define Sources
 #-----------------------------------------------------------------------------
 SET (examples
+    h5_crtdat
+    h5_rdwt
+    h5_crtatt
+    h5_crtgrp
+    h5_crtgrpar
+    h5_crtgrpd
+    h5_cmprss
+    h5_extend
+    h5_subset
     h5_write
     h5_read
     h5_extend_write
@@ -51,11 +60,15 @@ IF (BUILD_TESTING)
           -E remove 
           Attributes.h5
           btrees_file.h5
+          cmprss.h5
           default_file.h5
+          dset.h5
+          extend.h5 
           extlink_prefix_source.h5
           extlink_source.h5
           extlink_target.h5
           group.h5
+          groups.h5
           hard_link.h5
           mount1.h5
           mount2.h5
@@ -71,6 +84,7 @@ IF (BUILD_TESTING)
           separate_indexes_file.h5
           small_lists_file.h5
           soft_link.h5
+          subset.h5
           unix2win.h5
   )
   IF (NOT "${last_test}" STREQUAL "")
