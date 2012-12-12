@@ -212,9 +212,9 @@ PROGRAM H5_EXTEND
   CALL H5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, data_dims, &
        error, memspace, dataspace)
 
-  PRINT *,"Dataset:" 
+  WRITE(*,'(A)') "Dataset:" 
   DO i = 1, dimsr(1)
-     PRINT *, rdata(i,1:dimsr(2))    
+     WRITE(*,'(100(I0,1X))') rdata(i,1:dimsr(2))    
   END DO
 
   !

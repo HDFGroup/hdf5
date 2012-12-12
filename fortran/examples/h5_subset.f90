@@ -107,11 +107,10 @@ PROGRAM H5_SUBSET
   !
   ! Data Written to File 
   !
-  PRINT*, "Original Data Written to File:"
+  WRITE(*,'(/,A)') "Original Data Written to File:"
   DO i = 1, dim0
-     PRINT*, DATA(i,1:dim1)
+     WRITE(*,'(100(1X,I0,1X))') DATA(i,1:dim1)
   END DO
-  PRINT*, " "
 
   !
   !
@@ -147,8 +146,8 @@ PROGRAM H5_SUBSET
   !
   CALL h5screate_simple_f(rank, dimsm, memspace, error)
 
-  PRINT *,"Write subset to file specifying:"
-  PRINT *, "   offset=1x2 stride=1x1 count=3x4 block=1x1"
+  WRITE(*,'(/,A)') "Write subset to file specifying:"
+  WRITE(*,'(A,/)') "   offset=2x1 stride=1x1 count=4x3 block=1x1"
 
   !
   ! Write subset to dataset  
@@ -163,9 +162,9 @@ PROGRAM H5_SUBSET
   !
   ! Read entire dataset back 
   !
-  PRINT *,"Data in File after Subset Written:"
+  WRITE(*,'(A)') "Data in File after Subset Written:"
   DO i = 1, dim0 
-     PRINT *,rdata(i,1:dim1)
+    WRITE(*,'(100(1X,I0,1X))') rdata(i,1:dim1)
   END DO
   PRINT *, " "
 
