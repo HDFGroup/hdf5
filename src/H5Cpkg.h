@@ -43,20 +43,6 @@
 /* Get needed headers */
 #include "H5SLprivate.h"        /* Skip lists */
 
-/* With the introduction of the fractal heap, it is now possible for
- * entries to be dirtied, resized, and/or moved in the flush callbacks.
- * As a result, on flushes, it may be necessary to make multiple passes
- * through the slist before it is empty.  The H5C__MAX_PASSES_ON_FLUSH
- * #define is used to set an upper limit on the number of passes.
- * The current value was obtained via personal communication with
- * Quincey.  I have applied a fudge factor of 2.
- *
- *						-- JRM
- */
-
-#define H5C__MAX_PASSES_ON_FLUSH	4
-
-
 
 /****************************************************************************
  *
@@ -1013,6 +999,9 @@ struct H5C_t
 /****************************************************************************/
 /***************************** Macro Definitions ****************************/
 /****************************************************************************/
+
+/* Initial allocated size of the "flush_dep_parent" array */
+#define H5C_FLUSH_DEP_PARENT_INIT 8
 
 /****************************************************************************
  *

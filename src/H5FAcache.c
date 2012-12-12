@@ -834,9 +834,7 @@ H5FA__cache_dblock_notify(H5AC_notify_action_t action, H5FA_dblock_t *dblock))
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on extensible array header */
-                if(H5FA__destroy_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and header, address = %llu", (unsigned long long)dblock->addr)
+                /* Nothing to do */
                 break;
 
             default:

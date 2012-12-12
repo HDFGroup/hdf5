@@ -312,10 +312,10 @@ finish_tparam(earray_test_param_t *tparam)
  *-------------------------------------------------------------------------
  */
 static int
-create_file(hid_t fapl, hid_t *file, H5F_t **f)
+create_file(unsigned flags, hid_t fapl, hid_t *file, H5F_t **f)
 {
     /* Create the file to work on */
-    if((*file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((*file = H5Fcreate(filename_g, flags, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
@@ -825,7 +825,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1047,7 +1047,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1120,7 +1120,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1226,7 +1226,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     h5_stat_size_t file_size;           /* File size, after deleting array */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1415,7 +1415,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
     hsize_t     idx;                    /* Index value of element */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -2469,7 +2469,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     TESTING(test_str);
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /* Create array */
@@ -2643,7 +2643,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     TESTING(test_str);
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /* Create array */

@@ -215,15 +215,6 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
 #define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
 #define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
 
-/* Maximum height of flush dependency relationships between entries.  This is
- * currently tuned to the extensible array (H5EA) data structure, which only
- * requires 6 levels of dependency (i.e. heights 0-6) (actually, the extensible
- * array needs 4 levels, plus another 2 levels are needed: one for the layer
- * under the extensible array and one for the layer above it).
- */
-
-#define H5C__NUM_FLUSH_DEP_HEIGHTS            6
-
 
 
 /****************************************************************************
@@ -439,33 +430,29 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  * Fields supporting the 'flush dependency' feature:
  *
- * Entries in the cache may have a 'flush dependency' on another entry in the
+ * Entries in the cache may have a 'flush dependencies' on other entries in the
  * cache.  A flush dependency requires that all dirty child entries be flushed
  * to the file before a dirty parent entry (of those child entries) can be
  * flushed to the file.  This can be used by cache clients to create data
  * structures that allow Single-Writer/Multiple-Reader (SWMR) access for the
  * data structure.
  *
- * The leaf child entry will have a "height" of 0, with any parent entries
- * having a height of 1 greater than the maximum height of any of their child
- * entries (flush dependencies are allowed to create asymmetric trees of
- * relationships).
+ * flush_dep_parent:    Pointer to the array of flush dependency parent entries
+ *              for this entry.
  *
- * flush_dep_parent:	Pointer to the parent entry for an entry in a flush
- *		dependency relationship.
+ * flush_dep_nparents:  Number of flush dependency parent entries for this
+ *              entry, i.e. the number of valid elements in flush_dep_parent.
  *
- * child_flush_dep_height_rc:	An array of reference counts for child entries,
- *		where the number of children of each height is tracked.
+ * flush_dep_parent_nalloc: The number of allocated elements in
+ *              flush_dep_parent_nalloc.
  *
- * flush_dep_height:	The height of the entry, which is one greater than the
- *		maximum height of any of its child entries..
+ * flush_dep_nchildren: Number of flush dependency children for this entry.  If
+ *              this field is nonzero, then this entry must be pinned and
+ *              therefore cannot be evicted.
  *
- * pinned_from_client:	Whether the entry was pinned by an explicit pin request
- *		from a cache client.
- *
- * pinned_from_cache:	Whether the entry was pinned implicitly as a
- *		request of being a parent entry in a flush dependency
- *		relationship.
+ * flush_dep_ndirty_children: Number of flush dependency children that are
+ *              either dirty or have a nonzero flush_dep_ndirty_children.  If
+ *              this field is nonzero, then this entry cannot be flushed.
  *
  *
  * Fields supporting the hash table:
@@ -633,9 +620,11 @@ typedef struct H5C_cache_entry_t
 
     /* fields supporting the 'flush dependency' feature: */
 
-    struct H5C_cache_entry_t *	flush_dep_parent;
-    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-    unsigned            flush_dep_height;
+    struct H5C_cache_entry_t ** flush_dep_parent;
+    unsigned                    flush_dep_nparents;
+    unsigned                    flush_dep_parent_nalloc;
+    unsigned                    flush_dep_nchildren;
+    unsigned                    flush_dep_ndirty_children;
     hbool_t		pinned_from_client;
     hbool_t		pinned_from_cache;
 

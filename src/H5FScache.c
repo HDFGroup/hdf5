@@ -1038,9 +1038,7 @@ H5FS_cache_sinfo_notify(H5AC_notify_action_t action, H5FS_sinfo_t *sinfo)
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on extensible array header */
-                if(H5FS__destroy_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
-                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between data block and header, address = %llu", (unsigned long long)sinfo->fspace->sect_addr)
+                //* Nothing to do */
                 break;
 
             default:

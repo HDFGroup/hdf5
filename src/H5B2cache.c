@@ -504,9 +504,7 @@ H5B2_cache_hdr_notify(H5AC_notify_action_t action, H5B2_hdr_t *hdr)
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on parent */
-                if(H5B2__destroy_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                /* Nothing to do */
                 break;
 
             default:
@@ -929,9 +927,7 @@ H5B2_cache_internal_notify(H5AC_notify_action_t action, H5B2_internal_t *interna
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on parent */
-                if(H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                /* Nothing to do */
                 break;
 
             default:
@@ -1319,9 +1315,7 @@ H5B2_cache_leaf_notify(H5AC_notify_action_t action, H5B2_leaf_t *leaf)
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on parent */
-                if(H5B2__destroy_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                /* Nothing to do */
                 break;
 
             default:

@@ -810,9 +810,7 @@ H5HL__datablock_notify(H5AC_notify_action_t action, H5HL_dblk_t *dblk))
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on parent */
-                if(FAIL == H5HL__destroy_flush_depend((H5AC_info_t *)dblk->heap->prfx, (H5AC_info_t *)dblk))
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and parent, address = %llu", (unsigned long long)dblk->heap->dblk_addr);
+                /* Nothing to do */
                 break;
 
             default:

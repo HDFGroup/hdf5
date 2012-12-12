@@ -420,9 +420,7 @@ H5B_notify(H5AC_notify_action_t action, H5B_t *bt)
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-                /* Destroy flush dependency on parent */
-                if(H5AC_destroy_flush_dependency(bt->parent, bt) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                /* Nothing to do */
                 break;
 
             default:
