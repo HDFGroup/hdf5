@@ -46,6 +46,7 @@
 ./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
 ./bin/chkcopyright      _DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
+./bin/cmakehdf5
 ./bin/compile
 ./bin/config.guess
 ./bin/config.sub
