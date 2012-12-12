@@ -75,7 +75,7 @@ int main () {
     status = H5Pset_szip (plist_id, szip_options_mask, szip_pixels_per_block);
     */
     
-    dataset_id = H5Dcreate (file_id, "Compressed_Data", H5T_STD_I32BE, 
+    dataset_id = H5Dcreate2 (file_id, "Compressed_Data", H5T_STD_I32BE, 
                             dataspace_id, H5P_DEFAULT, plist_id, H5P_DEFAULT); 
 
     for (i = 0; i< DIM0; i++) 
@@ -91,7 +91,7 @@ int main () {
 
     /* Now reopen the file and dataset in the file. */
     file_id = H5Fopen (FILE, H5F_ACC_RDWR, H5P_DEFAULT);
-    dataset_id = H5Dopen (file_id, "Compressed_Data", H5P_DEFAULT);
+    dataset_id = H5Dopen2 (file_id, "Compressed_Data", H5P_DEFAULT);
 
     /* Retrieve filter information. */
     plist_id = H5Dget_create_plist (dataset_id);
@@ -101,7 +101,7 @@ int main () {
      
     for (i=0; i<numfilt; i++) {
        nelmts = 0;
-       filter_type = H5Pget_filter (plist_id, 0, &flags, &nelmts, NULL, 0, NULL,
+       filter_type = H5Pget_filter2 (plist_id, 0, &flags, &nelmts, NULL, 0, NULL,
                      &filter_info);
        printf ("Filter Type: ");
        switch (filter_type) {

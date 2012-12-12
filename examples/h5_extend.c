@@ -75,7 +75,7 @@ main (void)
 
     /* Create a new dataset within the file using chunk 
        creation properties.  */
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, dataspace,
+    dataset = H5Dcreate2 (file, DATASETNAME, H5T_NATIVE_INT, dataspace,
                          H5P_DEFAULT, prop, H5P_DEFAULT);
 
     /* Write data to dataset */
@@ -85,7 +85,7 @@ main (void)
     /* Extend the dataset. Dataset becomes 10 x 3  */
     size[0] = dims[0]+ dimsext[0];
     size[1] = dims[1];
-    status = H5Dextend (dataset, size);
+    status = H5Dset_extent (dataset, size);
 
     /* Select a hyperslab in extended portion of dataset  */
     filespace = H5Dget_space (dataset);
@@ -114,7 +114,7 @@ main (void)
      ********************************************/
 
     file = H5Fopen (FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
-    dataset = H5Dopen (file, DATASETNAME, H5P_DEFAULT);
+    dataset = H5Dopen2 (file, DATASETNAME, H5P_DEFAULT);
 
     filespace = H5Dget_space (dataset);
     rank = H5Sget_simple_extent_ndims (filespace);

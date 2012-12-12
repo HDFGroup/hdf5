@@ -36,14 +36,14 @@ int main() {
    file_id = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
 
    /* Open an existing dataset. */
-   dataset_id = H5Dopen(file_id, "/dset", H5P_DEFAULT);
+   dataset_id = H5Dopen2(file_id, "/dset", H5P_DEFAULT);
 
    /* Create the data space for the attribute. */
    dims = 2;
    dataspace_id = H5Screate_simple(1, &dims, NULL);
 
    /* Create a dataset attribute. */
-   attribute_id = H5Acreate (dataset_id, "Units", H5T_STD_I32BE, dataspace_id, 
+   attribute_id = H5Acreate2 (dataset_id, "Units", H5T_STD_I32BE, dataspace_id, 
                              H5P_DEFAULT, H5P_DEFAULT);
 
    /* Write the attribute data. */

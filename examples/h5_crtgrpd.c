@@ -47,7 +47,7 @@ int main() {
    dataspace_id = H5Screate_simple(2, dims, NULL);
 
    /* Create a dataset in group "MyGroup". */
-   dataset_id = H5Dcreate(file_id, "/MyGroup/dset1", H5T_STD_I32BE, dataspace_id,
+   dataset_id = H5Dcreate2(file_id, "/MyGroup/dset1", H5T_STD_I32BE, dataspace_id,
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /* Write the first dataset. */
@@ -61,7 +61,7 @@ int main() {
    status = H5Dclose(dataset_id);
 
    /* Open an existing group of the specified file. */
-   group_id = H5Gopen(file_id, "/MyGroup/Group_A", H5P_DEFAULT);
+   group_id = H5Gopen2(file_id, "/MyGroup/Group_A", H5P_DEFAULT);
 
    /* Create the data space for the second dataset. */
    dims[0] = 2;
@@ -69,7 +69,7 @@ int main() {
    dataspace_id = H5Screate_simple(2, dims, NULL);
 
    /* Create the second dataset in group "Group_A". */
-   dataset_id = H5Dcreate(group_id, "dset2", H5T_STD_I32BE, dataspace_id, 
+   dataset_id = H5Dcreate2(group_id, "dset2", H5T_STD_I32BE, dataspace_id, 
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /* Write the second dataset. */

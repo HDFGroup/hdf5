@@ -63,7 +63,7 @@ main (void)
     dims[1] = DIM1;
     dataspace_id = H5Screate_simple (RANK, dims, NULL); 
 
-    dataset_id = H5Dcreate (file_id, DATASETNAME, H5T_STD_I32BE, dataspace_id,
+    dataset_id = H5Dcreate2 (file_id, DATASETNAME, H5T_STD_I32BE, dataspace_id,
                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 
@@ -95,7 +95,7 @@ main (void)
      *****************************************************/
 
     file_id = H5Fopen (FILE, H5F_ACC_RDWR, H5P_DEFAULT);
-    dataset_id = H5Dopen (file_id, DATASETNAME, H5P_DEFAULT);
+    dataset_id = H5Dopen2 (file_id, DATASETNAME, H5P_DEFAULT);
 
     /* Specify size and shape of subset to write. */
 

@@ -36,7 +36,7 @@ int main() {
    dataspace_id = H5Screate_simple(2, dims, NULL);
 
    /* Create the dataset. */
-   dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id, 
+   dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, dataspace_id, 
                           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /* End access to the dataset and release resources used by it. */

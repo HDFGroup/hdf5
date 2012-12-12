@@ -137,7 +137,7 @@ PROGRAM H5_EXTEND
   !Extend the dataset. Dataset becomes 10 x 3.
   !
   size(1:2)   = (/3,10/)
-  CALL h5dextend_f(dset_id, size, error)
+  CALL h5dset_extent_f(dset_id, size, error)
 
   offset(1:2) = (/0,3/)
   count(1:2)  = (/3,7/)
