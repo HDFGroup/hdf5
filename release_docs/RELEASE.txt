@@ -45,6 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
+- Bug Fixes since HDF5-1.8.10
 - Bug Fixes since HDF5-1.8.9
 - Supported Platforms
 - Supported Configuration Features Summary
@@ -109,6 +110,20 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
+    - None
+
+Bug Fixes since HDF5-1.8.10
+===========================
+    Library
+    -------
+    - None
+
+    Tools
+    -----
+    - None
+
+    Testing
+    -------
     - None
 
 Bug Fixes since HDF5-1.8.9
