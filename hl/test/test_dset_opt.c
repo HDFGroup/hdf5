@@ -207,7 +207,7 @@ test_direct_chunk_write (hid_t file)
     if(H5Dclose(dataset) < 0)
         goto error;
 
-    if((dataset = H5Dopen(file, DATASETNAME1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME1, H5P_DEFAULT)) < 0)
         goto error;
 
     /*
@@ -281,7 +281,7 @@ test_direct_chunk_write (hid_t file)
     if(H5Dclose(dataset) < 0)
         goto error;
 
-    if((dataset = H5Dopen(file, DATASETNAME1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME1, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Read the chunk back */
@@ -422,7 +422,7 @@ test_skip_compress_write1(hid_t file)
     if(H5Dclose(dataset) < 0)
         goto error;
 
-    if((dataset = H5Dopen(file, DATASETNAME2, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME2, H5P_DEFAULT)) < 0)
         goto error;
 
     /*
@@ -664,7 +664,7 @@ test_skip_compress_write2(hid_t file)
     if(H5Dclose(dataset) < 0)
         goto error;
 
-    if((dataset = H5Dopen(file, DATASETNAME3, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME3, H5P_DEFAULT)) < 0)
         goto error;
 
     /*
@@ -846,7 +846,7 @@ test_data_conv(hid_t file)
     if(H5Dclose(dataset) < 0)
         goto error;
 
-    if((dataset = H5Dopen(file, DATASETNAME4, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME4, H5P_DEFAULT)) < 0)
         goto error;
 
     /*

@@ -180,7 +180,7 @@ main (void)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, DATASETNAME, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /*
@@ -258,7 +258,7 @@ main (void)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, DATASETNAME, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Read the chunk back */
