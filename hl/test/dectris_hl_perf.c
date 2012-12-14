@@ -278,7 +278,7 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, DIRECT_UNCOMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DIRECT_UNCOMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
 
@@ -343,7 +343,7 @@ test_direct_write_compressed_data(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, DIRECT_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, DIRECT_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
 
@@ -414,7 +414,7 @@ test_compressed_write(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, REG_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, REG_COMPRESSED_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if((dataspace = H5Dget_space(dataset)) < 0)
@@ -502,7 +502,7 @@ test_no_compress_write(hid_t fapl_id)
     if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if((dataset = H5Dopen(file, REG_NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dopen2(file, REG_NO_COMPRESS_DSET, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if((dataspace = H5Dget_space(dataset)) < 0)
