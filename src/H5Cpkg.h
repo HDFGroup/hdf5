@@ -838,7 +838,7 @@
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	28
+#define H5C__MAX_NUM_TYPE_IDS	29
 #define H5C__PREFIX_LEN		32
 
 struct H5C_t

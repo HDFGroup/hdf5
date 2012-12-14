@@ -720,7 +720,7 @@ static herr_t
 H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 {
     H5O_loc_t oloc;         /* Temporary object header location for dataset */
-    H5O_t *oh = NULL;       /* Dataset's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -742,18 +742,18 @@ H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     oloc.file = idx_info->f;
     oloc.addr = idx_info->storage->u.earray.dset_ohdr_addr;
 
-    /* Pin the dataset's object header */
-    if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+    /* Pin the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
 
     /* Make the extensible array a child flush dependency of the dataset's object header */
-    if(H5EA_depend((H5AC_info_t *)oh, idx_info->storage->u.earray.ea) < 0)
+    if(H5EA_depend((H5AC_info_t *)oh_proxy, idx_info->storage->u.earray.ea) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
 
 done:
-    /* Unpin the dataset's object header */
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+    /* Unpin the dataset's object header proxy */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_earray_idx_depend() */
@@ -777,7 +777,7 @@ static herr_t
 H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
 {
     H5O_loc_t oloc;         /* Temporary object header location for dataset */
-    H5O_t *oh = NULL;       /* Dataset's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -799,18 +799,18 @@ H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
     oloc.file = idx_info->f;
     oloc.addr = idx_info->storage->u.earray.dset_ohdr_addr;
 
-    /* Pin the dataset's object header */
-    if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+    /* Pin the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
 
     /* Remove the extensible array as a child flush dependency of the dataset's object header */
-    if(H5EA_undepend((H5AC_info_t *)oh, idx_info->storage->u.earray.ea) < 0)
+    if(H5EA_undepend((H5AC_info_t *)oh_proxy, idx_info->storage->u.earray.ea) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
 
 done:
-    /* Unpin the dataset's object header */
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+    /* Unpin the dataset's object header proxy */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_earray_idx_undepend() */

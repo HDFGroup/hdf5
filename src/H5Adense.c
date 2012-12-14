@@ -445,7 +445,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     unsigned mesg_flags = 0;            /* Flags for storing message */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
-    H5O_t *oh = NULL;                   /* Attribute's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Attribute's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -533,13 +533,12 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-        /* Pin the attribute's object header */
-        /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
-        if(NULL == (oh = H5O_pin(&attr->oloc, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header")
+        /* Pin the attribute's object header proxy */
+        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&attr->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header proxy")
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh_proxy)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the callback information for v2 B-tree record insertion */
@@ -562,9 +561,8 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     /* Check if we should create a creation order index v2 B-tree record */
     if(ainfo->index_corder) {
         /* Open the creation order index v2 B-tree */
-        /*!FIXME use ohdr proxy -NAF */
         HDassert(H5F_addr_defined(ainfo->corder_bt2_addr));
-        if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, ainfo->corder_bt2_addr, NULL, oh)))
+        if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, ainfo->corder_bt2_addr, NULL, oh_proxy)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Insert the record into the creation order index v2 B-tree */
@@ -574,8 +572,8 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
 done:
     /* Release resources */
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
@@ -650,7 +648,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
     H5B2_t *bt2_corder = NULL;          /* v2 B-tree handle for creation order index */
     H5WB_t *wb = NULL;                  /* Wrapped buffer for attribute data */
     uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
-    H5O_t *oh = NULL;                   /* Attribute's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Attribute's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -676,14 +674,12 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 
             /* Check for SWMR writes to the file */
             if(H5F_INTENT(op_data->f) & H5F_ACC_SWMR_WRITE)
-                /* Pin the attribute's object header */
-                /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
-                if(NULL == (oh = H5O_pin(&op_data->attr->oloc, op_data->dxpl_id)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header")
+                /* Pin the attribute's object header proxy */
+                if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&op_data->attr->oloc, op_data->dxpl_id)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header proxy")
 
             /* Open the creation order index v2 B-tree */
-            /*!FIXME use ohdr proxy -NAF */
-            if(NULL == (bt2_corder = H5B2_open(op_data->f, op_data->dxpl_id, op_data->corder_bt2_addr, NULL, oh)))
+            if(NULL == (bt2_corder = H5B2_open(op_data->f, op_data->dxpl_id, op_data->corder_bt2_addr, NULL, oh_proxy)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
             /* Create the "udata" information for v2 B-tree record modify */
@@ -744,8 +740,8 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 
 done:
     /* Release resources */
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(bt2_corder && H5B2_close(bt2_corder, op_data->dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for creation order index")
     if(wb && H5WB_unwrap(wb) < 0)
@@ -777,7 +773,7 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
-    H5O_t *oh = NULL;                   /* Attribute's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Attribute's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -817,14 +813,12 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
     /* Check for SWMR writes to the file */
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-        /* Pin the attribute's object header */
-        /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
-        if(NULL == (oh = H5O_pin(&attr->oloc, dxpl_id)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header")
+        /* Pin the attribute's object header proxy */
+        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&attr->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin attribute object header proxy")
 
     /* Open the name index v2 B-tree */
-    /*!FIXME use ohdr proxy -NAF */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh_proxy)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Create the "udata" information for v2 B-tree record modify */
@@ -853,8 +847,8 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 
 done:
     /* Release resources */
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(shared_fheap && H5HF_close(shared_fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)

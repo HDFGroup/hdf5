@@ -814,6 +814,7 @@
 ./src/H5Opkg.h
 ./src/H5Opline.c
 ./src/H5Oprivate.h
+./src/H5Oproxy.c
 ./src/H5Opublic.h
 ./src/H5Orefcount.c
 ./src/H5Osdspace.c

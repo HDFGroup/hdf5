@@ -449,6 +449,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->attr_msgs_seen = oh_src->attr_msgs_seen;
     oh_dst->sizeof_size = H5F_SIZEOF_SIZE(oloc_dst->file);
     oh_dst->sizeof_addr = H5F_SIZEOF_ADDR(oloc_dst->file);
+    oh_dst->swmr_write = !!(H5F_INTENT(oloc_dst->file) & H5F_ACC_SWMR_WRITE);
 
     /* Copy time fields */
     oh_dst->atime = oh_src->atime;
@@ -459,6 +460,14 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Copy attribute storage information */
     oh_dst->max_compact = oh_src->max_compact;
     oh_dst->min_dense = oh_src->min_dense;
+
+    /* Create object header proxy if doing SWMR writes */
+    if(H5F_INTENT(oloc_dst->file) & H5F_ACC_SWMR_WRITE) {
+        if(H5O_proxy_create(oloc_dst->file, dxpl_id, oh_dst) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
+    } /* end if */
+    else
+        oh_dst->proxy_addr = HADDR_UNDEF;
 
     /* Initialize size of chunk array.  Start off with zero chunks so this field
      * is consistent with the current state of the chunk array.  This is

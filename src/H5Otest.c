@@ -159,6 +159,7 @@ htri_t
 H5O_is_attr_empty_test(hid_t oid)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
     htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
@@ -194,12 +195,17 @@ H5O_is_attr_empty_test(hid_t oid)
                 /* Check for any messages in object header */
                 HDassert(nattrs == 0);
 
+                /* Check for SWMR writes to the file */
+                if(H5F_INTENT(loc->file) & H5F_ACC_SWMR_WRITE)
+                    /* Pin the attribute's object header proxy */
+                    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(loc->file, H5AC_ind_dxpl_id, oh)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
+
                 /* Set metadata tag in dxpl_id */
                 H5_BEGIN_TAG(H5AC_ind_dxpl_id, loc->addr, FAIL);
 
                 /* Open the name index v2 B-tree */
-                /*!FIXME use ohdr proxy -NAF */
-                if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL, oh)))
+                if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL, oh_proxy)))
                     HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Reset metadata tag in dxpl_id */
@@ -224,6 +230,8 @@ done:
     /* Release resources */
     if(bt2_name && H5B2_close(bt2_name, H5AC_ind_dxpl_id) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(oh && H5O_unprotect(loc, H5AC_ind_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
@@ -254,6 +262,7 @@ herr_t
 H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
     H5O_loc_t *loc;            /* Pointer to object's location */
@@ -288,12 +297,17 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
             /* Check for any messages in object header */
             HDassert(obj_nattrs == 0);
 
+            /* Check for SWMR writes to the file */
+            if(H5F_INTENT(loc->file) & H5F_ACC_SWMR_WRITE)
+                /* Pin the attribute's object header proxy */
+                if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(loc->file, H5AC_ind_dxpl_id, oh)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
+
             /* Set metadata tag in dxpl_id */
             H5_BEGIN_TAG(H5AC_ind_dxpl_id, loc->addr, FAIL);
 
             /* Open the name index v2 B-tree */
-                /*!FIXME use ohdr proxy -NAF */
-            if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL, oh)))
+            if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL, oh_proxy)))
                 HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
             /* Reset metadata tag in dxpl_id */
@@ -315,6 +329,8 @@ done:
     /* Release resources */
     if(bt2_name && H5B2_close(bt2_name, H5AC_ind_dxpl_id) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(oh && H5O_unprotect(loc, H5AC_ind_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
@@ -347,6 +363,7 @@ herr_t
 H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
     H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
     H5B2_t *bt2_corder = NULL;  /* v2 B-tree handle for creation order index */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
@@ -374,6 +391,12 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
             HGOTO_ERROR_TAG(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
     } /* end if */
 
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(loc->file) & H5F_ACC_SWMR_WRITE)
+        /* Pin the attribute's object header proxy */
+        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(loc->file, H5AC_ind_dxpl_id, oh)))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
+
     /* Check for 'dense' attribute storage file addresses being defined */
     if(!H5F_addr_defined(ainfo.fheap_addr))
         HGOTO_DONE_TAG(FAIL, FAIL)
@@ -381,8 +404,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_DONE_TAG(FAIL, FAIL)
 
     /* Open the name index v2 B-tree */
-    /*!FIXME use ohdr proxy -NAF */
-    if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL, oh)))
+    if(NULL == (bt2_name = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.name_bt2_addr, NULL, oh_proxy)))
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in name index */
@@ -392,8 +414,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     /* Check if there is a creation order index */
     if(H5F_addr_defined(ainfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
-        /*!FIXME use ohdr proxy -NAF */
-        if(NULL == (bt2_corder = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.corder_bt2_addr, NULL, oh)))
+        if(NULL == (bt2_corder = H5B2_open(loc->file, H5AC_ind_dxpl_id, ainfo.corder_bt2_addr, NULL, oh_proxy)))
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Retrieve # of records in creation order index */
@@ -412,6 +433,8 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for name index")
     if(bt2_corder && H5B2_close(bt2_corder, H5AC_ind_dxpl_id) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTCLOSEOBJ, FAIL, "can't close v2 B-tree for creation order index")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(oh && H5O_unprotect(loc, H5AC_ind_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 

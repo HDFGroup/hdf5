@@ -122,25 +122,12 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
         fprintf(stderr, "Symbol = '%s', location = %lld\n", symbol->name, (long long)start);
 
     /* Read record from dataset */
-#ifdef OHDR_DEPS_WORK
-    /* Even with the sequence number attribute and all the flush dependencues,
-     * it is still currently possible for the attribute to be updated before the
-     * index and/or raw data, because the attribute may reside in an object
-     * header chunk afer the first.  Until this is fixed, just allow the read
-     * value to be 0. */
     record->rec_id = (uint64_t)ULLONG_MAX;
-#else /* OHDR_DEPS_WORK */
-    record->rec_id = (uint64_t)0;
-#endif /* OHDR_DEPS_WORK */
     if(H5Dread(dsid, symbol_tid, rec_sid, file_sid, H5P_DEFAULT, record) < 0)
         return -1;
 
     /* Verify record value */
-    if(record->rec_id != start[1]
-#ifndef OHDR_DEPS_WORK
-             && record->rec_id != (uint64_t)0
-#endif
-            ) {
+    if(record->rec_id != start[1]) {
         fprintf(stderr, "*** ERROR ***\n");
         fprintf(stderr, "Incorrect record value!\n");
         fprintf(stderr, "Symbol = '%s', location = %lld, record->rec_id = %llu\n", symbol->name, (long long)start, (unsigned long long)record->rec_id);

@@ -73,7 +73,7 @@
 static herr_t H5D__chunk_proxy_destroy(H5D_chunk_proxy_t *proxy);
 
 /* Metadata cache (H5AC) callbacks */
-static H5D_chunk_proxy_t *H5D__cache_proxy_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static H5D_chunk_proxy_t *H5D__cache_proxy_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata);
 static herr_t H5D__cache_proxy_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5D_chunk_proxy_t *proxy, unsigned UNUSED * flags_ptr);
 static herr_t H5D__cache_proxy_dest(H5F_t *f, H5D_chunk_proxy_t *proxy);
 static herr_t H5D__cache_proxy_clear(H5F_t *f, H5D_chunk_proxy_t *proxy, hbool_t destroy);
@@ -128,7 +128,7 @@ H5FL_DEFINE_STATIC(H5D_chunk_proxy_t);
  */
 static H5D_chunk_proxy_t *
 H5D__cache_proxy_load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr,
-    const void UNUSED *udata1, void UNUSED *udata2)
+    const void UNUSED *udata)
 {
     H5D_chunk_proxy_t *ret_value;               /* Return value */
 
@@ -365,7 +365,7 @@ HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
     /* Create a flush dependency between the proxy (as the child) and the
      *  metadata object in the index (as the parent).
      */
-    if((supported = (dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, udata, (H5AC_info_t *)proxy)) < 0)
+    if((supported = (dset->shared->layout.storage.u.chunk.ops->support)(&idx_info, (H5D_chunk_common_ud_t *)udata, (H5AC_info_t *)proxy)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency for chunk proxy")
     proxy->supported = (hbool_t)supported;
 
@@ -540,7 +540,7 @@ H5D__chunk_proxy_destroy(H5D_chunk_proxy_t *proxy)
  * Purpose:     Creates a flush dependency between the specified chunk
  *              (child) and parent, if not already present.
  *
-+ * Return:      Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
  *              21 Sept 2010

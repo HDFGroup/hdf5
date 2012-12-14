@@ -323,7 +323,9 @@ H5O_ainfo_free(void *mesg)
 /*-------------------------------------------------------------------------
  * Function:    H5O_ainfo_delete
  *
- * Purpose:     Free file space referenced by message
+ * Purpose:     Free file space referenced by message.  Note that open_oh
+ *              *must* be non-NULL - this means that calls to
+ *              H5O_msg_delete must include an oh if the type is ainfo.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -336,6 +338,7 @@ static herr_t
 H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
+    H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -343,14 +346,26 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
     /* check args */
     HDassert(f);
     HDassert(ainfo);
+    HDassert(open_oh);
 
     /* If the object is using "dense" attribute storage, delete it */
-    if(H5F_addr_defined(ainfo->fheap_addr))
-        /*!FIXME use ohdr proxy -NAF */
-        if(H5A_dense_delete(f, dxpl_id, ainfo, open_oh) < 0)
+    if(H5F_addr_defined(ainfo->fheap_addr)) {
+        /* Check for SWMR writes to the file */
+        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+            /* Pin the attribute's object header proxy */
+            if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(f, dxpl_id, open_oh)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
+
+        /* Delete the attribute */
+        if(H5A_dense_delete(f, dxpl_id, ainfo, oh_proxy) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
+    } /* end if */
 
 done:
+    /* Release resources */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_delete() */
 

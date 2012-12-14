@@ -78,6 +78,7 @@ static H5O_chunk_proxy_t *H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t ad
 static herr_t H5O_cache_chk_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5O_chunk_proxy_t *chk_proxy, unsigned UNUSED * flags_ptr);
 static herr_t H5O_cache_chk_dest(H5F_t *f, H5O_chunk_proxy_t *chk_proxy);
 static herr_t H5O_cache_chk_clear(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t destroy);
+static herr_t H5O_cache_chk_notify(H5AC_notify_action_t action, H5O_chunk_proxy_t *chk_proxy);
 static herr_t H5O_cache_chk_size(const H5F_t *f, const H5O_chunk_proxy_t *chk_proxy, size_t *size_ptr);
 
 /* Chunk proxy routines */
@@ -115,7 +116,7 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
     (H5AC_flush_func_t)H5O_cache_chk_flush,
     (H5AC_dest_func_t)H5O_cache_chk_dest,
     (H5AC_clear_func_t)H5O_cache_chk_clear,
-    (H5AC_notify_func_t)NULL,
+    (H5AC_notify_func_t)H5O_cache_chk_notify,
     (H5AC_size_func_t)H5O_cache_chk_size,
 }};
 
@@ -198,6 +199,16 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     /* File-specific, non-stored information */
     oh->sizeof_size = H5F_SIZEOF_SIZE(udata->common.f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(udata->common.f);
+    oh->swmr_write = !!(H5F_INTENT(udata->common.f) & H5F_ACC_SWMR_WRITE);
+
+    /* Create object header proxy if doing SWMR writes */
+    HDassert(!oh->proxy_present);
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        if(H5O_proxy_create(f, dxpl_id, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header proxy")
+    } /* end if */
+    else
+        oh->proxy_addr = HADDR_UNDEF;
 
     /* Check for presence of magic number */
     /* (indicates version 2 or later) */
@@ -932,6 +943,77 @@ H5O_cache_chk_clear(H5F_t *f, H5O_chunk_proxy_t *chk_proxy, hbool_t destroy)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_cache_chk_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_cache_chk_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Mar 20 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_cache_chk_notify(H5AC_notify_action_t action, H5O_chunk_proxy_t *chk_proxy)
+{
+    void *parent = NULL;                /* Chunk containing continuation message that points to this chunk */
+    H5O_chunk_proxy_t *cont_chk_proxy = NULL; /* Proxy for chunk containing continuation message that points to this chunk, if not chunk 0 */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(chk_proxy);
+    HDassert(chk_proxy->oh);
+
+    if(chk_proxy->oh->swmr_write) {
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Add flush dependency from chunk containing the continuation message
+                 * that points to this chunk (either oh or another chunk proxy object)
+                 */
+                if(chk_proxy->cont_chunkno == 0)
+                    parent = chk_proxy->oh;
+                else {
+                    if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_ind_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+                    parent = cont_chk_proxy;
+                } /* end else */
+
+                if(H5AC_create_flush_dependency(parent, chk_proxy) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+                /* Add flush dependency on object header proxy, if proxy exists */
+                if(chk_proxy->oh->proxy_present)
+                    if(H5O_proxy_depend(chk_proxy->f, H5AC_ind_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "can't create flush dependency on object header proxy")
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Nothing to do */
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    if(cont_chk_proxy)
+        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_ind_dxpl_id, cont_chk_proxy, FALSE) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_cache_chk_notify() */
 
 
 /*-------------------------------------------------------------------------

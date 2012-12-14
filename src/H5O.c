@@ -1153,6 +1153,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
         oh->version = H5O_VERSION_1;
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    oh->swmr_write = !!(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE);
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
     /* Check whether the "bad message count" property is set */
     if(H5P_exist_plist(oc_plist, H5O_BAD_MESG_COUNT_NAME) > 0) {
@@ -1164,6 +1165,14 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* Set initial status flags */
     oh->flags = oh_flags;
+
+    /* Create object header proxy if doing SWMR writes */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        if(H5O_proxy_create(f, dxpl_id, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
+    } /* end if */
+    else
+        oh->proxy_addr = HADDR_UNDEF;
 
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
@@ -3535,4 +3544,122 @@ H5O_free(H5O_t *oh)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_pin_flush_dep_proxy
+ *
+ * Purpose:     Pin an object header proxy for use as a flush dependency
+ *              parent for items referenced by the object header.
+ *
+ * Return:      Success:        Pointer to the object header proxy
+ *                              structure for the object.
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Mar 16 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5O_proxy_t *
+H5O_pin_flush_dep_proxy(H5O_loc_t *loc, hid_t dxpl_id)
+{
+    H5O_t       *oh = NULL;     /* Object header */
+    H5O_proxy_t *proxy = NULL;  /* Object header proxy */
+    H5O_proxy_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* check args */
+    HDassert(loc);
+
+    /* Get header */
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC_READ)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to protect object header")
+
+    /* Pin object header proxy */
+    if(NULL == (proxy = H5O_proxy_pin(loc->file, dxpl_id, oh)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header proxy")
+
+    /* Set the return value */
+    ret_value = proxy;
+
+done:
+    /* Release the object header from the cache */
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+
+    if(!ret_value)
+        if(proxy && H5O_proxy_unpin(proxy) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, NULL, "unable to release object header proxy")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pin_flush_dep_proxy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_pin_flush_dep_proxy_oh
+ *
+ * Purpose:     Pin an object header proxy for use as a flush dependency
+ *              parent for items referenced by the object header.
+ *
+ * Return:      Success:        Pointer to the object header proxy
+ *                              structure for the object.
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              Mar 16 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+H5O_proxy_t *
+H5O_pin_flush_dep_proxy_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
+{
+    H5O_proxy_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Pin object header proxy */
+    if(NULL == (ret_value = H5O_proxy_pin(f, dxpl_id, oh)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header proxy")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pin_flush_dep_proxy_oh() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_unpin_flush_dep_proxy
+ *
+ * Purpose:     Unpin an object header proxy.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Mar 16 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_unpin_flush_dep_proxy(H5O_proxy_t *proxy)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check args */
+    HDassert(proxy);
+
+    /* Unin object header proxy */
+    if(H5O_proxy_unpin(proxy) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header proxy")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_unpin_flush_dep_proxy() */
 

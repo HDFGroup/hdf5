@@ -83,7 +83,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c \
         H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
-        H5Oname.c H5Onull.c H5Opline.c H5Orefcount.c \
+        H5Oname.c H5Onull.c H5Opline.c H5Oproxy.c H5Orefcount.c \
         H5Osdspace.c H5Oshared.c \
         H5Oshmesg.c \
         H5Ostab.c \

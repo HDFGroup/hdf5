@@ -993,7 +993,7 @@ H5D_bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
     H5D_bt2_ctx_ud_t u_ctx;	/* user data for creating context */
     H5O_loc_t oloc;             /* Temporary object header location for dataset */
-    H5O_t *oh = NULL;           /* Dataset's object header */
+    H5O_proxy_t *oh_proxy = NULL; /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1020,19 +1020,18 @@ H5D_bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
         oloc.file = idx_info->f;
         oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
 
-        /* Pin the dataset's object header */
-        /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
-        if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+        /* Pin the dataset's object header proxy */
+        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
     } /* end if */
 
     /* Open v2 B-tree for the chunk index */
-    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr , &u_ctx, oh)))
+    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr , &u_ctx, oh_proxy)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset")
 
 done:
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_bt2_idx_open() */
@@ -1055,7 +1054,7 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_t *oh = NULL;                   /* Dataset's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1104,14 +1103,13 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
         oloc.file = idx_info->f;
         oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
 
-        /* Pin the dataset's object header */
-        /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
-        if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+        /* Pin the dataset's object header proxy */
+        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
     } /* end if */
 
     /* Create the v2 B-tree for the chunked dataset */
-    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, idx_info->dxpl_id, &bt2_cparam, &u_ctx, oh)))
+    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, idx_info->dxpl_id, &bt2_cparam, &u_ctx, oh_proxy)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking chunked dataset")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -1119,8 +1117,8 @@ H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get v2 B-tree address for tracking chunked dataset")
 
 done:
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_bt2_idx_create() */
@@ -1797,7 +1795,7 @@ H5D_bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
     H5B2_remove_t remove_op;		/* The removal callback */
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
     H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_t *oh = NULL;                   /* Dataset's object header */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;     	/* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1839,23 +1837,22 @@ H5D_bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
             oloc.file = idx_info->f;
             oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
 
-            /* Pin the dataset's object header */
-            /*!FIXME change to use ohdr proxy once those changes are merged -NAF */
-            if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+            /* Pin the dataset's object header proxy */
+            if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
         } /* end if */
 
 	/* Delete the v2 B-tree */
 	/*(space in the file for each object is freed in the 'remove' callback) */
-	if(H5B2_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx, oh, remove_op, &remove_udata) < 0)
+	if(H5B2_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx, oh_proxy, remove_op, &remove_udata) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
 
 	idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */
 
 done:
-    if(oh && H5O_unpin(oh) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_bt2_idx_delete() */

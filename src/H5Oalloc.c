@@ -1081,7 +1081,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     oh->mesg[idx].chunkno = chunkno;
 
     /* Insert the new chunk into the cache */
-    if(H5O_chunk_add(f, dxpl_id, oh, chunkno) < 0)
+    if(H5O_chunk_add(f, dxpl_id, oh, chunkno, oh->mesg[found_null].chunkno) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't add new chunk to cache")
 
     /* Initialize the continuation information */

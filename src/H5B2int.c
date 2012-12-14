@@ -4184,7 +4184,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5B2_shadow_internal
  *
- * Purpose:     fnord
+ * Purpose:     "Shadow: an internal node - copy it to a new location,
+ *              leaving the data in the old location intact (for now).
+ *              This is done when writing in SWMR mode to ensure that
+ *              readers do not see nodes that are out of date with
+ *              respect to each other and thereby inconsistent.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -4281,7 +4285,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5B2_shadow_leaf
  *
- * Purpose:     fnord
+ * Purpose:     "Shadow: a leaf node - copy it to a new location, leaving
+ *              the data in the old location intact (for now).  This is
+ *              done when writing in SWMR mode to ensure that readers do
+ *              not see nodes that are out of date with respect to each
+ *              other and thereby inconsistent.
  *
  * Return:      Non-negative on success/Negative on failure
  *

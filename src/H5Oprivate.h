@@ -45,6 +45,7 @@
 typedef struct H5O_msg_class_t H5O_msg_class_t;
 typedef struct H5O_mesg_t H5O_mesg_t;
 typedef struct H5O_t H5O_t;
+typedef struct H5O_proxy_t H5O_proxy_t;
 
 /* Values used to create the shared message & attribute heaps */
 /* (Note that these parameters have been tuned so that the resulting heap ID
@@ -774,6 +775,10 @@ H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlink
 H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
 H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
+H5_DLL H5O_proxy_t *H5O_pin_flush_dep_proxy(H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL H5O_proxy_t *H5O_pin_flush_dep_proxy_oh(H5F_t *f, hid_t dxpl_id,
+    H5O_t *oh);
+H5_DLL herr_t H5O_unpin_flush_dep_proxy(H5O_proxy_t *proxy);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
