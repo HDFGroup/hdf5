@@ -70,7 +70,9 @@ RunTest()
 # Run tests
 if [ $? -eq 0 ]
 then
-    if (RunTest h5_crtdat &&\
+    if (RunTest h5_cmprss &&\
+        rm h5_cmprss &&\
+        RunTest h5_crtdat &&\
         rm h5_crtdat &&\
         RunTest h5_extend &&\
         rm h5_extend &&\

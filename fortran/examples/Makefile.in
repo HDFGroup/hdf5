@@ -406,14 +406,14 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 # We don't tell automake about these programs so that it doesn't try to
 # compile them with the regular fortran compiler.
 EXAMPLE_PROG = h5_crtdat h5_rdwt h5_crtatt h5_crtgrp h5_crtgrpar \
-	h5_crtgrpd h5_extend h5_subset hyperslab selectele \
+	h5_crtgrpd h5_extend h5_subset h5_cmprss hyperslab selectele \
 	refobjexample refregexample mountexample compound \
 	$(am__append_1)
 
 # List files to be installed here
 INSTALL_FILES = h5_crtdat.f90 h5_rdwt.f90 h5_crtatt.f90 h5_crtgrp.f90 \
 	h5_crtgrpar.f90 h5_crtgrpd.f90 h5_extend.f90 h5_subset.f90 \
-	hyperslab.f90 selectele.f90 refobjexample.f90 \
+	h5_cmprss.f90 hyperslab.f90 selectele.f90 refobjexample.f90 \
 	refregexample.f90 mountexample.f90 compound.f90 ph5example.f90 \
 	$(am__append_2)
 INSTALL_SCRIPT_FILES = run-fortran-ex.sh
@@ -696,6 +696,7 @@ h5_crtatt: h5_crtatt.f90
 h5_crtgrp: h5_crtgrp.f90
 h5_crtgrpar: h5_crtgrpar.f90
 h5_crtgrpd: h5_crtgrpd.f90
+h5_cmprss: h5_cmprss.f90
 hyperslab: hyperslab.f90
 selectele: selectele.f90
 refobjexample: refobjexample.f90

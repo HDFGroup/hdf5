@@ -251,6 +251,7 @@
 ./fortran/examples/compound.f90
 ./fortran/examples/compound_fortran2003.f90
 ./fortran/examples/compound_complex_fortran2003.f90
+./fortran/examples/h5_cmprss.f90
 ./fortran/examples/h5_crtatt.f90
 ./fortran/examples/h5_crtdat.f90
 ./fortran/examples/h5_crtgrp.f90

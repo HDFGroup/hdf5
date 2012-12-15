@@ -14,6 +14,7 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${
 # Define Sources
 #-----------------------------------------------------------------------------
 SET (examples
+    h5_cmprss
     h5_crtdat
     h5_rdwt
     h5_crtatt
