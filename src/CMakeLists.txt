@@ -426,6 +426,7 @@ SET (H5O_SRCS
     ${HDF5_SRC_DIR}/H5Oname.c
     ${HDF5_SRC_DIR}/H5Onull.c
     ${HDF5_SRC_DIR}/H5Opline.c
+    ${HDF5_SRC_DIR}/H5Oproxy.c
     ${HDF5_SRC_DIR}/H5Orefcount.c
     ${HDF5_SRC_DIR}/H5Osdspace.c
     ${HDF5_SRC_DIR}/H5Oshared.c
