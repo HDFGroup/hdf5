@@ -117,7 +117,7 @@ IF (NOT TEST_SKIP_COMPARE)
 
   # again, if return value is !=0 scream and shout
   IF (NOT ${TEST_RESULT} STREQUAL 0)
-    MESSAGE (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not match ${TEST_REFERENCE}")
+    MESSAGE (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
   ENDIF (NOT ${TEST_RESULT} STREQUAL 0)
   
   IF (TEST_ERRREF)
@@ -136,7 +136,7 @@ IF (NOT TEST_SKIP_COMPARE)
 
     # again, if return value is !=0 scream and shout
     IF (NOT ${TEST_RESULT} STREQUAL 0)
-      MESSAGE (FATAL_ERROR "Failed: The error output of ${TEST_PROGRAM} did not match ${TEST_ERRREF}")
+      MESSAGE (FATAL_ERROR "Failed: The error output of ${TEST_OUTPUT}.err did not match ${TEST_ERRREF}")
     ENDIF (NOT ${TEST_RESULT} STREQUAL 0)
   ENDIF (TEST_ERRREF)
 ENDIF (NOT TEST_SKIP_COMPARE)
