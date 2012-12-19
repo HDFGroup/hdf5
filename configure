@@ -22754,6 +22754,14 @@ fi
 
 done
 
+## Also need to detect Darwin for pubconf
+case $host_os in
+  darwin*)
+
+$as_echo "#define HAVE_DARWIN 1" >>confdefs.h
+
+  ;;
+esac
 
 ## Windows
 case "`uname`" in
