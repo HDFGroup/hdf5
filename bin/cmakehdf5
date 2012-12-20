@@ -89,9 +89,9 @@ set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_A
   message ("Dashboard script uname output: ${osname}-${osrel}-${cpu}\n")
 
   if (SITE_BUILDNAME_SUFFIX)
-    set (CTEST_BUILD_NAME  "AT-${osname}-${osrel}-${cpu}-${SITE_BUILDNAME_SUFFIX}")
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}-${SITE_BUILDNAME_SUFFIX}")
   else (SITE_BUILDNAME_SUFFIX)
-    set (CTEST_BUILD_NAME  "AT-${osname}-${osrel}-${cpu}")
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
   endif (SITE_BUILDNAME_SUFFIX)
 # -----------------------------------------------------------  
   
