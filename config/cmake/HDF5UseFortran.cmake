@@ -110,6 +110,9 @@ CHECK_FORTRAN_FEATURE(RealIsNotDouble
   FORTRAN_DEFAULT_REAL_NOT_DOUBLE
 )
 
+#-----------------------------------------------------------------------------
+# Checks if the ISO_C_BINDING module meets all the requirements
+#-----------------------------------------------------------------------------
 CHECK_FORTRAN_FEATURE(iso_c_binding
   "
        PROGRAM main
@@ -117,6 +120,7 @@ CHECK_FORTRAN_FEATURE(iso_c_binding
             IMPLICIT NONE
             TYPE(C_PTR) :: ptr
             TYPE(C_FUNPTR) :: funptr
+            INTEGER(C_INT64_T) :: c_int64_type 
             CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
             ptr = C_LOC(ichr(1:1))
        END PROGRAM
