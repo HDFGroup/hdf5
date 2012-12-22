@@ -2152,7 +2152,6 @@
 ./hl/examples/image8.txt
 ./hl/examples/pal_rgb.h
 ./hl/examples/ptExampleFL.c
-./hl/examples/ptExampleVL.c
 ./hl/examples/run-hl-ex.sh
 ./hl/examples/run-hlc-ex.sh.in
 ./hl/src/COPYING
@@ -2265,7 +2264,6 @@
 ./hl/c++/examples/Makefile.am
 ./hl/c++/examples/Makefile.in
 ./hl/c++/examples/ptExampleFL.cpp
-./hl/c++/examples/ptExampleVL.cpp
 ./hl/c++/examples/run-hlc++-ex.sh.in
 ./hl/c++/src/H5PacketTable.h
 ./hl/c++/src/H5PacketTable.cpp

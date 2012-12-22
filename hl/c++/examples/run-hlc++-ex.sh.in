@@ -64,9 +64,7 @@ RunTest()
 if [ $? -eq 0 ]
 then
     if (RunTest ptExampleFL &&\
-        rm ptExampleFL &&\
-        RunTest ptExampleVL &&\
-        rm ptExampleVL); then
+        rm ptExampleFL); then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}
