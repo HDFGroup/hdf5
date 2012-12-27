@@ -172,4 +172,13 @@ EOF
 
 
 # Run ctest
-ctest -S $cfgfile -C Release -O testhdf.log -VV
+date
+ctest -S $cfgfile -C Release -O testhdf.log
+exit_code=$?
+if [ $exit_code = 0 ]; then
+    echo Complete without error
+else
+    echo Error countered
+fi
+date
+exit $exit_code
