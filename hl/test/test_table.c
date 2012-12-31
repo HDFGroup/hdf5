@@ -19,9 +19,9 @@
 #include "H5srcdir.h"
 #include "H5TBpublic.h"
 
-#define TEST_FILE_BE "test_table_be.hdf5"
-#define TEST_FILE_LE "test_table_le.hdf5"
-#define TEST_FILE_CRAY "test_table_cray.hdf5"
+#define TEST_FILE_BE "test_table_be.h5"
+#define TEST_FILE_LE "test_table_le.h5"
+#define TEST_FILE_CRAY "test_table_cray.h5"
 
 
 /*-------------------------------------------------------------------------

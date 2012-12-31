@@ -23,7 +23,6 @@ SET (examples
     ex_lite2
     ex_lite3
     ptExampleFL
-    ptExampleVL
     ex_image1
     ex_image2
     ex_table_01
