@@ -96,6 +96,14 @@ set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_A
 # -----------------------------------------------------------  
   
 set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
+ 
+#-----------------------------------------------------------------------------
+# MAC machines need special option
+#-----------------------------------------------------------------------------
+if (APPLE)
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
+endif (APPLE)
+
 
 # -----------------------------------------------------------  
 find_package (Subversion)
@@ -178,7 +186,7 @@ exit_code=$?
 if [ $exit_code = 0 ]; then
     echo Complete without error
 else
-    echo Error countered
+    echo Error encountered
 fi
 date
 exit $exit_code
