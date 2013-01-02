@@ -107,7 +107,7 @@ endif (APPLE)
 
 # -----------------------------------------------------------  
 find_package (Subversion)
-set (CTEST_UPDATE_COMMAND ${Subversion_SVN_EXECUTABLE})
+set (CTEST_UPDATE_COMMAND "${Subversion_SVN_EXECUTABLE}")
 # -- Only clean build folder if LOCAL_CLEAR_BUILD is set  
 if (LOCAL_CLEAR_BUILD)
   set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
@@ -132,6 +132,16 @@ foreach (req
   endif (NOT DEFINED ${req})
 endforeach (req)
 
+## -- set output to english
+set($ENV{LC_MESSAGES}  "en_EN")
+ 
+#-----------------------------------------------------------------------------
+# Initialize the CTEST commands
+#------------------------------
+SET (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
+SET (CTEST_CONFIGURE_COMMAND
+    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
+
 # Print summary information.
 foreach (v
     CTEST_SITE
@@ -149,13 +159,8 @@ foreach (v
   set (vars "${vars}  ${v}=[${${v}}]\n")
 endforeach (v)
 message ("Dashboard script configuration:\n${vars}\n")
-#-----------------------------------------------------------------------------
-#-- Do the work
-#-----------------------------------------------------------------------------
-SET (CTEST_CONFIGURE_COMMAND
-    "${CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
 
-CTEST_START (${MODEL})
+CTEST_START (${MODEL} TRACK ${MODEL})
 if (NOT LOCAL_SKIP_UPDATE)
   CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
 endif (NOT LOCAL_SKIP_UPDATE)
