@@ -92,7 +92,7 @@ static herr_t H5FD_mdc_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_mdc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mdc_mpi_rank(const H5FD_t *_file);
 static int H5FD_mdc_mpi_size(const H5FD_t *_file);
-static int H5FD_mdc_communicator(const H5FD_t *_file);
+static MPI_Comm H5FD_mdc_communicator(const H5FD_t *_file);
 
 /* The MDC file driver information */
 static const H5FD_class_mpi_t H5FD_mdc_g = {
@@ -516,7 +516,7 @@ H5FD_mdc_close(H5FD_t *_file)
         if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                        &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                        MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
         MPI_Pcontrol(1);
         H5MM_free(send_buf);
     }
@@ -575,7 +575,7 @@ H5FD_mdc_query(const H5FD_t UNUSED*_file, unsigned long *flags /* out */)
 /*-------------------------------------------------------------------------
  * Function:	H5FD_mdc_alloc
  *
- * Purpose:	Gets the end-of-address marker for the file. The request 
+ * Purpose:	allocates space in the file. The request 
  *              will be sent to the MDS server because it is the one
  *              responsible for managing this value.
  *
@@ -647,10 +647,10 @@ H5FD_mdc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
                                    &ret_value, sizeof(uint64_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to send message")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HADDR_UNDEF, "failed to send message");
     MPI_Pcontrol(1);
 
-    H5MM_free(send_buf);
+    H5MM_xfree(send_buf);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD_mdc_alloc */
@@ -676,13 +676,15 @@ static haddr_t
 H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 {
     const H5FD_mdc_t	*file = (const H5FD_mdc_t*)_file;
-    size_t buf_size;
-    uint8_t *p = NULL;
-    void *send_buf = NULL;
     haddr_t ret_value = HADDR_UNDEF;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    ret_value = H5FDget_eoa(file->memb, type);
+
+    FUNC_LEAVE_NOAPI(ret_value + HADDR_MAX/2)
+
+#if 0
     buf_size = 1 /* request type*/ + sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t);
 
     /* allocate the buffer for encoding the parameters */
@@ -713,7 +715,8 @@ H5FD_mdc_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     H5MM_free(send_buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value + HADDR_MAX/2)
+#endif
 }
 
 
@@ -737,13 +740,12 @@ static herr_t
 H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 {
     const H5FD_mdc_t	*file = (const H5FD_mdc_t*)_file;
-    size_t buf_size;
-    uint8_t *p = NULL;
-    void *send_buf = NULL;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    ret_value = H5FDset_eoa(file->memb, type, eoa - HADDR_MAX/2);
+#if 0
     buf_size = 1 /* request type*/ + sizeof(hid_t) /* metadata file id */ + sizeof(H5FD_mem_t) +
         sizeof(uint64_t);
 
@@ -771,8 +773,9 @@ H5FD_mdc_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     MPI_Pcontrol(1);
 
     H5MM_free(send_buf);
-
 done:
+#endif
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -908,11 +911,28 @@ H5FD_mdc_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 static herr_t
 H5FD_mdc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
-    H5FD_mdc_t			*file = (H5FD_mdc_t*)_file;
+    H5FD_mdc_t *file = (H5FD_mdc_t*)_file;
+    MPI_Comm comm;
+    haddr_t global_eoa, local_eoa;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
-    FUNC_LEAVE_NOAPI(H5FDtruncate(file->memb, dxpl_id, closing))
+    comm = H5FD_mpi_get_comm(file->memb);
+
+    if(HADDR_UNDEF == (local_eoa = H5FDget_eoa(file->memb, H5FD_MEM_DRAW)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "cannot get file eoa");
+
+    MPI_Allreduce(&local_eoa, &global_eoa, 1, MPI_UINT64_T, MPI_MAX, comm);
+
+    if(H5FDset_eoa(file->memb, H5FD_MEM_DRAW, global_eoa) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "cannot set file eoa");
+
+    if(H5FDtruncate(file->memb, dxpl_id, closing) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "cannot truncate");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 

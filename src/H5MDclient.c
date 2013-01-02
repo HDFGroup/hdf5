@@ -40,7 +40,9 @@
 
 /* Declare a free list to manage the H5D_t and H5D_shared_t structs */
 H5FL_DEFINE_STATIC(H5D_t);
-H5FL_DEFINE_STATIC(H5D_shared_t);
+
+/* Declare the external free list to manage the H5D_chunk_info_t struct */
+H5FL_EXTERN(H5D_chunk_info_t);
 
 
 /*-------------------------------------------------------------------------
@@ -250,9 +252,8 @@ H5MD_dset_create(H5F_t *file, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_
 
 done:
     if(!ret_value && new_dset && new_dset->shared) {
-        if(new_dset->shared) {
-            new_dset->shared = H5FL_FREE(H5D_shared_t, new_dset->shared);
-        } /* end if */
+        if(new_dset->shared)
+            H5D__dest(new_dset->shared);
         new_dset->oloc.file = NULL;
         new_dset = H5FL_FREE(H5D_t, new_dset);
     } /* end if */
@@ -376,13 +377,13 @@ H5MD_dset_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     io_info.u.rbuf = buf;
     if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
-
     io_info_init = TRUE;
 
     /* Call storage method's I/O initialization routine */
     HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
 
-    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if(io_info.layout_ops.io_init && 
+       (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
@@ -560,7 +561,8 @@ H5MD_dset_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Call storage method's I/O initialization routine */
     HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if(io_info.layout_ops.io_init && 
+       (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
@@ -609,13 +611,34 @@ done:
 herr_t
 H5MD_dset_close(H5D_t *dataset)
 {
-    unsigned free_failed = FALSE;
+    unsigned free_failed;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(dataset);
+
+    if(H5D_CHUNKED == dataset->shared->layout.type) {
+        /* Check for skip list for iterating over chunks during I/O to close */
+        if(dataset->shared->cache.chunk.sel_chunks) {
+            HDassert(H5SL_count(dataset->shared->cache.chunk.sel_chunks) == 0);
+            H5SL_close(dataset->shared->cache.chunk.sel_chunks);
+            dataset->shared->cache.chunk.sel_chunks = NULL;
+        } /* end if */
+
+        /* Check for cached single chunk dataspace */
+        if(dataset->shared->cache.chunk.single_space) {
+            (void)H5S_close(dataset->shared->cache.chunk.single_space);
+            dataset->shared->cache.chunk.single_space = NULL;
+        } /* end if */
+
+        /* Check for cached single element chunk info */
+        if(dataset->shared->cache.chunk.single_chunk_info) {
+            dataset->shared->cache.chunk.single_chunk_info = H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
+            dataset->shared->cache.chunk.single_chunk_info = NULL;
+        } /* end if */
+    }
 
     /*
      * Release datatype, dataspace and creation property list -- there isn't
@@ -624,7 +647,6 @@ H5MD_dset_close(H5D_t *dataset)
     free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id) < 0 || 
                              H5S_close(dataset->shared->space) < 0 ||
                              H5I_dec_ref(dataset->shared->dcpl_id) < 0);
-
 
     /*
      * Free memory.  Before freeing the memory set the file pointer to NULL.
@@ -636,6 +658,8 @@ H5MD_dset_close(H5D_t *dataset)
 
     if(H5D__dest(dataset->shared) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free shared dataset struct\n");
+
+    //dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
 
    /* Release the dataset's path info */
    if(H5G_name_free(&(dataset->path)) < 0)

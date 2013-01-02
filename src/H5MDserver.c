@@ -1528,6 +1528,7 @@ H5MD__dataset_create_func(uint8_t *p, int source)
     hid_t type_id; /* datatype for dataset */
     hid_t space_id; /* dataspace for dataset */
     H5P_genplist_t  *plist;
+    haddr_t eoa;
     void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
     size_t buf_size = 0; /* send_buf size */
     uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
@@ -1563,8 +1564,11 @@ H5MD__dataset_create_func(uint8_t *p, int source)
     if(FAIL == (ret_value = H5D__encode_layout(dset->shared->layout, NULL, &buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
 
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(dset->oloc.file, H5FD_MEM_DRAW)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file EOA");
+
     /* for the dataset ID */
-    buf_size += sizeof(int);
+    buf_size += sizeof(int) + 1 + H5V_limit_enc_size((uint64_t)eoa);
 
     /* allocate the buffer for encoding the parameters */
     if(NULL == (send_buf = H5MM_malloc(buf_size)))
@@ -1575,10 +1579,13 @@ H5MD__dataset_create_func(uint8_t *p, int source)
     /* encode the object id */
     INT32ENCODE(p1, dset_id);
 
+    UINT64ENCODE_VARLEN(p1, eoa);
+
     /* encode layout of the dataset */ 
     if(FAIL == (ret_value = H5D__encode_layout(dset->shared->layout, p1, &buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
-    buf_size += sizeof(int);
+
+    buf_size += sizeof(int) + 1 + H5V_limit_enc_size((uint64_t)eoa);
 
 done:
     if(SUCCEED == ret_value) {
@@ -1753,8 +1760,13 @@ static herr_t
 H5MD__dataset_set_extent_func(uint8_t *p, int source)
 {
     hid_t dset_id = FAIL; /* dset id */
+    H5D_t *dset = NULL;
     hsize_t *size = NULL;
     int rank;
+    void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
+    uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+    size_t buf_size = 0, layout_size = 0;
+    haddr_t eoa;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1762,16 +1774,55 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
     if(H5VL__decode_dataset_set_extent_params(p, &dset_id, &rank, &size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode dataset set_extent params");
 
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a dataset");
+
     /* Set_Extent the dataset through the native VOL */
-    if(H5VL_native_dataset_set_extent(H5I_object_verify(dset_id, H5I_DATASET), size, 
-                                      H5_REQUEST_NULL) < 0)
+    if(H5VL_native_dataset_set_extent(dset, size, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set_extent dataset");
 
+    /* determine the buffer size needed to store the encoded layout of the dataset */ 
+    if(FAIL == H5D__encode_layout(dset->shared->layout, NULL, &layout_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(dset->oloc.file, H5FD_MEM_DRAW)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file EOA");
+
+    buf_size = sizeof(int32_t) + 
+        1 + H5V_limit_enc_size((uint64_t)eoa) + 
+        1 + H5V_limit_enc_size((uint64_t)layout_size) + layout_size;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p1 = (uint8_t *)send_buf;
+
+    INT32ENCODE(p1, ret_value);
+    UINT64ENCODE_VARLEN(p1, eoa);
+
+    /* encode the layout size */
+    UINT64ENCODE_VARLEN(p1, layout_size);
+    if(layout_size) {
+        /* encode layout of the dataset */ 
+        if(FAIL == H5D__encode_layout(dset->shared->layout, p1, &layout_size))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+        p1 += layout_size;
+    }
 done:
-    /* Send failed to the client */
-    if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
-                               H5MD_RETURN_TAG, MPI_COMM_WORLD))
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    if(SUCCEED == ret_value) {
+        /* Send the dataset id & metadata to the client */
+        if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        /* Send failed to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    H5MM_xfree(send_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MD__dataset_set_extent_func */
@@ -3890,6 +3941,7 @@ done:
     if(idx_info.dxpl_id && idx_info.dxpl_id != H5P_DATASET_XFER_DEFAULT && 
        H5I_dec_ref(idx_info.dxpl_id) < 0)
         HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close plist");
+    H5MM_xfree(send_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MD__chunk_get_addr */
@@ -3934,7 +3986,7 @@ H5D__chunk_iterate_cb(const H5D_chunk_rec_t *chunk_rec, void *op_data)
                                    MPI_COMM_WORLD, MPI_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to communicate with client");
 
-    H5MM_free(send_buf);
+    H5MM_xfree(send_buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

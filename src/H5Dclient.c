@@ -219,7 +219,8 @@ H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
@@ -228,13 +229,14 @@ H5D__client_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     MPI_Pcontrol(1);
     p1 = (uint8_t *)recv_buf;
 
-    /* encode udata */
+    /* decode udata */
     H5_DECODE_UNSIGNED(p1, udata->idx_hint);
     UINT32DECODE(p1, udata->nbytes);
     H5_DECODE_UNSIGNED(p1, udata->filter_mask);
     UINT64DECODE_VARLEN(p1, udata->addr);
 
-    H5MM_free(send_buf);
+    H5MM_xfree(recv_buf);
+    H5MM_xfree(send_buf);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__client_idx_insert() */
@@ -345,7 +347,8 @@ H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
     /* allocate the receive buffer */
-    recv_buf = (void *)H5MM_malloc (incoming_msg_size);
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
     /* receive the actual message */
     if(MPI_SUCCESS != MPI_Recv (recv_buf, incoming_msg_size, MPI_BYTE, status.MPI_SOURCE, 
@@ -360,7 +363,8 @@ H5D__client_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     H5_DECODE_UNSIGNED(p1, udata->filter_mask);
     UINT64DECODE_VARLEN(p1, udata->addr);
 
-    H5MM_free(send_buf);
+    H5MM_xfree(send_buf);
+    H5MM_xfree(recv_buf);
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__client_idx_get_addr() */
@@ -446,7 +450,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
                                H5MD_LISTEN_TAG, MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
-    H5MM_free(send_buf);
+    H5MM_xfree(send_buf);
     MPI_Pcontrol(1);
 
     while (1) {
@@ -466,7 +470,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
 
         /* allocate the receive buffer */
-        if(NULL == (recv_buf = H5MM_malloc(incoming_msg_size)))
+        if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
         /* receive the actual message */
@@ -480,7 +484,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
         /* decode the ret value from the server to see whether we need to continue iterating or stop */
         INT32DECODE(p, ret_value);
         if(ret_value == SUCCEED || ret_value == FAIL) {
-            H5MM_free(recv_buf);
+            H5MM_xfree(recv_buf);
             break;
         }
         HDassert(ret_value == H5MD_CONT);
@@ -491,7 +495,7 @@ H5D__client_idx_iterate(const H5D_chk_idx_info_t *idx_info,
         H5_DECODE_UNSIGNED(p, chunk_rec.filter_mask);    
         UINT64DECODE_VARLEN(p, chunk_rec.chunk_addr);
 
-        H5MM_free(recv_buf);
+        H5MM_xfree(recv_buf);
 
         /* execute the iterate callback */
         ret = chunk_cb(&chunk_rec, chunk_udata);

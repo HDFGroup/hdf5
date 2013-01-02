@@ -2301,6 +2301,7 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     uint8_t        *p = NULL; /* pointer into recv_buf; used for decoding */
     hid_t          type_id, space_id, lcpl_id;
     H5O_layout_t   layout;        /* Dataset's layout information */
+    haddr_t        eoa; /* raw data eoa */
     void           *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2367,6 +2368,10 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(dset->common.obj_id < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create meta dataset object");
 
+    /* Decode the raw data EOA and set it at the raw data driver */
+    UINT64DECODE_VARLEN(p, eoa);
+    H5FD_set_eoa(obj->raw_file->shared->lf, H5FD_MEM_DRAW, eoa);
+
     /* decode the dataset layout */
     if(FAIL == H5D__decode_layout(p, &layout))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "failed to decode dataset layout");
@@ -2377,12 +2382,14 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 
     /* set the layout of the dataset */
     new_dset->shared->layout = layout;
+
     /* Set the dataset's I/O operations */
     if(H5D__layout_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
 
     /* reset the chunk ops to use the stub client ops */
-    new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+    if(H5D_CHUNKED == new_dset->shared->layout.type)
+        new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
 
 #if 0
     {
@@ -2526,7 +2533,7 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     UINT64DECODE_VARLEN(p, space_size);
     if(space_size) {
         H5S_t *ds = NULL;
-        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+        if(NULL == (ds = H5S_decode((const unsigned char *)p)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, NULL, "can't decode object");
         /* Register the type and return the ID */
         if((space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
@@ -2550,8 +2557,10 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* Set the dataset's I/O operations */
     if(H5D__layout_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations");
+
     /* reset the chunk ops to use the stub client ops */
-    new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+    if(H5D_CHUNKED == new_dset->shared->layout.type)
+        new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
 
     new_dset->oloc.file = obj->raw_file;
     /* set the dataset struct in the high level object */
@@ -2716,10 +2725,17 @@ herr_t
 H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
 {
     H5MD_dset_t *dset = (H5MD_dset_t *)obj;
-    void            *send_buf = NULL;
-    size_t           buf_size;
-    int              rank = dset->dset->shared->space->extent.rank;
-    herr_t           ret_value = SUCCEED;    /* Return value */
+    void           *send_buf = NULL;
+    size_t         buf_size;
+    int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
+    void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    uint8_t        *p; /* pointer into recv_buf; used for decoding */
+    MPI_Status     status;
+    H5O_layout_t   layout;        /* Dataset's layout information */
+    size_t         layout_size;
+    int            rank = dset->dset->shared->space->extent.rank;
+    haddr_t        eoa;
+    herr_t         ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2737,13 +2753,56 @@ H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
 
     MPI_Pcontrol(0);
     /* send the request to the MDS process and recieve the return value */
-    if(MPI_SUCCESS != MPI_Sendrecv(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
-                                   &ret_value, sizeof(herr_t), MPI_BYTE, MDS_RANK, H5MD_RETURN_TAG,
-                                   MPI_COMM_WORLD, MPI_STATUS_IGNORE))
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, H5MD_LISTEN_TAG,
+                               MPI_COMM_WORLD))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
     MPI_Pcontrol(1);
 
+    p = (uint8_t *)recv_buf;
+
+    /* decode the dataset ID at the MDS */
+    INT32DECODE(p, ret_value);
+
+    if(ret_value < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to set extent");
+
+    /* Decode the raw data EOA and set it at the raw data driver */
+    UINT64DECODE_VARLEN(p, eoa);
+    H5FD_set_eoa(dset->common.raw_file->shared->lf, H5FD_MEM_DRAW, eoa);
+
+    /* decode the layout size */
+    UINT64DECODE_VARLEN(p, layout_size);
+    /* decode the dataset layout */
+    if(FAIL == H5D__decode_layout(p, &layout))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataset layout");
+    p += layout_size;
+
+    /* set the layout of the dataset */
+    dset->dset->shared->layout = layout;
+    /* Set the dataset's I/O operations */
+    if(H5D__layout_set_io_ops(dset->dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize I/O operations");
+    /* reset the chunk ops to use the stub client ops */
+    dset->dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+
     H5MM_xfree(send_buf);
+    H5MM_xfree(recv_buf);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

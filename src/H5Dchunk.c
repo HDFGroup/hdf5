@@ -642,7 +642,6 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-
     /* Initialize "last chunk" information */
     fm->last_index = (hsize_t)-1;
     fm->last_chunk_info = NULL;
@@ -1195,7 +1194,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
 
             /* Insert the new chunk into the skip list */
             if(H5SL_insert(fm->sel_chunks, new_chunk_info, &new_chunk_info->index) < 0) {
-                    H5D__free_chunk_info(new_chunk_info, NULL, NULL);
+                H5D__free_chunk_info(new_chunk_info, NULL, NULL);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
             } /* end if */
 

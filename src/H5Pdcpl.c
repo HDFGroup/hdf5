@@ -174,6 +174,9 @@ static const H5O_layout_t H5D_def_layout_g = H5D_CRT_LAYOUT_DEF;        /* Defau
 static const H5O_fill_t H5D_def_fill_g = H5D_CRT_FILL_VALUE_DEF;        /* Default fill value */
 static const unsigned H5D_def_alloc_time_state_g = H5D_CRT_ALLOC_TIME_STATE_DEF;  /* Default allocation time state */
 static const H5O_efl_t H5D_def_efl_g = H5D_CRT_EXT_FILE_LIST_DEF;                 /* Default external file list */
+static const hid_t H5D_type_id_g = FAIL;
+static const hid_t H5D_space_id_g = FAIL;
+static const hid_t H5D_lcpl_id_g = FAIL;//H5P_LINK_CREATE_DEFAULT;
 
 /* Defaults for each type of layout */
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
@@ -203,9 +206,6 @@ static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 static herr_t
 H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
 {
-    hid_t type_id = FAIL;
-    hid_t space_id = FAIL;
-    hid_t lcpl_id = H5P_LINK_CREATE_DEFAULT;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -235,17 +235,17 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type ID property*/
-    if(H5P_register_real(pclass, H5VL_DSET_TYPE_ID, sizeof(hid_t), &type_id, 
+    if(H5P_register_real(pclass, H5VL_DSET_TYPE_ID, sizeof(hid_t), &H5D_type_id_g, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the space ID property */
-    if(H5P_register_real(pclass, H5VL_DSET_SPACE_ID, sizeof(hid_t), &space_id, 
+    if(H5P_register_real(pclass, H5VL_DSET_SPACE_ID, sizeof(hid_t), &H5D_space_id_g, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the lcpl ID property */
-    if(H5P_register_real(pclass, H5VL_DSET_LCPL_ID, sizeof(hid_t), &lcpl_id, 
+    if(H5P_register_real(pclass, H5VL_DSET_LCPL_ID, sizeof(hid_t), &H5D_lcpl_id_g, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

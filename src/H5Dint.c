@@ -1671,7 +1671,7 @@ H5D__alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_a
                  * B-tree gets expanded. -QAK
                  */
 		if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
-                        && time_alloc == H5D_ALLOC_EXTEND)
+                   && time_alloc == H5D_ALLOC_EXTEND)
 		    must_init_space = TRUE;
                 break;
 

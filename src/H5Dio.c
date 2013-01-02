@@ -664,7 +664,7 @@ herr_t
 H5D__ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const H5D_type_info_t *type_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check args */
     HDassert(dset);
@@ -734,7 +734,7 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     const H5T_t	*dst_type;              /* Destination datatype */
     herr_t ret_value = SUCCEED;	        /* Return value	*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(type_info);
@@ -891,7 +891,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
     H5D_mpio_actual_io_mode_t actual_io_mode; /* performed io mode */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check args */
     HDassert(dset);
@@ -979,7 +979,7 @@ H5D__ioinfo_term(H5D_io_info_t *io_info)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check if we used the MPI VFD for the I/O */
     if(io_info->using_mpi_vfd) {
@@ -1032,7 +1032,7 @@ done:
 herr_t
 H5D__typeinfo_term(const H5D_type_info_t *type_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check for releasing datatype conversion & background buffers */
     if(type_info->tconv_buf_allocated) {

@@ -250,6 +250,7 @@ static const H5D_mpio_no_collective_cause_t H5D_def_mpio_no_collective_cause_g =
 #ifdef H5_HAVE_PARALLEL
 static const MPI_Datatype H5D_def_btype_g = H5FD_MPI_XFER_MEM_MPI_TYPE_DEF;  /* Default value for MPI buffer type */
 static const MPI_Datatype H5D_def_ftype_g = H5FD_MPI_XFER_FILE_MPI_TYPE_DEF; /* Default value for MPI file type */
+static const hid_t H5D_mds_dset_id = FAIL; /* Default value for the Dataset ID at the MDS side - specific only to MDS VOL plugin */
 #endif /* H5_HAVE_PARALLEL */
 static const H5Z_EDC_t H5D_def_enable_edc_g = H5D_XFER_EDC_DEF;            /* Default value for EDC property */
 static const H5Z_cb_t H5D_def_filter_cb_g = H5D_XFER_FILTER_CB_DEF;        /* Default value for filter callback */
@@ -272,7 +273,6 @@ static const void *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF;          /* Defaul
 static herr_t
 H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 {
-    hid_t mds_dset_id = FAIL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -403,7 +403,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type ID property*/
-    if(H5P_register_real(pclass, H5MD_DSET_ID, sizeof(hid_t), &mds_dset_id, 
+    if(H5P_register_real(pclass, H5MD_DSET_ID, sizeof(hid_t), &H5D_mds_dset_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
