@@ -373,6 +373,162 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL__mds_dataset_refresh
+ *
+ * Purpose:	Check if the dataset at the client side is up-to-date with the MDS.
+ *              Update if it isn't.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__mds_dataset_refresh(H5MD_dset_t *dataset)
+{
+    H5D_t          *dset = dataset->dset;
+    size_t         buf_size;
+    int            incoming_msg_size; /* incoming buffer size for MDS returned dataset */
+    void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
+    void           *send_buf = NULL; /* buffer to hold data to send to MDS */
+    uint8_t        *p; /* pointer into recv_buf; used for decoding */
+    MPI_Status     status;
+    hid_t          space_id=FAIL, dcpl_id=H5P_DATASET_CREATE_DEFAULT;
+    H5O_layout_t   layout;        /* Dataset's layout information */
+    int            need_to_refresh = -1;
+    size_t         space_size, dcpl_size, layout_size;
+    herr_t         ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    buf_size = 1 + sizeof(int) * 2;
+
+    /* allocate the buffer for encoding the parameters */
+    if(NULL == (send_buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    p = (uint8_t *)send_buf;
+    *p++ = (uint8_t)H5VL_DSET_REFRESH;
+    INT32ENCODE(p, dataset->common.obj_id);
+    INT32ENCODE(p, dset->shared->current_version);
+
+    MPI_Pcontrol(0);
+    /* send the request to the MDS process and recieve the return value */
+    if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, MDS_RANK, 
+                               H5MD_LISTEN_TAG, MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+    H5MM_xfree(send_buf);
+
+    /* probe for a message from the mds */
+    if(MPI_SUCCESS != MPI_Probe(MDS_RANK, H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to probe for a message");
+    /* get the incoming message size from the probe result */
+    if(MPI_SUCCESS != MPI_Get_count(&status, MPI_BYTE, &incoming_msg_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get incoming message size");
+
+    /* allocate the receive buffer */
+    if(NULL == (recv_buf = H5MM_malloc((size_t)incoming_msg_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+    /* receive the actual message */
+    if(MPI_SUCCESS != MPI_Recv(recv_buf, incoming_msg_size, MPI_BYTE, MDS_RANK, 
+                               H5MD_RETURN_TAG, MPI_COMM_WORLD, &status))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to receive message");
+    MPI_Pcontrol(1);
+
+    p = (uint8_t *)recv_buf;
+
+    /* decode whether we need to refresh client metadata or not*/
+    INT32DECODE(p, need_to_refresh);
+
+    if(0 == need_to_refresh)
+        HGOTO_DONE(SUCCEED)
+    else
+        HDassert(1 == need_to_refresh);
+
+    /* Decode the current version the dataset is being updated to */
+    INT32DECODE(p, dset->shared->current_version);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dcpl_size);
+    /* decode property lists if they are not default*/
+    if(dcpl_size) {
+        if((dcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dcpl_size;
+    }
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    if(space_size) {
+        H5S_t *ds = NULL;
+        if(NULL == (ds = H5S_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+        p += space_size;
+    }
+
+    /* decode the layout size */
+    UINT64DECODE_VARLEN(p, layout_size);
+    /* decode the dataset layout */
+    if(FAIL == H5D__decode_layout(p, &layout))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataset layout");
+    p += layout_size;
+
+    /* replace the dcpl  of the dataset with the new one received from the MDS */
+    if(H5P_DATASET_CREATE_DEFAULT != dcpl_id) {
+        if(H5I_dec_ref(dset->shared->dcpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to reset dcpl");
+        dset->shared->dcpl_id = dcpl_id;
+    }
+
+    /* replace the dataspace of the dataset with the new one received from the MDS */
+    if(space_id) {
+        const H5S_t         *space = NULL;          /* Dataspace for dataset */
+
+        if(H5S_close(dset->shared->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to reset dataspace");
+
+        /* Get the dataset's dataspace */
+        if(NULL == (space = (const H5S_t *)H5I_object(space_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+
+        /* Check if the dataspace has an extent set (or is NULL) */
+        if(!H5S_has_extent(space))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set.");
+
+        /* Copy & initialize dataspace for dataset */
+        if(H5D__init_space(dataset->common.raw_file, dset, space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy dataspace");
+
+        if(H5I_dec_ref(space_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to reset dataspace");
+    }
+
+    /* set the layout of the dataset */
+    dset->shared->layout = layout;
+    /* Set the dataset's I/O operations */
+    if(H5D__layout_set_io_ops(dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize I/O operations");
+
+    /* reset the chunk ops to use the stub client ops */
+    if(H5D_CHUNKED == dset->shared->layout.type)
+        dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+
+    H5MM_xfree(recv_buf);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__mds_dataset_refresh() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_mds
  *
  * Purpose:	Modify the file access property list to use the H5VL_MDS
@@ -2380,6 +2536,9 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(NULL == (new_dset = H5MD_dset_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
 
+    /* initialize current version of dataset to 0 */
+    new_dset->shared->current_version = 0;
+
     /* set the layout of the dataset */
     new_dset->shared->layout = layout;
 
@@ -2552,6 +2711,9 @@ H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     if(NULL == (new_dset = H5MD_dset_create(obj->raw_file, type_id, space_id, dcpl_id, dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "failed to create client dataset object");
 
+    /* initialize current version of dataset to 0 */
+    new_dset->shared->current_version = 0;
+
     /* set the layout of the dataset */
     new_dset->shared->layout = layout;
     /* Set the dataset's I/O operations */
@@ -2602,6 +2764,7 @@ H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
     H5P_genplist_t *plist = NULL;
+    char           fake_char;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2635,6 +2798,13 @@ H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     if(H5P_set(plist, H5MD_DSET_ID, &dset_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for mds dataset id");
 
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
+    if(!buf)
+        buf = &fake_char;
+
     /* read raw data */
     if(H5MD_dset_read(dset->dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data");
@@ -2666,6 +2836,7 @@ H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t   *mem_space = NULL;
     const H5S_t   *file_space = NULL;
     H5P_genplist_t *plist = NULL;
+    char           fake_char;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2690,6 +2861,13 @@ H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
 
     if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
+    if(!buf)
+        buf = &fake_char;
 
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
@@ -2731,13 +2909,18 @@ H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
     void           *recv_buf = NULL; /* buffer to hold incoming data from MDS */
     uint8_t        *p; /* pointer into recv_buf; used for decoding */
     MPI_Status     status;
+    hid_t          space_id=FAIL, dcpl_id=H5P_DATASET_CREATE_DEFAULT;
     H5O_layout_t   layout;        /* Dataset's layout information */
-    size_t         layout_size;
+    size_t         space_size, dcpl_size, layout_size;
     int            rank = dset->dset->shared->space->extent.rank;
     haddr_t        eoa;
     herr_t         ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check if we are allowed to modify this file */
+    if(0 == (H5F_INTENT(dset->dset->oloc.file) & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* determine the size of the buffer needed to encode the parameters */
     if(H5VL__encode_dataset_set_extent_params(NULL, &buf_size, dset->common.obj_id, rank, size) < 0)
@@ -2786,6 +2969,28 @@ H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
     UINT64DECODE_VARLEN(p, eoa);
     H5FD_set_eoa(dset->common.raw_file->shared->lf, H5FD_MEM_DRAW, eoa);
 
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dcpl_size);
+
+    /* decode property lists if they are not default*/
+    if(dcpl_size) {
+        if((dcpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dcpl_size;
+    }
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    if(space_size) {
+        H5S_t *ds = NULL;
+        if(NULL == (ds = H5S_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+        p += space_size;
+    }
+
     /* decode the layout size */
     UINT64DECODE_VARLEN(p, layout_size);
     /* decode the dataset layout */
@@ -2793,13 +2998,45 @@ H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataset layout");
     p += layout_size;
 
+    /* replace the dcpl  of the dataset with the new one received from the MDS */
+    if(H5P_DATASET_CREATE_DEFAULT != dcpl_id) {
+        if(H5I_dec_ref(dset->dset->shared->dcpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to reset dcpl");
+        dset->dset->shared->dcpl_id = dcpl_id;
+    }
+
+    /* replace the dataspace of the dataset with the new one received from the MDS */
+    if(space_id) {
+        const H5S_t         *space = NULL;          /* Dataspace for dataset */
+
+        if(H5S_close(dset->dset->shared->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to reset dataspace");
+
+        /* Get the dataset's dataspace */
+        if(NULL == (space = (const H5S_t *)H5I_object(space_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+        /* Check if the dataspace has an extent set (or is NULL) */
+        if(!H5S_has_extent(space))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set.")
+
+        /* Copy & initialize dataspace for dataset */
+        if(H5D__init_space(dset->common.raw_file, dset->dset, space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy dataspace")
+
+        if(H5I_dec_ref(space_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to reset dataspace");
+    }
+
     /* set the layout of the dataset */
     dset->dset->shared->layout = layout;
     /* Set the dataset's I/O operations */
     if(H5D__layout_set_io_ops(dset->dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize I/O operations");
+
     /* reset the chunk ops to use the stub client ops */
-    dset->dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
+    if(H5D_CHUNKED == dset->dset->shared->layout.type)
+        dset->dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
 
     H5MM_xfree(send_buf);
     H5MM_xfree(recv_buf);
@@ -2831,121 +3068,29 @@ H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t req, va_list 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_native_dataset_get((void *)dset, get_type, req, arguments) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
-
-#if 0
     switch (get_type) {
-        /* H5Dget_space */
-        case H5VL_DATASET_GET_SPACE:
-            {
-                hid_t	*ret_id = va_arg (arguments, hid_t *);
-
-                if((*ret_id = H5D_get_space(dset)) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get space ID of dataset")
-
-                break;
-            }
-            /* H5Dget_space_statuc */
-        case H5VL_DATASET_GET_SPACE_STATUS:
-            {
-                H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
-
-                /* Read data space address and return */
-                if(H5D__get_space_status(dset, allocation, H5AC_ind_dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
-
-                break;
-            }
-            /* H5Dget_type */
-        case H5VL_DATASET_GET_TYPE:
-            {
-                hid_t	*ret_id = va_arg (arguments, hid_t *);
-
-                if((*ret_id = H5D_get_type(dset)) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
-
-                break;
-            }
-            /* H5Dget_create_plist */
+        /* Some metadata for a dataset might have been modified by other clients through the MDS,
+           so contact the MDS and make sure that the metadata of the dataset is up-to-date;
+           If it is not, update it.
+        */
         case H5VL_DATASET_GET_DCPL:
-            {
-                hid_t	*ret_id = va_arg (arguments, hid_t *);
-                hid_t    dcpl_id;
-
-                dcpl_id = dset->shared->dcpl_id;
-
-                if(dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
-                    if(H5I_inc_ref(dcpl_id, FALSE) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, FAIL, "can't increment default DCPL ID");
-                    *ret_id = dcpl_id;
-                }
-                else {
-                    H5P_genplist_t  *plist;
-
-                    /* Get the property list */
-                    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-
-                    *ret_id = H5P_copy_plist(plist, FALSE);
-                } /* end else */
-                break;
-            }
-            /* H5Dget_access_plist */
-        case H5VL_DATASET_GET_DAPL:
-            {
-                hid_t	*ret_id = va_arg (arguments, hid_t *);
-
-                if((*ret_id = H5D_get_access_plist(dset)) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get access property list for dataset")
-
-                break;
-            }
-            /* H5Dget_storage_size */
+        case H5VL_DATASET_GET_SPACE:
+        case H5VL_DATASET_GET_SPACE_STATUS:
         case H5VL_DATASET_GET_STORAGE_SIZE:
-            {
-                hsize_t *ret = va_arg (arguments, hsize_t *);
-
-                /* Set return value */
-                if(H5D__get_storage_size(dset, H5AC_ind_dxpl_id, ret) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
-                break;
-            }
-            /* H5Dget_offset */
         case H5VL_DATASET_GET_OFFSET:
-            {
-                haddr_t *ret = va_arg (arguments, haddr_t *);
-
-                switch(dset->shared->layout.type) {
-                    case H5D_CHUNKED:
-                    case H5D_COMPACT:
-                        break;
-
-                    case H5D_CONTIGUOUS:
-                        /* If dataspace hasn't been allocated or dataset is stored in
-                         * an external file, the value will be HADDR_UNDEF. */
-                        if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.storage.u.contig.addr))
-                            /* Return the absolute dataset offset from the beginning of file. */
-                            *ret = dset->shared->layout.storage.u.contig.addr;
-                        break;
-
-                    case H5D_LAYOUT_ERROR:
-                    case H5D_NLAYOUTS:
-                    default:
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type");
-                } /*lint !e788 All appropriate cases are covered */
-
-                /* Set return value */
-                *ret = H5D__get_offset(dset);
-                if(!H5F_addr_defined(*ret))
-                    *ret = HADDR_UNDEF;
-                break;
-            }
+            if(H5VL__mds_dataset_refresh(dataset) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to refresh dataset metadata");
+            break;
+        /* the rest are immutable; no need to contact MDS */
+        case H5VL_DATASET_GET_TYPE:
+        case H5VL_DATASET_GET_DAPL:
+            break;
         default:
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
     }
-#endif
 
+    if(H5VL_native_dataset_get((void *)dset, get_type, req, arguments) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_mds_dataset_get() */

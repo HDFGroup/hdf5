@@ -91,7 +91,7 @@ static herr_t H5MD__chunk_iterate(uint8_t *p, int source);
 static herr_t H5MD__dataset_create_func(uint8_t *p, int source);
 static herr_t H5MD__dataset_open_func(uint8_t *p, int source);
 static herr_t H5MD__dataset_set_extent_func(uint8_t *p, int source);
-static herr_t H5MD__dataset_get_func(uint8_t *p, int source);
+static herr_t H5MD__dataset_refresh_func(uint8_t *p, int source);
 static herr_t H5MD__dataset_close_func(uint8_t *p, int source);
 static herr_t H5MD__datatype_commit_func(uint8_t *p, int source);
 static herr_t H5MD__datatype_open_func(uint8_t *p, int source);
@@ -145,7 +145,7 @@ static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
     H5MD__dataset_create_func,
     H5MD__dataset_open_func,
     H5MD__dataset_set_extent_func,
-    H5MD__dataset_get_func,
+    H5MD__dataset_refresh_func,
     H5MD__dataset_close_func,
     H5MD__datatype_commit_func,
     H5MD__datatype_open_func,
@@ -1560,6 +1560,9 @@ H5MD__dataset_create_func(uint8_t *p, int source)
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom");
 
+    /* initialize current version of dataset to 0 */
+    dset->shared->current_version = 0;
+
     /* determine the buffer size needed to store the encoded layout of the dataset */ 
     if(FAIL == (ret_value = H5D__encode_layout(dset->shared->layout, NULL, &buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
@@ -1650,6 +1653,9 @@ H5MD__dataset_open_func(uint8_t *p, int source)
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset atom")
+
+    /* initialize current version of dataset to 0 */
+    dset->shared->current_version = 0;
 
     /* START Encode metadata of the dataset and send them to the client along with the ID */
     /* determine the size of the dcpl if it is not default */
@@ -1765,7 +1771,9 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
     int rank;
     void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
     uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
-    size_t buf_size = 0, layout_size = 0;
+    size_t dcpl_size = 0, space_size = 0, layout_size = 0;
+    H5P_genplist_t *dcpl;
+    size_t buf_size = 0;
     haddr_t eoa;
     herr_t ret_value = SUCCEED;
 
@@ -1781,15 +1789,37 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
     if(H5VL_native_dataset_set_extent(dset, size, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set_extent dataset");
 
-    /* determine the buffer size needed to store the encoded layout of the dataset */ 
-    if(FAIL == H5D__encode_layout(dset->shared->layout, NULL, &layout_size))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+    /* increment current version of dataset */
+    dset->shared->current_version ++;
 
     if(HADDR_UNDEF == (eoa = H5F_get_eoa(dset->oloc.file, H5FD_MEM_DRAW)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get file EOA");
 
+    /* encode metadata of the dataset and send them to the client */
+    /* determine the size of the dcpl if it is not default */
+    if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
+        if(NULL == (dcpl = (H5P_genplist_t *)H5I_object_verify(dset->shared->dcpl_id, 
+                                                               H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(dcpl, FALSE, NULL, &dcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    if(NULL != dset->shared->space) {
+        /* get Dataspace size to encode */
+        if((ret_value = H5S_encode(dset->shared->space, NULL, &space_size)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+    }
+
+    /* determine the buffer size needed to store the encoded layout of the dataset */ 
+    if(FAIL == H5D__encode_layout(dset->shared->layout, NULL, &layout_size))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+
+    /* for the dataset ID */
     buf_size = sizeof(int32_t) + 
-        1 + H5V_limit_enc_size((uint64_t)eoa) + 
+        1 + H5V_limit_enc_size((uint64_t)eoa) +
+        1 + H5V_limit_enc_size((uint64_t)dcpl_size) + dcpl_size +
+        1 + H5V_limit_enc_size((uint64_t)space_size) + space_size + 
         1 + H5V_limit_enc_size((uint64_t)layout_size) + layout_size;
 
     /* allocate the buffer for encoding the parameters */
@@ -1801,6 +1831,24 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
     INT32ENCODE(p1, ret_value);
     UINT64ENCODE_VARLEN(p1, eoa);
 
+    /* encode the plist size */
+    UINT64ENCODE_VARLEN(p1, dcpl_size);
+    /* encode property lists if they are not default*/
+    if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
+        if((ret_value = H5P__encode(dcpl, FALSE, p1, &dcpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+        p1 += dcpl_size;
+    }
+
+    /* encode the dataspace size */
+    UINT64ENCODE_VARLEN(p1, space_size);
+    if(space_size) {
+        /* encode datatspace */
+        if((ret_value = H5S_encode(dset->shared->space, p1, &space_size)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+        p1 += space_size;
+    }
+
     /* encode the layout size */
     UINT64ENCODE_VARLEN(p1, layout_size);
     if(layout_size) {
@@ -1809,6 +1857,7 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
         p1 += layout_size;
     }
+
 done:
     if(SUCCEED == ret_value) {
         /* Send the dataset id & metadata to the client */
@@ -1823,38 +1872,128 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
     }
     H5MM_xfree(send_buf);
+    H5MM_xfree(size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5MD__dataset_set_extent_func */
 
 /*-------------------------------------------------------------------------
-* Function:	H5MD__dataset_get_func
+* Function:	H5MD__dataset_refresh_func
 *------------------------------------------------------------------------- */
 static herr_t
-H5MD__dataset_get_func(uint8_t *p, int UNUSED source)
+H5MD__dataset_refresh_func(uint8_t *p, int UNUSED source)
 {
-    H5VL_dataset_get_t get_type = -1;
+    hid_t dset_id = FAIL; /* dset id */
+    H5D_t *dset = NULL; /* New dataset's info */
+    int client_version = -1;
+    int need_to_refresh = -1;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    get_type = (H5VL_dataset_get_t)*p++;
+    /* decode the dset id */
+    INT32DECODE(p, dset_id);
 
-    switch(get_type) {
-        case H5VL_DATASET_GET_SPACE:
-        case H5VL_DATASET_GET_SPACE_STATUS:
-        case H5VL_DATASET_GET_TYPE:
-        case H5VL_DATASET_GET_DCPL:
-        case H5VL_DATASET_GET_DAPL:
-        case H5VL_DATASET_GET_STORAGE_SIZE:
-        case H5VL_DATASET_GET_OFFSET:
-        default:
-            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset");
+    /* decode the version number */
+    INT32DECODE(p, client_version);
+
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a dataset");
+
+    if(dset->shared->current_version == client_version) {
+        need_to_refresh = 0;
+        if(MPI_SUCCESS != MPI_Send(&need_to_refresh, sizeof(int), MPI_BYTE, source, 
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
+    else {
+        size_t dcpl_size = 0, space_size = 0, layout_size = 0;
+        H5P_genplist_t *dcpl;
+        size_t buf_size = 0;
+        void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
+        uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+
+        need_to_refresh = 1;
+
+        /* START Encode metadata of the dataset and send them to the client */
+        /* determine the size of the dcpl if it is not default */
+        if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
+            if(NULL == (dcpl = (H5P_genplist_t *)H5I_object_verify(dset->shared->dcpl_id, 
+                                                                   H5I_GENPROP_LST)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+            if((ret_value = H5P__encode(dcpl, FALSE, NULL, &dcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+        }
+
+        if(NULL != dset->shared->space) {
+            /* get Dataspace size to encode */
+            if((ret_value = H5S_encode(dset->shared->space, NULL, &space_size)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode dataspace");
+        }
+
+        /* determine the buffer size needed to store the encoded layout of the dataset */ 
+        if(FAIL == H5D__encode_layout(dset->shared->layout, NULL, &layout_size))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+
+        buf_size = 2 * sizeof(int) +
+            1 + H5V_limit_enc_size((uint64_t)dcpl_size) + dcpl_size +
+            1 + H5V_limit_enc_size((uint64_t)space_size) + space_size + 
+            1 + H5V_limit_enc_size((uint64_t)layout_size) + layout_size;
+
+        /* allocate the buffer for encoding the parameters */
+        if(NULL == (send_buf = H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+
+        p1 = (uint8_t *)send_buf;
+
+        /* encode a flag to refresh and the current version number*/
+        INT32ENCODE(p1, need_to_refresh);
+        INT32ENCODE(p1, dset->shared->current_version);
+
+        /* encode the plist size */
+        UINT64ENCODE_VARLEN(p1, dcpl_size);
+        /* encode property lists if they are not default*/
+        if(H5P_DATASET_CREATE_DEFAULT != dset->shared->dcpl_id) {
+            if((ret_value = H5P__encode(dcpl, FALSE, p1, &dcpl_size)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+            p1 += dcpl_size;
+        }
+
+        /* encode the dataspace size */
+        UINT64ENCODE_VARLEN(p1, space_size);
+        if(space_size) {
+            /* encode datatspace */
+            if((ret_value = H5S_encode(dset->shared->space, p1, &space_size)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+            p1 += space_size;
+        }
+
+        /* encode the layout size */
+        UINT64ENCODE_VARLEN(p1, layout_size);
+        if(layout_size) {
+            /* encode layout of the dataset */ 
+            if(FAIL == H5D__encode_layout(dset->shared->layout, p1, &layout_size))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset layout");
+            p1 += layout_size;
+        }
+
+        /* Send the dataset id & metadata to the client */
+        if(MPI_SUCCESS != MPI_Send(send_buf, (int)buf_size, MPI_BYTE, source, 
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+
+        H5MM_xfree(send_buf);
     }
 
 done:
+    if(SUCCEED != ret_value) {
+        /* Send failed to the client */
+        if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
+                                   H5MD_RETURN_TAG, MPI_COMM_WORLD))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
+    }
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5MD__dataset_get_func */
+} /* H5MD__dataset_refresh_func */
 
 /*-------------------------------------------------------------------------
 * Function:	H5MD__dataset_close_func
