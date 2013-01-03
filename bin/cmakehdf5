@@ -70,6 +70,9 @@ set (REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
 # -- Standard build options  
 set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
+# Use multiple CPU cores to build
+SET (CTEST_BUILD_FLAGS "-j4")
+
 # -----------------------------------------------------------  
 # -- Get environment
 # -----------------------------------------------------------  
@@ -86,7 +89,6 @@ set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_A
   getuname (osname -s)
   getuname (osrel  -r)
   getuname (cpu    -m)
-  message ("Dashboard script uname output: ${osname}-${osrel}-${cpu}\n")
 
   if (SITE_BUILDNAME_SUFFIX)
     set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}-${SITE_BUILDNAME_SUFFIX}")
@@ -101,6 +103,13 @@ set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME
 # MAC machines need special option
 #-----------------------------------------------------------------------------
 if (APPLE)
+  # Compiler choice
+  execute_process(COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
+  SET(ENV{CC} "${XCODE_CC}")
+  SET(ENV{CXX} "${XCODE_CXX}")
+  # Shared fortran is not supported, build static 
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
   set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif (APPLE)
 
@@ -150,11 +159,8 @@ foreach (v
     CTEST_BINARY_DIRECTORY
     CTEST_CMAKE_GENERATOR
     CTEST_BUILD_CONFIGURATION
-    CTEST_GIT_COMMAND
-    CTEST_CHECKOUT_COMMAND
     CTEST_CONFIGURE_COMMAND
     CTEST_SCRIPT_DIRECTORY
-    CTEST_USE_LAUNCHERS
     )
   set (vars "${vars}  ${v}=[${${v}}]\n")
 endforeach (v)
@@ -165,6 +171,7 @@ if (NOT LOCAL_SKIP_UPDATE)
   CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
 endif (NOT LOCAL_SKIP_UPDATE)
 CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
+message ("Configure DONE")
 CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
 if (NOT LOCAL_NO_SUBMIT)
   CTEST_SUBMIT (PARTS Update Configure Notes)
@@ -173,11 +180,13 @@ CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
 if (NOT LOCAL_NO_SUBMIT)
   CTEST_SUBMIT (PARTS Build)
 endif (NOT LOCAL_NO_SUBMIT)
+message ("build DONE")
 if (NOT LOCAL_SKIP_TEST)
   CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
   if (NOT LOCAL_NO_SUBMIT)
     CTEST_SUBMIT (PARTS Test)
   endif (NOT LOCAL_NO_SUBMIT)
+  message ("test DONE")
 endif (NOT LOCAL_SKIP_TEST)
 
 message ("DONE")
