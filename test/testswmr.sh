@@ -76,6 +76,33 @@ do
     do
         echo
         echo "###############################################################################"
+        echo "## Generator test"
+        echo "###############################################################################"
+        # Launch the Generator without SWMR_WRITE
+        echo launch the swmr_generator
+        ./swmr_generator $compress $index_type
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Launch the Generator with SWMR_WRITE
+        echo launch the swmr_generator with SWMR_WRITE
+        ./swmr_generator -s $compress $index_type
+        if test $? -ne 0; then
+            echo generator had error
+            nerrors=`expr $nerrors + 1`
+        fi
+
+        # Check for error and exit if one occured
+        $DPRINT nerrors=$nerrors
+        if test $nerrors -ne 0 ; then
+            echo "SWMR tests failed with $nerrors errors."
+            exit 1
+        fi
+
+        echo
+        echo "###############################################################################"
         echo "## Writer test - test expanding the dataset"
         echo "###############################################################################"
 

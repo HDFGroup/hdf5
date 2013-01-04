@@ -42,8 +42,9 @@
 /* Local Prototypes */
 /********************/
 
-static int gen_skeleton(const char *filename, unsigned verbose, int comp_level,
-    const char *index_type, unsigned random_seed);
+static int gen_skeleton(const char *filename, unsigned verbose,
+    unsigned swmr_write, int comp_level, const char *index_type,
+    unsigned random_seed);
 static void usage(void);
 
 
@@ -76,8 +77,8 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static int
-gen_skeleton(const char *filename, unsigned verbose, int comp_level,
-    const char *index_type, unsigned random_seed)
+gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
+    int comp_level, const char *index_type, unsigned random_seed)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fcpl;         /* File creation property list */
@@ -145,7 +146,7 @@ gen_skeleton(const char *filename, unsigned verbose, int comp_level,
         fprintf(stderr, "Creating file\n");
 
     /* Create the file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr_write ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl)) < 0)
         return -1;
 
     /* Close file creation property list */
@@ -234,8 +235,8 @@ usage(void)
     printf("\n");
     printf("Usage error!\n");
     printf("\n");
-    printf("Usage: swmr_generator [-q] [-c <deflate compression level>] [-i <index type>]\n");
-    printf("    [-r <random seed>]\n");
+    printf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
+    printf("    [-i <index type>] [-r <random seed>]\n");
     printf("\n");
     printf("NOTE: The random seed option is only used by the sparse test.  Other\n");
     printf("      tests specify the random seed as a reader/writer option.\n");
@@ -244,8 +245,9 @@ usage(void)
     printf("\n");
     printf("<index type> should be b1, b2, fa, or ea (fa not yet implemented)\n");
     printf("\n");
-    printf("Defaults to verbose (no '-q' given), no compression ('-c -1'), v1 b-tree\n");
-    printf("indexing (-i b1), and will generate a random seed (no -r given).\n");
+    printf("Defaults to verbose (no '-q' given), no SWMR_WRITE mode (no '-s' given) no\n");
+    printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
+    printf("seed (no -r given).\n");
     printf("\n");
     exit(1);
 } /* end usage() */
@@ -254,6 +256,7 @@ int main(int argc, const char *argv[])
 {
     int comp_level = -1;            /* Compression level (-1 is no compression) */
     unsigned verbose = 1;           /* Whether to emit some informational messages */
+    unsigned swmr_write = 0;        /* Whether to create file with SWMR_WRITE access */
     const char *index_type = "b1";  /* Chunk index type */
     unsigned use_seed = 0;          /* Set to 1 if a seed was set on the command line */
     unsigned random_seed = 0;       /* Random # seed */
@@ -301,6 +304,12 @@ int main(int argc, const char *argv[])
                         u++;
                         break;
 
+                    /* Run with SWMR_WRITE */
+                    case 's':
+                        swmr_write = 1;
+                        u++;
+                        break;
+
                     default:
                         usage();
                         break;
@@ -312,8 +321,9 @@ int main(int argc, const char *argv[])
     /* Emit informational message */
     if(verbose) {
         fprintf(stderr, "Parameters:\n");
+        fprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
         fprintf(stderr, "\tcompression level = %d\n", comp_level);
-        fprintf(stderr, "\tindex_type = %s\n", index_type);
+        fprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
     
     /* Set the random seed */
@@ -331,7 +341,7 @@ int main(int argc, const char *argv[])
         fprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
 
     /* Generate file skeleton */
-    if(gen_skeleton(FILENAME, verbose, comp_level, index_type, random_seed) < 0) {
+    if(gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
         fprintf(stderr, "Error generating skeleton file!\n");
         exit(1);
     } /* end if */
