@@ -109,6 +109,11 @@ IF (NOT TEST_SKIP_COMPARE)
   ENDIF (WIN32 AND NOT MINGW)
 
   # now compare the output with the reference
+  EXECUTE_PROCESS (
+      COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+      RESULT_VARIABLE TEST_RESULT
+  )
+  IF (NOT ${TEST_RESULT} STREQUAL 0)
   SET (TEST_RESULT 0)
   FILE (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
   LIST (LENGTH test_act len_act)
@@ -130,6 +135,7 @@ IF (NOT TEST_SKIP_COMPARE)
   IF (NOT ${len_act} STREQUAL ${len_ref})
     SET (TEST_RESULT 1)
   ENDIF (NOT ${len_act} STREQUAL ${len_ref})
+  ENDIF (NOT ${TEST_RESULT} STREQUAL 0)
 
   MESSAGE (STATUS "COMPARE Result: ${TEST_RESULT}")
 
@@ -145,6 +151,11 @@ IF (NOT TEST_SKIP_COMPARE)
     ENDIF (WIN32 AND NOT MINGW)
 
     # now compare the error output with the error reference
+    EXECUTE_PROCESS (
+        COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT}.err ${TEST_FOLDER}/${TEST_ERRREF}
+        RESULT_VARIABLE TEST_RESULT
+    )
+    IF (NOT ${TEST_RESULT} STREQUAL 0)
     SET (TEST_RESULT 0)
     FILE (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT}.err test_act)
     LIST (LENGTH test_act len_act)
@@ -167,6 +178,7 @@ IF (NOT TEST_SKIP_COMPARE)
     IF (NOT ${len_act} STREQUAL ${len_ref})
       SET (TEST_RESULT 1)
     ENDIF (NOT ${len_act} STREQUAL ${len_ref})
+    ENDIF (NOT ${TEST_RESULT} STREQUAL 0)
 
     MESSAGE (STATUS "COMPARE Result: ${TEST_RESULT}")
 
