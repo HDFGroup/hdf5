@@ -116,7 +116,13 @@ Bug Fixes since HDF5-1.8.10
 ===========================
     Library
     -------
-    - None
+    - The library now behaves correctly when performing large I/O operations on
+      Mac OS-X.  Previously, single I/O operations > 2 GB would fail since the
+      Darwin read/write calls cannot handle the number of bytes that their
+      parameter types imply.
+      Fixes HDFFV-7975 and HDFFV-8240 (DER - 07 JAN 2013)
+    - Fixed a bug in the core VFD that cause failures when opening files > 2 GB.
+      Fixes HDFFV-8124 and HDFFV-8158 (DER - 07 JAN 2013)
 
     Tools
     -----
