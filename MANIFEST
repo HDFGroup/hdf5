@@ -46,6 +46,7 @@
 ./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
 ./bin/chkcopyright      _DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
+./bin/cmakehdf5
 ./bin/compile
 ./bin/config.guess
 ./bin/config.sub
@@ -121,6 +122,15 @@
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
+./examples/h5_crtgrpd.c
+./examples/h5_subset.c
+./examples/h5_cmprss.c
+./examples/h5_rdwt.c
+./examples/h5_crtgrpar.c
+./examples/h5_extend.c
+./examples/h5_crtatt.c
+./examples/h5_crtgrp.c
+./examples/h5_crtdat.c
 ./examples/h5_drivers.c
 ./examples/h5_dtransform.c
 ./examples/h5_elink_unix2win.c
@@ -238,22 +248,24 @@
 
 ./fortran/examples/Makefile.am
 ./fortran/examples/Makefile.in
-./fortran/examples/attrexample.f90
 ./fortran/examples/compound.f90
 ./fortran/examples/compound_fortran2003.f90
 ./fortran/examples/compound_complex_fortran2003.f90
-./fortran/examples/dsetexample.f90
-./fortran/examples/fileexample.f90
-./fortran/examples/groupexample.f90
-./fortran/examples/grpdsetexample.f90
-./fortran/examples/grpsexample.f90
+./fortran/examples/h5_cmprss.f90
+./fortran/examples/h5_crtatt.f90
+./fortran/examples/h5_crtdat.f90
+./fortran/examples/h5_crtgrp.f90
+./fortran/examples/h5_crtgrpar.f90
+./fortran/examples/h5_crtgrpd.f90
+./fortran/examples/h5_extend.f90
+./fortran/examples/h5_rdwt.f90
+./fortran/examples/h5_subset.f90
 ./fortran/examples/hyperslab.f90
 ./fortran/examples/mountexample.f90
 ./fortran/examples/ph5example.f90
 ./fortran/examples/refobjexample.f90
 ./fortran/examples/refregexample.f90
 ./fortran/examples/run-fortran-ex.sh.in
-./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
 ./fortran/examples/testh5fc.sh.in
 ./fortran/examples/nested_derived_type.f90
@@ -1072,8 +1084,8 @@
 ./test/tvltypes.c
 ./test/unlink.c
 ./test/vfd.c
-./test/test_filters_le.hdf5
-./test/test_filters_be.hdf5
+./test/test_filters_le.h5
+./test/test_filters_be.h5
 ./test/gen_filters.c
 ./test/chunk_info.c
 
@@ -2142,7 +2154,6 @@
 ./hl/examples/image8.txt
 ./hl/examples/pal_rgb.h
 ./hl/examples/ptExampleFL.c
-./hl/examples/ptExampleVL.c
 ./hl/examples/run-hl-ex.sh
 ./hl/examples/run-hlc-ex.sh.in
 ./hl/src/COPYING
@@ -2200,9 +2211,9 @@
 ./hl/test/test_table.c
 ./hl/test/test_ds_le.h5
 ./hl/test/test_ds_be.h5
-./hl/test/test_table_le.hdf5
-./hl/test/test_table_be.hdf5
-./hl/test/test_table_cray.hdf5
+./hl/test/test_table_le.h5
+./hl/test/test_table_be.h5
+./hl/test/test_table_cray.h5
 ./hl/test/usa.wri
 
 # tools
@@ -2260,7 +2271,6 @@
 ./hl/c++/examples/Makefile.am
 ./hl/c++/examples/Makefile.in
 ./hl/c++/examples/ptExampleFL.cpp
-./hl/c++/examples/ptExampleVL.cpp
 ./hl/c++/examples/run-hlc++-ex.sh.in
 ./hl/c++/src/H5PacketTable.h
 ./hl/c++/src/H5PacketTable.cpp

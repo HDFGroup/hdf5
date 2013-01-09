@@ -14,7 +14,7 @@ INCLUDE (${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
 INCLUDE (${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
 
 #-----------------------------------------------------------------------------
-# Always SET this for now IF we are on an OS X box
+# APPLE/Darwin setup
 #-----------------------------------------------------------------------------
 IF (APPLE)
   LIST(LENGTH CMAKE_OSX_ARCHITECTURES ARCH_LENGTH)
@@ -27,6 +27,11 @@ IF (APPLE)
   ENDIF()
   SET (H5_AC_APPLE_UNIVERSAL_BUILD 0)
 ENDIF (APPLE)
+
+# Check for Darwin (not just Apple - we also want to catch OpenDarwin)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") 
+    SET (H5_HAVE_DARWIN 1) 
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 #-----------------------------------------------------------------------------
 # Option to Clear File Buffers before write --enable-clear-file-buffers

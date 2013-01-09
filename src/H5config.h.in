@@ -74,6 +74,9 @@
 /* Define if the function stack tracing code is to be compiled in */
 #undef HAVE_CODESTACK
 
+/* Define if Darwin or Mac OS X */
+#undef HAVE_DARWIN
+
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 #undef HAVE_DECL_TZNAME

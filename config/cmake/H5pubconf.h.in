@@ -111,6 +111,9 @@
 /* Define if the function stack tracing code is to be compiled in */
 #cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
 
+/* Define if Darwin or Mac OS X */
+#cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
+
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 #cmakedefine H5_HAVE_DECL_TZNAME @H5_HAVE_DECL_TZNAME@
