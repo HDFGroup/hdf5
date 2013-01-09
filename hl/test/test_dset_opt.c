@@ -1115,7 +1115,9 @@ int main( void )
         goto error;
 
     /* Test direct chunk write */
+#ifdef H5_HAVE_FILTER_DEFLATE
     nerrors += test_direct_chunk_write(file_id);
+#endif /* H5_HAVE_FILTER_DEFLATE */
     nerrors += test_skip_compress_write1(file_id);
     nerrors += test_skip_compress_write2(file_id);
     nerrors += test_data_conv(file_id);
