@@ -18,8 +18,14 @@
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5DOpublic.h"
-#include <zlib.h>
 #include <math.h>
+
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
+# define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+# include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 
 #define FILE_NAME "test_dectris.h5"
 
