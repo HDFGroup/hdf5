@@ -20,7 +20,6 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-#include <zlib.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +28,17 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+
  
+#ifdef H5_HAVE_FILTER_DEFLATE
+
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
+# define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+# include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
+
 const char *FILENAME[] = {
     "dectris_perf",
     "unix.raw",
@@ -637,3 +646,12 @@ main (void)
     h5_cleanup(FILENAME, fapl);
     return 0;
 }
+#else
+int
+main (void)
+{
+    printf("Skipped because DEFLATE filter is disabled");
+    return 0;
+}
+#endif /* H5_HAVE_FILTER_DEFLATE */
+

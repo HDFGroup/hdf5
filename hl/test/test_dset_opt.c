@@ -90,6 +90,7 @@ const H5Z_class2_t H5Z_BOGUS2[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+#ifdef H5_HAVE_FILTER_DEFLATE
 static int
 test_direct_chunk_write (hid_t file)
 {
@@ -332,6 +333,7 @@ error:
 
     return 1;
 }
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
 /*-------------------------------------------------------------------------
  * Function:	test_skip_compress_write1
@@ -499,7 +501,7 @@ filter_bogus1(unsigned int flags, size_t UNUSED cd_nelmts,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
+    ssize_t buf_left=*buf_size;  /* Amount of data buffer left to process */
 
     if(flags & H5Z_FLAG_REVERSE) { /* read */
         /* Substract the "add on" value to all the data values */
@@ -536,7 +538,7 @@ filter_bogus2(unsigned int flags, size_t UNUSED cd_nelmts,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
+    ssize_t buf_left=*buf_size;  /* Amount of data buffer left to process */
 
     if(flags & H5Z_FLAG_REVERSE) { /* read */
         /* Substract the "add on" value to all the data values */
@@ -948,7 +950,6 @@ test_invalid_parameters(hid_t file)
 
     unsigned    filter_mask = 0;
     int         direct_buf[CHUNK_NX][CHUNK_NY];
-    int         check_chunk[CHUNK_NX][CHUNK_NY];
     hsize_t     offset[2] = {0, 0};
     size_t      buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
     int         aggression = 9;     /* Compression aggression setting */

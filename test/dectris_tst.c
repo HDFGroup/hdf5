@@ -19,9 +19,17 @@
  */
 
 #include "h5test.h"
-#include <zlib.h>
 #include <math.h>
 #include <stdlib.h>
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+
+#if defined(H5_HAVE_ZLIB_H) && !defined(H5_ZLIB_HEADER) 
+# define H5_ZLIB_HEADER "zlib.h"
+#endif
+#if defined(H5_ZLIB_HEADER)
+# include H5_ZLIB_HEADER /* "zlib.h" */
+#endif
 
 const char *FILENAME[] = {
     "dectris",
@@ -308,3 +316,11 @@ error:
 
     return 1;
 }
+#else
+int
+main(void)
+{
+    TESTING("Skipped because DEFLATE filter is disabled");
+    return 0;
+}
+#endif /* H5_HAVE_FILTER_DEFLATE */
