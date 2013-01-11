@@ -52,12 +52,12 @@ if BUILD_PARALLEL_CONDITIONAL
     TEST_PROG_PARA=h5perf perf
 endif
 # Serial test programs.
-TEST_PROG = dectris_perf iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
+TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
 
 # check_PROGRAMS will be built but not installed.  Do not any executable
 # that is in bin_PROGRAMS already. Otherwise, it will be removed twice in
 # "make clean" and some systems, e.g., AIX, do not like it.
-check_PROGRAMS= dectris_perf iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS) perf
+check_PROGRAMS= iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS) perf
 
 h5perf_SOURCES=pio_perf.c pio_engine.c pio_timer.c
 h5perf_serial_SOURCES=sio_perf.c sio_engine.c sio_timer.c
@@ -72,7 +72,6 @@ LDADD=$(LIBHDF5)
 h5perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 h5perf_serial_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_LDADD=$(LIBH5TEST) $(LIBHDF5)
-dectris_perf_LDADD=$(LIBH5TEST) $(LIBHDF5)
 iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_meta_LDADD=$(LIBH5TEST) $(LIBHDF5)

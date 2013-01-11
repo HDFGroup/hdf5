@@ -285,7 +285,7 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_direct_write
  *
- * Purpose:	Internal routine for H5PSIdirect_write to write a chunk 
+ * Purpose:	Internal routine to write a chunk 
  *              directly into the file.
  *
  * Return:	Non-negative on success/Negative on failure
