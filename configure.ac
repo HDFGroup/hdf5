@@ -16,7 +16,7 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_REVISION($Id: configure.ac 23142 2013-01-08 02:19:17Z derobins $)
+AC_REVISION($Id: configure.ac 22697 2012-08-19 14:35:47Z hdftest $)
 AC_PREREQ([2.69])
 
 ## AC_INIT takes the name of the package, the version number, and an
@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.8.11-snap7], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.140], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -2238,12 +2238,19 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
                [hdf5_cv_lone_colon],
                [
   echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
-  $CC $CFLAGS conftest.c -o a.out> /dev/null 2> /dev/null
-  echo "./a.out :" > conftest.sh
+  $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
+case "`uname`" in
+  CYGWIN*)
+    echo "./a.exe :" > conftest.sh
+    ;;
+  *)
+    echo "./a.out :" > conftest.sh
+    ;;
+esac
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
-  rm -f a.out
+  rm -f a.out a.exe
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then
