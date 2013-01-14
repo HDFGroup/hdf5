@@ -1133,7 +1133,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                     }
                     for (i = 0; i < size && (s[i] || pad != H5T_STR_NULLTERM); i++) {
                         HDmemcpy(&tempuchar, &s[i], sizeof(unsigned char));
-                        if (1 != HDfwrite(&tempuchar, size, 1, stream))
+                        if (1 != HDfwrite(&tempuchar, sizeof(unsigned char), 1, stream))
                             H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
                     } /* i */
                 } /* for (block_index = 0; block_index < block_nelmts; block_index++) */
