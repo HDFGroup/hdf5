@@ -281,6 +281,108 @@ H5FL_DEFINE(H5D_chunk_info_t);
 /* Declare a free list to manage the chunk sequence information */
 H5FL_BLK_DEFINE_STATIC(chunk);
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__chunk_direct_write
+ *
+ * Purpose:	Internal routine to write a chunk 
+ *              directly into the file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              30 July 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, hsize_t *offset, 
+         size_t data_size, const void *buf)
+{
+    const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */
+    H5D_chunk_ud_t udata;   /* User data for querying chunk info */
+    hsize_t chunk_idx;
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    const H5D_rdcc_t       *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
+    int         space_ndims;    /* Dataset's space rank */
+    hsize_t     space_dim[H5O_LAYOUT_NDIMS];    /* Dataset's dataspace dimensions */
+    H5FD_t *lf; 
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
+
+    /* Allocate data space and initialize it if it hasn't been. */
+    if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
+ 	/* Allocate storage */
+        if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+    } /* end if */
+
+
+    /* Retrieve the dataset dimensions */
+    if((space_ndims = H5S_get_simple_extent_dims(dset->shared->space, space_dim, NULL)) < 0)
+         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple dataspace info")
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index((unsigned)space_ndims, offset,
+	layout->u.chunk.dim, layout->u.chunk.down_chunks, &chunk_idx) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get chunk index")
+
+    /* Find out the file address of the chunk */
+    if(H5D__chunk_lookup(dset, dxpl_id, offset, chunk_idx,
+	    &udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
+
+    udata.filter_mask = filters;
+
+    /* Check if the chunk needs to be 'inserted' (could exist already and
+     *      the 'insert' operation could resize it)
+     */
+    {
+	H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+
+	/* Compose chunked index info struct */
+	idx_info.f = dset->oloc.file;
+	idx_info.dxpl_id = dxpl_id;
+	idx_info.pline = &(dset->shared->dcpl_cache.pline);
+	idx_info.layout = &(dset->shared->layout.u.chunk);
+	idx_info.storage = &(dset->shared->layout.storage.u.chunk);
+
+	/* Set up the size of chunk for user data */
+	udata.nbytes = data_size;
+
+        /* Create the chunk it if it doesn't exist, or reallocate the chunk
+         *  if its size changed.
+         */
+	if((dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert/resize chunk")
+
+	/* Make sure the address of the chunk is returned. */
+	if(!H5F_addr_defined(udata.addr))
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined")
+    } /* end if */
+
+    /* Fill the DXPL cache values for later use */
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+    /* Evict the entry from the cache if present, but do not flush
+     * it to disk */
+    if(UINT_MAX != udata.idx_hint) {
+        if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache,
+	    rdcc->slot[udata.idx_hint], FALSE) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
+    } /* end if */
+
+    /* Write the data to the file */
+    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, data_size, dxpl_id, buf) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
+
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+}
 
 
 /*-------------------------------------------------------------------------

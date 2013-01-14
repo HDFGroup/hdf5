@@ -174,5 +174,8 @@ H5_DLL herr_t H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_ad
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, unsigned ndims);
 
+H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, 
+         hsize_t *offset, size_t data_size, const void *buf);
+
 #endif /* _H5Dprivate_H */
 

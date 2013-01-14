@@ -2157,6 +2157,9 @@
 ./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
+./hl/src/H5DO.c
+./hl/src/H5DOprivate.h
+./hl/src/H5DOpublic.h
 ./hl/src/H5DS.c
 ./hl/src/H5DSprivate.h
 ./hl/src/H5DSpublic.h
@@ -2195,8 +2198,10 @@
 ./hl/test/image24plane.txt
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
+./hl/test/dectris_hl_perf.c
 ./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
+./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c

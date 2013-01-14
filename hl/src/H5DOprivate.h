@@ -13,21 +13,25 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * This is the main public HDF5 High Level include file.  Put further
- * information in a particular header file and include that here, don't
- * fill this file with lots of gunk...
+#ifndef _H5DOprivate_H
+#define _H5DOprivate_H
+
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
+
+/* public LT prototypes			*/
+#include "H5DOpublic.h"
+
+/*-------------------------------------------------------------------------
+ * Private functions
+ *-------------------------------------------------------------------------
  */
 
-#ifndef _HDF5_HL_H
-#define _HDF5_HL_H
+H5_HLDLL herr_t H5DO_write_chunk(hid_t dset_id, 
+			hid_t dxpl_id, 
+			uint32_t filters, 
+			const hsize_t *offset, 
+         		size_t data_size, 
+			const void *buf);
 
-#include "H5DOpublic.h" /* dataset optimization */
-#include "H5DSpublic.h" /* dimension scales */
-#include "H5LTpublic.h" /* lite */
-#include "H5IMpublic.h" /* image */
-#include "H5TBpublic.h" /* table */
-#include "H5PTpublic.h" /* table */
-
-#endif /*H5_INCLUDE_HL*/
-
+#endif
