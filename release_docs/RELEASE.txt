@@ -41,6 +41,7 @@ New Features
 
     Configuration:
     -------------
+    - CMake minimum is now 2.8.10. (ADB 2013/1/14)
     - Fixed AIX Fortran compiler flags to use appropriate settings for
       debugging, profiling, optimization situations. HDFFV-8069. (AKC
       2012/09/27)

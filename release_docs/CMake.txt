@@ -39,7 +39,7 @@ Notes: This short instruction is written for users who want to quickly build
 ========================================================================                          
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8.x product requires CMake version 2.8.6.                     
+      web site. The HDF5 1.8.x product requires CMake version 2.8.10.                     
                                                                          
    2. If you plan to use Zlib or Szip;
       A. Download the packages and install them
@@ -61,6 +61,15 @@ Notes: This short instruction is written for users who want to quickly build
          where "some_location" is the URL or full path to the compressed file and 
          ext is the type of compression file.
                                     
+   3. Building on Apple Darwin platforms should add the following options:
+         Compiler choice - use xcode by setting the ENV variables of CC and CXX
+         Shared fortran is not supported, build static:
+            BUILD_SHARED_LIBS:BOOL=OFF
+         Additional options:
+            CMAKE_ANSI_CFLAGS:STRING=-fPIC
+            CTEST_USE_LAUNCHERS:BOOL=ON
+            CMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF         
+   
                                                                          
 ========================================================================
           Building HDF5 C/C++ Libraries with CMake
