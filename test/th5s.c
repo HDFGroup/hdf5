@@ -725,8 +725,8 @@ test_h5s_zero_dim(void)
         ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
         CHECK(ret, FAIL, "H5Pset_chunk");
 
-        // ret = H5Pset_alloc_time(plist_id, alloc_time);
-        // CHECK(ret, FAIL, "H5Pset_alloc_time");
+        /* ret = H5Pset_alloc_time(plist_id, alloc_time); */
+        /* CHECK(ret, FAIL, "H5Pset_alloc_time"); */
 
         dset1 = H5Dcreate2(fid1, BASICDATASET1, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
         CHECK(dset1, FAIL, "H5Dcreate2");
