@@ -1361,6 +1361,7 @@
 ./tools/testfiles/tall-4s.ddl
 ./tools/testfiles/tall-5s.ddl
 ./tools/testfiles/tall-6.ddl
+./tools/testfiles/tall-6.exp
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
@@ -1479,12 +1480,17 @@
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tnestedcmpddt.ddl
 ./tools/testfiles/tnestedcmpddt.h5
+./tools/testfiles/tnoddl.ddl
+./tools/testfiles/tnoddlfile.ddl
+./tools/testfiles/tnoddlfile.exp
 ./tools/testfiles/tno-subset.h5
 ./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/topaque.h5
+./tools/testfiles/trawdatafile.ddl
+./tools/testfiles/trawdatafile.exp
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
@@ -1574,6 +1580,9 @@
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
 ./tools/testfiles/twidedisplay.ddl
+./tools/testfiles/twithddl.ddl
+./tools/testfiles/twithddlfile.ddl
+./tools/testfiles/twithddlfile.exp
 
 # h5dump test error files
 ./tools/h5dump/errfiles/filter_fail.err
