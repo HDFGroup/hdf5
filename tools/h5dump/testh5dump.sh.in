@@ -755,10 +755,10 @@ COPY_TESTFILES_TO_TESTDIR
 #TOOLTEST h5dump-help.txt -h
 
 # test data output redirection
-TOOLTEST tnoddl.ddl --enable-error-stack --redirect-metadata=NULL -y packedbits.h5
-TOOLTEST2 trawdatafile.exp --enable-error-stack -y -o trawdatafile.txt packedbits.h5
-TOOLTEST2 tnoddlfile.exp --enable-error-stack --redirect-metadata=NULL -y -o tnoddlfile.txt packedbits.h5
-TOOLTEST2A twithddlfile.exp twithddl.ddl --enable-error-stack --redirect-metadata=twithddl.txt -y -o twithddlfile.txt packedbits.h5
+#TOOLTEST tnoddl.ddl --enable-error-stack --redirect-metadata=NULL -y packedbits.h5
+#TOOLTEST2 trawdatafile.exp --enable-error-stack -y -o trawdatafile.txt packedbits.h5
+#TOOLTEST2 tnoddlfile.exp --enable-error-stack --redirect-metadata=NULL -y -o tnoddlfile.txt packedbits.h5
+#TOOLTEST2A twithddlfile.exp twithddl.ddl --enable-error-stack --redirect-metadata=twithddl.txt -y -o twithddlfile.txt packedbits.h5
 
 # test for maximum display datasets
 TOOLTEST twidedisplay.ddl --enable-error-stack -w0 packedbits.h5
