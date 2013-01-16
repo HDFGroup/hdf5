@@ -223,6 +223,9 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+# Source in the output filter function definitions.
+. $srcdir/../../bin/output_filter.sh
+
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -232,18 +235,17 @@ TESTING() {
 # non-zero value.
 #
 TOOLTEST() {
-   expect="$srcdir/../testfiles/$1"
-   actual="../testfiles/`basename $1 .ddl`.out"
-   actual_err="../testfiles/`basename $1 .ddl`.err"
+   expect="$TESTDIR/$1"
+   actual="$TESTDIR/`basename $1 .xml`.out"
+   actual_err="$TESTDIR/`basename $1 .xml`.err"
    shift
 
-   # Run test.
-   TESTING $DUMPER $@
-   (
-      cd $srcdir/../testfiles
-      $RUNSERIAL $DUMPER_BIN $@
-   ) >$actual 2>$actual_err
-   cat $actual_err >> $actual
+    # Run test.
+    TESTING $DUMPER $@
+    (
+    cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN "$@"
+    ) >$actual 2>$actual_err
 
 
    if [ ! -f $expect ]; then
@@ -254,7 +256,7 @@ TOOLTEST() {
       echo " PASSED"
    else
       echo "*FAILED*"
-      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      echo "    Expected result (*.xml) differs from actual result (*.out)"
       nerrors="`expr $nerrors + 1`"
       test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
    fi
@@ -277,6 +279,8 @@ SKIP() {
 ###        T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
 # test XML
 TOOLTEST tall.h5.xml --xml tall.h5
