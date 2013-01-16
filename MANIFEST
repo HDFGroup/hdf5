@@ -1511,6 +1511,8 @@
 ./tools/testfiles/tstr.h5
 ./tools/testfiles/tstr2.h5
 ./tools/testfiles/tstr-2.ddl
+./tools/testfiles/tstr2bin2.exp
+./tools/testfiles/tstr2bin6.exp
 ./tools/testfiles/tvldtypes1.ddl
 ./tools/testfiles/tvldtypes1.h5
 ./tools/testfiles/tvldtypes2.ddl
