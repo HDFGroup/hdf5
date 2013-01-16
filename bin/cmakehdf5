@@ -25,16 +25,6 @@ trap "rm -f $cminfile $cfgfile" 0
 # First generate the two needed input files, the $cimnfile and $cfgfile.
 # Then use ctest to use the two input files.
 
-# This works only in Jam for now.
-# Exit if not running in Jam.
-if [ `hostname` != jam ]; then
-    echo This is known to work in Jam for now.
-    echo It may fail in other machines.
-    echo Support for more platforms is coming.
-    echo
-fi
-
-
 #==========
 # create the configure file
 #==========
