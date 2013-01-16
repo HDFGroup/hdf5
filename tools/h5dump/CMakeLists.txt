@@ -176,6 +176,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr-2.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin2.exp
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin6.exp
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstringe.ddl
@@ -1106,6 +1108,8 @@ IF (BUILD_TESTING)
           tstr-1.out.err
           tstr-2.out
           tstr-2.out.err
+          tstr2bin2.txt
+          tstr2bin6.txt
           tstring.out
           tstring.out.err
           tstring2.out
@@ -1426,6 +1430,10 @@ IF (BUILD_TESTING)
 
   # test for binary output
   ADD_H5_TEST (tbin1LE 0 --enable-error-stack -d integer -o out1LE.bin -b LE tbinary.h5)
+
+  # test for string binary output
+  ADD_H5_EXPORT_TEST (tstr2bin2 tstr2.h5 0 --enable-error-stack -d /g2/dset2 -b -o)
+  ADD_H5_EXPORT_TEST (tstr2bin6 tstr2.h5 0 --enable-error-stack -d /g6/dset6 -b -o)
 
   # NATIVE default. the NATIVE test can be validated with h5import/h5diff
   ADD_H5_TEST (tbin1 0 --enable-error-stack -d integer -o out1.bin -b tbinary.h5)

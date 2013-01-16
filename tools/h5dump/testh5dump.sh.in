@@ -297,6 +297,8 @@ $SRC_H5DUMP_TESTFILES/tslink-D.ddl
 $SRC_H5DUMP_TESTFILES/tsplit_file.ddl
 $SRC_H5DUMP_TESTFILES/tstr-1.ddl
 $SRC_H5DUMP_TESTFILES/tstr-2.ddl
+$SRC_H5DUMP_TESTFILES/tstr2bin2.exp
+$SRC_H5DUMP_TESTFILES/tstr2bin6.exp
 $SRC_H5DUMP_TESTFILES/tstring.ddl
 $SRC_H5DUMP_TESTFILES/tstring2.ddl
 $SRC_H5DUMP_TESTFILES/tstringe.ddl
@@ -554,6 +556,45 @@ TOOLTEST2A() {
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actualdata $actual_err $actualmeta
+    fi
+
+}
+
+# same as TOOLTEST2 but only compares the generated data file to the expected data file
+# used for the binary tests that expect a full path in -o with -b
+# ADD_H5_EXPORT_TEST
+TOOLTEST2B() {
+
+    expectdata="$TESTDIR/$1"
+    actualdata="$TESTDIR/`basename $1 .exp`.txt"
+    actual="$TESTDIR/`basename $1 .exp`.out"
+    actual_err="$TESTDIR/`basename $1 .exp`.err"
+    shift
+
+    # Run test.
+    TESTING $DUMPER $@
+    (
+      cd $TESTDIR
+      $RUNSERIAL $DUMPER_BIN "$@"
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    if [ ! -f $expectdata ]; then
+    # Create the expect data file if it doesn't yet exist.
+      echo " CREATED"
+      cp $actualdata $expectdata
+    elif $CMP $expectdata $actualdata; then
+      echo " PASSED"
+    else
+      echo "*FAILED*"
+      echo "    Expected datafile (*.exp) differs from actual datafile (*.txt)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expectdata $actualdata |sed 's/^/    /'
+    fi
+    
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actualdata $actual_err
     fi
 
 }
@@ -866,7 +907,7 @@ TOOLTEST tarray8.ddl --enable-error-stack tarray8.h5
 
 # test for wildcards in filename (does not work with cmake)
 # inconsistent across platforms TOOLTEST3 tstarfile.ddl --enable-error-stack -H -d Dataset1 tarr*.h5
-TOOLTEST4 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
+#TOOLTEST4 tqmarkfile.ddl --enable-error-stack -H -d Dataset1 tarray?.h5
 TOOLTEST tmultifile.ddl --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5
 
 # test for files with empty data
@@ -1007,17 +1048,21 @@ TOOLTEST zerodim.ddl --enable-error-stack zerodim.h5
 TOOLTEST tvms.ddl --enable-error-stack tvms.h5
 
 # test for binary output
-TOOLTEST   tbin1.ddl --enable-error-stack -d integer -o out1.bin -b LE    tbinary.h5
+TOOLTEST tbin1.ddl --enable-error-stack -d integer -o out1.bin -b LE tbinary.h5
+
+# test for string binary output
+TOOLTEST2B tstr2bin2.exp --enable-error-stack -d /g2/dset2 -b -o tstr2bin2.txt tstr2.h5
+TOOLTEST2B tstr2bin6.exp --enable-error-stack -d /g6/dset6 -b -o tstr2bin6.txt tstr2.h5
 
 # NATIVE default. the NATIVE test can be validated with h5import/h5diff
-TOOLTEST   tbin1.ddl --enable-error-stack -d integer -o out1.bin  -b      tbinary.h5
+TOOLTEST   tbin1.ddl --enable-error-stack -d integer -o out1.bin  -b  tbinary.h5
 IMPORTTEST out1.bin -c out3.h5import -o out1.h5
 DIFFTEST   tbinary.h5 out1.h5 /integer /integer
 # Same but use h5dump as input to h5import
 IMPORTTEST out1.bin -c tbin1.ddl -o out1D.h5
 DIFFTEST   tbinary.h5 out1D.h5 /integer /integer
 
-TOOLTEST   tbin2.ddl --enable-error-stack -b BE -d float  -o out2.bin      tbinary.h5
+TOOLTEST   tbin2.ddl --enable-error-stack -b BE -d float  -o out2.bin  tbinary.h5
 
 # the NATIVE test can be validated with h5import/h5diff
 TOOLTEST   tbin3.ddl --enable-error-stack -d integer -o out3.bin -b NATIVE tbinary.h5
