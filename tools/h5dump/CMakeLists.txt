@@ -195,11 +195,11 @@ IF (BUILD_TESTING)
   )
   SET (HDF5_REFERENCE_EXP_FILES
       tall-6.exp
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddlfile.exp
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.exp
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin2.exp
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin6.exp
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.exp
+      tnoddlfile.exp
+      trawdatafile.exp
+      tstr2bin2.exp
+      tstr2bin6.exp
+      twithddlfile.exp
   )
   SET (HDF5_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/charsets.h5
