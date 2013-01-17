@@ -55,7 +55,6 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-4s.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-5s.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-6.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-6.exp
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tallfilters.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1_big.ddl
@@ -143,11 +142,9 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnbit.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddl.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddlfile.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddlfile.exp
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnullspace.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.exp
       ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr2.ddl
@@ -176,8 +173,6 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr-2.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin2.exp
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin6.exp
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstringe.ddl
@@ -195,9 +190,16 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twidedisplay.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddl.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.exp
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
+  )
+  SET (HDF5_REFERENCE_EXP_FILES
+      tall-6.exp
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddlfile.exp
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.exp
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin2.exp
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2bin6.exp
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.exp
   )
   SET (HDF5_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/charsets.h5
@@ -334,6 +336,20 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${tst_h5_file} ${dest}
     )
   ENDFOREACH (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
+  
+  FOREACH (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
+    IF (WIN32 AND NOT CYGWIN)
+      FILE (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
+      FILE (WRITE ${PROJECT_BINARY_DIR}/testfiles/${tst_exp_file} "${TEST_STREAM}")
+    ELSE (WIN32 AND NOT CYGWIN)
+      ADD_CUSTOM_COMMAND (
+          TARGET     h5dump
+          POST_BUILD
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}  ${PROJECT_BINARY_DIR}/testfiles/${tst_exp_file}
+      )
+    ENDIF (WIN32 AND NOT CYGWIN)
+  ENDFOREACH (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
 
   FOREACH (tst_other_file ${HDF5_REFERENCE_FILES})
     GET_FILENAME_COMPONENT(fname "${tst_other_file}" NAME)
@@ -1155,30 +1171,30 @@ IF (BUILD_TESTING)
   ADD_HELP_TEST(help 0 -h)
 
   # test data output redirection
-#  ADD_H5_TEST (tnoddl 0 --enable-error-stack --redirect-ddl=NULL -y packedbits.h5)
-#  ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
-#  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=NULL -y -o)
-#  ADD_TEST (
-#      NAME H5DUMP-clear-twithddlfile-export
-#      COMMAND    ${CMAKE_COMMAND}
-#          -E remove twithddl.txt
-#  )
-#  SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-#  IF (NOT "${last_test}" STREQUAL "")
-#    SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES DEPENDS ${last_test})
-#  ENDIF (NOT "${last_test}" STREQUAL "")
-#  SET (last_test "H5DUMP-clear-twithddlfile-export")
-#  ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=twithddl.txt -y -o)
-#  ADD_TEST (
-#      NAME H5DUMP-output-cmp-meta-twithddlfile
-#      COMMAND ${CMAKE_COMMAND}
-#          -E compare_files twithddl.txt twithddl.ddl
-#  )
-#  SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-#  IF (NOT "${last_test}" STREQUAL "")
-#    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES DEPENDS ${last_test})
-#  ENDIF (NOT "${last_test}" STREQUAL "")
-#  SET (last_test "H5DUMP-output-cmp-meta-twithddlfile")
+  ADD_H5_TEST (tnoddl 0 --enable-error-stack --redirect-ddl=NULL -y packedbits.h5)
+  ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
+  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=NULL -y -o)
+  ADD_TEST (
+      NAME H5DUMP-clear-twithddlfile-export
+      COMMAND    ${CMAKE_COMMAND}
+          -E remove twithddl.txt
+  )
+  SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-clear-twithddlfile-export")
+  ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=twithddl.txt -y -o)
+  ADD_TEST (
+      NAME H5DUMP-output-cmp-meta-twithddlfile
+      COMMAND ${CMAKE_COMMAND}
+          -E compare_files twithddl.txt twithddl.ddl
+  )
+  SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
+  SET (last_test "H5DUMP-output-cmp-meta-twithddlfile")
   
   # test for maximum display datasets
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
