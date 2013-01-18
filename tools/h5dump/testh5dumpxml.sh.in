@@ -51,7 +51,7 @@ SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
 TESTDIR=./testfiles/xml
-test -d $TESTDIR || mkdir $TESTDIR
+test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
 # test files
