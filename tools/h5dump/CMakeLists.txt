@@ -1171,30 +1171,30 @@ IF (BUILD_TESTING)
   ADD_HELP_TEST(help 0 -h)
 
   # test data output redirection
-  ADD_H5_TEST (tnoddl 0 --enable-error-stack --redirect-ddl=NULL -y packedbits.h5)
-  ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
-  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=NULL -y -o)
-  ADD_TEST (
-      NAME H5DUMP-clear-twithddlfile-export
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove twithddl.txt
-  )
-  SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5DUMP-clear-twithddlfile-export")
-  ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=twithddl.txt -y -o)
-  ADD_TEST (
-      NAME H5DUMP-output-cmp-meta-twithddlfile
-      COMMAND ${CMAKE_COMMAND}
-          -E compare_files twithddl.txt twithddl.ddl
-  )
-  SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5DUMP-output-cmp-meta-twithddlfile")
+#  ADD_H5_TEST (tnoddl 0 --enable-error-stack --redirect-ddl=NULL -y packedbits.h5)
+#  ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
+#  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=NULL -y -o)
+#  ADD_TEST (
+#      NAME H5DUMP-clear-twithddlfile-export
+#      COMMAND    ${CMAKE_COMMAND}
+#          -E remove twithddl.txt
+#  )
+#  SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+#  IF (NOT "${last_test}" STREQUAL "")
+#    SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES DEPENDS ${last_test})
+#  ENDIF (NOT "${last_test}" STREQUAL "")
+#  SET (last_test "H5DUMP-clear-twithddlfile-export")
+#  ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=twithddl.txt -y -o)
+#  ADD_TEST (
+#      NAME H5DUMP-output-cmp-meta-twithddlfile
+#      COMMAND ${CMAKE_COMMAND}
+#          -E compare_files twithddl.txt twithddl.ddl
+#  )
+#  SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+#  IF (NOT "${last_test}" STREQUAL "")
+#    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES DEPENDS ${last_test})
+#  ENDIF (NOT "${last_test}" STREQUAL "")
+#  SET (last_test "H5DUMP-output-cmp-meta-twithddlfile")
   
   # test for maximum display datasets
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
