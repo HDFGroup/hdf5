@@ -29,11 +29,6 @@
 #include "H5FDmpi.h"            /* Common MPI file driver		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
-/*
- * The view is set to this value
- */
-char H5FD_mpi_native_g[] = "native";
-
 #ifdef H5_HAVE_PARALLEL
 
 

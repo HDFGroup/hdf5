@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5_TEST)
 
 #-----------------------------------------------------------------------------
@@ -148,8 +148,8 @@ SET (HDF5_REFERENCE_TEST_FILES
     tarrold.h5
     tbad_msg_count.h5
     tbogus.h5
-    test_filters_be.hdf5
-    test_filters_le.hdf5
+    test_filters_be.h5
+    test_filters_le.h5
     th5s.h5
     tlayouto.h5
     tmtimen.h5

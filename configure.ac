@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.135], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.141], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -1278,6 +1278,12 @@ AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
 ## Darwin
 AC_CHECK_HEADERS([mach/mach_time.h])
+## Also need to detect Darwin for pubconf
+case $host_os in
+  darwin*)
+    AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
+  ;;
+esac
 
 ## Windows
 case "`uname`" in
@@ -2232,19 +2238,12 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
                [hdf5_cv_lone_colon],
                [
   echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
-  $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
-case "`uname`" in
-  CYGWIN*)
-    echo "./a.exe :" > conftest.sh
-    ;;
-  *)
-    echo "./a.out :" > conftest.sh
-    ;;
-esac
+  $CC $CFLAGS conftest.c -o a.out> /dev/null 2> /dev/null
+  echo "./a.out :" > conftest.sh
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
-  rm -f a.out a.exe
+  rm -f a.out
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then

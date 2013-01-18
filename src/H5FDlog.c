@@ -14,49 +14,34 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
  *              Monday, April 17, 2000
  *
- * Purpose:	The POSIX unbuffered file driver using only the HDF5 public
- *		API and with a few optimizations: the lseek() call is made
- *		only when the current file position is unknown or needs to be
- *		changed based on previous I/O through this driver (don't mix
- *		I/O from this driver with I/O from other parts of the
- *		application to the same file).
- *          With custom modifications...
+ * Purpose:     The POSIX unbuffered file driver using only the HDF5 public
+ *              API and with a few optimizations: the lseek() call is made
+ *              only when the current file position is unknown or needs to be
+ *              changed based on previous I/O through this driver (don't mix
+ *              I/O from this driver with I/O from other parts of the
+ *              application to the same file).
+ *              With custom modifications...
  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5FD_log_init_interface
 
 
-#include "H5private.h"      /* Generic Functions */
-#include "H5Eprivate.h"     /* Error handling */
-#include "H5Fprivate.h"     /* File access */
-#include "H5FDprivate.h"    /* File drivers */
-#include "H5FDlog.h"        /* Logging file driver */
-#include "H5FLprivate.h"    /* Free Lists */
-#include "H5Iprivate.h"     /* IDs */
-#include "H5MMprivate.h"    /* Memory management */
-#include "H5Pprivate.h"     /* Property lists */
+#include "H5private.h"      /* Generic Functions    */
+#include "H5Eprivate.h"     /* Error handling       */
+#include "H5Fprivate.h"     /* File access          */
+#include "H5FDprivate.h"    /* File drivers         */
+#include "H5FDlog.h"        /* Logging file driver  */
+#include "H5FLprivate.h"    /* Free Lists           */
+#include "H5Iprivate.h"     /* IDs                  */
+#include "H5MMprivate.h"    /* Memory management    */
+#include "H5Pprivate.h"     /* Property lists       */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_LOG_g = 0;
-
-/* Since Windows doesn't follow the rest of the world when it comes
- * to POSIX I/O types, some typedefs and constants are needed to avoid
- * making the code messy with #ifdefs.
- */
-#ifdef H5_HAVE_WIN32_API
-typedef unsigned int    h5_log_io_t;
-typedef int             h5_log_io_ret_t;
-static int H5_LOG_MAX_IO_BYTES_g = INT_MAX;
-#else
-/* Unix, everyone else */
-typedef size_t          h5_log_io_t;
-typedef ssize_t         h5_log_io_ret_t;
-static size_t H5_LOG_MAX_IO_BYTES_g = SSIZET_MAX;
-#endif /* H5_HAVE_WIN32_API */
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
@@ -161,24 +146,23 @@ typedef struct H5FD_log_t {
  * These macros check for overflow of various quantities.  These macros
  * assume that HDoff_t is signed and haddr_t and size_t are unsigned.
  *
- * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
- *			is too large to be represented by the second argument
- *			of the file seek function.
+ * ADDR_OVERFLOW:   Checks whether a file address of type `haddr_t'
+ *                  is too large to be represented by the second argument
+ *                  of the file seek function.
  *
- * SIZE_OVERFLOW:	Checks whether a buffer size of type `hsize_t' is too
- *			large to be represented by the `size_t' type.
+ * SIZE_OVERFLOW:   Checks whether a buffer size of type `hsize_t' is too
+ *                  large to be represented by the `size_t' type.
  *
- * REGION_OVERFLOW:	Checks whether an address and size pair describe data
- *			which can be addressed entirely by the second
- *			argument of the file seek function.
+ * REGION_OVERFLOW: Checks whether an address and size pair describe data
+ *                  which can be addressed entirely by the second
+ *                  argument of the file seek function.
  */
-#define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
-#define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) ||			      \
-				 ((A) & ~(haddr_t)MAXADDR))
-#define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
-                                 HADDR_UNDEF==(A)+(Z) ||		      \
-				 (HDoff_t)((A)+(Z))<(HDoff_t)(A))
+#define MAXADDR                 (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
+#define ADDR_OVERFLOW(A)        (HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
+#define SIZE_OVERFLOW(Z)        ((Z) & ~(hsize_t)MAXADDR)
+#define REGION_OVERFLOW(A,Z)    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||    \
+                                 HADDR_UNDEF==(A)+(Z) ||                    \
+                                (HDoff_t)((A)+(Z))<(HDoff_t)(A))
 
 /* Prototypes */
 static herr_t H5FD_log_term(void);
@@ -186,7 +170,7 @@ static void *H5FD_log_fapl_get(H5FD_t *file);
 static void *H5FD_log_fapl_copy(const void *_old_fa);
 static herr_t H5FD_log_fapl_free(void *_fa);
 static H5FD_t *H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
-			      haddr_t maxaddr);
+            haddr_t maxaddr);
 static herr_t H5FD_log_close(H5FD_t *_file);
 static int H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_log_query(const H5FD_t *_f1, unsigned long *flags);
@@ -196,9 +180,9 @@ static herr_t H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_log_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_log_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			     size_t size, void *buf);
+            size_t size, void *buf);
 static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
-			      size_t size, const void *buf);
+            size_t size, const void *buf);
 static herr_t H5FD_log_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static const H5FD_class_t H5FD_log_g = {
@@ -240,19 +224,16 @@ static const H5FD_class_t H5FD_log_g = {
 H5FL_DEFINE_STATIC(H5FD_log_t);
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5FD_log_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5FD_log_init_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_log_init currently).
-
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_log_init_interface
+ *
+ * Purpose:     Initializes any interface-specific data or routines.
+ *
+ * Return:      Success:    The driver ID for the log driver.
+ *              Failure:    Negative.
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5FD_log_init_interface(void)
 {
@@ -263,15 +244,15 @@ H5FD_log_init_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_init
+ * Function:    H5FD_log_init
  *
- * Purpose:	Initialize this driver by registering the driver with the
- *		library.
+ * Purpose:     Initialize this driver by registering the driver with the
+ *              library.
  *
- * Return:	Success:	The driver ID for the log driver.
- *		Failure:	Negative.
+ * Return:      Success:    The driver ID for the log driver.
+ *              Failure:    Negative.
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -295,11 +276,11 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5FD_log_term
+ * Function:    H5FD_log_term
  *
- * Purpose:	Shut down the VFD
+ * Purpose:     Shut down the VFD
  *
- * Returns:     Non-negative on success or negative on failure
+ * Returns:     SUCCEED (Can't fail)
  *
  * Programmer:  Quincey Koziol
  *              Friday, Jan 30, 2004
@@ -319,15 +300,15 @@ H5FD_log_term(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_log
+ * Function:    H5Pset_fapl_log
  *
- * Purpose:	Modify the file access property list to use the H5FD_LOG
- *		driver defined in this source file.
+ * Purpose:     Modify the file access property list to use the H5FD_LOG
+ *              driver defined in this source file.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
- *		Thursday, February 19, 1998
+ * Programmer:  Robb Matzke
+ *              Thursday, February 19, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -360,17 +341,17 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_fapl_get
+ * Function:    H5FD_log_fapl_get
  *
- * Purpose:	Returns a file access property list which indicates how the
- *		specified file is being accessed. The return list could be
- *		used to access another file the same way.
+ * Purpose:     Returns a file access property list which indicates how the
+ *              specified file is being accessed. The return list could be
+ *              used to access another file the same way.
  *
- * Return:	Success:	Ptr to new file access property list with all
- *				members copied from the file struct.
- *		Failure:	NULL
+ * Return:      Success:    Ptr to new file access property list with all
+ *                          members copied from the file struct.
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, April 20, 2000
  *
  *-------------------------------------------------------------------------
@@ -378,8 +359,8 @@ done:
 static void *
 H5FD_log_fapl_get(H5FD_t *_file)
 {
-    H5FD_log_t	*file = (H5FD_log_t *)_file;
-    void *ret_value;    /* Return value */
+    H5FD_log_t  *file = (H5FD_log_t *)_file;
+    void        *ret_value;                     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -391,14 +372,14 @@ H5FD_log_fapl_get(H5FD_t *_file)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_fapl_copy
+ * Function:    H5FD_log_fapl_copy
  *
- * Purpose:	Copies the log-specific file access properties.
+ * Purpose:     Copies the log-specific file access properties.
  *
- * Return:	Success:	Ptr to a new property list
- *		Failure:	NULL
+ * Return:      Success:    Ptr to a new property list
+ *              Failure:    NULL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, April 20, 2000
  *
  *-------------------------------------------------------------------------
@@ -406,9 +387,9 @@ H5FD_log_fapl_get(H5FD_t *_file)
 static void *
 H5FD_log_fapl_copy(const void *_old_fa)
 {
-    const H5FD_log_fapl_t *old_fa = (const H5FD_log_fapl_t*)_old_fa;
-    H5FD_log_fapl_t *new_fa = NULL;    /* New FAPL info */
-    void *ret_value;    /* Return value */
+    const H5FD_log_fapl_t   *old_fa = (const H5FD_log_fapl_t*)_old_fa;
+    H5FD_log_fapl_t         *new_fa = NULL;     /* New FAPL info */
+    void                    *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -442,14 +423,13 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_fapl_free
+ * Function:    H5FD_log_fapl_free
  *
- * Purpose:	Frees the log-specific file access properties.
+ * Purpose:     Frees the log-specific file access properties.
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, April 20, 2000
  *
  *-------------------------------------------------------------------------
@@ -471,16 +451,16 @@ H5FD_log_fapl_free(void *_fa)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_open
+ * Function:    H5FD_log_open
  *
- * Purpose:	Create and/or opens a file as an HDF5 file.
+ * Purpose:     Create and/or opens a file as an HDF5 file.
  *
- * Return:	Success:	A pointer to a new file data structure. The
- *				public fields will be initialized by the
- *				caller, which is always H5FD_open().
- *		Failure:	NULL
+ * Return:      Success:    A pointer to a new file data structure. The
+ *                          public fields will be initialized by the
+ *                          caller, which is always H5FD_open().
+ *              Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -488,11 +468,11 @@ H5FD_log_fapl_free(void *_fa)
 static H5FD_t *
 H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_log_t	*file = NULL;
-    H5P_genplist_t *plist;      /* Property list */
-    H5FD_log_fapl_t	*fa;    /* File access property list information */
-    int		fd = (-1);      /* File descriptor */
-    int		o_flags;        /* Flags for open() call */
+    H5FD_log_t      *file = NULL;
+    H5P_genplist_t  *plist;         /* Property list */
+    H5FD_log_fapl_t *fa;            /* File access property list information */
+    int             fd = -1;        /* File descriptor */
+    int             o_flags;        /* Flags for open() call */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -501,8 +481,8 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct timeval open_timeval_diff;
     struct timeval stat_timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
-    h5_stat_t	sb;
-    H5FD_t	*ret_value;     /* Return value */
+    h5_stat_t       sb;
+    H5FD_t          *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -679,14 +659,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_close
+ * Function:    H5FD_log_close
  *
- * Purpose:	Closes an HDF5 file.
+ * Purpose:     Closes an HDF5 file.
  *
- * Return:	Success:	0
- *		Failure:	-1, file not closed.
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL, file not closed.
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -827,16 +807,16 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_cmp
+ * Function:    H5FD_log_cmp
  *
- * Purpose:	Compares two files belonging to this driver using an
- *		arbitrary (but consistent) ordering.
+ * Purpose:     Compares two files belonging to this driver using an
+ *              arbitrary (but consistent) ordering.
  *
- * Return:	Success:	A value like strcmp()
- *		Failure:	never fails (arguments were checked by the
- *				caller).
+ * Return:      Success:    A value like strcmp()
+ *              Failure:    never fails (arguments were checked by the
+ *                          caller).
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -844,8 +824,8 @@ done:
 static int
 H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
-    const H5FD_log_t	*f1 = (const H5FD_log_t *)_f1;
-    const H5FD_log_t	*f2 = (const H5FD_log_t *)_f2;
+    const H5FD_log_t    *f1 = (const H5FD_log_t *)_f1;
+    const H5FD_log_t    *f2 = (const H5FD_log_t *)_f2;
     int ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -888,15 +868,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_query
+ * Function:    H5FD_log_query
  *
- * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ * Purpose:     Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, August 25, 2000
  *
  *-------------------------------------------------------------------------
@@ -904,7 +883,7 @@ done:
 static herr_t
 H5FD_log_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
-    const H5FD_log_t	*file = (const H5FD_log_t *)_file;
+    const H5FD_log_t    *file = (const H5FD_log_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -927,19 +906,18 @@ H5FD_log_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_alloc
+ * Function:    H5FD_log_alloc
  *
- * Purpose:	Allocate file memory.
+ * Purpose:     Allocate file memory.
  *
- * Return:	Success:	Address of new memory
- *		Failure:	HADDR_UNDEF
+ * Return:      Success:    Address of new memory
+ *              Failure:    HADDR_UNDEF
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, April 17, 2000
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static haddr_t
 H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t size)
 {
@@ -981,16 +959,16 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t siz
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_get_eoa
+ * Function:    H5FD_log_get_eoa
  *
- * Purpose:	Gets the end-of-address marker for the file. The EOA marker
- *		is the first address past the last byte allocated in the
- *		format address space.
+ * Purpose:     Gets the end-of-address marker for the file. The EOA marker
+ *              is the first address past the last byte allocated in the
+ *              format address space.
  *
- * Return:	Success:	The end-of-address marker.
- *		Failure:	HADDR_UNDEF
+ * Return:      Success:    The end-of-address marker.
+ *              Failure:    HADDR_UNDEF
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Monday, August  2, 1999
  *
  *-------------------------------------------------------------------------
@@ -998,7 +976,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t siz
 static haddr_t
 H5FD_log_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 {
-    const H5FD_log_t	*file = (const H5FD_log_t *)_file;
+    const H5FD_log_t    *file = (const H5FD_log_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1007,16 +985,15 @@ H5FD_log_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_set_eoa
+ * Function:    H5FD_log_set_eoa
  *
- * Purpose:	Set the end-of-address marker for the file. This function is
- *		called shortly after an existing HDF5 file is opened in order
- *		to tell the driver where the end of the HDF5 data is located.
+ * Purpose:     Set the end-of-address marker for the file. This function is
+ *              called shortly after an existing HDF5 file is opened in order
+ *              to tell the driver where the end of the HDF5 data is located.
  *
- * Return:	Success:	0
- *		Failure:	-1
+ * Return:      SUCCEED (Can't fail)
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -1024,25 +1001,25 @@ H5FD_log_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 static herr_t
 H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 {
-    H5FD_log_t	*file = (H5FD_log_t *)_file;
+    H5FD_log_t  *file = (H5FD_log_t *)_file;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(file->fa.flags != 0) {
-	if(H5F_addr_gt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
-	    hsize_t size = addr - file->eoa;
+        if(H5F_addr_gt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
+            hsize_t size = addr - file->eoa;
 
             /* Retain the flavor of the space allocated by the extension */
-	    if(file->fa.flags & H5FD_LOG_FLAVOR) {
-		HDassert(addr < file->iosize);
-		H5_CHECK_OVERFLOW(size, hsize_t, size_t);
-		HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
-	    } /* end if */
+            if(file->fa.flags & H5FD_LOG_FLAVOR) {
+                HDassert(addr < file->iosize);
+                H5_CHECK_OVERFLOW(size, hsize_t, size_t);
+                HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
+            } /* end if */
 
             /* Log the extension like an allocation */
-	    if(file->fa.flags & H5FD_LOG_ALLOC)
-		HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Allocated\n", file->eoa, addr, size, flavors[type]);
-	} /* end if */
+            if(file->fa.flags & H5FD_LOG_ALLOC)
+                HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Allocated\n", file->eoa, addr, size, flavors[type]);
+        } /* end if */
     } /* end if */
 
     file->eoa = addr;
@@ -1052,18 +1029,18 @@ H5FD_log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_get_eof
+ * Function:    H5FD_log_get_eof
  *
- * Purpose:	Returns the end-of-file marker, which is the greater of
- *		either the filesystem end-of-file or the HDF5 end-of-address
- *		markers.
+ * Purpose:     Returns the end-of-file marker, which is the greater of
+ *              either the filesystem end-of-file or the HDF5 end-of-address
+ *              markers.
  *
- * Return:	Success:	End of file address, the first address past
- *				the end of the "file", either the filesystem file
- *				or the HDF5 file.
- *		Failure:	HADDR_UNDEF
+ * Return:      Success:    End of file address, the first address past
+ *                          the end of the "file", either the filesystem file
+ *                          or the HDF5 file.
+ *              Failure:    HADDR_UNDEF
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
@@ -1084,14 +1061,13 @@ H5FD_log_get_eof(const H5FD_t *_file)
  *
  * Purpose:        Returns the file handle of LOG file driver.
  *
- * Returns:        Non-negative if succeed or negative if fails.
+ * Returns:        SUCCEED/FAIL
  *
  * Programmer:     Raymond Lu
  *                 Sept. 16, 2002
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_log_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void **file_handle)
 {
@@ -1111,27 +1087,26 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_read
+ * Function:    H5FD_log_read
  *
- * Purpose:	Reads SIZE bytes of data from FILE beginning at address ADDR
- *		into buffer BUF according to data transfer properties in
- *		DXPL_ID.
+ * Purpose:     Reads SIZE bytes of data from FILE beginning at address ADDR
+ *              into buffer BUF according to data transfer properties in
+ *              DXPL_ID.
  *
- * Return:	Success:	Zero. Result is stored in caller-supplied
- *				buffer BUF.
- *		Failure:	-1, Contents of buffer BUF are undefined.
+ * Return:      Success:    SUCCEED. Result is stored in caller-supplied
+ *                          buffer BUF.
+ *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       size_t size, void *buf/*out*/)
+            size_t size, void *buf/*out*/)
 {
-    H5FD_log_t		*file = (H5FD_log_t *)_file;
+    H5FD_log_t          *file = (H5FD_log_t *)_file;
     size_t              orig_size = size; /* Save the original size for later */
     haddr_t             orig_addr = addr;
 #ifdef H5_HAVE_GETTIMEOFDAY
@@ -1219,16 +1194,16 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr
 #endif /* H5_HAVE_GETTIMEOFDAY */
     while(size > 0) {
 
-        h5_log_io_t         bytes_in        = 0;    /* # of bytes to read       */
-        h5_log_io_ret_t     bytes_read      = -1;   /* # of bytes actually read */ 
+        h5_posix_io_t       bytes_in        = 0;    /* # of bytes to read       */
+        h5_posix_io_ret_t   bytes_read      = -1;   /* # of bytes actually read */ 
 
         /* Trying to read more bytes than the return type can handle is
          * undefined behavior in POSIX.
          */
-        if(size > H5_LOG_MAX_IO_BYTES_g)
-            bytes_in = H5_LOG_MAX_IO_BYTES_g;
+        if(size > H5_POSIX_MAX_IO_BYTES)
+            bytes_in = H5_POSIX_MAX_IO_BYTES;
         else
-            bytes_in = (h5_log_io_t)size;
+            bytes_in = (h5_posix_io_t)size;
 
         do {
             bytes_read = HDread(file->fd, buf, bytes_in);
@@ -1242,7 +1217,7 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr
             if(file->fa.flags & H5FD_LOG_LOC_READ)
                 HDfprintf(file->logfp, "Error! Reading: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, size = %lu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long)size, (unsigned long long)myoffset);
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total read size = %llu, bytes this sub-read = %llu, bytes actually read = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_read, (unsigned long long)myoffset);
         } /* end if */
 
         if(0 == bytes_read) {
@@ -1313,26 +1288,24 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_write
+ * Function:    H5FD_log_write
  *
- * Purpose:	Writes SIZE bytes of data to FILE beginning at address ADDR
- *		from buffer BUF according to data transfer properties in
- *		DXPL_ID.
+ * Purpose:     Writes SIZE bytes of data to FILE beginning at address ADDR
+ *              from buffer BUF according to data transfer properties in
+ *              DXPL_ID.
  *
- * Return:	Success:	Zero
- *		Failure:	-1
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Thursday, July 29, 1999
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
-		size_t size, const void *buf)
+            size_t size, const void *buf)
 {
-    H5FD_log_t		*file = (H5FD_log_t *)_file;
+    H5FD_log_t          *file = (H5FD_log_t *)_file;
     size_t              orig_size = size; /* Save the original size for later */
     haddr_t             orig_addr = addr;
 #ifdef H5_HAVE_GETTIMEOFDAY
@@ -1425,16 +1398,16 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
 #endif /* H5_HAVE_GETTIMEOFDAY */
     while(size > 0) {
 
-        h5_log_io_t         bytes_in        = 0;    /* # of bytes to write  */
-        h5_log_io_ret_t     bytes_wrote     = -1;   /* # of bytes written   */ 
+        h5_posix_io_t       bytes_in        = 0;    /* # of bytes to write  */
+        h5_posix_io_ret_t   bytes_wrote     = -1;   /* # of bytes written   */ 
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
          */
-        if(size > H5_LOG_MAX_IO_BYTES_g)
-            bytes_in = H5_LOG_MAX_IO_BYTES_g;
+        if(size > H5_POSIX_MAX_IO_BYTES)
+            bytes_in = H5_POSIX_MAX_IO_BYTES;
         else
-            bytes_in = (h5_log_io_t)size;
+            bytes_in = (h5_posix_io_t)size;
 
         do {
             bytes_wrote = HDwrite(file->fd, buf, bytes_in);
@@ -1448,7 +1421,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
             if(file->fa.flags & H5FD_LOG_LOC_WRITE)
                 HDfprintf(file->logfp, "Error! Writing: %10a-%10a (%10Zu bytes)\n", orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, size = %lu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long)size, (unsigned long long)myoffset);
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, error message = '%s', buf = %p, total write size = %llu, bytes this sub-write = %llu, bytes actually written = %llu, offset = %llu", HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf, (unsigned long long)size, (unsigned long long)bytes_in, (unsigned long long)bytes_wrote, (unsigned long long)myoffset);
         } /* end if */
 
         HDassert(bytes_wrote > 0);
@@ -1518,25 +1491,23 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_truncate
+ * Function:    H5FD_log_truncate
  *
- * Purpose:	Makes sure that the true file size is the same (or larger)
- *		than the end-of-address.
+ * Purpose:     Makes sure that the true file size is the same (or larger)
+ *              than the end-of-address.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Wednesday, August  4, 1999
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
-    H5FD_log_t	*file = (H5FD_log_t *)_file;
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    H5FD_log_t  *file = (H5FD_log_t *)_file;
+    herr_t      ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1597,4 +1568,3 @@ H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_truncate() */
-

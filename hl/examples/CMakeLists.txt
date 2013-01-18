@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5_HL_EXAMPLES )
 
 SET (HDF5_TEST_FILES
@@ -23,7 +23,6 @@ SET (examples
     ex_lite2
     ex_lite3
     ptExampleFL
-    ptExampleVL
     ex_image1
     ex_image2
     ex_table_01

@@ -6571,7 +6571,7 @@ test_filters_endianess(void)
     hid_t     dsid=-1;                  /* dataset ID */
     hid_t     sid=-1;                   /* dataspace ID */
     hid_t     dcpl=-1;                  /* dataset creation property list ID */
-    const char *data_file = H5_get_srcdir_filename("test_filters_le.hdf5"); /* Corrected test file name */
+    const char *data_file = H5_get_srcdir_filename("test_filters_le.h5"); /* Corrected test file name */
 
     TESTING("filters with big-endian/little-endian data");
 
@@ -6596,7 +6596,7 @@ test_filters_endianess(void)
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
-    data_file = H5_get_srcdir_filename("test_filters_be.hdf5"); /* Corrected test file name */
+    data_file = H5_get_srcdir_filename("test_filters_be.h5"); /* Corrected test file name */
 
     /* open */
     if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR

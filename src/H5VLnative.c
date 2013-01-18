@@ -1320,6 +1320,7 @@ H5VL_native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     /* check arguments */
     if(NULL == dset->oloc.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
@@ -1384,6 +1385,7 @@ H5VL_native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     /* check arguments */
     if(NULL == dset->oloc.file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
@@ -1411,9 +1413,8 @@ H5VL_native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf)
         buf = &fake_char;
 
-    /* write raw data */
-    if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    if(H5D__pre_write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0) 
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

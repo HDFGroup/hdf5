@@ -46,6 +46,7 @@
 ./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
 ./bin/chkcopyright      _DO_NOT_DISTRIBUTE_
 ./bin/chkmanifest
+./bin/cmakehdf5
 ./bin/compile
 ./bin/config.guess
 ./bin/config.sub
@@ -121,6 +122,15 @@
 ./examples/Makefile.in
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
+./examples/h5_crtgrpd.c
+./examples/h5_subset.c
+./examples/h5_cmprss.c
+./examples/h5_rdwt.c
+./examples/h5_crtgrpar.c
+./examples/h5_extend.c
+./examples/h5_crtatt.c
+./examples/h5_crtgrp.c
+./examples/h5_crtdat.c
 ./examples/h5_drivers.c
 ./examples/h5_dtransform.c
 ./examples/h5_elink_unix2win.c
@@ -238,22 +248,24 @@
 
 ./fortran/examples/Makefile.am
 ./fortran/examples/Makefile.in
-./fortran/examples/attrexample.f90
 ./fortran/examples/compound.f90
 ./fortran/examples/compound_fortran2003.f90
 ./fortran/examples/compound_complex_fortran2003.f90
-./fortran/examples/dsetexample.f90
-./fortran/examples/fileexample.f90
-./fortran/examples/groupexample.f90
-./fortran/examples/grpdsetexample.f90
-./fortran/examples/grpsexample.f90
+./fortran/examples/h5_cmprss.f90
+./fortran/examples/h5_crtatt.f90
+./fortran/examples/h5_crtdat.f90
+./fortran/examples/h5_crtgrp.f90
+./fortran/examples/h5_crtgrpar.f90
+./fortran/examples/h5_crtgrpd.f90
+./fortran/examples/h5_extend.f90
+./fortran/examples/h5_rdwt.f90
+./fortran/examples/h5_subset.f90
 ./fortran/examples/hyperslab.f90
 ./fortran/examples/mountexample.f90
 ./fortran/examples/ph5example.f90
 ./fortran/examples/refobjexample.f90
 ./fortran/examples/refregexample.f90
 ./fortran/examples/run-fortran-ex.sh.in
-./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
 ./fortran/examples/testh5fc.sh.in
 ./fortran/examples/nested_derived_type.f90
@@ -1078,8 +1090,8 @@
 ./test/tvltypes.c
 ./test/unlink.c
 ./test/vfd.c
-./test/test_filters_le.hdf5
-./test/test_filters_be.hdf5
+./test/test_filters_le.h5
+./test/test_filters_be.h5
 ./test/gen_filters.c
 ./test/chunk_info.c
 
@@ -1357,6 +1369,7 @@
 ./tools/testfiles/tall-4s.ddl
 ./tools/testfiles/tall-5s.ddl
 ./tools/testfiles/tall-6.ddl
+./tools/testfiles/tall-6.exp
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
@@ -1475,12 +1488,17 @@
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tnestedcmpddt.ddl
 ./tools/testfiles/tnestedcmpddt.h5
+./tools/testfiles/tnoddl.ddl
+./tools/testfiles/tnoddlfile.ddl
+./tools/testfiles/tnoddlfile.exp
 ./tools/testfiles/tno-subset.h5
 ./tools/testfiles/tno-subset.ddl
 ./tools/testfiles/tnullspace.h5
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/topaque.h5
+./tools/testfiles/trawdatafile.ddl
+./tools/testfiles/trawdatafile.exp
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
@@ -1501,6 +1519,8 @@
 ./tools/testfiles/tstr.h5
 ./tools/testfiles/tstr2.h5
 ./tools/testfiles/tstr-2.ddl
+./tools/testfiles/tstr2bin2.exp
+./tools/testfiles/tstr2bin6.exp
 ./tools/testfiles/tvldtypes1.ddl
 ./tools/testfiles/tvldtypes1.h5
 ./tools/testfiles/tvldtypes2.ddl
@@ -1570,6 +1590,9 @@
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
 ./tools/testfiles/twidedisplay.ddl
+./tools/testfiles/twithddl.ddl
+./tools/testfiles/twithddlfile.ddl
+./tools/testfiles/twithddlfile.exp
 
 # h5dump test error files
 ./tools/h5dump/errfiles/filter_fail.err
@@ -2148,12 +2171,14 @@
 ./hl/examples/image8.txt
 ./hl/examples/pal_rgb.h
 ./hl/examples/ptExampleFL.c
-./hl/examples/ptExampleVL.c
 ./hl/examples/run-hl-ex.sh
 ./hl/examples/run-hlc-ex.sh.in
 ./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
+./hl/src/H5DO.c
+./hl/src/H5DOprivate.h
+./hl/src/H5DOpublic.h
 ./hl/src/H5DS.c
 ./hl/src/H5DSprivate.h
 ./hl/src/H5DSpublic.h
@@ -2192,8 +2217,10 @@
 ./hl/test/image24plane.txt
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
+./hl/test/dectris_hl_perf.c
 ./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
+./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
@@ -2201,9 +2228,9 @@
 ./hl/test/test_table.c
 ./hl/test/test_ds_le.h5
 ./hl/test/test_ds_be.h5
-./hl/test/test_table_le.hdf5
-./hl/test/test_table_be.hdf5
-./hl/test/test_table_cray.hdf5
+./hl/test/test_table_le.h5
+./hl/test/test_table_be.h5
+./hl/test/test_table_cray.h5
 ./hl/test/usa.wri
 
 # tools
@@ -2261,7 +2288,6 @@
 ./hl/c++/examples/Makefile.am
 ./hl/c++/examples/Makefile.in
 ./hl/c++/examples/ptExampleFL.cpp
-./hl/c++/examples/ptExampleVL.cpp
 ./hl/c++/examples/run-hlc++-ex.sh.in
 ./hl/c++/src/H5PacketTable.h
 ./hl/c++/src/H5PacketTable.cpp
