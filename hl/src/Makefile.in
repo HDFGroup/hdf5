@@ -114,8 +114,8 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_hl_la_DEPENDENCIES = $(LIBHDF5)
-am_libhdf5_hl_la_OBJECTS = H5DS.lo H5IM.lo H5LT.lo H5LTanalyze.lo \
-	H5LTparse.lo H5PT.lo H5TB.lo
+am_libhdf5_hl_la_OBJECTS = H5DO.lo H5DS.lo H5IM.lo H5LT.lo \
+	H5LTanalyze.lo H5LTparse.lo H5PT.lo H5TB.lo
 libhdf5_hl_la_OBJECTS = $(am_libhdf5_hl_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -467,13 +467,13 @@ lib_LTLIBRARIES = libhdf5_hl.la
 libhdf5_hl_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
 
 # List sources to include in the HDF5 HL Library.
-libhdf5_hl_la_SOURCES = H5DS.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c
+libhdf5_hl_la_SOURCES = H5DO.c H5DS.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c
 
 # HDF5 HL library depends on HDF5 Library.
 libhdf5_hl_la_LIBADD = $(LIBHDF5)
 
 # Public header files (to be installed)
-include_HEADERS = hdf5_hl.h H5IMpublic.h H5LTpublic.h H5TBpublic.h H5DSpublic.h H5PTpublic.h
+include_HEADERS = hdf5_hl.h H5DOpublic.h H5IMpublic.h H5LTpublic.h H5TBpublic.h H5DSpublic.h H5PTpublic.h
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -572,6 +572,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DO.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LT.Plo@am__quote@

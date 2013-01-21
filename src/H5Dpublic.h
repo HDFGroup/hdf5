@@ -34,6 +34,12 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
 #define H5D_CHUNK_CACHE_W0_DEFAULT          -1.
 
+/* Property names for H5LTDdirect_chunk_write */   
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME	        "direct_chunk_flag"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME	"direct_chunk_filters"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME		"direct_chunk_offset"
+#define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME	"direct_chunk_datasize"
+ 
 /*******************/
 /* Public Typedefs */
 /*******************/
