@@ -57,7 +57,9 @@ New Features
 
     Configuration
     -------------
-    - None
+    - A new tool, cmakehdf5, which is a build command script similar to
+      buildhdf5 is added and is available in the bin directory.
+      (AKC - 2013/01/16)
     
     Library
     -------
