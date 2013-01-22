@@ -184,6 +184,14 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
   )
+  SET (HDF5_REFERENCE_EXP_FILES
+#      tall-6.exp
+#      tnoddlfile.exp
+#      trawdatafile.exp
+      tstr2bin2.exp
+      tstr2bin6.exp
+#      twithddlfile.exp
+  )
   SET (HDF5_REFERENCE_TEST_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/charsets.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/filter_fail.h5
@@ -315,6 +323,20 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${tst_h5_file} ${dest}
     )
   ENDFOREACH (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
+  
+  FOREACH (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
+    IF (WIN32 AND NOT CYGWIN)
+      FILE (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
+      FILE (WRITE ${PROJECT_BINARY_DIR}/testfiles/${tst_exp_file} "${TEST_STREAM}")
+    ELSE (WIN32 AND NOT CYGWIN)
+      ADD_CUSTOM_COMMAND (
+          TARGET     h5dump
+          POST_BUILD
+          COMMAND    ${CMAKE_COMMAND}
+          ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}  ${PROJECT_BINARY_DIR}/testfiles/${tst_exp_file}
+      )
+    ENDIF (WIN32 AND NOT CYGWIN)
+  ENDFOREACH (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
 
   FOREACH (tst_other_file ${HDF5_REFERENCE_FILES})
     GET_FILENAME_COMPONENT(fname "${tst_other_file}" NAME)
@@ -664,9 +686,9 @@ IF (BUILD_TESTING)
   MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
     ADD_TEST (
         NAME H5DUMP-output-${resultfile}
-        COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile}.txt ${PROJECT_BINARY_DIR}/testfiles/${targetfile}
+        COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile}
     )
-      SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+    SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
@@ -675,8 +697,9 @@ IF (BUILD_TESTING)
       ADD_TEST (
           NAME H5DUMP-output-cmp-${resultfile}
           COMMAND ${CMAKE_COMMAND}
-                -E compare_files ${PROJECT_BINARY_DIR}/testfiles/${resultfile}.txt ${PROJECT_BINARY_DIR}/testfiles/${resultfile}.exp
+                -E compare_files ${resultfile}.txt ${resultfile}.exp
       )
+      SET_TESTS_PROPERTIES (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       IF (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
@@ -1028,6 +1051,8 @@ IF (BUILD_TESTING)
           tstr-1.out.err
           tstr-2.out
           tstr-2.out.err
+          tstr2bin2.txt
+          tstr2bin6.txt
           tstring.out
           tstring.out.err
           tstring2.out
@@ -1311,6 +1336,10 @@ IF (BUILD_TESTING)
 
   # test for binary output
   ADD_H5_TEST (tbin1LE 0 --enable-error-stack -d integer -o out1LE.bin -b LE tbinary.h5)
+
+  # test for string binary output
+  ADD_H5_EXPORT_TEST (tstr2bin2 tstr2.h5 0 --enable-error-stack -d /g2/dset2 -b -o)
+  ADD_H5_EXPORT_TEST (tstr2bin6 tstr2.h5 0 --enable-error-stack -d /g6/dset6 -b -o)
 
   # NATIVE default. the NATIVE test can be validated with h5import/h5diff
   ADD_H5_TEST (tbin1 0 --enable-error-stack -d integer -o out1.bin -b tbinary.h5)
