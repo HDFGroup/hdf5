@@ -1480,6 +1480,9 @@
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tnestedcmpddt.ddl
 ./tools/testfiles/tnestedcmpddt.h5
+./tools/testfiles/tnoattrdata.ddl
+./tools/testfiles/tnoattrddl.ddl
+./tools/testfiles/tnodata.ddl
 ./tools/testfiles/tnoddl.ddl
 ./tools/testfiles/tnoddlfile.ddl
 ./tools/testfiles/tnoddlfile.exp
