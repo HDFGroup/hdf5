@@ -42,6 +42,9 @@ New Features
     Configuration:
     -------------
     - CMake minimum is now 2.8.10. (ADB 2013/1/14)
+    - A new tool, cmakehdf5, which is a build command script similar to
+      buildhdf5 is added and is available in the bin directory.
+      (AKC - 2012/12/12)
     - Fixed AIX Fortran compiler flags to use appropriate settings for
       debugging, profiling, optimization situations. HDFFV-8069. (AKC
       2012/09/27)
