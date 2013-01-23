@@ -1585,7 +1585,7 @@
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
 ./tools/testfiles/twidedisplay.ddl
-./tools/testfiles/twithddl.ddl
+./tools/testfiles/twithddl.exp
 ./tools/testfiles/twithddlfile.ddl
 ./tools/testfiles/twithddlfile.exp
 

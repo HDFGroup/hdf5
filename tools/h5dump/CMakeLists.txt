@@ -191,7 +191,6 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twidedisplay.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddl.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
@@ -202,6 +201,7 @@ IF (BUILD_TESTING)
       trawdatafile.exp
       tstr2bin2.exp
       tstr2bin6.exp
+      twithddl.exp
       twithddlfile.exp
   )
   SET (HDF5_REFERENCE_TEST_FILES
@@ -1282,7 +1282,7 @@ IF (BUILD_TESTING)
   ADD_TEST (
       NAME H5DUMP-output-cmp-meta-twithddlfile
       COMMAND ${CMAKE_COMMAND}
-          -E compare_files twithddl.txt twithddl.ddl
+          -E compare_files twithddl.txt twithddl.exp
   )
   SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
   IF (NOT "${last_test}" STREQUAL "")

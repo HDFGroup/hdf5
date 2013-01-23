@@ -316,7 +316,7 @@ $SRC_H5DUMP_TESTFILES/tvldtypes5.ddl
 $SRC_H5DUMP_TESTFILES/tvlstr.ddl
 $SRC_H5DUMP_TESTFILES/tvms.ddl
 $SRC_H5DUMP_TESTFILES/twidedisplay.ddl
-$SRC_H5DUMP_TESTFILES/twithddl.ddl
+$SRC_H5DUMP_TESTFILES/twithddl.exp
 $SRC_H5DUMP_TESTFILES/twithddlfile.ddl
 $SRC_H5DUMP_TESTFILES/twithddlfile.exp
 $SRC_H5DUMP_TESTFILES/h5dump-help.txt
@@ -510,7 +510,7 @@ TOOLTEST2A() {
     actual_err="$TESTDIR/`basename $1 .exp`.err"
     shift
     expectmeta="$TESTDIR/$1"
-    actualmeta="$TESTDIR/`basename $1 .ddl`.txt"
+    actualmeta="$TESTDIR/`basename $1 .exp`.txt"
     shift
 
     # Run test.
@@ -805,7 +805,7 @@ TOOLTEST tnoattrddl.ddl --enable-error-stack --ddl=NULL -y tattr.h5
 TOOLTEST tnoattrdata.ddl --enable-error-stack -A --output=NULL tattr.h5
 TOOLTEST2 trawdatafile.exp --enable-error-stack -y -o trawdatafile.txt packedbits.h5
 TOOLTEST2 tnoddlfile.exp --enable-error-stack --ddl=NULL -y -o tnoddlfile.txt packedbits.h5
-TOOLTEST2A twithddlfile.exp twithddl.ddl --enable-error-stack --ddl=twithddl.txt -y -o twithddlfile.txt packedbits.h5
+TOOLTEST2A twithddlfile.exp twithddl.exp --enable-error-stack --ddl=twithddl.txt -y -o twithddlfile.txt packedbits.h5
 
 # test for maximum display datasets
 TOOLTEST twidedisplay.ddl --enable-error-stack -w0 packedbits.h5
