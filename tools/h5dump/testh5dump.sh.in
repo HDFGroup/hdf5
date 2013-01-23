@@ -31,7 +31,7 @@ H5IMPORT=../h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 
-CMP='cmp -s'
+CMP='diff -qb'                    # Compares without end of file newlines
 DIFF='diff -c'
 CP='cp'
 DIRNAME='dirname'
@@ -530,7 +530,7 @@ TOOLTEST2A() {
       # Create the expect data file if it doesn't yet exist.
         echo " CREATED"
         cp $actualdata $expectdata
-      elif $CMP $expectdata $actualdata; then
+      elif $DIFF $expectdata $actualdata; then
         if [ ! -f $expectmeta ]; then
         # Create the expect meta file if it doesn't yet exist.
           echo " CREATED"
