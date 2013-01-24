@@ -1453,7 +1453,7 @@ dump_dataset_values(hid_t dset)
 
     h5tools_str_close(&buffer);
     
-    HDfprintf(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
 }
 
 
@@ -1637,7 +1637,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
     } 
     h5tools_str_close(&buffer);
 
-    HDfprintf(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
 
     return 0;
 }
@@ -2263,7 +2263,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
                 grp_literal_g = orig_grp_literal;
             }
             else
-                HDfprintf(rawoutstream, "\n");
+                PRINTVALSTREAM(rawoutstream, "\n");
             }
             break;
 
@@ -2749,7 +2749,7 @@ main(int argc, const char *argv[])
 
             if(file >= 0) {
                 if(verbose_g)
-                    HDfprintf(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
+                    PRINTSTREAM(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
             } /* end if */
 

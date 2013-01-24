@@ -1168,23 +1168,23 @@ dump_fcpl(hid_t fid)
     * SUPER_BLOCK
     *-------------------------------------------------------------------------
     */
-    HDfprintf(rawoutstream, "\n%s %s\n",SUPER_BLOCK, BEGIN);
+    PRINTSTREAM(rawoutstream, "\n%s %s\n",SUPER_BLOCK, BEGIN);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %u\n","SUPERBLOCK_VERSION", finfo.super.version);
+    PRINTSTREAM(rawoutstream, "%s %u\n","SUPERBLOCK_VERSION", finfo.super.version);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %u\n","FREELIST_VERSION", finfo.free.version);
+    PRINTSTREAM(rawoutstream, "%s %u\n","FREELIST_VERSION", finfo.free.version);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %u\n","SYMBOLTABLE_VERSION", 0);  /* Retain this for backward compatibility, for now (QAK) */
+    PRINTSTREAM(rawoutstream, "%s %u\n","SYMBOLTABLE_VERSION", 0);  /* Retain this for backward compatibility, for now (QAK) */
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %u\n","OBJECTHEADER_VERSION", finfo.sohm.version);
+    PRINTSTREAM(rawoutstream, "%s %u\n","OBJECTHEADER_VERSION", finfo.sohm.version);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream,"%s %Hd\n","OFFSET_SIZE", (long long)off_size);
+    PRINTSTREAM(rawoutstream,"%s %Hd\n","OFFSET_SIZE", (long long)off_size);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream,"%s %Hd\n","LENGTH_SIZE", (long long)len_size);
+    PRINTSTREAM(rawoutstream,"%s %Hd\n","LENGTH_SIZE", (long long)len_size);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %u\n","BTREE_RANK", sym_ik);
+    PRINTSTREAM(rawoutstream, "%s %u\n","BTREE_RANK", sym_ik);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %d\n","BTREE_LEAF", sym_lk);
+    PRINTSTREAM(rawoutstream, "%s %d\n","BTREE_LEAF", sym_lk);
 
 #ifdef SHOW_FILE_DRIVER
     if (H5FD_CORE==fdriver)
@@ -1215,37 +1215,42 @@ dump_fcpl(hid_t fid)
     /* Take out this because the driver used can be different from the
      * standard output. */
     /*indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %s\n","FILE_DRIVER", dname);*/
+    PRINTSTREAM(rawoutstream, "%s %s\n","FILE_DRIVER", dname);*/
 #endif
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %u\n","ISTORE_K", istore_ik);
+    PRINTSTREAM(rawoutstream, "%s %u\n","ISTORE_K", istore_ik);
 
     indentation(dump_indent + COL);
-    if(fs_strategy == H5F_FILE_SPACE_ALL_PERSIST)
-        HDfprintf(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL_PERSIST");
-    else if(fs_strategy == H5F_FILE_SPACE_ALL)
-        HDfprintf(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL");
-    else if(fs_strategy == H5F_FILE_SPACE_AGGR_VFD)
-        HDfprintf(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_AGGR_VFD");
-    else if(fs_strategy == H5F_FILE_SPACE_VFD)
-        HDfprintf(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_VFD");
-    else
-        HDfprintf(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "Unknown strategy");
+    if(fs_strategy == H5F_FILE_SPACE_ALL_PERSIST) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL_PERSIST");
+    }
+    else if(fs_strategy == H5F_FILE_SPACE_ALL) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_ALL");
+    }
+    else if(fs_strategy == H5F_FILE_SPACE_AGGR_VFD) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_AGGR_VFD");
+    }
+    else if(fs_strategy == H5F_FILE_SPACE_VFD) {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "H5F_FILE_SPACE_VFD");
+    }
+    else {
+        PRINTSTREAM(rawoutstream, "%s %s\n", "FILE_SPACE_STRATEGY", "Unknown strategy");
+    }
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s %Hu\n","FREE_SPACE_THRESHOLD", fs_threshold);
+    PRINTSTREAM(rawoutstream, "%s %Hu\n","FREE_SPACE_THRESHOLD", fs_threshold);
 
     /*-------------------------------------------------------------------------
     * USER_BLOCK
     *-------------------------------------------------------------------------
     */
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "USER_BLOCK %s\n",BEGIN);
+    PRINTSTREAM(rawoutstream, "USER_BLOCK %s\n",BEGIN);
     indentation(dump_indent + COL + COL);
-    HDfprintf(rawoutstream,"%s %Hu\n","USERBLOCK_SIZE", userblock);
+    PRINTSTREAM(rawoutstream,"%s %Hu\n","USERBLOCK_SIZE", userblock);
     indentation(dump_indent + COL);
-    HDfprintf(rawoutstream, "%s\n",END);
+    PRINTSTREAM(rawoutstream, "%s\n",END);
 
-    HDfprintf(rawoutstream, "%s",END);
+    PRINTSTREAM(rawoutstream, "%s",END);
 }
 
 /*-------------------------------------------------------------------------
@@ -1264,7 +1269,7 @@ dump_fcpl(hid_t fid)
 void
 dump_fcontents(hid_t fid)
 {
-    HDfprintf(rawoutstream, "%s %s\n",FILE_CONTENTS, BEGIN);
+    PRINTSTREAM(rawoutstream, "%s %s\n",FILE_CONTENTS, BEGIN);
 
     /* special case of unamed types in root group */
     if (unamedtype) {
@@ -1272,14 +1277,14 @@ dump_fcontents(hid_t fid)
 
         for (u = 0; u < type_table->nobjs; u++) {
             if (!type_table->objs[u].recorded)
-                HDfprintf(rawoutstream, " %-10s /#"H5_PRINTF_HADDR_FMT"\n", "datatype", type_table->objs[u].objno);
+                PRINTSTREAM(rawoutstream, " %-10s /#"H5_PRINTF_HADDR_FMT"\n", "datatype", type_table->objs[u].objno);
         }
     }
 
     /* print objects in the files */
     h5trav_print(fid);
 
-    HDfprintf(rawoutstream, " %s\n",END);
+    PRINTSTREAM(rawoutstream, " %s\n",END);
 }
 
 /*-------------------------------------------------------------------------
@@ -1564,12 +1569,12 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 
         if(found_obj) {
             if (found_obj->displayed) {
-                HDfprintf(rawoutstream, "\n");
+                PRINTVALSTREAM(rawoutstream, "\n");
                 indentation(dump_indent);
                 begin_obj(h5tools_dump_header_format->datasetbegin, real_name, h5tools_dump_header_format->datasetblockbegin);
-                HDfprintf(rawoutstream, "\n");
+                PRINTVALSTREAM(rawoutstream, "\n");
                 indentation(dump_indent + COL);
-                HDfprintf(rawoutstream, "%s \"%s\"\n", HARDLINK, found_obj->objname);
+                PRINTSTREAM(rawoutstream, "%s \"%s\"\n", HARDLINK, found_obj->objname);
                 indentation(dump_indent);
                 end_obj(h5tools_dump_header_format->datasetend, h5tools_dump_header_format->datasetblockend);
             } 
@@ -1621,9 +1626,9 @@ handle_groups(hid_t fid, const char *group, void UNUSED *data, int pe, const cha
 
     if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) {
         if (pe) {
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             begin_obj(h5tools_dump_header_format->groupbegin, real_name, h5tools_dump_header_format->groupblockbegin);
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
             error_msg("unable to open group \"%s\"\n", real_name);
             end_obj(h5tools_dump_header_format->groupend, h5tools_dump_header_format->groupblockend);
@@ -1678,15 +1683,15 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
     } 
     else {
         char *buf = (char *)HDmalloc(linfo.u.val_size);
-        HDfprintf(rawoutstream, "\n");
+        PRINTVALSTREAM(rawoutstream, "\n");
 
         switch(linfo.type) {
         case H5L_TYPE_SOFT:    /* Soft link */
             begin_obj(h5tools_dump_header_format->softlinkbegin, links, h5tools_dump_header_format->softlinkblockbegin);
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
             if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0)
-                HDfprintf(rawoutstream, "LINKTARGET \"%s\"\n", buf);
+                PRINTSTREAM(rawoutstream, "LINKTARGET \"%s\"\n", buf);
             else {
                 error_msg("h5dump error: unable to get link value for \"%s\"\n", links);
                 h5tools_setstatus(EXIT_FAILURE);
@@ -1696,21 +1701,21 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
 
         case H5L_TYPE_EXTERNAL:
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
             begin_obj(h5tools_dump_header_format->extlinkbegin, links, h5tools_dump_header_format->extlinkblockbegin);
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
                 const char *elink_file;
                 const char *elink_path;
 
                 if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
                     indentation(COL);
-                    HDfprintf(rawoutstream, "LINKCLASS %d\n", linfo.type);
+                    PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
                     indentation(COL);
-                    HDfprintf(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
+                    PRINTSTREAM(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
                     indentation(COL);
-                    HDfprintf(rawoutstream, "TARGETPATH \"%s\"\n", elink_path);
+                    PRINTSTREAM(rawoutstream, "TARGETPATH \"%s\"\n", elink_path);
                 } 
                 else {
                     error_msg("h5dump error: unable to unpack external link value for \"%s\"\n", links);
@@ -1726,12 +1731,12 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
 
         default:
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
-            HDfprintf(rawoutstream, "\n");
+            PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
-            HDfprintf(rawoutstream, "LINKCLASS %d\n", linfo.type);
+            PRINTSTREAM(rawoutstream, "LINKCLASS %d\n", linfo.type);
             end_obj(h5tools_dump_header_format->udlinkend, h5tools_dump_header_format->udlinkblockend);
             break;
         } /* end switch */
@@ -1785,9 +1790,9 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
         if(idx == type_table->nobjs) {
             if (pe) {
                 /* unknown type */
-                HDfprintf(rawoutstream, "\n");
+                PRINTVALSTREAM(rawoutstream, "\n");
                 begin_obj(h5tools_dump_header_format->datatypebegin, real_name, h5tools_dump_header_format->datatypeblockbegin);
-                HDfprintf(rawoutstream, "\n");
+                PRINTVALSTREAM(rawoutstream, "\n");
                 indentation(COL);
                 error_msg("unable to open datatype \"%s\"\n", real_name);
                 end_obj(h5tools_dump_header_format->datatypeend, h5tools_dump_header_format->datatypeblockend);

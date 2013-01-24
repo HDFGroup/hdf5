@@ -1488,6 +1488,9 @@
 ./tools/testfiles/tnestedcomp.h5
 ./tools/testfiles/tnestedcmpddt.ddl
 ./tools/testfiles/tnestedcmpddt.h5
+./tools/testfiles/tnoattrdata.ddl
+./tools/testfiles/tnoattrddl.ddl
+./tools/testfiles/tnodata.ddl
 ./tools/testfiles/tnoddl.ddl
 ./tools/testfiles/tnoddlfile.ddl
 ./tools/testfiles/tnoddlfile.exp
@@ -1590,7 +1593,7 @@
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
 ./tools/testfiles/twidedisplay.ddl
-./tools/testfiles/twithddl.ddl
+./tools/testfiles/twithddl.exp
 ./tools/testfiles/twithddlfile.ddl
 ./tools/testfiles/twithddlfile.exp
 

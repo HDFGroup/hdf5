@@ -19,9 +19,32 @@ $DPRINT $cfgfile
 # Remove temporary generated files if exit 0
 trap "rm -f $cminfile $cfgfile" 0
 
+#=============
+# Function definitions
+#=============
+TIMESTAMP()
+{
+    echo "=====" "`date`" "====="
+}
+
+
 #==========
 # main
 #==========
+# Show a start time stamp
+TIMESTAMP
+
+# Explain what and where log files are.
+cat <<EOF
+ctest.log: output of ctest script.
+Log files will be stored in Testing/Temporary:
+    LastConfigure_<timestamp>.log: output of configure
+    LastBuild_<timestamp>.log: output of build
+    LastTest_<timestamp>.log: output of testing
+    LastTestsFailed_<timestamp>.log: list of failed tests
+
+EOF
+
 # First generate the two needed input files, the $cimnfile and $cfgfile.
 # Then use ctest to use the two input files.
 
@@ -49,7 +72,7 @@ set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
 set (CTEST_BUILD_CONFIGURATION "Release")
 
 # -- CDash variables
-#set (LOCAL_NO_SUBMIT TRUE)
+set (LOCAL_NO_SUBMIT TRUE)	# No CDash submit.
 set (MODEL "Experimental")
 set (CDASH_LOCAL TRUE)
 set (SITE_BUILDNAME_SUFFIX "SHARED")
@@ -184,13 +207,12 @@ EOF
 
 
 # Run ctest
-date
-ctest -S $cfgfile -C Release -O testhdf.log
+ctest -S $cfgfile -C Release -O ctest.log
 exit_code=$?
 if [ $exit_code = 0 ]; then
     echo Complete without error
 else
     echo Error encountered
 fi
-date
+TIMESTAMP
 exit $exit_code

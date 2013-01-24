@@ -140,6 +140,9 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestcomp-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcmpddt.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnbit.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoattrdata.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoattrddl.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddl.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnoddlfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.ddl
@@ -188,7 +191,6 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twidedisplay.ddl
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddl.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twithddlfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/h5dump-help.txt
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
@@ -199,6 +201,7 @@ IF (BUILD_TESTING)
       trawdatafile.exp
       tstr2bin2.exp
       tstr2bin6.exp
+      twithddl.exp
       twithddlfile.exp
   )
   SET (HDF5_REFERENCE_TEST_FILES
@@ -1139,6 +1142,12 @@ IF (BUILD_TESTING)
           tnestedcmpddt.out.err
           tnbit.out
           tnbit.out.err
+          tnoattrdata.out
+          tnoattrdata.out.err
+          tnoattrddl.out
+          tnoattrddl.out.err
+          tnodata.out
+          tnodata.out.err
           tnoddl.out
           tnoddl.out.err
           tnoddlfile.out
@@ -1253,9 +1262,12 @@ IF (BUILD_TESTING)
   ADD_HELP_TEST(help 0 -h)
 
   # test data output redirection
-  ADD_H5_TEST (tnoddl 0 --enable-error-stack --redirect-ddl=NULL -y packedbits.h5)
+  ADD_H5_TEST (tnoddl 0 --enable-error-stack --ddl=NULL -y packedbits.h5)
+  ADD_H5_TEST (tnodata 0 --enable-error-stack --output=NULL packedbits.h5)
+  ADD_H5_TEST (tnoattrddl 0 --enable-error-stack --ddl=NULL -y tattr.h5)
+  ADD_H5_TEST (tnoattrdata 0 --enable-error-stack -A --output=NULL tattr.h5)
   ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
-  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=NULL -y -o)
+  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --ddl=NULL -y -o)
   ADD_TEST (
       NAME H5DUMP-clear-twithddlfile-export
       COMMAND    ${CMAKE_COMMAND}
@@ -1266,11 +1278,11 @@ IF (BUILD_TESTING)
     SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
   SET (last_test "H5DUMP-clear-twithddlfile-export")
-  ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --redirect-ddl=twithddl.txt -y -o)
+  ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --ddl=twithddl.txt -y -o)
   ADD_TEST (
       NAME H5DUMP-output-cmp-meta-twithddlfile
       COMMAND ${CMAKE_COMMAND}
-          -E compare_files twithddl.txt twithddl.ddl
+          -E compare_files twithddl.txt twithddl.exp
   )
   SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
   IF (NOT "${last_test}" STREQUAL "")

@@ -40,6 +40,7 @@ hid_t H5tools_ERR_CLS_g = -1;
 hid_t H5E_tools_g = -1;
 hid_t H5E_tools_min_id_g = -1;
 int         compound_data;
+FILE       *rawattrstream;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawdatastream;      /* should initialize to stdout but gcc moans about it */
 FILE       *rawoutstream;       /* should initialize to stdout but gcc moans about it */
 FILE       *rawerrorstream;     /* should initialize to stderr but gcc moans about it */
@@ -119,6 +120,8 @@ h5tools_init(void)
         H5tools_ERR_STACK_g = H5Ecreate_stack();
         H5TOOLS_INIT_ERROR()
 
+        if (!rawattrstream)
+            rawattrstream = stdout;
         if (!rawdatastream)
             rawdatastream = stdout;
         if (!rawoutstream)
@@ -157,6 +160,12 @@ h5tools_close(void)
         H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
         if(tools_func!=NULL)
             H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
+        if (rawattrstream && rawattrstream != stdout) {
+            if (fclose(rawattrstream))
+                perror("closing rawattrstream");
+            else
+                rawattrstream = NULL;
+        }
         if (rawdatastream && rawdatastream != stdout) {
             if (fclose(rawdatastream))
                 perror("closing rawdatastream");
@@ -573,6 +582,9 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     size_t templength = 0;
     int i, indentlevel = 0;
 
+    if (stream == NULL)
+        return;
+
     if (!ctx->need_prefix)
         return;
 
@@ -581,9 +593,9 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-        HDfputs(OPT(info->line_suf, ""), stream);
+        PUTSTREAM(OPT(info->line_suf, ""), stream);
         HDputc('\n', stream);
-        HDfputs(OPT(info->line_sep, ""), stream);
+        PUTSTREAM(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -607,23 +619,26 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            HDfputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&str, 0, info->line_indent), stream);
         }
     }
 
-    if (elmtno == 0 && secnum == 0 && info->line_1st)
-        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
-    else if (secnum && info->line_cont)
-        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
-    else
-        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+    if (elmtno == 0 && secnum == 0 && info->line_1st) {
+        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+    }
+    else if (secnum && info->line_cont) {
+        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+    }
+    else {
+        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+    }
 
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            HDfputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -662,6 +677,9 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
     size_t templength = 0;
     int i, indentlevel = 0;
 
+    if (stream == NULL)
+        return;
+
     if (!ctx->need_prefix)
         return;
 
@@ -670,9 +688,9 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-        HDfputs(OPT(info->line_suf, ""), stream);
+        PUTSTREAM(OPT(info->line_suf, ""), stream);
         HDputc('\n', stream);
-        HDfputs(OPT(info->line_sep, ""), stream);
+        PUTSTREAM(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
@@ -696,23 +714,26 @@ h5tools_region_simple_prefix(FILE *stream, const h5tool_format_t *info,
        the prefix is printed one indentation level before */
     if (info->pindex) {
         for (i = 0; i < indentlevel - 1; i++) {
-            HDfputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&str, 0, info->line_indent), stream);
         }
     }
 
-    if (elmtno == 0 && secnum == 0 && info->line_1st)
-        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
-    else if (secnum && info->line_cont)
-        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
-    else
-        HDfputs(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+    if (elmtno == 0 && secnum == 0 && info->line_1st) {
+        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_1st), stream);
+    }
+    else if (secnum && info->line_cont) {
+        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_cont), stream);
+    }
+    else {
+        PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_pre), stream);
+    }
 
     templength = h5tools_str_len(&prefix);
 
     for (i = 0; i < indentlevel; i++) {
         /*we already made the indent for the array indices case */
         if (!info->pindex) {
-            HDfputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            PUTSTREAM(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
             templength += h5tools_str_len(&prefix);
         }
         else {
@@ -765,6 +786,9 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
     char    *section; /*a section of output  */
     int      secnum; /*section sequence number */
     int      multiline; /*datum was multiline  */
+
+    if (stream == NULL)
+        return dimension_break;
 
     s = h5tools_str_fmt(buffer, 0, "%s");
 
@@ -870,12 +894,12 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info,
             h5tools_simple_prefix(stream, info, ctx, *curr_pos, secnum);
         }
         else if ((local_elmt_counter || ctx->continuation) && secnum == 0) {
-            HDfputs(OPT(info->elmt_suf2, " "), stream);
+            PUTSTREAM(OPT(info->elmt_suf2, " "), stream);
             ctx->cur_column += HDstrlen(OPT(info->elmt_suf2, " "));
         }
 
         /* Print the section */
-        HDfputs(section, stream);
+        PUTSTREAM(section, stream);
         ctx->cur_column += HDstrlen(section);
     }
 
@@ -1026,12 +1050,12 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
             h5tools_region_simple_prefix(stream, info, ctx, local_elmt_counter, ptdata, secnum);
         }
         else if ((local_elmt_counter || ctx->continuation) && secnum == 0) {
-            HDfputs(OPT(info->elmt_suf2, " "), stream);
+            PUTSTREAM(OPT(info->elmt_suf2, " "), stream);
             ctx->cur_column += HDstrlen(OPT(info->elmt_suf2, " "));
         }
 
         /* Print the section */
-        HDfputs(section, stream);
+        PUTSTREAM(section, stream);
         ctx->cur_column += HDstrlen(section);
     }
 

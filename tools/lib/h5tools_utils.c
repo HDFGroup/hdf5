@@ -152,8 +152,9 @@ error_msg(const char *fmt, ...)
     va_list ap;
 
     HDva_start(ap, fmt);
-    HDfflush(rawdatastream);
-    HDfflush(rawoutstream);
+    FLUSHSTREAM(rawattrstream);
+    FLUSHSTREAM(rawdatastream);
+    FLUSHSTREAM(rawoutstream);
     HDfprintf(rawerrorstream, "%s error: ", h5tools_getprogname());
     HDvfprintf(rawerrorstream, fmt, ap);
 
@@ -182,8 +183,9 @@ warn_msg(const char *fmt, ...)
     va_list ap;
 
     HDva_start(ap, fmt);
-    HDfflush(rawdatastream);
-    HDfflush(rawoutstream);
+    FLUSHSTREAM(rawattrstream);
+    FLUSHSTREAM(rawdatastream);
+    FLUSHSTREAM(rawoutstream);
     HDfprintf(rawerrorstream, "%s warning: ", h5tools_getprogname());
     HDvfprintf(rawerrorstream, fmt, ap);
     HDva_end(ap);
@@ -388,7 +390,7 @@ indentation(int x)
 {
     if (x < h5tools_nCols) {
         while (x-- > 0)
-            HDfprintf(rawoutstream, " ");
+            PRINTVALSTREAM(rawoutstream, " ");
     } 
     else {
         HDfprintf(rawerrorstream, "error: the indentation exceeds the number of cols.\n");
@@ -414,7 +416,7 @@ indentation(int x)
 void
 print_version(const char *progname)
 {
-    HDfprintf(rawoutstream, "%s: Version %u.%u.%u%s%s\n",
+    PRINTSTREAM(rawoutstream, "%s: Version %u.%u.%u%s%s\n",
            progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
            ((char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
@@ -494,9 +496,9 @@ dump_table(char* tablename, table_t *table)
 {
     unsigned u;
 
-    HDfprintf(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
+    PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
     for (u = 0; u < table->nobjs; u++)
-    HDfprintf(rawoutstream,"%a %s %d %d\n", table->objs[u].objno,
+        PRINTSTREAM(rawoutstream,"%a %s %d %d\n", table->objs[u].objno,
            table->objs[u].objname,
            table->objs[u].displayed, table->objs[u].recorded);
 }
