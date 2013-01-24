@@ -45,6 +45,11 @@
 static hid_t H5FD_MPIO_g = 0;
 
 /*
+ * The view is set to this value
+ */
+static char H5FD_mpi_native_g[] = "native";
+
+/*
  * The description of a file belonging to this driver.
  * The EOF value is only used just after the file is opened in order for the
  * library to determine whether the file is empty, truncated, or okay. The MPIO

@@ -31,9 +31,6 @@
 
 /* Macros */
 
-#define IS_H5FD_MPIPOSIX(f) /* (H5F_t *f) */                                \
-    (H5FD_MPIPOSIX==H5F_DRIVER_ID(f))
-
 #ifdef H5_HAVE_PARALLEL
 
 /* Function prototypes */
