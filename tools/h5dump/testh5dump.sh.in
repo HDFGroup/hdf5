@@ -31,7 +31,7 @@ H5IMPORT=../h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 
-CMP='diff -qb'                    # Compares without end of file newlines
+CMP='diff -b'                     # Compares without end of file newlines
 DIFF='diff -c'
 CP='cp'
 DIRNAME='dirname'
