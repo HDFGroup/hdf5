@@ -295,7 +295,7 @@ HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" OFF
 HDF5_TEST_VFD "Execute tests with different VFDs" OFF
 HDF5_USE_16_API_DEFAULT "Use the HDF5 1.6.x API by default" OFF
 HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" OFF
-HDF5_USE_FOLDERS "Do not include CPack Packaging" OFF
+HDF5_USE_FOLDERS "Enable folder grouping of projects in IDEs." OFF
 HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON
 HDF5_WANT_DCONV_EXCEPTION "exception handling functions is checked during data conversions" ON
 IF (APPLE) 
@@ -303,7 +303,7 @@ IF (APPLE)
 IF (CMAKE_BUILD_TYPE MATCHES Debug) 
     HDF5_ENABLE_TRACE "Enable API tracing capability" ON
 IF (HDF5_TEST_VFD) 
-    HDF5_TEST_FHEAP_VFD "Execute tests with different VFDs" ON
+    HDF5_TEST_FHEAP_VFD "Execute fheap test with different VFDs" ON
 IF (WIN32 AND NOT CYGWIN) 
     HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF
 HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF
