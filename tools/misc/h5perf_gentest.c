@@ -14,7 +14,8 @@
 #define NGROUPS     20
 #define NDSETS      20
 #define NATTRS      20
-#define NROWS       40
+#define DIM0        40
+#define NROWS       100
 #define NTYPES      9
 #define MAXVLEN     10
 #define FIXED_LEN   8
@@ -40,12 +41,15 @@ typedef struct {
 
 int add_attrs(hid_t oid, int idx);
 int add_attr(hid_t oid, const char *name, hid_t tid, hid_t sid, void *buf) ;
+herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, 
+       int nattrs, hsize_t nrows, hsize_t dim0, hsize_t chunk, int vlen, 
+	   int compressed, int latest);
 
 int main (int argc, char *argv[])
 {
     char fname[32];
-    int i, ngrps=NGROUPS, ndsets=NDSETS, nattrs=NATTRS, nrows=NROWS, 
-	    chunk=NROWS/10+1, vlen=MAXVLEN, l=0, z=0;
+    int i, ngrps=NGROUPS, ndsets=NDSETS, nattrs=NATTRS, dim0=DIM0, 
+	    chunk=DIM0/10+1, nrows=NROWS, vlen=MAXVLEN, l=0, z=0;
 
     memset(fname, 0, 32);
     for (i=1; i<argc; i++) {
@@ -59,6 +63,8 @@ int main (int argc, char *argv[])
             nattrs = atoi(argv[i+1]);
         else if (strcmp(argv[i], "-r")==0)
             nrows = atoi(argv[i+1]);
+        else if (strcmp(argv[i], "-s")==0)
+            dim0 = atoi(argv[i+1]);
         else if (strcmp(argv[i], "-c")==0)
             chunk = atoi(argv[i+1]);
         else if (strcmp(argv[i], "-v")==0)
@@ -73,14 +79,15 @@ int main (int argc, char *argv[])
             printf("\t-g N:\tnumber of top level groups (default: %d).\n", NGROUPS);
             printf("\t-d N:\tnumber of datasets (default: %d).\n", NDSETS);
             printf("\t-a N:\tnumber of attributes (default: %d).\n", NATTRS);
-            printf("\t-r N:\tnumber of rows in a dataset (default: %d).\n", NROWS);
-            printf("\t-c N:\tchunk size (default: %d).\n", (NROWS/10+1));
+            printf("\t-r N:\tnumber of rows in the large compound dataset (default: %d).\n", NROWS);
+            printf("\t-s N:\tsize of dim0 in datasets (default: %d).\n", DIM0);
+            printf("\t-c N:\tchunk size of dim0 (default: %d).\n", (DIM0/10+1));
             printf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
             printf("\t-l:\tuse latest format (default: no).\n");
             printf("\t-z:\tuse gzip compression (default: no).\n");
             printf("\t-h:\tthis help information.\n");
             printf("Example:\n");
-            printf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 400 -c 20 -v 40 -l -z\n\n");
+            printf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 10000 -s 200 -c 20 -v 40 -l -z\n\n");
             exit(0);
         }
     }
@@ -88,15 +95,16 @@ int main (int argc, char *argv[])
     if (ngrps<NGROUPS) ngrps=NGROUPS;
 	if (ndsets<NDSETS) ndsets=NDSETS;
 	if (nattrs<NATTRS) nattrs=NATTRS;
-	if (nrows<NROWS) nrows=NROWS;
-    if (chunk>nrows) chunk=nrows/4;
+	if (dim0<DIM0) dim0=DIM0;
+    if (chunk>dim0) chunk=dim0/4;
     if (chunk<1) chunk = 1;
 	if (vlen<1) vlen = MAXVLEN;
 		
     if (strlen(fname)<=0)
         sprintf(fname, FNAME);
 
-	create_perf_test_file(fname, ngrps, ndsets, nattrs, nrows, (hsize_t)chunk, vlen, z, l);
+	create_perf_test_file(fname, ngrps, ndsets, nattrs, (hsize_t)nrows, 
+	                     (hsize_t)dim0, (hsize_t)chunk, vlen, z, l);
     
     return 0;
 }
@@ -119,18 +127,19 @@ int main (int argc, char *argv[])
   
   Programmer:  Peter Cao <xcao@hdfgroup.org>, Jan. 2013
  ****************************************************************************/
-herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, 
-                          int nrows, hsize_t chunk, int vlen, int compressed, int latest)
+herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, 
+       int nattrs, hsize_t nrows, hsize_t dim0, hsize_t chunk, int vlen, 
+	   int compressed, int latest)
 {
     int         i, j, k;
-    hid_t       fid, sid_null, sid_1d, sid_2d, did, aid, sid_2, fapl=H5P_DEFAULT, dcpl=H5P_DEFAULT, 
-                gid1, gid2, cmp_tid, tid_str, tid_enum, tid_array_f, tid_vlen_i, 
-				tid_vlen_s;
+    hid_t       fid, sid_null, sid_1d, sid_2d, did, aid, sid_2, sid_large, 
+	            fapl=H5P_DEFAULT, dcpl=H5P_DEFAULT, gid1, gid2, cmp_tid, tid_str, 
+				tid_enum, tid_array_f, tid_vlen_i, tid_vlen_s;
     char        name[32];
-    hsize_t     dims[1]={nrows}, dims2d[2]={nrows, (nrows/4+1)}, dims_array[1]={FIXED_LEN}, 
+    hsize_t     dims[1]={dim0}, dims2d[2]={dim0, (dim0/4+1)}, dims_array[1]={FIXED_LEN}, 
 	            dim1[1]={2};
     char        *enum_names[4] = {"SOLID", "LIQUID", "GAS", "PLASMA"};
-    test_comp_t *buf_comp=NULL;
+    test_comp_t *buf_comp=NULL, *buf_comp_large=NULL;
     int         *buf_int=NULL;
     float       (*buf_float_a)[FIXED_LEN]=NULL;
     double      **buf_double2d=NULL;
@@ -146,6 +155,9 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
     hid_t       types[NTYPES] = { H5T_NATIVE_INT, H5T_NATIVE_UINT64, H5T_NATIVE_FLOAT, 
                 H5T_NATIVE_DOUBLE, tid_str, tid_enum, tid_array_f, tid_vlen_i, tid_vlen_s};
 	hsize_t     coords[4][2] = { {0,  1}, {3, 5}, {1,  0}, {2,  4}}, start=0, stride=1, count=1;
+	
+	/* the large compound dataset will be at least as large as regular datasets. */
+	if (nrows < dim0) nrows = dim0; 
 
     /* create fixed string datatype */                                   
     types[4] = tid_str =  H5Tcopy (H5T_C_S1);
@@ -184,6 +196,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
     sid_1d = H5Screate_simple (1, dims, NULL);
     sid_2d = H5Screate_simple (2, dims2d, NULL);
     sid_2 = H5Screate_simple  (1, dim1, NULL);
+	sid_large = H5Screate_simple  (1, &nrows, NULL);
     sid_null = H5Screate (H5S_NULL);	
 	
 	/* create fid access property */
@@ -201,7 +214,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
 	/* set dataset compression */
     if (compressed) {
         if (chunk<=0) {
-            chunk = nrows/10+1;;
+            chunk = dim0/10+1;;
             H5Pset_chunk (dcpl, 1, &chunk);
         }
         H5Pset_shuffle (dcpl);
@@ -209,12 +222,13 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
     }	
 
 	/* allocate buffers */
-    buf_comp   = (test_comp_t *)calloc(nrows, sizeof(test_comp_t));
-    buf_int    = (int *)calloc(nrows, sizeof(int));
-    buf_float_a  = malloc(nrows*sizeof(*buf_float_a));
-	buf_vlen_i = (hvl_t *)calloc(nrows, sizeof (hvl_t));
-    buf_vlen_s = (char **)calloc(nrows, sizeof(char *));
-	buf_str    =  malloc(nrows*sizeof (*buf_str));
+    buf_comp   = (test_comp_t *)calloc(dim0, sizeof(test_comp_t));
+    buf_comp_large   = (test_comp_t *)calloc(nrows, sizeof(test_comp_t));
+    buf_int    = (int *)calloc(dim0, sizeof(int));
+    buf_float_a  = malloc(dim0*sizeof(*buf_float_a));
+	buf_vlen_i = (hvl_t *)calloc(dim0, sizeof (hvl_t));
+    buf_vlen_s = (char **)calloc(dim0, sizeof(char *));
+	buf_str    =  malloc(dim0*sizeof (*buf_str));
 
 	/* allocate array of doulbe pointers */
 	buf_double2d  = (double **)calloc(dims2d[0],sizeof(double *));
@@ -253,13 +267,35 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
 		    buf_double2d[i][j] = i+j/10000.0;
     }
 
-
+    for (i=0; i<nrows; i++) {
+        buf_comp_large[i].i = i-2147483648;
+        buf_comp_large[i].l = 0xffffffffffffffff-i;
+        buf_comp_large[i].f = 1.0/(i+1.0);
+        buf_comp_large[i].d = 987654321.0*i+1.0/(i+1.0);
+        buf_comp_large[i].e = (phase_t) (i % (int) (PLASMA + 1));
+        for (j=0; j<FIXED_LEN-1; j++) {
+            buf_comp_large[i].f_array[j] = i*100+j;
+            buf_comp_large[i].s[j] = 'a' + (i%26);
+        }
+        buf_comp_large[i].i_vlen.len = i%vlen+1;
+        buf_comp_large[i].i_vlen.p = (int *)calloc(buf_comp_large[i].i_vlen.len, sizeof(int));
+        for (j=0; j<buf_comp_large[i].i_vlen.len; j++) ((int*)(buf_comp_large[i].i_vlen.p))[j] = i*100+j;
+        buf_comp_large[i].s_vlen = (char *)calloc(i+2, sizeof(char));
+        for (j=0; j<i+1; j++) (buf_comp_large[i].s_vlen)[j] = j%26+'A';
+    }
+	
 	/* create file */
     if (latest)
         fid = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     else
         fid = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 	add_attrs(fid, 0);
+
+	sprintf(name, "a cmp ds of %d rows", nrows);
+	did = H5Dcreate (fid, name, cmp_tid, sid_large, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+	H5Dwrite (did, cmp_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_comp_large);
+	add_attrs(did, 0); 
+	H5Dclose(did);
 
 	/* add attributes*/
     gid1 = H5Gcreate (fid, "attributes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -380,15 +416,22 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
     H5Sclose (sid_1d);
     H5Sclose (sid_2d);
     H5Sclose (sid_2);
+    H5Sclose (sid_large);
     H5Sclose (sid_null);
     H5Fclose (fid);
 
     for (i=0; i<dims[0]; i++) {
-		free(buf_vlen_i[i].p);
-		free(buf_vlen_s[i]);
+		if (buf_vlen_i[i].p) free(buf_vlen_i[i].p);
+		if (buf_vlen_s[i]) free(buf_vlen_s[i]);
 	}
-		
+
+    for (i=0; i<nrows; i++) {
+	    if (buf_comp_large[i].i_vlen.p)  free(buf_comp_large[i].i_vlen.p);
+		if (buf_comp_large[i].s_vlen) free(buf_comp_large[i].s_vlen);
+	}
+	
     free (buf_comp);
+    free (buf_comp_large);
     free (buf_int);
     free (buf_float_a);
     free (buf_double2d[0]);
