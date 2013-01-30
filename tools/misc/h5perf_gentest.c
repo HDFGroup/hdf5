@@ -38,8 +38,8 @@ typedef struct {
     char    *city;
 } zipcode_t;                               
 
-void add_attrs(hid_t oid, int idx);
-void add_attr(hid_t oid, const char *name, hid_t tid, hid_t sid, void *buf) ;
+int add_attrs(hid_t oid, int idx);
+int add_attr(hid_t oid, const char *name, hid_t tid, hid_t sid, void *buf) ;
 
 int main (int argc, char *argv[])
 {
@@ -263,10 +263,10 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
 
 	/* add attributes*/
     gid1 = H5Gcreate (fid, "attributes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-	nattrs = nattrs/6;
 	if (nattrs<1) nattrs = 1;
-    for (i=0; i<nattrs; i++)
-	    add_attrs(gid1, i);
+	i=0;
+	while (i<nattrs)
+	    i += add_attrs(gid1, i);
 	H5Gclose(gid1);
 		
 	/* add many sub groups to a group*/
@@ -276,7 +276,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
 	    /* create sub groups */
         sprintf(name, "g%02d", i);
         gid2 = H5Gcreate (gid1, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-		if (!i) add_attrs(gid2, 0);
+		if (i<10) add_attrs(gid2, 0);
 		H5Gclose(gid2);
 	}
 	H5Gclose(gid1);
@@ -401,21 +401,30 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattr
 }
 
 /* add a single attribute */
-void add_attr(hid_t oid, const char *name, hid_t tid, hid_t sid, void *buf) 
+int add_attr(hid_t oid, const char *name, hid_t tid, hid_t sid, void *buf) 
 {
     hid_t aid;
 
     aid = H5Acreate (oid, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+	if (aid <0)
+	return 0;
+	
     H5Awrite(aid, tid, buf); 
 
     H5Aclose(aid);
+	
+	return 1;
 }
 
-/* add different types of attributes */
-void add_attrs(hid_t oid, int idx) 
+/* 
+    adds different types of attributes to an object.
+	
+	returns the number of attributes added to the objects.
+ */
+int add_attrs(hid_t oid, int idx) 
 {
     char name[32];
-    int i0, i1, i2, j;
+    int i0, i1, i2, j, nattrs=0;
 	hid_t aid, tid, tid1, sid;
     hvl_t               i_vlen[4];
 	hobj_ref_t          ref;
@@ -456,62 +465,62 @@ void add_attrs(hid_t oid, int idx)
 	tid =  H5Tcopy (H5T_C_S1);
     H5Tset_size (tid, strlen(s[0])+1);
 	sprintf(name, "%05d scalar int", idx);
-    add_attr(oid, name, H5T_NATIVE_UINT, sid, &i);	
+    nattrs += add_attr(oid, name, H5T_NATIVE_UINT, sid, &i);	
 	sprintf(name, "%05d scalar ulong", idx);
-    add_attr(oid, name, H5T_NATIVE_INT64, sid, &l);	
+    nattrs += add_attr(oid, name, H5T_NATIVE_INT64, sid, &l);	
 	sprintf(name, "%05d scalar str", idx);
-    add_attr(oid, name, tid, sid, s[0]);	
+    nattrs += add_attr(oid, name, tid, sid, s[0]);	
 	H5Tclose(tid);
 	H5Sclose(sid);
 
-	/* 2 single point */
+	/* 4 single point */
 	sid = H5Screate_simple (1, dims1, NULL);
     H5Rcreate(&ref, oid, ".", H5R_OBJECT, -1);
 	sprintf(name, "%05d single float", idx);
-    add_attr(oid, name, H5T_NATIVE_FLOAT, sid, &f);	
+    nattrs += add_attr(oid, name, H5T_NATIVE_FLOAT, sid, &f);	
 	sprintf(name, "%05d single double", idx);
-    add_attr(oid, name, H5T_NATIVE_DOUBLE, sid, &d);	
+    nattrs += add_attr(oid, name, H5T_NATIVE_DOUBLE, sid, &d);	
 	sprintf(name, "%05d single obj_ref", idx);
-    add_attr(oid, name, H5T_STD_REF_OBJ, sid, &ref);	
+    nattrs += add_attr(oid, name, H5T_STD_REF_OBJ, sid, &ref);	
 	H5Sclose(sid);
 	
-	/* 3 fixed length 1D array */
+	/* 7 fixed length 1D array */
 	sid = H5Screate_simple (1, dims1, NULL);
 	tid = H5Tarray_create (H5T_NATIVE_FLOAT, 1, dims2);
 	sprintf(name, "%05d array float", idx);
-    add_attr(oid, name, tid, sid, &f_array[0]);
+    nattrs += add_attr(oid, name, tid, sid, &f_array[0]);
 	H5Tclose(tid);
 	tid =  H5Tcopy (H5T_C_S1);
     H5Tset_size (tid, strlen(s[0])+1);	
 	tid1 = H5Tarray_create (tid, 1, dims2);
 	sprintf(name, "%05d array str", idx);
-    add_attr(oid, name, tid1, sid, s);	
+    nattrs += add_attr(oid, name, tid1, sid, s);	
 	H5Tclose(tid1);	
 	H5Tclose(tid);	
 	H5Sclose(sid);
 
-	/* 4 fixed length 2D int arrays */
+	/* 9 fixed length 2D int arrays */
 	sid = H5Screate_simple (1, dims2, NULL);
 	tid = H5Tarray_create (H5T_NATIVE_INT, 2, dims3);
 	sprintf(name, "%05d array int 2D", idx);
-    add_attr(oid, name, tid, sid, int3d[0][0]);
+    nattrs += add_attr(oid, name, tid, sid, int3d[0][0]);
 	H5Tclose(tid);
 	H5Sclose(sid);
 	
-	/* 5 variable length arrays */
+	/* 10 variable length arrays */
 	sid = H5Screate_simple (1, dims2, NULL);
 	tid = H5Tcopy (H5T_C_S1);
 	H5Tset_size (tid, H5T_VARIABLE);
 	sprintf(name, "%05d vlen strings", idx);
-    add_attr(oid, name, tid, sid, s_vlen);
+    nattrs += add_attr(oid, name, tid, sid, s_vlen);
 	H5Tclose(tid);	
 	tid = H5Tvlen_create (H5T_NATIVE_INT);;
 	sprintf(name, "%05d vlen int array", idx);
-    add_attr(oid, name, tid, sid, i_vlen);
+    nattrs += add_attr(oid, name, tid, sid, i_vlen);
 	H5Tclose(tid);
 	H5Sclose(sid);
 
-	/* 6 compound data */
+	/* 12 compound data */
 	sid = H5Screate_simple (1, dims2, NULL);
 	tid = H5Tcreate (H5T_COMPOUND, sizeof (zipcode_t));
 	tid1 = H5Tcopy (H5T_C_S1);
@@ -519,11 +528,13 @@ void add_attrs(hid_t oid, int idx)
     H5Tinsert (tid, "zip code", 0, H5T_NATIVE_INT); offset += sizeof(H5T_NATIVE_INT);
     H5Tinsert (tid, "City", offset, tid1); offset += sizeof(char *);
 	sprintf(name, "%05d compound data", idx);
-    add_attr(oid, name, tid, sid, cmp_data);
+    nattrs += add_attr(oid, name, tid, sid, cmp_data);
 	H5Tclose(tid1);	
 	H5Tclose(tid);	
 	H5Sclose(sid);
 
 	for (i0=0; i0<4; i0++) 
 	    free(i_vlen[i0].p);
+		
+	return nattrs;
 }
