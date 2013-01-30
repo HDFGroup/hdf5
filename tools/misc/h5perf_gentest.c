@@ -69,7 +69,7 @@ int main (int argc, char *argv[])
             z = 1; 
         else if (strcmp(argv[i], "-h")==0) {
             printf("\nOPTONS:\n");
-            printf("\t-f F:\tfile_name (default: %s).\n", FNAME);
+            printf("\t-f F:\tname of the test file (default: %s).\n", FNAME);
             printf("\t-g N:\tnumber of top level groups (default: %d).\n", NGROUPS);
             printf("\t-d N:\tnumber of datasets (default: %d).\n", NDSETS);
             printf("\t-a N:\tnumber of attributes (default: %d).\n", NATTRS);
@@ -78,6 +78,7 @@ int main (int argc, char *argv[])
             printf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
             printf("\t-l:\tuse latest format (default: no).\n");
             printf("\t-z:\tuse gzip comnpression (default: no).\n");
+            printf("\t-h:\tthis help information.\n");
             printf("Example:\n");
             printf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 400 -c 20 -v 40 -l -z\n\n");
             exit(0);
