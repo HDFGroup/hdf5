@@ -1300,6 +1300,8 @@
 ./tools/misc/talign.c
 ./tools/misc/testfiles/h5mkgrp_help.txt
 ./tools/misc/testfiles/h5mkgrp_version.txt.in
+./tools/misc/h5perf_gentest.c
+
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
