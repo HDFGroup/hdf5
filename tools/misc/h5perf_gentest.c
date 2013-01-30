@@ -77,7 +77,7 @@ int main (int argc, char *argv[])
             printf("\t-c N:\tchunk size (default: %d).\n", (NROWS/10+1));
             printf("\t-v N:\tmax vlen size (default: %d).\n", MAXVLEN);
             printf("\t-l:\tuse latest format (default: no).\n");
-            printf("\t-z:\tuse gzip comnpression (default: no).\n");
+            printf("\t-z:\tuse gzip compression (default: no).\n");
             printf("\t-h:\tthis help information.\n");
             printf("Example:\n");
             printf("\t./a.out -f test.h5 -g 10000 -d 5000 -a 500 -r 400 -c 20 -v 40 -l -z\n\n");
