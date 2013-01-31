@@ -157,6 +157,9 @@ h5tools_close(void)
     H5E_auto2_t         tools_func;
     void               *tools_edata;
     if (h5tools_init_g) {
+        if((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
+            HDfprintf(rawdatastream, "\n");
+
         H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
         if(tools_func!=NULL)
             H5Eprint2(H5tools_ERR_STACK_g, rawerrorstream);
@@ -1237,7 +1240,8 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
         case H5T_REFERENCE:
             {
-                if (H5Tequal(tid, H5T_STD_REF_DSETREG)) {
+                if (size == H5R_DSET_REG_REF_BUF_SIZE) {
+                    /* if (H5Tequal(tid, H5T_STD_REF_DSETREG)) */
                     if (region_output) {
                         /* region data */
                         hid_t   region_id, region_space;
@@ -1261,7 +1265,8 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         }
                     } /* end if (region_output... */
                 }
-                else if (H5Tequal(tid, H5T_STD_REF_OBJ)) {
+                else if (size == H5R_OBJ_REF_BUF_SIZE) {
+                    /* if (H5Tequal(tid, H5T_STD_REF_OBJ)) */
                     ;
                 }
             }
