@@ -96,7 +96,10 @@ Bug Fixes since HDF5-1.8.10
 
     Configuration
     -------------
-    - None
+    - CMake builds on Windows will no longer use legacy naming for libraries, 
+      the "dll" tag will no longer be added to the name of *.lib and *.dll.
+      The option HDF_LEGACY_NAMING is now OFF by default.
+      Fixes HDFFV-8292 (ADB 2013/01/30)
 
     Library
     -------
