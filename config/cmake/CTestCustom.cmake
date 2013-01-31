@@ -13,6 +13,7 @@ SET (CTEST_CUSTOM_WARNING_EXCEPTION
     "disabling jobserver mode"
     "config.cmake.xlatefile.c"
     "warning.*implicit declaration of function"
+    "note: expanded from macro"
 #    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
 )
  
