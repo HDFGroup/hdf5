@@ -92,14 +92,6 @@ int main (int argc, char *argv[])
         }
     }
 	
-    if (ngrps<NGROUPS) ngrps=NGROUPS;
-	if (ndsets<NDSETS) ndsets=NDSETS;
-	if (nattrs<NATTRS) nattrs=NATTRS;
-	if (dim0<DIM0) dim0=DIM0;
-    if (chunk>dim0) chunk=dim0/4;
-    if (chunk<1) chunk = 1;
-	if (vlen<1) vlen = MAXVLEN;
-		
     if (strlen(fname)<=0)
         sprintf(fname, FNAME);
 
@@ -132,10 +124,10 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 	   int compressed, int latest)
 {
     int         i, j, k;
-    hid_t       fid, sid_null, sid_1d, sid_2d, did, aid, sid_2, sid_large, 
+    hid_t       fid, sid_null, sid_scalar, sid_1d, sid_2d, did, aid, sid_2, sid_large, 
 	            fapl=H5P_DEFAULT, dcpl=H5P_DEFAULT, gid1, gid2, cmp_tid, tid_str, 
 				tid_enum, tid_array_f, tid_vlen_i, tid_vlen_s;
-    char        name[32];
+    char        name[32], tmp_name1[32], tmp_name2[32], tmp_name3[32];
     hsize_t     dims[1]={dim0}, dims2d[2]={dim0, (dim0/4+1)}, dims_array[1]={FIXED_LEN}, 
 	            dim1[1]={2};
     char        *enum_names[4] = {"SOLID", "LIQUID", "GAS", "PLASMA"};
@@ -148,7 +140,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 	char        **buf_vlen_s=NULL;
 	hobj_ref_t  buf_ref[2];
 	hdset_reg_ref_t buf_reg_ref[2];
-    size_t      offset;
+    size_t      offset, len;
     herr_t      status;
     char        *names[NTYPES] = { "int", "ulong", "float", "double", "fixed string", 
 	            "enum", "fixed float array", "vlen int array", "vlen strings"};
@@ -156,8 +148,14 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
                 H5T_NATIVE_DOUBLE, tid_str, tid_enum, tid_array_f, tid_vlen_i, tid_vlen_s};
 	hsize_t     coords[4][2] = { {0,  1}, {3, 5}, {1,  0}, {2,  4}}, start=0, stride=1, count=1;
 	
-	/* the large compound dataset will be at least as large as regular datasets. */
-	if (nrows < dim0) nrows = dim0; 
+	if (nrows < NROWS) nrows = NROWS; 
+    if (ngrps<NGROUPS) ngrps=NGROUPS;
+	if (ndsets<NDSETS) ndsets=NDSETS;
+	if (nattrs<NATTRS) nattrs=NATTRS;
+	if (dim0<DIM0) dim0=DIM0;
+    if (chunk>dim0) chunk=dim0/4;
+    if (chunk<1) chunk = 1;
+	if (vlen<1) vlen = MAXVLEN;
 
     /* create fixed string datatype */                                   
     types[4] = tid_str =  H5Tcopy (H5T_C_S1);
@@ -198,6 +196,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
     sid_2 = H5Screate_simple  (1, dim1, NULL);
 	sid_large = H5Screate_simple  (1, &nrows, NULL);
     sid_null = H5Screate (H5S_NULL);	
+	sid_scalar = H5Screate (H5S_SCALAR);
 	
 	/* create fid access property */
 	fapl = H5Pcreate (H5P_FILE_ACCESS);
@@ -238,6 +237,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 	for (i=1; i <dims2d[0]; i++) buf_double2d[i] = buf_double2d[0]+i*dims2d[1];
 
 	/* fill buffer values */
+	len = 1;
     for (i=0; i<dims[0]; i++) {
         buf_comp[i].i = buf_int[i] = i-2147483648;
         buf_comp[i].l = 0xffffffffffffffff-i;
@@ -252,14 +252,15 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 		buf_str[i][FIXED_LEN-1] = 0;
         strcpy(buf_comp[i].s, buf_str[i]);
 		
-		buf_vlen_i[i].len = i%vlen+1;
-		buf_vlen_i[i].p = (int *)calloc(buf_vlen_i[i].len, sizeof(int));
-		for (j=0; j<buf_vlen_i[i].len; j++)
-		    ((int*)(buf_vlen_i[i].p))[j] = i*100+j;
+		len = (1-cos(i/8.0))/2*vlen+1;
+		if (!i) len = vlen;
+		buf_vlen_i[i].len = len;
+		buf_vlen_i[i].p = (int *)calloc(len, sizeof(int));
+		for (j=0; j<len; j++) ((int*)(buf_vlen_i[i].p))[j] = i*100+j;
 		buf_comp[i].i_vlen = buf_vlen_i[i];
 		
-		buf_vlen_s[i] = (char *)calloc(i+2, sizeof(char));
-		for (j=0; j<i+1; j++)
+		buf_vlen_s[i] = (char *)calloc(len, sizeof(char));
+		for (j=0; j<len-1; j++)
 		    buf_vlen_s[i][j] = j%26+'A';
 		buf_comp[i].s_vlen = buf_vlen_s[i];
 		
@@ -277,9 +278,10 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
             buf_comp_large[i].f_array[j] = i*100+j;
             buf_comp_large[i].s[j] = 'a' + (i%26);
         }
-        buf_comp_large[i].i_vlen.len = i%vlen+1;
-        buf_comp_large[i].i_vlen.p = (int *)calloc(buf_comp_large[i].i_vlen.len, sizeof(int));
-        for (j=0; j<buf_comp_large[i].i_vlen.len; j++) ((int*)(buf_comp_large[i].i_vlen.p))[j] = i*100+j;
+		len = i%vlen+1;
+        buf_comp_large[i].i_vlen.len = len;
+        buf_comp_large[i].i_vlen.p = (int *)calloc(len, sizeof(int));
+        for (j=0; j<len; j++) ((int*)(buf_comp_large[i].i_vlen.p))[j] = i*100+j;
         buf_comp_large[i].s_vlen = (char *)calloc(i+2, sizeof(char));
         for (j=0; j<i+1; j++) (buf_comp_large[i].s_vlen)[j] = j%26+'A';
     }
@@ -297,12 +299,11 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 	add_attrs(did, 0); 
 	H5Dclose(did);
 
-	/* add attributes*/
+	// /* add attributes*/
     gid1 = H5Gcreate (fid, "attributes", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	if (nattrs<1) nattrs = 1;
 	i=0;
-	while (i<nattrs)
-	    i += add_attrs(gid1, i);
+	while (i<nattrs) i += add_attrs(gid1, i);
 	H5Gclose(gid1);
 		
 	/* add many sub groups to a group*/
@@ -316,86 +317,99 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 		H5Gclose(gid2);
 	}
 	H5Gclose(gid1);
-	
+
 	/* add many datasets to a group */
 	gid1 = H5Gcreate (fid, "datasets", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	add_attrs(gid1, 0);
-	ndsets = ndsets/10;
-	if (ndsets<1) ndsets = 1;
-    for (j=0; j<ndsets; j++) {
-	
+    for (j=0; j<ndsets; j+=12) {
 		/* 1 add a null dataset */
 		sprintf(name, "%05d null dataset", j);
         did = H5Dcreate (gid1, name, H5T_STD_I32LE, sid_null, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		if (!j) add_attrs(did, j); 
-        H5Dclose(did);		
+        H5Dclose(did);	
+
+		/* 2 add scalar int point */
+	    sprintf(name, "%05d scalar int point", j);
+        did = H5Dcreate (gid1, name, H5T_NATIVE_INT, sid_scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Dwrite (did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &j);		
+		if (!j) add_attrs(did, j); 
+		H5Dclose(did);		
+		
+		/* 3 scalar vlen string */
+	    sprintf(name, "%05d scalar vlen string", j);
+        did = H5Dcreate (gid1, name, tid_vlen_s, sid_scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Dwrite (did, tid_vlen_s, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf_vlen_s[0]);		
+		if (!j) add_attrs(did, j); 
+		H5Dclose(did);			
 	
-	    /* 2 add fixed-length float array */
+	    /* 4 add fixed-length float array */
 		sprintf(name, "%05d fixed-length float array", j);
 		did = H5Dcreate (gid1, name, tid_array_f, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 		H5Dwrite (did, tid_array_f, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_float_a);
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 	
-		/* 3 add fixed-length strings */
+		/* 5 add fixed-length strings */
 		sprintf(name, "%05d fixed-length strings", j);
 		did = H5Dcreate (gid1, name, tid_str, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 		H5Dwrite (did, tid_str, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_str);
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 		
-		/* 4 add compound data */
+		/* 6 add compound data */
 	    sprintf(name, "%05d compund data", j);
 	    did = H5Dcreate (gid1, name, cmp_tid, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 	    H5Dwrite (did, cmp_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_comp);
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 
-		/* 5 add 2D double */
+		/* 7 add 2D double */
 	    sprintf(name, "%05d 2D double", j);
+		strcpy (tmp_name1, name);
 	    did = H5Dcreate (gid1, name, H5T_NATIVE_DOUBLE, sid_2d, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 	    H5Dwrite (did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_double2d[0]);
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 		
-		/* 6 add 1D int array */
+		/* 8 add 1D int array */
 	    sprintf(name, "%05d 1D int array", j);
         did = H5Dcreate (gid1, name, H5T_NATIVE_INT, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite (did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_int);		
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 		
-		/* 7 add vlen int array */
+		/* 9 add vlen int array */
 	    sprintf(name, "%05d vlen int array", j);
+		strcpy (tmp_name2, name);
         did = H5Dcreate (gid1, name, tid_vlen_i, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite (did, tid_vlen_i, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_vlen_i);		
+		if (!j) add_attrs(did, j); 
 		H5Dclose(did);	
 
-		/* 8 add vlen strings */
+		/* 10 add vlen strings */
 	    sprintf(name, "%05d vlen strings", j);
+		strcpy (tmp_name3, name);
         did = H5Dcreate (gid1, name, tid_vlen_s, sid_1d, H5P_DEFAULT, dcpl, H5P_DEFAULT);
         H5Dwrite (did, tid_vlen_s, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_vlen_s);		
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);	
 		
-		/* 9 add object refs */
+		/* 11 add object refs */
 		H5Rcreate(&buf_ref[0],gid1, ".", H5R_OBJECT, -1); 
-		H5Rcreate(&buf_ref[1],gid1, name, H5R_OBJECT, -1); 
+		H5Rcreate(&buf_ref[1],gid1, tmp_name3, H5R_OBJECT, -1); 
 	    sprintf(name, "%05d obj refs", j);
         did = H5Dcreate (gid1, name, H5T_STD_REF_OBJ, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite (did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_ref);		
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 
-		/* 10 add region refs */
-		sprintf(name, "%05d 2D double", j);
+		/* 12 add region refs */
 		H5Sselect_elements (sid_2d, H5S_SELECT_SET, 4, coords[0]);
-		H5Rcreate(&buf_reg_ref[0],gid1, name, H5R_DATASET_REGION, sid_2d); 
+		H5Rcreate(&buf_reg_ref[0],gid1, tmp_name1, H5R_DATASET_REGION, sid_2d); 
 		H5Sselect_none(sid_2d);
-		sprintf(name, "%05d vlen int array", j);
 		count = dims[0]/2+1;
 		H5Sselect_hyperslab (sid_1d, H5S_SELECT_SET, &start, &stride, &count,NULL);
-		H5Rcreate(&buf_reg_ref[1],gid1, name, H5R_DATASET_REGION, sid_1d); 
+		H5Rcreate(&buf_reg_ref[1],gid1, tmp_name2, H5R_DATASET_REGION, sid_1d); 
 		H5Sselect_none(sid_1d);
 	    sprintf(name, "%05d region refs", j);
         did = H5Dcreate (gid1, name, H5T_STD_REF_DSETREG, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -418,6 +432,7 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
     H5Sclose (sid_2);
     H5Sclose (sid_large);
     H5Sclose (sid_null);
+    H5Sclose (sid_scalar);
     H5Fclose (fid);
 
     for (i=0; i<dims[0]; i++) {
@@ -505,14 +520,14 @@ int add_attrs(hid_t oid, int idx)
 	
 	/* 1 scalar point */
 	sid = H5Screate (H5S_SCALAR);
-	tid =  H5Tcopy (H5T_C_S1);
-    H5Tset_size (tid, strlen(s[0])+1);
 	sprintf(name, "%05d scalar int", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_UINT, sid, &i);	
 	sprintf(name, "%05d scalar ulong", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_INT64, sid, &l);	
 	sprintf(name, "%05d scalar str", idx);
-    nattrs += add_attr(oid, name, tid, sid, s[0]);	
+	tid =  H5Tcopy (H5T_C_S1);
+    H5Tset_size (tid, H5T_VARIABLE);
+    nattrs += add_attr(oid, name, tid, sid, &s[2]);	
 	H5Tclose(tid);
 	H5Sclose(sid);
 
