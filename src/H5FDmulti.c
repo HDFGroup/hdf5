@@ -77,6 +77,7 @@
 #define H5FD_MULTI_DXPL_PROP_NAME       "H5FD_MULTI_DXPL"
 #define H5FD_MULTI_DXPL_PROP_SIZE       sizeof(H5FD_multi_dxpl_t)
 
+#define H5FD_MULT_MAX_FILE_NAME_LEN     1024
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_MULTI_g = 0;
@@ -207,12 +208,14 @@ static char *
 my_strdup(const char *s)
 {
     char *x;
+    size_t str_len;
 
     if(!s)
         return NULL;
-    if(NULL == (x = (char *)malloc(strlen(s) + 1)))
+    str_len = strlen(s) + 1;
+    if(NULL == (x = (char *)malloc(str_len)))
         return NULL;
-    strcpy(x, s);
+    memcpy(x, s, str_len);
 
     return x;
 }
@@ -301,7 +304,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
     H5FD_mem_t		memb_map[H5FD_MEM_NTYPES];
     hid_t		memb_fapl[H5FD_MEM_NTYPES];
     const char		*memb_name[H5FD_MEM_NTYPES];
-    char		meta_name[1024], raw_name[1024];
+    char		meta_name[H5FD_MULT_MAX_FILE_NAME_LEN], raw_name[H5FD_MULT_MAX_FILE_NAME_LEN];
     haddr_t		memb_addr[H5FD_MEM_NTYPES];
 
     /*NO TRACE*/
@@ -324,25 +327,39 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
 
     /* The names */
     /* process meta filename */
-    if (meta_ext){
-	if (strstr(meta_ext, "%s"))
-	    strcpy(meta_name, meta_ext);
+    if(meta_ext) {
+	if(strstr(meta_ext, "%s")) {
+            /* Note: this doesn't accommodate for when the '%s' in the user's
+             *  string is at a position >sizeof(meta_name) - QK & JK - 2013/01/17
+             */
+	    strncpy(meta_name, meta_ext, sizeof(meta_name));
+            meta_name[sizeof(meta_name) - 1] = '\0';
+        }
 	else
-	    sprintf(meta_name, "%%s%s", meta_ext);
+	    snprintf(meta_name, sizeof(meta_name), "%%s%s", meta_ext);
     }
-    else
-	strcpy(meta_name, "%s.meta");
+    else {
+	strncpy(meta_name, "%s.meta", sizeof(meta_name));
+        meta_name[sizeof(meta_name) - 1] = '\0';
+    }
     memb_name[H5FD_MEM_SUPER] = meta_name;
 
     /* process raw filename */
-    if (raw_ext){
-	if (strstr(raw_ext, "%s"))
-	    strcpy(raw_name, raw_ext);
+    if(raw_ext) {
+	if(strstr(raw_ext, "%s")) {
+            /* Note: this doesn't accommodate for when the '%s' in the user's
+             *  string is at a position >sizeof(raw_name) - QK & JK - 2013/01/17
+             */
+	    strncpy(raw_name, raw_ext, sizeof(raw_name));
+            raw_name[sizeof(raw_name) - 1] = '\0';
+        }
 	else
-	    sprintf(raw_name, "%%s%s", raw_ext);
+	    snprintf(raw_name, sizeof(raw_name), "%%s%s", raw_ext);
     }
-    else
-	strcpy(raw_name, "%s.raw");
+    else {
+	strncpy(raw_name, "%s.raw", sizeof(raw_name));
+        raw_name[sizeof(raw_name) - 1] = '\0';
+    }
     memb_name[H5FD_MEM_DRAW] = raw_name;
 
     /* The sizes */
@@ -471,7 +488,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     if (!memb_name) {
 	assert(strlen(letters)==H5FD_MEM_NTYPES);
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    sprintf(_memb_name[mt], "%%s-%c.h5", letters[mt]);
+	    snprintf(_memb_name[mt], sizeof(_memb_name[mt]), "%%s-%c.h5", letters[mt]);
 	    _memb_name_ptrs[mt] = _memb_name[mt];
 	}
 	memb_name = _memb_name_ptrs;
@@ -573,12 +590,11 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 		memb_fapl[mt] = fa->memb_fapl[mt]; /*default or bad ID*/
 	}
     }
-    if (memb_name) {
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    if (fa->memb_name[mt]) {
-		memb_name[mt] = (char *)malloc(strlen(fa->memb_name[mt])+1);
-		strcpy(memb_name[mt], fa->memb_name[mt]);
-	    } else
+    if(memb_name) {
+	for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+	    if(fa->memb_name[mt])
+		memb_name[mt] = my_strdup(fa->memb_name[mt]);
+	    else
 		memb_name[mt] = NULL;
 	}
     }
@@ -969,17 +985,17 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name/*out*/,
         p += sizeof(haddr_t);
         nseen++;
     } END_MEMBERS;
-    if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, nseen*2, buf+8, NULL,
-		   H5P_DEFAULT)<0)
+    if (H5Tconvert(H5T_NATIVE_HADDR, H5T_STD_U64LE, nseen*2, buf+8, NULL, H5P_DEFAULT)<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_DATATYPE, H5E_CANTCONVERT, "can't convert superblock info", -1)
 
     /* Encode all name templates */
     p = buf + 8 + nseen*2*8;
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
         size_t n = strlen(file->fa.memb_name[mt]) + 1;
-        strcpy((char *)p, file->fa.memb_name[mt]);
+        strncpy((char *)p, file->fa.memb_name[mt], n);
         p += n;
-        for (i=n; i%8; i++) *p++ = '\0';
+        for (i=n; i%8; i++)
+            *p++ = '\0';
     } END_MEMBERS;
 
     return 0;
@@ -1209,19 +1225,21 @@ H5FD_multi_fapl_copy(const void *_old_fa)
     ALL_MEMBERS(mt) {
 	if (old_fa->memb_fapl[mt]>=0) {
 	    new_fa->memb_fapl[mt] = H5Pcopy(old_fa->memb_fapl[mt]);
-	    if (new_fa->memb_fapl[mt]<0) nerrors++;
+	    if(new_fa->memb_fapl[mt]<0)
+                nerrors++;
 	}
 	if (old_fa->memb_name[mt]) {
-	    new_fa->memb_name[mt] = (char *)malloc(strlen(old_fa->memb_name[mt])+1);
+	    new_fa->memb_name[mt] = my_strdup(old_fa->memb_name[mt]);
 	    assert(new_fa->memb_name[mt]);
-	    strcpy(new_fa->memb_name[mt], old_fa->memb_name[mt]);
 	}
     } END_MEMBERS;
 
     if (nerrors) {
         ALL_MEMBERS(mt) {
-            if (new_fa->memb_fapl[mt]>=0) (void)H5Pclose(new_fa->memb_fapl[mt]);
-            if (new_fa->memb_name[mt]) free(new_fa->memb_name[mt]);
+            if (new_fa->memb_fapl[mt]>=0)
+                (void)H5Pclose(new_fa->memb_fapl[mt]);
+            if (new_fa->memb_name[mt])
+                free(new_fa->memb_name[mt]);
         } END_MEMBERS;
         free(new_fa);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
@@ -2191,7 +2209,7 @@ compute_next(H5FD_multi_t *file)
 static int
 open_members(H5FD_multi_t *file)
 {
-    char	tmp[1024];
+    char	tmp[H5FD_MULT_MAX_FILE_NAME_LEN];
     int		nerrors=0;
     static const char *func="(H5FD_multi)open_members";  /* Function Name for error reporting */
 
@@ -2199,30 +2217,28 @@ open_members(H5FD_multi_t *file)
     H5Eclear2(H5E_DEFAULT);
 
     UNIQUE_MEMBERS(file->fa.memb_map, mt) {
-	if (file->memb[mt]) continue; /*already open*/
+	if(file->memb[mt])
+            continue; /*already open*/
 	assert(file->fa.memb_name[mt]);
-	sprintf(tmp, file->fa.memb_name[mt], file->name);
+        /* Note: This truncates the user's filename down to only sizeof(tmp)
+         *      characters. -QK & JK, 2013/01/17
+         */
+	snprintf(tmp, sizeof(tmp), file->fa.memb_name[mt], file->name);
 
 #ifdef H5FD_MULTI_DEBUG
-	if (file->flags & H5F_ACC_DEBUG) {
-	    fprintf(stderr, "H5FD_MULTI: open member %d \"%s\"\n",
-		    (int)mt, tmp);
-	}
+	if(file->flags & H5F_ACC_DEBUG)
+	    fprintf(stderr, "H5FD_MULTI: open member %d \"%s\"\n", (int)mt, tmp);
 #endif
 	H5E_BEGIN_TRY {
-	    file->memb[mt] = H5FDopen(tmp, file->flags, file->fa.memb_fapl[mt],
-				      HADDR_UNDEF);
+	    file->memb[mt] = H5FDopen(tmp, file->flags, file->fa.memb_fapl[mt], HADDR_UNDEF);
 	} H5E_END_TRY;
-	if (!file->memb[mt]) {
+	if(!file->memb[mt]) {
 #ifdef H5FD_MULTI_DEBUG
-	    if (file->flags & H5F_ACC_DEBUG) {
-		fprintf(stderr, "H5FD_MULTI: open failed for member %d\n",
-			(int)mt);
-	    }
+	    if(file->flags & H5F_ACC_DEBUG)
+		fprintf(stderr, "H5FD_MULTI: open failed for member %d\n", (int)mt);
 #endif
-	    if (!file->fa.relax || (file->flags & H5F_ACC_RDWR)) {
+	    if(!file->fa.relax || (file->flags & H5F_ACC_RDWR))
 		nerrors++;
-	    }
 	}
     } END_MEMBERS;
     if (nerrors)

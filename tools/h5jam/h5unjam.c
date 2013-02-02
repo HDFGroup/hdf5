@@ -43,14 +43,14 @@ static const char *s_opts = "hu:i:o:d:V";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
-  {"i", require_arg, 'i'},  /* input file */
-  {"u", require_arg, 'u'},  /* user block file */
-  {"o", require_arg, 'o'},  /* output file */
-  {"delete", no_arg, 'd'},  /* delete ub */
-  {"delet", no_arg, 'd'},
-  {"dele", no_arg, 'd'},
-  {"del", no_arg, 'd'},
-  {"de", no_arg, 'd'},
+    {"i", require_arg, 'i'},    /* input file */
+    {"u", require_arg, 'u'},    /* user block file */
+    {"o", require_arg, 'o'},    /* output file */
+    {"delete", no_arg, 'd'},    /* delete ub */
+    {"delet", no_arg, 'd'},
+    {"dele", no_arg, 'd'},
+    {"del", no_arg, 'd'},
+    {"de", no_arg, 'd'},
     { NULL, 0, '\0' }
 };
 
@@ -123,86 +123,69 @@ usage(const char *prog)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    leave
- *
- * Purpose:     Shutdown and call exit()
- *
- * Return:      Does not return
- *
- *-------------------------------------------------------------------------
- */
-static void
-leave(int ret)
-{
-    if (ub_file)
-        HDfree (ub_file);
-    if (input_file)
-        HDfree (input_file);
-    if (output_file)
-        HDfree (output_file);
-
-    h5tools_close();
-
-    HDexit(ret);
-}
-
-/*-------------------------------------------------------------------------
  * Function:    parse_command_line
  *
  * Purpose:     Parse the command line for the h5dumper.
  *
- * Return:      Success:
+ * Return:      Success:    EXIT_SUCCESS;
  *
- *              Failure:    Exits program with EXIT_FAILURE value.
- *
- * Programmer:
- *
- * Modifications:
+ *              Failure:    Exits function with EXIT_FAILURE value.
  *
  *-------------------------------------------------------------------------
  */
-
-static void
+static int
 parse_command_line(int argc, const char *argv[])
 {
     int opt = FALSE;
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-        switch ((char) opt) {
-        case 'o':
-            output_file = HDstrdup (opt_arg);
-            break;
-        case 'i':
-            input_file = HDstrdup (opt_arg);
-            break;
-        case 'u':
-            ub_file = HDstrdup (opt_arg);
-            break;
-        case 'd':
-            do_delete = TRUE;
-            break;
-        case 'h':
-            usage(h5tools_getprogname());
-            leave(EXIT_SUCCESS);
-        case 'V':
-            print_version(h5tools_getprogname());
-            leave(EXIT_SUCCESS);
-        case '?':
-        default:
-            usage(h5tools_getprogname());
-            leave(EXIT_FAILURE);
+        switch((char)opt) {
+            case 'o':
+                output_file = HDstrdup(opt_arg);
+                break;
+
+            case 'i':
+                input_file = HDstrdup(opt_arg);
+                break;
+
+            case 'u':
+                ub_file = HDstrdup(opt_arg);
+                break;
+
+            case 'd':
+                do_delete = TRUE;
+                break;
+
+            case 'h':
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
+                goto done;
+
+            case 'V':
+                print_version (h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
+                goto done;
+
+            case '?':
+            default:
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
         }
     }
 
-    /* check for file name to be processed */
-/*
-    if (argc <= opt_ind+2) {
-        error_msg("missing file name\n");
-        usage(h5tools_getprogname());
-        HDexit(EXIT_FAILURE);
-    }
-*/
+    return EXIT_SUCCESS;
+    
+done:
+    if(input_file)
+        HDfree(input_file);
+    if(output_file)
+        HDfree(output_file);
+    if(ub_file)
+        HDfree(ub_file);
+
+    return EXIT_FAILURE;
 }
 
 /*-------------------------------------------------------------------------
@@ -246,13 +229,15 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    parse_command_line(argc, argv);
+    if(EXIT_FAILURE == parse_command_line(argc, argv))
+        goto done;
 
     if (input_file == NULL) {
         /* no user block */
         error_msg("missing arguemnt for HDF5 file input.\n");
         help_ref_msg(stderr);
-        leave (EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     testval = H5Fis_hdf5(input_file);
@@ -286,8 +271,10 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    H5Pclose(plist);
-    H5Fclose(ifile);
+    status = H5Pclose(plist);
+    HDassert(status >= 0);
+    status = H5Fclose(ifile);
+    HDassert(status >= 0);
 
     if (usize == 0) {
   /* no user block to remove: message? */
@@ -320,7 +307,7 @@ main(int argc, const char *argv[])
 
     if (ub_file == NULL) {
         /* write to sdtout */
-        ufid = HDdup(1);
+        ufid = STDOUT_FILENO;
     } 
     else {
         ufid = HDopen(ub_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
@@ -371,17 +358,25 @@ main(int argc, const char *argv[])
     }
 
 done:
-    if (ub_file) {
-        HDfree (ub_file);
-        if (ufid >= 0) HDclose(ufid);
+    if(input_file)
+        HDfree(input_file);
+    if(output_file)
+        HDfree(output_file);
+    if(ub_file) {
+        HDfree(ub_file);
+        if(ufid >= 0)
+            status = HDclose(ufid);
+            HDassert(status >= 0);
     }
-    if (input_file)
-        HDfree (input_file);
-    if (output_file)
-        HDfree (output_file);
 
-    if (h5fid >= 0) HDclose(h5fid);
-    if (ifid >= 0) HDclose(ifid);
+    if(h5fid >= 0) {
+        status = HDclose(h5fid);
+        HDassert(status >= 0);
+    }
+    if(ifid >= 0) {
+        status = HDclose(ifid);
+        HDassert(status >= 0);
+    }
 
     return h5tools_getstatus();
 }

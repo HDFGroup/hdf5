@@ -714,14 +714,14 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 
     if (!disable_version_check){
 	/*
-	 *verify if H5_VERS_INFO is consistent with the other version information.
-	 *Check only the first sizeof(lib_str) char.  Assume the information
-	 *will fit within this size or enough significance.
+	 * Verify if H5_VERS_INFO is consistent with the other version information.
+	 * Check only the first sizeof(lib_str) char.  Assume the information
+	 * will fit within this size or enough significance.
 	 */
-	sprintf(lib_str, "HDF5 library version: %d.%d.%d",
+	HDsnprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d",
 	    H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
 	if(*substr) {
-	    HDstrcat(lib_str, "-");
+	    HDstrncat(lib_str, "-", 1);
 	    HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
 	} /* end if */
 	if (HDstrcmp(lib_str, H5_lib_vers_info_g)){
