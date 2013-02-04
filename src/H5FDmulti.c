@@ -336,7 +336,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
             meta_name[sizeof(meta_name) - 1] = '\0';
         }
 	else
-	    snprintf(meta_name, sizeof(meta_name), "%%s%s", meta_ext);
+	    sprintf(meta_name, "%%s%s", meta_ext);
     }
     else {
 	strncpy(meta_name, "%s.meta", sizeof(meta_name));
@@ -354,7 +354,7 @@ H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id,
             raw_name[sizeof(raw_name) - 1] = '\0';
         }
 	else
-	    snprintf(raw_name, sizeof(raw_name), "%%s%s", raw_ext);
+	    sprintf(raw_name, "%%s%s", raw_ext);
     }
     else {
 	strncpy(raw_name, "%s.raw", sizeof(raw_name));
@@ -488,7 +488,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map,
     if (!memb_name) {
 	assert(strlen(letters)==H5FD_MEM_NTYPES);
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
-	    snprintf(_memb_name[mt], sizeof(_memb_name[mt]), "%%s-%c.h5", letters[mt]);
+	    sprintf(_memb_name[mt], "%%s-%c.h5", letters[mt]);
 	    _memb_name_ptrs[mt] = _memb_name[mt];
 	}
 	memb_name = _memb_name_ptrs;
@@ -2223,7 +2223,7 @@ open_members(H5FD_multi_t *file)
         /* Note: This truncates the user's filename down to only sizeof(tmp)
          *      characters. -QK & JK, 2013/01/17
          */
-	snprintf(tmp, sizeof(tmp), file->fa.memb_name[mt], file->name);
+	sprintf(tmp, file->fa.memb_name[mt], file->name);
 
 #ifdef H5FD_MULTI_DEBUG
 	if(file->flags & H5F_ACC_DEBUG)
