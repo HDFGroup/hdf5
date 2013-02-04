@@ -71,7 +71,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RECM:O:";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:Aq:z:m:RECM:O*";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -139,11 +139,11 @@ static struct long_options l_opts[] = {
     { "grou", require_arg, 'g' },
     { "gro", require_arg, 'g' },
     { "gr", require_arg, 'g' },
-    { "output", require_arg, 'o' },
-    { "outpu", require_arg, 'o' },
-    { "outp", require_arg, 'o' },
-    { "out", require_arg, 'o' },
-    { "ou", require_arg, 'o' },
+    { "output", optional_arg, 'o' },
+    { "outpu", optional_arg, 'o' },
+    { "outp", optional_arg, 'o' },
+    { "out", optional_arg, 'o' },
+    { "ou", optional_arg, 'o' },
     { "soft-link", require_arg, 'l' },
     { "soft-lin", require_arg, 'l' },
     { "soft-li", require_arg, 'l' },
@@ -187,7 +187,7 @@ static struct long_options l_opts[] = {
     { "enable-error-stack", no_arg, 'E' },
     { "packed-bits", require_arg, 'M' },
     { "no-compact-subset", no_arg, 'C' },
-    { "ddl", require_arg, 'O' },
+    { "ddl", optional_arg, 'O' },
     { NULL, 0, '\0' }
 };
 
@@ -283,7 +283,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
     PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
     PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
-    PRINTVALSTREAM(rawoutstream, "                          Use NULL as filename to suppress ddl display\n");
+    PRINTVALSTREAM(rawoutstream, "                          Do not use filename F to suppress ddl display\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
     PRINTVALSTREAM(rawoutstream, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
@@ -515,11 +515,7 @@ set_data_output_file(const char *fname, int is_bin)
     }
 
     /* First check if filename is string "NULL" */
-    if (HDstrcmp(fname, "NULL") == 0) {
-        rawdatastream = NULL;
-        retvalue = SUCCEED;
-    }
-    else {
+    if (fname != NULL) {
         /* binary output */
         if (is_bin) {
             if ((f = HDfopen(fname, "wb")) != NULL) {
@@ -533,6 +529,10 @@ set_data_output_file(const char *fname, int is_bin)
                 retvalue = SUCCEED;
             }
         }
+    }
+    else {
+        rawdatastream = NULL;
+        retvalue = SUCCEED;
     }
 
     return retvalue;
@@ -564,15 +564,15 @@ set_attr_output_file(const char *fname, int is_bin)
     }
 
     /* First check if filename is string "NULL" */
-    if (HDstrcmp(fname, "NULL") == 0) {
-        rawattrstream = NULL;
-        retvalue = SUCCEED;
-    }
-    else {
+    if (fname != NULL) {
         if ((f = HDfopen(fname, "w")) != NULL) {
             rawattrstream = f;
             retvalue = SUCCEED;
         }
+    }
+    else {
+        rawattrstream = NULL;
+        retvalue = SUCCEED;
     }
 
     return retvalue;
@@ -603,12 +603,14 @@ set_output_file(const char *fname)
             rawoutstream = NULL;
     }
     /* First check if filename is string "NULL" */
-    if (HDstrcmp(fname, "NULL") == 0) {
-        rawoutstream = NULL;
-        retvalue = SUCCEED;
+    if (fname != NULL) {
+        if ((f = HDfopen(fname, "w")) != NULL) {
+                rawoutstream = f;
+                retvalue = SUCCEED;
+        }
     }
-    else if ((f = HDfopen(fname, "w")) != NULL) {
-        rawoutstream = f;
+    else {
+        rawoutstream = NULL;
         retvalue = SUCCEED;
     }
 

@@ -277,6 +277,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
                         opt_opt = '?';
                     }
+                    else
+                        opt_arg = NULL;
                 } 
                 else {
                     if (arg[len] == '=') {

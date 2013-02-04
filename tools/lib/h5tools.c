@@ -153,6 +153,7 @@ h5tools_close(void)
     H5E_auto2_t         tools_func;
     void               *tools_edata;
     if (h5tools_init_g) {
+        /* special case where only data is output to stdout */
         if((rawoutstream == NULL) && rawdatastream && (rawdatastream == stdout))
             HDfprintf(rawdatastream, "\n");
 

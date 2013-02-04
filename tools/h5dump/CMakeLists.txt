@@ -1262,12 +1262,14 @@ IF (BUILD_TESTING)
   ADD_HELP_TEST(help 0 -h)
 
   # test data output redirection
-  ADD_H5_TEST (tnoddl 0 --enable-error-stack --ddl=NULL -y packedbits.h5)
-  ADD_H5_TEST (tnodata 0 --enable-error-stack --output=NULL packedbits.h5)
-  ADD_H5_TEST (tnoattrddl 0 --enable-error-stack --ddl=NULL -y tattr.h5)
-  ADD_H5_TEST (tnoattrdata 0 --enable-error-stack -A --output=NULL tattr.h5)
+  #ADD_H5_TEST (tnoddl 0 --enable-error-stack -O -y packedbits.h5)
+  ADD_H5_TEST (tnoddl 0 --enable-error-stack --ddl -y packedbits.h5)
+  #ADD_H5_TEST (tnodata 0 --enable-error-stack -o packedbits.h5)
+  ADD_H5_TEST (tnodata 0 --enable-error-stack --output packedbits.h5)
+  ADD_H5_TEST (tnoattrddl 0 --enable-error-stack -O -y tattr.h5)
+  ADD_H5_TEST (tnoattrdata 0 --enable-error-stack -A -o tattr.h5)
   ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
-  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack --ddl=NULL -y -o)
+  ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack -O -y -o)
   ADD_TEST (
       NAME H5DUMP-clear-twithddlfile-export
       COMMAND    ${CMAKE_COMMAND}
