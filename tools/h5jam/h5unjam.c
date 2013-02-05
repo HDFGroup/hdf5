@@ -307,7 +307,7 @@ main(int argc, const char *argv[])
 
     if (ub_file == NULL) {
         /* write to sdtout */
-        ufid = STDOUT_FILENO;
+        ufid = HDdup(1);
     } 
     else {
         ufid = HDopen(ub_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
