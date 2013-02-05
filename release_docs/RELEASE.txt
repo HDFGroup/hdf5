@@ -106,6 +106,9 @@ New Features
 
     Library:
     --------
+    - Added new API functions H5Dscatter and H5Dgather to scatter data to and
+      and gather data from a selection within a memory buffer.
+      (NAF - 2013/02/05)
     - The library now supports the data conversion from enumeration to numeric
       (integer and floating-point number) datatypes. See Issue 8221.
       (SLU - 2012/10/23)  
