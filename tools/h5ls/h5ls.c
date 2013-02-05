@@ -177,7 +177,7 @@ static void
 usage (void)
 {
     HDfprintf(rawerrorstream, "\
-usage: %s [OPTIONS] [OBJECTS...]\n\
+usage: %s [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]\n\
   OPTIONS\n\
    -h, -?, --help  Print a usage message and exit\n\
    -a, --address   Print raw data address.  If dataset is contiguous, address\n\
@@ -217,7 +217,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
    --vfd=DRIVER    Use the specified virtual file driver\n\
    -x, --hexdump   Show raw data in hexadecimal format\n\
 \n\
-  OBJECTS\n\
+  file/OBJECT\n\
     Each object consists of an HDF5 file name optionally followed by a\n\
     slash and an object name within the file (if no object is specified\n\
     within the file then the contents of the root group are displayed).\n\
