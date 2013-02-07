@@ -8236,7 +8236,7 @@ static herr_t
 test_scatter(void)
 {
     hid_t       sid = -1;       /* Dataspace ID */
-    hsize_t     dim[3] = {8, 4, 8}; /* Dataspace dimensions */
+    hsize_t     dim[3] = {8, 5, 8}; /* Dataspace dimensions */
     hsize_t     start[3] = {0, 0, 0};
     hsize_t     stride[3] = {0, 0, 0};
     hsize_t     count[3] = {0, 0, 0};
@@ -8246,8 +8246,8 @@ test_scatter(void)
     hsize_t     point[4][3] = {{2, 3, 2}, {3, 0, 2}, {7, 2, 0}, {0, 1, 5}};
     size_t      src_buf_size;
     int         src_buf[36];    /* Source data buffer */
-    int         dst_buf[8][4][8]; /* Destination data buffer */
-    int         expect_dst_buf[8][4][8]; /* Expected destination data buffer */
+    int         dst_buf[8][5][8]; /* Destination data buffer */
+    int         expect_dst_buf[8][5][8]; /* Expected destination data buffer */
     scatter_info_t scatter_info; /* Operator data for callback */
     int         i, j, k, src_i; /* Local index variables */
 
@@ -8562,7 +8562,7 @@ static herr_t
 test_gather(void)
 {
     hid_t       sid = -1;       /* Dataspace ID */
-    hsize_t     dim[3] = {8, 4, 8}; /* Dataspace dimensions */
+    hsize_t     dim[3] = {8, 5, 8}; /* Dataspace dimensions */
     hsize_t     start[3] = {0, 0, 0};
     hsize_t     stride[3] = {0, 0, 0};
     hsize_t     count[3] = {0, 0, 0};
@@ -8571,7 +8571,7 @@ test_gather(void)
     hsize_t     count2[3] = {0, 0, 0};
     hsize_t     point[4][3] = {{2, 3, 2}, {3, 0, 2}, {7, 2, 0}, {0, 1, 5}};
     size_t      dst_buf_size;
-    int         src_buf[8][4][8]; /* Source data buffer */
+    int         src_buf[8][5][8]; /* Source data buffer */
     int         dst_buf[36];    /* Destination data buffer */
     int         expect_dst_buf[36]; /* Expected destination data buffer */
     gather_info_t gather_info;  /* Operator data for callback */
@@ -8597,17 +8597,17 @@ test_gather(void)
     /* Select hyperslab */
     count[0] = 1;
     count[1] = 1;
-    count[2] = 10;
+    count[2] = 8;
     if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL ,count, NULL) < 0)
         TEST_ERROR
 
     /* Initialize expect_dst_buf */
     (void)HDmemset(expect_dst_buf, 0, sizeof(expect_dst_buf));
-    for(i=0; i<10; i++)
+    for(i=0; i<8; i++)
         expect_dst_buf[i] = src_buf[0][0][i];
 
     /* Loop over buffer sizes */
-    for(dst_buf_size=1; dst_buf_size<=11; dst_buf_size++) {
+    for(dst_buf_size=1; dst_buf_size<=9; dst_buf_size++) {
         /* Reset dst_buf */
         (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
 
@@ -8621,7 +8621,7 @@ test_gather(void)
             TEST_ERROR
 
         /* Verify that all data has been gathered (and verified) */
-        if(gather_info.expect_dst_buf - expect_dst_buf != 10) TEST_ERROR
+        if(gather_info.expect_dst_buf - expect_dst_buf != 8) TEST_ERROR
     } /* end for */
 
     /* Test with a dst_buf_size that is not a multiple of the datatype size */
@@ -8639,7 +8639,7 @@ test_gather(void)
         TEST_ERROR
 
     /* Verify that all data has been gathered (and verified) */
-    if(gather_info.expect_dst_buf - expect_dst_buf != 10) TEST_ERROR
+    if(gather_info.expect_dst_buf - expect_dst_buf != 8) TEST_ERROR
 
 
     /*
