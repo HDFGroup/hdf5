@@ -8624,6 +8624,22 @@ test_gather(void)
         if(gather_info.expect_dst_buf - expect_dst_buf != 8) TEST_ERROR
     } /* end for */
 
+    /* Test without a callback */
+    /* Loop over buffer sizes */
+    for(dst_buf_size=8; dst_buf_size<=9; dst_buf_size++) {
+        /* Reset dst_buf */
+        (void)HDmemset(dst_buf, 0, sizeof(dst_buf));
+
+        /* Gather data */
+        if(H5Dgather(sid, src_buf, H5T_NATIVE_INT, dst_buf_size * sizeof(dst_buf[0]), dst_buf, NULL, NULL) < 0)
+            TEST_ERROR
+
+        /* Verify data */
+        for(i=0; i<(int)(sizeof(dst_buf)/sizeof(dst_buf[0])); i++)
+            if(dst_buf[i] != expect_dst_buf[i])
+                TEST_ERROR
+    } /* end for */
+
     /* Test with a dst_buf_size that is not a multiple of the datatype size */
     /* Reset dst_buf */
     dst_buf_size = 7;
@@ -9155,7 +9171,7 @@ test_gather_error(void)
     gather_info.expect_dst_buf = expect_dst_buf;
     gather_info.last_call = FALSE;
     H5E_BEGIN_TRY {
-        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 6 * sizeof(dst_buf[0]), dst_buf, NULL, &gather_info);
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 5 * sizeof(dst_buf[0]), dst_buf, NULL, &gather_info);
     } H5E_END_TRY
     if(ret >= 0) TEST_ERROR
 

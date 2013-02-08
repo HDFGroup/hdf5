@@ -1048,8 +1048,6 @@ H5Dgather(hid_t src_space_id, void *src_buf, hid_t type_id, size_t dst_buf_size,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "destination buffer size is 0")
     if(dst_buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
-    if(op == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid callback function pointer")
 
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(H5P_DATASET_XFER_DEFAULT, &dxpl_cache) < 0)
@@ -1068,6 +1066,11 @@ H5Dgather(hid_t src_space_id, void *src_buf, hid_t type_id, size_t dst_buf_size,
     if((nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(src_space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get number of elements in selection")
 
+    /* If dst_buf is not large enough to hold all the elements, make sure there
+     * is a callback */
+    if(((size_t)nelmts > dst_buf_nelmts) && (op == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback supplied and destination buffer too small")
+
     /* Initialize selection iterator */
     if(H5S_select_iter_init(&iter, src_space, type_size) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize selection iterator information")
@@ -1081,10 +1084,11 @@ H5Dgather(hid_t src_space_id, void *src_buf, hid_t type_id, size_t dst_buf_size,
         HDassert(nelmts_gathered == MIN(dst_buf_nelmts, (size_t)nelmts));
 
         /* Make callback to process dst_buf */
-        if(op(dst_buf, nelmts_gathered * type_size, op_data) < 0)
+        if(op && op(dst_buf, nelmts_gathered * type_size, op_data) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, FAIL, "callback operator returned failure")
 
         nelmts -= (hssize_t)nelmts_gathered;
+        HDassert(op || (nelmts == 0));
     } /* end while */
 
 done:
