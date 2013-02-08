@@ -764,7 +764,7 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
 
         /* Create the new path */
         if(path_prefix2_len > 0) {
-            HDstrncpy(new_path, path_prefix2, path_prefix2_len);
+            HDstrncpy(new_path, path_prefix2, path_prefix2_len + 1);
             HDstrncpy(new_path + path_prefix2_len, dst_suffix, dst_suffix_len + 1);
         } /* end if */
         else

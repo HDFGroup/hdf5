@@ -365,26 +365,35 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     if (ADDR_OVERFLOW(maxaddr))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_ARGS, H5E_OVERFLOW, "maxaddr too large", NULL)
 
-    /* Attempt to open/create the file */
-    if (access(name, F_OK) < 0) {
-        if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR)) {
+    /* Tentatively open file in read-only mode, to check for existence */
+    if(flags & H5F_ACC_RDWR)
+        f = fopen(name, "rb+");
+    else
+        f = fopen(name, "rb");
+
+    if(!f) {
+        /* File doesn't exist */
+        if(flags & H5F_ACC_CREAT) {
+            assert(flags & H5F_ACC_RDWR);
             f = fopen(name, "wb+");
             write_access = 1;     /* Note the write access */
         }
         else
             H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "file doesn't exist and CREAT wasn't specified", NULL)
-    } else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_EXCL)) {
+    } else if(flags & H5F_ACC_EXCL) {
+        /* File exists, but EXCL is passed.  Fail. */
+        assert(flags & H5F_ACC_CREAT);
+        fclose(f);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FILEEXISTS, "file exists but CREAT and EXCL were specified", NULL)
-    } else if (flags & H5F_ACC_RDWR) {
-        if (flags & H5F_ACC_TRUNC)
-            f = fopen(name, "wb+");
-        else
-            f = fopen(name, "rb+");
+    } else if(flags & H5F_ACC_RDWR) {
+        if(flags & H5F_ACC_TRUNC)
+            f = freopen(name, "wb+", f);
         write_access = 1;     /* Note the write access */
-    } else {
-        f = fopen(name, "rb");
-    }
-    if (!f)
+    } /* end if */
+    /* Note there is no need to reopen if neither TRUNC nor EXCL are specified,
+     * as the tentative open will work */
+
+    if(!f)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "fopen failed", NULL)
 
     /* Build the return value */
