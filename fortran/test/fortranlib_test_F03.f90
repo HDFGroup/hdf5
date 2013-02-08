@@ -82,6 +82,10 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Testing writing/reading enum dataset, using C_LOC', total_error)  
 
   ret_total_error = 0
+  CALL t_enum_conv(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing enumeration conversions', total_error)  
+
+  ret_total_error = 0
   CALL t_bit(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing writing/reading bitfield dataset, using C_LOC', total_error)
 

@@ -1028,8 +1028,8 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4)  !should map to INTEGER*4 on most modern processors
     INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8) !should map to INTEGER*8 on most modern processors
     
-    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4) !should map to REAL*4 on most modern processors
-    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_8) !should map to REAL*8 on most modern processors
+    INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4)   !should map to REAL*4 on most modern processors
+    INTEGER, PARAMETER :: real_kind_15 = SELECTED_REAL_KIND(Fortran_REAL_8)  !should map to REAL*8 on most modern processors
     
     CHARACTER(LEN=12), PARAMETER :: filename = "dsetf_F03.h5" ! File name
     CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name
@@ -3091,4 +3091,351 @@ SUBROUTINE test_nbit(cleanup, total_error )
 
 END SUBROUTINE test_nbit
 
+
+SUBROUTINE t_enum_conv(total_error)
+
+!-------------------------------------------------------------------------
+! Subroutine: t_enum_conv
+!
+! Purpose: Tests converting data from enumeration datatype
+!          to numeric (integer or floating-point number)
+!          datatype. Tests various KINDs of INTEGERs
+!          and REALs. Checks reading enum data into
+!          INTEGER and REAL KINDs.
+!
+! Return: Success:	0
+!	  Failure:	number of errors
+!
+! Programmer:  M. Scot Breitenfeld
+!              October 27, 2012
+!
+! Note:        Adapted from C test (enum.c -- test_conv)
+!              No reliance on C tests.
+!-------------------------------------------------------------------------
+!
+  USE HDF5
+  USE ISO_C_BINDING
+
+  IMPLICIT NONE
+
+  INTEGER, INTENT(INOUT) :: total_error
+
+  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(Fortran_INTEGER_4) !should map to INTEGER*4 on most modern processors
+  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(Fortran_INTEGER_8)!should map to INTEGER*8 on most modern processors
+  
+  INTEGER, PARAMETER :: real_kind_7 = SELECTED_REAL_KIND(Fortran_REAL_4)  !should map to REAL*4 on most modern processors
+
+  INTEGER(hid_t) :: cwg=-1, dtype=-1, space=-1, dset=-1, memtype ! Handles
+  INTEGER(hid_t) :: file ! Handles
+
+  ! Enumerated type
+  ENUM, BIND(C)
+    ENUMERATOR :: E1_RED, E1_GREEN, E1_BLUE, E1_WHITE, E1_BLACK
+  END ENUM
+
+  INTEGER :: val
+
+  ! Enumerated data array 
+  ! Some values are out of range for testing. The library should accept them
+  INTEGER(KIND(E1_RED)), DIMENSION(1:20), TARGET :: data1 = (/E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,&
+       E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED,&
+       E1_RED, E1_BLUE,  E1_GREEN, E1_BLACK, E1_WHITE,&
+       E1_RED, E1_WHITE, INT(0,KIND(E1_RED)), INT(-1,KIND(E1_RED)), INT(-2,KIND(E1_RED))/)
+
+  ! Reading array for enum data
+  INTEGER(KIND(E1_RED)), DIMENSION(1:20), TARGET :: data2
+
+  ! Reading array's for converted enum data
+  INTEGER(C_SHORT), DIMENSION(1:20), TARGET :: data_short
+  INTEGER(C_INT), DIMENSION(1:20), TARGET :: data_int
+  REAL(C_DOUBLE), DIMENSION(1:20), TARGET :: data_double
+
+  INTEGER(int_kind_8), DIMENSION(1:20), TARGET :: data_i8
+  INTEGER(int_kind_16), DIMENSION(1:20), TARGET :: data_i16
+  REAL(real_kind_7), DIMENSION(1:20), TARGET :: data_r7
+
+  INTEGER(hsize_t), DIMENSION(1:1) :: ds_size = (/20/)
+  INTEGER(size_t) :: i
+  INTEGER :: error
+  TYPE(C_PTR) :: f_ptr
+  INTEGER(HID_T) :: m_baset  ! Memory base type
+  !
+  ! Create a new file using the default properties.
+  !
+  CALL h5fcreate_f("enum1.h5", H5F_ACC_TRUNC_F, file, error)
+  CALL check("h5fcreate_f", error, total_error)
+  !
+  ! Create a new group using the default properties.
+  !
+  CALL h5gcreate_f(file, "test_conv", cwg, error)
+  CALL check("h5gcreate_f",error, total_error)
+  !
+  ! Create a enum type
+  !
+  CALL H5Tcreate_f(H5T_ENUM_F, H5OFFSETOF(C_LOC(data1(1)), C_LOC(data1(2))), dtype, error)
+  CALL check("h5tcreate_f",error, total_error)
+  !
+  ! Initialize enum data.
+  !
+  val = E1_RED
+  CALL H5Tenum_insert_f(dtype, "RED", val, error)
+  CALL check("h5tenum_insert_f",error, total_error)
+  val = E1_GREEN
+  CALL H5Tenum_insert_f(dtype, "GREEN", val, error)
+  CALL check("h5tenum_insert_f",error, total_error)
+  val = E1_BLUE
+  CALL H5Tenum_insert_f(dtype, "BLUE", val, error)
+  CALL check("h5tenum_insert_f",error, total_error)
+  val = E1_WHITE
+  CALL H5Tenum_insert_f(dtype, "WHITE", val, error)
+  CALL check("h5tenum_insert_f",error, total_error)
+  val = E1_BLACK
+  CALL H5Tenum_insert_f(dtype, "BLACK", val, error)
+  CALL check("h5tenum_insert_f",error, total_error)
+  !
+  ! Create dataspace.  Setting maximum size to be the current size.
+  !
+  CALL h5screate_simple_f(1, ds_size, space, error)
+  CALL check("h5screate_simple_f", error, total_error)
+
+  ! ***************************************
+  ! * Dataset of enumeration type
+  ! ***************************************
+  !
+  ! Create a dataset of enum type and write enum data to it
+
+  CALL h5dcreate_f(cwg, "color_table1", dtype, space, dset, error)
+  CALL check("h5dcreate_f", error, total_error)
+
+  f_ptr = C_LOC(data1(1))
+  CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
+  CALL check(" h5dwrite_f", error, total_error)
+
+  ! Test reading back the data with no conversion
+
+  f_ptr = C_LOC(data2(1))
+  CALL h5dread_f(dset, dtype, f_ptr, error, space, space)
+  CALL check(" h5dread_f", error, total_error)
+
+  ! Check values
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. data2(i))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    1. data1(",I0,")=",I0," .NE. data2(",I0,")=",I0)') i, data1(i),i,data2(i)
+        EXIT
+     ENDIF
+  ENDDO
+
+  ! Test converting the data to integer (KIND=C_SHORT). Read enum data back as integer
+  m_baset = h5kind_to_type(KIND(data_short(1)), H5_INTEGER_KIND) ! Memory base type
+  f_ptr = C_LOC(data_short(1))
+  CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+  ! Check values
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. data_short(i))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    2. data1(",I0,")=",I0," .NE. data_short(",I0,")=",I0)') i, data1(i),i,data_short(i)
+        EXIT
+     ENDIF
+  ENDDO
+
+  ! Test converting the data to (KIND=C_double) number. 
+  ! Read enum data back as (KIND=C_double) number
+
+  m_baset = h5kind_to_type(KIND(data_double(1)), H5_REAL_KIND) ! Memory base type
+  f_ptr = C_LOC(data_double(1))
+  CALL h5dread_f(dset,  m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+  ! Check values
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. INT(data_double(i)))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    3. data_double(",I0,")=",I0," .NE. data_double(",I0,")=",I0)') &
+             i, INT(data1(i)), i, INT(data_double(i))
+        EXIT
+     ENDIF
+  ENDDO
+
+  ! Test converting the data to (SELECTED_INT_KIND(Fortran_INTEGER_4)) number. 
+  ! Read enum data back as (SELECTED_INT_KIND(Fortran_INTEGER_4)) number
+
+  m_baset = h5kind_to_type(int_kind_8, H5_INTEGER_KIND) ! Memory base type
+  f_ptr = C_LOC(data_i8(1))
+  CALL h5dread_f(dset,  m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+  ! Check values
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. INT(data_i8(i)))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    4. data_i8(",I0,")=",I0," .NE. data_i8(",I0,")=",I0)') &
+             i, INT(data1(i)), i, INT(data_i8(i))
+        EXIT
+     ENDIF
+  ENDDO
+
+  ! Test converting the data to (SELECTED_INT_KIND(Fortran_INTEGER_8)) number. 
+  ! Read enum data back as (SELECTED_INT_KIND(Fortran_INTEGER_8)) number
+
+  m_baset = h5kind_to_type(int_kind_16, H5_INTEGER_KIND) ! Memory base type
+  f_ptr = C_LOC(data_i16(1))
+  CALL h5dread_f(dset,  m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+  ! Check values
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. INT(data_i16(i)))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    5. data_i16(",I0,")=",I0," .NE. data_i16(",I0,")=",I0)') &
+             i, INT(data1(i)), i, INT(data_i16(i))
+        EXIT
+     ENDIF
+  ENDDO
+
+  ! Test converting the data to  SELECTED_REAL_KIND(Fortran_REAL_4) number. 
+  ! Read enum data back as  SELECTED_REAL_KIND(Fortran_REAL_4) number
+
+  m_baset = h5kind_to_type(KIND(data_r7(1)), H5_REAL_KIND) ! Memory base type
+  f_ptr = C_LOC(data_r7(1))
+  CALL h5dread_f(dset,  m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+  ! Check values
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. INT(data_r7(i)))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    6. data_r7(",I0,")=",I0," .NE. data_r7(",I0,")=",I0)') &
+             i, INT(data1(i)), i, INT(data_r7(i))
+        EXIT
+     ENDIF
+  ENDDO
+
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f", error, total_error)
+
+  ! ***************************************
+  ! *    Dataset of C_int type
+  ! ***************************************
+
+  ! Create a integer dataset of KIND=C_INT and write enum data to it
+  m_baset = h5kind_to_type(KIND(data_int(1)), H5_INTEGER_KIND) ! Memory base type
+  CALL h5dcreate_f(cwg, "color_table2", m_baset, space, dset, error)
+  CALL check("h5dcreate_f", error, total_error)
+  
+  ! Write the enum data
+  f_ptr = C_LOC(data1(1))
+  CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
+  CALL check("h5dwrite_f", error, total_error)
+
+  ! Test reading back the data with no conversion 
+  f_ptr = C_LOC(data_int(1))
+  CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. data_int(i))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    7. data1(",I0,")=",I0," .NE. data_int(",I0,")=",I0)') i, data1(i),i,data_int(i)
+        EXIT
+     ENDIF
+  ENDDO
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f", error, total_error)
+
+  !**************************************
+  !*    Dataset of C_double type
+  !**************************************
+
+  ! Create a dataset of KIND=C_DOUBLE and write enum data to it
+  m_baset = h5kind_to_type(KIND(data_double(1)), H5_REAL_KIND) ! Memory base type
+  CALL h5dcreate_f(cwg, "color_table3", m_baset, space, dset,  error)
+  CALL check("h5dcreate_f", error, total_error)
+
+  f_ptr = C_LOC(data1(1))
+  CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
+  CALL check("h5dwrite_f", error, total_error)
+
+  ! Test reading back the data with no conversion 
+  f_ptr = C_LOC(data_double(1))
+  CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. INT(data_double(i)))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    8. data1(",I0,")=",I0," .NE. data_double(",I0,")=",I0)') i, data1(i),i,INT(data_double(i))
+        EXIT
+     ENDIF
+  ENDDO
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f", error, total_error)
+
+  !*********************************************************
+  !* Dataset of real SELECTED_REAL_KIND(Fortran_REAL_4) type
+  !*********************************************************
+
+  ! Create a dataset of SELECTED_REAL_KIND(Fortran_REAL_4) and write enum data to it
+  m_baset = h5kind_to_type(KIND(data_r7(1)), H5_REAL_KIND) ! Memory base type
+  CALL h5dcreate_f(cwg, "color_table4", m_baset, space, dset,  error)
+  CALL check("h5dcreate_f", error, total_error)
+
+  f_ptr = C_LOC(data1(1))
+  CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
+  CALL check("h5dwrite_f", error, total_error)
+
+  ! Test reading back the data with no conversion 
+  f_ptr = C_LOC(data_r7(1))
+  CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. INT(data_r7(i)))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    9. data1(",I0,")=",I0," .NE. data_r7(",I0,")=",I0)') i, data1(i),i,INT(data_r7(i))
+        EXIT
+     ENDIF
+  ENDDO
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f", error, total_error)
+
+  ! *****************************************************************
+  ! * Dataset of integer SELECTED_INT_KIND(Fortran_INTEGER_8) type
+  ! *****************************************************************
+
+  ! Create a integer dataset of (SELECTED_INT_KIND(Fortran_INTEGER_8)) and write enum data to it
+  m_baset = h5kind_to_type(KIND(data_i16(1)), H5_INTEGER_KIND) ! Memory base type
+  CALL h5dcreate_f(cwg, "color_table5", m_baset, space, dset, error)
+  CALL check("h5dcreate_f", error, total_error)
+  
+  ! Write the enum data
+  f_ptr = C_LOC(data1(1))
+  CALL h5dwrite_f(dset, dtype, f_ptr, error, space, space)
+  CALL check("h5dwrite_f", error, total_error)
+
+  ! Test reading back the data with no conversion 
+  f_ptr = C_LOC(data_i16(1))
+  CALL h5dread_f(dset, m_baset, f_ptr, error, space, space)
+  CALL check("h5dread_f", error, total_error)
+
+  DO i = 1, ds_size(1)
+     IF(data1(i) .NE. data_i16(i))THEN
+        total_error = total_error + 1
+        WRITE(*,'("    10. data1(",I0,")=",I0," .NE. data_i16(",I0,")=",I0)') i, data1(i),i,data_i16(i)
+        EXIT
+     ENDIF
+  ENDDO
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f", error, total_error)
+
+  !
+  ! Close and release resources.
+  !
+  CALL h5sclose_f(space, error)
+  CALL check("H5Sclose_f", error, total_error)
+  CALL h5tclose_f(dtype, error)
+  CALL check("H5Tclose_f", error, total_error)
+  CALL h5gclose_f(cwg, error)
+  CALL check("h5gclose_f",error, total_error)
+  CALL h5fclose_f(file, error)
+  CALL check("H5Fclose_f", error, total_error)
+
+END SUBROUTINE t_enum_conv
 
