@@ -975,7 +975,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
-
+      - Fixed problem with H5DSget_scale_name including the NULL terminator in
+        the size calculation returned by the function. The API does not
+      	include the NULL terminator in the size returned (MSB- 2013/2/10)
+ 
       - Fixed problem with H5TBdelete_record destroying all data following the deletion
         of a row. (MSB- 2012/7/26)
 
