@@ -371,9 +371,9 @@ New Features
     High-Level APIs:
     ------
      - Table: In version 3.0 of Table, "NROWS" (used to store number of records) was 
-           deprecated (PVN - 2008/11/24)
+            deprecated (PVN - 2008/11/24)
 
-      - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
+     - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
           h5dsset_scale_f
           h5dsattach_scale_f
           h5dsdetach_scale_f
@@ -386,9 +386,15 @@ New Features
                   (EIP for SB - 2011/10/13)
 
      - New API: h5ltpath_valid (Fortran: h5ltpath_valid_f) which checks
-       if a path is correct and determines if a link resolves to a valid
-       object and checks that the link does not dangle. (MSB- 2012/3/15)
-    
+            if a path is correct and determines if a link resolves to a valid
+            object and checks that the link does not dangle. (MSB- 2012/3/15)
+     
+     - A new API function H5DOwrite_chunk.  It writes a data chunk directly
+            into a file bypassing hyperslab selection, data conversion, and
+            filter pipeline.  The user must be careful with the function and
+            clearly understand the I/O process of the library. 
+            (SLU - 2013/2/11)
+
     Documentation 
     ------------- 
 
