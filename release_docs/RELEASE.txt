@@ -141,7 +141,10 @@ Bug Fixes since HDF5-1.8.10
 
     High-Level APIs:
     ------
-    - None
+    - A new API function H5DOwrite_chunk.  It writes a data chunk directly
+      into a file bypassing hyperslab selection, data conversion, and
+      filter pipeline.  The user must be careful with the function and
+      clearly understand the I/O process of the library. (SLU - 2013/2/11)
 
     Fortran High-Level APIs:
     ------
