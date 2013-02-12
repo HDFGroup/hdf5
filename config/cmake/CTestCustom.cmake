@@ -41,10 +41,15 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5COPY-clear-refs
     H5COPY-clear-ext-links
     H5COPY-clear-misc
+    H5COPY-clearall-objects
     ######### tools/h5diff #########
     H5DIFF-clearall-objects
     ######### tools/h5dump #########
     H5DUMP-clearall-objects
+    H5DUMP-clear-objects-tbin1
+    H5DUMP-clear-objects-tbin2
+    H5DUMP-clear-objects-tbin3
+    H5DUMP-clear-objects-tbin4
     H5DUMP-clear-out1
     H5DUMP-clear-out3
     H5DUMP-clear-objects
