@@ -141,12 +141,9 @@ IF (BUILD_TESTING)
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
     ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5IMPORT-${testname}-clear-objects")
 
     ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
     SET (last_test "H5IMPORT-${testname}")
 
     # If using memchecker add tests without using scripts
@@ -264,10 +261,12 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_H5_DUMPTEST testname datasetname testfile)
 
   MACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
-    ADD_TEST (
-        NAME H5IMPORT-DUMP-${testname}-SKIPPED
-        COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
-    )
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5IMPORT-DUMP-${testname}-SKIPPED
+          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile} --- DEFLATE filter not available"
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
 
   # --------------------------------------------------------------------
