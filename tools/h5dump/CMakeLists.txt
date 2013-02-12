@@ -1275,6 +1275,10 @@ IF (BUILD_TESTING)
             -E remove twithddl.txt
     )
     SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5DUMP-clear-twithddlfile-export PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5DUMP-clear-twithddlfile-export")
     ADD_H5_TEST_EXPORT (twithddlfile packedbits.h5 0 --enable-error-stack --ddl=twithddl.txt -y -o)
     ADD_TEST (
         NAME H5DUMP-output-cmp-meta-twithddlfile
@@ -1282,7 +1286,7 @@ IF (BUILD_TESTING)
             -E compare_files twithddl.txt twithddl.exp
     )
     SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES DEPENDS "H5DUMP-clear-twithddlfile-export")
+    SET_TESTS_PROPERTIES (H5DUMP-output-cmp-meta-twithddlfile PROPERTIES DEPENDS "(H5DUMP-output-cmp-twithddlfile")
   ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   
   # test for maximum display datasets
