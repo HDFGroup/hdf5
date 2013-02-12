@@ -386,7 +386,7 @@ CONTAINS
 !  Retrieves a name of a referenced object.
 !
 ! INPUTS
-!  loc_id  - Identifier for the dataset containing the reference or for the group that dataset is in.
+!  loc_id  - Identifier for the file containing the reference or for any object in that file.
 !  ref 	   - An object or dataset region reference.
 !
 ! OUTPUTS
@@ -397,7 +397,8 @@ CONTAINS
 !             Failure: -1
 !
 ! OPTIONAL PARAMETERS
-!  size    - The size of the name buffer.
+!  size    - The size of the name buffer, returning 0 (zero) if 
+!            no name is associated with the identifier
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
@@ -406,7 +407,8 @@ CONTAINS
 ! SOURCES
   SUBROUTINE h5rget_name_object_f(loc_id,  ref, name, hdferr, size)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for the dataset containing the reference
+    INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for the file containing the reference or 
+                                           ! for any object in that file.
                                            ! or for the group that dataset is in.
     TYPE(hobj_ref_t_f), INTENT(IN) :: ref  ! Object reference
     INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size   ! The size of the name buffer,
@@ -453,8 +455,8 @@ CONTAINS
 !  Retrieves a name of a dataset region.
 !
 ! INPUTS
-!  loc_id 	 - Identifier for the dataset containing the reference or
-!                  for the group that dataset is in.
+!  loc_id 	 - Identifier for the file containing the reference or 
+!                  for any object in that file.
 !  ref 	         - An object or dataset region reference.
 !
 ! OUTPUTS
@@ -464,7 +466,8 @@ CONTAINS
 !                   Failure: -1
 !
 ! OPTIONAL PARAMETERS
-!  size 	 - The size of the name buffer.
+!  size 	 - The size of the name buffer,  returning 0 (zero) if no 
+!                  name is associated  with the identifier
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
@@ -473,14 +476,11 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5rget_name_region_f(loc_id, ref, name, hdferr, size)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id   ! Identifier for the dataset containing the reference
-                                           ! or for the group that dataset is in.
-    TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref       ! Object reference
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size   ! The size of the name buffer,
-                                                     ! returning 0 (zero) if no name is associated 
-                                                     ! with the identifier
-    CHARACTER(LEN=*), INTENT(OUT) :: name  ! A name associated with the referenced object or dataset region.
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref
+    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
+    CHARACTER(LEN=*), INTENT(OUT) :: name
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER :: ref_f(REF_REG_BUF_LEN)      ! Local buffer to pass reference
     INTEGER(SIZE_T) :: size_default
