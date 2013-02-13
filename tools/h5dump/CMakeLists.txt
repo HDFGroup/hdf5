@@ -837,19 +837,19 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_H5_TEST_EXPORT_DDL file)
 
   MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
-    ADD_TEST (
-        NAME H5DUMP-output-${resultfile}-clear-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove ${resultfile}.txt
-    )
-    SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    ADD_TEST (
-        NAME H5DUMP-output-${resultfile}
-        COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile}
-    )
-    SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile}-clear-objects)
     IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DUMP-output-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.txt
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      ADD_TEST (
+          NAME H5DUMP-output-${resultfile}
+          COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile}
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      SET_TESTS_PROPERTIES (H5DUMP-output-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile}-clear-objects)
       ADD_TEST (
           NAME H5DUMP-output-cmp-${resultfile}
           COMMAND ${CMAKE_COMMAND}
@@ -1095,6 +1095,8 @@ IF (BUILD_TESTING)
           tattrreg.out.err
           tattrregR.out
           tattrregR.out.err
+          tbin1LE.bin
+          tbinregR.txt
           tbinregR.out
           tbinregR.out.err
           tbigdims.out
@@ -1229,7 +1231,7 @@ IF (BUILD_TESTING)
           tnoddlfile.out.err
           trawdatafile.out
           trawdatafile.out.err
-          twithddlfile.txt
+          trawdatafile.txt
           tno-subset.out
           tno-subset.out.err
           tnullspace.out
