@@ -1068,6 +1068,10 @@ Bug Fixes since HDF5-1.8.0 release
           in "New Features" section.
           (BMR - 2008/08/10)
 
+    Testing
+    -------
+      - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
+      faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
 
 
 Supported Platforms
