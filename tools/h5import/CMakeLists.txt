@@ -197,7 +197,7 @@ IF (BUILD_TESTING)
 
       IF ("${ARGN}" STREQUAL "BINARY")
         ADD_TEST (
-            NAME H5IMPORT-DUMP-${testname}-H5DUMP
+            NAME H5IMPORT-DUMP-${testname}-H5DMP
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                 -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-b;testfiles/${testfile}"
@@ -209,7 +209,7 @@ IF (BUILD_TESTING)
         )
       ELSE ("${ARGN}" STREQUAL "BINARY")
         ADD_TEST (
-            NAME H5IMPORT-DUMP-${testname}-H5DUMP
+            NAME H5IMPORT-DUMP-${testname}-H5DMP
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
                 -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-y;--width=1;testfiles/${testfile}"
@@ -220,7 +220,7 @@ IF (BUILD_TESTING)
                 -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
         )
       ENDIF ("${ARGN}" STREQUAL "BINARY")
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DUMP PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects")
+      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects")
       
       ADD_TEST (
           NAME H5IMPORT-DUMP-${testname}
@@ -233,10 +233,10 @@ IF (BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname} PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-H5DUMP")
+      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname} PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP")
 
       ADD_TEST (
-          NAME H5IMPORT-DUMP-${testname}-H5DIFF
+          NAME H5IMPORT-DUMP-${testname}-H5DFF
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
               -D "TEST_ARGS:STRING=-v;d${testfile};testfiles/${testfile};${datasetname};${datasetname}"
@@ -247,7 +247,7 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=testfiles/d${testfile}.txt"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DIFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
+      SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_DUMPTEST testname datasetname testfile)
 
