@@ -128,28 +128,29 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
   MACRO (ADD_H5_TEST testname importfile conffile testfile)
-    ADD_TEST (
-        NAME H5IMPORT-${testname}-clear-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-            ${testfile}
-            ${testfile}.new
-            ${testfile}.new.err
-            ${testfile}.out
-            ${testfile}.out.err
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-
-    ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
-    SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
-    SET (last_test "H5IMPORT-${testname}")
-
-    # If using memchecker add tests without using scripts
-    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    # If using memchecker skip macro based tests
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5IMPORT-H5DMP-${testname}
+          NAME H5IMPORT-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              ${testfile}
+              ${testfile}.new
+              ${testfile}.new.err
+              ${testfile}.out
+              ${testfile}.out.err
+      )
+
+      ADD_TEST (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
+      SET_TESTS_PROPERTIES (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
+
+      ADD_TEST (
+          NAME H5IMPORT-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=${testfile}"
@@ -160,9 +161,9 @@ IF (BUILD_TESTING)
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-H5DMP-${testname} PROPERTIES DEPENDS H5IMPORT-${testname})
+      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-H5DMP PROPERTIES DEPENDS H5IMPORT-${testname})
       ADD_TEST (
-          NAME H5IMPORT-H5DMP_CMP-${testname}
+          NAME H5IMPORT-${testname}-H5DMP_CMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
               -D "TEST_ARGS:STRING=testfiles/${testfile}"
@@ -173,13 +174,12 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${testfile}.new"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5IMPORT-H5DMP_CMP-${testname} PROPERTIES DEPENDS H5IMPORT-H5DMP-${testname})
-      SET (last_test "H5IMPORT-H5DMP_CMP-${testname}")
-    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      SET_TESTS_PROPERTIES (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES DEPENDS H5IMPORT-${testname}-H5DMP)
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST testname importfile conffile testfile)
 
   MACRO (ADD_H5_DUMPTEST testname datasetname testfile)
-    # If using memchecker add tests without using scripts
+    # If using memchecker skip tests
     IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5IMPORT-DUMP-${testname}-clear-objects
@@ -194,9 +194,6 @@ IF (BUILD_TESTING)
               d${testfile}.dff
               d${testfile}.dff.err
       )
-      IF (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
 
       IF ("${ARGN}" STREQUAL "BINARY")
         ADD_TEST (
@@ -251,12 +248,6 @@ IF (BUILD_TESTING)
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
       SET_TESTS_PROPERTIES (H5IMPORT-DUMP-${testname}-H5DIFF PROPERTIES DEPENDS "H5IMPORT-DUMP-${testname}")
-      SET (last_test "H5IMPORT-DUMP-${testname}-H5DIFF")
-    ELSE (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (
-          NAME H5IMPORT-DUMP-${testname}-SKIPPED
-          COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname} ${datasetname} ${testfile}"
-      )
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_DUMPTEST testname datasetname testfile)
 
@@ -282,27 +273,171 @@ IF (BUILD_TESTING)
 ##############################################################################
 ##############################################################################
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME H5IMPORT-clear-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          binfp64.bin
-          binin8.bin
-          binin8w.bin
-          binin16.bin
-          binin32.bin
-          binuin16.bin
-          binuin32.bin
-          ${HDF5_REFERENCE_TEST_FILES}
-  )
-  SET (last_test "H5IMPORT-clear-objects")
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
+        NAME H5IMPORT-clear-objects
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove 
+            binfp64.bin
+            binin8.bin
+            binin8w.bin
+            binin16.bin
+            binin32.bin
+            binuin16.bin
+            binuin32.bin
+            txtin32.h5
+            txtin32.h5.new
+            txtin32.h5.new.err
+            txtin32.h5.out
+            txtin32.h5.out.err
+            txtin16.h5
+            txtin16.h5.new
+            txtin16.h5.new.err
+            txtin16.h5.out
+            txtin16.h5.out.err
+            txtin8.h5
+            txtin8.h5.new
+            txtin8.h5.new.err
+            txtin8.h5.out
+            txtin8.h5.out.err
+            txtuin16.h5
+            txtuin16.h5.new
+            txtuin16.h5.new.err
+            txtuin16.h5.out
+            txtuin16.h5.out.err
+            txtuin32.h5
+            txtuin32.h5.new
+            txtuin32.h5.new.err
+            txtuin32.h5.out
+            txtuin32.h5.out.err
+            txtfp32.h5
+            txtfp32.h5.new
+            txtfp32.h5.new.err
+            txtfp32.h5.out
+            txtfp32.h5.out.err
+            txtfp64.h5
+            txtfp64.h5.new
+            txtfp64.h5.new.err
+            txtfp64.h5.out
+            txtfp64.h5.out.err
+            binfp64.h5
+            binfp64.h5.new
+            binfp64.h5.new.err
+            binfp64.h5.out
+            binfp64.h5.out.err
+            binin8.h5
+            binin8.h5.new
+            binin8.h5.new.err
+            binin8.h5.out
+            binin8.h5.out.err
+            binin8w.h5
+            binin8w.h5.new
+            binin8w.h5.new.err
+            binin8w.h5.out
+            binin8w.h5.out.err
+            binin16.h5
+            binin16.h5.new
+            binin16.h5.new.err
+            binin16.h5.out
+            binin16.h5.out.err
+            binin32.h5
+            binin32.h5.new
+            binin32.h5.new.err
+            binin32.h5.out
+            binin32.h5.out.err
+            binuin16.h5
+            binuin16.h5.new
+            binuin16.h5.new.err
+            binuin16.h5.out
+            binuin16.h5.out.err
+            binuin32.h5
+            binuin32.h5.new
+            binuin32.h5.new.err
+            binuin32.h5.out
+            binuin32.h5.out.err
+            txtstr.h5
+            txtstr.h5.new
+            txtstr.h5.new.err
+            txtstr.h5.out
+            txtstr.h5.out.err
+            textpfe.h5
+            textpfe.h5.new
+            textpfe.h5.new.err
+            textpfe.h5.out
+            textpfe.h5.out.err
+            dbinfp64.h5
+            dbinfp64.h5.bin
+            dbinfp64.h5.imp
+            dbinfp64.h5.imp.err
+            dbinfp64.h5.dmp
+            dbinfp64.h5.dmp.err
+            dbinfp64.h5.dff
+            dbinfp64.h5.dff.err
+            dbinin8.h5
+            dbinin8.h5.bin
+            dbinin8.h5.imp
+            dbinin8.h5.imp.err
+            dbinin8.h5.dmp
+            dbinin8.h5.dmp.err
+            dbinin8.h5.dff
+            dbinin8.h5.dff.err
+            dbinin8w.h5
+            dbinin8w.h5.bin
+            dbinin8w.h5.imp
+            dbinin8w.h5.imp.err
+            dbinin8w.h5.dmp
+            dbinin8w.h5.dmp.err
+            dbinin8w.h5.dff
+            dbinin8w.h5.dff.err
+            dbinin16.h5
+            dbinin16.h5.bin
+            dbinin16.h5.imp
+            dbinin16.h5.imp.err
+            dbinin16.h5.dmp
+            dbinin16.h5.dmp.err
+            dbinin16.h5.dff
+            dbinin16.h5.dff.err
+            dbinin32.h5
+            dbinin32.h5.bin
+            dbinin32.h5.imp
+            dbinin32.h5.imp.err
+            dbinin32.h5.dmp
+            dbinin32.h5.dmp.err
+            dbinin32.h5.dff
+            dbinin32.h5.dff.err
+            dbinuin16.h5
+            dbinuin16.h5.bin
+            dbinuin16.h5.imp
+            dbinuin16.h5.imp.err
+            dbinuin16.h5.dmp
+            dbinuin16.h5.dmp.err
+            dbinuin16.h5.dff
+            dbinuin16.h5.dff.err
+            dbinuin32.h5
+            dbinuin32.h5.bin
+            dbinuin32.h5.imp
+            dbinuin32.h5.imp.err
+            dbinuin32.h5.dmp
+            dbinuin32.h5.dmp.err
+            dbinuin32.h5.dff
+            dbinuin32.h5.dff.err
+            dtxtstr.h5
+            dtxtstr.h5.bin
+            dtxtstr.h5.imp
+            dtxtstr.h5.imp.err
+            dtxtstr.h5.dmp
+            dtxtstr.h5.dmp.err
+            dtxtstr.h5.dff
+            dtxtstr.h5.dff.err
+    )
+    SET (last_test "H5IMPORT-clear-objects")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
   ADD_TEST (NAME H5IMPORT-h5importtest COMMAND $<TARGET_FILE:h5importtest>)
   IF (NOT "${last_test}" STREQUAL "")
     SET_TESTS_PROPERTIES (H5IMPORT-h5importtest PROPERTIES DEPENDS ${last_test})
   ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5IMPORT-h5importtest")
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
   ADD_H5_TEST (ASCII_I32 testfiles/txtin32.txt testfiles/txtin32.conf txtin32.h5)
