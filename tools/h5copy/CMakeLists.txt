@@ -62,20 +62,6 @@ IF (BUILD_TESTING)
         ARGS       -E copy_if_different ${listfiles} ${dest}
     )
   ENDFOREACH (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-
-  #
-  # This section can be removed, but leave here for a reference later.
-  # Purpose: '-l3' ignores top 3 lines when copy text file.
-  #
-  #FOREACH (listfiles ${LIST_OTHER_TEST_FILES})
-  #  SET (lsdest "${PROJECT_BINARY_DIR}/testfiles/${listfiles}")
-  #  ADD_CUSTOM_COMMAND (
-  #      TARGET     h5copy
-  #      POST_BUILD
-  #      COMMAND    ${XLATE_UTILITY}
-  #      ARGS       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/${listfiles} ${lsdest} -l3
-  #  )
-  #ENDFOREACH (listfiles ${LIST_OTHER_TEST_FILES})
   
 ##############################################################################
 ##############################################################################
@@ -86,177 +72,225 @@ IF (BUILD_TESTING)
   #
   # Perform h5copy according to passing parmeters
   #
-  MACRO (ADD_H5_F_TEST testname resultcode infile outfile fparam vparam sparam srcname dparam dstname)
-    # Remove any output file left over from previous test run
-    ADD_TEST (
-        NAME H5COPY_F-clear-objects-${testname}
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove 
-            ./testfiles/${outfile}
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY_F-clear-objects-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
+  MACRO (ADD_H5_F_TEST testname resultcode infile fparam vparam sparam srcname dparam dstname)
+      IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      ADD_TEST (
+          NAME H5COPY_F-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove 
+              ./testfiles/${testname}.out.h5
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+
     ADD_TEST (
         NAME H5COPY_F-${testname}
-        COMMAND $<TARGET_FILE:h5copy> -f ${fparam} -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+        COMMAND $<TARGET_FILE:h5copy> -f ${fparam} -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
     )
-    SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS H5COPY_F-clear-objects-${testname})
-    SET (last_test "H5COPY_F-${testname}")
-    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${last_test} ${infile} ${outfile} ${srcname} ${dstname})
-  ENDMACRO (ADD_H5_F_TEST)
-  
-  MACRO (ADD_H5_TEST testname resultcode infile outfile vparam sparam srcname dparam dstname)
-    # Remove any output file left over from previous test run
-    ADD_TEST (
-        NAME H5COPY-clear-objects-${testname}
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove 
-            ./testfiles/${outfile}
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-clear-objects-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    ADD_TEST (
-        NAME H5COPY-${testname}
-        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
-    )
-    SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-clear-objects-${testname})
-    SET (last_test "H5COPY-${testname}")
-    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${last_test} ${infile} ${outfile} ${srcname} ${dstname})
-  ENDMACRO (ADD_H5_TEST)
-  
-  MACRO (ADD_H5_TEST2 testname resultcode infile outfile psparam pdparam vparam sparam srcname dparam dstname)
-    # Remove any output file left over from previous test run
-    ADD_TEST (
-        NAME H5COPY-clear-objects-${testname}
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove 
-            ./testfiles/${outfile}
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-clear-objects-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    ADD_TEST (
-        NAME H5COPY-${testname}-prefill
-        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} -v -s ${psparam} -d ${pdparam}
-    )
-    SET_TESTS_PROPERTIES (H5COPY-${testname}-prefill PROPERTIES DEPENDS H5COPY-clear-objects-${testname})
-    ADD_TEST (
-        NAME H5COPY-${testname}
-        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
-    )
-    SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-prefill)
-    SET (last_test "H5COPY-${testname}")
-    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${last_test} ${infile} ${outfile} ${srcname} ${dstname})
-  ENDMACRO (ADD_H5_TEST2)
-  
-  MACRO (ADD_H5_TEST3 testname resultcode infile outfile pfile psparam pdparam vparam sparam srcname dparam dstname)
-    # Remove any output file left over from previous test run
-    ADD_TEST (
-        NAME H5COPY-clear-objects-${testname}
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove 
-            ./testfiles/${outfile}
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-clear-objects-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    ADD_TEST (
-        NAME H5COPY-${testname}-prefill
-        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${pfile} -o ./testfiles/${infile} -v -s ${psparam} -d ${pdparam}
-    )
-    SET_TESTS_PROPERTIES (H5COPY-${testname}-prefill PROPERTIES DEPENDS H5COPY-clear-objects-${testname})
-    ADD_TEST (
-        NAME H5COPY-${testname}
-        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
-    )
-    SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-prefill)
-    SET (last_test "H5COPY-${testname}")
-    ADD_H5_DIFF_TEST (${testname} ${resultcode} ${last_test} ${infile} ${outfile} ${srcname} ${dstname})
-  ENDMACRO (ADD_H5_TEST3)
-  
-  MACRO (ADD_H5_DIFF_TEST testname resultcode testdepends infile outfile srcname dstname)
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS H5COPY_F-${testname-clear-objects})
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
     # resultcode=2 will cause the test to skip the diff test
     IF (NOT ${resultcode} STREQUAL "2")
       ADD_TEST (
-          NAME H5COPY-DIFF-${testname}
-          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${outfile} ${srcname} ${dstname}
+          NAME H5COPY_F-${testname}-DIFF
+          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
       )
-      SET_TESTS_PROPERTIES(H5COPY-DIFF-${testname} PROPERTIES DEPENDS ${testdepends})
-      SET (last_test "H5COPY-DIFF-${testname}")
+      SET_TESTS_PROPERTIES(H5COPY_F-${testname}-DIFF PROPERTIES DEPENDS H5COPY_F-${testname})
       IF (${resultcode} STREQUAL "1")
-        SET_TESTS_PROPERTIES (H5COPY-DIFF-${testname} PROPERTIES WILL_FAIL "true")
+        SET_TESTS_PROPERTIES (H5COPY_F-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
     ENDIF (NOT ${resultcode} STREQUAL "2")
-  ENDMACRO (ADD_H5_DIFF_TEST)
+  ENDMACRO (ADD_H5_F_TEST)
+  
+  MACRO (ADD_H5_TEST testname resultcode infile vparam sparam srcname dparam dstname)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      ADD_TEST (
+          NAME H5COPY-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove 
+              ./testfiles/${testname}.out.h5
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+
+    ADD_TEST (
+        NAME H5COPY-${testname}
+        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+    )
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+    # resultcode=2 will cause the test to skip the diff test
+    IF (NOT ${resultcode} STREQUAL "2")
+      ADD_TEST (
+          NAME H5COPY-${testname}-DIFF
+          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+      )
+      SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
+      IF (${resultcode} STREQUAL "1")
+        SET_TESTS_PROPERTIES (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
+      ENDIF (${resultcode} STREQUAL "1")
+    ENDIF (NOT ${resultcode} STREQUAL "2")
+  ENDMACRO (ADD_H5_TEST)
+  
+  MACRO (ADD_H5_TEST2 testname resultcode infile  psparam pdparam vparam sparam srcname dparam dstname)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      ADD_TEST (
+          NAME H5COPY-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove 
+              ./testfiles/${testname}.out.h5
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+
+    ADD_TEST (
+        NAME H5COPY-${testname}-prefill
+        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
+    )
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5COPY-${testname}-prefill PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      SET_TESTS_PROPERTIES (H5COPY-${testname}-prefill PROPERTIES DEPENDS H5COPY-${testname}-clear-objects)
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+    ADD_TEST (
+        NAME H5COPY-${testname}
+        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+    )
+    SET_TESTS_PROPERTIES (H5COPY-${testname} PROPERTIES DEPENDS H5COPY-${testname}-prefill)
+    # resultcode=2 will cause the test to skip the diff test
+    IF (NOT ${resultcode} STREQUAL "2")
+      ADD_TEST (
+          NAME H5COPY-${testname}-DIFF
+          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${infile} ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+      )
+      SET_TESTS_PROPERTIES(H5COPY-${testname}-DIFF PROPERTIES DEPENDS H5COPY-${testname})
+      IF (${resultcode} STREQUAL "1")
+        SET_TESTS_PROPERTIES (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
+      ENDIF (${resultcode} STREQUAL "1")
+    ENDIF (NOT ${resultcode} STREQUAL "2")
+  ENDMACRO (ADD_H5_TEST2)
+  
+  MACRO (ADD_H5_TEST_SAME testname resultcode pfile psparam pdparam vparam sparam srcname dparam dstname)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      ADD_TEST (
+          NAME H5COPY_SAME-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove 
+              ./testfiles/${testname}.out.h5
+      )
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+
+    ADD_TEST (
+        NAME H5COPY_SAME-${testname}-prefill
+        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${pfile} -o ./testfiles/${testname}.out.h5 -v -s ${psparam} -d ${pdparam}
+    )
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5COPY_SAME-${testname}-prefill PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      SET_TESTS_PROPERTIES (H5COPY_SAME-${testname}-prefill PROPERTIES DEPENDS H5COPY_SAME-${testname}-clear-objects)
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+
+    ADD_TEST (
+        NAME H5COPY_SAME-${testname}
+        COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${testname}.out.h5 -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN}
+    )
+    SET_TESTS_PROPERTIES (H5COPY_SAME-${testname} PROPERTIES DEPENDS H5COPY_SAME-${testname}-prefill)
+    # resultcode=2 will cause the test to skip the diff test
+    IF (NOT ${resultcode} STREQUAL "2")
+      ADD_TEST (
+          NAME H5COPY_SAME-${testname}-DIFF
+          COMMAND $<TARGET_FILE:h5diff> -q ./testfiles/${testname}.out.h5 ./testfiles/${testname}.out.h5 ${srcname} ${dstname}
+      )
+      SET_TESTS_PROPERTIES(H5COPY_SAME-${testname}-DIFF PROPERTIES DEPENDS H5COPY_SAME-${testname})
+      IF (${resultcode} STREQUAL "1")
+        SET_TESTS_PROPERTIES (H5COPY_SAME-${testname}-DIFF PROPERTIES WILL_FAIL "true")
+      ENDIF (${resultcode} STREQUAL "1")
+    ENDIF (NOT ${resultcode} STREQUAL "2")
+  ENDMACRO (ADD_H5_TEST_SAME)
 
   #
   # Test result with h5ls
   #
-  MACRO (ADD_H5LS_TEST file filetest)
-    # Remove any output file left over from previous test run
-    ADD_TEST (
-        NAME H5COPY-h5ls-clear-objects-${file}-${filetest}
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove 
-            ./testfiles/${file}.out.h5
-            ./testfiles/${file}.out.out
-            ./testfiles/${file}.out.out.err
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-h5ls-clear-objects-${file}-${filetest} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
+  MACRO (ADD_H5LS_TEST infile filetest)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-h5ls-${file}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${file}.out.h5)
+      ADD_TEST (NAME H5COPY-h5ls-${infile}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${filetest}.out.h5)
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5COPY-h5ls-${infile}-${filetest} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      ADD_TEST (
+          NAME H5COPY-h5ls-${infile}-${filetest}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove 
+              ./testfiles/${filetest}.out.h5
+              ./testfiles/${filetest}.out.out
+              ./testfiles/${filetest}.out.out.err
+      )
       ADD_TEST (
           NAME H5COPY-h5ls-${file}-${filetest}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-              -D "TEST_ARGS=-Svr;./testfiles/${file}.out.h5"
+              -D "TEST_ARGS=-Svr;./testfiles/${filetest}.out.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${file}.out.out"
+              -D "TEST_OUTPUT=./testfiles/${filetest}.out.out"
               -D "TEST_EXPECT=0"
-              -D "TEST_REFERENCE=./testfiles/${file}.out.ls"
+              -D "TEST_REFERENCE=./testfiles/${infile}.out.ls"
               -D "TEST_MASK=true"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      SET_TESTS_PROPERTIES (H5COPY-h5ls-${infile}-${filetest} PROPERTIES DEPENDS H5COPY-h5ls-${infile}-${filetest}-clear-objects)
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    SET_TESTS_PROPERTIES (H5COPY-h5ls-${file}-${filetest} PROPERTIES DEPENDS H5COPY-h5ls-clear-objects-${file}-${filetest})
-    SET (last_test "H5COPY-h5ls-${file}-${filetest}")
   ENDMACRO (ADD_H5LS_TEST)
 
   #
   # Similiar to ADD_H5_TEST macro. Compare to outputs from source & target
   # files instead of checking with h5ls.
   #
-  MACRO (ADD_H5_CMP_TEST testname resultcode infile outfile vparam sparam srcname dparam dstname)
-    # Remove any output file left over from previous test run
-    ADD_TEST (
-        NAME H5COPY-CMP-clear-objects-${testname}
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove 
-            ./testfiles/${outfile}
-            ./testfiles/${testname}.out.out
-            ./testfiles/${testname}.out.out.err
-    )
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-CMP-clear-objects-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
+  MACRO (ADD_H5_CMP_TEST testname resultcode infile vparam sparam srcname dparam dstname)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${outfile} ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
+      ADD_TEST (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
       IF (${resultcode} STREQUAL "1")
         SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES WILL_FAIL "true")
       ENDIF (${resultcode} STREQUAL "1")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      ADD_TEST (
+          NAME H5COPY-CMP-${testname}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove 
+              ./testfiles/${testname}.out.h5
+              ./testfiles/${testname}.out.out
+              ./testfiles/${testname}.out.out.err
+      )
       ADD_TEST (
           NAME H5COPY-CMP-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5copy>"
-              -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${outfile};${vparam};${sparam};${srcname};${dparam};${dstname}"
+              -D "TEST_ARGS=-i;./testfiles/${infile};-o;./testfiles/${testname}.out.h5;${vparam};${sparam};${srcname};${dparam};${dstname}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=./testfiles/${testname}.out.out"
               -D "TEST_EXPECT=${resultcode}"
@@ -264,11 +298,8 @@ IF (BUILD_TESTING)
               -D "TEST_MASK=true"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
+      SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-    IF (NOT "${last_test}" STREQUAL "")
-      SET_TESTS_PROPERTIES (H5COPY-CMP-${testname} PROPERTIES DEPENDS ${last_test})
-    ENDIF (NOT "${last_test}" STREQUAL "")
-    SET (last_test "H5COPY-CMP-${testname}")
   ENDMACRO (ADD_H5_CMP_TEST)
 
 ##############################################################################
@@ -285,61 +316,89 @@ IF (BUILD_TESTING)
   SET (HDF_EXT_SRC_FILE h5copy_extlinks_src)
   SET (HDF_EXT_TRG_FILE h5copy_extlinks_trg)
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME H5COPY-clearall-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          ./testfiles/${HDF_FILE1}.out.h5
-          ./testfiles/${HDF_FILE1}.out.out
-          ./testfiles/${HDF_FILE1}.out.out.err
-          ./testfiles/${HDF_FILE2}.out.h5
-          ./testfiles/${HDF_FILE2}.out.out
-          ./testfiles/${HDF_FILE2}.out.out.err
-          ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
-          ./testfiles/${HDF_EXT_SRC_FILE}.out.out
-          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5COPY-clearall-objects PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5COPY-clearall-objects")
+  IF (HDF5_ENABLE_USING_MEMCHECKER)
+    # Remove any output file left over from previous test run
+    ADD_TEST (
+        NAME H5COPY-clearall-objects
+        COMMAND    ${CMAKE_COMMAND}
+            -E remove 
+            simple.out.h5
+            chunk.out.h5
+            compact.out.h5
+            compound.out.h5
+            compressed.out.h5
+            named_vl.out.h5
+            nested_vl.out.h5
+            simple_top.out.h5
+            dsrename.out.h5
+            grp_empty.out.h5
+            grp_dsets.out.h5
+            grp_nested.out.h5
+            simple_group.out.h5
+            grp_rename.out.h5
+            grp_dsets_rename.out.h5
+            A_B1_simple.out.h5
+            A_B2_simple2.out.h5
+            C_D_simple.out.h5
+            E_F_grp_dsets.out.h5
+            G_H_grp_nested.out.h5
+            region_ref.out.h5
+            ext_link.out.h5
+            ext_link_f.out.h5
+            ext_dangle_noobj.out.h5
+            ext_dangle_noobj_f.out.h5
+            ext_dangle_nofile.out.h5
+            ext_dangle_nofile_f.out.h5
+            ext_link_group.out.h5
+            ext_link_group_f.out.h5
+            samefile1.out.h5
+            samefile2.out.h5
+            h5copy_misc1.out.h5
+            h5copy_misc1.out.out
+            h5copy_misc1.out.out.err
+    )
+    SET_TESTS_PROPERTIES (H5COPY-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+    IF (NOT "${last_test}" STREQUAL "")
+      SET_TESTS_PROPERTIES (H5COPY-clearall-objects PROPERTIES DEPENDS ${last_test})
+    ENDIF (NOT "${last_test}" STREQUAL "")
+    SET (last_test "H5COPY-clearall-objects")
+  ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   
   # "Test copying various forms of datasets"
-  ADD_H5_TEST (simple 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s simple -d simple)
-  ADD_H5_TEST (chunk 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s chunk -d chunk)
-  ADD_H5_TEST (compact 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s compact -d compact)
-  ADD_H5_TEST (compound 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s compound -d compound)
-  ADD_H5_TEST (compressed 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s compressed -d compressed)
-  ADD_H5_TEST (named_vl 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s named_vl -d named_vl)
-  ADD_H5_TEST (nested_vl 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s nested_vl -d nested_vl)
+  ADD_H5_TEST (simple 0 ${HDF_FILE1}.h5 -v -s simple -d simple)
+  ADD_H5_TEST (chunk 0 ${HDF_FILE1}.h5 -v -s chunk -d chunk)
+  ADD_H5_TEST (compact 0 ${HDF_FILE1}.h5 -v -s compact -d compact)
+  ADD_H5_TEST (compound 0 ${HDF_FILE1}.h5 -v -s compound -d compound)
+  ADD_H5_TEST (compressed 0 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
+  ADD_H5_TEST (named_vl 0 ${HDF_FILE1}.h5 -v -s named_vl -d named_vl)
+  ADD_H5_TEST (nested_vl 0 ${HDF_FILE1}.h5 -v -s nested_vl -d nested_vl)
 
   # "Test copying dataset within group in source file to root of destination"
-  ADD_H5_TEST (simple_top 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s grp_dsets/simple -d simple_top)
+  ADD_H5_TEST (simple_top 0 ${HDF_FILE1}.h5 -v -s grp_dsets/simple -d simple_top)
 
   # "Test copying & renaming dataset"
-  ADD_H5_TEST (rename 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s compound -d rename)
+  ADD_H5_TEST (dsrename 0 ${HDF_FILE1}.h5 -v -s compound -d rename)
 
   # "Test copying empty, 'full' & 'nested' groups"
-  ADD_H5_TEST (grp_empty 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s grp_empty -d grp_empty)
-  ADD_H5_TEST (grp_dsets 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s grp_dsets -d grp_dsets)
-  ADD_H5_TEST (grp_nested 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s grp_nested -d grp_nested)
+  ADD_H5_TEST (grp_empty 0 ${HDF_FILE1}.h5 -v -s grp_empty -d grp_empty)
+  ADD_H5_TEST (grp_dsets 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
+  ADD_H5_TEST (grp_nested 0 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
 
   # "Test copying dataset within group in source file to group in destination"
-  ADD_H5_TEST2 (simple_group 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 grp_dsets grp_dsets -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
+  ADD_H5_TEST2 (simple_group 0 ${HDF_FILE1}.h5 grp_dsets grp_dsets -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
 
   # "Test copying & renaming group"
-  ADD_H5_TEST (grp_rename 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s grp_dsets -d grp_rename)
+  ADD_H5_TEST (grp_rename 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_rename)
 
   # "Test copying 'full' group hierarchy into group in destination file"
-  ADD_H5_TEST2 (grp_dsets_rename 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
+  ADD_H5_TEST2 (grp_dsets_rename 0 ${HDF_FILE1}.h5 grp_dsets grp_rename -v -s grp_dsets -d /grp_rename/grp_dsets)
 
   # "Test copying objects into group hier. that doesn't exist yet in destination file"
-  ADD_H5_TEST (A_B1_simple 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -vp -s simple -d /A/B1/simple)
-  ADD_H5_TEST (A_B2_simple2 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -vp -s simple -d /A/B2/simple2)
-  ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -vp -s /grp_dsets/simple -d /C/D/simple)
-  ADD_H5_TEST (E_F_grp_dsets 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
-  ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -vp -s /grp_nested -d /G/H/grp_nested)
+  ADD_H5_TEST (A_B1_simple 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B1/simple)
+  ADD_H5_TEST (A_B2_simple2 0 ${HDF_FILE1}.h5 -vp -s simple -d /A/B2/simple2)
+  ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets/simple -d /C/D/simple)
+  ADD_H5_TEST (E_F_grp_dsets 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
+  ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1}.h5 -vp -s /grp_nested -d /G/H/grp_nested)
 
   # Verify that the file created above is correct
   # This test is not independent of the above tests
@@ -347,22 +406,8 @@ IF (BUILD_TESTING)
   
 ############# COPY REFERENCES ##############
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME H5COPY-clear-refs
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          ./testfiles/${HDF_FILE2}.out.h5
-          ./testfiles/${HDF_FILE2}.out.out
-          ./testfiles/${HDF_FILE2}.out.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5COPY-clear-refs PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5COPY-clear-refs")
-
   # "Test copying object and region references"
-  ADD_H5_F_TEST (region_ref 2 ${HDF_FILE2}.h5 ${HDF_FILE2}.out.h5 ref -v -s / -d /COPY)
+  ADD_H5_F_TEST (region_ref 2 ${HDF_FILE2}.h5 ref -v -s / -d /COPY)
 
   # Verify that the file created above is correct
   # This test is not independent of the above tests
@@ -370,86 +415,48 @@ IF (BUILD_TESTING)
 
 ############# COPY EXT LINKS ############## 
 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME H5COPY-clear-ext-links
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          ./testfiles/${HDF_EXT_SRC_FILE}.out.h5
-          ./testfiles/${HDF_EXT_SRC_FILE}.out.out
-          ./testfiles/${HDF_EXT_SRC_FILE}.out.out.err
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5COPY-clear-ext-links PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5COPY-clear-ext-links")
-
   # "Test copying external link directly without -f ext"
-  ADD_H5_TEST (ext_link 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 -v -s /group_ext/extlink_dset -d /copy1_dset)
+  ADD_H5_TEST (ext_link 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_dset -d /copy1_dset)
 
   # "Test copying external link directly with -f ext"
-  ADD_H5_F_TEST (ext_link_f 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 ext -v -s /group_ext/extlink_dset -d /copy2_dset)
+  ADD_H5_F_TEST (ext_link_f 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_dset -d /copy2_dset)
 
   # "Test copying dangling external link (no obj) directly without -f ext"
-  ADD_H5_TEST (ext_dangle_noobj 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1)
+  ADD_H5_TEST (ext_dangle_noobj 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_1)
 
   # "Test copying dangling external link (no obj) directly with -f ext"
-  ADD_H5_F_TEST (ext_dangle_noobj_f 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 ext -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2)
+  ADD_H5_F_TEST (ext_dangle_noobj_f 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2)
 
   # "Test copying dangling external link (no file) directly without -f ext"
-  ADD_H5_TEST (ext_dangle_nofile 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1)
+  ADD_H5_TEST (ext_dangle_nofile 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_1)
 
   # "Test copying dangling external link (no file) directly with -f ext"
-  ADD_H5_F_TEST (ext_dangle_nofile_f 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 ext -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2)
+  ADD_H5_F_TEST (ext_dangle_nofile_f 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2)
 
   # "Test copying a group contains external links without -f ext"
-  ADD_H5_TEST (ext_link_group 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 -v -s /group_ext -d /copy1_group)
+  ADD_H5_TEST (ext_link_group 2 ${HDF_EXT_SRC_FILE}.h5 -v -s /group_ext -d /copy1_group)
 
   # "Test copying a group contains external links with -f ext"
-  ADD_H5_F_TEST (ext_link_group_f 2 ${HDF_EXT_SRC_FILE}.h5 ${HDF_EXT_SRC_FILE}.out.h5 ext -v -s /group_ext -d /copy2_group) 
+  ADD_H5_F_TEST (ext_link_group_f 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext -d /copy2_group) 
 
   # Verify that the file created above is correct
   # This test is not independent of the above tests
   #ADD_H5LS_TEST (${HDF_EXT_SRC_FILE} links)
 
 ############# Test misc. ############## 
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME H5COPY-clear-misc
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          ./testfiles/h5copy_misc1.out.out
-          ./testfiles/h5copy_misc1.out.out.err
-          ./testfiles/${HDF_FILE1}.out.h5
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5COPY-clear-misc PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5COPY-clear-misc")
 
   #-----------------------------------------------------------------
   # "Test copying object into group which doesn't exist, without -p"
   #
-  ADD_H5_CMP_TEST (h5copy_misc1 1 ${HDF_FILE1}.h5 ${HDF_FILE1}.out.h5 -v -s /simple -d /g1/g2/simple)
-  # Remove any output file left over from previous test run
-  ADD_TEST (
-      NAME H5COPY-clear-samefile
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove 
-          ./testfiles/${HDF_FILE1}.out.h5
-  )
-  IF (NOT "${last_test}" STREQUAL "")
-    SET_TESTS_PROPERTIES (H5COPY-clear-samefile PROPERTIES DEPENDS ${last_test})
-  ENDIF (NOT "${last_test}" STREQUAL "")
-  SET (last_test "H5COPY-clear-samefile")
+  ADD_H5_CMP_TEST (h5copy_misc1 1 ${HDF_FILE1}.h5 -v -s /simple -d /g1/g2/simple)
   
   #-------------------------------------------
   # "Test copying objects to the same file "
   #
   # - dataset
-  ADD_H5_TEST3 (samefile1 0 ${HDF_FILE1}.out.h5 ${HDF_FILE1}.out.h5 ${HDF_FILE1}.h5 /simple /simple -v -s /simple -d /simple_cp)
+  ADD_H5_TEST_SAME (samefile1 0 ${HDF_FILE1}.h5 /simple /simple -v -s /simple -d /simple_cp)
   # - group with some datasets
-  ADD_H5_TEST3 (samefile2 0 ${HDF_FILE1}.out.h5 ${HDF_FILE1}.out.h5 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
+  ADD_H5_TEST_SAME (samefile2 0 ${HDF_FILE1}.h5 /grp_dsets /grp_dsets -v -s /grp_dsets -d /grp_dsets_cp)
 ENDIF (BUILD_TESTING)
 
 ##############################################################################
