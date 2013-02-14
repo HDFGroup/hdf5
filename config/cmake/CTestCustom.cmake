@@ -43,13 +43,6 @@ SET (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DIFF-clearall-objects
     ######### tools/h5dump #########
     H5DUMP-clearall-objects
-    H5DUMP-clear-objects-tbin1
-    H5DUMP-clear-objects-tbin2
-    H5DUMP-clear-objects-tbin3
-    H5DUMP-clear-objects-tbin4
-    H5DUMP-clear-out1
-    H5DUMP-clear-out3
-    H5DUMP-clear-objects
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     ######### tools/h5import #########
