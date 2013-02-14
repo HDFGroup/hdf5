@@ -724,7 +724,6 @@ IF (BUILD_TESTING)
       IF (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
-#      SET (last_test "H5DUMP-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-${resultfile}-clear-objects
@@ -758,7 +757,6 @@ IF (BUILD_TESTING)
       IF (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
-#      SET (last_test "H5DUMP-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-${resultfile}-clear-objects
@@ -799,7 +797,6 @@ IF (BUILD_TESTING)
       IF (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
-#      SET (last_test "H5DUMP-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-${resultfile}-clear-objects
@@ -950,7 +947,6 @@ IF (BUILD_TESTING)
       IF (NOT "${last_pbits_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_pbits_test})
       ENDIF (NOT "${last_pbits_test}" STREQUAL "")
-#      SET (last_test "H5DUMP-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-${resultfile}-clear-objects
@@ -996,7 +992,6 @@ IF (BUILD_TESTING)
       IF (NOT "${last_xml_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       ENDIF (NOT "${last_xml_test}" STREQUAL "")
-#      SET (last_xml_test "H5DUMP-XML-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
           NAME H5DUMP-XML-${resultfile}-clear-objects
