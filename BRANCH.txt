@@ -1,0 +1,8 @@
+This is feature branch for "HDFFV-8313 - ANL: Provide feature to read&write multiple datasets all together with collective I/O access in parallel operation." task.
+
+This branch was created by Jonathan Kim on Feb 14, 2013.
+
+This branch is off of the trunk. All trunk changes through r23279 have been merged up to this feature branch.
+
+This task involves providing feature to read and write multiple datasets in a file all together with collective I/O access. This makes number of disk IO access once or significantly reduced manner, which proved to improve performance.
+H5Dread_multi() and H5Dwrite_multi() functions will be provided as new APIs.
