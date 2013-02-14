@@ -73,7 +73,7 @@ IF (BUILD_TESTING)
   # Perform h5copy according to passing parmeters
   #
   MACRO (ADD_H5_F_TEST testname resultcode infile fparam vparam sparam srcname dparam dstname)
-      IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       ADD_TEST (
           NAME H5COPY_F-${testname}-clear-objects
@@ -92,7 +92,7 @@ IF (BUILD_TESTING)
         SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
-      SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS H5COPY_F-${testname-clear-objects})
+      SET_TESTS_PROPERTIES (H5COPY_F-${testname} PROPERTIES DEPENDS H5COPY_F-${testname}-clear-objects)
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
 
     # resultcode=2 will cause the test to skip the diff test
