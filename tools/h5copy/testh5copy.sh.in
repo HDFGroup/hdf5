@@ -514,10 +514,10 @@ TEST_MISC()
     FILEOUT="$TESTDIR/`basename h5copytst.h5 .h5`.out.h5"
 
     # Remove any output file left over from previous test run
-    rm -f $FILEOUT
+    rm -f $h5copy_misc1.out.h5
 
     echo "Test copying object into group which doesn't exist, without -p"
-    TOOLTEST_FAIL h5copy_misc1.out -v -i $TESTFILE -o $FILEOUT -s /simple  -d /g1/g2/simple
+    TOOLTEST_FAIL h5copy_misc1.out -v -i $TESTFILE -o h5copy_misc1.out.h5 -s /simple  -d /g1/g2/simple
 
     echo "Test copying objects to the same file "
     rm -f $FILEOUT
