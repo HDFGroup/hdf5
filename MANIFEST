@@ -2128,16 +2128,18 @@
 ./tools/h5copy/testfiles/h5copy_misc1.out
 
 # test files for h5mkgrp
-./tools/testfiles/h5mkgrp_help.ls
-./tools/testfiles/h5mkgrp_nested.ls
-./tools/testfiles/h5mkgrp_nested_latest.ls
-./tools/testfiles/h5mkgrp_nested_mult.ls
-./tools/testfiles/h5mkgrp_nested_mult_latest.ls
+./tools/testfiles/h5mkgrp_nested-p.ls
+./tools/testfiles/h5mkgrp_nested_lp.ls
+./tools/testfiles/h5mkgrp_nested_mult-p.ls
+./tools/testfiles/h5mkgrp_nested_mult_lp.ls
 ./tools/testfiles/h5mkgrp_several.ls
-./tools/testfiles/h5mkgrp_several_latest.ls
+./tools/testfiles/h5mkgrp_several-v.ls
+./tools/testfiles/h5mkgrp_several-p.ls
+./tools/testfiles/h5mkgrp_several_l.ls
 ./tools/testfiles/h5mkgrp_single.ls
-./tools/testfiles/h5mkgrp_single_latest.ls
-./tools/testfiles/h5mkgrp_version.ls
+./tools/testfiles/h5mkgrp_single-v.ls
+./tools/testfiles/h5mkgrp_single-p.ls
+./tools/testfiles/h5mkgrp_single_l.ls
 
 
 # high level libraries
