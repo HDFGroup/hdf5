@@ -350,6 +350,13 @@ hsize_t diff_attr(hid_t loc1_id,
     if( build_match_list_attrs(loc1_id, loc2_id, &match_list_attrs, options) < 0)
         goto error;
 
+    /* if detect any unique extra attr */
+    if(match_list_attrs->nattrs_only1 || match_list_attrs->nattrs_only2)
+    {
+        /* exit will be 1 */
+        options->contents = 0;
+    }
+
     for(u = 0; u < (unsigned)match_list_attrs->nattrs; u++)
     {
         if( (match_list_attrs->attrs[u].exist[0]) && (match_list_attrs->attrs[u].exist[1]) )
