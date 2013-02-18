@@ -31,15 +31,85 @@ H5LS=h5ls                   # The h5ls tool name
 H5LS_ARGS=-vr               # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/../h5ls/$H5LS # The path of the h5ls tool binary
 
+CMP='cmp'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
 nerrors=0
 verbose=yes
 
-INDIR=$srcdir/../testfiles
-OUTDIR=../testfiles
+# source dirs
+SRC_TOOLS="$srcdir/../"
+
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+# testfiles source dirs for tools
+SRC_H5MKGRP_TESTFILES="$SRC_TOOLS/misc/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir -p $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+
 CMP='cmp -s'
 DIFF='diff -c'
 
-test -d $OUTDIR || mkdir $OUTDIR
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="
+$SRC_H5MKGRP_TESTFILES/h5mkgrp_help.txt
+$SRC_TOOLS_TESTFILES/h5mkgrp_single.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_single_v.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_single_p.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_single_l.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_several.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_several_v.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_several_p.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_several_l.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_nested_p.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_nested_lp.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_nested_mult_p.ls
+$SRC_TOOLS_TESTFILES/h5mkgrp_nested_mult_lp.ls
+"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -71,9 +141,7 @@ TOOLTEST()
 {
     TESTING $H5MKGRP $@
     (
-    echo "#############################"
-    echo " output for '$H5MKGRP $@'"
-    echo "#############################"
+    cd $TESTDIR
     $RUNSERIAL $H5MKGRP_BIN $@
     ) > output.out
     RET=$?
@@ -96,17 +164,15 @@ TOOLTEST()
 #
 H5LSTEST() 
 {
-    expect="$INDIR/`basename $1 .h5`.ls"
-    actual="$OUTDIR/`basename $1 .h5`.out"
+    expect="$TESTDIR/`basename $1 .h5`.ls"
+    actual="$TESTDIR/`basename $1 .h5`.out"
     actual_sav=${actual}-sav
 
     # Stderr is included in stdout so that the diff can detect
     # any unexpected output from that stream too.
     VERIFY_H5LS  $@
     (
-      echo "#############################"
-      echo "Expected output for '$H5LS $@'" 
-      echo "#############################"
+      cd $TESTDIR
       $RUNSERIAL $H5LS_BIN $H5LS_ARGS $@
     ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
 
@@ -142,7 +208,7 @@ H5LSTEST()
 # $* are groups to create
 RUNTEST() 
 {
-    FILEOUT=$OUTDIR/$1
+    FILEOUT=$1
     shift
     H5MKGRP_ARGS=$1
     shift
@@ -158,9 +224,8 @@ RUNTEST()
 
     # Remove output file created, if the "no cleanup" environment variable is
     #   not defined
-echo "FILEOUT=" $FILEOUT
     if test -z "$HDF5_NOCLEANUP"; then
-        rm -f $FILEOUT
+        rm -f $TESTDIR/$FILEOUT
     fi
 }
 
@@ -172,16 +237,17 @@ echo "FILEOUT=" $FILEOUT
 # $* are groups to create
 CMPTEST() 
 {
-    FILEOUT=$OUTDIR/$1
-    expect="$srcdir/testfiles/`basename $1 .h5`.txt"
-    actual="$OUTDIR/`basename $1 .h5`.out"
-    actual_err="$OUTDIR/`basename $1 .h5`.err"
+    FILEOUT=$1
+    expect="$TESTDIR/`basename $1 .h5`.txt"
+    actual="$TESTDIR/`basename $1 .h5`.out"
+    actual_err="$TESTDIR/`basename $1 .h5`.err"
     shift
 
     # Stderr is included in stdout so that the diff can detect
     # any unexpected output from that stream too.
     TESTING $H5MKGRP $@
     (
+    cd $TESTDIR
     $RUNSERIAL $H5MKGRP_BIN $@
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
@@ -208,28 +274,30 @@ CMPTEST()
 ##############################################################################
 ###           T H E   T E S T S                                            ###
 ##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
 
 # Check that help & version is displayed properly
 CMPTEST h5mkgrp_help.h5 "-h"
-RUNTEST h5mkgrp_version.h5 "-V"
+#CMPTEST h5mkgrp_version.h5 "-V"
 
 # Create single group at root level
 RUNTEST h5mkgrp_single.h5 " " single
-RUNTEST h5mkgrp_single.h5 "-v" single
-RUNTEST h5mkgrp_single.h5 "-p" single
-RUNTEST h5mkgrp_single_latest.h5 "-l" latest
+RUNTEST h5mkgrp_single_v.h5 "-v" single
+RUNTEST h5mkgrp_single_p.h5 "-p" single
+RUNTEST h5mkgrp_single_l.h5 "-l" latest
 
 # Create several groups at root level
 RUNTEST h5mkgrp_several.h5 " " one two
-RUNTEST h5mkgrp_several.h5 "-v" one two
-RUNTEST h5mkgrp_several.h5 "-p" one two
-RUNTEST h5mkgrp_several_latest.h5 "-l" one two
+RUNTEST h5mkgrp_several_v.h5 "-v" one two
+RUNTEST h5mkgrp_several_p.h5 "-p" one two
+RUNTEST h5mkgrp_several_l.h5 "-l" one two
 
 # Create various nested groups 
-RUNTEST h5mkgrp_nested.h5 "-p" /one/two
-RUNTEST h5mkgrp_nested_latest.h5 "-lp" /one/two
-RUNTEST h5mkgrp_nested_mult.h5 "-p" /one/two /three/four
-RUNTEST h5mkgrp_nested_mult_latest.h5 "-lp" /one/two /three/four
+RUNTEST h5mkgrp_nested_p.h5 "-p" /one/two
+RUNTEST h5mkgrp_nested_lp.h5 "-lp" /one/two
+RUNTEST h5mkgrp_nested_mult_p.h5 "-p" /one/two /three/four
+RUNTEST h5mkgrp_nested_mult_lp.h5 "-lp" /one/two /three/four
 
 
 if test $nerrors -eq 0 ; then
