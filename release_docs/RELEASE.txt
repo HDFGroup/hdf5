@@ -149,6 +149,10 @@ Bug Fixes since HDF5-1.8.10
       filter pipeline.  The user must be careful with the function and
       clearly understand the I/O process of the library. (SLU - 2013/2/11)
 
+    - Fixed problem with H5DSget_scale_name including the NULL terminator in
+      the size calculation returned by the function. The API was changed to NOT
+      include the NULL terminator in the size of name returned (MSB- 2013/2/10)
+
     Fortran High-Level APIs:
     ------
     - None
