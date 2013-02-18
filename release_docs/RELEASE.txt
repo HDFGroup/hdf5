@@ -157,6 +157,11 @@ Bug Fixes since HDF5-1.8.10
     ------
     - None
 
+    Testing
+    -------
+      - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
+      faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
+
 Supported Platforms
 ===================
     AIX 5.3                       xlc 10.1.0.5
