@@ -405,7 +405,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL check("h5tarray_create_f", error, total_error)
 
     ! Insert character array field 
-    CALL h5tinsert_f(tid2, "c", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1))), tid4, error)
+    CALL h5tinsert_f(tid2, "c", H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)(1:1))), tid4, error)
     CALL check("h5tinsert2_f", error, total_error)
 
     !  Close array of floats field datatype 
@@ -551,7 +551,7 @@ END SUBROUTINE test_array_compound_atomic
     CALL H5Tget_member_offset_f(tid2, 2, off, error)
     CALL check("H5Tget_member_offset_f", error, total_error)
     CALL VERIFY("H5Tget_member_offset_f",INT(off),&
-         INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)))), total_error) 
+         INT(H5OFFSETOF(C_LOC(wdata(1,1)),C_LOC(wdata(1,1)%c(1)(1:1)))), total_error) 
 
     !  Check the 3rd field's datatype 
     CALL H5Tget_member_type_f(tid2, 2, mtid2, error)
@@ -1710,7 +1710,7 @@ SUBROUTINE t_opaque(total_error)
   !
   CALL h5dcreate_f(file, dataset, dtype, space, dset, error)
   CALL check("h5dcreate_f",error, total_error)
-  f_ptr = C_LOC(wdata(1))
+  f_ptr = C_LOC(wdata(1)(1:1))
   CALL h5dwrite_f(dset, dtype, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
   !
@@ -1774,7 +1774,7 @@ SUBROUTINE t_opaque(total_error)
   !
   ! Read the data.
   !
-  f_ptr = C_LOC(rdata(1))
+  f_ptr = C_LOC(rdata(1)(1:1))
   CALL h5dread_f(dset, dtype, f_ptr, error)
   CALL check("H5Dread_f",error, total_error)
   !
@@ -2123,7 +2123,7 @@ SUBROUTINE t_regref(total_error)
      CALL h5screate_simple_f(1, dims3, memspace, error)
      CALL check("h5screate_simple_f",error, total_error)
 
-     f_ptr = C_LOC(rdata2(1))
+     f_ptr = C_LOC(rdata2(1)(1:1))
      CALL h5dread_f( dset2, H5T_NATIVE_INTEGER_1, f_ptr, error, memspace, space)
      CALL check("H5Dread_f",error, total_error)
      CALL verifystring("h5dread_f",rdata2(1)(1:npoints),TRIM(chrref_correct(i)), total_error)
@@ -2473,24 +2473,24 @@ SUBROUTINE t_vlstring_readwrite(total_error)
 
   ! Initialize array of C pointers
 
-  wdata(1) = C_LOC(A(1))
-  wdata(2) = C_LOC(B(1))
-  wdata(3) = C_LOC(C(1))
-  wdata(4) = C_LOC(D(1))
+  wdata(1) = C_LOC(A(1)(1:1))
+  wdata(2) = C_LOC(B(1)(1:1))
+  wdata(3) = C_LOC(C(1)(1:1))
+  wdata(4) = C_LOC(D(1)(1:1))
 
   data_w(1) = A(1)
   data_w(2) = B(1)
   data_w(3) = C(1)
   data_w(4) = D(1)
 
-  wdata2D(1,1) = C_LOC(A11(1))
-  wdata2D(1,2) = C_LOC(A12(1))
-  wdata2D(1,3) = C_LOC(A13(1))
-  wdata2D(1,4) = C_LOC(A14(1))
-  wdata2D(2,1) = C_LOC(A21(1))
-  wdata2D(2,2) = C_LOC(A22(1))
-  wdata2D(2,3) = C_LOC(A23(1))
-  wdata2D(2,4) = C_LOC(A24(1))
+  wdata2D(1,1) = C_LOC(A11(1)(1:1))
+  wdata2D(1,2) = C_LOC(A12(1)(1:1))
+  wdata2D(1,3) = C_LOC(A13(1)(1:1))
+  wdata2D(1,4) = C_LOC(A14(1)(1:1))
+  wdata2D(2,1) = C_LOC(A21(1)(1:1))
+  wdata2D(2,2) = C_LOC(A22(1)(1:1))
+  wdata2D(2,3) = C_LOC(A23(1)(1:1))
+  wdata2D(2,4) = C_LOC(A24(1)(1:1))
 
   data2D_w(1,1) = A11(1)
   data2D_w(1,2) = A12(1)
