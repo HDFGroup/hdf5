@@ -681,7 +681,7 @@ INSTRUMENT_LIBRARY
 TRACE_API
 DEBUG_PKG
 H5_LONE_COLON
-PTHREAD
+HAVE_PTHREAD
 BUILD_SHARED_SZIP_CONDITIONAL_FALSE
 BUILD_SHARED_SZIP_CONDITIONAL_TRUE
 LL_PATH
@@ -25273,11 +25273,14 @@ if test "x$ac_cv_header_dmalloc_h" = xyes; then :
 #define HAVE_DMALLOC_H 1
 _ACEOF
 
+else
+  unset HAVE_DMALLOC
 fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmalloc_shutdown in -ldmalloc" >&5
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmalloc_shutdown in -ldmalloc" >&5
 $as_echo_n "checking for dmalloc_shutdown in -ldmalloc... " >&6; }
 if ${ac_cv_lib_dmalloc_dmalloc_shutdown+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25332,7 +25335,7 @@ else
   unset HAVE_DMALLOC
 fi
 
-
+    fi
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find dmalloc library" "$LINENO" 5
     fi
@@ -25387,18 +25390,19 @@ if test "x$ac_cv_header_dmalloc_h" = xyes; then :
 _ACEOF
 
 else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_DMALLOC
 fi
 
 done
 
 
-    if test -n "$dmalloc_lib"; then
-      LDFLAGS="$LDFLAGS -L$dmalloc_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
-    fi
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      if test -n "$dmalloc_lib"; then
+        LDFLAGS="$LDFLAGS -L$dmalloc_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
+      fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmalloc_shutdown in -ldmalloc" >&5
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dmalloc_shutdown in -ldmalloc" >&5
 $as_echo_n "checking for dmalloc_shutdown in -ldmalloc... " >&6; }
 if ${ac_cv_lib_dmalloc_dmalloc_shutdown+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25453,6 +25457,7 @@ else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC
 fi
 
+    fi
 
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find dmalloc library" "$LINENO" 5
@@ -25487,11 +25492,14 @@ if test "x$ac_cv_header_zlib_h" = xyes; then :
 #define HAVE_ZLIB_H 1
 _ACEOF
  HAVE_ZLIB_H="yes"
+else
+  unset HAVE_ZLIB
 fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compress2 in -lz" >&5
+    if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compress2 in -lz" >&5
 $as_echo_n "checking for compress2 in -lz... " >&6; }
 if ${ac_cv_lib_z_compress2+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25546,14 +25554,17 @@ else
   unset HAVE_ZLIB
 fi
 
-    ac_fn_c_check_func "$LINENO" "compress2" "ac_cv_func_compress2"
+    fi
+    if test -z "$HAVE_ZLIB"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        as_fn_error $? "couldn't find zlib library" "$LINENO" 5
+      fi
+    else
+      ac_fn_c_check_func "$LINENO" "compress2" "ac_cv_func_compress2"
 if test "x$ac_cv_func_compress2" = xyes; then :
   HAVE_COMPRESS2="yes"
 fi
 
-
-    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find zlib library" "$LINENO" 5
     fi
     ;;
   no)
@@ -25567,8 +25578,8 @@ $as_echo "suppressed" >&6; }
     HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
-        zlib_inc="`echo $withval |cut -f1 -d,`"
-        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        zlib_inc="`echo $withval | cut -f1 -d,`"
+        zlib_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -25606,7 +25617,7 @@ if test "x$ac_cv_header_zlib_h" = xyes; then :
 _ACEOF
  HAVE_ZLIB_H="yes"
 else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_ZLIB
 fi
 
 done
@@ -25617,7 +25628,8 @@ done
       AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compress2 in -lz" >&5
+    if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compress2 in -lz" >&5
 $as_echo_n "checking for compress2 in -lz... " >&6; }
 if ${ac_cv_lib_z_compress2+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25672,14 +25684,18 @@ else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ZLIB
 fi
 
-    ac_fn_c_check_func "$LINENO" "compress2" "ac_cv_func_compress2"
+    fi
+
+    if test -z "$HAVE_ZLIB"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        as_fn_error $? "couldn't find zlib library" "$LINENO" 5
+      fi
+    else
+      ac_fn_c_check_func "$LINENO" "compress2" "ac_cv_func_compress2"
 if test "x$ac_cv_func_compress2" = xyes; then :
   HAVE_COMPRESS2="yes"
 fi
 
-
-    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find zlib library" "$LINENO" 5
     fi
     ;;
 esac
@@ -25688,13 +25704,13 @@ if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2"
 
 $as_echo "#define HAVE_FILTER_DEFLATE 1" >>confdefs.h
 
-    USE_FILTER_DEFLATE="yes"
+  USE_FILTER_DEFLATE="yes"
 
-    ## Add "deflate" to external filter list
-    if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-    fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
+  ## Add "deflate" to external filter list
+  if test "X$EXTERNAL_FILTERS" != "X"; then
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+  fi
+  EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 
@@ -25725,11 +25741,14 @@ if test "x$ac_cv_header_szlib_h" = xyes; then :
 #define HAVE_SZLIB_H 1
 _ACEOF
  HAVE_SZLIB_H="yes"
+else
+  unset HAVE_SZLIB
 fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SZ_BufftoBuffCompress in -lsz" >&5
+    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SZ_BufftoBuffCompress in -lsz" >&5
 $as_echo_n "checking for SZ_BufftoBuffCompress in -lsz... " >&6; }
 if ${ac_cv_lib_sz_SZ_BufftoBuffCompress+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25784,7 +25803,7 @@ else
   unset HAVE_SZLIB
 fi
 
-
+    fi
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find szlib library" "$LINENO" 5
     fi
@@ -25839,7 +25858,7 @@ if test "x$ac_cv_header_szlib_h" = xyes; then :
 _ACEOF
  HAVE_SZLIB_H="yes"
 else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZIP
 fi
 
 done
@@ -25850,7 +25869,8 @@ done
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SZ_BufftoBuffCompress in -lsz" >&5
+    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SZ_BufftoBuffCompress in -lsz" >&5
 $as_echo_n "checking for SZ_BufftoBuffCompress in -lsz... " >&6; }
 if ${ac_cv_lib_sz_SZ_BufftoBuffCompress+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -25905,6 +25925,7 @@ else
   LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB
 fi
 
+    fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find szlib library" "$LINENO" 5
@@ -25913,22 +25934,22 @@ fi
 esac
 
 if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
-    ## SZLIB library is available.  Check if it can encode
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for szlib encoder" >&5
+  ## SZLIB library is available.  Check if it can encode
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for szlib encoder" >&5
 $as_echo_n "checking for szlib encoder... " >&6; }
 
-    ## Set LD_LIBRARY_PATH so encoder test can find the library and run.
-    ## Also add LL_PATH substitution to Makefiles so they can use the
-    ## path as well, for testing examples.
-    if test -z "$LD_LIBRARY_PATH"; then
+  ## Set LD_LIBRARY_PATH so encoder test can find the library and run.
+  ## Also add LL_PATH substitution to Makefiles so they can use the
+  ## path as well, for testing examples.
+  if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
-    else
+  else
     export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
-    fi
+  fi
 
-     LL_PATH="$LD_LIBRARY_PATH"
+   LL_PATH="$LD_LIBRARY_PATH"
 
-    if ${hdf5_cv_szlib_can_encode+:} false; then :
+  if ${hdf5_cv_szlib_can_encode+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if test "$cross_compiling" = yes; then :
@@ -25967,31 +25988,30 @@ fi
 
 $as_echo "#define HAVE_FILTER_SZIP 1" >>confdefs.h
 
-    USE_FILTER_SZIP="yes"
+  USE_FILTER_SZIP="yes"
 
-    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+  if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-    fi
-    if test ${hdf5_cv_szlib_can_encode} = "no"; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+  fi
+  if test ${hdf5_cv_szlib_can_encode} = "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-    fi
+  fi
 
-    ## Add "szip" to external filter list
-    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        if test "X$EXTERNAL_FILTERS" != "X"; then
-            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-        fi
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
+  ## Add "szip" to external filter list
+  if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+    if test "X$EXTERNAL_FILTERS" != "X"; then
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-    if test ${hdf5_cv_szlib_can_encode} = "no"; then
-        if test "X$EXTERNAL_FILTERS" != "X"; then
-            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-        fi
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
+  fi
+  if test ${hdf5_cv_szlib_can_encode} = "no"; then
+    if test "X$EXTERNAL_FILTERS" != "X"; then
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+  fi
 fi
 
  if test "X$USE_FILTER_SZIP" = "Xyes" && test "X$LL_PATH" != "X"; then
@@ -26097,7 +26117,7 @@ rm -f confcache
 ## and/or a library path.  If the library path is specified then it must
 ## be preceded by a comma.
 ##
- PTHREAD=yes
+ HAVE_PTHREAD=yes
 
 # Check whether --with-pthread was given.
 if test "${with_pthread+set}" = set; then :
@@ -26117,11 +26137,14 @@ if test "x$ac_cv_header_pthread_h" = xyes; then :
 #define HAVE_PTHREAD_H 1
 _ACEOF
 
+else
+  unset HAVE_PTHREAD
 fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26173,16 +26196,17 @@ _ACEOF
   LIBS="-lpthread $LIBS"
 
 else
-  unset PTHREAD
+  unset HAVE_PTHREAD
 fi
 
+    fi
     ;;
   no)
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread" >&5
 $as_echo_n "checking for pthread... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
-    unset PTHREAD
+    unset HAVE_PTHREAD
     ;;
   *)
     case "$withval" in
@@ -26221,7 +26245,7 @@ if test "x$ac_cv_header_pthread_h" = xyes; then :
 _ACEOF
 
 else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset PTHREAD
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD
 fi
 
 done
@@ -26236,19 +26260,20 @@ if test "x$ac_cv_header_pthread_h" = xyes; then :
 _ACEOF
 
 else
-  unset PTHREAD
+  unset HAVE_PTHREAD
 fi
 
 done
 
     fi
 
-    if test -n "$pthread_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
-      saved_AM_LDFLAGS="$AM_LDFLAGS"
-      LDFLAGS="$LDFLAGS -L$pthread_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      if test -n "$pthread_lib"; then
+        saved_LDFLAGS="$LDFLAGS"
+        saved_AM_LDFLAGS="$AM_LDFLAGS"
+        LDFLAGS="$LDFLAGS -L$pthread_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26300,12 +26325,11 @@ _ACEOF
   LIBS="-lpthread $LIBS"
 
 else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset PTHREAD
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD
 fi
 
-
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -26357,9 +26381,10 @@ _ACEOF
   LIBS="-lpthread $LIBS"
 
 else
-  unset PTHREAD
+  unset HAVE_PTHREAD
 fi
 
+      fi
     fi
     ;;
 esac

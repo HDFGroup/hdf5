@@ -4,14 +4,14 @@
 
 Notes: This short instruction is written for users who want to quickly build 
        HDF5 Applications from the HDF5 Examples package using the CMake tools.
-       Users can adapt these instructions for their own applicaltions, see the 
+       Users can adapt these instructions for their own applications, see the 
        "Minimum Project Files" section.
        
        More information about using CMake can be found at the KitWare site, 
        www.cmake.org.
          
        CMake uses the command line, however the visual CMake tool is 
-       available for the configuration step. The steps are similiar for
+       available for the configuration step. The steps are similar for
        all the operating systems supported by CMake.
        
        NOTES:
@@ -62,7 +62,7 @@ Notes: This short instruction is written for users who want to quickly build
       available in your Start menu. For Linux, UNIX, and Mac users the
       executable is named "cmake-gui" and can be found where CMake was 
       installed. 
-      Specify the source and build directories. It is recommemded that you 
+      Specify the source and build directories. It is recommended that you 
       choose a build directory different then the source directory 
       (for example on Windows, if the source is at c:\MyHDFstuff\hdf5, then
       use c:\MyHDFstuff\hdf5\build or c:\MyHDFstuff\build\hdf5). 
@@ -156,7 +156,7 @@ Notes: This short instruction is written for users who want to quickly build
                          
                                                                          
 ========================================================================
-          Using HDF5 Libraries with Visual Studio 2008
+   Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
 ========================================================================
 
    8. Set up path for external libraries and headers
@@ -168,11 +168,11 @@ Notes: This short instruction is written for users who want to quickly build
           and select "x64".
 
       8.2 Find the box "Show directories for", choose "Include files", add the 
-          header path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.7\include)
+          header path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.x\include)
           to the included directories.
 
       8.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.7\lib)
+          library path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.x\lib)
           to the library directories.
           
       8.4 If using Fortran libraries, you will also need to setup the path
