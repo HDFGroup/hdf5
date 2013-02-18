@@ -1,13 +1,14 @@
-!****h* ROBODoc/HDF5
+!****h* ROBODoc/H5F (F90)
 !
 ! NAME
-!  MODULE HDF5
-!
-! FILE
-!  src/fortran/src/HDF5.f90
+!  H5F_PROVISIONAL
 !
 ! PURPOSE
-!  This is the main module used for linking to the Fortran HDF library.
+!  This file contains Fortran 90 interfaces for H5F functions. It 
+!  containsthe same functions as H5Fff_F03.f90, when applicable,
+!  but excludes the Fortran 2003 functions and the interface listings. 
+!  This file will be compiled instead of H5Fff_F03.f90 if Fortran 2003 
+!  functions are not enabled.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,32 +26,18 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! NOTES
+!                         *** IMPORTANT ***
+!  If you add a new H5F function you must add the function name to the
+!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  This is needed for Windows based operating systems.
+!
 !*****
 
-MODULE HDF5
+
+MODULE H5F_PROVISIONAL
+
   USE H5GLOBAL
-  USE H5F
-  USE H5F_PROVISIONAL
-  USE H5G
-  USE H5E
-  USE H5E_PROVISIONAL
-  USE H5I
-  USE H5L
-  USE H5L_PROVISIONAL
-  USE H5S
-  USE H5D
-  USE H5D_PROVISIONAL
-  USE H5A
-  USE H5A_PROVISIONAL
-  USE H5T
-  USE H5T_PROVISIONAL
-  USE H5O
-  USE H5O_PROVISIONAL
-  USE H5P
-  USE H5P_PROVISIONAL
-  USE H5R
-  USE H5R_PROVISIONAL
-  USE H5Z
-  USE H5_DBLE_INTERFACE
-  USE H5LIB
-END MODULE HDF5
+  IMPLICIT NONE
+
+END MODULE H5F_PROVISIONAL

@@ -70,7 +70,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/run-fortran-ex.sh.in $(srcdir)/testh5fc.sh.in \
 	$(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/config/commence.am \

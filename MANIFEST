@@ -293,6 +293,8 @@
 ./fortran/src/H5FDmpioff.f90
 ./fortran/src/H5Ff.c
 ./fortran/src/H5Fff.f90
+./fortran/src/H5Fff_F90.f90
+./fortran/src/H5Fff_F03.f90
 ./fortran/src/H5Gf.c
 ./fortran/src/H5Gff.f90
 ./fortran/src/H5If.c
@@ -354,6 +356,7 @@
 ./fortran/test/tH5E_F03.f90
 ./fortran/test/tH5E.f90
 ./fortran/test/tH5F.f90
+./fortran/test/tH5F_F03.f90
 ./fortran/test/tH5G.f90
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
