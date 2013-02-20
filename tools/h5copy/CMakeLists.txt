@@ -44,9 +44,6 @@ IF (BUILD_TESTING)
 
   SET (LIST_OTHER_TEST_FILES
       ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_misc1.out
-      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_extlinks_src.out.ls
-      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copy_ref.out.ls
-      ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/testfiles/h5copytst.out.ls
   )
 
   FILE (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
@@ -227,42 +224,6 @@ IF (BUILD_TESTING)
   ENDMACRO (ADD_H5_TEST_SAME)
 
   #
-  # Test result with h5ls
-  #
-  MACRO (ADD_H5LS_TEST infile filetest)
-    # If using memchecker add tests without using scripts
-    IF (HDF5_ENABLE_USING_MEMCHECKER)
-      ADD_TEST (NAME H5COPY-h5ls-${infile}-${filetest} COMMAND $<TARGET_FILE:h5ls> -Svr ./testfiles/${filetest}.out.h5)
-      IF (NOT "${last_test}" STREQUAL "")
-        SET_TESTS_PROPERTIES (H5COPY-h5ls-${infile}-${filetest} PROPERTIES DEPENDS ${last_test})
-      ENDIF (NOT "${last_test}" STREQUAL "")
-    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
-      # Remove any output file left over from previous test run
-      ADD_TEST (
-          NAME H5COPY-h5ls-${infile}-${filetest}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove 
-              ./testfiles/${filetest}.out.h5
-              ./testfiles/${filetest}.out.out
-              ./testfiles/${filetest}.out.out.err
-      )
-      ADD_TEST (
-          NAME H5COPY-h5ls-${file}-${filetest}
-          COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
-              -D "TEST_ARGS=-Svr;./testfiles/${filetest}.out.h5"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=./testfiles/${filetest}.out.out"
-              -D "TEST_EXPECT=0"
-              -D "TEST_REFERENCE=./testfiles/${infile}.out.ls"
-              -D "TEST_MASK=true"
-              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
-      )
-      SET_TESTS_PROPERTIES (H5COPY-h5ls-${infile}-${filetest} PROPERTIES DEPENDS H5COPY-h5ls-${infile}-${filetest}-clear-objects)
-    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5LS_TEST)
-
-  #
   # Similiar to ADD_H5_TEST macro. Compare to outputs from source & target
   # files instead of checking with h5ls.
   #
@@ -399,19 +360,11 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (C_D_simple 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets/simple -d /C/D/simple)
   ADD_H5_TEST (E_F_grp_dsets 0 ${HDF_FILE1}.h5 -vp -s /grp_dsets -d /E/F/grp_dsets)
   ADD_H5_TEST (G_H_grp_nested 0 ${HDF_FILE1}.h5 -vp -s /grp_nested -d /G/H/grp_nested)
-
-  # Verify that the file created above is correct
-  # This test is not independent of the above tests
-  #ADD_H5LS_TEST (${HDF_FILE1} basic)
   
 ############# COPY REFERENCES ##############
 
   # "Test copying object and region references"
   ADD_H5_F_TEST (region_ref 2 ${HDF_FILE2}.h5 ref -v -s / -d /COPY)
-
-  # Verify that the file created above is correct
-  # This test is not independent of the above tests
-  #ADD_H5LS_TEST (${HDF_FILE2} refs)
 
 ############# COPY EXT LINKS ############## 
 
@@ -438,10 +391,6 @@ IF (BUILD_TESTING)
 
   # "Test copying a group contains external links with -f ext"
   ADD_H5_F_TEST (ext_link_group_f 2 ${HDF_EXT_SRC_FILE}.h5 ext -v -s /group_ext -d /copy2_group) 
-
-  # Verify that the file created above is correct
-  # This test is not independent of the above tests
-  #ADD_H5LS_TEST (${HDF_EXT_SRC_FILE} links)
 
 ############# Test misc. ############## 
 
