@@ -124,6 +124,9 @@ Bug Fixes since HDF5-1.8.10
 
     Tools
     -----
+    - h5diff: Fixed to return correct exit code 1 when detect unique extra
+      attribute. Prior to this fix, h5diff returned exit code 0 indicating 
+      two files are identical.   HDFFV-7643 (JKM 2013/02/15)
     - The following h5stat test case failed in BG/P machines (and potentially
       other machines that display extra output if an MPI task returns with a
       non-zero code.)
