@@ -241,7 +241,6 @@ IF (BUILD_TESTING)
               COMMAND ${CMAKE_COMMAND} -E remove ${outfile}.ufile.txt ${outfile}.ufile.txt.err
           )
           SET_TESTS_PROPERTIES (H5JAM-${testname}-UNJAM_D-clear-objects PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-clear-objects)
-          ADD_TEST (NAME H5JAM-${testname}-UNJAM COMMAND $<TARGET_FILE:h5unjam> -i ${infile} -o ${outfile})
           ADD_TEST (
               NAME H5JAM-${testname}-UNJAM
               COMMAND "${CMAKE_COMMAND}"
