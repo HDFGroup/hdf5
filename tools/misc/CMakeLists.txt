@@ -246,7 +246,7 @@ IF (BUILD_TESTING)
 
   # test the output files repartitioned above.
   ADD_TEST (NAME H5REPART-h5repart_test COMMAND $<TARGET_FILE:h5repart_test>)
-  SET_TESTS_PROPERTIES (H5REPART-h5repart_test PROPERTIES DEPENDS H5REPART-clearall-objects H5REPART-h5repart_20KH5REPART-h5repart_5K H5REPART-h5repart_sec2)
+  SET_TESTS_PROPERTIES (H5REPART-h5repart_test PROPERTIES DEPENDS H5REPART-clearall-objects DEPENDS H5REPART-h5repart_20K DEPENDS H5REPART-h5repart_5K DEPENDS H5REPART-h5repart_sec2)
 
   SET (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test
