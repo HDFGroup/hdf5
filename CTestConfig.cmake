@@ -20,6 +20,8 @@ SET (CTEST_DROP_SITE_CDASH TRUE)
 SET (UPDATE_TYPE svn)
 SET (VALGRIND_COMMAND "/usr/bin/valgrind")
 SET (VALGRIND_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
+SET (CTEST_MEMORYCHECK_COMMAND "/usr/bin/valgrind")
+SET (CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v --tool=memcheck --leak-check=full --track-fds=yes --num-callers=50 --show-reachable=yes --track-origins=yes --malloc-fill=0xff --free-fill=0xfe")
 
 SET (CTEST_TEST_TIMEOUT 3600 CACHE STRING 
     "Maximum time allowed before CTest will kill the test.") 
