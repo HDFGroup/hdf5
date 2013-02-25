@@ -187,7 +187,7 @@ H5HF_dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwi
 void
 H5HF_hdr_print(const H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t dump_internal, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -381,7 +381,7 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         size_t start, end;      /* Start & end of the overlapping area */
         size_t len;             /* Length of the overlapping area */
         size_t overlap;         /* Track any overlaps */
-        unsigned u;             /* Local index variable */
+        size_t u;               /* Local index variable */
 
         /* Calculate the starting & ending */
         if(sect_start < dblock_start)
@@ -396,7 +396,7 @@ H5HF_dblock_debug_cb(H5FS_section_info_t *_sect, void *_udata)
         /* Calculate the length */
         len = end - start;
 
-        sprintf(temp_str, "Section #%u:", (unsigned)udata->sect_count);
+        HDsnprintf(temp_str, sizeof(temp_str), "Section #%u:", (unsigned)udata->sect_count);
 	HDfprintf(udata->stream, "%*s%-*s %8Zu, %8Zu\n", udata->indent + 3, "", MAX(0, udata->fwidth - 9),
 		temp_str,
 		start, len);
@@ -530,7 +530,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 
     HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth,
             "Percent of available space for data used:",
-            (100.0 * (double)((dblock->size - blk_prefix_size) - amount_free) / (double)(dblock->size - blk_prefix_size)));
+            ((double)100.0f * (double)((dblock->size - blk_prefix_size) - amount_free) / (double)(dblock->size - blk_prefix_size)));
 
     /*
      * Print the data in a VMS-style octal dump.
@@ -569,7 +569,7 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
     char temp_str[64];                  /* Temporary string, for formatting */
     size_t	u, v;                   /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /*
      * Check arguments.
@@ -614,13 +614,13 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
     else
         HDfprintf(stream, "%*sDirect Block Entries: (address)\n", indent, "");
     for(u = 0; u < hdr->man_dtable.max_direct_rows && u < iblock->nrows; u++) {
-        sprintf(temp_str, "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)hdr->man_dtable.row_block_size[u]);
+        HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (block size: %lu)", (unsigned)u, (unsigned long)hdr->man_dtable.row_block_size[u]);
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                 temp_str);
         for(v = 0; v < hdr->man_dtable.cparam.width; v++) {
             size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
-            sprintf(temp_str, "Col #%u:", (unsigned)v);
+            HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
             if(hdr->filter_len > 0)
                 HDfprintf(stream, "%*s%-*s %9a/%6Zu/%x\n", indent + 6, "", MAX(0, fwidth - 6),
                         temp_str,
@@ -642,13 +642,13 @@ H5HF_iblock_print(const H5HF_indirect_t *iblock,
                             H5V_log2_of2(hdr->man_dtable.cparam.width);
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++) {
             num_indirect_rows = (H5V_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
-            sprintf(temp_str, "Row #%u: (# of rows: %u)", (unsigned)u, num_indirect_rows);
+            HDsnprintf(temp_str, sizeof(temp_str), "Row #%u: (# of rows: %u)", (unsigned)u, num_indirect_rows);
             HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                     temp_str);
             for(v = 0; v < hdr->man_dtable.cparam.width; v++) {
                 size_t off = (u * hdr->man_dtable.cparam.width) + v;
 
-                sprintf(temp_str, "Col #%u:", (unsigned)v);
+                HDsnprintf(temp_str, sizeof(temp_str), "Col #%u:", (unsigned)v);
                 HDfprintf(stream, "%*s%-*s %9a\n", indent + 6, "", MAX(0, fwidth - 6),
                         temp_str,
                         iblock->ents[off].addr);
