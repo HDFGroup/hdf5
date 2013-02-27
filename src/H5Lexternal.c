@@ -102,7 +102,7 @@ H5L_getenv_prefix_name(char **env_prefix/*in,out*/)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    strret = HDstrchr(*env_prefix, COLON_SEPC);
+    strret = HDstrchr(*env_prefix, H5_COLON_SEPC);
     if (strret == NULL) {
         retptr = *env_prefix;
         *env_prefix = strret;
@@ -144,14 +144,9 @@ H5L_build_name(char *prefix, char *file_name, char **full_name/*out*/)
     if(NULL == (*full_name = (char *)H5MM_malloc(prefix_len + fname_len + 2)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
 
-    /* Copy the prefix into the buffer */
-    HDstrcpy(*full_name, prefix);
-
-    if (!CHECK_DELIMITER(prefix[prefix_len-1]))
-        HDstrcat(*full_name, DIR_SEPS);
-
-    /* Add the external link's filename to the prefix supplied */
-    HDstrcat(*full_name, file_name);
+    /* Compose the full file name */
+    HDsnprintf(*full_name, (prefix_len + fname_len + 2), "%s%s%s", prefix,
+        (H5_CHECK_DELIMITER(prefix[prefix_len - 1]) ? "" : H5_DIR_SEPS), file_name);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -319,24 +314,32 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* target file_name is an absolute pathname: see RM for detailed description */
-    if(CHECK_ABSOLUTE(file_name) || CHECK_ABS_PATH(file_name)) {
+    if(H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
         if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))) {
-            char *ptr = NULL;
+            char *ptr;
 
             H5E_clear_stack(NULL);
 
             /* get last component of file_name */
-	    GET_LAST_DELIMITER(file_name, ptr)
+	    H5_GET_LAST_DELIMITER(file_name, ptr)
 	    HDassert(ptr);
-	    HDstrcpy(temp_file_name, ++ptr);
+
+            /* Increment past delimiter */
+            ptr++;
+
+            /* Copy into the temp. file name */
+	    HDstrncpy(temp_file_name, ptr, HDstrlen(ptr) + 1);
         } /* end if */
     } /* end if */
-    else if(CHECK_ABS_DRIVE(file_name)) {
+    else if(H5_CHECK_ABS_DRIVE(file_name)) {
+        /* Try opening file */
         if(NULL == (ext_file = H5F_efc_open(loc.oloc->file, file_name, intent, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id))) {
+
             H5E_clear_stack(NULL);
+
 	    /* strip "<drive-letter>:" */
-	    HDstrcpy(temp_file_name, &file_name[2]);
+	    HDstrncpy(temp_file_name, &file_name[2], (HDstrlen(file_name) - 2) + 1);
 	} /* end if */
     } /* end if */
 
@@ -414,7 +417,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
             HGOTO_ERROR(H5E_LINK, H5E_CANTALLOC, FAIL, "can't duplicate resolved file name string")
 
         /* get last component of file_name */
-        GET_LAST_DELIMITER(actual_file_name, ptr)
+        H5_GET_LAST_DELIMITER(actual_file_name, ptr)
         if(!ptr)
             HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file, external link file name = '%s', temp_file_name = '%s'", file_name, temp_file_name)
 
@@ -543,6 +546,8 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     char       *norm_obj_name = NULL;	/* Pointer to normalized current name */
     void       *ext_link_buf = NULL;    /* Buffer to contain external link */
     size_t      buf_size;               /* Size of buffer to hold external link */
+    size_t      file_name_len;          /* Length of file name string */
+    size_t      norm_obj_name_len;      /* Length of normalized object name string */
     uint8_t    *p;                      /* Pointer into external link buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -565,16 +570,18 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize object name")
 
     /* Combine the filename and link name into a single buffer to give to the UD link */
-    buf_size = 1 + (HDstrlen(file_name) + 1) + (HDstrlen(norm_obj_name) + 1);
+    file_name_len = HDstrlen(file_name) + 1;
+    norm_obj_name_len = HDstrlen(norm_obj_name) + 1;
+    buf_size = 1 + file_name_len + norm_obj_name_len;
     if(NULL == (ext_link_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate udata buffer")
 
     /* Encode the external link information */
     p = (uint8_t *)ext_link_buf;
     *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL;  /* External link version & flags */
-    HDstrcpy((char *)p, file_name);     /* Name of file containing external link's object */
-    p += HDstrlen(file_name) + 1;
-    HDstrcpy((char *)p, norm_obj_name);       /* External link's object */
+    HDstrncpy((char *)p, file_name, file_name_len);     /* Name of file containing external link's object */
+    p += file_name_len;
+    HDstrncpy((char *)p, norm_obj_name, norm_obj_name_len);       /* External link's object */
 
     /* Create an external link */
     if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
