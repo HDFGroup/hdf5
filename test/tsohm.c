@@ -3144,6 +3144,8 @@ static void test_sohm_extlink_helper(hid_t src_fcpl_id, hid_t dst_fcpl_id)
     /* Close the dataset and both files to make sure everything gets flushed
      * out of memory
      */
+    ret = H5Sclose(space_id);
+    CHECK_I(ret, "H5Sclose");
     ret = H5Dclose(dset_id);
     CHECK_I(ret, "H5Dclose");
     ret = H5Fclose(src_file_id);
@@ -3201,6 +3203,9 @@ test_sohm_extlink(void)
     test_sohm_extlink_helper(fcpl_id, H5P_DEFAULT);
     test_sohm_extlink_helper(H5P_DEFAULT, fcpl_id);
     test_sohm_extlink_helper(fcpl_id, fcpl_id);
+
+    ret = H5Pclose(fcpl_id);
+    CHECK_I(ret, "H5Pclose");
 }
 
 
@@ -3788,6 +3793,9 @@ test_sohm_extend_dset(void)
     CHECK_I(ret, "test_sohm_extend_dset_helper");
     ret = test_sohm_extend_dset_helper(fcpl_id, TRUE);
     CHECK_I(ret, "test_sohm_extend_dset_helper");
+
+    ret = H5Pclose(fcpl_id);
+    CHECK_I(ret, "H5Pclose");
 }
 
 

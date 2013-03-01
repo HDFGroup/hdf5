@@ -225,6 +225,9 @@ ADD_TEST (
 )
 ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
 SET_TESTS_PROPERTIES(testhdf5 PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+IF (HDF5_ENABLE_USING_MEMCHECKER)
+  SET_TESTS_PROPERTIES(testhdf5 PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
+ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   
 ##############################################################################
 ##############################################################################
