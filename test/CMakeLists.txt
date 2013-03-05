@@ -223,10 +223,23 @@ ADD_TEST (
         tsohm_dst.h5
         tsohm_src.h5
 )
-ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
-SET_TESTS_PROPERTIES(testhdf5 PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+
 IF (HDF5_ENABLE_USING_MEMCHECKER)
-  SET_TESTS_PROPERTIES(testhdf5 PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
+  ADD_TEST (NAME testhdf5-base COMMAND $<TARGET_FILE:testhdf5> -x heap file select)
+  SET_TESTS_PROPERTIES(testhdf5-base PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+  SET_TESTS_PROPERTIES(testhdf5-base PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
+  ADD_TEST (NAME testhdf5-heap COMMAND $<TARGET_FILE:testhdf5> -o heap)
+  SET_TESTS_PROPERTIES(testhdf5-heap PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+  SET_TESTS_PROPERTIES(testhdf5-heap PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
+  ADD_TEST (NAME testhdf5-file COMMAND $<TARGET_FILE:testhdf5> -o file)
+  SET_TESTS_PROPERTIES(testhdf5-file PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+  SET_TESTS_PROPERTIES(testhdf5-file PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
+  ADD_TEST (NAME testhdf5-select COMMAND $<TARGET_FILE:testhdf5> -o select)
+  SET_TESTS_PROPERTIES(testhdf5-select PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
+  SET_TESTS_PROPERTIES(testhdf5-select PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
+ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+  ADD_TEST (NAME testhdf5 COMMAND $<TARGET_FILE:testhdf5>)
+  SET_TESTS_PROPERTIES(testhdf5 PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
 ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   
 ##############################################################################
