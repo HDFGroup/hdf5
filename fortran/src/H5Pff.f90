@@ -2329,14 +2329,16 @@ CONTAINS
 ! HISTORY
 !  Explicit Fortran interfaces were added for 
 !  called C functions (it is needed for Windows
-!  port).  March 14, 2001 
+!  port).  March 14, 2001
+!
+!  Changed type of 'offset' from integer to off_t -- MSB January 9, 2012
 !  
 ! Fortran90 Interface:
-  SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr)
+  SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of an external file
-    INTEGER, INTENT(IN) :: offset         ! Offset, in bytes, from the beginning 
+    INTEGER(OFF_T), INTENT(IN) :: offset  ! Offset, in bytes, from the beginning 
                                           !  of the file to the location in the file 
                                           !  where the data starts.
     INTEGER(HSIZE_T), INTENT(IN) :: bytes ! Number of bytes reserved in the 
@@ -2347,9 +2349,6 @@ CONTAINS
 
     INTEGER :: namelen
 
-!            INTEGER, EXTERNAL :: h5pset_external_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
     INTERFACE
        INTEGER FUNCTION h5pset_external_c(prp_id, name,namelen, offset, bytes)
          USE H5GLOBAL
@@ -2360,7 +2359,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: prp_id
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER :: namelen
-         INTEGER, INTENT(IN) :: offset
+         INTEGER(OFF_T), INTENT(IN) :: offset
          INTEGER(HSIZE_T), INTENT(IN) :: bytes
        END FUNCTION h5pset_external_c
     END INTERFACE
@@ -2453,7 +2452,9 @@ CONTAINS
 ! HISTORY
 !  Explicit Fortran interfaces were added for 
 !  called C functions (it is needed for Windows
-!  port).  March 14, 2001 
+!  port).  March 14, 2001
+!
+! Changed type of 'offset' from integer to off_t -- MSB January 9, 2012
 !  
 ! Fortran90 Interface:
   SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
@@ -2462,7 +2463,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: idx           ! External file index.
     INTEGER(SIZE_T), INTENT(IN) :: name_size ! Maximum length of name array 
     CHARACTER(LEN=*), INTENT(OUT) :: name    ! Name of an external file
-    INTEGER, INTENT(OUT) :: offset           ! Offset, in bytes, from the beginning 
+    INTEGER(OFF_T), INTENT(OUT) :: offset    ! Offset, in bytes, from the beginning 
                                              !  of the file to the location in the file 
                                              !  where the data starts.
     INTEGER(HSIZE_T), INTENT(OUT) :: bytes   ! Number of bytes reserved in the 
@@ -2485,7 +2486,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: idx 
          INTEGER(SIZE_T), INTENT(IN) :: name_size
          CHARACTER(LEN=*), INTENT(OUT) :: name
-         INTEGER, INTENT(OUT) :: offset
+         INTEGER(OFF_T), INTENT(OUT) :: offset
          INTEGER(HSIZE_T), INTENT(OUT) :: bytes
        END FUNCTION h5pget_external_c
     END INTERFACE

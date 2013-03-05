@@ -1937,28 +1937,29 @@ DONE:
 
 /****if* H5Pf/h5pset_external_c
  * NAME
- *        h5pset_external_c
+ *  h5pset_external_c
  * PURPOSE
- *     Call H5Pset_external to add an external file to the
- *              list of external files.
+ *  Call H5Pset_external to add an external file to the
+ *  list of external files.
  * INPUTS
- *      prp_id - property list identifier
- *              name - Name of an external file
- *              namelen - length of name
- *              offset - Offset, in bytes, from the beginning of the file
- *                       to the location in the file where the data starts.
- *              bytes - Number of bytes reserved in the file for the data.
+ *  prp_id  - property list identifier
+ *  name    - Name of an external file
+ *  namelen - length of name
+ *  offset  - Offset, in bytes, from the beginning of the file
+ *            to the location in the file where the data starts.
+ *  bytes   - Number of bytes reserved in the file for the data.
  * RETURNS
- *     0 on success, -1 on failure
+ *  0 on success, -1 on failure
  * AUTHOR
  *  Xiangyang Su
- *              Wednesday, February 23, 2000
+ *  Wednesday, February 23, 2000
  * HISTORY
- *
+ *  Changed type of 'offset' from int_f to off_t_f -- MSB January 9, 2012
+ *  
  * SOURCE
 */
 int_f
-nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, hsize_t_f*bytes)
+nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, off_t_f* offset, hsize_t_f*bytes)
 /******/
 {
      int ret_value = -1;
@@ -2029,14 +2030,14 @@ nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
 
 /****if* H5Pf/h5pget_external_c
  * NAME
- *        h5pget_external_c
+ *  h5pget_external_c
  * PURPOSE
- *     Call H5Pget_external to get nformation about an external file.
+ *  Call H5Pget_external to get nformation about an external file.
  * INPUTS
  *    prp_id - property list identifier
  * name_size - length of name
  *       idx - External file index.
- *OUTPUT
+ * OUTPUT
  *      name - Name of an external file
  *    offset - Offset, in bytes, from the beginning of the file
  *             to the location in the file where the data starts.
@@ -2047,11 +2048,12 @@ nh5pget_external_count_c (hid_t_f *prp_id, int_f* count)
  *  Xiangyang Su
  *  Wednesday, February 23, 2000
  * HISTORY
+ *  Changed type of 'offset' from integer to off_t -- MSB January 9, 2012
  *
  * SOURCE
 */
 int_f
-nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes)
+nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, off_t_f* offset, hsize_t_f*bytes)
 /******/
 {
      int ret_value = -1;
@@ -2079,7 +2081,7 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
 
      if (status < 0) goto DONE;
 
-     *offset = (int_f)c_offset;
+     *offset = (off_t_f)c_offset;
      *bytes = (hsize_t_f)size;
      /* Note: if the size of the fortran buffer is larger then the returned string
       *       from the function then we need to give HD5packFstring the fortran buffer size so
