@@ -286,7 +286,7 @@ typedef struct H5VL_object_class_t {
 /* enum value to identify the class of a VOL plugin (mostly for comparison purposes */
 typedef enum H5VL_class_value_t {
     NATIVE = 0,
-    DUMMY = 1
+    IOD = 1
 } H5VL_class_value_t;
 
 /* Class information for each VOL driver */
