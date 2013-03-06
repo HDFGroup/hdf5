@@ -225,7 +225,7 @@ ADD_TEST (
 )
 
 IF (HDF5_ENABLE_USING_MEMCHECKER)
-  ADD_TEST (NAME testhdf5-base COMMAND $<TARGET_FILE:testhdf5> -x heap file select)
+  ADD_TEST (NAME testhdf5-base COMMAND $<TARGET_FILE:testhdf5> -x heap -x file -x select)
   SET_TESTS_PROPERTIES(testhdf5-base PROPERTIES DEPENDS h5test-clear-testhdf5-objects)
   SET_TESTS_PROPERTIES(testhdf5-base PROPERTIES ENVIRONMENT HDF5_ALARM_SECONDS=3600)
   ADD_TEST (NAME testhdf5-heap COMMAND $<TARGET_FILE:testhdf5> -o heap)
