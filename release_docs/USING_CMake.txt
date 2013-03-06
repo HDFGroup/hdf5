@@ -31,6 +31,10 @@ Notes: This short instruction is written for users who want to quickly build
             Please read the HDF and CDash document at:
             www.hdfgroup.org/CDash/HowToSubmit. 
             
+         4. See the appendix at the bottom of this file for an example of using
+            a ctest script for building and testing. See CMake.txt for more
+            information.
+            
 
 ========================================================================
                             Preconditions                                                           
@@ -180,10 +184,28 @@ Notes: This short instruction is written for users who want to quickly build
 
                                                                          
 ========================================================================
+   Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
+========================================================================
+
+   9. Set up path for external libraries and headers
+
+      The path settings will need to be in project property sheets per project. 
+      Go to "Project" and select "Properties", find "Configuration Properties", 
+      and then "VC++ Directories".
+          
+      9.1 If you are building on 64-bit Windows, find the "Platform" dropdown
+              and select "x64".
+              
+      9.2 Add the header path to the "Include Directories" setting.
+          
+      9.3 Add the library path to the "Library Directories" setting.
+
+                                                                         
+========================================================================
           Minimum C Project Files for CMake
 ========================================================================
 
-   9. Create a CMakeLists.txt file at the source root.
+   10. Create a CMakeLists.txt file at the source root.
 ..........................................................................
 cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5MyApp C CXX)
@@ -196,7 +218,55 @@ ADD_EXECUTABLE (hdf_example ${PROJECT_SOURCE_DIR}/hdf_example.c)
 TARGET_LINK_LIBRARIES (hdf_example ${LINK_LIBS})
 ..........................................................................
 
+
 ************************************************************************
+                      APPENDIX
+
+Below ia an example of the ctest script used by The HDF Group. See the
+Appendix in the CMake.txt file for the CTestScript.cmake file used by this
+script.
+
+************************************************************************
+Product specific script, HDF518Example.cmake, that uses the 
+CTestScript.cmake file (see Appendix in the CMake.txt). Usage:
+"ctest -S HDF518Example.cmake,hdf518Examples -C Release -O hdf518EX.log"
+where hdf518Examples is the source folder relative to the location of these scripts
+========================================================================
+
+cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
+
+set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
+set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)
+set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
+set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_SOURCE_NAME}")
+set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
+set(CTEST_BUILD_CONFIGURATION "Release")
+set(MODEL "Experimental")
+
+# build generator name, see cmake generator list
+set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
+
+# machine description, can be removed on linux
+set(CTEST_SITE "machine.domain")
+set(SITE_OS_NAME "os name")
+set(SITE_OS_VERSION "os version")
+set(SITE_OS_BITS "os size")
+set(SITE_COMPILER_NAME "compiler name")
+set(SITE_COMPILER_VERSION "compiler version")
+
+
+# needed for source updates, change as required
+set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/1_8")
+
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5Examples-1.8")
+
+# location of the installed hdf5 (cmake configuration folder)
+set(ENV{HDF5_DIR} "/usr/share/cmake/hdf5")
+
+include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
+
+message("DONE")
+
 
 Need further assistance, send email to help@hdfgroup.org
 
