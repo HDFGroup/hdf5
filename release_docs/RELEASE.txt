@@ -1073,8 +1073,17 @@ Bug Fixes since HDF5-1.8.0 release
 
     Testing
     -------
+      - In some Mac system, testlibinfo.sh failed with this error:
+           Check file ../src/.libs/libhdf5.7.dylib
+           strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
+	   (unknown load command 15)
+        The strings command of Mac inspects library files and older
+	versions of strings may not know newer library format, resulting
+	in errors.  Fixed by sending the library file as stdin to the strings
+	coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
+
       - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
-      faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
+        faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
 
 
 Supported Platforms
