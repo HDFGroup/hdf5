@@ -267,6 +267,9 @@ H5_DLL hsize_t H5S_select_iter_nelmts(const H5S_sel_iter_t *sel_iter);
 H5_DLL herr_t H5S_select_iter_next(H5S_sel_iter_t *sel_iter, size_t nelem);
 H5_DLL herr_t H5S_select_iter_release(H5S_sel_iter_t *sel_iter);
 
+H5_DLL herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
+H5_DLL H5S_t *H5S_decode(const unsigned char *buf);
+
 #ifdef H5_HAVE_PARALLEL
 /* Global vars whose value comes from environment variable */
 /* (Defined in H5S.c) */

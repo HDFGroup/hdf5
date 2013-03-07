@@ -43,6 +43,7 @@ typedef struct H5VL_iod_remote_file_t {
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
     hid_t fcpl_id;
+    fs_handle_t fs_handle;
 } H5VL_iod_remote_file_t;
 
 /* struct that contains the information about the IOD group */
@@ -52,6 +53,7 @@ typedef struct H5VL_iod_remote_group_t {
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
     hid_t gcpl_id;
+    fs_handle_t fs_handle;
 } H5VL_iod_remote_group_t;
 
 /* struct that contains the information about the IOD dset */
@@ -63,6 +65,7 @@ typedef struct H5VL_iod_remote_dset_t {
     hid_t dcpl_id;
     hid_t space_id;
     hid_t type_id;
+    fs_handle_t fs_handle;
 } H5VL_iod_remote_dset_t;
 
 typedef struct H5VL_iod_file_create_input_t {

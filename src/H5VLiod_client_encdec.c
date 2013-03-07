@@ -18,13 +18,17 @@
  * Purpose:	IOD plugin client encode/decode code
  */
 
+#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"         /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Ppkg.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspaces				*/
+#include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"         /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
@@ -65,22 +69,20 @@ H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input)
     }
     len = HDstrlen(name) + 1;
 
-    size += (1 + 1 + H5V_limit_enc_size((uint64_t)len) + len + sizeof(unsigned) + 
-             1 + H5V_limit_enc_size((uint64_t)fapl_size) + fapl_size + 
-             1 + H5V_limit_enc_size((uint64_t)fcpl_size) + fcpl_size);
+    size = sizeof(unsigned) + 
+        1 + H5V_limit_enc_size((uint64_t)len) + len +
+        1 + H5V_limit_enc_size((uint64_t)fapl_size) + fapl_size + 
+        1 + H5V_limit_enc_size((uint64_t)fcpl_size) + fcpl_size;
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_FILE_CREATE;
 
     /* encode length of name and name */
     UINT64ENCODE_VARLEN(p, len);
@@ -127,19 +129,19 @@ H5VL_iod_client_decode_file_create(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
     /* decode the location with the container handle & iod object IDs and opened handles */
-    UINT64DECODE_VARLEN(p, output->coh);
-    UINT64DECODE_VARLEN(p, output->root_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->root_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->root_oh);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->scratch_oh);
+    UINT64DECODE_VARLEN(p, output->coh.cookie);
+    UINT64DECODE_VARLEN(p, output->root_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->root_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->root_oh.cookie);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->scratch_oh.cookie);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -172,22 +174,19 @@ H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     len = HDstrlen(name) + 1;
-    size += (1 + sizeof(unsigned) +
-             1 + H5V_limit_enc_size((uint64_t)len) + len +  
-             1 + H5V_limit_enc_size((uint64_t)fapl_size) + fapl_size);
+    size = sizeof(unsigned) +
+        1 + H5V_limit_enc_size((uint64_t)len) + len +  
+        1 + H5V_limit_enc_size((uint64_t)fapl_size) + fapl_size;
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
-
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_FILE_OPEN;
 
     /* encode length of name and name */
     UINT64ENCODE_VARLEN(p, len);
@@ -218,36 +217,37 @@ H5VL_iod_client_decode_file_open(fs_proc_t proc, void *_output)
 {
     H5VL_iod_remote_file_t *output = (H5VL_iod_remote_file_t *)_output;
     void *buf=NULL;
+    size_t fcpl_size = 0;
     uint8_t *p;
 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
     /* decode the location with the container handle & iod object IDs and opened handles */
-    UINT64DECODE_VARLEN(p, output->coh);
-    UINT64DECODE_VARLEN(p, output->root_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->root_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->root_oh);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->scratch_oh);
+    UINT64DECODE_VARLEN(p, output->coh.cookie);
+    UINT64DECODE_VARLEN(p, output->root_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->root_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->root_oh.cookie);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->scratch_oh.cookie);
 
     /* decode the plist size */
-    UINT64DECODE_VARLEN(p, fapl_size);
+    UINT64DECODE_VARLEN(p, fcpl_size);
     /* decode property lists if they are not default*/
-    if(fapl_size) {
-        if((output->fapl_id = H5P__decode(p)) < 0)
+    if(fcpl_size) {
+        if((output->fcpl_id = H5P__decode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += fapl_size;
+        p += fcpl_size;
     }
     else {
-        output->fapl_id = H5P_FILE_ACCESS_DEFAULT;
+        output->fcpl_id = H5P_FILE_CREATE_DEFAULT;
     }
 
 done:
@@ -268,29 +268,32 @@ H5VL_iod_client_encode_file_close(fs_proc_t proc, void *_input)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    size += (1 + sizeof(iod_handle_t)*3 + sizeof(iod_obj_id_t)*2;
+    size = 1 + H5V_limit_enc_size((uint64_t)input->coh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)input->root_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->root_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->root_oh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_oh.cookie);
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_FILE_CLOSE;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->coh);
-    UINT64ENCODE_VARLEN(p, input->root_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->root_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->root_oh);
-    UINT64ENCODE_VARLEN(p, input->scratch_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->scratch_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->scratch_oh);
+    UINT64ENCODE_VARLEN(p, input->coh.cookie);
+    UINT64ENCODE_VARLEN(p, input->root_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->root_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->root_oh.cookie);
+    UINT64ENCODE_VARLEN(p, input->scratch_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->scratch_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->scratch_oh.cookie);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -310,7 +313,7 @@ H5VL_iod_client_decode_file_close(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;
@@ -364,30 +367,30 @@ H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input)
     if(NULL != name)
         len = HDstrlen(name) + 1;
 
-    size += (1 + sizeof(iod_handle_t)*2 + sizeof(iod_obj_id_t) + 
-             1 + H5V_limit_enc_size((uint64_t)len) + len + 
-             1 + H5V_limit_enc_size((uint64_t)gapl_size) + gapl_size + 
-             1 + H5V_limit_enc_size((uint64_t)gcpl_size) + gcpl_size + 
-             1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size);
+    size = 1 + H5V_limit_enc_size((uint64_t)input->coh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_oh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)len) + len + 
+        1 + H5V_limit_enc_size((uint64_t)gapl_size) + gapl_size + 
+        1 + H5V_limit_enc_size((uint64_t)gcpl_size) + gcpl_size + 
+        1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size;
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_GROUP_CREATE;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->coh);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->loc_oh);
+    UINT64ENCODE_VARLEN(p, input->coh.cookie);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->loc_oh.cookie);
 
     /* encode length of the group name and the actual group name */
     UINT64ENCODE_VARLEN(p, len);
@@ -440,18 +443,18 @@ H5VL_iod_client_decode_group_create(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;
 
     /* decode the location with the container handle & iod object IDs and opened handles */
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->iod_oh);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->scratch_oh);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->iod_oh.cookie);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->scratch_oh.cookie);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -487,28 +490,28 @@ H5VL_iod_client_encode_group_open(fs_proc_t proc, void *_input)
     if(NULL != name)
         len = HDstrlen(name) + 1;
 
-    size += (1 + sizeof(iod_handle_t)*2 + sizeof(iod_obj_id_t) + 
-             1 + H5V_limit_enc_size((uint64_t)len) + len + 
-             1 + H5V_limit_enc_size((uint64_t)gapl_size) + gapl_size;
+    size = 1 + H5V_limit_enc_size((uint64_t)input->coh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_oh.cookie) +
+        1 + H5V_limit_enc_size((uint64_t)len) + len + 
+        1 + H5V_limit_enc_size((uint64_t)gapl_size) + gapl_size;
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_GROUP_OPEN;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->coh);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->loc_oh);
+    UINT64ENCODE_VARLEN(p, input->coh.cookie);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->loc_oh.cookie);
 
     /* encode length of the group name and the actual group name */
     UINT64ENCODE_VARLEN(p, len);
@@ -537,35 +540,36 @@ H5VL_iod_client_decode_group_open(fs_proc_t proc, void *_output)
 {
     H5VL_iod_remote_group_t *output = (H5VL_iod_remote_group_t *)_output;
     void *buf=NULL;
+    size_t gcpl_size = 0;
     uint8_t *p;
 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;
 
     /* decode the location with the container handle & iod object IDs and opened handles */
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->iod_oh);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->scratch_oh);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->iod_oh.cookie);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->scratch_oh.cookie);
 
     /* decode the plist size */
-    UINT64DECODE_VARLEN(p, gapl_size);
+    UINT64DECODE_VARLEN(p, gcpl_size);
     /* decode property lists if they are not default*/
-    if(gapl_size) {
-        if((output->gapl_id = H5P__decode(p)) < 0)
+    if(gcpl_size) {
+        if((output->gcpl_id = H5P__decode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += gapl_size;
+        p += gcpl_size;
     }
     else {
-        output->gapl_id = H5P_FILE_ACCESS_DEFAULT;
+        output->gcpl_id = H5P_FILE_CREATE_DEFAULT;
     }
 
 done:
@@ -586,28 +590,30 @@ H5VL_iod_client_encode_group_close(fs_proc_t proc, void *_input)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    size += (1 + sizeof(iod_handle_t)*2 + sizeof(iod_obj_id_t)*2;
+    size = 1 + H5V_limit_enc_size((uint64_t)input->iod_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->iod_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->iod_oh.cookie) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_oh.cookie);
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_GROUP_CLOSE;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->iod_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->iod_id.cs_lo)
-    UINT64ENCODE_VARLEN(p, input->iod_oh);
-    UINT64ENCODE_VARLEN(p, input->scratch_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->scratch_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->scratch_oh);
+    UINT64ENCODE_VARLEN(p, input->iod_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->iod_id.oid_lo)
+    UINT64ENCODE_VARLEN(p, input->iod_oh.cookie);
+    UINT64ENCODE_VARLEN(p, input->scratch_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->scratch_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->scratch_oh.cookie);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -627,7 +633,7 @@ H5VL_iod_client_decode_group_close(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;
@@ -646,7 +652,10 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     H5VL_iod_dset_create_input_t *input = (H5VL_iod_dset_create_input_t *)_input;
     size_t size, nalloc;
     size_t len = 0, dcpl_size = 0, dapl_size = 0, lcpl_size = 0;
+    size_t type_size = 0, space_size = 0;
     H5P_genplist_t *dcpl = NULL, *dapl = NULL, *lcpl = NULL;
+    H5T_t *dtype = NULL;
+    H5S_t *dspace = NULL;
     const char *name = input->name;
     hid_t dcpl_id = input->dcpl_id;
     hid_t dapl_id = input->dapl_id;
@@ -695,32 +704,32 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     if(NULL != name)
         len = HDstrlen(name) + 1;
 
-    size += (1 + sizeof(iod_handle_t)*2 + sizeof(iod_obj_id_t) +
-             1 + H5V_limit_enc_size((uint64_t)len) + len + 
-             1 + H5V_limit_enc_size((uint64_t)dapl_size) + dapl_size + 
-             1 + H5V_limit_enc_size((uint64_t)dcpl_size) + dcpl_size + 
-             1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size + 
-             1 + H5V_limit_enc_size((uint64_t)type_size) + type_size + 
-             1 + H5V_limit_enc_size((uint64_t)space_size) + space_size);
+    size = 1 + H5V_limit_enc_size((uint64_t)input->coh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_oh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)len) + len + 
+        1 + H5V_limit_enc_size((uint64_t)dapl_size) + dapl_size + 
+        1 + H5V_limit_enc_size((uint64_t)dcpl_size) + dcpl_size + 
+        1 + H5V_limit_enc_size((uint64_t)lcpl_size) + lcpl_size + 
+        1 + H5V_limit_enc_size((uint64_t)type_size) + type_size + 
+        1 + H5V_limit_enc_size((uint64_t)space_size) + space_size;
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_DSET_CREATE;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->coh);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->loc_oh);
+    UINT64ENCODE_VARLEN(p, input->coh.cookie);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->loc_oh.cookie);
 
     /* encode length of the dataset name and the actual dataset name */
     UINT64ENCODE_VARLEN(p, len);
@@ -787,18 +796,18 @@ H5VL_iod_client_decode_dset_create(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;
 
     /* decode the location with the container handle & iod object IDs and opened handles */
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->iod_oh);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->scratch_oh);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->iod_oh.cookie);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->scratch_oh.cookie);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -834,28 +843,28 @@ H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input)
     if(NULL != name)
         len = HDstrlen(name) + 1;
 
-    size += (1 + sizeof(iod_handle_t)*2 + sizeof(iod_obj_id_t) +
-             1 + H5V_limit_enc_size((uint64_t)len) + len + 
-             1 + H5V_limit_enc_size((uint64_t)dapl_size) + dapl_size;
+    size = 1 + H5V_limit_enc_size((uint64_t)input->coh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->loc_oh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)len) + len + 
+        1 + H5V_limit_enc_size((uint64_t)dapl_size) + dapl_size;
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_DSET_OPEN;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->coh);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->loc_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->loc_oh);
+    UINT64ENCODE_VARLEN(p, input->coh.cookie);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->loc_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->loc_oh.cookie);
 
     /* encode length of the dataset name and the actual dataset name */
     UINT64ENCODE_VARLEN(p, len);
@@ -884,35 +893,36 @@ H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output)
 {
     H5VL_iod_remote_dset_t *output = (H5VL_iod_remote_dset_t *)_output;
     void *buf=NULL;
+    size_t dcpl_size = 0;
     uint8_t *p;
 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;
 
     /* decode the location with the container handle & iod object IDs and opened handles */
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->iod_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->iod_oh);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_hi);
-    UINT64DECODE_VARLEN(p, output->scratch_id.cs_lo);
-    UINT64DECODE_VARLEN(p, output->scratch_oh);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->iod_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->iod_oh.cookie);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_hi);
+    UINT64DECODE_VARLEN(p, output->scratch_id.oid_lo);
+    UINT64DECODE_VARLEN(p, output->scratch_oh.cookie);
 
     /* decode the plist size */
-    UINT64DECODE_VARLEN(p, dapl_size);
+    UINT64DECODE_VARLEN(p, dcpl_size);
     /* decode property lists if they are not default*/
-    if(dapl_size) {
-        if((output->dapl_id = H5P__decode(p)) < 0)
+    if(dcpl_size) {
+        if((output->dcpl_id = H5P__decode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
-        p += dapl_size;
+        p += dcpl_size;
     }
     else {
-        output->dapl_id = H5P_FILE_ACCESS_DEFAULT;
+        output->dcpl_id = H5P_FILE_CREATE_DEFAULT;
     }
 
 done:
@@ -933,28 +943,30 @@ H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    size += (1 + sizeof(iod_handle_t)*2 + sizeof(iod_obj_id_t)*2;
+    size = 1 + H5V_limit_enc_size((uint64_t)input->iod_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->iod_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->iod_oh.cookie) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_id.oid_hi) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_id.oid_lo) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_oh.cookie);
 
     nalloc = fs_proc_get_size(proc);
 
     if(nalloc < size)
-        fs_proc_set_size(size);
+        fs_proc_set_size(proc, size);
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
 
-    /* encode request type */
-    *p++ = (uint8_t)H5VL_DSET_CLOSE;
-
     /* encode the location with the container handle & iod object IDs and opened handles */
-    UINT64ENCODE_VARLEN(p, input->iod_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->iod_id.cs_lo)
-    UINT64ENCODE_VARLEN(p, input->iod_oh);
-    UINT64ENCODE_VARLEN(p, input->scratch_id.cs_hi);
-    UINT64ENCODE_VARLEN(p, input->scratch_id.cs_lo);
-    UINT64ENCODE_VARLEN(p, input->scratch_oh);
+    UINT64ENCODE_VARLEN(p, input->iod_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->iod_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->iod_oh.cookie);
+    UINT64ENCODE_VARLEN(p, input->scratch_id.oid_hi);
+    UINT64ENCODE_VARLEN(p, input->scratch_id.oid_lo);
+    UINT64ENCODE_VARLEN(p, input->scratch_oh.cookie);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -974,7 +986,7 @@ H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (buf = fs_proc_get_buf(proc)))
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
 
     p = (uint8_t *)buf;

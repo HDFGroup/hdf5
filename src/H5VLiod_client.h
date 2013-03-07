@@ -90,6 +90,22 @@ H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t 
 
 H5_DLL herr_t H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_file_create(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_file_open(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_file_close(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_file_close(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_group_create(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_group_open(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_group_open(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_group_close(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_group_close(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_dset_create(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output);
 
 
 #endif /* _H5VLiod_client_H */

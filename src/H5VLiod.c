@@ -26,14 +26,13 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5FDprivate.h"        /* file drivers            		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_client.h"     /* Client IOD helper			*/
-
-#include "/mnt/hdf/chaarawi/hdf5/source/iod/iod/include/iod_api.h"
 
 /* Prototypes */
 static void *H5VL_iod_fapl_copy(const void *_old_fa);
@@ -148,7 +147,7 @@ static H5VL_class_t H5VL_iod_g = {
         NULL,//H5VL_iod_dataset_write,              /* write */
         NULL,//H5VL_iod_dataset_set_extent,         /* set extent */
         NULL,//H5VL_iod_dataset_get,                /* get */
-        NULL//H5VL_iod_dataset_close               /* close */
+        H5VL_iod_dataset_close               /* close */
     },
     {                                           /* file_cls */
         H5VL_iod_file_create,                /* create */

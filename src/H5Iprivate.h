@@ -94,6 +94,6 @@ H5_DLL int H5I_get_type_ref(H5I_type_t type);
 H5_DLL herr_t H5I_register_aux(hid_t id, void *aux_ptr);
 H5_DLL void *H5I_get_aux(hid_t id);
 H5_DLL hid_t H5I_get_id(void *object, H5I_type_t type);
-H5_DLL void* H5I_search_name(char *name, H5I_type_t type);
+H5_DLL void *H5I_search_name(char *name, H5I_type_t type);
 #endif /* _H5Iprivate_H */
 

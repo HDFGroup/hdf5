@@ -51,6 +51,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* Virtual Object Layer                 */
+#include "H5VLiod_client.h"     /* Client IOD helper			*/
 
 #include "H5Fpkg.h"		/* MSC- just a temp workaround FILES*/
 

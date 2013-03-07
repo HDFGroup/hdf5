@@ -134,7 +134,7 @@ H5VL_iod_request_wait(H5VL_iod_request_t *request)
 } /* end H5VL_iod_wait */
 
 herr_t
-H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, const char *name,
+H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_params, const char *name,
                         iod_obj_id_t *id, iod_handle_t *oh, char **new_name)
 {
     iod_obj_id_t cur_id;
@@ -225,6 +225,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_local_traverse */
 
+#if 0
 herr_t
 H5VL_iod_client_function_shipper_init()
 {
@@ -252,3 +253,4 @@ H5VL_iod_client_function_shipper_init()
     /* Register function and encoding/decoding functions */
     H5VL_FILE_CREATE_ID = IOFSL_SHIPPER_REGISTER(bla_open, bla_open_in_t, bla_open_out_t);
 }
+#endif

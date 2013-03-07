@@ -58,13 +58,13 @@ static herr_t H5VL_iod_server_group_open_cb(size_t num_necessary_parents, AXE_ta
 static herr_t H5VL_iod_server_group_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_dataset_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                                 size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                                 void *op_data);
-static herr_t H5VL_iod_server_dataset_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                               size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                               void *op_data);
-static herr_t H5VL_iod_server_dataset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                                size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                                void *op_data);
 
@@ -75,8 +75,8 @@ static herr_t H5VL_iod_server_dataset_close_cb(size_t num_necessary_parents, AXE
  * Purpose:	Function shipper registered call for File Create.
  *              Inserts the real worker routine into the Async Engine.
  *
- * Return:	Success:	the file id. 
- *		Failure:	NULL
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              January, 2012
@@ -114,12 +114,364 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_file_open
+ *
+ * Purpose:	Function shipper registered call for File Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_file_open(fs_handle_t handle)
+{
+    H5VL_iod_file_open_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_file_open_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_file_open_input_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_open_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_file_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_file_close
+ *
+ * Purpose:	Function shipper registered call for File Close.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_file_close(fs_handle_t handle)
+{
+    H5VL_iod_remote_file_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_remote_file_t *)
+                H5MM_malloc(sizeof(H5VL_iod_remote_file_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_close_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_file_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_group_create
+ *
+ * Purpose:	Function shipper registered call for Group Create.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_group_create(fs_handle_t handle)
+{
+    H5VL_iod_group_create_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_group_create_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_group_create_input_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_create_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_group_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_group_open
+ *
+ * Purpose:	Function shipper registered call for Group Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_group_open(fs_handle_t handle)
+{
+    H5VL_iod_group_open_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_group_open_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_group_open_input_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_open_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_group_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_group_close
+ *
+ * Purpose:	Function shipper registered call for Group Close.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_group_close(fs_handle_t handle)
+{
+    H5VL_iod_remote_group_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_remote_group_t *)
+                H5MM_malloc(sizeof(H5VL_iod_remote_group_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_close_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_group_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_create
+ *
+ * Purpose:	Function shipper registered call for Dset Create.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_create(fs_handle_t handle)
+{
+    H5VL_iod_dset_create_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dset_create_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dset_create_input_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_create_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_open
+ *
+ * Purpose:	Function shipper registered call for Dset Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_open(fs_handle_t handle)
+{
+    H5VL_iod_dset_open_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dset_open_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dset_open_input_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_open_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_close
+ *
+ * Purpose:	Function shipper registered call for Dset Close.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_close(fs_handle_t handle)
+{
+    H5VL_iod_remote_dset_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_remote_dset_t *)
+                H5MM_malloc(sizeof(H5VL_iod_remote_dset_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_close_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_file_create_cb
  *
  * Purpose:	Creates a file as a iod HDF5 file.
  *
- * Return:	Success:	the file id. 
- *		Failure:	NULL
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              January, 2012
@@ -132,7 +484,7 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
                                void *op_data)
 {
     H5VL_iod_file_create_input_t *input = (H5VL_iod_file_create_input_t *)op_data;
-    H5VL_iod_remote_file_t output;
+    H5VL_iod_server_remote_file_t output;
     unsigned int mode;
     iod_handle_t coh;
     iod_handle_t root_handle, scratch_handle;
@@ -219,8 +571,8 @@ done:
  *
  * Purpose:	Opens a file as a iod HDF5 file.
  *
- * Return:	Success:	Positive. 
- *		Failure:	NULL
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              January, 2012
@@ -233,7 +585,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
                              void *op_data)
 {
     H5VL_iod_file_open_input_t *input = (H5VL_iod_file_open_input_t *)op_data;
-    H5VL_iod_remote_file_t output;
+    H5VL_iod_server_remote_file_t output;
     unsigned int mode;
     iod_handle_t coh;
     iod_handle_t root_handle, scratch_handle;
@@ -258,6 +610,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+
     output.coh = coh;
     output.root_id = ROOT_ID;
     output.root_oh = root_handle;
@@ -279,8 +632,8 @@ done:
  *
  * Purpose:	Closes iod HDF5 file.
  *
- * Return:	Success:	Positive. 
- *		Failure:	NULL
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              January, 2012
@@ -295,24 +648,17 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     H5VL_iod_remote_file_t *input = (H5VL_iod_remote_file_t *)op_data;
     iod_handle_t coh = input->coh;
     iod_handle_t root_oh = input->root_oh;
-    iod_obj_id_t root_id = input->root_id;
     iod_handle_t scratch_oh = input->scratch_oh;
-    iod_obj_id_t scratch_id = input->scratch_id;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* close root scratch pad */
-    if (iod_obj_open_write(scratch_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close root scratch object");
-
-    /* close root root kv store */
-    if (iod_obj_open_write(root_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close root object");
-
-    /* close container */
-    if (iod_obj_open_write(coh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
+    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
+    if((ret_value = iod_obj_close(root_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+    if((ret_value = iod_container_close(coh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't close container");
 
 done:
     fs_handler_complete(input->fs_handle, &ret_value);
@@ -325,6 +671,9 @@ done:
  *
  * Purpose:	Creates a group as a iod object.
  *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
  * Programmer:  Mohamad Chaarawi
  *              February, 2012
  *
@@ -336,7 +685,7 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
                                 void *op_data)
 {
     H5VL_iod_group_create_input_t *input = (H5VL_iod_group_create_input_t *)op_data;
-    H5VL_iod_remote_group_t output;
+    H5VL_iod_server_remote_group_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_handle;
@@ -461,6 +810,9 @@ done:
  *
  * Purpose:	Opens a group as a iod object.
  *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
  * Programmer:  Mohamad Chaarawi
  *              February, 2012
  *
@@ -472,12 +824,12 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
                               void *op_data)
 {
     H5VL_iod_group_open_input_t *input = (H5VL_iod_group_open_input_t *)op_data;
-    H5VL_iod_remote_group_t output;
+    H5VL_iod_server_remote_group_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_handle;
     iod_obj_id_t cur_id, scratch_pad;
-    char *name = input->name;
+    const char *name = input->name;
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;          /* Pointer to buffer for path components */
     H5WB_t *wb = NULL;     /* Wrapped buffer for temporary buffer */
@@ -542,6 +894,19 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+    /* MSC - need to store the gcpl in create */
+    output.gcpl_size = 0;
+#if 0 
+    if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_gcpl", NULL, 
+                        &output.gcpl_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset gcpl lookup failed");
+    if(NULL == (output.gcpl = H5MM_malloc (output.gcpl_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate gcpl buffer");
+    if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_gcpl", output.gcpl, 
+                        &output.gcpl_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
+#endif
+
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
@@ -557,6 +922,8 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
+    H5MM_xfree(output.gcpl);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_open_cb() */
 
@@ -566,8 +933,8 @@ done:
  *
  * Purpose:	Closes iod HDF5 group.
  *
- * Return:	Success:	Positive. 
- *		Failure:	NULL
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              January, 2012
@@ -586,13 +953,10 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* close root scratch pad */
-    if (iod_obj_open_write(scratch_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close scratch object");
-
-    /* close root root kv store */
-    if (iod_obj_open_write(iod_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close object");
+    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
+    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
 done:
     fs_handler_complete(input->fs_handle, &ret_value);
@@ -601,9 +965,12 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_dataset_create_cb
+ * Function:	H5VL_iod_server_dset_create_cb
  *
- * Purpose:	Creates a dataset as a iod object.
+ * Purpose:	Creates a dset as a iod object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              February, 2012
@@ -611,17 +978,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dataset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                   size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                   void *op_data)
 {
     H5VL_iod_dset_create_input_t *input = (H5VL_iod_dset_create_input_t *)op_data;
-    H5VL_iod_remote_dset_t output;
+    H5VL_iod_server_remote_dset_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_handle;
     iod_obj_id_t cur_id, scratch_pad;
-    char *name = input->name;
+    const char *name = input->name;
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;          /* Pointer to buffer for path components */
     H5WB_t *wb = NULL;     /* Wrapped buffer for temporary buffer */
@@ -777,7 +1144,7 @@ H5VL_iod_server_dataset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_
     if(NULL == (kv.value = malloc (buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dcpl buffer");
     /* encode dcpl of the dataset */ 
-    if(H5Pencode(input->dcpl_id, (void *)kv.value, &buf_size) < 0)
+    if(H5Pencode(input->dcpl_id, kv.value, &buf_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset dcpl");
     kv.value_len = (iod_size_t)buf_size;
     /* insert kv pair into scratch pad */
@@ -792,7 +1159,7 @@ H5VL_iod_server_dataset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_
     if(NULL == (kv.value = malloc (buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
     /* encode datatype of the dataset */ 
-    if(H5Tencode(input->type_id, (void *)kv.value, &buf_size) < 0)
+    if(H5Tencode(input->type_id, kv.value, &buf_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset type");
     kv.value_len = (iod_size_t)buf_size;
     /* insert kv pair into scratch pad */
@@ -806,7 +1173,7 @@ H5VL_iod_server_dataset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_
     if(NULL == (kv.value = malloc (buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate space buffer");
     /* encode dataspace of the dataset */ 
-    if(H5Sencode(input->space_id, (void *)kv.value, &buf_size) < 0)
+    if(H5Sencode(input->space_id, kv.value, &buf_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset space");
     kv.value_len = (iod_size_t)buf_size;
     /* insert kv pair into scratch pad */
@@ -830,13 +1197,16 @@ done:
         fs_handler_complete(input->fs_handle, &ret_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_server_dataset_create_cb() */
+} /* end H5VL_iod_server_dset_create_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_dataset_open_cb
+ * Function:	H5VL_iod_server_dset_open_cb
  *
  * Purpose:	Opens a dataset as a iod object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              February, 2012
@@ -844,13 +1214,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dataset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                 size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                 void *op_data)
 {
     H5VL_iod_dset_open_input_t *input = (H5VL_iod_dset_open_input_t *)op_data;
-    H5VL_iod_remote_dset_t output;
-    unsigned int mode;
+    H5VL_iod_server_remote_dset_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_handle;
@@ -919,36 +1288,38 @@ H5VL_iod_server_dataset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
     /* open the scratch pad */
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
-    
+
     /*retrieve all metadata from scratch pad */
-#if 0
+    output.dcpl_size = 0;
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dcpl", NULL, 
-                        &dcpl_size, NULL, NULL) < 0)
+                        &output.dcpl_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
-    if(NULL == (dcpl = malloc (dcpl_size)))
+    if(NULL == (output.dcpl = H5MM_malloc (output.dcpl_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dcpl buffer");
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dcpl", output.dcpl, 
                         &output.dcpl_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
 
+    output.dtype_size = 0;
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dtype", NULL, 
                         &output.dtype_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dtype lookup failed");
-    if(NULL == (output.dtype = malloc (output.dtype_size)))
+    if(NULL == (output.dtype = H5MM_malloc (output.dtype_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dtype buffer");
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dtype", output.dtype, 
                         &output.dtype_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dtype lookup failed");
 
+    output.dspace_size = 0;
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dspace", NULL, 
                         &output.dspace_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dspace lookup failed");
-    if(NULL == (output.dspace = malloc (output.dspace_size)))
+    if(NULL == (output.dspace = H5MM_malloc (output.dspace_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dspace buffer");
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dspace", output.dspace, 
                         &output.dspace_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dspace lookup failed");
-#endif
+
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
@@ -964,17 +1335,21 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
+    H5MM_xfree(output.dcpl);
+    H5MM_xfree(output.dtype);
+    H5MM_xfree(output.dspace);
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_server_dataset_open_cb() */
+} /* end H5VL_iod_server_dset_open_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_dataset_close_cb
+ * Function:	H5VL_iod_server_dset_close_cb
  *
  * Purpose:	Closes iod HDF5 dataset.
  *
- * Return:	Success:	Positive. 
- *		Failure:	NULL
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
  *
  * Programmer:  Mohamad Chaarawi
  *              January, 2012
@@ -982,7 +1357,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dataset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                  size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                  void *op_data)
 {
@@ -993,15 +1368,12 @@ H5VL_iod_server_dataset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* close root scratch pad */
-    if (iod_obj_open_write(scratch_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close scratch object");
-
-    /* close root root kv store */
-    if (iod_obj_open_write(iod_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close object");
+    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
+    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
 done:
     fs_handler_complete(input->fs_handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_server_dataset_close_cb() */
+} /* end H5VL_iod_server_dset_close_cb() */

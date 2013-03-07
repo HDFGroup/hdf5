@@ -24,6 +24,7 @@
 
 #include "AXE.h"
 #include "iod_api.h"
+#include "iod_types.h"
 #include "function_shipper.h"
 #include "function_shipper_handler.h"
 
