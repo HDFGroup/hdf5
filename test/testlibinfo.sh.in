@@ -53,9 +53,9 @@ SKIP() {
 # Function definitions
 CHECK_LIBINFO(){
     LINEMSG $1
-    # Some systems, like Mac, strings inspect library files and older versions
-    # of strings maybe know newer library format, resulting in errors.
-    # Make it read the file as stdin, avoiding this problem.
+    # Some systems, like Mac, the strings command inspects library files. Older
+    # versions of strings may not know newer library format, resulting in
+    # command errors. Make it read the file as stdin to avoid the problem.
     if strings < $1 | grep "SUMMARY OF THE HDF5 CONFIGURATION" > /dev/null; then
 	echo " PASSED"
     else
