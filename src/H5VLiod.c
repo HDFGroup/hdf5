@@ -234,6 +234,41 @@ H5VL_iod_init(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLeff_init
+ *
+ * Purpose:	initialize to the EFF stack
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLeff_init(MPI_Comm comm, MPI_Info info)
+{
+    char mpi_port_name[MPI_MAX_PORT_NAME];
+    FILE *config;
+    herr_t          ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    if ((config = fopen("port.cfg", "r")) != NULL) {
+        fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
+        printf("Using MPI port name: %s.\n", mpi_port_name);
+        fclose(config);
+    }
+
+    if(NA_UNDEFINED == (PEER = H5VL_iod_client_eff_init(mpi_port_name, comm, info)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize eff stack");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLeff_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_iod
  *
  * Purpose:	Modify the file access property list to use the H5VL_IOD

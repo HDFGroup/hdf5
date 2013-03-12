@@ -36,9 +36,9 @@
  */
 
 AXE_engine_t engine = NULL;
-
-#define EEXISTS 0
+MPI_Comm iod_comm;
 iod_obj_id_t ROOT_ID;
+#define EEXISTS 0
 
 static herr_t H5VL_iod_server_file_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
@@ -67,6 +67,113 @@ static herr_t H5VL_iod_server_dset_open_cb(size_t num_necessary_parents, AXE_tas
 static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                                size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                                void *op_data);
+
+herr_t
+H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
+{
+    na_network_class_t *network_class = NULL;
+    int num_procs;
+    herr_t ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    MPI_Comm_size(comm, &num_procs);
+
+    iod_comm = comm;
+    /* initialize the netwrok class */
+    network_class = na_mpi_init(NULL, MPI_INIT_SERVER);
+    if(S_SUCCESS != fs_handler_init(network_class))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
+
+    /* Register function and encoding/decoding functions */
+    fs_handler_register("eff_init", 
+                        H5VL_iod_server_eff_init,
+                        H5VL_iod_server_decode_eff_init, 
+                        H5VL_iod_server_encode_eff_init);
+    fs_handler_register("file_create", 
+                        H5VL_iod_server_file_create,
+                        H5VL_iod_server_decode_file_create, 
+                        H5VL_iod_server_encode_file_create);
+    fs_handler_register("file_open", 
+                        H5VL_iod_server_file_open,
+                        H5VL_iod_server_decode_file_open, 
+                        H5VL_iod_server_encode_file_open);
+    fs_handler_register("file_close", 
+                        H5VL_iod_server_file_close,
+                        H5VL_iod_server_decode_file_close, 
+                        H5VL_iod_server_encode_file_close);
+    fs_handler_register("group_create", 
+                        H5VL_iod_server_group_create,
+                        H5VL_iod_server_decode_group_create, 
+                        H5VL_iod_server_encode_group_create);
+    fs_handler_register("group_open", 
+                        H5VL_iod_server_group_open,
+                        H5VL_iod_server_decode_group_open, 
+                        H5VL_iod_server_encode_group_open);
+    fs_handler_register("group_close", 
+                        H5VL_iod_server_group_close,
+                        H5VL_iod_server_decode_group_close, 
+                        H5VL_iod_server_encode_group_close);
+    fs_handler_register("dset_create", 
+                        H5VL_iod_server_dset_create,
+                        H5VL_iod_server_decode_dset_create, 
+                        H5VL_iod_server_encode_dset_create);
+    fs_handler_register("dset_open", 
+                        H5VL_iod_server_dset_open,
+                        H5VL_iod_server_decode_dset_open, 
+                        H5VL_iod_server_encode_dset_open);
+    fs_handler_register("dset_close", 
+                        H5VL_iod_server_dset_close,
+                        H5VL_iod_server_decode_dset_close, 
+                        H5VL_iod_server_encode_dset_close);
+
+    /* Loop tp receive requests from clients */
+    while(1) {
+        /* Receive new function calls */
+        if(S_SUCCESS != fs_handler_receive())
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to handle client request");
+    }
+
+    if (S_SUCCESS != fs_handler_finalize()) {
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_eff_init
+ *
+ * Purpose:	Function shipper registered call for initializing the eff stack.
+ *              this will initialize the IOD library
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_eff_init(fs_handle_t handle)
+{
+    int num_procs;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(S_FAIL == fs_handler_get_input(handle, &num_procs))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(iod_initialize(iod_comm, NULL, num_procs, num_procs, NULL) < 0 )
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't initialize");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_eff_init() */
 
 
 /*-------------------------------------------------------------------------

@@ -37,6 +37,62 @@
  */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_decode_eff_init_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_decode_eff_init(fs_proc_t proc, void *_input)
+{
+    int *input = (int *)_input;
+    void *buf=NULL;
+    uint8_t *p;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    INT32DECODE(p, *input);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_decode_eff_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_encode_eff_init_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_encode_eff_init(fs_proc_t proc, void *_output)
+{
+    herr_t *output = (herr_t *)_output;
+    void *buf = NULL;
+    uint8_t *p;
+    size_t size, nalloc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = sizeof(herr_t);
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    INT32ENCODE(p, output);
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_server_encode_eff_init() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_decode_file_create_params
  *------------------------------------------------------------------------- */
 herr_t 

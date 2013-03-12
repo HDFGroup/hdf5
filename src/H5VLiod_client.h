@@ -87,7 +87,10 @@ H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);
+na_addr_t H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info info);
 
+H5_DLL herr_t H5VL_iod_client_encode_eff_init(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_eff_init(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_file_create(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input);
