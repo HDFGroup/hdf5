@@ -498,6 +498,9 @@ test_file_open(void)
     /* Close dataset from first open */
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
 }   /* test_file_open() */
 
 /****************************************************************
@@ -1032,6 +1035,9 @@ test_get_file_id(void)
     VERIFY(fid2, FAIL, "H5Iget_file_id");
 
     /* Close objects */
+    ret = H5Pclose(plist);
+    CHECK(ret, FAIL, "H5Pclose");
+
     ret = H5Tclose(datatype_id);
     CHECK(ret, FAIL, "H5Tclose");
 
