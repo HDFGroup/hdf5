@@ -321,6 +321,19 @@ int main(void)
     return -1;
 #endif
 
+  /* off_t */
+#if defined H5_FORTRAN_HAS_INTEGER_8_KIND && H5_SIZEOF_OFF_T >= 8
+    writeToFiles("OFF_T", "off_t_f", 8, H5_FORTRAN_HAS_INTEGER_8_KIND);
+#elif defined H5_FORTRAN_HAS_INTEGER_4_KIND && H5_SIZEOF_OFF_T >= 4
+    writeToFiles("OFF_T", "off_t_f", 4, H5_FORTRAN_HAS_INTEGER_4_KIND);
+#elif defined H5_FORTRAN_HAS_INTEGER_2_KIND && H5_SIZEOF_OFF_T >= 2
+    writeToFiles("OFF_T", "off_t_f", 2, H5_FORTRAN_HAS_INTEGER_2_KIND);
+#elif defined H5_FORTRAN_HAS_INTEGER_1_KIND && H5_SIZEOF_OFF_T >= 1
+    writeToFiles("OFF_T", "off_t_f", 1, H5_FORTRAN_HAS_INTEGER_1_KIND);
+#else
+    /* Error: couldn't find a size for off_t */
+    return -1;
+#endif
 
   /* size_t */
 #if defined H5_FORTRAN_HAS_INTEGER_8_KIND && H5_SIZEOF_SIZE_T >= 8

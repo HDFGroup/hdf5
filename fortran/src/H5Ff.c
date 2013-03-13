@@ -679,3 +679,37 @@ nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size)
 done:
       return ret_value;
 }
+
+/****if* H5Ff/h5fget_file_image_c
+ * NAME
+ *  h5fget_file_image_c
+ * PURPOSE
+ *  Calls h5fget_file_image
+ * INPUTS
+ *  file_id    - Target file identifier.
+ *  buf_ptr    - Pointer to the buffer into which the image of the HDF5 file is to be copied.
+ *  buf_len    - Size of the supplied buffer.
+ * OUTPUTS
+ *  buf_req    - The size in bytes of the buffer required to store the file image.
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  November 26, 2012
+ * SOURCE
+*/
+int_f
+nh5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f *buf_req)
+/******/
+{
+    herr_t ret_value=0;          /* Return value */
+
+    /*
+     * Call h5fget_file_image function
+     */
+    if ((*buf_req = (size_t_f)H5Fget_file_image((hid_t)*file_id, buf_ptr, (size_t)*buf_len)) < 0)
+         HGOTO_DONE(FAIL);
+
+done:
+      return ret_value;
+}

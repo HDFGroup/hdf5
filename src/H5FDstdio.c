@@ -415,23 +415,36 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
 
     /* Get the file descriptor (needed for truncate and some Windows information) */
     file->fd = fileno(file->fp);
-    if(file->fd < 0)
+    if(file->fd < 0) {
+        free(file);
+        fclose(f);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get file descriptor", NULL);
+    } /* end if */
 
 
 #ifdef H5_HAVE_WIN32_API
     file->hFile = (HANDLE)_get_osfhandle(file->fd);
-    if(INVALID_HANDLE_VALUE == file->hFile)
+    if(INVALID_HANDLE_VALUE == file->hFile) {
+        free(file);
+        fclose(f);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get Windows file handle", NULL);
+    } /* end if */
 
-    if(!GetFileInformationByHandle((HANDLE)file->hFile, &fileinfo))
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get Windows file desinformationcriptor", NULL);
+    if(!GetFileInformationByHandle((HANDLE)file->hFile, &fileinfo)) {
+        free(file);
+        fclose(f);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTOPENFILE, "unable to get Windows file descriptor information", NULL);
+    } /* end if */
 
     file->nFileIndexHigh = fileinfo.nFileIndexHigh;
     file->nFileIndexLow = fileinfo.nFileIndexLow;
     file->dwVolumeSerialNumber = fileinfo.dwVolumeSerialNumber;
 #else /* H5_HAVE_WIN32_API */
-    fstat(file->fd, &sb);
+    if(fstat(file->fd, &sb) < 0) {
+        free(file);
+        fclose(f);
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADFILE, "unable to fstat file", NULL)
+    } /* end if */
     file->device = sb.st_dev;
 #ifdef H5_VMS
     file->inode[0] = sb.st_ino[0];

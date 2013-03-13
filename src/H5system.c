@@ -707,7 +707,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
      * OpenVMS: <disk name>$<partition>:[path]<file name>
      *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c
      */
-    if(CHECK_ABSOLUTE(name)) {
+    if(H5_CHECK_ABSOLUTE(name)) {
         if(NULL == (full_path = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end if */
@@ -726,7 +726,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
          * Unix: does not apply
          * OpenVMS: does not apply
          */
-        if(CHECK_ABS_DRIVE(name)) {
+        if(H5_CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrcpy(new_name, &name[2]);
@@ -737,7 +737,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         * Unix: does not apply
         * OpenVMS: does not apply
         */
-        else if(CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
+        else if(H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
             sprintf(cwdpath, "%c:%c", (drive+'A'-1), name[0]);
             retcwd = cwdpath;
             HDstrcpy(new_name, &name[1]);
@@ -773,8 +773,8 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
             else
                 HDstrncat(full_path, new_name, HDstrlen(new_name));
 #else
-            if(!CHECK_DELIMITER(cwdpath[cwdlen - 1]))
-                HDstrncat(full_path, DIR_SEPS, HDstrlen(DIR_SEPS));
+            if(!H5_CHECK_DELIMITER(cwdpath[cwdlen - 1]))
+                HDstrncat(full_path, H5_DIR_SEPS, HDstrlen(H5_DIR_SEPS));
             HDstrncat(full_path, new_name, HDstrlen(new_name));
 #endif
         } /* end if */
@@ -784,7 +784,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
     if(full_path) {
         char *ptr = NULL;
 
-        GET_LAST_DELIMITER(full_path, ptr)
+        H5_GET_LAST_DELIMITER(full_path, ptr)
         HDassert(ptr);
         *++ptr = '\0';
         *extpath = full_path;

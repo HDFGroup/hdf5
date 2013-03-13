@@ -1,4 +1,4 @@
-HDF5 version 1.9.144 currently under development
+HDF5 version 1.9.148 currently under development
 ================================================================================
 
 
@@ -751,9 +751,12 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed to return correct exit code 1 when detect unique extra
+          attribute. Prior to this fix, h5diff returned exit code 0 indicating 
+          two files are identical.   HDFFV-7643 (JKM 2013/02/15)
         - h5diff: Improved speed when comparing HDF5 files with lots of
-          attributes. Much slower performance was identified with release version 
-          from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
+          attributes. Much slower performance was identified with release 
+          version from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
         - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
           source file contains chunked dataset and a chunk dim is bigger than 
           the dataset dim. Another issue is that the command changed max dims
@@ -1068,6 +1071,19 @@ Bug Fixes since HDF5-1.8.0 release
           in "New Features" section.
           (BMR - 2008/08/10)
 
+    Testing
+    -------
+      - In some Mac system, testlibinfo.sh failed with this error:
+           Check file ../src/.libs/libhdf5.7.dylib
+           strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
+	   (unknown load command 15)
+        The strings command of Mac inspects library files and older
+	versions of strings may not know newer library format, resulting
+	in errors.  Fixed by sending the library file as stdin to the strings
+	coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
+
+      - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
+        faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
 
 
 Supported Platforms
