@@ -22247,7 +22247,7 @@ $as_echo "user-defined" >&6; }
 esac
 
 ## ----------------------------------------------------------------------
-## Check for system libraries.
+## Check for system libraries. "dl" stands for dynamically loaded library
 ##
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ceil in -lm" >&5
 $as_echo_n "checking for ceil in -lm... " >&6; }
@@ -22299,6 +22299,59 @@ if test "x$ac_cv_lib_m_ceil" = xyes; then :
 _ACEOF
 
   LIBS="-lm $LIBS"
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
+$as_echo_n "checking for dlopen in -ldl... " >&6; }
+if ${ac_cv_lib_dl_dlopen+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_dl_dlopen=yes
+else
+  ac_cv_lib_dl_dlopen=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
+$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
+if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBDL 1
+_ACEOF
+
+  LIBS="-ldl $LIBS"
 
 fi
 
@@ -31133,7 +31186,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh test/plugin_lib/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -32394,6 +32447,8 @@ do
     "test/H5srcdir_str.h") CONFIG_FILES="$CONFIG_FILES test/H5srcdir_str.h" ;;
     "test/testlibinfo.sh") CONFIG_FILES="$CONFIG_FILES test/testlibinfo.sh" ;;
     "test/testlinks_env.sh") CONFIG_FILES="$CONFIG_FILES test/testlinks_env.sh" ;;
+    "test/test_plugin.sh") CONFIG_FILES="$CONFIG_FILES test/test_plugin.sh" ;;
+    "test/plugin_lib/Makefile") CONFIG_FILES="$CONFIG_FILES test/plugin_lib/Makefile" ;;
     "testpar/Makefile") CONFIG_FILES="$CONFIG_FILES testpar/Makefile" ;;
     "testpar/testph5.sh") CONFIG_FILES="$CONFIG_FILES testpar/testph5.sh" ;;
     "perform/Makefile") CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;

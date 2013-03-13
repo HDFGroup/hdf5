@@ -1,0 +1,26 @@
+CFLAGS = -fPIC -g
+CC = @CC@
+SRCDIR = @srcdir@
+TOP_SRCDIR = @top_srcdir@
+TOP_BUILDDIR = @top_builddir@
+MAJOR = 0
+MINOR = 1
+NAME1 = dynlib1
+VERSION = $(MAJOR).$(MINOR)
+
+# Include files in hdf5/src build/src directories for hdf5.h and H5pubconf.h
+INCLUDES = -I$(TOP_SRCDIR)/src -I$(TOP_BUILDDIR)/src
+
+lib: lib$(NAME1).so.$(VERSION)
+
+$(NAME1).o: $(SRCDIR)/$(NAME1).c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRCDIR)/$(NAME1).c
+
+lib$(NAME1).so.$(VERSION): $(NAME1).o
+	$(CC) -shared -Wl,-soname,lib$(NAME1).so.$(MAJOR) $^ -o $@
+
+clean:
+	$(RM) *.o *.so* Makefile
+
+distclean:
+	$(RM) *.o *.so* Makefile

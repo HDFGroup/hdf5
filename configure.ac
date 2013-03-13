@@ -1242,9 +1242,10 @@ case "X-$enable_production" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check for system libraries.
+## Check for system libraries. "dl" stands for dynamically loaded library
 ##
 AC_CHECK_LIB([m], [ceil])
+AC_CHECK_LIB([dl], [dlopen])
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   ## ...for Solaris
@@ -4425,6 +4426,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/test_plugin.sh
+                 test/plugin_lib/Makefile
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile

@@ -26,6 +26,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5PLprivate.h"        /* Plugins                              */
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
@@ -303,6 +304,8 @@ H5Z_register (const H5Z_class2_t *cls)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+/*if(cls)
+fprintf(stderr, "cls=%p, cls->id=%d\n", cls, cls->id);*/
 
     HDassert(cls);
     HDassert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
@@ -450,7 +453,6 @@ done:
 htri_t
 H5Zfilter_avail(H5Z_filter_t id)
 {
-    size_t i;                   /* Local index variable */
     htri_t ret_value=FALSE;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -459,6 +461,36 @@ H5Zfilter_avail(H5Z_filter_t id)
     /* Check args */
     if(id<0 || id>H5Z_FILTER_MAX)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
+ 
+    if((ret_value = H5Z_filter_avail(id)) < 0)
+	HGOTO_ERROR (H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Zfilter_avail() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_filter_avail
+ *
+ * Purpose:	Private function to check if a filter is available
+ *
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              13 February 2013
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Z_filter_avail(H5Z_filter_t id)
+{
+    size_t i;                   /* Local index variable */
+    htri_t ret_value=FALSE;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Is the filter already registered? */
     for(i=0; i<H5Z_table_used_g; i++)
@@ -468,8 +500,8 @@ H5Zfilter_avail(H5Z_filter_t id)
         } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Zfilter_avail() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_filter_avail() */
 
 
 /*-------------------------------------------------------------------------
@@ -1088,16 +1120,36 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 		failed |= (unsigned)1 << idx;
 		continue;/*filter excluded*/
 	    }
+
+            /* If the filter isn't registered, try to load it dynamically and register it.  Otherwise, return failure */
+	    if ((fclass_idx=H5Z_find_idx(pline->filter[idx].id))<0) {
+                H5Z_class2_t    *filter_info = NULL;
+
+                if((filter_info = (H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id))) != NULL) {
+                    if (H5Z_register(filter_info)<0)
+	                HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
+                } else {
+                    /* Print out the filter name to give more info.  But the name is optional for 
+                     * the filter */
+                    if(pline->filter[idx].name)
+		        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered", 
+                                pline->filter[idx].name)
+                    else
+		        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter (name unavailable) is not registered")
+                }
+	    }
+
+            /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */ 
 	    if ((fclass_idx=H5Z_find_idx(pline->filter[idx].id))<0) {
                 /* Print out the filter name to give more info.  But the name is optional for 
                  * the filter */
                 if(pline->filter[idx].name)
 		    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered", 
-                            pline->filter[idx].name)
+                                pline->filter[idx].name)
                 else
 		    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter (name unavailable) is not registered")
-
 	    }
+
             fclass=&H5Z_table_g[fclass_idx];
 #ifdef H5Z_DEBUG
             fstats=&H5Z_stat_table_g[fclass_idx];

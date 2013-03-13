@@ -108,6 +108,8 @@ H5_DLL herr_t H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter,
 H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id,
     unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[],
     size_t namelen, char name[], unsigned *filter_config);
+H5_DLL herr_t H5P_set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, 
+    unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/]);
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);

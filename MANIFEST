@@ -846,6 +846,10 @@
 ./src/H5Ppublic.h
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
+./src/H5PL.c
+./src/H5PLpkg.c
+./src/H5PLprivate.c
+./src/H5PLpublic.c
 ./src/H5R.c
 ./src/H5Rdeprec.c
 ./src/H5Rpkg.h
@@ -1027,6 +1031,7 @@
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/objcopy.c
+./test/plugin.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -1049,6 +1054,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_plugin.sh.in
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
@@ -1086,6 +1092,10 @@
 ./test/test_filters_be.h5
 ./test/gen_filters.c
 ./test/chunk_info.c
+
+./test/plugin_lib/dynlib1.c
+./test/plugin_lib/dynlib1.h
+./test/plugin_lib/Makefile.in
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2

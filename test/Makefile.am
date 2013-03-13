@@ -24,9 +24,9 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) plugin$(EXEEXT)
 
 
 # These are our main targets. They should be listed in the order to be
@@ -50,7 +50,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env plugin
 
 
 # These programs generate test files for the tests.  They don't need to be
@@ -128,7 +128,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     earray.h5 efc[0-5].h5 log_vfd_out.log                            \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
-    file_image_core_test.h5.copy
+    file_image_core_test.h5.copy plugin.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
@@ -137,6 +137,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 
 include $(top_srcdir)/config/conclude.am
