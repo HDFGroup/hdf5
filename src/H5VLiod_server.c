@@ -73,15 +73,16 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 {
     na_network_class_t *network_class = NULL;
     int num_procs;
-    herr_t ret_value;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_API(FAIL)
 
     MPI_Comm_size(comm, &num_procs);
 
     iod_comm = comm;
     /* initialize the netwrok class */
     network_class = na_mpi_init(NULL, MPI_INIT_SERVER);
+
     if(S_SUCCESS != fs_handler_init(network_class))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
 
@@ -129,6 +130,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Loop tp receive requests from clients */
     while(1) {
+        printf("Server In Loop\n");
         /* Receive new function calls */
         if(S_SUCCESS != fs_handler_receive())
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to handle client request");
@@ -139,7 +141,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_API(ret_value)
 }
 
 
@@ -161,17 +163,18 @@ int
 H5VL_iod_server_eff_init(fs_handle_t handle)
 {
     int num_procs;
-    int ret_value = S_SUCCESS;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if(S_FAIL == fs_handler_get_input(handle, &num_procs))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get input parameters");
 
     if(iod_initialize(iod_comm, NULL, num_procs, num_procs, NULL) < 0 )
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't initialize");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't initialize");
 
 done:
+    fs_handler_complete(handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_eff_init() */
 
@@ -663,6 +666,7 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
+    printf("Done with file create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -768,6 +772,7 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't close container");
 
 done:
+    printf("Done with file close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_close_cb() */

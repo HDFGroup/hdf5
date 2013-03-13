@@ -902,6 +902,9 @@ enable_production
 enable_largefile
 with_fnord
 with_dmalloc
+with_axe
+with_iofsl
+with_iod
 with_zlib
 with_szlib
 with_pthread
@@ -1657,6 +1660,9 @@ Optional Packages:
                          include/ and lib/ subdirectories
 
   --with-dmalloc=DIR      Use dmalloc memory debugging aid [default=no]
+  --with-axe=DIR          Use axe [default=no]
+  --with-iofsl=DIR        Use iofsl [default=no]
+  --with-iod=DIR          Use iod [default=no]
   --with-zlib=DIR         Use zlib library for external deflate I/O filter
                           [default=yes]
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
@@ -3572,6 +3578,12 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MKDIR_P" >&5
 $as_echo "$MKDIR_P" >&6; }
 
+mkdir_p="$MKDIR_P"
+case $mkdir_p in
+  [\\/$]* | ?:[\\/]*) ;;
+  */*) mkdir_p="\$(top_builddir)/$mkdir_p" ;;
+esac
+
 for ac_prog in gawk mawk nawk awk
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -3703,12 +3715,6 @@ AUTOHEADER=${AUTOHEADER-"${am_missing_run}autoheader"}
 
 
 MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
-
-# For better backward compatibility.  To be removed once Automake 1.9.x
-# dies out for good.  For more background, see:
-# <http://lists.gnu.org/archive/html/automake/2012-07/msg00001.html>
-# <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
-mkdir_p='$(MKDIR_P)'
 
 # We need awk for the "check" target.  The system "awk" is bad on
 # some platforms.
@@ -25456,6 +25462,324 @@ fi
 
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find dmalloc library" "$LINENO" 5
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the axe present? It has a header file `AXE.h' and a library
+## `-laxe' and their locations might be specified with the `--with-axe'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+
+# Check whether --with-axe was given.
+if test "${with_axe+set}" = set; then :
+  withval=$with_axe;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_AXE="yes"
+    for ac_header in AXE.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "AXE.h" "ac_cv_header_AXE_h" "$ac_includes_default"
+if test "x$ac_cv_header_AXE_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_AXE_H 1
+_ACEOF
+
+fi
+
+done
+
+
+    if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find axe library" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_AXE="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for axe library" >&5
+$as_echo_n "checking for axe library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_AXE="yes"
+    case "$withval" in
+      *,*)
+        axe_inc="`echo $withval |cut -f1 -d,`"
+        axe_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          axe_inc="$withval/include"
+          axe_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$axe_inc" = "X/usr/include"; then
+      axe_inc=""
+    fi
+    if test "X$axe_lib" = "X/usr/lib"; then
+      axe_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$axe_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$axe_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$axe_inc"
+    fi
+
+    for ac_header in AXE.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "AXE.h" "ac_cv_header_AXE_h" "$ac_includes_default"
+if test "x$ac_cv_header_AXE_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_AXE_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$axe_lib"; then
+      LDFLAGS="$LDFLAGS -L$axe_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$axe_lib"
+    fi
+
+    if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find axe library" "$LINENO" 5
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iofsl present? It has a header file `iofsl.h' and a library
+## `-liofsl' and their locations might be specified with the `--with-iofsl'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+
+# Check whether --with-iofsl was given.
+if test "${with_iofsl+set}" = set; then :
+  withval=$with_iofsl;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_IOFSL="yes"
+    for ac_header in function_shipper.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper.h" "ac_cv_header_function_shipper_h" "$ac_includes_default"
+if test "x$ac_cv_header_function_shipper_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FUNCTION_SHIPPER_H 1
+_ACEOF
+
+fi
+
+done
+
+    for ac_header in function_shipper_handler.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper_handler.h" "ac_cv_header_function_shipper_handler_h" "$ac_includes_default"
+if test "x$ac_cv_header_function_shipper_handler_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FUNCTION_SHIPPER_HANDLER_H 1
+_ACEOF
+
+fi
+
+done
+
+
+    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iofsl library" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_IOFSL="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iofsl library" >&5
+$as_echo_n "checking for iofsl library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_IOFSL="yes"
+    case "$withval" in
+      *,*)
+        iofsl_inc="`echo $withval |cut -f1 -d,`"
+        iofsl_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iofsl_inc="$withval/include"
+          iofsl_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iofsl_inc" = "X/usr/include"; then
+      iofsl_inc=""
+    fi
+    if test "X$iofsl_lib" = "X/usr/lib"; then
+      iofsl_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iofsl_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iofsl_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iofsl_inc"
+    fi
+
+    for ac_header in function_shipper.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper.h" "ac_cv_header_function_shipper_h" "$ac_includes_default"
+if test "x$ac_cv_header_function_shipper_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FUNCTION_SHIPPER_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$iofsl_lib"; then
+      LDFLAGS="$LDFLAGS -L$iofsl_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iofsl_lib"
+    fi
+
+    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iofsl library" "$LINENO" 5
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iod present? It has a header file `iod.h' and a library
+## `-liod' and their locations might be specified with the `--with-iod'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+
+# Check whether --with-iod was given.
+if test "${with_iod+set}" = set; then :
+  withval=$with_iod;
+else
+  withval=no
+fi
+
+
+case $withval in
+  yes)
+    HAVE_IOD="yes"
+    for ac_header in iod_api.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iod_api.h" "ac_cv_header_iod_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_iod_api_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOD_API_H 1
+_ACEOF
+
+fi
+
+done
+
+
+    if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iod library" "$LINENO" 5
+    fi
+    ;;
+  no)
+    HAVE_IOD="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod library" >&5
+$as_echo_n "checking for iod library... " >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
+$as_echo "suppressed" >&6; }
+    ;;
+  *)
+    HAVE_IOD="yes"
+    case "$withval" in
+      *,*)
+        iod_inc="`echo $withval |cut -f1 -d,`"
+        iod_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iod_inc="$withval/include"
+          iod_lib="$withval/src"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iod_inc" = "X/usr/include"; then
+      iod_inc=""
+    fi
+    if test "X$iod_lib" = "X/usr/lib"; then
+      iod_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iod_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iod_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc"
+    fi
+
+    for ac_header in iod_api.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "iod_api.h" "ac_cv_header_iod_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_iod_api_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOD_API_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$iod_lib"; then
+      LDFLAGS="$LDFLAGS -L$iod_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
+    fi
+
+    if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find iod library" "$LINENO" 5
     fi
     ;;
 esac

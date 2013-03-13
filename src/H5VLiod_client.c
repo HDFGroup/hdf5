@@ -47,7 +47,9 @@ H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     else {
         file->request_list_head = request;
         file->request_list_tail = request;
+        request->prev = NULL;
     }
+    request->next = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
@@ -92,10 +94,8 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 }
 
 herr_t
-H5VL_iod_request_wait(H5VL_iod_request_t *request)
+H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)request->data;
-    H5VL_iod_file_t *file = obj->file;
     H5VL_iod_request_t *cur_req = file->request_list_head;
     fs_status_t status;
 
@@ -110,10 +110,12 @@ H5VL_iod_request_wait(H5VL_iod_request_t *request)
         /* if it has not completed, go through the list of requests on the container to
            test progress */
         if(!status) {
-            H5VL_iod_request_t *tmp_req = cur_req->next;
+            H5VL_iod_request_t *tmp_req;
 
             if(cur_req) {
                 fs_status_t tmp_status;
+
+                tmp_req = cur_req->next;
                 fs_wait(*((fs_request_t *)cur_req->req), 0, &tmp_status);
                 if(tmp_status) {
                     H5VL_iod_request_delete(file, cur_req);
@@ -153,7 +155,7 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
     if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
 
-    if(H5VL_iod_request_wait(obj->request) < 0)
+    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 
     if(H5I_FILE == obj->obj_type) {
@@ -204,7 +206,7 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
         if(NULL == (cur_grp = (H5VL_iod_group_t *)H5I_search_name(cur_name, H5I_GROUP)))
             break;
 
-        if(H5VL_iod_request_wait(cur_grp->common.request) < 0)
+        if(H5VL_iod_request_wait(obj->file, cur_grp->common.request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
         cur_id = cur_grp->remote_group.iod_id;
         cur_oh = cur_grp->remote_group.iod_oh;
@@ -273,11 +275,12 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
                                       H5VL_iod_client_decode_dset_close);
 
     /* forward the init call to the IONs */
-    if(fs_forward(ion_target, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &ret_value) < 0)
+    if(fs_forward(ion_target, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to ship eff_init");
 
     fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
+    ret_value = ion_target;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

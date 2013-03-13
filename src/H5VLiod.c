@@ -291,6 +291,9 @@ H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
+    if(fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
@@ -301,7 +304,7 @@ H5Pset_fapl_iod(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     fa.comm = comm;
     fa.info = info;
 
-    ret_value = H5P_set_vol(plist, &H5VL_iod_g, NULL);
+    ret_value = H5P_set_vol(plist, &H5VL_iod_g, &fa);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -403,7 +406,7 @@ done:
 static void *
 H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t UNUSED req)
 {
-    H5VL_iod_fapl_t *fa;
+    H5VL_iod_fapl_t *fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
     int my_rank, my_size;
     H5VL_iod_file_t *file = NULL;
@@ -690,6 +693,9 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if(H5VL_iod_request_wait(file, file->common.request) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
@@ -707,6 +713,9 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(file, request);
+
+    if(H5VL_iod_request_wait(file, request) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 
     free(file->file_name);
     free(file->common.obj_name);

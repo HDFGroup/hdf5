@@ -1677,6 +1677,223 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
+## Is the axe present? It has a header file `AXE.h' and a library
+## `-laxe' and their locations might be specified with the `--with-axe'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_ARG_WITH([axe],
+            [AS_HELP_STRING([--with-axe=DIR],
+                            [Use axe [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_AXE="yes"
+    AC_CHECK_HEADERS([AXE.h])
+
+    if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find axe library])
+    fi
+    ;;
+  no)
+    HAVE_AXE="no"
+    AC_MSG_CHECKING([for axe library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_AXE="yes"
+    case "$withval" in
+      *,*)
+        axe_inc="`echo $withval |cut -f1 -d,`"
+        axe_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          axe_inc="$withval/include"
+          axe_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$axe_inc" = "X/usr/include"; then
+      axe_inc=""
+    fi
+    if test "X$axe_lib" = "X/usr/lib"; then
+      axe_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$axe_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$axe_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$axe_inc"
+    fi
+
+    AC_CHECK_HEADERS([AXE.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$axe_lib"; then
+      LDFLAGS="$LDFLAGS -L$axe_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$axe_lib"
+    fi
+
+    if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find axe library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iofsl present? It has a header file `iofsl.h' and a library
+## `-liofsl' and their locations might be specified with the `--with-iofsl'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_ARG_WITH([iofsl],
+            [AS_HELP_STRING([--with-iofsl=DIR],
+                            [Use iofsl [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_IOFSL="yes"
+    AC_CHECK_HEADERS([function_shipper.h])
+    AC_CHECK_HEADERS([function_shipper_handler.h])
+
+    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iofsl library])
+    fi
+    ;;
+  no)
+    HAVE_IOFSL="no"
+    AC_MSG_CHECKING([for iofsl library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_IOFSL="yes"
+    case "$withval" in
+      *,*)
+        iofsl_inc="`echo $withval |cut -f1 -d,`"
+        iofsl_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iofsl_inc="$withval/include"
+          iofsl_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iofsl_inc" = "X/usr/include"; then
+      iofsl_inc=""
+    fi
+    if test "X$iofsl_lib" = "X/usr/lib"; then
+      iofsl_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iofsl_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iofsl_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iofsl_inc"
+    fi
+
+    AC_CHECK_HEADERS([function_shipper.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$iofsl_lib"; then
+      LDFLAGS="$LDFLAGS -L$iofsl_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iofsl_lib"
+    fi
+
+    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iofsl library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Is the iod present? It has a header file `iod.h' and a library
+## `-liod' and their locations might be specified with the `--with-iod'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_ARG_WITH([iod],
+            [AS_HELP_STRING([--with-iod=DIR],
+                            [Use iod [default=no]])],,
+            [withval=no])
+
+case $withval in
+  yes)
+    HAVE_IOD="yes"
+    AC_CHECK_HEADERS([iod_api.h])
+
+    if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iod library])
+    fi
+    ;;
+  no)
+    HAVE_IOD="no"
+    AC_MSG_CHECKING([for iod library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_IOD="yes"
+    case "$withval" in
+      *,*)
+        iod_inc="`echo $withval |cut -f1 -d,`"
+        iod_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          iod_inc="$withval/include"
+          iod_lib="$withval/src"
+        fi
+        ;;
+    esac
+
+    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
+    ## can mess some compilers up.
+    if test "X$iod_inc" = "X/usr/include"; then
+      iod_inc=""
+    fi
+    if test "X$iod_lib" = "X/usr/lib"; then
+      iod_lib=""
+    fi
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$iod_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$iod_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$iod_inc"
+    fi
+
+    AC_CHECK_HEADERS([iod_api.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+
+    if test -n "$iod_lib"; then
+      LDFLAGS="$LDFLAGS -L$iod_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
+    fi
+
+    if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find iod library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Is the GNU zlib present? It has a header file `zlib.h' and a library
 ## `-lz' and their locations might be specified with the `--with-zlib'
 ## command-line switch. The value is an include path and/or a library path.
