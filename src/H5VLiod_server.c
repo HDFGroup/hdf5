@@ -59,14 +59,14 @@ static herr_t H5VL_iod_server_group_close_cb(size_t num_necessary_parents, AXE_t
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
 static herr_t H5VL_iod_server_dset_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                                size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
-                                                void *op_data);
+                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                             void *op_data);
 static herr_t H5VL_iod_server_dset_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
-                                              void *op_data);
+                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                           void *op_data);
 static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                               size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
-                                               void *op_data);
+                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                            void *op_data);
 
 herr_t
 H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
@@ -728,6 +728,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
+    printf("Done with file open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -848,10 +849,12 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
 
         kv_size = sizeof(iod_obj_id_t);
         /* lookup next object in the current group */
+        /* MSC - if else need to be flipped when we have a real IOD */
         if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, 
-                            &kv_size, NULL, NULL) < 0) {
+                            &kv_size, NULL, NULL) >= 0) {
             iod_kv_t kv;
 
+            printf("creating group %s\n",comp);
             /* we don't want to close the handle for the group we start on */
             if(close_handle)
                 if(iod_obj_close(cur_oh, NULL, NULL) < 0)
@@ -859,7 +862,7 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
 
             /* create the current group */
             if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
-                                  &cur_id, NULL /*event*/) < 0)
+                               &cur_id, NULL /*event*/) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
 
             kv.key = HDstrdup(comp);
@@ -882,6 +885,13 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
             /* add the scratch pad to the current group */
             if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+
+            if(last_comp) {
+                /* open the scratch pad */
+                if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+                break;
+            }
         } /* end if */
         else {
             /* if this is the last component, then the group create should fail since object
@@ -907,6 +917,7 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
+    printf("Done with group create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -953,6 +964,7 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     FUNC_ENTER_NOAPI_NOINIT
 
     cur_oh = loc_handle;
+    printf("group open name %s\n", name);
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
@@ -995,6 +1007,8 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
+        if(last_comp)
+                break;
         close_handle = TRUE;
     }
 
@@ -1028,6 +1042,7 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
+    printf("Done with group open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1071,6 +1086,7 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
 done:
+    printf("Done with group close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_close_cb() */
@@ -1152,8 +1168,10 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
         kv_size = sizeof(iod_obj_id_t);
         /* lookup next object in the current group */
+        /* MSC - if else need to be flipped when we have a real IOD */
         if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, 
-                            &kv_size, NULL, NULL) < 0) {
+                            &kv_size, NULL, NULL) >= 0) {
+            printf("creating intermediate group %s\n",comp);
             /* we don't want to close the handle for the group we start on */
             if(close_handle)
                 if(iod_obj_close(cur_oh, NULL, NULL) < 0)
@@ -1217,7 +1235,8 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     }
 #endif
     array.dims_seq = NULL;
-
+    printf("now creating the dataset %s cellsize %d num dimenstions %d\n",
+           comp, array.cell_size, array.num_dims);
     /* create the dataset */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
                           &cur_id, NULL /*event*/) < 0)
@@ -1302,6 +1321,8 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     output.scratch_oh = scratch_handle;
 
     free(max_dims);
+
+    printf("Done with dset create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1441,6 +1462,7 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
+    printf("Done with dset open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1486,6 +1508,7 @@ H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
 done:
+    printf("Done with dset close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close_cb() */

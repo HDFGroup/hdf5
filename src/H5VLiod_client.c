@@ -87,9 +87,6 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         }
     }
 
-    H5MM_free(request->req);
-    H5MM_free(request);
-
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
@@ -100,6 +97,9 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     fs_status_t status;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(request);
+    HDassert(request->req);
 
     /* Loop to complete the request while poking through other requests on the 
        container to avoid deadlock. */
@@ -155,8 +155,12 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
     if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
 
-    if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+    if(NULL != obj->request) {
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        obj->request->req = H5MM_xfree(obj->request->req);
+        obj->request = H5MM_xfree(obj->request);
+    }
 
     if(H5I_FILE == obj->obj_type) {
         cur_oh = obj->file->remote_file.root_oh;
@@ -206,8 +210,14 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
         if(NULL == (cur_grp = (H5VL_iod_group_t *)H5I_search_name(cur_name, H5I_GROUP)))
             break;
 
-        if(H5VL_iod_request_wait(obj->file, cur_grp->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        if(NULL != cur_grp->common.request) {
+            if(H5VL_iod_request_wait(obj->file, cur_grp->common.request) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+
+            cur_grp->common.request->req = H5MM_xfree(cur_grp->common.request->req);
+            cur_grp->common.request = H5MM_xfree(cur_grp->common.request);
+        }
+
         cur_id = cur_grp->remote_group.iod_id;
         cur_oh = cur_grp->remote_group.iod_oh;
 

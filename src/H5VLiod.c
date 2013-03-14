@@ -458,6 +458,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* setup a request to track completion of the operation */
     if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+
     request->type = FS_FILE_CREATE;
     request->data = file;
     request->req = fs_req;
@@ -693,9 +694,12 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(H5VL_iod_request_wait(file, file->common.request) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
-
+    if(NULL != file->common.request) {
+        if(H5VL_iod_request_wait(file, file->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        file->common.request->req = H5MM_xfree(file->common.request->req);
+        file->common.request = H5MM_xfree(file->common.request);
+    }
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
@@ -854,7 +858,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     char *new_name;
     fs_request_t *fs_req;
     H5VL_iod_request_t *request;
-    H5VL_iod_group_create_input_t input;
+    H5VL_iod_group_open_input_t input;
     void           *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -964,6 +968,13 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED req)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != grp->common.request) {
+        if(H5VL_iod_request_wait(grp->common.file, grp->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        grp->common.request->req = H5MM_xfree(grp->common.request->req);
+        grp->common.request = H5MM_xfree(grp->common.request);
+    }
 
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
@@ -1126,7 +1137,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the dataset */
     H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
-    H5VL_iod_dset_create_input_t input;
+    H5VL_iod_dset_open_input_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name;
@@ -1215,6 +1226,13 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != dset->common.request) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        dset->common.request->req = H5MM_xfree(dset->common.request->req);
+        dset->common.request = H5MM_xfree(dset->common.request);
+    }
 
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
