@@ -188,7 +188,7 @@ int	points_deflate[DSET_DIM1][DSET_DIM2],
 /*-------------------------------------------------------------------------
  * Function:	test_filter_internal
  *
- * Purpose:	Tests 
+ * Purpose:	Tests writing entire data and partial data with filters  
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -417,6 +417,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size
 
     PASSED();
 
+    /* Save the data written to the file for later comparison when the file 
+     * is reopened for read test */
     for(i=0; i<size[0]; i++) {
         for(j=0; j<size[1]; j++) {
             if(!HDstrcmp(name, DSET_DEFLATE_NAME)) {
@@ -450,13 +452,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_filters
  *
- * Purpose:	Tests dataset filter.
+ * Purpose:	Tests creating datasets and writing data with dynamically
+ *              loaded filters
  *
  * Return:	Success:	0
  *		Failure:	-1
  *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
+ * Programmer:	Raymond Lu
+ *              14 March 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -501,8 +504,10 @@ test_filters(hid_t file, hid_t fapl)
     if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB1, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
 
     if(test_filter_internal(file,DSET_DYNLIB1_NAME,dc,&deflate_size) < 0) goto error;
+
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
+
     /* Unregister the dynamic filter DYNLIB1 for testing purpose. The next time when this test is run for 
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
      * for this filter. */
@@ -519,9 +524,11 @@ test_filters(hid_t file, hid_t fapl)
     if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
 
     if(test_filter_internal(file,DSET_DYNLIB2_NAME,dc,&deflate_size) < 0) goto error;
+
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
-    /* Unregister the dynamic filter BOGUS for testing purpose. The next time when this test is run for 
+
+    /* Unregister the dynamic filter DYNLIB2 for testing purpose. The next time when this test is run for 
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
      * for this filter. */
     if(H5Zunregister(H5Z_FILTER_DYNLIB2) < 0) goto error;
@@ -537,8 +544,10 @@ test_filters(hid_t file, hid_t fapl)
     if(H5Pset_filter (dc, H5Z_FILTER_BZIP2, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
 
     if(test_filter_internal(file,DSET_BZIP2_NAME,dc,&deflate_size) < 0) goto error;
+
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
+
     /* Unregister the dynamic filter BOGUS for testing purpose. The next time when this test is run for 
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
      * for this filter. */
@@ -554,13 +563,13 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_read_data
  *
- * Purpose:	Tests dataset filter.
+ * Purpose:	Tests reading data and compares values
  *
  * Return:	Success:	0
  *		Failure:	-1
  *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
+ * Programmer:	Raymond Lu
+ *              14 March 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -601,13 +610,13 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_read_with_filters
  *
- * Purpose:	Tests dataset filter.
+ * Purpose:	Tests reading dataset created with dynamically loaded filters
  *
  * Return:	Success:	0
  *		Failure:	-1
  *
- * Programmer:	Robb Matzke
- *              Wednesday, April 15, 1998
+ * Programmer:	Raymond Lu
+ *              14 March 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -693,14 +702,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	main
  *
- * Purpose:	Tests the dataset interface (H5D)
+ * Purpose:	Tests the plugin module (H5PL)
  *
  * Return:	Success:	exit(0)
  *
  *		Failure:	exit(1)
  *
- * Programmer:	Robb Matzke
- *		Tuesday, December  9, 1997
+ * Programmer:	Raymond Lu
+ *		14 March 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -715,15 +724,6 @@ main(void)
     size_t rdcc_nbytes;
     double rdcc_w0;
     int	nerrors = 0;
-    const char *envval;
-
-    /* Don't run this test using certain file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-
-    /* Set the random # seed */
-    HDsrandom((unsigned)HDtime(NULL));
 
     /* Testing setup */
     h5_reset();
@@ -762,14 +762,7 @@ main(void)
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
             TEST_ERROR 
 
-        /* Cause the library to emit initial messages */
-        if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-            TEST_ERROR 
-        if(H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
-            TEST_ERROR 
-        if(H5Gclose(grp) < 0)
-            TEST_ERROR 
-
+        /* Test dynamically loaded filters */
         nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);
 
         if(H5Fclose(file) < 0)
@@ -790,6 +783,7 @@ main(void)
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR 
 
+    /* Read the data with filters */
     nerrors += (test_read_with_filters(file, fapl) < 0		? 1 : 0);
 
     if(H5Fclose(file) < 0)

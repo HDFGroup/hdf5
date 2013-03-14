@@ -43,10 +43,12 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_SCALEOFFSET  6       /*scale+offset compression      */
 #define H5Z_FILTER_RESERVED     256	/*filter ids below this value are reserved for library use */
 
+/* Filters for HDF5 internal test */
 #define H5Z_FILTER_DYNLIB1      257
 #define H5Z_FILTER_DYNLIB2      258 
 
-#define H5Z_FILTER_BZIP2        300
+/* Registered third-party filters */
+#define H5Z_FILTER_BZIP2        307
 
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 

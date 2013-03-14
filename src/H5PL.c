@@ -57,7 +57,7 @@ H5PL_init_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5PL_term_interface
  *
- * Purpose:	Terminate the H5I interface: release all memory, reset all
+ * Purpose:	Terminate the H5PL interface: release all memory, reset all
  *		global variables to initial values. This only happens if all
  *		types have been destroyed from other interfaces.
  *
@@ -68,6 +68,8 @@ H5PL_init_interface(void)
  *
  * Programmer:	Raymond Lu
  *              20 February 2013
+ *
+ * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -80,16 +82,17 @@ H5PL_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
-	/* Free the table of dynamic libraries */
+	/* Close opened dynamic libraries */
         for(i=0; i<H5PL_table_used_g; i++) { 
             handle = (H5PL_table_g[i]).handle;
-/*fprintf(stderr, "%s: handle=%p\n", FUNC, handle);*/
             H5PL_close(handle);
         }
 
+	/* Free the table of dynamic libraries */
 	H5PL_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_table_g);
 	H5PL_table_used_g = H5PL_table_alloc_g = 0;
 
+        /* Free the table of search paths */
         for(i = 0; i < num_paths; i++) {
             if(path_table[i])
                 path_table[i] = H5MM_xfree(path_table[i]);
@@ -109,7 +112,9 @@ H5PL_term_interface(void)
 /*-------------------------------------------------------------------------
  * Function:	H5PL_load
  *
- * Purpose:	
+ * Purpose:	Given the plugin type and identifier, this function searches
+ *              and/or loads a dynamic plugin library first among the already
+ *              opened libraries then in the designated location paths.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -149,7 +154,10 @@ H5PL_load(H5PL_type_t type, int id)
         HGOTO_DONE(ret_value)
     }
 
+    /* Find the location paths for dynamic libraries */
     if(FALSE == path_found) {
+        /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
+         * or from the default paths if it isn't set */
         origin_dl_path = HDgetenv("HDF5_PLUGIN_PATH");
         if(origin_dl_path == NULL) {
             len = HDstrlen(H5PL_DEFAULT_PATH) + 1;
@@ -162,6 +170,7 @@ H5PL_load(H5PL_type_t type, int id)
             HDstrncpy(dl_path, origin_dl_path, len);
         }
 
+        /* Put paths in the path table.  They are seperated by ":" */
         dir = HDstrtok(dl_path, H5PL_PATH_SEPERATOR);
         while(dir) {
             path_table[num_paths] = (char *)HDmalloc(HDstrlen(dir) + 1);
@@ -174,9 +183,8 @@ H5PL_load(H5PL_type_t type, int id)
         path_found = TRUE;
     }
 
-#ifndef TMP
+    /* Iterate through the path table to find the right dynamic libraries */
     for(i=0; i<num_paths; i++) {
-        /*fprintf(stderr, "path[%d]=%s\n", i, path_table[i]);*/
         if((found_in_path = H5PL_find(type, id, path_table[i], &plugin_info)) < 0)
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in paths failed")
  
@@ -186,7 +194,6 @@ H5PL_load(H5PL_type_t type, int id)
             HGOTO_DONE(ret_value)
         }
     }
-#endif
 
 done:
     if(dl_path)
@@ -231,11 +238,13 @@ H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-  
-        if(dirp = HDopendir(dir)) {
-            struct dirent *dp = NULL;
-            struct stat my_stat;
-            while ((dp = HDreaddir(dirp)) != NULL) {
+    /* Open the directory */  
+    if(dirp = HDopendir(dir)) {
+        struct dirent *dp = NULL;
+        struct stat my_stat;
+        /* Iterates through all entries in the directory to find the right plugin library */
+        while ((dp = HDreaddir(dirp)) != NULL) {
+                   /* The library we are looking for should be called libxxx.so... */ 
                    if(!HDstrncmp(dp->d_name, "lib", 3) && HDstrstr(dp->d_name, ".so")) {
                        pathname = (char *)H5MM_malloc(strlen(dir) + strlen(dp->d_name) + 2); 
                        HDstrncpy(pathname, dir, strlen(dir)+1);
@@ -248,21 +257,25 @@ H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
                        if(HDstat(pathname, &my_stat) == -1)
                            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file: %s", strerror(errno))
                        
-                       if(!S_ISDIR(my_stat.st_mode)) { /* if directory, skip it */
+                       if(!S_ISDIR(my_stat.st_mode)) { /* if it is a directory, skip it */
                            if(NULL == (handle = dlopen(pathname, RTLD_NOW|RTLD_LAZY))) {
                                /*fprintf(stderr, "not open dl library: %s", dlerror());*/
-                               if(!HDstrcmp(dp->d_name, "libbogus2.so"))
-                                   HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "can't open dl library: %s", dlerror())
-                               else
-                                   continue;
+                               /* There are different reasons why a library can't be open, e.g. wrong architecture.
+                                * simply continue if we can't open it */
+                               continue;
                            }
 
-                           dlerror(); /*clear error*/ 
+                           dlerror(); /*clear error*/
+    
+                           /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
+                            * The plugin library is suppose to define this function. */
                            if(NULL == (H5PL_get_plugin_info = dlsym(handle, "H5PL_get_plugin_info"))) {
                                if(H5PL_close(handle) < 0)
                                    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
                            }
 
+                           /* Envoke H5PL_get_plugin_info to verify this is the right library we are looking for.
+                            * Move on if it isn't. */
                            if(H5PL_get_plugin_info) {
                                if(NULL == (plugin_info = (*H5PL_get_plugin_info)())) {
                                    if(H5PL_close(handle) < 0)
@@ -289,12 +302,12 @@ H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
                        if(pathname) 
                            pathname = (char *)H5MM_xfree(pathname);
                    }
-            }
-
-            if(HDclosedir(dirp) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", strerror(errno))
-            dirp = NULL;
         }
+
+        if(HDclosedir(dirp) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", strerror(errno))
+        dirp = NULL;
+    }
 
 
 done:
@@ -310,7 +323,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5PL_search_table
  *
- * Purpose:	
+ * Purpose:     Search in the list of already opened dynamic libraries
+ *              to see if the one we are looking for is already opened.
  *
  * Return:	TRUE on success, 
  *              FALSE on not found,
@@ -355,7 +369,7 @@ fprintf(stderr, "%s: H5PL_table_used_g=%d, id=%d\n", FUNC, H5PL_table_used_g, (H
         }
     }
 
-    /* Expand the table if it is small */
+    /* Expand the table if it is too small */
     if(H5PL_table_used_g >= H5PL_table_alloc_g) {
         size_t n = MAX(H5Z_MAX_NFILTERS, 2*H5PL_table_alloc_g);
         H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
@@ -375,7 +389,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5PL_close
  *
- * Purpose:	
+ * Purpose:     Closes the handle for dynamic library	
  *
  * Return:	Non-negative on success/Negative on failure
  *

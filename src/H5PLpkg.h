@@ -29,6 +29,7 @@
 /* Local typedefs */
 /****************************/
 
+/* Type for the list of info for opened plugin libraries */
 typedef struct H5PL_table_t {
     H5PL_type_t pl_type;			/* plugin type	     */
     int         pl_id;                          /* ID for the plugin */
@@ -39,10 +40,12 @@ typedef struct H5PL_table_t {
 /* Local variables */
 /****************************/
 
+/* Table for opened plugin libraries */
 static size_t		H5PL_table_alloc_g = 0;
 static size_t		H5PL_table_used_g = 0;
 static H5PL_table_t     *H5PL_table_g = NULL;
 
+/* Table of location paths for plugin libraries */
 static char             *path_table[MAX_PATH_NUM];
 static size_t           num_paths = 0;
 static htri_t           path_found = FALSE;

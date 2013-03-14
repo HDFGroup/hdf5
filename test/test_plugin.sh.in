@@ -13,7 +13,10 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tests for test_error and err_compat 
+# This script file first envokes the Makefile in plugin_lib to build dynamic
+# plugin libraries.  Then it moves the libraries to some locations and points
+# HDF5_PLUGIN_PATH to these locations.  In the end, it runs plugin.c test.
+# 
 
 srcdir=@srcdir@
 TOP_BUILDDIR=@top_builddir@

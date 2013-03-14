@@ -27,6 +27,7 @@
 /* Library Public Typedefs */
 /****************************/
 
+/* Plugin type */
 typedef enum H5PL_type_t {
     H5PL_TYPE_ERROR        = -1,  /*error                    */
     H5PL_TYPE_FILTER       = 0,   /*filter                   */
