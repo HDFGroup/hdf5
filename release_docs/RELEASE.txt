@@ -5,7 +5,7 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.10 and 
-HDF5 1.8.11-*, and contains information on the platforms tested and 
+HDF5-1.8.11-*, and contains information on the platforms tested and 
 known problems in HDF5-1.8.11-*. 
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
@@ -80,10 +80,14 @@ New Features
 
     High-Level APIs
     ---------------
-    - None
+    - A new API function, H5DOwrite_chunk.  This function writes a data chunk 
+      directly into a file, bypassing hyperslab selection, data conversion, 
+      and the filter pipeline.  The user must be careful with the function and
+      clearly understand the I/O process of the library. (SLU - 2013/2/11)
 
     Fortran API
     -----------
+    - None
 
     C++ API
     -------
@@ -147,11 +151,6 @@ Bug Fixes since HDF5-1.8.10
 
     High-Level APIs:
     ------
-    - A new API function H5DOwrite_chunk.  It writes a data chunk directly
-      into a file bypassing hyperslab selection, data conversion, and
-      filter pipeline.  The user must be careful with the function and
-      clearly understand the I/O process of the library. (SLU - 2013/2/11)
-
     - Fixed problem with H5DSget_scale_name including the NULL terminator in
       the size calculation returned by the function. The API was changed to NOT
       include the NULL terminator in the size of name returned (MSB- 2013/2/10)
