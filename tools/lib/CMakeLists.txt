@@ -45,7 +45,7 @@ H5_SET_LIB_OPTIONS (
     HDF5_TOOLS_LIB_NAME_RELEASE
   HDF5_TOOLS_LIB_NAME_DEBUG
 )
-SET_TARGET_PROPERTIES (hdf5_tools PROPERTIES FOLDER libraries/tools)
+SET_TARGET_PROPERTIES (${HDF5_TOOLS_LIB_TARGET} PROPERTIES FOLDER libraries/tools)
 
 ##############################################################################
 ##############################################################################
