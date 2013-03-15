@@ -134,7 +134,8 @@ H5E_PATH_g=
 /* No error */    
 H5E_NONE_MINOR_g=
 
-/* Plugin errors */
+/* Plugin errors */    
+H5E_OPENERROR_g=
 
 /* File accessibilty errors */    
 H5E_FILEEXISTS_g=    

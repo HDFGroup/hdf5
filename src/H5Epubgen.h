@@ -224,6 +224,8 @@ H5_DLLVAR hid_t H5E_PATH_g;          /* Problem with path to object */
 H5_DLLVAR hid_t H5E_NONE_MINOR_g;    /* No error */
 
 /* Plugin errors */
+#define H5E_OPENERROR        (H5OPEN H5E_OPENERROR_g)
+H5_DLLVAR hid_t H5E_OPENERROR_g;     /* Can't open directory or file */
 
 /* File accessibilty errors */
 #define H5E_FILEEXISTS       (H5OPEN H5E_FILEEXISTS_g)

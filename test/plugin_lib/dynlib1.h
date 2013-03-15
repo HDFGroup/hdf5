@@ -26,8 +26,6 @@
 #define FILTER_DYNLIB1_VERS 1
 
 const H5PL_type_t   H5PL_get_plugin_type(void);
-const int           H5PL_get_plugin_version(void);
-const char*         H5PL_get_plugin_name(void);
 const H5Z_class2_t* H5PL_get_plugin_info(void);
 
 /* Local prototypes for filter functions */

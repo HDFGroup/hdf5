@@ -54,6 +54,5 @@
 
 /* Internal API routines */
 H5_DLL void* H5PL_load(H5PL_type_t plugin_type, int type_id);
-H5_DLL herr_t H5PL_close(void *handle);
 
 #endif

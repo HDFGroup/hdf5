@@ -133,6 +133,7 @@ hid_t H5E_PATH_g           = FAIL;      /* Problem with path to object */
 hid_t H5E_NONE_MINOR_g     = FAIL;      /* No error */
 
 /* Plugin errors */
+hid_t H5E_OPENERROR_g      = FAIL;      /* Can't open directory or file */
 
 /* File accessibilty errors */
 hid_t H5E_FILEEXISTS_g     = FAIL;      /* File already exists */

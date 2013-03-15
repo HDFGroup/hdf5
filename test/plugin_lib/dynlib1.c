@@ -33,8 +33,6 @@ const H5Z_class2_t H5Z_DYNLIB1[1] = {{
 }};
 
 const H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const int           H5PL_get_plugin_version(void) {return (int)FILTER_DYNLIB1_VERS;}
-const char*         H5PL_get_plugin_name(void) {return "dynlib1";}
 const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB1;}
 
 /*-------------------------------------------------------------------------

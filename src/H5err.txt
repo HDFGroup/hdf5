@@ -260,5 +260,8 @@ MINOR, PIPELINE, H5E_CANTFILTER, Filter operation failed
 # System level errors
 MINOR, SYSTEM, H5E_SYSERRSTR, System error message
 
+# Plugin errors
+MINOR, PLUGIN, H5E_OPENERROR, Can't open directory or file
+
 # No error, for backward compatibility */
 MINOR, NONE, H5E_NONE_MINOR, No error
