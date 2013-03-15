@@ -3084,7 +3084,7 @@ test_filespace_compatible(void)
 	VERIFY(free_space, (hssize_t)0, "H5Fget_freespace");
 
 	/* Get the file's file creation property list */
-	/* Retrieve the file space handling stretegy and threshold */
+	/* Retrieve the file space handling strategy and threshold */
 	fcpl = H5Fget_create_plist(fid);
 	CHECK(fcpl, FAIL, "H5Fget_create_plist");
 	ret = H5Pget_file_space(fcpl, &strategy, &threshold);
@@ -3117,9 +3117,13 @@ test_filespace_compatible(void)
 	ret = H5Ldelete(fid, DSETNAME, H5P_DEFAULT);
 	CHECK(ret, FAIL, "H5Ldelete");
 
-	/* Close the file */
-	ret = H5Fclose(fid);
-	CHECK(ret, FAIL, "H5Fclose");
+    /* Close the plist */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
 
 	/* Re-Open the file */
 	fid = H5Fopen(FILE5, H5F_ACC_RDONLY, H5P_DEFAULT);
