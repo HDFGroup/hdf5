@@ -28,7 +28,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5G function you must add the function name to the
-!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
 !*****
@@ -927,7 +927,7 @@ CONTAINS
                                            ! Buffer to hold a comment
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
-    INTEGER :: namelen ! Lenghth of the current_name string
+    INTEGER :: namelen ! Length of the current_name string
 
     INTERFACE
        INTEGER FUNCTION h5gget_comment_c(loc_id, name, namelen, size, buffer)

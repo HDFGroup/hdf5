@@ -29,7 +29,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5P function you must add the function name to the
-!  Windows dll file '*hdf5_fortrandll.def' in the fortran/src directory.
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !*****
 

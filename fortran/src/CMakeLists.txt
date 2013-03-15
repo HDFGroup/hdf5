@@ -142,13 +142,13 @@ SET_TARGET_PROPERTIES (${HDF5_F90_C_LIB_TARGET} PROPERTIES LINKER_LANGUAGE C)
 #-----------------------------------------------------------------------------
 # Fortran 2003 standard
 #-----------------------------------------------------------------------------
-IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+IF (HDF5_ENABLE_F2003)
   # default real is 4 bytes, so include double signatures
   SET (F_STATUS "_F03")
-ELSE (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+ELSE (HDF5_ENABLE_F2003)
   # default real is 8 bytes, so exclude double signatures
   SET (F_STATUS "_F90")
-ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+ENDIF (HDF5_ENABLE_F2003)
 
 #-----------------------------------------------------------------------------
 # Fortran Real Size
@@ -188,6 +188,7 @@ SET (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Fff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Lff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Off${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff${F_STATUS}.f90

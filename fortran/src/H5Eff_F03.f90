@@ -1,7 +1,7 @@
 !****h* ROBODoc/H5E (F03)
 !
 ! NAME
-!  H5L_PROVISIONAL
+!  H5E_PROVISIONAL
 !
 ! FILE
 !  src/fortran/src/H5Eff_F03.f90 
@@ -9,9 +9,9 @@
 ! PURPOSE
 !
 !  This file contains Fortran 90 and Fortran 2003 interfaces for H5E functions.
-!  It contains the same functions as H5Eff_DEPRECIATE.f90 but includes the
+!  It contains the same functions as H5Eff_F90.f90 but includes the
 !  Fortran 2003 functions and the interface listings. This file will be compiled
-!  instead of H5Eff_DEPRECIATE.f90 if Fortran 2003 functions are enabled.
+!  instead of H5Eff_F90.f90 if Fortran 2003 functions are enabled.
 !
 !
 ! COPYRIGHT
@@ -33,7 +33,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5E function to the module you must add the function name
-!  to the Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  to the Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
 !*****
@@ -44,10 +44,10 @@ MODULE H5E_PROVISIONAL
 
 CONTAINS
 
-!****s* H5E/h5eset_auto2_f
+!****s* H5E/h5eset_auto_f
 !
 ! NAME
-!  h5eset_auto2_f
+!  h5eset_auto_f
 !
 ! PURPOSE
 !  Returns settings for automatic error stack traversal function and its data.
@@ -68,9 +68,9 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  July 10, 2009
 !
-! Signature:
+! Fortran2003 Interface:
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
-    USE ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING
     INTEGER       , INTENT(IN)            :: printflag
     INTEGER       , INTENT(OUT)           :: hdferr
     INTEGER(HID_T), INTENT(IN) , OPTIONAL :: estack_id
@@ -82,7 +82,7 @@ CONTAINS
     TYPE(C_PTR)    :: client_data_default
     INTERFACE
        INTEGER FUNCTION h5eset_auto2_c(printflag, estack_id, func, client_data)
-         USE ISO_C_BINDING
+         USE, INTRINSIC :: ISO_C_BINDING
          USE H5GLOBAL
          !DEC$IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ESET_AUTO2_C'::h5eset_auto2_c

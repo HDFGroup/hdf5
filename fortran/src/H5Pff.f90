@@ -27,7 +27,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5P function you must add the function name to the
-!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !*****
 
@@ -85,7 +85,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pcreate_f(class, prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: class
@@ -140,7 +140,7 @@ CONTAINS
 !  Datatype of the flag parameter is changed from 
 !  INTEGER to LOGICAL June 4, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -198,7 +198,7 @@ CONTAINS
 !  INTEGER to LOGICAL 
 !  June 4, 2003 
 ! 
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -262,7 +262,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -320,7 +320,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
@@ -370,7 +370,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pclose_f(prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
@@ -420,7 +420,7 @@ CONTAINS
 !   called C functions (it is needed for Windows
 !   port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -476,7 +476,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -532,7 +532,7 @@ CONTAINS
 !			called C functions (it is needed for Windows
 !			port).  March 14, 2001
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -586,7 +586,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE          
+! Fortran90 Interface:          
   SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
        stab, shhdr, hdferr)
     IMPLICIT NONE
@@ -649,7 +649,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -701,7 +701,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier 
@@ -753,7 +753,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier 
@@ -809,7 +809,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id        ! Property list identifier 
@@ -866,7 +866,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -921,7 +921,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -975,7 +975,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1027,7 +1027,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1080,7 +1080,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
@@ -1130,7 +1130,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1218,7 +1218,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1306,7 +1306,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
@@ -1361,7 +1361,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier 
@@ -1415,7 +1415,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
@@ -1474,7 +1474,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
@@ -1533,7 +1533,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
@@ -1589,7 +1589,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier 
@@ -1652,7 +1652,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1721,7 +1721,7 @@ CONTAINS
 !  Bug fix: type of the rdcc_nelmts parameter should be INTEGER
 !  instead of INTEGER(SIZE_T) October 10, 2003 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1787,7 +1787,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
@@ -1907,7 +1907,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE 
+! Fortran90 Interface: 
   SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1961,7 +1961,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !		
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_gc_references_f(prp_id, gc_reference, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2019,7 +2019,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2079,7 +2079,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2135,7 +2135,7 @@ CONTAINS
 !  Elena Pourmal
 !  February, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2195,7 +2195,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2257,7 +2257,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2333,7 +2333,7 @@ CONTAINS
 !
 !  Changed type of 'offset' from integer to off_t -- MSB January 9, 2012
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
@@ -2395,7 +2395,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -2456,7 +2456,7 @@ CONTAINS
 !
 ! Changed type of 'offset' from integer to off_t -- MSB January 9, 2012
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
@@ -2523,7 +2523,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
@@ -2583,7 +2583,7 @@ CONTAINS
 !  called C functions (it is needed for Windows
 !  port).  March 14, 2001 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
@@ -2643,7 +2643,7 @@ CONTAINS
 ! HISTORY
 ! 
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
@@ -2697,7 +2697,7 @@ CONTAINS
 !  Elena Pourmal
 !  September 26, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
@@ -2747,7 +2747,7 @@ CONTAINS
 !  Elena Pourmal
 !  September 30, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist1_id ! Property list identifier 
@@ -2795,7 +2795,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 2, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
@@ -2841,7 +2841,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 2, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
@@ -2892,7 +2892,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 4, 2002
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! Dataset creation property list identifier
@@ -2944,7 +2944,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 4, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! Dataset creation property list identifier
@@ -2998,7 +2998,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 4, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! Dataset creation property list identifier
@@ -3050,7 +3050,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 4, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! Dataset creation property list identifier
@@ -3101,7 +3101,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 4, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! Dataset creation property list identifier
@@ -3148,7 +3148,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! File access property list identifier 
@@ -3191,7 +3191,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! File access property list identifier 
@@ -3234,7 +3234,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
@@ -3278,7 +3278,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
@@ -3322,7 +3322,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
@@ -3366,7 +3366,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id  ! File access property list identifier 
@@ -3410,7 +3410,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
@@ -3454,7 +3454,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 7, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
@@ -3499,7 +3499,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
@@ -3557,7 +3557,7 @@ CONTAINS
 ! HISTORY
 ! 	
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
@@ -3606,7 +3606,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
@@ -3656,7 +3656,7 @@ CONTAINS
 ! HISTORY
 ! Returned the size of name as an argument	
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
@@ -3709,7 +3709,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
@@ -3754,7 +3754,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist     ! Property list identifier 
@@ -3803,7 +3803,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dst_id  ! Destination property list 
@@ -3854,7 +3854,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5premove_f(plid, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plid   ! Property list identifier
@@ -3901,7 +3901,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5punregister_f(class, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
@@ -3947,7 +3947,7 @@ CONTAINS
 !  Elena Pourmal
 !  October 9, 2002	
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pclose_class_f(class, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class ! Property list class identifier
@@ -3984,7 +3984,7 @@ CONTAINS
 !  Elena Pourmal
 !  March 12, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_shuffle_f(prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -4030,7 +4030,7 @@ CONTAINS
 !  Elena Pourmal
 !  March 13, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -4075,7 +4075,7 @@ CONTAINS
 !  Elena Pourmal
 !  March 13, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset transfer property list identifier 
@@ -4126,7 +4126,7 @@ CONTAINS
 !  Elena Pourmal
 !  March 13, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -4170,7 +4170,7 @@ CONTAINS
 !  Elena Pourmal
 !  19 March 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier 
@@ -4219,7 +4219,7 @@ CONTAINS
 !  Elena Pourmal
 !  20 March 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
@@ -4287,7 +4287,7 @@ CONTAINS
 !  Elena Pourmal
 !  31 March 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
@@ -4342,7 +4342,7 @@ CONTAINS
 !  Elena Pourmal
 !  24 March 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
@@ -4417,7 +4417,7 @@ CONTAINS
 !  Elena Pourmal
 !  April 10 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_szip_f(prp_id, options_mask, pixels_per_block, hdferr) 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
@@ -4474,7 +4474,7 @@ CONTAINS
 !  Elena Pourmal
 !  April 10 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
@@ -4533,7 +4533,7 @@ CONTAINS
 !  Elena Pourmal
 !  April 10 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier 
@@ -4599,7 +4599,7 @@ CONTAINS
 !  Elena Pourmal
 !  April 10 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -4653,7 +4653,7 @@ CONTAINS
 !  Quincey Koziol
 !  January 27 2004
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property list
@@ -4704,7 +4704,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  January, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pget_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
@@ -4755,7 +4755,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  January, 2008
 !
-! SOURCE 
+! Fortran90 Interface: 
   SUBROUTINE h5pset_attr_creation_order_f(ocpl_id, crt_order_flags , hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id   ! Object (dataset or group) creation property list identifier
@@ -4802,7 +4802,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  January, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_shared_mesg_nindexes_f( plist_id, nindexes, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! File creation property list
@@ -4855,7 +4855,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  January, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_shared_mesg_index_f(fcpl_id, index_num, mesg_type_flags, min_mesg_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fcpl_id  ! file creation property list
@@ -4910,7 +4910,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id   ! Object (group or dataset) creation property list identifier 
@@ -4961,7 +4961,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February 18, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_libver_bounds_f(fapl_id, low, high, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
@@ -5018,7 +5018,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February 18, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id  ! File access property list identifier
@@ -5068,7 +5068,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February 20, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pget_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
@@ -5118,7 +5118,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  February 22, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pget_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property 
@@ -5184,7 +5184,7 @@ CONTAINS
 !  February 22, 2008
 !	
 !  
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property
@@ -5241,7 +5241,7 @@ CONTAINS
 ! HISTORY	
 ! The long subroutine name (>31) on older f90 compilers causes problems
 !          so had to shorten the name
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lcpl_id      ! Link creation property list identifier
@@ -5290,7 +5290,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  March 3, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id   ! Group creation property list identifier
@@ -5341,7 +5341,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  March 3, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_char_encoding_f(plist_id, encoding, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Property list identifier
@@ -5395,7 +5395,7 @@ CONTAINS
 !  M. Scot Breitenfeld
 !  March 3, 2008
 !
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE  h5pget_char_encoding_f(plist_id, encoding, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Property list identifier
@@ -5450,7 +5450,7 @@ CONTAINS
 ! HISTORY
 !
 !  
-! SOURCE  
+! Fortran90 Interface:  
   SUBROUTINE h5pset_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocp_plist_id ! Object copy property list identifier
@@ -5503,7 +5503,7 @@ CONTAINS
 ! HISTORY
 !
 !  
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocp_plist_id ! Object copy property list identifier
@@ -5560,7 +5560,7 @@ CONTAINS
 ! HISTORY
 !
 ! Should hdferr return just 0 or 1 and add another arguement for the size?
-! SOURCE
+! Fortran90 Interface:
 SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id         ! Identifier of the property list or class
@@ -5619,7 +5619,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !  M. Scot Breitenfeld
 !  March 19, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_data_transform_f(plist_id, expression, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id     ! Identifier of the property list or class
@@ -5670,7 +5670,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id     ! Group creation property list identifier
@@ -5721,7 +5721,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 ! HISTORY
 !
 ! 
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id   ! Group creation property list identifier  
@@ -5770,7 +5770,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id    ! Group creation property list identifier
@@ -5818,7 +5818,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id  ! Group creation property list identifier  
@@ -5868,7 +5868,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! SOURCE
+! Fortran90 Interface:
 SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
@@ -5919,7 +5919,7 @@ SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! SOURCE
+! Fortran90 Interface:
 SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE  
     INTEGER(HID_T), INTENT(IN) :: fapl_id     ! File access property list identifier
@@ -5971,7 +5971,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE  
     INTEGER(HID_T), INTENT(IN) :: fapl_id       ! File access property list identifier
@@ -6024,7 +6024,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
 !  M. Scot Breitenfeld
 !  January, 2008
 !
-! SOURCE
+! Fortran90 Interface:
 SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
@@ -6063,31 +6063,22 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 ! PURPOSE
 !  Sets up the use of the N-Bit filter.
 !
-! INPUTS
-! 
+! Inputs:
 !  plist_id - Dataset creation property list identifier.
-! OUTPUTS
 !
-!  hdferr   - Error code
-!              Success:  0
-!  	       Failure: -1
+! Outputs:
+!  hdferr   - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! HISTORY
-!
-! 
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_nbit_f(plist_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property list identifier
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
-                                           ! 0 on success and -1 on failure
-!***** 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+    INTEGER(HID_T), INTENT(IN)  :: plist_id
+    INTEGER       , INTENT(OUT) :: hdferr
+!*****
     INTERFACE
        INTEGER FUNCTION H5Pset_nbit_c(plist_id)
          USE H5GLOBAL
@@ -6107,37 +6098,33 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !  h5pset_scaleoffset_f 
 !
 ! PURPOSE
-!  Sets up the use of the Scale-Offset filter.
+!  Sets up the use of the scale-offset filter.
 !
-! INPUTS
-! 
+! Inputs:
 !  plist_id     - Dataset creation property list identifier.
-!  scale_type   - Flag indicating compression method.
-!  scale_factor - Parameter related to scale.
-! OUTPUTS
+!  scale_type   - Flag indicating compression method. Valid values:
+!                    H5Z_SO_FLOAT_DSCALE_F
+!                    H5Z_SO_FLOAT_ESCALE_F
+!                    H5Z_SO_INT_F
 !
-!  hdferr	 - Error code
-!                   Success:  0
-!  		    Failure: -1
+!  scale_factor - Parameter related to scale.
+!
+! Outputs:
+!  hdferr       - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
 !  March 21, 2008
 !
-! HISTORY
-!
-! 
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property list identifier
-    INTEGER, INTENT(IN) :: scale_type      ! Flag indicating compression method.
-    INTEGER, INTENT(IN) :: scale_factor    ! Parameter related to scale.
-    INTEGER, INTENT(OUT) :: hdferr         ! Error code
-                                           ! 0 on success and -1 on failure
+    INTEGER(HID_T), INTENT(IN)  :: plist_id
+    INTEGER       , INTENT(IN)  :: scale_type
+    INTEGER       , INTENT(IN)  :: scale_factor
+    INTEGER       , INTENT(OUT) :: hdferr
 !***** 
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
+
     INTERFACE
        INTEGER FUNCTION h5pset_scaleoffset_c(plist_id, scale_type, scale_factor)
          USE H5GLOBAL
@@ -6179,7 +6166,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 ! HISTORY
 !
 ! 
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lapl_id ! File access property list identifier
@@ -6227,7 +6214,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !  M. Scot Breitenfeld
 !  March 24, 2008
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lapl_id  ! File access property list identifier
@@ -6278,7 +6265,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 ! 	
 ! The long subroutine name (>31) on older f90 compilers causes problems
 !          so the name was shortened
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lcpl_id      ! Link creation property list identifier
@@ -6343,7 +6330,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !
 ! HISTORY
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dapl_id      ! Dataset access property list identifier.
@@ -6404,7 +6391,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !
 ! HISTORY
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dapl_id       ! Dataset access property list identifier.
@@ -6432,4 +6419,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_chunk_cache_f
 
 END MODULE H5P
+
+
 
