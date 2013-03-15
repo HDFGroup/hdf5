@@ -7,6 +7,21 @@ PROJECT (HDF5_TEST)
 ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
+# If plugin library tests can be tested
+#-----------------------------------------------------------------------------
+IF (BUILD_SHARED_LIBS)
+  IF (EXISTS "${HDF5_TEST_SOURCE_DIR}/plugin_lib" AND IS_DIRECTORY "${HDF5_TEST_SOURCE_DIR}/plugin_lib")
+    ADD_SUBDIRECTORY (${HDF5_TEST_SOURCE_DIR}/plugin_lib ${PROJECT_BINARY_DIR}/plugin_lib)
+  ENDIF (EXISTS "${HDF5_TEST_SOURCE_DIR}/plugin_lib" AND IS_DIRECTORY "${HDF5_TEST_SOURCE_DIR}/plugin_lib")
+ELSE (BUILD_SHARED_LIBS)
+  MESSAGE (STATUS " **** Plugins libraries must be built as shared libraries **** ")
+  ADD_TEST (
+      NAME H5PLUGIN-SKIPPED
+      COMMAND ${CMAKE_COMMAND} -E echo "SKIP H5PLUGIN TESTING"
+  )
+ENDIF (BUILD_SHARED_LIBS)
+
+#-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
 SET (TEST_LIB_SRCS
