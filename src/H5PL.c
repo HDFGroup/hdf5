@@ -204,7 +204,8 @@ done:
  *
  * Purpose:     Given a path, this function opens the directory and envokes
  *              another function to go through all files to find the right 
- *              plugin library.
+ *              plugin library. Two function definitions are for Unix and 
+ *              Windows.
  *
  * Return:	TRUE on success, 
  *              FALSE on not found,
@@ -217,6 +218,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_HAVE_WIN32_API
 htri_t
 H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 {
@@ -276,6 +278,66 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+#else
+htri_t
+H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
+{
+    char           *pathname = NULL;
+    DIR            *dirp = NULL;
+    struct dirent  *dp = NULL;
+    struct stat    my_stat;
+
+    WIN32_FIND_DATA fdFile;
+    HANDLE hFind = NULL;
+
+    htri_t         found_in_dir = FALSE;
+    htri_t         ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if((hFind = FindFirstFile(dir, &fdFile)) == INVALID_HANDLE_VALUE) {
+        /*fprintf(stderr, "Path not found: [%s]\n", dir);*/
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
+    }
+
+    do {
+        /* Find first file will always return "."
+         * and ".." as the first two directories. */
+        if(HDstrcmp(fdFile.cFileName, ".") != 0 && HDstrcmp(fdFile.cFileName, "..") != 0) {
+	    pathname = (char *)H5MM_malloc(strlen(dir) + strlen(fdFile.cFileName) + 2); 
+	    HDstrncpy(pathname, dir, strlen(dir)+1);
+	    HDstrcat(pathname, "\");
+	    HDstrcat(pathname, fdFile.cFileName);
+
+            /* Is the entity a File or Folder? */
+            if(fdFile.dwFileAttributes &FILE_ATTRIBUTE_DIRECTORY)
+                continue;
+
+            if((found_in_dir = H5PL_open(plugin_type, pathname, type_id, info)) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+
+            if(found_in_dir) {
+       	        ret_value = TRUE; 
+	        HGOTO_DONE(ret_value)
+            } else
+	        if(pathname) 
+		    pathname = (char *)H5MM_xfree(pathname);
+        }
+    } while(FindNextFile(hFind, &fdFile)); /* Find the next file. */
+
+    /* Clean things up! */
+    FindClose(hFind);
+    hFind = NULL;
+
+done:
+    if(pathname) 
+        pathname = (char *)H5MM_xfree(pathname);
+    if(hFind) 
+        FindClose(hFind);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif
 
 
 /*-------------------------------------------------------------------------
