@@ -32,6 +32,8 @@
 #include "H5VLiod_client.h"
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
+na_network_class_t *network_class = NULL;
+
 herr_t
 H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -136,6 +138,31 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 } /* end H5VL_iod_wait */
 
 herr_t
+H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
+{
+    H5VL_iod_request_t *cur_req = file->request_list_head;
+    fs_status_t status;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Loop to complete all requests */
+    while(cur_req) {
+        H5VL_iod_request_t *tmp_req;
+
+        tmp_req = cur_req->next;
+        fs_wait(*((fs_request_t *)cur_req->req), FS_MAX_IDLE_TIME, &status);
+        if(!status)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "a pending request did not complete");
+        H5VL_iod_request_delete(file, cur_req);
+        cur_req = tmp_req;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_wait */
+
+herr_t
 H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_params, const char *name,
                         iod_obj_id_t *id, iod_handle_t *oh, char **new_name)
 {
@@ -147,6 +174,7 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;              /* Pointer to buffer for path components */
     size_t nchars;	     /* component name length	*/
+    size_t cur_size;
     hbool_t last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
     herr_t ret_value = SUCCEED;
 
@@ -154,6 +182,8 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
 
     if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
+    HDstrcpy(cur_name, obj->obj_name);
+    cur_size = HDstrlen(obj->obj_name);
 
     if(NULL != obj->request) {
         if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
@@ -172,8 +202,6 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
     }
     else
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
-
-    HDstrcat(cur_name, obj->obj_name);
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
@@ -206,9 +234,13 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
             last_comp = TRUE;
 
         HDstrcat(cur_name, comp);
+        cur_size += nchars;
+        cur_name[cur_size] = '\0';
 
         if(NULL == (cur_grp = (H5VL_iod_group_t *)H5I_search_name(cur_name, H5I_GROUP)))
             break;
+
+        printf("Found %s Locally\n", comp);
 
         if(NULL != cur_grp->common.request) {
             if(H5VL_iod_request_wait(obj->file, cur_grp->common.request) < 0)
@@ -241,7 +273,6 @@ na_addr_t
 H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUSED info)
 {
     na_addr_t ion_target;
-    na_network_class_t *network_class = NULL;
     int fs_ret;
     na_addr_t ret_value;
     int num_procs;
@@ -257,6 +288,10 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
     if (fs_ret != S_SUCCESS)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to initialize client function shipper");
 
+    fs_ret = bds_init(network_class);
+    if (fs_ret != S_SUCCESS)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to initialize client function shipper");
+
     /* Look up addr id */
     fs_ret = na_addr_lookup(network_class, mpi_port_name, &ion_target);
     if (fs_ret != S_SUCCESS)
@@ -264,6 +299,8 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
 
     /* Register function and encoding/decoding functions */
     H5VL_EFF_INIT_ID = fs_register("eff_init", H5VL_iod_client_encode_eff_init, 
+                                   H5VL_iod_client_decode_eff_init);
+    H5VL_EFF_FINALIZE_ID = fs_register("eff_finalize", NULL, 
                                    H5VL_iod_client_decode_eff_init);
     H5VL_FILE_CREATE_ID = fs_register("file_create", H5VL_iod_client_encode_file_create, 
                                       H5VL_iod_client_decode_file_create);
@@ -281,8 +318,12 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
                                       H5VL_iod_client_decode_dset_create);
     H5VL_DSET_OPEN_ID = fs_register("dset_open", H5VL_iod_client_encode_dset_open, 
                                       H5VL_iod_client_decode_dset_open);
+    H5VL_DSET_READ_ID = fs_register("dset_read", H5VL_iod_client_encode_dset_io, 
+                                    H5VL_iod_client_decode_dset_io);
+    H5VL_DSET_WRITE_ID = fs_register("dset_write", H5VL_iod_client_encode_dset_io, 
+                                     H5VL_iod_client_decode_dset_io);
     H5VL_DSET_CLOSE_ID = fs_register("dset_close", H5VL_iod_client_encode_dset_close, 
-                                      H5VL_iod_client_decode_dset_close);
+                                     H5VL_iod_client_decode_dset_close);
 
     /* forward the init call to the IONs */
     if(fs_forward(ion_target, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &fs_req) < 0)
@@ -291,6 +332,39 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
     fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
     ret_value = ion_target;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t
+H5VL_iod_client_eff_finalize(na_addr_t ion_target)
+{
+    herr_t ret_value = SUCCEED;
+    fs_request_t fs_req;
+    int fs_ret;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* forward the finalize call to the IONs */
+    if(fs_forward(ion_target, H5VL_EFF_FINALIZE_ID, NULL, &ret_value, &fs_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship eff_finalize");
+
+    fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
+
+    /* Free addr id */
+    fs_ret = na_addr_free(network_class, ion_target);
+    if (fs_ret != S_SUCCESS)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown function shipper address");
+
+    /* Finalize interface */
+    fs_ret = fs_finalize();
+    if (fs_ret != S_SUCCESS) 
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to finalize function shipper");
+
+    fs_ret = bds_finalize();
+    if (fs_ret != S_SUCCESS) 
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to finalize function shipper");
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

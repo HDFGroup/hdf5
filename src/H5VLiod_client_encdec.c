@@ -985,6 +985,108 @@ done:
 } /* end H5VL_client_decode_dset_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_client_encode_dset_io
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
+{
+    H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)_input;
+    size_t size, nalloc;
+    void *buf;
+    uint8_t *p;
+    H5P_genplist_t *dxpl = NULL;
+    hid_t dxpl_id = input->dxpl_id;
+    hid_t space_id = input->space_id;
+    size_t space_size = 0, dxpl_size = 0;
+    H5S_t *dspace = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get size for property lists to encode */
+    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
+        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        if((ret_value = H5P__encode(dxpl, FALSE, NULL, &dxpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+    }
+
+    /* get Dataspace size to encode */
+    if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+    if(H5S_encode(dspace, NULL, &space_size)<0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+
+    size = BDS_MAX_HANDLE_SIZE + 
+        1 + H5V_limit_enc_size((uint64_t)input->iod_oh.cookie) +
+        1 + H5V_limit_enc_size((uint64_t)input->scratch_oh.cookie) + 
+        1 + H5V_limit_enc_size((uint64_t)dxpl_size) + dxpl_size + 
+        1 + H5V_limit_enc_size((uint64_t)space_size) + space_size;
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode the location with the container handle & iod object IDs and opened handles */
+    UINT64ENCODE_VARLEN(p, input->iod_oh.cookie);
+    UINT64ENCODE_VARLEN(p, input->scratch_oh.cookie);
+
+    /* encode the plist size */
+    UINT64ENCODE_VARLEN(p, dxpl_size);
+    /* encode property lists if they are not default*/
+    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
+        if((ret_value = H5P__encode(dxpl, FALSE, p, &dxpl_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+        p += dxpl_size;
+    }
+
+    /* encode the dataspace size */
+    UINT64ENCODE_VARLEN(p, space_size);
+    /* encode datatspace */
+    if((ret_value = H5S_encode(dspace, p, &space_size)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
+    p += space_size;
+
+    if(S_FAIL == bds_handle_serialize(p, BDS_MAX_HANDLE_SIZE, input->bds_handle))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to serialize bds handle");
+
+    p += BDS_MAX_HANDLE_SIZE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_encode_dset_io() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_client_decode_dset_close
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_decode_dset_io(fs_proc_t proc, void *_output)
+{
+    int *output = (int *)_output;
+    void *buf=NULL;
+    uint8_t *p;
+
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
+
+    p = (uint8_t *)buf;
+    INT32DECODE(p, *output);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_decode_dset_io() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_client_encode_dset_close
  *------------------------------------------------------------------------- */
 herr_t 

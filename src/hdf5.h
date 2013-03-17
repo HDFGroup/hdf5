@@ -42,6 +42,7 @@
 
 /* Predefined VOL plugins */
 #include "H5VLnative.h"		/* Native HDF5 plugin           	*/
+#include "H5VLiod.h"            /* IOD VOL plugin                       */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/* Files stored entirely in memory	*/

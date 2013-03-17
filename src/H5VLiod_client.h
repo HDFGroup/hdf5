@@ -35,6 +35,8 @@ typedef enum H5RQ_type_t {
     FS_GROUP_CLOSE,
     FS_DSET_CREATE,
     FS_DSET_OPEN,
+    FS_DSET_READ,
+    FS_DSET_WRITE,
     FS_DSET_CLOSE
 } H5RQ_type_t;
 
@@ -84,10 +86,13 @@ typedef struct H5VL_iod_dset_t {
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
+H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
 H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);
-na_addr_t H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info info);
+
+H5_DLL na_addr_t H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info info);
+H5_DLL herr_t H5VL_iod_client_eff_finalize(na_addr_t ion_target);
 
 H5_DLL herr_t H5VL_iod_client_encode_eff_init(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_eff_init(fs_proc_t proc, void *_output);
@@ -107,6 +112,8 @@ H5_DLL herr_t H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_create(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_dset_io(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output);
 

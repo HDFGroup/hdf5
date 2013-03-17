@@ -26,6 +26,7 @@
 
 /* types for different ways that objects are located in an HDF5 container */
 fs_id_t H5VL_EFF_INIT_ID;
+fs_id_t H5VL_EFF_FINALIZE_ID;
 fs_id_t H5VL_FILE_CREATE_ID;
 fs_id_t H5VL_FILE_OPEN_ID;
 fs_id_t H5VL_FILE_CLOSE_ID;
@@ -34,6 +35,8 @@ fs_id_t H5VL_GROUP_OPEN_ID;
 fs_id_t H5VL_GROUP_CLOSE_ID;
 fs_id_t H5VL_DSET_CREATE_ID;
 fs_id_t H5VL_DSET_OPEN_ID;
+fs_id_t H5VL_DSET_READ_ID;
+fs_id_t H5VL_DSET_WRITE_ID;
 fs_id_t H5VL_DSET_CLOSE_ID;
 
 /* struct that contains the information about the IOD container */
@@ -125,6 +128,15 @@ typedef struct H5VL_iod_dset_open_input_t {
     hid_t dapl_id;
     fs_handle_t fs_handle;
 } H5VL_iod_dset_open_input_t;
+
+typedef struct H5VL_iod_dset_io_input_t {
+    iod_handle_t iod_oh;
+    iod_handle_t scratch_oh;
+    hid_t space_id;
+    hid_t dxpl_id;
+    bds_handle_t bds_handle;
+    fs_handle_t fs_handle;
+} H5VL_iod_dset_io_input_t;
 
 #if 0
 /* Define fs_proc_iod_handle_t */

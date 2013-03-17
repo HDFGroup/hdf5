@@ -58,6 +58,7 @@ typedef struct H5VL_iod_server_remote_dset_t {
 } H5VL_iod_server_remote_dset_t;
 
 H5_DLL int H5VL_iod_server_eff_init(fs_handle_t handle);
+H5_DLL int H5VL_iod_server_eff_finalize(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_file_create(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_file_open(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_file_close(fs_handle_t handle);
@@ -66,6 +67,8 @@ H5_DLL int H5VL_iod_server_group_open(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_group_close(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_create(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_open(fs_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_read(fs_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_write(fs_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_close(fs_handle_t handle);
 
 H5_DLL herr_t H5VL_iod_server_encode_eff_init(fs_proc_t proc, void *_input);
@@ -86,6 +89,8 @@ H5_DLL herr_t H5VL_iod_server_encode_dset_create(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_server_encode_dset_open(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_server_decode_dset_open(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_server_encode_dset_io(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_server_decode_dset_io(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_server_encode_dset_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_server_decode_dset_close(fs_proc_t proc, void *_input);
 

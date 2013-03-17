@@ -38,6 +38,10 @@
 AXE_engine_t engine = NULL;
 MPI_Comm iod_comm;
 iod_obj_id_t ROOT_ID;
+int num_peers = 0;
+int terminate_requests = 0;
+hbool_t shutdown = FALSE;
+
 #define EEXISTS 0
 
 static herr_t H5VL_iod_server_file_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
@@ -64,6 +68,12 @@ static herr_t H5VL_iod_server_dset_create_cb(size_t num_necessary_parents, AXE_t
 static herr_t H5VL_iod_server_dset_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                            void *op_data);
+static herr_t H5VL_iod_server_dset_read_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                           void *op_data);
+static herr_t H5VL_iod_server_dset_write_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                            void *op_data);
 static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
@@ -90,6 +100,10 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     fs_handler_register("eff_init", 
                         H5VL_iod_server_eff_init,
                         H5VL_iod_server_decode_eff_init, 
+                        H5VL_iod_server_encode_eff_init);
+    fs_handler_register("eff_finalize", 
+                        H5VL_iod_server_eff_finalize,
+                        NULL,
                         H5VL_iod_server_encode_eff_init);
     fs_handler_register("file_create", 
                         H5VL_iod_server_file_create,
@@ -123,6 +137,14 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                         H5VL_iod_server_dset_open,
                         H5VL_iod_server_decode_dset_open, 
                         H5VL_iod_server_encode_dset_open);
+    fs_handler_register("dset_read",
+                        H5VL_iod_server_dset_read,
+                        H5VL_iod_server_decode_dset_io, 
+                        H5VL_iod_server_encode_dset_io);
+    fs_handler_register("dset_write",
+                        H5VL_iod_server_dset_write,
+                        H5VL_iod_server_decode_dset_io, 
+                        H5VL_iod_server_encode_dset_io);
     fs_handler_register("dset_close", 
                         H5VL_iod_server_dset_close,
                         H5VL_iod_server_decode_dset_close, 
@@ -134,12 +156,13 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
         /* Receive new function calls */
         if(S_SUCCESS != fs_handler_receive())
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to handle client request");
+        if(shutdown)
+            break;
     }
 
     if (S_SUCCESS != fs_handler_finalize()) {
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
     }
-
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -163,20 +186,60 @@ int
 H5VL_iod_server_eff_init(fs_handle_t handle)
 {
     int num_procs;
-    herr_t ret_value = SUCCEED;
+    int ret_value = S_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if(S_FAIL == fs_handler_get_input(handle, &num_procs))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get input parameters");
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
     if(iod_initialize(iod_comm, NULL, num_procs, num_procs, NULL) < 0 )
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't initialize");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't initialize");
+
+    /* MSC - this needs to be changed to be the number of peers connecting to this server */
+    num_peers = num_procs;
 
 done:
     fs_handler_complete(handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_eff_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_eff_finalize
+ *
+ * Purpose:	Function to shutdown server
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_eff_finalize(fs_handle_t handle)
+{
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(iod_finalize(NULL, NULL) < 0 )
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, S_FAIL, "can't finalize IOD");
+
+    terminate_requests ++;
+
+    if(terminate_requests == num_peers) {
+        if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, S_FAIL, "can't shutdown AXE engine");
+        shutdown = TRUE;
+    }
+
+done:
+    fs_handler_complete(handle, &ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_eff_finalize() */
 
 
 /*-------------------------------------------------------------------------
@@ -532,6 +595,86 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_read
+ *
+ * Purpose:	Function shipper registered call for Dset Read.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_read(fs_handle_t handle)
+{
+    H5VL_iod_dset_io_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dset_io_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dset_io_input_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_read_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_write
+ *
+ * Purpose:	Function shipper registered call for Dset Write.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_write(fs_handle_t handle)
+{
+    H5VL_iod_dset_io_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dset_io_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dset_io_input_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_write_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_write() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_dset_close
  *
  * Purpose:	Function shipper registered call for Dset Close.
@@ -603,6 +746,8 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start file create\n");
 
     /* convert HDF5 flags to IOD flags */
     mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_RO;
@@ -706,6 +851,8 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    printf("Start file open\n");
+
     if((status = iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
@@ -765,6 +912,8 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    printf("Start file close\n");
+
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
     if((ret_value = iod_obj_close(root_oh, NULL, NULL)) < 0)
@@ -813,6 +962,8 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start group create %s\n", name);
 
     cur_oh = loc_handle;
 
@@ -963,8 +1114,8 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    printf("Start group open %s\n", name);
     cur_oh = loc_handle;
-    printf("group open name %s\n", name);
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
@@ -1080,6 +1231,8 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    printf("Start group close\n");
+
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
     if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
@@ -1131,6 +1284,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    printf("Start dataset Create %s\n", name);
     cur_oh = loc_handle;
 
     /* Wrap the local buffer for serialized header info */
@@ -1368,6 +1522,7 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    printf("Start dataset Open %s\n", name);
     cur_oh = loc_handle;
 
     /* Wrap the local buffer for serialized header info */
@@ -1478,6 +1633,143 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_read_cb
+ *
+ * Purpose:	Reads from IOD into the function shipper BDS handle.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                             void *op_data)
+{
+    H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)op_data;
+    iod_handle_t iod_oh = input->iod_oh;
+    iod_handle_t scratch_oh = input->scratch_oh;
+    bds_handle_t bds_handle = input->bds_handle;
+    hid_t space_id = input->space_id;
+    hid_t dxpl_id = input->dxpl_id;
+    bds_block_handle_t bds_block_handle = NULL;
+    iod_mem_desc_t mem_desc;
+    iod_array_iodesc_t file_desc;
+    size_t size;
+    void *buf;
+    ssize_t ret;
+    na_addr_t dest = fs_handler_get_addr(input->fs_handle);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start dataset Read\n");
+
+    size = bds_handle_get_size(bds_handle);
+    if(NULL == (buf = malloc(size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+
+    mem_desc.nfrag = 1;
+    mem_desc.frag[0].addr = buf;
+    mem_desc.frag[0].len = (iod_size_t)size;
+
+    /* MSC TODO - populate file location hyperslab */
+
+    /* read from array object */
+    if(iod_array_read(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+
+    /* Create a new block handle to write the data */
+    bds_block_handle_create(buf, size, BDS_READ_ONLY, &bds_block_handle);
+
+    /* Write bulk data here and wait for the data to be there  */
+    if(S_SUCCESS != bds_write(bds_handle, dest, bds_block_handle))
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+
+    if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+
+done:
+    printf("Done with dset read, sending response to client\n");
+    fs_handler_complete(input->fs_handle, &ret_value);
+    bds_block_handle_free(bds_block_handle);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_read_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_write_cb
+ *
+ * Purpose:	Writes from IOD into the function shipper BDS handle.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                             void *op_data)
+{
+    H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)op_data;
+    iod_handle_t iod_oh = input->iod_oh;
+    iod_handle_t scratch_oh = input->scratch_oh;
+    bds_handle_t bds_handle = input->bds_handle;
+    hid_t space_id = input->space_id;
+    hid_t dxpl_id = input->dxpl_id;
+    bds_block_handle_t bds_block_handle = NULL;
+    iod_mem_desc_t mem_desc;
+    iod_array_iodesc_t file_desc;
+    size_t size;
+    void *buf;
+    ssize_t ret;
+    na_addr_t dest = fs_handler_get_addr(input->fs_handle);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start dataset Write\n");
+
+    /* Write bulk data here and wait for the data to be there  */
+    if(S_SUCCESS != bds_read(bds_handle, dest, &bds_block_handle))
+        HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+
+    if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
+        HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
+
+    /* Call write */
+    buf = bds_block_handle_get_data(bds_block_handle);
+    size = bds_block_handle_get_size(bds_block_handle);
+
+    mem_desc.nfrag = 1;
+    mem_desc.frag[0].addr = buf;
+    mem_desc.frag[0].len = (iod_size_t)size;
+
+    /* MSC TODO - populate file location hyperslab */
+
+    /* write from array object */
+    if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
+
+done:
+    printf("Done with dset write, sending response to client\n");
+    fs_handler_complete(input->fs_handle, &ret_value);
+    bds_block_handle_free(bds_block_handle);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_write_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_dset_close_cb
  *
  * Purpose:	Closes iod HDF5 dataset.
@@ -1492,8 +1784,8 @@ done:
  */
 static herr_t
 H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                                 size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                                 void *op_data)
+                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                              void *op_data)
 {
     H5VL_iod_remote_dset_t *input = (H5VL_iod_remote_dset_t *)op_data;
     iod_handle_t iod_oh = input->iod_oh;
@@ -1501,6 +1793,8 @@ H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start dataset Close\n");
 
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");

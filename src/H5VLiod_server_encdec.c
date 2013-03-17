@@ -891,6 +891,95 @@ done:
 } /* end H5VL_iod_server_encode_dset_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_decode_dset_io_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_decode_dset_io(fs_proc_t proc, void *_input)
+{
+    H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)_input;
+    void *buf=NULL;
+    uint8_t *p;
+    size_t dxpl_size = 0;
+    size_t space_size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    /* decode the location with the container handle & iod object IDs and opened handles */
+    UINT64DECODE_VARLEN(p, input->iod_oh.cookie);
+    UINT64DECODE_VARLEN(p, input->scratch_oh.cookie);
+
+    /* decode the plist size */
+    UINT64DECODE_VARLEN(p, dxpl_size);
+    /* decode property lists if they are not default*/
+    if(dxpl_size) {
+        if((input->dxpl_id = H5P__decode(p)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+        p += dxpl_size;
+    }
+    else {
+        input->dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    /* decode the dataspace */
+    {
+        H5S_t *ds = NULL;
+        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((input->space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+    }
+    p += space_size;
+
+    if(S_FAIL == bds_handle_deserialize(&input->bds_handle, p, BDS_MAX_HANDLE_SIZE))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to desrialize bds handle");
+    p += BDS_MAX_HANDLE_SIZE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_decode_dset_io() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_encode_dset_io_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_encode_dset_io(fs_proc_t proc, void *_output)
+{
+    int output = *((int *)_output);
+    void *buf = NULL;
+    uint8_t *p;
+    size_t size, nalloc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = sizeof(int32_t);
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    INT32ENCODE(p, output);
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_server_encode_dset_io() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_decode_dset_close_params
  *------------------------------------------------------------------------- */
 herr_t 

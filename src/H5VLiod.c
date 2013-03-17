@@ -30,6 +30,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspaces		  		*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_client.h"     /* Client IOD helper			*/
@@ -57,9 +58,9 @@ static herr_t H5VL_iod_datatype_close(void *dt, hid_t req);
 static void *H5VL_iod_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
 static void *H5VL_iod_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
 static herr_t H5VL_iod_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                       hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
+                                    hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
 static herr_t H5VL_iod_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                        hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
+                                     hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
 static herr_t H5VL_iod_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
 static herr_t H5VL_iod_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_iod_dataset_close(void *dset, hid_t req);
@@ -81,23 +82,23 @@ static herr_t H5VL_iod_group_close(void *grp, hid_t req);
 
 /* Link callbacks */
 static herr_t H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *obj, 
-                                      H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+                                   H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 static herr_t H5VL_iod_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
-                                    void *dst_obj, H5VL_loc_params_t loc_params2,
-                                    hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+                                 void *dst_obj, H5VL_loc_params_t loc_params2,
+                                 hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
 static herr_t H5VL_iod_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
-                                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                                       H5L_iterate_t op, void *op_data, hid_t req);
+                                    H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
+                                    H5L_iterate_t op, void *op_data, hid_t req);
 static herr_t H5VL_iod_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_iod_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
 
 /* Object callbacks */
 static void *H5VL_iod_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t req);
 static herr_t H5VL_iod_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
-                                      void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-                                      hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+                                   void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
+                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
 static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                                       H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
+                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
 //static herr_t H5VL_iod_object_lookup(hid_t loc_id, H5VL_loc_type_t lookup_type, void **location, hid_t req, va_list arguments);
 //static herr_t H5VL_iod_object_free_loc(void *location, hid_t req);
 static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, va_list arguments);
@@ -143,8 +144,8 @@ static H5VL_class_t H5VL_iod_g = {
     {                                           /* dataset_cls */
         H5VL_iod_dataset_create,             /* create */
         H5VL_iod_dataset_open,               /* open */
-        NULL,//H5VL_iod_dataset_read,               /* read */
-        NULL,//H5VL_iod_dataset_write,              /* write */
+        H5VL_iod_dataset_read,               /* read */
+        H5VL_iod_dataset_write,              /* write */
         NULL,//H5VL_iod_dataset_set_extent,         /* set extent */
         NULL,//H5VL_iod_dataset_get,                /* get */
         H5VL_iod_dataset_close               /* close */
@@ -269,6 +270,32 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLeff_finalize
+ *
+ * Purpose:	shutdown the EFF stack
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLeff_finalize(void)
+{
+    herr_t          ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(H5VL_iod_client_eff_finalize(PEER) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown eff stack");
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLeff_finalize() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_iod
  *
  * Purpose:	Modify the file access property list to use the H5VL_IOD
@@ -337,7 +364,7 @@ H5VL_iod_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the general information */
-    HDmemcpy(new_fa, old_fa, sizeof(H5VL_iod_fapl_t));
+    //HDmemcpy(new_fa, old_fa, sizeof(H5VL_iod_fapl_t));
 
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
@@ -477,6 +504,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     file->common.obj_type = H5I_FILE;
     file->common.obj_name = strdup("/");
+    file->common.obj_name[1] = '\0';
     file->common.file = file;
     file->common.request = request;
 
@@ -559,6 +587,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
 
     file->common.obj_type = H5I_FILE; 
     file->common.obj_name = strdup("/");
+    file->common.obj_name[1] = '\0';
     file->common.file = file;
     file->common.request = request;
 
@@ -694,12 +723,9 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL != file->common.request) {
-        if(H5VL_iod_request_wait(file, file->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
-        file->common.request->req = H5MM_xfree(file->common.request->req);
-        file->common.request = H5MM_xfree(file->common.request);
-    }
+    if(H5VL_iod_request_wait_all(file) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS requests");
+
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
@@ -813,8 +839,10 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     if (NULL == (grp->common.obj_name = (char *)malloc
                  (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcat(grp->common.obj_name, obj->obj_name);
+    HDstrcpy(grp->common.obj_name, obj->obj_name);
     HDstrcat(grp->common.obj_name, name);
+    grp->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+
     /* copy property lists */
     if((grp->remote_group.gcpl_id = H5Pcopy(gcpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gcpl");
@@ -901,8 +929,10 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     if (NULL == (grp->common.obj_name = (char *)malloc
                  (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcat(grp->common.obj_name, obj->obj_name);
+    HDstrcpy(grp->common.obj_name, obj->obj_name);
     HDstrcat(grp->common.obj_name, name);
+    grp->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+
     /* copy property lists */
     if((grp->gapl_id = H5Pcopy(gapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
@@ -1091,8 +1121,10 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if (NULL == (dset->common.obj_name = (char *)malloc
                  (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcat(dset->common.obj_name, obj->obj_name);
+    HDstrcpy(dset->common.obj_name, obj->obj_name);
     HDstrcat(dset->common.obj_name, name);
+    dset->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+
     /* copy property lists, dtype, and dspace*/
     if((dset->remote_dset.dcpl_id = H5Pcopy(dcpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dcpl");
@@ -1185,10 +1217,13 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     if (NULL == (dset->common.obj_name = (char *)malloc
                  (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcat(dset->common.obj_name, obj->obj_name);
+    HDstrcpy(dset->common.obj_name, obj->obj_name);
     HDstrcat(dset->common.obj_name, name);
+    dset->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+
     if((dset->dapl_id = H5Pcopy(dapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
     /* set common object parameters */
     dset->common.obj_type = H5I_DATASET;
     dset->common.file = obj->file;
@@ -1201,6 +1236,214 @@ done:
     free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_dataset_read
+ *
+ * Purpose:	Reads raw data from a dataset into a buffer.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, data not read.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
+                      hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t UNUSED req)
+{
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
+    H5VL_iod_dset_io_input_t input;
+    fs_request_t *fs_req;
+    bds_handle_t bds_handle;
+    H5VL_iod_request_t *request;
+    int *status;
+    const H5S_t *mem_space = NULL;
+    const H5S_t *file_space = NULL;
+    char fake_char;
+    size_t size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != dset->common.request) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        dset->common.request->req = H5MM_xfree(dset->common.request->req);
+        dset->common.request = H5MM_xfree(dset->common.request);
+    }
+
+    /* check arguments */
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
+
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
+    if(!buf)
+        buf = &fake_char;
+
+    size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
+
+    /* Register memory */
+    if(S_SUCCESS != bds_handle_create(buf, size, BDS_READWRITE, &bds_handle))
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+    /* Fill input structure */
+    input.iod_oh = dset->remote_dset.iod_oh;
+    input.scratch_oh = dset->remote_dset.scratch_oh;
+    input.bds_handle = bds_handle;
+    input.dxpl_id = dxpl_id;
+    input.space_id = file_space_id;
+
+    status = (int *)malloc(sizeof(int));
+
+    /* forward the call to the IONs */
+    if(fs_forward(PEER, H5VL_DSET_READ_ID, &input, &status, fs_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
+
+    /* setup a request to track completion of the operation */
+    if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    request->type = FS_DSET_READ;
+    request->data = status;
+    request->req = fs_req;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(dset->common.file, request);
+
+    /* Free memory handle */
+    if(S_SUCCESS != bds_handle_free(bds_handle))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_dataset_write
+ *
+ * Purpose:	Writes raw data from a buffer into a dataset.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, dataset not writed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
+                       hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
+{
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
+    H5VL_iod_dset_io_input_t input;
+    fs_request_t *fs_req;
+    bds_handle_t bds_handle;
+    H5VL_iod_request_t *request;
+    const H5S_t *mem_space = NULL;
+    const H5S_t *file_space = NULL;
+    char fake_char;
+    int *status;
+    size_t size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != dset->common.request) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        dset->common.request->req = H5MM_xfree(dset->common.request->req);
+        dset->common.request = H5MM_xfree(dset->common.request);
+    }
+
+    /* check arguments */
+    if(H5S_ALL != mem_space_id) {
+	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(mem_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
+    if(H5S_ALL != file_space_id) {
+	if(NULL == (file_space = (const H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+	/* Check for valid selection */
+	if(H5S_SELECT_VALID(file_space) != TRUE)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+    } /* end if */
+
+    if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
+
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
+     * doesn't support this feature.
+     */
+    if(!buf)
+        buf = &fake_char;
+
+    size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
+
+    /* Register memory */
+    if(S_SUCCESS != bds_handle_create(buf, size, BDS_READ_ONLY, &bds_handle))
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
+
+    /* Fill input structure */
+    input.iod_oh = dset->remote_dset.iod_oh;
+    input.scratch_oh = dset->remote_dset.scratch_oh;
+    input.bds_handle = bds_handle;
+    input.dxpl_id = dxpl_id;
+    input.space_id = file_space_id;
+
+    status = (int *)malloc(sizeof(int));
+
+    /* forward the call to the IONs */
+    if(fs_forward(PEER, H5VL_DSET_WRITE_ID, &input, &status, fs_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
+
+    /* setup a request to track completion of the operation */
+    if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    request->type = FS_DSET_WRITE;
+    request->data = status;
+    request->req = fs_req;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(dset->common.file, request);
+
+    /* Free memory handle */
+    if(S_SUCCESS != bds_handle_free(bds_handle))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_write() */
 
 
 /*-------------------------------------------------------------------------
