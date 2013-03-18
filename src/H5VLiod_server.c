@@ -820,7 +820,7 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
-
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_create_cb() */
 
@@ -884,7 +884,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
 done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
-
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_open_cb() */
 
@@ -927,6 +927,8 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 done:
     printf("Done with file close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
+
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_close_cb() */
 
@@ -1078,6 +1080,7 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_create_cb() */
 
@@ -1204,6 +1207,7 @@ done:
         fs_handler_complete(input->fs_handle, &ret_value);
 
     H5MM_xfree(output.gcpl);
+    input = H5MM_xfree(input);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_open_cb() */
@@ -1244,6 +1248,8 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 done:
     printf("Done with group close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
+
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_close_cb() */
 
@@ -1486,6 +1492,7 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_create_cb() */
 
@@ -1631,6 +1638,7 @@ done:
     H5MM_xfree(output.dtype);
     H5MM_xfree(output.dspace);
 
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_open_cb() */
 
@@ -1667,6 +1675,7 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     void *buf;
     uint32_t cs;
     na_addr_t dest = fs_handler_get_addr(input->fs_handle);
+    hbool_t flag;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1686,13 +1695,19 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     if(iod_array_read(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
+    if(H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
+    
     {
         int i;
         int *buf_ptr = (int *)buf;
 
         for(i=0;i<60;++i)
             buf_ptr[i] = i;
-        buf_ptr[0] = 10;
+        if(flag) {
+            printf("Injecting a bad data value to generate a bad checksum \n");
+            buf_ptr[0] = 10;
+        }
         cs = H5_checksum_fletcher32(buf, size);
         printf("Checksum Generated for data at client: %u\n", cs);
     }
@@ -1717,6 +1732,7 @@ done:
     if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_read_cb() */
 
@@ -1797,6 +1813,7 @@ done:
     //if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
     //HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_write_cb() */
 
@@ -1836,5 +1853,7 @@ H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 done:
     printf("Done with dset close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
+
+    input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close_cb() */

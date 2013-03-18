@@ -418,6 +418,50 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_fapl_free() */
 
+herr_t
+H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5D_XFER_INJECT_BAD_CHECKSUM_NAME, &flag) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_dxpl_inject_bad_checksum() */
+
+herr_t
+H5Pget_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t *flag/*out*/)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the transfer mode */
+    if(flag)
+        if(H5P_get(plist, H5D_XFER_INJECT_BAD_CHECKSUM_NAME, flag) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_dxpl_inject_bad_checksum() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_file_create

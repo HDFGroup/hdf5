@@ -40,11 +40,17 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5VLiod.h"		/* IOD plugin    		  	*/
 
 
 /****************/
 /* Local Macros */
 /****************/
+
+#define H5D_XFER_INJECT_BAD_CHECKSUM_SIZE		sizeof(hbool_t)
+#define H5D_XFER_INJECT_BAD_CHECKSUM_DEF    		FALSE
+#define H5D_XFER_INJECT_BAD_CHECKSUM_ENC                H5P__encode_unsigned
+#define H5D_XFER_INJECT_BAD_CHECKSUM_DEC                H5P__decode_unsigned
 
 /* ======== Data transfer properties ======== */
 /* Definitions for maximum temp buffer size property */
@@ -236,6 +242,8 @@ const H5P_libclass_t H5P_CLS_DXFR[1] = {{
 /* Local Private Variables */
 /***************************/
 
+static const hbool_t H5D_def_inject_bad_checksum_g = H5D_XFER_INJECT_BAD_CHECKSUM_DEF;
+
 /* Property value defaults */
 static const size_t H5D_def_max_temp_buf_g = H5D_XFER_MAX_TEMP_BUF_DEF;        /* Default value for maximum temp buffer size */
 static const void *H5D_def_tconv_buf_g = H5D_XFER_TCONV_BUF_DEF;               /* Default value for type conversion buffer */
@@ -287,6 +295,12 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
+
+    if(H5P_register_real(pclass, H5D_XFER_INJECT_BAD_CHECKSUM_NAME, H5D_XFER_INJECT_BAD_CHECKSUM_SIZE, 
+                         &H5D_def_inject_bad_checksum_g,
+                         NULL, NULL, NULL, H5D_XFER_INJECT_BAD_CHECKSUM_ENC, H5D_XFER_INJECT_BAD_CHECKSUM_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the max. temp buffer size property */
     if(H5P_register_real(pclass, H5D_XFER_MAX_TEMP_BUF_NAME, H5D_XFER_MAX_TEMP_BUF_SIZE, &H5D_def_max_temp_buf_g, 
