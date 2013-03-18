@@ -26,6 +26,19 @@
 /* Private headers needed by this file */
 #include "H5private.h"          /* Generic Functions                    */
 
+#ifdef H5_HAVE_WIN32_API
+/* The following two defines must be before any windows headers are included */
+#define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
+#define NOGDI                  /* Exclude Graphic Display Interface macros */
+
+#ifdef H5_HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
+
+#include <windows.h>
+
+#endif /*H5_HAVE_WIN32_API*/
+
 #ifdef H5_HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif

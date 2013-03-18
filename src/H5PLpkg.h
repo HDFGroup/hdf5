@@ -48,7 +48,7 @@
 #define H5PL_ERROR DWORD dw; char *error
 
 /* Clear error - nothing to do */
-#define H5PLG_CLR_ERROR
+#define H5PL_CLR_ERROR
 
 /* Print error message */
 #define H5PL_CHECK_ERR(R) { \
