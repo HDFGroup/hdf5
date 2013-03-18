@@ -266,43 +266,6 @@ void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void**
 }
 
 //--------------------------------------------------------------------------
-// Function:	DSetMemXferPropList::setMulti
-///\brief	Sets the data transfer property list for the multi-file driver.
-///\param	memb_dxpl - OUT: Array of data access property lists
-///\exception	H5::PropListIException
-///\par Description
-///		This function can only be used after the member map has
-///		been set with FileAccPropList::setMulti (not done - BMR.)
-// Programmer:	Binh-Minh Ribler - April, 2004
-//--------------------------------------------------------------------------
-void DSetMemXferPropList::setMulti(const hid_t *memb_dxpl)
-{
-   herr_t ret_value = H5Pset_dxpl_multi(id, memb_dxpl);
-   if (ret_value < 0)
-   {
-      throw PropListIException("DSetMemXferPropList::setMulti",
-		"H5Pset_dxpl_multi failed");
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:	DSetMemXferPropList::getMulti
-///\brief	Returns multi-file data transfer property list information.
-///\param	memb_dxpl - OUT: Array of data access property lists
-///\exception	H5::PropListIException
-// Programmer:	Binh-Minh Ribler - April, 2004
-//--------------------------------------------------------------------------
-void DSetMemXferPropList::getMulti(hid_t *memb_dxpl)
-{
-   herr_t ret_value = H5Pget_dxpl_multi(id, memb_dxpl);
-   if (ret_value < 0)
-   {
-      throw PropListIException("DSetMemXferPropList::getMulti",
-		"H5Pget_dxpl_multi failed");
-   }
-}
-
-//--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::setSmallDataBlockSize
 ///\brief	Sets the size of a contiguous block reserved for small data.
 ///\param	size - IN: Maximum size, in bytes, of the small data block.
