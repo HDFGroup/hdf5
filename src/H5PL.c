@@ -237,8 +237,10 @@ H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 
     /* Iterates through all entries in the directory to find the right plugin library */
     while ((dp = HDreaddir(dirp)) != NULL) {
-	   /* The library we are looking for should be called libxxx.so... */ 
-	   if(!HDstrncmp(dp->d_name, "lib", (size_t)3) && HDstrstr(dp->d_name, ".so")) {
+	   /* The library we are looking for should be called libxxx.so... on Unix 
+            * or libxxx.xxx.dylib on Mac */ 
+	   if(!HDstrncmp(dp->d_name, "lib", (size_t)3) && 
+                   (HDstrstr(dp->d_name, ".so") || HDstrstr(dp->d_name, ".dylib"))) {
 	       pathname = (char *)H5MM_malloc(strlen(dir) + strlen(dp->d_name) + 2); 
 	       HDstrncpy(pathname, dir, strlen(dir)+1);
 	       HDstrcat(pathname, "/");
@@ -283,7 +285,6 @@ htri_t
 H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 {
     char           *pathname = NULL;
-    DIR            *dirp = NULL;
     struct dirent  *dp = NULL;
     struct stat    my_stat;
 
@@ -371,7 +372,7 @@ H5PL_open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * simply continue if we can't open it */
     if(NULL == (handle = H5PL_OPEN_DLIB(libname)))
-        /*fprintf(stderr, "not open dl library: %s", H5PL_CLR_ERR);*/
+        /*fprintf(stderr, "not open dl library: %s\n", H5PL_CLR_ERR);*/
         HGOTO_DONE(ret_value)
 
      H5PL_CLR_ERR; /*clear error*/
