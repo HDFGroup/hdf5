@@ -306,7 +306,7 @@ H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
         if(HDstrcmp(fdFile.cFileName, ".") != 0 && HDstrcmp(fdFile.cFileName, "..") != 0) {
 	    pathname = (char *)H5MM_malloc(strlen(dir) + strlen(fdFile.cFileName) + 2); 
 	    HDstrncpy(pathname, dir, strlen(dir)+1);
-	    HDstrcat(pathname, "\");
+	    HDstrcat(pathname, "\\");
 	    HDstrcat(pathname, fdFile.cFileName);
 
             /* Is the entity a File or Folder? */
