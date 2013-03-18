@@ -1668,14 +1668,13 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     bds_handle_t bds_handle = input->bds_handle;
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
-    bds_block_handle_t bds_block_handle = NULL;
+    bds_block_handle_t bds_block_handle;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
     void *buf;
     uint32_t cs;
     na_addr_t dest = fs_handler_get_addr(input->fs_handle);
-    hbool_t flag;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1694,16 +1693,16 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     /* read from array object */
     if(iod_array_read(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-
-    if(H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
     
     {
         int i;
+        hbool_t flag;
         int *buf_ptr = (int *)buf;
 
         for(i=0;i<60;++i)
             buf_ptr[i] = i;
+        if(H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
             printf("Injecting a bad data value to generate a bad checksum \n");
             buf_ptr[0] = 10;
@@ -1726,13 +1725,19 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
 done:
     output.ret = ret_value;
     output.cs = cs;
+
     printf("Done with dset read, sending response to client\n");
+
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+    if(S_SUCCESS != bds_handle_free(input->bds_handle))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
     if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     input = H5MM_xfree(input);
+    free(buf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_read_cb() */
 
@@ -1762,7 +1767,7 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
     uint32_t cs = input->checksum;
-    bds_block_handle_t bds_block_handle = NULL;
+    bds_block_handle_t bds_block_handle;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
@@ -1775,16 +1780,19 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     printf("Start dataset Write with checksum %u\n", cs);
 
+    /* Read bulk data here and wait for the data to be here  */
+    size = bds_handle_get_size(bds_handle);
+    if(NULL == (buf = malloc(size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
+
+    bds_block_handle_create(buf, size, BDS_READWRITE, &bds_block_handle);
+
     /* Write bulk data here and wait for the data to be there  */
-    if(S_SUCCESS != bds_read(bds_handle, source, &bds_block_handle))
+    if(S_SUCCESS != bds_read(bds_handle, source, bds_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
-
-    /* Call write */
-    buf = bds_block_handle_get_data(bds_block_handle);
-    size = bds_block_handle_get_size(bds_block_handle);
 
     { 
         int i;
@@ -1808,12 +1816,17 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
 done:
     printf("Done with dset write, sending response to client\n");
+
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+    if(S_SUCCESS != bds_handle_free(input->bds_handle))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
     //if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
     //HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     input = H5MM_xfree(input);
+    free(buf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_write_cb() */
 

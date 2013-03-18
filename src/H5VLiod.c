@@ -1494,6 +1494,12 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(fs_forward(PEER, H5VL_DSET_WRITE_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
 
+#if 0
+    fs_wait(*fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
+    HDassert(SUCCEED == *status);
+    free(fs_req);
+#endif
+#if 1
     /* setup info struct for I/O request */
     if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
@@ -1510,6 +1516,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
