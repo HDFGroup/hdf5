@@ -76,7 +76,7 @@
 #define H5PL_ERROR char *error
 
 /* Clear error */
-#define H5PL_CLR_ERR dlerror()
+#define H5PL_CLR_ERROR dlerror()
 
 /* Print error message */
 #define H5PL_CHECK_ERR(R) { \
