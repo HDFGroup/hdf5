@@ -235,7 +235,7 @@ H5VL_iod_init(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VLeff_init
+ * Function:	EFF_init
  *
  * Purpose:	initialize to the EFF stack
  *
@@ -247,13 +247,13 @@ H5VL_iod_init(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLeff_init(MPI_Comm comm, MPI_Info info)
+EFF_init(MPI_Comm comm, MPI_Info info)
 {
     char mpi_port_name[MPI_MAX_PORT_NAME];
     FILE *config;
-    herr_t          ret_value;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
+    //FUNC_ENTER_API(FAIL)
 
     if ((config = fopen("port.cfg", "r")) != NULL) {
         fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
@@ -262,15 +262,16 @@ H5VLeff_init(MPI_Comm comm, MPI_Info info)
     }
 
     if(NA_UNDEFINED == (PEER = H5VL_iod_client_eff_init(mpi_port_name, comm, info)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize eff stack");
+        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize eff stack");
 
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLeff_init() */
+    //done:
+    //FUNC_LEAVE_API(ret_value)
+    return ret_value;
+} /* end EFF_init() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VLeff_finalize
+ * Function:	EFF_finalize
  *
  * Purpose:	shutdown the EFF stack
  *
@@ -282,17 +283,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLeff_finalize(void)
+EFF_finalize(void)
 {
-    herr_t          ret_value;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
+    //FUNC_ENTER_API(FAIL)
 
     if(H5VL_iod_client_eff_finalize(PEER) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown eff stack");
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5VLeff_finalize() */
+        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown eff stack");
+    //done:
+    //FUNC_LEAVE_API(ret_value)
+    return ret_value;
+} /* end EFF_finalize() */
 
 
 /*-------------------------------------------------------------------------
@@ -1257,14 +1259,15 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_io_input_t input;
-    fs_request_t *fs_req;
-    bds_handle_t bds_handle;
-    H5VL_iod_request_t *request;
-    int *status;
+    fs_request_t *fs_req = NULL;
+    bds_handle_t *bds_handle;
+    H5VL_iod_request_t *request = NULL;
+    H5VL_iod_read_status_t *status = NULL;
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
     char fake_char;
     size_t size;
+    H5VL_iod_io_info_t *info;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1306,36 +1309,45 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
 
+    if(NULL == (bds_handle = (bds_handle_t *)H5MM_malloc(sizeof(bds_handle_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
+
     /* Register memory */
-    if(S_SUCCESS != bds_handle_create(buf, size, BDS_READWRITE, &bds_handle))
+    if(S_SUCCESS != bds_handle_create(buf, size, BDS_READWRITE, bds_handle))
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
 
     /* Fill input structure */
     input.iod_oh = dset->remote_dset.iod_oh;
     input.scratch_oh = dset->remote_dset.scratch_oh;
-    input.bds_handle = bds_handle;
+    input.bds_handle = *bds_handle;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
 
-    status = (int *)malloc(sizeof(int));
+    status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
+
+    if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
     /* forward the call to the IONs */
-    if(fs_forward(PEER, H5VL_DSET_READ_ID, &input, &status, fs_req) < 0)
+    if(fs_forward(PEER, H5VL_DSET_READ_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
+
+    /* setup info struct for I/O request */
+    if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+    info->status = status;
+    info->bds_handle = bds_handle;
 
     /* setup a request to track completion of the operation */
     if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
     request->type = FS_DSET_READ;
-    request->data = status;
+    request->data = info;
     request->req = fs_req;
+    request->obj_name = HDstrdup(dset->common.obj_name);
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
-
-    /* Free memory handle */
-    if(S_SUCCESS != bds_handle_free(bds_handle))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1361,14 +1373,16 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_io_input_t input;
-    fs_request_t *fs_req;
-    bds_handle_t bds_handle;
-    H5VL_iod_request_t *request;
+    fs_request_t *fs_req = NULL;
+    bds_handle_t *bds_handle;
+    H5VL_iod_request_t *request = NULL;
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
     char fake_char;
-    int *status;
+    int *status = NULL;
     size_t size;
+    H5VL_iod_io_info_t *info;
+    uint32_t cs;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1409,37 +1423,49 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
+    cs = H5_checksum_fletcher32(buf, size);
+    printf("Checksum Generated for data at client: %u\n", cs);
+
+    if(NULL == (bds_handle = (bds_handle_t *)H5MM_malloc(sizeof(bds_handle_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a bulk data transfer handle");
 
     /* Register memory */
-    if(S_SUCCESS != bds_handle_create(buf, size, BDS_READ_ONLY, &bds_handle))
+    if(S_SUCCESS != bds_handle_create((void *)buf, size, BDS_READ_ONLY, bds_handle))
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
 
     /* Fill input structure */
     input.iod_oh = dset->remote_dset.iod_oh;
     input.scratch_oh = dset->remote_dset.scratch_oh;
-    input.bds_handle = bds_handle;
+    input.bds_handle = *bds_handle;
+    input.checksum = cs;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
 
     status = (int *)malloc(sizeof(int));
 
+    if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a FS request");
+
     /* forward the call to the IONs */
-    if(fs_forward(PEER, H5VL_DSET_WRITE_ID, &input, &status, fs_req) < 0)
+    if(fs_forward(PEER, H5VL_DSET_WRITE_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
+
+    /* setup info struct for I/O request */
+    if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+    info->status = status;
+    info->bds_handle = bds_handle;
 
     /* setup a request to track completion of the operation */
     if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
     request->type = FS_DSET_WRITE;
-    request->data = status;
+    request->data = info;
     request->req = fs_req;
+    request->obj_name = HDstrdup(dset->common.obj_name);
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
-
-    /* Free memory handle */
-    if(S_SUCCESS != bds_handle_free(bds_handle))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1470,12 +1496,8 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL != dset->common.request) {
-        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
-        dset->common.request->req = H5MM_xfree(dset->common.request->req);
-        dset->common.request = H5MM_xfree(dset->common.request);
-    }
+    if(H5VL_iod_request_wait_some(dset->common.file, dset->common.obj_name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS requests");
 
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");

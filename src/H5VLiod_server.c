@@ -95,6 +95,8 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     if(S_SUCCESS != fs_handler_init(network_class))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
+    if(S_SUCCESS != bds_init(network_class))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
 
     /* Register function and encoding/decoding functions */
     fs_handler_register("eff_init", 
@@ -140,11 +142,11 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     fs_handler_register("dset_read",
                         H5VL_iod_server_dset_read,
                         H5VL_iod_server_decode_dset_io, 
-                        H5VL_iod_server_encode_dset_io);
+                        H5VL_iod_server_encode_dset_read);
     fs_handler_register("dset_write",
                         H5VL_iod_server_dset_write,
                         H5VL_iod_server_decode_dset_io, 
-                        H5VL_iod_server_encode_dset_io);
+                        H5VL_iod_server_encode_dset_write);
     fs_handler_register("dset_close", 
                         H5VL_iod_server_dset_close,
                         H5VL_iod_server_decode_dset_close, 
@@ -160,9 +162,11 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
             break;
     }
 
-    if (S_SUCCESS != fs_handler_finalize()) {
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
-    }
+    if(S_SUCCESS != bds_finalize())
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
+    if(S_SUCCESS != fs_handler_finalize())
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -225,12 +229,11 @@ H5VL_iod_server_eff_finalize(fs_handle_t handle)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(iod_finalize(NULL, NULL) < 0 )
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, S_FAIL, "can't finalize IOD");
-
     terminate_requests ++;
 
     if(terminate_requests == num_peers) {
+        if(iod_finalize(NULL, NULL) < 0 )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, S_FAIL, "can't finalize IOD");
         if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
             HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, S_FAIL, "can't shutdown AXE engine");
         shutdown = TRUE;
@@ -1651,6 +1654,7 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
                              void *op_data)
 {
     H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)op_data;
+    H5VL_iod_read_status_t output;
     iod_handle_t iod_oh = input->iod_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
     bds_handle_t bds_handle = input->bds_handle;
@@ -1661,15 +1665,14 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     iod_array_iodesc_t file_desc;
     size_t size;
     void *buf;
-    ssize_t ret;
+    uint32_t cs;
     na_addr_t dest = fs_handler_get_addr(input->fs_handle);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Read\n");
-
     size = bds_handle_get_size(bds_handle);
+    printf("Start dataset Read of size %d\n", size);
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
@@ -1683,6 +1686,18 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     if(iod_array_read(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
+    {
+        int i;
+        int *buf_ptr = (int *)buf;
+
+        for(i=0;i<60;++i)
+            buf_ptr[i] = i;
+        buf_ptr[0] = 10;
+        cs = H5_checksum_fletcher32(buf, size);
+        printf("Checksum Generated for data at client: %u\n", cs);
+    }
+
+
     /* Create a new block handle to write the data */
     bds_block_handle_create(buf, size, BDS_READ_ONLY, &bds_block_handle);
 
@@ -1694,9 +1709,13 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:
+    output.ret = ret_value;
+    output.cs = cs;
     printf("Done with dset read, sending response to client\n");
-    fs_handler_complete(input->fs_handle, &ret_value);
-    bds_block_handle_free(bds_block_handle);
+    if(S_SUCCESS != fs_handler_complete(input->fs_handle, &output))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+    if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_read_cb() */
@@ -1726,21 +1745,22 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     bds_handle_t bds_handle = input->bds_handle;
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
+    uint32_t cs = input->checksum;
     bds_block_handle_t bds_block_handle = NULL;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
     void *buf;
     ssize_t ret;
-    na_addr_t dest = fs_handler_get_addr(input->fs_handle);
+    na_addr_t source = fs_handler_get_addr(input->fs_handle);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Write\n");
+    printf("Start dataset Write with checksum %u\n", cs);
 
     /* Write bulk data here and wait for the data to be there  */
-    if(S_SUCCESS != bds_read(bds_handle, dest, &bds_block_handle))
+    if(S_SUCCESS != bds_read(bds_handle, source, &bds_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
@@ -1750,6 +1770,16 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     buf = bds_block_handle_get_data(bds_block_handle);
     size = bds_block_handle_get_size(bds_block_handle);
 
+    { 
+        int i;
+        int *buf_ptr = (int *)buf;
+
+        printf("Received a buffer of size %d with values: ", size);
+        for(i=0;i<60;++i)
+            printf("%d ", buf_ptr[i]);
+        printf("\n");
+    }
+
     mem_desc.nfrag = 1;
     mem_desc.frag[0].addr = buf;
     mem_desc.frag[0].len = (iod_size_t)size;
@@ -1757,13 +1787,15 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     /* MSC TODO - populate file location hyperslab */
 
     /* write from array object */
-    if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, &cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
 done:
     printf("Done with dset write, sending response to client\n");
-    fs_handler_complete(input->fs_handle, &ret_value);
-    bds_block_handle_free(bds_block_handle);
+    if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+    //if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
+    //HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_write_cb() */

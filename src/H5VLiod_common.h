@@ -134,9 +134,15 @@ typedef struct H5VL_iod_dset_io_input_t {
     iod_handle_t scratch_oh;
     hid_t space_id;
     hid_t dxpl_id;
+    uint32_t checksum;
     bds_handle_t bds_handle;
     fs_handle_t fs_handle;
 } H5VL_iod_dset_io_input_t;
+
+typedef struct H5VL_iod_read_status_t {
+    int ret;
+    uint32_t cs;
+} H5VL_iod_read_status_t;
 
 #if 0
 /* Define fs_proc_iod_handle_t */

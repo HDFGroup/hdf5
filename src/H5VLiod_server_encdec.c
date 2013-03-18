@@ -913,6 +913,7 @@ H5VL_iod_server_decode_dset_io(fs_proc_t proc, void *_input)
     /* decode the location with the container handle & iod object IDs and opened handles */
     UINT64DECODE_VARLEN(p, input->iod_oh.cookie);
     UINT64DECODE_VARLEN(p, input->scratch_oh.cookie);
+    UINT32DECODE(p, input->checksum);
 
     /* decode the plist size */
     UINT64DECODE_VARLEN(p, dxpl_size);
@@ -948,12 +949,12 @@ done:
 } /* end H5VL_iod_server_decode_dset_io() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_encode_dset_io_params
+ * Function:	H5VL_iod_server_encode_dset_read
  *------------------------------------------------------------------------- */
 herr_t 
-H5VL_iod_server_encode_dset_io(fs_proc_t proc, void *_output)
+H5VL_iod_server_encode_dset_read(fs_proc_t proc, void *_output)
 {
-    int output = *((int *)_output);
+    H5VL_iod_read_status_t *output = (H5VL_iod_read_status_t *)_output;
     void *buf = NULL;
     uint8_t *p;
     size_t size, nalloc;
@@ -961,7 +962,7 @@ H5VL_iod_server_encode_dset_io(fs_proc_t proc, void *_output)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    size = sizeof(int32_t);
+    size = sizeof(uint32_t) + sizeof(int32_t);
 
     nalloc = fs_proc_get_size(proc);
 
@@ -972,7 +973,38 @@ H5VL_iod_server_encode_dset_io(fs_proc_t proc, void *_output)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
 
     p = (uint8_t *)buf;
+    INT32ENCODE(p, output->ret);
+    UINT32ENCODE(p, output->cs);
 
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_server_encode_dset_read() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_encode_dset_write
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_encode_dset_write(fs_proc_t proc, void *_output)
+{
+    int output = *((int *)_output);
+    void *buf = NULL;
+    uint8_t *p;
+    size_t size, nalloc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = sizeof(int);
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
     INT32ENCODE(p, output);
 
 done:

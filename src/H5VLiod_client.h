@@ -45,6 +45,7 @@ typedef struct H5VL_iod_request_t {
     H5RQ_type_t type;
     void *data;
     void *req;
+    char *obj_name;
     struct H5VL_iod_request_t *prev;
     struct H5VL_iod_request_t *next;
 } H5VL_iod_request_t;
@@ -83,10 +84,17 @@ typedef struct H5VL_iod_dset_t {
     hid_t dapl_id;
 } H5VL_iod_dset_t;
 
+/* information about a dataset read/write request */
+typedef struct H5VL_iod_io_info_t {
+    void *status;
+    bds_handle_t *bds_handle;
+} H5VL_iod_io_info_t;
+
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
+H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const char *name);
 H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);
@@ -113,7 +121,8 @@ H5_DLL herr_t H5VL_iod_client_decode_dset_create(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_dset_io(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_decode_dset_read(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_decode_dset_write(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output);
 

@@ -1017,7 +1017,7 @@ H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
     if(H5S_encode(dspace, NULL, &space_size)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
-    size = BDS_MAX_HANDLE_SIZE + 
+    size = BDS_MAX_HANDLE_SIZE + sizeof(uint32_t) + 
         1 + H5V_limit_enc_size((uint64_t)input->iod_oh.cookie) +
         1 + H5V_limit_enc_size((uint64_t)input->scratch_oh.cookie) + 
         1 + H5V_limit_enc_size((uint64_t)dxpl_size) + dxpl_size + 
@@ -1036,6 +1036,7 @@ H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
     /* encode the location with the container handle & iod object IDs and opened handles */
     UINT64ENCODE_VARLEN(p, input->iod_oh.cookie);
     UINT64ENCODE_VARLEN(p, input->scratch_oh.cookie);
+    UINT32ENCODE(p, input->checksum);
 
     /* encode the plist size */
     UINT64ENCODE_VARLEN(p, dxpl_size);
@@ -1063,15 +1064,38 @@ done:
 } /* end H5VL_client_encode_dset_io() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_client_decode_dset_close
+ * Function:	H5VL_client_decode_dset_read
  *------------------------------------------------------------------------- */
 herr_t 
-H5VL_iod_client_decode_dset_io(fs_proc_t proc, void *_output)
+H5VL_iod_client_decode_dset_read(fs_proc_t proc, void *_output)
+{
+    H5VL_iod_read_status_t *output = (H5VL_iod_read_status_t *)_output;
+    void *buf=NULL;
+    uint8_t *p;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
+
+    p = (uint8_t *)buf;
+    INT32DECODE(p, output->ret);
+    UINT32DECODE(p, output->cs);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_decode_dset_read() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_client_decode_dset_write
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_decode_dset_write(fs_proc_t proc, void *_output)
 {
     int *output = (int *)_output;
     void *buf=NULL;
     uint8_t *p;
-
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1084,7 +1108,7 @@ H5VL_iod_client_decode_dset_io(fs_proc_t proc, void *_output)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_client_decode_dset_io() */
+} /* end H5VL_client_decode_dset_write() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_client_encode_dset_close
