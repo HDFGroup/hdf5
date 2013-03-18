@@ -371,10 +371,10 @@ H5PL_open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * simply continue if we can't open it */
     if(NULL == (handle = H5PL_OPEN_DLIB(libname)))
-        /*fprintf(stderr, "not open dl library: %s\n", H5PL_CLR_ERR);*/
+        /*fprintf(stderr, "not open dl library: %s\n", H5PL_CLR_ERROR);*/
         HGOTO_DONE(ret_value)
 
-        H5PL_CLR_ERROR; /*clear error*/
+     H5PL_CLR_ERROR; /*clear error*/
 
     /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
      * The plugin library is suppose to define this function. */
@@ -447,7 +447,7 @@ fprintf(stderr, "%s: H5PL_table_used_g=%d, id=%d\n", FUNC, H5PL_table_used_g, (H
         for(i=0; i<H5PL_table_used_g; i++) {
             if((plugin_type == (H5PL_table_g[i]).pl_type) && (type_id == (H5PL_table_g[i]).pl_id)) {
   	        if(NULL == (H5PL_get_plugin_info = H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
-		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function: H5PL_GET_LIB_FUNC")
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PL_get_plugin_info")
 
 	        if(NULL == (plugin_info = (*H5PL_get_plugin_info)()))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")

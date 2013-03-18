@@ -36,7 +36,7 @@
 #endif
 
 #include <windows.h>
-
+#include <direct.h>         /* For _getcwd() */
 #endif /*H5_HAVE_WIN32_API*/
 
 #ifdef H5_HAVE_DLFCN_H
