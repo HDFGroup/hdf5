@@ -27,11 +27,12 @@
 #include "H5private.h"          /* Generic Functions                    */
 
 #ifdef H5_HAVE_DLFCN_H
-  #include <dlfcn.h>
+#include <dlfcn.h>
 #endif
 
+#ifndef H5_HAVE_WIN32_API
 #include <dirent.h>
-/*#include <sys/dirent.h>*/
+#endif
 
 /**************************/
 /* Library Private Macros */
