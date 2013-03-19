@@ -38,10 +38,10 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5PLprivate.h"	/* Dynamic plugin			*/
-#include "H5Zprivate.h"	        /* Filter pipeline			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
+#include "H5PLprivate.h"	/* Dynamic plugin			*/
+#include "H5Zprivate.h"	        /* Filter pipeline			*/
 
 
 /****************/
@@ -92,6 +92,9 @@ static herr_t H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size
 static herr_t H5P__ocrt_pipeline_dec(const void **_pp, void *value);
 static int H5P__ocrt_pipeline_cmp(const void *value1, const void *value2, size_t size);
 
+/* Local routines */
+static herr_t H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, 
+    unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/]);
 
 /*********************/
 /* Package Variables */
@@ -748,9 +751,9 @@ herr_t
 H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
 	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
-    H5P_genplist_t  *plist;               /* Property list */
-    H5O_pline_t     pline;                /* Filter pipeline */
-    herr_t          ret_value=SUCCEED;    /* return value */
+    H5P_genplist_t  *plist;             /* Property list */
+    H5O_pline_t     pline;              /* Filter pipeline */
+    herr_t          ret_value=SUCCEED;  /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iZfIuz*[a3]Iu", plist_id, filter, flags, cd_nelmts, cd_values);
@@ -768,7 +771,7 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Call the private function */
-    if(H5P_set_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
+    if(H5P__set_filter(plist, filter, flags, cd_nelmts, cd_values) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "failed to call private function")
 
 done:
@@ -777,7 +780,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_set_filter
+ * Function:	H5P__set_filter
  *
  * Purpose:	Adds the specified FILTER and corresponding properties to the
  *		end of the data or link output filter pipeline
@@ -798,53 +801,40 @@ done:
  *		failed; the filter will not participate in the pipeline
  *		during an H5Dread() of the chunk.  If this bit is clear and
  *		the filter fails then the entire I/O operation fails.
- *      If this bit is set but encoding is disabled for a filter,
- *      attempting to write will generate an error.
+ *		If this bit is set but encoding is disabled for a filter,
+ *		attempting to write will generate an error.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Wednesday, April 15, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
- *              Neil Fortner
- *              Wednesday, May 20, 2009
- *              Overloaded to accept gcpl's as well as dcpl's and moved to
- *              H5Pocpl.c
- *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5P_set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
+static herr_t
+H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
 	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
-    H5O_pline_t     pline;              /* Filter pipeline */
-    H5Z_class2_t    *filter_info = NULL;
-    htri_t          filter_avail = FALSE; /* Filter availability */
-    herr_t          ret_value=SUCCEED;  /* return value */
+    H5O_pline_t     pline;                  /* Filter pipeline */
+    htri_t          filter_avail;           /* Filter availability */
+    herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
+    /* Check if filter is already available */
     if((filter_avail = H5Z_filter_avail(filter)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't check filter availability")
 
+    /* If filter is not available, try to dynamically load it */
     if(!filter_avail) {
-        if((filter_info = (H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)filter)) == NULL)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "failed to load dynamically loaded plugin")
-/*if(filter_info)
-fprintf(stderr, "%s: filter_info=%p, filter_info->id=%d\n", FUNC, filter_info, filter_info->id);*/
-        if (H5Z_register (filter_info)<0)
-	    HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
-       
-    }
+        H5Z_class2_t    *filter_info;
 
-#ifndef TMP
+        if(NULL == (filter_info = (H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)filter)))
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "failed to load dynamically loaded plugin")
+        if(H5Z_register(filter_info) < 0)
+	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
+    } /* end if */
+
     /* Get the pipeline property to append to */
     if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
@@ -856,11 +846,10 @@ fprintf(stderr, "%s: filter_info=%p, filter_info->id=%d\n", FUNC, filter_info, f
     /* Put the I/O pipeline information back into the property list */
     if(H5P_set(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set pipeline")
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_set_filter() */
+} /* end H5P__set_filter() */
 
 
 /*-------------------------------------------------------------------------

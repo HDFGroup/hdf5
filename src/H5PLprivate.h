@@ -26,26 +26,6 @@
 /* Private headers needed by this file */
 #include "H5private.h"          /* Generic Functions                    */
 
-#ifdef H5_HAVE_WIN32_API
-/* The following two defines must be before any windows headers are included */
-#define WIN32_LEAN_AND_MEAN    /* Exclude rarely-used stuff from Windows headers */
-#define NOGDI                  /* Exclude Graphic Display Interface macros */
-
-#ifdef H5_HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-
-#include <windows.h>
-#include <direct.h>         /* For _getcwd() */
-#endif /*H5_HAVE_WIN32_API*/
-
-#ifdef H5_HAVE_DLFCN_H
-#include <dlfcn.h>
-#endif
-
-#ifndef H5_HAVE_WIN32_API
-#include <dirent.h>
-#endif
 
 /**************************/
 /* Library Private Macros */
@@ -67,6 +47,6 @@
 /***************************************/
 
 /* Internal API routines */
-H5_DLL void* H5PL_load(H5PL_type_t plugin_type, int type_id);
+H5_DLL void *H5PL_load(H5PL_type_t plugin_type, int type_id);
 
-#endif
+#endif /* _H5PLprivate_H */

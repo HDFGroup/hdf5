@@ -304,8 +304,6 @@ H5Z_register (const H5Z_class2_t *cls)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-/*if(cls)
-fprintf(stderr, "cls=%p, cls->id=%d\n", cls, cls->id);*/
 
     HDassert(cls);
     HDassert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
@@ -463,7 +461,7 @@ H5Zfilter_avail(H5Z_filter_t id)
         HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
  
     if((ret_value = H5Z_filter_avail(id)) < 0)
-	HGOTO_ERROR (H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
+	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "unable to check the availability of the filter")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -480,24 +478,20 @@ done:
  * Programmer:	Raymond Lu
  *              13 February 2013
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5Z_filter_avail(H5Z_filter_t id)
 {
     size_t i;                   /* Local index variable */
-    htri_t ret_value=FALSE;     /* Return value */
+    htri_t ret_value = FALSE;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Is the filter already registered? */
-    for(i=0; i<H5Z_table_used_g; i++)
-	if(H5Z_table_g[i].id==id) {
-            ret_value=TRUE;
-            break;
-        } /* end if */
+    for(i = 0; i < H5Z_table_used_g; i++)
+	if(H5Z_table_g[i].id == id)
+	    HGOTO_DONE(TRUE)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1122,33 +1116,32 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 	    }
 
             /* If the filter isn't registered, try to load it dynamically and register it.  Otherwise, return failure */
-	    if ((fclass_idx=H5Z_find_idx(pline->filter[idx].id))<0) {
-                H5Z_class2_t    *filter_info = NULL;
+	    if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
+                H5Z_class2_t    *filter_info;
 
-                if((filter_info = (H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id))) != NULL) {
-                    if (H5Z_register(filter_info)<0)
-	                HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
-                } else {
+                if(NULL != (filter_info = (H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)(pline->filter[idx].id)))) {
+                    if(H5Z_register(filter_info) < 0)
+	                HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
+                } /* end if */
+                else {
                     /* Print out the filter name to give more info.  But the name is optional for 
                      * the filter */
                     if(pline->filter[idx].name)
-		        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered", 
-                                pline->filter[idx].name)
+		        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered", pline->filter[idx].name)
                     else
 		        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter (name unavailable) is not registered")
-                }
-	    }
+                } /* end else */
 
-            /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */ 
-	    if ((fclass_idx=H5Z_find_idx(pline->filter[idx].id))<0) {
-                /* Print out the filter name to give more info.  But the name is optional for 
-                 * the filter */
-                if(pline->filter[idx].name)
-		    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered", 
-                                pline->filter[idx].name)
-                else
-		    HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter (name unavailable) is not registered")
-	    }
+                /* Search in the table of registered filters again to find the dynamic filter just loaded and registered */ 
+                if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
+                    /* Print out the filter name to give more info.  But the name is optional for 
+                     * the filter */
+                    if(pline->filter[idx].name)
+                        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter '%s' is not registered", pline->filter[idx].name)
+                    else
+                        HGOTO_ERROR(H5E_PLINE, H5E_READERROR, FAIL, "required filter (name unavailable) is not registered")
+                } /* end if */
+	    } /* end if */
 
             fclass=&H5Z_table_g[fclass_idx];
 #ifdef H5Z_DEBUG

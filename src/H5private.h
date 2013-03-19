@@ -149,6 +149,17 @@
 #   include <io.h>
 #endif
 
+/*
+ * Dynamic library handling.  These are needed for dynamically loading I/O
+ * filters and VFDs.
+ */
+#ifdef H5_HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+#ifdef H5_HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */

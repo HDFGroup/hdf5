@@ -791,14 +791,15 @@ main(void)
 
     if(nerrors)
         TEST_ERROR 
-    printf("All dataset tests passed.\n");
+    printf("All plugin tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d DATASET TEST%s FAILED! *****\n",
+    printf("***** %d PLUGIN TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
+

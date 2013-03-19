@@ -13,32 +13,127 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5PL_PACKAGE		/*suppress error about including H5PLpkg	  */
+/****************/
+/* Module Setup */
+/****************/
 
 /* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5PL_init_interface
+#define H5_INTERFACE_INIT_FUNC	H5PL__init_interface
 
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Pprivate.h"         /* Property lists                       */
-#include "H5Sprivate.h"		/* Dataspace functions			*/
+#include "H5PLprivate.h"	/* Plugin       			*/
 #include "H5Zprivate.h"		/* Filter pipeline			*/
-#include "H5PLpkg.h"		/* Plugin       			*/
+
+
+/****************/
+/* Local Macros */
+/****************/
 
 #define H5PL_DEFAULT_PATH       "/usr:/usr/lib:/usr/local"
-#define H5PL_PATH_SEPERATOR     ":"
+#define H5PL_PATH_SEPARATOR     ":"
+#define H5PL_MAX_PATH_NUM       16
+
+/****************************/
+/* Macros for supporting 
+ * both Windows and Unix */
+/****************************/
+
+/* Handle for dynamic library */
+#ifdef H5_HAVE_WIN32_API
+/* Handle for dynamic library */
+#define H5PL_HANDLE HINSTANCE
+
+/* Get a handle to a plugin library.  Windows: TEXT macro handles Unicode strings */
+#define H5PL_OPEN_DLIB(S) LoadLibraryEx(TEXT(S), NULL, LOAD_WITH_ALTERED_SEARCH_PATH)
+
+/* Get the address of a symbol in dynamic library */
+#define H5PL_GET_LIB_FUNC(H,N) GetProcAddress(H,N)
+
+/* Close dynamic library */
+#define H5PL_CLOSE_LIB(H) FreeLibrary(H)
+
+/* Clear error - nothing to do */
+#define H5PL_CLR_ERROR
+
+#else /* H5_HAVE_WIN32_API */
+/* Handle for dynamic library */
+#define H5PL_HANDLE void *
+
+/* Get a handle to a plugin library.  Windows: TEXT macro handles Unicode strings */
+#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_NOW|RTLD_LAZY)
+
+/* Get the address of a symbol in dynamic library */
+#define H5PL_GET_LIB_FUNC(H,N) dlsym(H,N)
+
+/* Close dynamic library */
+#define H5PL_CLOSE_LIB(H) dlclose(H)
+
+/* Clear error */
+#define H5PL_CLR_ERROR dlerror()
+
+#endif /* H5_HAVE_WIN32_API */
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/* Type for the list of info for opened plugin libraries */
+typedef struct H5PL_table_t {
+    H5PL_type_t pl_type;			/* plugin type	     */
+    int         pl_id;                          /* ID for the plugin */
+    H5PL_HANDLE handle;			/* plugin handle     */
+} H5PL_table_t;
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+static herr_t H5PL__init_path_table(void);
+static htri_t H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info);
+static htri_t H5PL__open(H5PL_type_t pl_type, char *libname, int plugin_id, void **pl_info);
+static htri_t H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info);
+static herr_t H5PL__close(H5PL_HANDLE handle);
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
+/* Table for opened plugin libraries */
+static size_t		H5PL_table_alloc_g = 0;
+static size_t		H5PL_table_used_g = 0;
+static H5PL_table_t     *H5PL_table_g = NULL;
+
+/* Table of location paths for plugin libraries */
+static char             *H5PL_path_table_g[H5PL_MAX_PATH_NUM];
+static size_t           H5PL_num_paths_g = 0;
+static htri_t           H5PL_path_found_g = FALSE;
+
 
 
 /*--------------------------------------------------------------------------
 NAME
-   H5PL_init_interface -- Initialize interface-specific information
+   H5PL__init_interface -- Initialize interface-specific information
 USAGE
-    herr_t H5PL_init_interface()
-
+    herr_t H5PL__init_interface()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -46,12 +141,12 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5PL_init_interface(void)
+H5PL__init_interface(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5PL_init_interface() */
+} /* end H5PL__init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -69,36 +164,32 @@ H5PL_init_interface(void)
  * Programmer:	Raymond Lu
  *              20 February 2013
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
 H5PL_term_interface(void)
 {
-    void    *handle = NULL;
-    size_t  i = 0;
+    int  i = 0;
     
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_interface_initialize_g) {
+        size_t u;       /* Local index variable */
+
 	/* Close opened dynamic libraries */
-        for(i=0; i<H5PL_table_used_g; i++) { 
-            handle = (H5PL_table_g[i]).handle;
-            H5PL_close(handle);
-        }
+        for(u = 0; u < H5PL_table_used_g; u++)
+            H5PL__close((H5PL_table_g[u]).handle);
 
 	/* Free the table of dynamic libraries */
 	H5PL_table_g = (H5PL_table_t *)H5MM_xfree(H5PL_table_g);
 	H5PL_table_used_g = H5PL_table_alloc_g = 0;
 
         /* Free the table of search paths */
-        for(i = 0; i < num_paths; i++) {
-            if(path_table[i])
-                path_table[i] = (char *)H5MM_xfree(path_table[i]);
-        }
-        num_paths = 0;
-        path_found = FALSE;
+        for(u = 0; u < H5PL_num_paths_g; u++)
+            if(H5PL_path_table_g[u])
+                H5PL_path_table_g[u] = (char *)H5MM_xfree(H5PL_path_table_g[u]);
+        H5PL_num_paths_g = 0;
+        H5PL_path_found_g = FALSE;
 
 	H5_interface_initialize_g = 0;
         i = 1;
@@ -106,7 +197,6 @@ H5PL_term_interface(void)
 
     FUNC_LEAVE_NOAPI(i)
 } /* end H5PL_term_interface() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -116,91 +206,112 @@ H5PL_term_interface(void)
  *              and/or loads a dynamic plugin library first among the already
  *              opened libraries then in the designated location paths.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Non-NULL on success/NULL on failure
  *
  * Programmer:	Raymond Lu
  *              13 February 2013
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 void *
 H5PL_load(H5PL_type_t type, int id)
 {
-    char           *dl_path = NULL;
-    char           *origin_dl_path = NULL;
-    size_t         len = 0;
-    char           *dir = NULL;
-    size_t	   i;
-    htri_t         found_in_table = FALSE;
-    htri_t         found_in_path = FALSE;
+    htri_t         found;               /* Whether the plugin was found */
     H5Z_class2_t   *plugin_info = NULL;
     void           *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
+    /* Initialize the location paths for dynamic libraries, if they aren't
+     * already set up.
+     */
+    if(FALSE == H5PL_path_found_g)
+        if(H5PL__init_path_table() < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINIT, NULL, "can't initialize search path table")
+
     /* Search in the table of already loaded plugin libraries */
-    if((found_in_table = H5PL_search_table(type, id, (void **)&plugin_info)) < 0)
+    if((found = H5PL__search_table(type, id, (void **)&plugin_info)) < 0)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in table failed")
 
-    /* Finish the function if found */
-    if(found_in_table && plugin_info) {
-        ret_value = (void *)plugin_info;
-        HGOTO_DONE(ret_value)
-    }
+    /* If not found, iterate through the path table to find the right dynamic library */
+    if(!found) {
+        size_t	   i;                   /* Local index variable */
 
-    /* Find the location paths for dynamic libraries */
-    if(FALSE == path_found) {
-        /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
-         * or from the default paths if it isn't set */
-        origin_dl_path = HDgetenv("HDF5_PLUGIN_PATH");
-        if(origin_dl_path == NULL) {
-            len = HDstrlen(H5PL_DEFAULT_PATH) + 1;
-            dl_path = (char *)H5MM_malloc(len*sizeof(char));
-            HDstrncpy(dl_path, H5PL_DEFAULT_PATH, len-1);
-            dl_path[len-1] = '\0';
-        } else {
-            len = HDstrlen(origin_dl_path) + 1;
-            dl_path = (char *)H5MM_malloc(len*sizeof(char));
-            HDstrncpy(dl_path, origin_dl_path, len);
-        }
+        for(i = 0; i < H5PL_num_paths_g; i++) {
+            if((found = H5PL__find(type, id, H5PL_path_table_g[i], (void **)&plugin_info)) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in paths failed")
+     
+            /* Break out if found */
+            if(found) {
+                HDassert(plugin_info);
+                break;
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
-        /* Put paths in the path table.  They are seperated by ":" */
-        dir = HDstrtok(dl_path, H5PL_PATH_SEPERATOR);
-        while(dir) {
-            path_table[num_paths] = (char *)HDmalloc(HDstrlen(dir) + 1);
-            path_table[num_paths][0] = '\0';
-            HDstrcat(path_table[num_paths], dir);
-            num_paths++;
-            dir = HDstrtok(NULL, H5PL_PATH_SEPERATOR);
-        }
-   
-        path_found = TRUE;
-    }
+    /* Check if we found the plugin */
+    if(found)
+        ret_value = plugin_info;
 
-    /* Iterate through the path table to find the right dynamic libraries */
-    for(i=0; i<num_paths; i++) {
-        if((found_in_path = H5PL_find(type, id, path_table[i], (void **)&plugin_info)) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in paths failed")
- 
-        /* Finish the function if found */
-        if(found_in_path && plugin_info) {
-            ret_value = (void *)plugin_info;
-            HGOTO_DONE(ret_value)
-        }
-    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL_load() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5PL__init_path_table
+ *
+ * Purpose:	Initialize the path table.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              18 March 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5PL__init_path_table(void)
+{
+    char        *dl_path = NULL;
+    char        *origin_dl_path;
+    char        *dir;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
+     * or from the default paths if it isn't set.
+     */
+    origin_dl_path = HDgetenv("HDF5_PLUGIN_PATH");
+    if(NULL == origin_dl_path)
+        dl_path = HDstrdup(H5PL_DEFAULT_PATH);
+    else
+        dl_path = HDstrdup(origin_dl_path);
+    if(NULL == dl_path)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+
+    /* Put paths in the path table.  They are separated by ":" */
+    dir = HDstrtok(dl_path, H5PL_PATH_SEPARATOR);
+    while(dir) {
+        if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = HDstrdup(dir)))
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+        H5PL_num_paths_g++;
+        dir = HDstrtok(NULL, H5PL_PATH_SEPARATOR);
+    } /* end while */
+
+    H5PL_path_found_g = TRUE;
 
 done:
     if(dl_path)
         dl_path = (char *)H5MM_xfree(dl_path);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5PL__init_path_table() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_find
+ * Function:	H5PL__find
  *
  * Purpose:     Given a path, this function opens the directory and envokes
  *              another function to go through all files to find the right 
@@ -214,98 +325,91 @@ done:
  * Programmer:	Raymond Lu
  *              13 February 2013
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef H5_HAVE_WIN32_API
-htri_t
-H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
+static htri_t
+H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 {
     char           *pathname = NULL;
     DIR            *dirp = NULL;
-    struct dirent  *dp = NULL;
-    struct stat    my_stat;
-    htri_t         found_in_dir = FALSE;
+    struct dirent  *dp;
     htri_t         ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Open the directory */  
     if(!(dirp = HDopendir(dir)))
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 
     /* Iterates through all entries in the directory to find the right plugin library */
-    while ((dp = HDreaddir(dirp)) != NULL) {
-	   /* The library we are looking for should be called libxxx.so... on Unix 
-            * or libxxx.xxx.dylib on Mac */ 
-	   if(!HDstrncmp(dp->d_name, "lib", (size_t)3) && 
-                   (HDstrstr(dp->d_name, ".so") || HDstrstr(dp->d_name, ".dylib"))) {
-	       pathname = (char *)H5MM_malloc(strlen(dir) + strlen(dp->d_name) + 2); 
-	       HDstrncpy(pathname, dir, strlen(dir)+1);
-	       HDstrcat(pathname, "/");
-	       HDstrcat(pathname, dp->d_name);
+    while((dp = HDreaddir(dirp)) != NULL) {
+        /* The library we are looking for should be called libxxx.so... on Unix 
+         * or libxxx.xxx.dylib on Mac.
+         */ 
+        if(!HDstrncmp(dp->d_name, "lib", (size_t)3) && 
+                (HDstrstr(dp->d_name, ".so") || HDstrstr(dp->d_name, ".dylib"))) {
+            h5_stat_t   my_stat;
+            htri_t      found_in_dir;
 
-	       /*fprintf(stderr, "dp->d_name=%s, pathname=%s. ", dp->d_name, pathname);
-	       fprintf(stderr, "\n");*/
+            pathname = (char *)H5MM_malloc(HDstrlen(dir) + HDstrlen(dp->d_name) + 2); 
+            HDstrncpy(pathname, dir, HDstrlen(dir) + 1);
+            HDstrcat(pathname, "/");
+            HDstrcat(pathname, dp->d_name);
 
-	       if(HDstat(pathname, &my_stat) == -1)
-		   HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file: %s", strerror(errno))
-	      
-               /* If it is a directory, skip it */ 
-	       if(S_ISDIR(my_stat.st_mode))
-                   continue;
+            if(HDstat(pathname, &my_stat) == -1)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file: %s", strerror(errno))
 
-               if((found_in_dir = H5PL_open(plugin_type, pathname, type_id, info)) < 0)
-                   HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+            /* If it is a directory, skip it */ 
+            if(S_ISDIR(my_stat.st_mode))
+                continue;
 
-               if(found_in_dir) {
-            	   ret_value = TRUE; 
-	           HGOTO_DONE(ret_value)
-               } else
-	           if(pathname) 
-		       pathname = (char *)H5MM_xfree(pathname);
-	   }
-    }
-
-    if(HDclosedir(dirp) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", strerror(errno))
-    dirp = NULL;
+            /* Attempt to open the dynamic library as a filter library */
+            if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
+            if(found_in_dir) {
+                /* Indicate success */
+                ret_value = TRUE;
+                break;
+            } /* end if */
+            else
+                if(pathname) 
+                    pathname = (char *)H5MM_xfree(pathname);
+        } /* end if */
+    } /* end while */
 
 done:
+    if(dirp) 
+        if(HDclosedir(dirp) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", strerror(errno))
     if(pathname) 
         pathname = (char *)H5MM_xfree(pathname);
-    if(dirp) 
-        HDclosedir(dirp);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5PL__find() */
 #else
-htri_t
-H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
+static htri_t
+H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 {
-    char           *pathname = NULL;
-    struct dirent  *dp = NULL;
-
     WIN32_FIND_DATA fdFile;
-    HANDLE hFind = NULL;
+    HANDLE          hFind;
+    char           *pathname = NULL;
+    htri_t          ret_value = FALSE;
 
-    htri_t         found_in_dir = FALSE;
-    htri_t         ret_value = FALSE;
+    FUNC_ENTER_STATIC
 
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if((hFind = FindFirstFile(dir, &fdFile)) == INVALID_HANDLE_VALUE) {
-        /*fprintf(stderr, "Path not found: [%s]\n", dir);*/
+    if((hFind = FindFirstFile(dir, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
-    }
 
     do {
         /* Find first file will always return "."
-         * and ".." as the first two directories. */
+         * and ".." as the first two directories.
+         */
         if(HDstrcmp(fdFile.cFileName, ".") != 0 && HDstrcmp(fdFile.cFileName, "..") != 0) {
-	    pathname = (char *)H5MM_malloc(strlen(dir) + strlen(fdFile.cFileName) + 2); 
-	    HDstrncpy(pathname, dir, strlen(dir)+1);
+            htri_t         found_in_dir;
+
+	    pathname = (char *)H5MM_malloc(HDstrlen(dir) + HDstrlen(fdFile.cFileName) + 2); 
+	    HDstrncpy(pathname, dir, HDstrlen(dir)+1);
 	    HDstrcat(pathname, "\\");
 	    HDstrcat(pathname, fdFile.cFileName);
 
@@ -313,35 +417,32 @@ H5PL_find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
             if(fdFile.dwFileAttributes &FILE_ATTRIBUTE_DIRECTORY)
                 continue;
 
-            if((found_in_dir = H5PL_open(plugin_type, pathname, type_id, info)) < 0)
+            if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
-
             if(found_in_dir) {
-       	        ret_value = TRUE; 
-	        HGOTO_DONE(ret_value)
-            } else
+                /* Indicate success */
+                ret_value = TRUE;
+                break;
+            } /* end if */
+            else
 	        if(pathname) 
 		    pathname = (char *)H5MM_xfree(pathname);
-        }
+        } /* end if */
     } while(FindNextFile(hFind, &fdFile)); /* Find the next file. */
 
-    /* Clean things up! */
-    FindClose(hFind);
-    hFind = NULL;
-
 done:
-    if(pathname) 
-        pathname = (char *)H5MM_xfree(pathname);
     if(hFind) 
         FindClose(hFind);
+    if(pathname) 
+        pathname = (char *)H5MM_xfree(pathname);
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5PL__find() */
 #endif
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_open
+ * Function:	H5PL__open
  *
  * Purpose:     Iterates through all files to find the right plugin library.
  *              It loads the dynamic plugin library and keeps it on the list 
@@ -354,131 +455,129 @@ done:
  * Programmer:	Raymond Lu
  *              13 February 2013
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5PL_open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
+static htri_t
+H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
 {
     H5PL_HANDLE    handle = NULL;
-    H5Z_class2_t*  (*H5PL_get_plugin_info)(void) = NULL; 
-    H5Z_class2_t   *plugin_info = NULL;
     htri_t         ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
-     * simply continue if we can't open it */
-    if(NULL == (handle = H5PL_OPEN_DLIB(libname)))
-        /*fprintf(stderr, "not open dl library: %s\n", H5PL_CLR_ERROR);*/
-        HGOTO_DONE(ret_value)
+     * simply continue if we can't open it.
+     */
+    if(NULL == (handle = H5PL_OPEN_DLIB(libname))) {
+        H5PL_CLR_ERROR; /* clear error */
+    } /* end if */
+    else {
+        H5Z_class2_t   * (*H5PL_get_plugin_info)(void);
 
-     H5PL_CLR_ERROR; /*clear error*/
+        /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
+         * The plugin library is suppose to define this function.
+         */
+        if(NULL == (H5PL_get_plugin_info = (H5Z_class2_t *(*)(void))H5PL_GET_LIB_FUNC(handle, "H5PL_get_plugin_info"))) {
+            if(H5PL__close(handle) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+        } /* end if */
+        else {
+            H5Z_class2_t   *plugin_info;
 
-    /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
-     * The plugin library is suppose to define this function. */
-    if(NULL == (H5PL_get_plugin_info = H5PL_GET_LIB_FUNC(handle, "H5PL_get_plugin_info"))) {
-        if(H5PL_close(handle) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
-    }
+            /* Invoke H5PL_get_plugin_info to verify this is the right library we are looking for.
+             * Move on if it isn't.
+             */
+            if(NULL == (plugin_info = (*H5PL_get_plugin_info)())) {
+                if(H5PL__close(handle) < 0)
+                    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
+            } /* end if */
 
-    /* Envoke H5PL_get_plugin_info to verify this is the right library we are looking for.
-     * Move on if it isn't. */
-    if(H5PL_get_plugin_info) {
-        if(NULL == (plugin_info = (*H5PL_get_plugin_info)())) {
-            if(H5PL_close(handle) < 0)
-	        HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
-        }
+            /* Successfully found plugin library, check if it's the right one */
+            if(plugin_info->id == pl_id) {
+                /* Expand the table if it is too small */
+                if(H5PL_table_used_g >= H5PL_table_alloc_g) {
+                    size_t n = MAX(H5Z_MAX_NFILTERS, 2 * H5PL_table_alloc_g);
+                    H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
 
-        if(plugin_info->id == pl_id) {
-	    (H5PL_table_g[H5PL_table_used_g]).handle = handle;
-	    (H5PL_table_g[H5PL_table_used_g]).pl_type = pl_type;
-	    (H5PL_table_g[H5PL_table_used_g]).pl_id = plugin_info->id;
-/*fprintf(stderr, "%s: H5PL_table_used_g=%d, id=%d, id 2=%d\n", FUNC, H5PL_table_used_g, (H5PL_table_g[H5PL_table_used_g]).pl_id, plugin_info->id);*/
-	    H5PL_table_used_g++;
+                    if(!table)
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend dynamic library table")
 
-	    *pl_info = (void *)plugin_info;
-	    ret_value = TRUE;
- 
-	    HGOTO_DONE(ret_value)
-        } else if(H5PL_close(handle) < 0)
-	    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
-    }
+                    H5PL_table_g = table;
+                    H5PL_table_alloc_g = n;
+                } /* end if */
+
+                (H5PL_table_g[H5PL_table_used_g]).handle = handle;
+                (H5PL_table_g[H5PL_table_used_g]).pl_type = pl_type;
+                (H5PL_table_g[H5PL_table_used_g]).pl_id = plugin_info->id;
+                H5PL_table_used_g++;
+
+                /* Set the plugin info to return */
+                *pl_info = (void *)plugin_info;
+     
+                /* Indicate success */
+                ret_value = TRUE;
+            } /* end if */
+            else
+                if(H5PL__close(handle) < 0)
+                    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+        } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5PL__open() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_search_table
+ * Function:	H5PL__search_table
  *
  * Purpose:     Search in the list of already opened dynamic libraries
  *              to see if the one we are looking for is already opened.
  *
  * Return:	TRUE on success, 
  *              FALSE on not found,
- *              negative on failure
+ *              Negative on failure
  *
  * Programmer:	Raymond Lu
  *              13 February 2013
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5PL_search_table(H5PL_type_t plugin_type, int type_id, void **info)
+static htri_t
+H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
 {
-    H5Z_class2_t*  (*H5PL_get_plugin_info)(void) = NULL; 
-    H5Z_class2_t   *plugin_info = NULL;
     size_t         i;
     htri_t         ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
-
-/*if(0 < H5PL_table_used_g)
-fprintf(stderr, "%s: H5PL_table_used_g=%d, id=%d\n", FUNC, H5PL_table_used_g, (H5PL_table_g[H5PL_table_used_g-1]).pl_id);*/
+    FUNC_ENTER_STATIC
 
     /* Search in the table of already opened dynamic libraries */
-    if(0 < H5PL_table_used_g) {
-        for(i=0; i<H5PL_table_used_g; i++) {
+    if(H5PL_table_used_g > 0) {
+        for(i = 0; i < H5PL_table_used_g; i++) {
             if((plugin_type == (H5PL_table_g[i]).pl_type) && (type_id == (H5PL_table_g[i]).pl_id)) {
-  	        if(NULL == (H5PL_get_plugin_info = H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
-		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PL_get_plugin_info")
+                H5Z_class2_t *(*H5PL_get_plugin_info)(void);
+                H5Z_class2_t *plugin_info;
 
+  	        if(NULL == (H5PL_get_plugin_info = (H5Z_class2_t *(*)(void))H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PL_get_plugin_info")
 	        if(NULL == (plugin_info = (*H5PL_get_plugin_info)()))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
 
-	        /*fprintf(stderr, "%s: handle=%p, H5PL_get_plugin_info=%p, plugin_info=%p, id=%d\n", FUNC, (H5PL_table_g[i]).handle, H5PL_get_plugin_info, plugin_info, plugin_info->id);*/
-
 	        *info = (void *)plugin_info;
 	        ret_value = TRUE;
-            }
-        }
-    }
-
-    /* Expand the table if it is too small */
-    if(H5PL_table_used_g >= H5PL_table_alloc_g) {
-        size_t n = MAX(H5Z_MAX_NFILTERS, 2*H5PL_table_alloc_g);
-        H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
-
-        if(!table)
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend dynamic library table")
-
-        H5PL_table_g = table;
-        H5PL_table_alloc_g = n;
+                break;
+            } /* end if */
+        } /* end for */
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5PL__search_table() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5PL_close
+ * Function:	H5PL__close
  *
  * Purpose:     Closes the handle for dynamic library	
  *
@@ -487,20 +586,15 @@ done:
  * Programmer:	Raymond Lu
  *              13 February 2013
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5PL_close(H5PL_HANDLE handle)
+static herr_t
+H5PL__close(H5PL_HANDLE handle)
 {
-    herr_t        ret_value = SUCCEED;
+    FUNC_ENTER_STATIC_NOERR
 
-    FUNC_ENTER_NOAPI(FAIL)
-/*fprintf(stderr, "%s: closing. handle=%p\n", FUNC, handle);*/
     H5PL_CLOSE_LIB(handle);
    
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5PL__close() */
 

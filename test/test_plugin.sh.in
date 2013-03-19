@@ -24,7 +24,7 @@ TOP_BUILDDIR=@top_builddir@
 echo $srcdir
 echo $TOP_BUILDDIR
 
-# Determine backward compatibility options eneabled
+# Determine backward compatibility options enabled
 DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
 nerrors=0
@@ -54,7 +54,7 @@ TESTING() {
 }
 
 if test $nerrors -eq 0 ; then
-   echo "All Error API tests passed."
+   echo "All Plugin API tests passed."
 fi
 
 exit $nerrors

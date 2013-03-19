@@ -43,4 +43,5 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5PLpublic_H */
+
