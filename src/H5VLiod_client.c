@@ -187,7 +187,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
                     //HDfree(cur_req->obj_name);
                     //info = H5MM_xfree(info);
                     /* MSC not returning an error because we injected this failure */
-                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u). We're hosed.\n",
+                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
                             info->checksum, status->cs);
                     //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, SUCCEED, "Data Integrity Fail - bad Checksum");
                 }
@@ -256,7 +256,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const char *name)
                         //HDfree(cur_req->obj_name);
                         //info = H5MM_xfree(info);
                         /* MSC not returning an error because we injected this failure */
-                        fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u). We're hosed.\n",
+                        fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
                                 info->checksum, status->cs);
                         //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, SUCCEED, "Data Integrity Fail - bad Checksum");
                     }

@@ -42,7 +42,7 @@ int num_peers = 0;
 int terminate_requests = 0;
 hbool_t shutdown = FALSE;
 
-#define EEXISTS 0
+#define EEXISTS 1
 
 static herr_t H5VL_iod_server_file_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
@@ -759,7 +759,7 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     status = iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/);
 
-    if (EEXISTS != status && status > 0) {
+    if (EEXISTS != status && status == 0) {
         /* create root group KV store */
         if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
                               &root_id, NULL /*event*/) < 0)
@@ -917,16 +917,17 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     printf("Start file close\n");
 
-    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
-    if((ret_value = iod_obj_close(root_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
-    if((ret_value = iod_container_close(coh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't close container");
+    if(iod_obj_close(scratch_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close scratch object handle");
+    if(iod_obj_close(root_oh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
+    if(iod_container_close(coh, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
 
 done:
-    printf("Done with file close, sending response to client\n");
-    fs_handler_complete(input->fs_handle, &ret_value);
+    printf("Done with file close, sending response %d to client\n", ret_value);
+    if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1673,7 +1674,7 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     iod_array_iodesc_t file_desc;
     size_t size;
     void *buf;
-    uint32_t cs;
+    uint32_t cs = 0;
     na_addr_t dest = fs_handler_get_addr(input->fs_handle);
     herr_t ret_value = SUCCEED;
 
@@ -1718,7 +1719,7 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     /* Write bulk data here and wait for the data to be there  */
     if(S_SUCCESS != bds_write(bds_handle, dest, bds_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-
+    /* wait for it to complete */
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
@@ -1790,7 +1791,7 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     /* Write bulk data here and wait for the data to be there  */
     if(S_SUCCESS != bds_read(bds_handle, source, bds_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
-
+    /* wait for it to complete */
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 

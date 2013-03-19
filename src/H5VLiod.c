@@ -217,7 +217,7 @@ H5VL_iod_init_interface(void)
  *		Failure:	Negative.
  *
  * Programmer:	Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -243,7 +243,7 @@ H5VL_iod_init(void)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -279,7 +279,7 @@ EFF_init(MPI_Comm comm, MPI_Info info)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -307,7 +307,7 @@ EFF_finalize(void)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -350,7 +350,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Mohamad Chaarawi
- *              July 2012
+ *              July 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -394,7 +394,7 @@ done:
  *		Failure:	-1
  *
  * Programmer:	Mohamad Chaarawi
- *              July 2012
+ *              July 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -473,7 +473,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -518,10 +518,11 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     input.fcpl_id = fcpl_id;
     input.fapl_id = fapl_id;
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
 
-    /* forward the call to the IONs */
+    /* forward the call to the ION */
     if(fs_forward(PEER, H5VL_FILE_CREATE_ID, &input, &file->remote_file, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship file create");
 
@@ -532,7 +533,6 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     /* setup a request to track completion of the operation */
     if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-
     request->type = FS_FILE_CREATE;
     request->data = file;
     request->req = fs_req;
@@ -550,6 +550,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->nopen_objs = 1;
 
     file->common.obj_type = H5I_FILE;
+    /* The name of the location is the root's object name "\" */
     file->common.obj_name = strdup("/");
     file->common.obj_name[1] = '\0';
     file->common.file = file;
@@ -571,7 +572,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -601,13 +602,16 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD file struct");
 
+    /* set input paramters in struct to give to the function shipper */
     input.name = name;
     input.flags = flags;
     input.fapl_id = fapl_id;
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
 
+    /* forward the call to the server */
     if(fs_forward(PEER, H5VL_FILE_OPEN_ID, &input, &file->remote_file, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship file create");
 
@@ -633,6 +637,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED
     file->nopen_objs = 1;
 
     file->common.obj_type = H5I_FILE; 
+    /* The name of the location is the root's object name "\" */
     file->common.obj_name = strdup("/");
     file->common.obj_name[1] = '\0';
     file->common.file = file;
@@ -654,7 +659,7 @@ done:
  *		Failure:	-1, file not flushed.
  *
  * Programmer:  Mohamad Chaarawi
- *              February, 2012
+ *              February, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -680,7 +685,7 @@ done:
  *		Failure:	-1
  *
  * Programmer:  Mohamad Chaarawi
- *              February, 2012
+ *              February, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -706,7 +711,7 @@ done:
  *		Failure:	-1
  *
  * Programmer:  Mohamad Chaarawi
- *              April, 2012
+ *              April, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -730,7 +735,7 @@ done:
  *		Failure:	-1
  *
  * Programmer:  Mohamad Chaarawi
- *              May, 2012
+ *              May, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -755,7 +760,7 @@ done:
  *		Failure:	-1, file not closed.
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -770,14 +775,18 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* wait for all pending requests before closing the file */
     if(H5VL_iod_request_wait_all(file) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS requests");
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
+    /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
-    /* forward the call to the IONs */
+
+    /* forward the call to the ION */
     if(fs_forward(PEER, H5VL_FILE_CLOSE_ID, &file->remote_file, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
 
@@ -791,12 +800,13 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
     /* add request to container's linked list */
     H5VL_iod_request_add(file, request);
 
+    /* MSC - just wait for the file close here for now, till we give requests to the API */
     if(H5VL_iod_request_wait(file, request) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+    if(SUCCEED != *status)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "File close failed at the server");
 
-    HDassert(file->request_list_head == NULL);
-    HDassert(file->request_list_tail == NULL);
-
+    /* free everything */
     free(file->file_name);
     free(file->common.obj_name);
     if(H5Pclose(file->fapl_id) < 0)
@@ -804,6 +814,8 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
     if(H5Pclose(file->remote_file.fcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     file = H5FL_FREE(H5VL_iod_file_t, file);
+
+    free(status);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -819,7 +831,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -859,6 +871,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
+    /* set the input structure for the FS encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
@@ -867,6 +880,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.gapl_id = gapl_id;
     input.lcpl_id = lcpl_id;
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
 
@@ -921,7 +935,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2012
+ *              January, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -951,12 +965,14 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
+    /* set the input structure for the FS encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
     input.name = new_name;
     input.gapl_id = gapl_id;
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
 
@@ -1009,7 +1025,7 @@ done:
  *		Failure:	-1
  *
  * Programmer:  Mohamad Chaarawi
- *              February, 2012
+ *              February, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1034,7 +1050,7 @@ done:
  *		Failure:	-1, group not closed.
  *
  * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1049,6 +1065,7 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* wait for the actual create or open operation on the group to complete */
     if(NULL != grp->common.request) {
         if(H5VL_iod_request_wait(grp->common.file, grp->common.request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
@@ -1056,10 +1073,13 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED req)
         grp->common.request = H5MM_xfree(grp->common.request);
     }
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
+    /* allocate an integer to receive the return value if the group close succeeded or not */
     status = (int *)malloc(sizeof(int));
+
     /* forward the call to the IONs */
     if(fs_forward(PEER, H5VL_GROUP_CLOSE_ID, &grp->remote_group, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship group close");
@@ -1095,7 +1115,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              October, 2012
+ *              October, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1139,6 +1159,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
+    /* set the input structure for the FS encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
@@ -1149,6 +1170,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     input.type_id = type_id;
     input.space_id = space_id;
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
 
@@ -1209,7 +1231,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              October, 2012
+ *              October, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1239,12 +1261,14 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
 
+    /* set the input structure for the FS encode routine */
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
     input.name = new_name;
     input.dapl_id = dapl_id;
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
 
@@ -1297,7 +1321,7 @@ done:
  *		Failure:	-1, data not read.
  *
  * Programmer:  Mohamad Chaarawi
- *              October, 2012
+ *              October, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1319,13 +1343,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    if(NULL != dset->common.request) {
-        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
-        dset->common.request->req = H5MM_xfree(dset->common.request->req);
-        dset->common.request = H5MM_xfree(dset->common.request);
-    }
 
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
@@ -1355,12 +1372,22 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf)
         buf = &fake_char;
 
+    /* wait for the dataset create or open to complete */
+    if(NULL != dset->common.request) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        dset->common.request->req = H5MM_xfree(dset->common.request->req);
+        dset->common.request = H5MM_xfree(dset->common.request);
+    }
+
+    /* calculate the size of the buffer needed - MSC we are assuming everything is contiguous now */
     size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
 
+    /* allocate a bulk data transfer handle */
     if(NULL == (bds_handle = (bds_handle_t *)H5MM_malloc(sizeof(bds_handle_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* Register memory */
+    /* Register memory with bds_handle */
     if(S_SUCCESS != bds_handle_create(buf, size, BDS_READWRITE, bds_handle))
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
 
@@ -1371,8 +1398,10 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
 
+    /* allocate structure to receive status of read operation (contains return value and checksum */
     status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
@@ -1380,7 +1409,8 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(fs_forward(PEER, H5VL_DSET_READ_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
 
-    /* setup info struct for I/O request */
+    /* setup info struct for I/O request. 
+       This is to manage the I/O operation once the wait is called. */
     if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
@@ -1412,7 +1442,7 @@ done:
  *		Failure:	-1, dataset not writed.
  *
  * Programmer:  Mohamad Chaarawi
- *              October, 2012
+ *              October, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1471,12 +1501,16 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf)
         buf = &fake_char;
 
+    /* calculate the size of the buffer needed - MSC we are assuming everything is contiguous now */
     size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
 
+    /* calculate a checksum for the data */
     cs = H5_checksum_fletcher32(buf, size);
+    /* MSC- store it in a global variable for now so that the read can see it (for demo purposes */
     write_checksum = cs;
     printf("Checksum Generated for data at client: %u\n", cs);
 
+    /* allocate a bulk data transfer handle */
     if(NULL == (bds_handle = (bds_handle_t *)H5MM_malloc(sizeof(bds_handle_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a bulk data transfer handle");
 
@@ -1494,6 +1528,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     status = (int *)malloc(sizeof(int));
 
+    /* allocate a function shipper request */
     if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a FS request");
 
@@ -1501,13 +1536,8 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(fs_forward(PEER, H5VL_DSET_WRITE_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
 
-#if 0
-    fs_wait(*fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
-    HDassert(SUCCEED == *status);
-    free(fs_req);
-#endif
-#if 1
-    /* setup info struct for I/O request */
+    /* setup info struct for I/O request 
+       This is to manage the I/O operation once the wait is called. */
     if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
@@ -1524,7 +1554,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1540,7 +1569,7 @@ done:
  *		Failure:	-1, dataset not closed.
  *
  * Programmer:  Mohamad Chaarawi
- *              March, 2012
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
