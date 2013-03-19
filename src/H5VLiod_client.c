@@ -169,9 +169,29 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
 
             if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed")
-            else if(FS_DSET_READ == cur_req->type && 
-                    SUCCEED != ((H5VL_iod_read_status_t *)(info->status))->ret)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed")
+            else if(FS_DSET_READ == cur_req->type) {
+                H5VL_iod_read_status_t *status = (H5VL_iod_read_status_t *)info->status;
+
+                if(SUCCEED != status->ret) {
+                    free(info->status);
+                    info->status = NULL;
+                    info->bds_handle = H5MM_xfree(info->bds_handle);
+                    HDfree(cur_req->obj_name);
+                    info = H5MM_xfree(info);
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
+                }
+                if(info->checksum && info->checksum != status->cs) {
+                    //free(info->status);
+                    //info->status = NULL;
+                    //info->bds_handle = H5MM_xfree(info->bds_handle);
+                    //HDfree(cur_req->obj_name);
+                    //info = H5MM_xfree(info);
+                    /* MSC not returning an error because we injected this failure */
+                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u). We're hosed.\n",
+                            info->checksum, status->cs);
+                    //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, SUCCEED, "Data Integrity Fail - bad Checksum");
+                }
+            }
 
             free(info->status);
             info->status = NULL;
@@ -215,21 +235,43 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const char *name)
                 /* Free memory handle */
                 if(S_SUCCESS != bds_handle_free(*info->bds_handle))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
+
                 if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed")
-                else if(FS_DSET_READ == cur_req->type && 
-                        SUCCEED != ((H5VL_iod_read_status_t *)(info->status))->ret)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed")
+                else if(FS_DSET_READ == cur_req->type) {
+                    H5VL_iod_read_status_t *status = (H5VL_iod_read_status_t *)info->status;
+
+                    if(SUCCEED != status->ret) {
+                        free(info->status);
+                        info->status = NULL;
+                        info->bds_handle = H5MM_xfree(info->bds_handle);
+                        HDfree(cur_req->obj_name);
+                        info = H5MM_xfree(info);
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
+                    }
+                    if(info->checksum && info->checksum != status->cs) {
+                        //free(info->status);
+                        //info->status = NULL;
+                        //info->bds_handle = H5MM_xfree(info->bds_handle);
+                        //HDfree(cur_req->obj_name);
+                        //info = H5MM_xfree(info);
+                        /* MSC not returning an error because we injected this failure */
+                        fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u). We're hosed.\n",
+                                info->checksum, status->cs);
+                        //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, SUCCEED, "Data Integrity Fail - bad Checksum");
+                    }
+                }
 
                 free(info->status);
                 info->status = NULL;
                 info->bds_handle = H5MM_xfree(info->bds_handle);
                 HDfree(cur_req->obj_name);
                 info = H5MM_xfree(info);
+
+                H5VL_iod_request_delete(file, cur_req);
+                cur_req->req = H5MM_xfree(cur_req->req);
+                cur_req = H5MM_xfree(cur_req);
             }
-            H5VL_iod_request_delete(file, cur_req);
-            cur_req->req = H5MM_xfree(cur_req->req);
-            cur_req = H5MM_xfree(cur_req);
         }
         cur_req = tmp_req;
     }

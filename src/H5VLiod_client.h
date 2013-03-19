@@ -88,6 +88,7 @@ typedef struct H5VL_iod_dset_t {
 typedef struct H5VL_iod_io_info_t {
     void *status;
     bds_handle_t *bds_handle;
+    uint32_t checksum;
 } H5VL_iod_io_info_t;
 
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);

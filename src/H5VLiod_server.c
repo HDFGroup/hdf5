@@ -1816,7 +1816,6 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
 done:
     printf("Done with dset write, sending response to client\n");
-
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(S_SUCCESS != bds_handle_free(input->bds_handle))

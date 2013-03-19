@@ -117,6 +117,7 @@ H5FL_DEFINE(H5VL_iod_group_t);
 H5FL_DEFINE(H5VL_iod_dset_t);
 
 na_addr_t PEER;
+uint32_t write_checksum;
 
 static H5VL_class_t H5VL_iod_g = {
     IOD,
@@ -793,6 +794,9 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
     if(H5VL_iod_request_wait(file, request) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 
+    HDassert(file->request_list_head == NULL);
+    HDassert(file->request_list_tail == NULL);
+
     free(file->file_name);
     free(file->common.obj_name);
     if(H5Pclose(file->fapl_id) < 0)
@@ -1304,7 +1308,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_io_input_t input;
     fs_request_t *fs_req = NULL;
-    bds_handle_t *bds_handle;
+    bds_handle_t *bds_handle = NULL;
     H5VL_iod_request_t *request = NULL;
     H5VL_iod_read_status_t *status = NULL;
     const H5S_t *mem_space = NULL;
@@ -1381,6 +1385,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bds_handle = bds_handle;
+    info->checksum = write_checksum;
 
     /* setup a request to track completion of the operation */
     if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
@@ -1418,7 +1423,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_io_input_t input;
     fs_request_t *fs_req = NULL;
-    bds_handle_t *bds_handle;
+    bds_handle_t *bds_handle = NULL;
     H5VL_iod_request_t *request = NULL;
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
@@ -1467,14 +1472,16 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
+
     cs = H5_checksum_fletcher32(buf, size);
+    write_checksum = cs;
     printf("Checksum Generated for data at client: %u\n", cs);
 
     if(NULL == (bds_handle = (bds_handle_t *)H5MM_malloc(sizeof(bds_handle_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a bulk data transfer handle");
 
     /* Register memory */
-    if(S_SUCCESS != bds_handle_create((void *)buf, size, BDS_READ_ONLY, bds_handle))
+    if(S_SUCCESS != bds_handle_create(buf, size, BDS_READ_ONLY, bds_handle))
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
 
     /* Fill input structure */
@@ -1505,6 +1512,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bds_handle = bds_handle;
+    info->checksum = cs;
 
     /* setup a request to track completion of the operation */
     if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
