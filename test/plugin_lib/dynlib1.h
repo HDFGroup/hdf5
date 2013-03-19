@@ -32,11 +32,11 @@
 extern "C" {
 #endif
 
-    H5TEST_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
-    H5TEST_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
+    H5_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
+    H5_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
 
 /* Local prototypes for filter functions */
-    H5TEST_DLL static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+    static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 #ifdef __cplusplus
