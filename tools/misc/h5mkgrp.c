@@ -46,6 +46,7 @@ typedef struct {
     size_t ngroups;             /* Number of groups to create */
     char **groups;              /* Pointer to array of group names */
 } param_t;
+param_t params;             /* Command line parameter settings */
 
 
 /*-------------------------------------------------------------------------
@@ -62,6 +63,15 @@ typedef struct {
 static void
 leave(int ret)
 {
+    int curr_group;
+
+    if (params.fname)
+        HDfree (params.fname);
+    if (params.ngroups) {
+        for(curr_group = 0; curr_group < params.ngroups; curr_group++)
+            HDfree (params.groups[curr_group]);
+        HDfree (params.groups);
+    }
     h5tools_close();
     HDexit(ret);
 } /* end leave() */
@@ -206,7 +216,6 @@ for(curr_group = 0; curr_group < params->ngroups; curr_group++)
 int
 main(int argc, const char *argv[])
 {
-    param_t params;             /* Command line parameter settings */
     hid_t fid;                  /* HDF5 file ID */
     hid_t fapl_id;              /* File access property list ID */
     hid_t lcpl_id;              /* Link creation property list ID */
@@ -322,6 +331,6 @@ main(int argc, const char *argv[])
     /* Shut down h5tools lib */
     h5tools_close();
 
-    return EXIT_SUCCESS;
+    leave(EXIT_SUCCESS);
 } /* end main() */
 
