@@ -2958,11 +2958,14 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             int         ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
 
             /* only print the compression ratio for these filters */
-            for(i = 0; i < nfilters; i++) {
+            for(i = 0; i < nfilters && !ok; i++) {
                 cd_nelmts = NELMTS(cd_values);
                 filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
                                        cd_values, sizeof(f_name), f_name, NULL);
-
+				ok = (filtn>=0);
+				
+			    /* this following code will not show compression ratio for 
+				   user defined filter. For example, see HDFFV-8344 --xcao@hdfgroup.org
                 switch(filtn) {
                 case H5Z_FILTER_DEFLATE:
                 case H5Z_FILTER_SZIP:
@@ -2971,6 +2974,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     ok = 1;
                     break;
                 }
+				*/
             }
 
             if(ndims && ok) {
@@ -3148,6 +3152,9 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
             cd_nelmts = NELMTS(cd_values);
             filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
                 cd_values, sizeof(f_name), f_name, NULL);
+				
+			if (filtn<0)
+			    continue; /* nothing to print for invalid filter */
 
             ctx->need_prefix = TRUE;
             h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
@@ -3241,10 +3248,13 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
                     break;
                 default:
+                    /* filter do not have to be avaiable for showing registered filter info.
+					   see HDFFV-8346 for details. --xcao@hdfgroup.org
                     if(H5Zfilter_avail(filtn))
                         h5tools_str_append(&buffer, "%s %s", "USER_REGISTERED_FILTER", BEGIN);
                     else
-                        h5tools_str_append(&buffer, "%s %s", "UNKNOWN_FILTER", BEGIN);
+					*/
+                    h5tools_str_append(&buffer, "%s %s", "USER_DEFINED_FILTER", BEGIN);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, ncols, 0, 0);
 
                     ctx->indent_level++;
