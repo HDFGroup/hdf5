@@ -128,6 +128,10 @@ Bug Fixes since HDF5-1.8.10
 
     Tools
     -----
+    - h5dump: Fixed displaying comporession ratio for unknown or user-defined 
+      filters. HDFFV-8344 (XCAO 2013/03/19)
+    - h5dump: Changed UNKNOWN_FILTER to USER_DEFINED_FILTER for user defined filter.
+      HDFFV-8346 (XCAO 2013/03/19)
     - h5diff: Fixed to return correct exit code 1 when detect unique extra
       attribute. Prior to this fix, h5diff returned exit code 0 indicating 
       two files are identical.   HDFFV-7643 (JKM 2013/02/15)
