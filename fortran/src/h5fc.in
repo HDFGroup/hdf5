@@ -233,8 +233,13 @@ for arg in $@ ; do
         *) allargs="$allargs $arg"
 	if [ -s "$arg" ] ; then
 	    ext=`expr "$arg" : '.*\(\..*\)'`
-	    if [ "$ext" = ".f" -o "$ext" = ".F" -o "$ext" = ".f90" -o \
-		 "$ext" = ".for" -o "$ext" = ".FOR" -o "$ext" = ".F90" ] ; then
+	    if [ "$ext" = ".f" -o "$ext" = ".F" -o \
+                 "$ext" = ".for" -o "$ext" = ".FOR" -o \
+                 "$ext" = ".ftn" -o "$ext" = ".FTN" -o \
+                 "$ext" = ".f90" -o "$ext" = ".F90" -o \
+                 "$ext" = ".f95" -o "$ext" = ".F95" -o \
+                 "$ext" = ".f03" -o "$ext" = ".F03" -o \
+                 "$ext" = ".f08" -o "$ext" = ".F08" ] ; then
 	        do_compile="yes"
 	        compile_args="$compile_args $arg"
 	        fname=`basename $arg $ext`
