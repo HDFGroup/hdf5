@@ -36,8 +36,6 @@ SET (H5_TEST_PLUGIN_LIB_SRCS
 
 SET (H5_TEST_PLUGIN_LIB_HDRS
     ${HDF5_TEST_PLUGIN_LIB_SOURCE_DIR}/dynlib1.h
-    ${HDF5_TEST_SOURCE_DIR}/H5srcdir.h
-    ${HDF5_TEST_SOURCE_DIR}/h5test.h
 )
 
 #-----------------------------------------------------------------------------
