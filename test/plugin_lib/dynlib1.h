@@ -19,15 +19,28 @@
  *
  * Purpose:	Tests the plugin module (H5PL)
  */
+#ifndef DYNLIB1_H__
+#define DYNLIB1_H__
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <hdf5.h>
 
 #define FILTER_DYNLIB1_VERS 1
 
-const H5PL_type_t   H5PL_get_plugin_type(void);
-const H5Z_class2_t* H5PL_get_plugin_info(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    H5TEST_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
+    H5TEST_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
 
 /* Local prototypes for filter functions */
-static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+    H5TEST_DLL static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+                const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* DYNLIB1_H__ */
