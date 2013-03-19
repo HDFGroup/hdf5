@@ -22781,6 +22781,18 @@ fi
 
 done
 
+for ac_header in dirent.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "dirent.h" "ac_cv_header_dirent_h" "$ac_includes_default"
+if test "x$ac_cv_header_dirent_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DIRENT_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in stdint.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "stdint.h" "ac_cv_header_stdint_h" "$ac_includes_default"
