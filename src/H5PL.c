@@ -43,8 +43,7 @@
 /* Macros for supporting 
  * both Windows and Unix */
 /****************************/
-
-/* Handle for dynamic library */
+/* Windows support */
 #ifdef H5_HAVE_WIN32_API
 /* Handle for dynamic library */
 #define H5PL_HANDLE HINSTANCE
@@ -61,6 +60,20 @@
 /* Clear error - nothing to do */
 #define H5PL_CLR_ERROR
 
+#define H5PL_GET_PLUGIN_TYPE(H, ret_val) {    \
+typedef const int (__cdecl *get_plugin_type_t)(); \
+get_plugin_type_t get_plugin_type;  \
+get_plugin_type = (get_plugin_type_t)H5PL_GET_LIB_FUNC(H, "H5PL_get_plugin_type");  \
+ret_val = get_plugin_type();    \
+}
+
+#define H5PL_GET_PLUGIN_INFO(H, ret_val) {    \
+typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)(); \
+get_filter_info_t get_filter_info;  \
+get_filter_info = (get_filter_info_t)H5PL_GET_LIB_FUNC(H, "H5PL_get_plugin_info");  \
+ret_val = get_filter_info();    \
+}
+
 #else /* H5_HAVE_WIN32_API */
 /* Handle for dynamic library */
 #define H5PL_HANDLE void *
@@ -76,6 +89,20 @@
 
 /* Clear error */
 #define H5PL_CLR_ERROR dlerror()
+
+#define H5PL_GET_PLUGIN_TYPE(H, ret_val) {   \
+typedef const int (*get_plugin_type_t)(); \
+get_plugin_type_t get_plugin_type;  \
+get_plugin_type = (get_plugin_type_t)H5PL_GET_LIBRARY_FUNCTION(H, "H5PL_get_plugin_type");  \
+ret_val = (*get_plugin_type)();    \
+}
+
+#define H5PL_GET_PLUGIN_INFO(H, ret_val) {   \
+typedef const H5Z_class2_t *(*get_filter_info_t)(); \
+get_filter_info_t get_filter_info;  \
+*(void**)(&get_filter_info) = (get_filter_info_t)H5PL_GET_LIB_FUNC(H, "H5PL_get_plugin_info");  \
+ret_val = get_filter_info();    \
+}
 
 #endif /* H5_HAVE_WIN32_API */
 
@@ -461,6 +488,7 @@ static htri_t
 H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
 {
     H5PL_HANDLE    handle = NULL;
+    H5Z_class2_t   *plugin_info = NULL;
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
@@ -472,6 +500,7 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
         H5PL_CLR_ERROR; /* clear error */
     } /* end if */
     else {
+#ifdef TMP
         H5Z_class2_t   * (*H5PL_get_plugin_info)(void);
 
         /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
@@ -522,6 +551,42 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
                 if(H5PL__close(handle) < 0)
                     HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
         } /* end if */
+#else
+    H5PL_GET_PLUGIN_INFO(handle, plugin_info);
+    if(NULL == plugin_info) {
+        if(H5PL__close(handle) < 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
+    }
+
+    if(plugin_info->id == pl_id) {
+	/* Expand the table if it is too small */
+	if(H5PL_table_used_g >= H5PL_table_alloc_g) {
+	    size_t n = MAX(H5Z_MAX_NFILTERS, 2 * H5PL_table_alloc_g);
+	    H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
+
+	    if(!table)
+		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend dynamic library table")
+
+	    H5PL_table_g = table;
+	    H5PL_table_alloc_g = n;
+	} /* end if */
+
+        (H5PL_table_g[H5PL_table_used_g]).handle = handle;
+	(H5PL_table_g[H5PL_table_used_g]).pl_type = pl_type;
+	(H5PL_table_g[H5PL_table_used_g]).pl_id = plugin_info->id;
+/*fprintf(stderr, "%s: H5PL_table_used_g=%d, id=%d, id 2=%d\n", FUNC, H5PL_table_used_g, (H5PL_table_g[H5PL_table_used_g]).pl_id, plugin_info->id);*/
+	H5PL_table_used_g++;
+
+	*pl_info = (void *)plugin_info;
+	ret_value = TRUE;
+ 
+	HGOTO_DONE(ret_value)
+    } else 
+        if(H5PL__close(handle) < 0)
+	    HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
+
+#endif
     } /* end else */
 
 done:
@@ -548,6 +613,7 @@ static htri_t
 H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
 {
     size_t         i;
+    H5Z_class2_t   *plugin_info;
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
@@ -556,6 +622,7 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
     if(H5PL_table_used_g > 0) {
         for(i = 0; i < H5PL_table_used_g; i++) {
             if((plugin_type == (H5PL_table_g[i]).pl_type) && (type_id == (H5PL_table_g[i]).pl_id)) {
+#ifdef TMP
                 H5Z_class2_t *(*H5PL_get_plugin_info)(void);
                 H5Z_class2_t *plugin_info;
 
@@ -563,7 +630,9 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PL_get_plugin_info")
 	        if(NULL == (plugin_info = (*H5PL_get_plugin_info)()))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
-
+#else
+                H5PL_GET_PLUGIN_INFO((H5PL_table_g[i]).handle, plugin_info);
+#endif
 	        *info = (void *)plugin_info;
 	        ret_value = TRUE;
                 break;
