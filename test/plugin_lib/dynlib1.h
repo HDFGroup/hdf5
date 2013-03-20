@@ -26,14 +26,23 @@
 #include <stdio.h>
 #include <hdf5.h>
 
+/* plugins always export */
+  #if defined (_MSC_VER)  /* MSVC Compiler Case */
+    #define H5PLUGIN_DLL __declspec(dllexport)
+    #define H5PLUGIN_DLLVAR extern __declspec(dllexport)
+  #elif (__GNUC__ >= 4)  /* GCC 4.x has support for visibility options */
+    #define H5PLUGIN_DLL __attribute__ ((visibility("default")))
+    #define H5PLUGIN_DLLVAR extern __attribute__ ((visibility("default")))
+  #endif
+
 #define FILTER_DYNLIB1_VERS 1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    H5_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
-    H5_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
+    H5PLUGIN_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
+    H5PLUGIN_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
 
 /* Local prototypes for filter functions */
     static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
