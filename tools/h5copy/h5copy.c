@@ -199,23 +199,21 @@ static int parse_flag(const char* str_flag, unsigned *flag)
 int
 main (int argc, const char *argv[])
 {
-    hid_t        fid_src=-1;
-    hid_t        fid_dst=-1;
-    char         *fname_src=NULL;
-    char         *fname_dst=NULL;
-    char         *oname_src=NULL;
-    char         *oname_dst=NULL;
-    unsigned     flag=0;
-    unsigned     verbose=0;
-    unsigned     parents=0;
+    hid_t        fid_src = -1;
+    hid_t        fid_dst = -1;
+    char         *fname_src = NULL;
+    char         *fname_dst = NULL;
+    char         *oname_src = NULL;
+    char         *oname_dst = NULL;
+    char         *str_flag = NULL;
+    unsigned     flag = 0;
+    unsigned     verbose = 0;
+    unsigned     parents = 0;
     hid_t        ocpl_id = (-1);          /* Object copy property list */
     hid_t        lcpl_id = (-1);          /* Link creation property list */
-    char         str_flag[20];
     int          opt;
     int          li_ret;
     h5tool_link_info_t linkinfo;
-    int          i, len;
-    char         *str_ptr=NULL;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -249,7 +247,7 @@ main (int argc, const char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
-            HDstrcpy(str_flag,opt_arg);
+            str_flag = HDstrdup(opt_arg);
             break;
 
         case 'h':
@@ -377,8 +375,10 @@ main (int argc, const char *argv[])
     {
         printf("Copying file <%s> and object <%s> to file <%s> and object <%s>\n",
         fname_src, oname_src, fname_dst, oname_dst);
-        if (flag)
+        if (flag) {
+            HDassert(str_flag);
             printf("Using %s flag\n", str_flag);
+        }
     }
 
 
@@ -417,14 +417,19 @@ main (int argc, const char *argv[])
     } /* end if */
     else /* error, if parent groups doesn't already exist in destination file */
     {
+        size_t        i, len;
+
         len = HDstrlen(oname_dst);        
+
         /* check if all the parents groups exist. skip root group */
         for (i = 1; i < len; i++)
         {
             if ('/'==oname_dst[i])
             {
-                str_ptr = (char*)HDcalloc((size_t)i+1, sizeof(char));
-                HDstrncpy (str_ptr, oname_dst, (size_t)i);
+                char         *str_ptr;
+
+                str_ptr = (char *)HDcalloc(i + 1, sizeof(char));
+                HDstrncpy(str_ptr, oname_dst, i);
                 str_ptr[i]='\0';
                 if (H5Lexists(fid_dst, str_ptr, H5P_DEFAULT) <= 0)
                 {
@@ -513,6 +518,8 @@ error:
         HDfree(oname_dst);
     if (oname_src)
         HDfree(oname_src);
+    if (str_flag)
+        HDfree(str_flag);
 
     h5tools_close();
 
