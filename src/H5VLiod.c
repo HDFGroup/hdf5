@@ -35,6 +35,23 @@
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_client.h"     /* Client IOD helper			*/
 
+/* function shipper IDs for different routines */
+static fs_id_t H5VL_EFF_INIT_ID;
+static fs_id_t H5VL_EFF_FINALIZE_ID;
+static fs_id_t H5VL_FILE_CREATE_ID;
+static fs_id_t H5VL_FILE_OPEN_ID;
+static fs_id_t H5VL_FILE_FLUSH_ID;
+static fs_id_t H5VL_FILE_CLOSE_ID;
+static fs_id_t H5VL_GROUP_CREATE_ID;
+static fs_id_t H5VL_GROUP_OPEN_ID;
+static fs_id_t H5VL_GROUP_CLOSE_ID;
+static fs_id_t H5VL_DSET_CREATE_ID;
+static fs_id_t H5VL_DSET_OPEN_ID;
+static fs_id_t H5VL_DSET_READ_ID;
+static fs_id_t H5VL_DSET_WRITE_ID;
+static fs_id_t H5VL_DSET_SET_EXTENT_ID;
+static fs_id_t H5VL_DSET_CLOSE_ID;
+
 /* Prototypes */
 static void *H5VL_iod_fapl_copy(const void *_old_fa);
 static herr_t H5VL_iod_fapl_free(void *_fa);
@@ -251,9 +268,13 @@ EFF_init(MPI_Comm comm, MPI_Info info)
 {
     char mpi_port_name[MPI_MAX_PORT_NAME];
     FILE *config;
+    fs_request_t fs_req;
+    int num_procs;
     herr_t ret_value = SUCCEED;
 
     //FUNC_ENTER_API(FAIL)
+
+    MPI_Comm_size(comm, &num_procs);
 
     if ((config = fopen("port.cfg", "r")) != NULL) {
         fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
@@ -261,8 +282,46 @@ EFF_init(MPI_Comm comm, MPI_Info info)
         fclose(config);
     }
 
-    if(NA_UNDEFINED == (PEER = H5VL_iod_client_eff_init(mpi_port_name, comm, info)))
+    if(NA_UNDEFINED == (PEER = H5VL_iod_client_eff_init(mpi_port_name)))
         return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize eff stack");
+
+    /* Register function and encoding/decoding functions */
+    H5VL_EFF_INIT_ID = fs_register("eff_init", H5VL_iod_client_encode_eff_init, 
+                                   H5VL_iod_client_decode_eff_init);
+    H5VL_EFF_FINALIZE_ID = fs_register("eff_finalize", NULL, 
+                                   H5VL_iod_client_decode_eff_init);
+    H5VL_FILE_CREATE_ID = fs_register("file_create", H5VL_iod_client_encode_file_create, 
+                                      H5VL_iod_client_decode_file_create);
+    H5VL_FILE_OPEN_ID = fs_register("file_open", H5VL_iod_client_encode_file_open, 
+                                      H5VL_iod_client_decode_file_open);
+    H5VL_FILE_FLUSH_ID = fs_register("file_flush", H5VL_iod_client_encode_file_flush, 
+                                      H5VL_iod_client_decode_file_flush);
+    H5VL_FILE_CLOSE_ID = fs_register("file_close", H5VL_iod_client_encode_file_close, 
+                                      H5VL_iod_client_decode_file_close);
+    H5VL_GROUP_CREATE_ID = fs_register("group_create", H5VL_iod_client_encode_group_create, 
+                                      H5VL_iod_client_decode_group_create);
+    H5VL_GROUP_OPEN_ID = fs_register("group_open", H5VL_iod_client_encode_group_open, 
+                                      H5VL_iod_client_decode_group_open);
+    H5VL_GROUP_CLOSE_ID = fs_register("group_close", H5VL_iod_client_encode_group_close, 
+                                      H5VL_iod_client_decode_group_close);
+    H5VL_DSET_CREATE_ID = fs_register("dset_create", H5VL_iod_client_encode_dset_create, 
+                                      H5VL_iod_client_decode_dset_create);
+    H5VL_DSET_OPEN_ID = fs_register("dset_open", H5VL_iod_client_encode_dset_open, 
+                                      H5VL_iod_client_decode_dset_open);
+    H5VL_DSET_READ_ID = fs_register("dset_read", H5VL_iod_client_encode_dset_io, 
+                                    H5VL_iod_client_decode_dset_read);
+    H5VL_DSET_WRITE_ID = fs_register("dset_write", H5VL_iod_client_encode_dset_io, 
+                                     H5VL_iod_client_decode_dset_write);
+    H5VL_DSET_SET_EXTENT_ID = fs_register("dset_set_extent", H5VL_iod_client_encode_dset_set_extent, 
+                                          H5VL_iod_client_decode_dset_set_extent);
+    H5VL_DSET_CLOSE_ID = fs_register("dset_close", H5VL_iod_client_encode_dset_close, 
+                                     H5VL_iod_client_decode_dset_close);
+
+    /* forward the init call to the IONs */
+    if(fs_forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &fs_req) < 0)
+        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to ship eff_init");
+
+    fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
     //done:
     //FUNC_LEAVE_API(ret_value)
@@ -285,9 +344,16 @@ EFF_init(MPI_Comm comm, MPI_Info info)
 herr_t
 EFF_finalize(void)
 {
+    fs_request_t fs_req;
     herr_t ret_value = SUCCEED;
 
     //FUNC_ENTER_API(FAIL)
+
+    /* forward the finalize call to the IONs */
+    if(fs_forward(PEER, H5VL_EFF_FINALIZE_ID, NULL, &ret_value, &fs_req) < 0)
+        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship eff_finalize");
+
+    fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
     if(H5VL_iod_client_eff_finalize(PEER) < 0)
         return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown eff stack");

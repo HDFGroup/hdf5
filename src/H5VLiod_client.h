@@ -102,7 +102,7 @@ H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);
 
-H5_DLL na_addr_t H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info info);
+H5_DLL na_addr_t H5VL_iod_client_eff_init(const char *mpi_port_name);
 H5_DLL herr_t H5VL_iod_client_eff_finalize(na_addr_t ion_target);
 
 H5_DLL herr_t H5VL_iod_client_encode_eff_init(fs_proc_t proc, void *_input);

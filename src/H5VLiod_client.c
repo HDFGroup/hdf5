@@ -388,17 +388,13 @@ done:
 } /* end H5VL_iod_local_traverse */
 
 na_addr_t
-H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUSED info)
+H5VL_iod_client_eff_init(const char *mpi_port_name)
 {
     na_addr_t ion_target;
     int fs_ret;
     na_addr_t ret_value;
-    int num_procs;
-    fs_request_t fs_req;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    MPI_Comm_size(comm, &num_procs);
 
     network_class = na_mpi_init(NULL, 0);
 
@@ -415,44 +411,6 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
     if (fs_ret != S_SUCCESS)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to connect to network address");
 
-    /* Register function and encoding/decoding functions */
-    H5VL_EFF_INIT_ID = fs_register("eff_init", H5VL_iod_client_encode_eff_init, 
-                                   H5VL_iod_client_decode_eff_init);
-    H5VL_EFF_FINALIZE_ID = fs_register("eff_finalize", NULL, 
-                                   H5VL_iod_client_decode_eff_init);
-    H5VL_FILE_CREATE_ID = fs_register("file_create", H5VL_iod_client_encode_file_create, 
-                                      H5VL_iod_client_decode_file_create);
-    H5VL_FILE_OPEN_ID = fs_register("file_open", H5VL_iod_client_encode_file_open, 
-                                      H5VL_iod_client_decode_file_open);
-    H5VL_FILE_FLUSH_ID = fs_register("file_flush", H5VL_iod_client_encode_file_flush, 
-                                      H5VL_iod_client_decode_file_flush);
-    H5VL_FILE_CLOSE_ID = fs_register("file_close", H5VL_iod_client_encode_file_close, 
-                                      H5VL_iod_client_decode_file_close);
-    H5VL_GROUP_CREATE_ID = fs_register("group_create", H5VL_iod_client_encode_group_create, 
-                                      H5VL_iod_client_decode_group_create);
-    H5VL_GROUP_OPEN_ID = fs_register("group_open", H5VL_iod_client_encode_group_open, 
-                                      H5VL_iod_client_decode_group_open);
-    H5VL_GROUP_CLOSE_ID = fs_register("group_close", H5VL_iod_client_encode_group_close, 
-                                      H5VL_iod_client_decode_group_close);
-    H5VL_DSET_CREATE_ID = fs_register("dset_create", H5VL_iod_client_encode_dset_create, 
-                                      H5VL_iod_client_decode_dset_create);
-    H5VL_DSET_OPEN_ID = fs_register("dset_open", H5VL_iod_client_encode_dset_open, 
-                                      H5VL_iod_client_decode_dset_open);
-    H5VL_DSET_READ_ID = fs_register("dset_read", H5VL_iod_client_encode_dset_io, 
-                                    H5VL_iod_client_decode_dset_read);
-    H5VL_DSET_WRITE_ID = fs_register("dset_write", H5VL_iod_client_encode_dset_io, 
-                                     H5VL_iod_client_decode_dset_write);
-    H5VL_DSET_SET_EXTENT_ID = fs_register("dset_set_extent", H5VL_iod_client_encode_dset_set_extent, 
-                                          H5VL_iod_client_decode_dset_set_extent);
-    H5VL_DSET_CLOSE_ID = fs_register("dset_close", H5VL_iod_client_encode_dset_close, 
-                                     H5VL_iod_client_decode_dset_close);
-
-    /* forward the init call to the IONs */
-    if(fs_forward(ion_target, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &fs_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to ship eff_init");
-
-    fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
-
     ret_value = ion_target;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -462,16 +420,9 @@ herr_t
 H5VL_iod_client_eff_finalize(na_addr_t ion_target)
 {
     herr_t ret_value = SUCCEED;
-    fs_request_t fs_req;
     int fs_ret;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    /* forward the finalize call to the IONs */
-    if(fs_forward(ion_target, H5VL_EFF_FINALIZE_ID, NULL, &ret_value, &fs_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship eff_finalize");
-
-    fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
     /* Free addr id */
     fs_ret = na_addr_free(network_class, ion_target);
