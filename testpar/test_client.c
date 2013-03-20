@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
     /* Print the data that has been read with an injected fault,
        This should print the array similar to the previous one, but with the 
        first value modified to be 10 (the injected error) */
-    printf("Reading Bad Data ");
+    printf("Printing Corrupted Data ");
     for(i=0;i<nelem;++i)
         printf("%d ",r2_data[i]);
     printf("\n");

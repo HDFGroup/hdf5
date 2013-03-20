@@ -1092,7 +1092,7 @@ H5VL_iod_server_decode_dset_set_extent(fs_proc_t proc, void *_input)
 
     /* decode the rank */
     INT32DECODE(p, input->rank);
-    printf("Extending on dimension %d\n", input->rank);
+
     input->size = malloc (sizeof(hsize_t) * input->rank);
     for(i=0 ; i<input->rank ; i++)
         UINT64DECODE_VARLEN(p, input->size[i])
