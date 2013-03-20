@@ -29,6 +29,7 @@ fs_id_t H5VL_EFF_INIT_ID;
 fs_id_t H5VL_EFF_FINALIZE_ID;
 fs_id_t H5VL_FILE_CREATE_ID;
 fs_id_t H5VL_FILE_OPEN_ID;
+fs_id_t H5VL_FILE_FLUSH_ID;
 fs_id_t H5VL_FILE_CLOSE_ID;
 fs_id_t H5VL_GROUP_CREATE_ID;
 fs_id_t H5VL_GROUP_OPEN_ID;
@@ -37,6 +38,7 @@ fs_id_t H5VL_DSET_CREATE_ID;
 fs_id_t H5VL_DSET_OPEN_ID;
 fs_id_t H5VL_DSET_READ_ID;
 fs_id_t H5VL_DSET_WRITE_ID;
+fs_id_t H5VL_DSET_SET_EXTENT_ID;
 fs_id_t H5VL_DSET_CLOSE_ID;
 
 /* struct that contains the information about the IOD container */
@@ -86,6 +88,12 @@ typedef struct H5VL_iod_file_open_input_t {
     hid_t fapl_id;
     fs_handle_t fs_handle;
 } H5VL_iod_file_open_input_t;
+
+typedef struct H5VL_iod_file_flush_input_t {
+    iod_handle_t coh;
+    H5F_scope_t scope;
+    fs_handle_t fs_handle;
+} H5VL_iod_file_flush_input_t;
 
 typedef struct H5VL_iod_group_create_input_t {
     iod_handle_t coh;
@@ -138,6 +146,13 @@ typedef struct H5VL_iod_dset_io_input_t {
     bds_handle_t bds_handle;
     fs_handle_t fs_handle;
 } H5VL_iod_dset_io_input_t;
+
+typedef struct H5VL_iod_dset_set_extent_input_t {
+    iod_handle_t iod_oh;
+    int rank;
+    hsize_t *size;
+    fs_handle_t fs_handle;
+} H5VL_iod_dset_set_extent_input_t;
 
 typedef struct H5VL_iod_read_status_t {
     int ret;

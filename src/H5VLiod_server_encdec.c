@@ -290,6 +290,63 @@ done:
 } /* end H5VL_iod_server_encode_file_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_decode_file_flush_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_decode_file_flush(fs_proc_t proc, void *_input)
+{
+    H5VL_iod_file_flush_input_t *input = (H5VL_iod_file_flush_input_t *)_input;
+    void *buf=NULL;
+    uint8_t *p;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    input->scope = (H5F_scope_t)*p++;
+    UINT64DECODE_VARLEN(p, input->coh.cookie);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_decode_file_flush() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_encode_file_flush_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_encode_file_flush(fs_proc_t proc, void *_output)
+{
+    int output = *((int *)_output);
+    void *buf = NULL;
+    uint8_t *p;
+    size_t size, nalloc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = sizeof(int32_t);
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    INT32ENCODE(p, output);
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_server_encode_file_flush() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_decode_file_close_params
  *------------------------------------------------------------------------- */
 herr_t 
@@ -1010,6 +1067,71 @@ H5VL_iod_server_encode_dset_write(fs_proc_t proc, void *_output)
 done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_server_encode_dset_io() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_decode_dset_set_extent_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_decode_dset_set_extent(fs_proc_t proc, void *_input)
+{
+    H5VL_iod_dset_set_extent_input_t *input = (H5VL_iod_dset_set_extent_input_t *)_input;
+    void *buf=NULL;
+    uint8_t *p;
+    int i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    /* decode the location with the container handle & iod object IDs and opened handles */
+    UINT64DECODE_VARLEN(p, input->iod_oh.cookie);
+
+    /* decode the rank */
+    INT32DECODE(p, input->rank);
+    printf("Extending on dimension %d\n", input->rank);
+    input->size = malloc (sizeof(hsize_t) * input->rank);
+    for(i=0 ; i<input->rank ; i++)
+        UINT64DECODE_VARLEN(p, input->size[i])
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_decode_dset_set_extent() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_encode_dset_set_extent_params
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_server_encode_dset_set_extent(fs_proc_t proc, void *_output)
+{
+    int output = *((int *)_output);
+    void *buf = NULL;
+    uint8_t *p;
+    size_t size, nalloc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = sizeof(int32_t);
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    INT32ENCODE(p, output);
+
+done:
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_server_encode_dset_set_extent() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_decode_dset_close_params

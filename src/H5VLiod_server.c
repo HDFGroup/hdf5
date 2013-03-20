@@ -53,6 +53,9 @@ static herr_t H5VL_iod_server_file_open_cb(size_t num_necessary_parents, AXE_tas
 static herr_t H5VL_iod_server_file_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
+static herr_t H5VL_iod_server_file_flush_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                            void *op_data);
 static herr_t H5VL_iod_server_group_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                               size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                               void *op_data);
@@ -74,6 +77,9 @@ static herr_t H5VL_iod_server_dset_read_cb(size_t num_necessary_parents, AXE_tas
 static herr_t H5VL_iod_server_dset_write_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
+static herr_t H5VL_iod_server_dset_set_extent_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                                 size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                                 void *op_data);
 static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
@@ -115,6 +121,10 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                         H5VL_iod_server_file_open,
                         H5VL_iod_server_decode_file_open, 
                         H5VL_iod_server_encode_file_open);
+    fs_handler_register("file_flush", 
+                        H5VL_iod_server_file_flush,
+                        H5VL_iod_server_decode_file_flush, 
+                        H5VL_iod_server_encode_file_flush);
     fs_handler_register("file_close", 
                         H5VL_iod_server_file_close,
                         H5VL_iod_server_decode_file_close, 
@@ -147,6 +157,10 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                         H5VL_iod_server_dset_write,
                         H5VL_iod_server_decode_dset_io, 
                         H5VL_iod_server_encode_dset_write);
+    fs_handler_register("dset_set_extent",
+                        H5VL_iod_server_dset_set_extent,
+                        H5VL_iod_server_decode_dset_set_extent, 
+                        H5VL_iod_server_encode_dset_set_extent);
     fs_handler_register("dset_close", 
                         H5VL_iod_server_dset_close,
                         H5VL_iod_server_decode_dset_close, 
@@ -331,6 +345,50 @@ H5VL_iod_server_file_open(fs_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_file_flush
+ *
+ * Purpose:	Function shipper registered call for File Flush.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_file_flush(fs_handle_t handle)
+{
+    H5VL_iod_file_flush_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_file_flush_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_file_flush_input_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine) {
+        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+    }
+    input->fs_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_flush_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_file_flush() */
 
 
 /*-------------------------------------------------------------------------
@@ -678,6 +736,50 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_set_extent
+ *
+ * Purpose:	Function shipper registered call for Dset Set_Extent.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	S_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_set_extent(fs_handle_t handle)
+{
+    H5VL_iod_dset_set_extent_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = S_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dset_set_extent_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dset_set_extent_input_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, S_FAIL, "can't allocate input struct for decoding");
+
+    if(S_FAIL == fs_handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
+    input->fs_handle = handle;
+
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dset_set_extent_cb, input, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_set_extent() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_dset_close
  *
  * Purpose:	Function shipper registered call for Dset Close.
@@ -887,6 +989,43 @@ done:
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_open_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_file_flush_cb
+ *
+ * Purpose:	Flushs iod HDF5 file.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_file_flush_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                             void *op_data)
+{
+    H5VL_iod_file_flush_input_t *input = (H5VL_iod_file_flush_input_t *)op_data;
+    iod_handle_t coh = input->coh;
+    H5F_scope_t scope = input->scope;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start file flush with scope %d\n", scope);
+
+done:
+    printf("Done with file flush, sending response %d to client\n", ret_value);
+    if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file flush to client");
+
+    input = H5MM_xfree(input);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_file_flush_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1829,6 +1968,46 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_write_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_set_extent_cb
+ *
+ * Purpose:	Set_Extents iod HDF5 dataset.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_dset_set_extent_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                                   size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                                   void *op_data)
+{
+    H5VL_iod_dset_set_extent_input_t *input = (H5VL_iod_dset_set_extent_input_t *)op_data;
+    iod_handle_t iod_oh = input->iod_oh;
+    int rank = input->rank;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    printf("Start dataset Extend on the first dimension to %d\n", input->size[0]);
+
+    if(iod_array_extend(iod_oh, IOD_TID_UNKNOWN, (iod_size_t)input->size[0], NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't extend dataset");
+
+done:
+    printf("Done with dset set_extent, sending response to client\n");
+    fs_handler_complete(input->fs_handle, &ret_value);
+
+    free(input->size);
+    input = H5MM_xfree(input);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_set_extent_cb() */
 
 
 /*-------------------------------------------------------------------------

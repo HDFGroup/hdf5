@@ -29,6 +29,7 @@ struct H5VL_iod_file_t;
 typedef enum H5RQ_type_t {
     FS_FILE_CREATE,
     FS_FILE_OPEN,
+    FS_FILE_FLUSH,
     FS_FILE_CLOSE,
     FS_GROUP_CREATE,
     FS_GROUP_OPEN,
@@ -37,6 +38,7 @@ typedef enum H5RQ_type_t {
     FS_DSET_OPEN,
     FS_DSET_READ,
     FS_DSET_WRITE,
+    FS_DSET_SET_EXTENT,
     FS_DSET_CLOSE
 } H5RQ_type_t;
 
@@ -109,6 +111,8 @@ H5_DLL herr_t H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_file_create(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_file_open(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_file_flush(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_file_flush(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_file_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_file_close(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input);
@@ -124,6 +128,8 @@ H5_DLL herr_t H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_read(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_decode_dset_write(fs_proc_t proc, void *_output);
+H5_DLL herr_t H5VL_iod_client_encode_dset_set_extent(fs_proc_t proc, void *_input);
+H5_DLL herr_t H5VL_iod_client_decode_dset_set_extent(fs_proc_t proc, void *_output);
 H5_DLL herr_t H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output);
 

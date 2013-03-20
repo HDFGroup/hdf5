@@ -71,7 +71,6 @@ static void *H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id,
 static herr_t H5VL_iod_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
 static herr_t H5VL_iod_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
 static herr_t H5VL_iod_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
 static herr_t H5VL_iod_file_close(void *file, hid_t req);
 
 /* Group callbacks */
@@ -147,8 +146,8 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_dataset_open,               /* open */
         H5VL_iod_dataset_read,               /* read */
         H5VL_iod_dataset_write,              /* write */
-        NULL,//H5VL_iod_dataset_set_extent,         /* set extent */
-        NULL,//H5VL_iod_dataset_get,                /* get */
+        H5VL_iod_dataset_set_extent,         /* set extent */
+        H5VL_iod_dataset_get,                /* get */
         H5VL_iod_dataset_close               /* close */
     },
     {                                           /* file_cls */
@@ -157,7 +156,7 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_file_flush,                 /* flush */
         H5VL_iod_file_get,                   /* get */
         H5VL_iod_file_misc,                  /* misc */
-        H5VL_iod_file_optional,              /* optional */
+        NULL,                                /* optional */
         H5VL_iod_file_close                  /* close */
     },
     {                                           /* group_cls */
@@ -217,7 +216,7 @@ H5VL_iod_init_interface(void)
  *		Failure:	Negative.
  *
  * Programmer:	Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -307,7 +306,7 @@ EFF_finalize(void)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -473,7 +472,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -572,7 +571,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -664,12 +663,46 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t UNUSED req)
+H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t UNUSED req)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    H5VL_iod_file_t *file = obj->file;
+    fs_request_t *fs_req;
+    int *status;
+    H5VL_iod_file_flush_input_t input;
+    H5VL_iod_request_t *request;
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* wait for all pending requests before closing the file */
+    if(H5VL_iod_request_wait_all(file) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS requests");
+
+    /* allocate a function shipper request */
+    if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a FS request");
+
+    /* set the input structure for the FS encode routine */
+    input.coh = file->remote_file.coh;
+    input.scope = scope;
+
+    /* allocate an integer to receive the return value if the file close succeeded or not */
+    status = (int *)malloc(sizeof(int));
+
+    /* forward the call to the ION */
+    if(fs_forward(PEER, H5VL_FILE_FLUSH_ID, &input, status, fs_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
+
+    /* setup a request to track completion of the operation */
+    if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    request->type = FS_FILE_FLUSH;
+    request->data = status;
+    request->req = fs_req;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(file, request);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -690,12 +723,123 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_file_get(void *obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    H5VL_iod_file_t *file = obj->file;
+    fs_request_t *fs_req;
+    int *status;
+    H5VL_iod_request_t *request;
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    switch (get_type) {
+        /* H5Fget_access_plist */
+        case H5VL_FILE_GET_FAPL:
+            {
+                H5VL_iod_fapl_t fa, *old_fa;
+                H5P_genplist_t *new_plist, *old_plist;
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(file->fapl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
+
+                if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(*plist_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+                if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(file->fapl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+                if(NULL == (old_fa = (H5VL_iod_fapl_t *)H5P_get_vol_info(old_plist)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get vol info");
+                fa.comm = old_fa->comm;
+                fa.info = old_fa->info;
+
+                ret_value = H5P_set_vol(new_plist, &H5VL_iod_g, &fa);
+
+                break;
+            }
+        /* H5Fget_create_plist */
+        case H5VL_FILE_GET_FCPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(file->remote_file.fcpl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file creation property list")
+
+                break;
+            }
+        /* H5Fget_intent */
+        case H5VL_FILE_GET_INTENT:
+            {
+                unsigned *ret = va_arg (arguments, unsigned *);
+
+                if(file->flags & H5F_ACC_RDWR)
+                    *ret = H5F_ACC_RDWR;
+                else
+                    *ret = H5F_ACC_RDONLY;
+                break;
+            }
+        /* H5Fget_name */
+        case H5VL_FILE_GET_NAME:
+            {
+                H5I_type_t UNUSED type = va_arg (arguments, H5I_type_t);
+                size_t     size = va_arg (arguments, size_t);
+                char      *name = va_arg (arguments, char *);
+                ssize_t   *ret  = va_arg (arguments, ssize_t *);
+                size_t     len;
+
+                len = HDstrlen(file->file_name);
+
+                if(name) {
+                    HDstrncpy(name, file->file_name, MIN(len + 1,size));
+                    if(len >= size)
+                        name[size-1]='\0';
+                } /* end if */
+
+                /* Set the return value for the API call */
+                *ret = (ssize_t)len;
+                break;
+            }
+        /* H5I_get_file_id */
+        case H5VL_OBJECT_GET_FILE:
+            {
+
+                H5I_type_t UNUSED type = va_arg (arguments, H5I_type_t);
+                void      **ret = va_arg (arguments, void **);
+
+                *ret = (void*)file;
+                break;
+            }
+        /* H5Fget_obj_count */
+        case H5VL_FILE_GET_OBJ_COUNT:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+                size_t  obj_count = 0;      /* Number of opened objects */
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                //break;
+            }
+        /* H5Fget_obj_ids */
+        case H5VL_FILE_GET_OBJ_IDS:
+            {
+                unsigned types = va_arg (arguments, unsigned);
+                size_t max_objs = va_arg (arguments, size_t);
+                hid_t *oid_list = va_arg (arguments, hid_t *);
+                ssize_t *ret = va_arg (arguments, ssize_t *);
+                size_t  obj_count = 0;      /* Number of opened objects */
+
+                /* Set the return value */
+                *ret = (ssize_t)obj_count;
+                //break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information")
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -719,36 +863,52 @@ static herr_t
 H5VL_iod_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
+
     FUNC_ENTER_NOAPI_NOINIT
+
+    switch (misc_type) {
+        /* H5Fis_accessible */
+        case H5VL_FILE_IS_ACCESSIBLE:
+            {
+                hid_t fapl_id       = va_arg (arguments, hid_t);
+                const char *name    = va_arg (arguments, const char *);
+                htri_t     *ret     = va_arg (arguments, htri_t *);
+                H5VL_iod_file_t *file = NULL;
+#if 0
+                /* attempt to open the file through the MDS plugin */
+                if(NULL == (file = (H5VL_iod_file_t *)H5VL_iod_file_open(name, H5F_ACC_RDONLY, fapl_id,
+                                                                         H5_REQUEST_NULL)))
+                    *ret = FALSE;
+                else
+                    *ret = TRUE;
+
+                /* close the file if it was succesfully opened */
+                if(file && H5VL_iod_file_close((void*)file, H5_REQUEST_NULL) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
+                break;
+#endif
+            }
+        /* H5Fmount */
+        case H5VL_FILE_MOUNT:
+            {
+                H5I_type_t type        = va_arg (arguments, H5I_type_t);
+                const char *name       = va_arg (arguments, const char *);
+                H5VL_iod_file_t *child = va_arg (arguments, H5VL_iod_file_t *);
+                hid_t plist_id         = va_arg (arguments, hid_t);
+            }
+        /* H5Fmount */
+        case H5VL_FILE_UNMOUNT:
+            {
+                H5I_type_t  type       = va_arg (arguments, H5I_type_t);
+                const char *name       = va_arg (arguments, const char *);
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "MDS Plugin does not support this operation type")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_file_misc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_file_optional
- *
- * Purpose:	Perform a plugin specific operation on a iod file
- *
- * Return:	Success:	0
- *		Failure:	-1
- *
- * Programmer:  Mohamad Chaarawi
- *              May, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_iod_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t UNUSED req, va_list arguments)
-{
-    herr_t       ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_file_optional() */
 
 
 /*-------------------------------------------------------------------------
@@ -760,7 +920,7 @@ done:
  *		Failure:	-1, file not closed.
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -831,7 +991,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -935,7 +1095,7 @@ done:
  *		Failure:	NULL
  *
  * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ *              March, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1030,12 +1190,33 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_group_get(void *obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_iod_group_get(void *_grp, H5VL_group_get_t get_type, hid_t UNUSED req, va_list arguments)
 {
+    H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    switch (get_type) {
+        /* H5Gget_create_plist */
+        case H5VL_GROUP_GET_GCPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(grp->remote_group.gcpl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group create property list")
+                break;
+            }
+        /* H5Gget_info */
+        case H5VL_GROUP_GET_INFO:
+            {
+                H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
+                H5G_info_t *ginfo = va_arg (arguments, H5G_info_t *);
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from group")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_get() */
@@ -1561,6 +1742,152 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_dataset_set_extent
+ *
+ * Purpose:	Set Extent of dataset
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              October, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t UNUSED req)
+{
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
+    H5VL_iod_dset_set_extent_input_t input;
+    iod_obj_id_t iod_id;
+    iod_handle_t iod_oh;
+    fs_request_t *fs_req;
+    H5VL_iod_request_t *request;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* wait for the dataset create or open to complete */
+    if(NULL != dset->common.request) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        dset->common.request->req = H5MM_xfree(dset->common.request->req);
+        dset->common.request = H5MM_xfree(dset->common.request);
+    }
+
+    /* wait for pending I/O requests on the dataset */
+    if(H5VL_iod_request_wait_some(dset->common.file, dset->common.obj_name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS requests");
+
+    /* Fill input structure */
+    input.iod_oh = dset->remote_dset.iod_oh;
+    input.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
+    input.size = size;
+
+    status = (int *)malloc(sizeof(int));
+
+    /* allocate a function shipper request */
+    if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a FS request");
+
+    /* forward the call to the IONs */
+    if(fs_forward(PEER, H5VL_DSET_SET_EXTENT_ID, &input, status, fs_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
+
+    /* setup a request to track completion of the operation */
+    if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    request->type = FS_DSET_SET_EXTENT;
+    request->data = status;
+    request->req = fs_req;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(dset->common.file, request);
+
+    /* set this request to be the creation request pending for this dataset now */
+    dset->common.request = request;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_set_extent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_dataset_get
+ *
+ * Purpose:	Gets certain information about a dataset
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              March, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
+{
+    H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        case H5VL_DATASET_GET_DCPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(dset->remote_dset.dcpl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset creation property list")
+
+                break;
+            }
+        case H5VL_DATASET_GET_DAPL:
+            {
+                hid_t *plist_id = va_arg (arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(dset->dapl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset access property list")
+
+                break;
+            }
+        case H5VL_DATASET_GET_SPACE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((*ret_id = H5Scopy(dset->remote_dset.space_id)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset")
+            }
+        case H5VL_DATASET_GET_SPACE_STATUS:
+            {
+                H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
+
+                *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
+                break;
+            }
+        case H5VL_DATASET_GET_TYPE:
+            {
+                hid_t	*ret_id = va_arg (arguments, hid_t *);
+
+                if((*ret_id = H5Tcopy(dset->remote_dset.type_id)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+            }
+        case H5VL_DATASET_GET_STORAGE_SIZE:
+        case H5VL_DATASET_GET_OFFSET:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_dataset_close
  *
  * Purpose:	Closes a dataset.
@@ -1583,6 +1910,13 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != dset->common.request) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+        dset->common.request->req = H5MM_xfree(dset->common.request->req);
+        dset->common.request = H5MM_xfree(dset->common.request);
+    }
 
     if(H5VL_iod_request_wait_some(dset->common.file, dset->common.obj_name) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS requests");

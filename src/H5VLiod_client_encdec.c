@@ -310,6 +310,64 @@ done:
 } /* end H5VL_client_decode_file_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_client_encode_file_flush
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_encode_file_flush(fs_proc_t proc, void *_input)
+{
+    H5VL_iod_file_flush_input_t *input = (H5VL_iod_file_flush_input_t *)_input;
+    size_t size, nalloc;
+    void *buf;
+    uint8_t *p;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = 1 + 1 + H5V_limit_enc_size((uint64_t)input->coh.cookie);
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;
+
+    /* encode scope */
+    *p++ = (uint8_t)input->scope;
+    UINT64ENCODE_VARLEN(p, input->coh.cookie);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_encode_file_flush() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_client_decode_file_flush
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_decode_file_flush(fs_proc_t proc, void *_output)
+{
+    int *output = (int *)_output;
+    void *buf=NULL;
+    uint8_t *p;
+
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
+
+    p = (uint8_t *)buf;
+    INT32DECODE(p, *output);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_decode_file_flush() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_client_encode_file_close
  *------------------------------------------------------------------------- */
 herr_t 
@@ -1109,6 +1167,70 @@ H5VL_iod_client_decode_dset_write(fs_proc_t proc, void *_output)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_client_decode_dset_write() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_client_encode_dset_set_extent
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_encode_dset_set_extent(fs_proc_t proc, void *_input)
+{
+    H5VL_iod_dset_set_extent_input_t *input = (H5VL_iod_dset_set_extent_input_t *)_input;
+    size_t size, nalloc;
+    void *buf;
+    uint8_t *p;
+    int i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    size = 1 + H5V_limit_enc_size((uint64_t)input->iod_oh.cookie) + sizeof(int32_t);
+    for(i=0 ; i<input->rank ; i++)
+        size += 1 + H5V_limit_enc_size((uint64_t)(input->size[i]));
+
+    nalloc = fs_proc_get_size(proc);
+
+    if(nalloc < size)
+        fs_proc_set_size(proc, size);
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to encode in does not exist");
+
+    p = (uint8_t *)buf;    /* Temporary pointer to encoding buffer */
+
+    /* encode the location with the container handle & iod object IDs and opened handles */
+    UINT64ENCODE_VARLEN(p, input->iod_oh.cookie);
+    /* encode the rank */
+    INT32ENCODE(p, input->rank);
+    for(i=0 ; i<input->rank ; i++)
+        UINT64ENCODE_VARLEN(p, input->size[i])
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_encode_dset_set_extent() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_client_decode_dset_set_extent
+ *------------------------------------------------------------------------- */
+herr_t 
+H5VL_iod_client_decode_dset_set_extent(fs_proc_t proc, void *_output)
+{
+    int *output = (int *)_output;
+    void *buf=NULL;
+    uint8_t *p;
+
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (buf = fs_proc_get_buf_ptr(proc)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "buffer to decode from does not exist");
+
+    p = (uint8_t *)buf;
+    INT32DECODE(p, *output);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_client_decode_dset_set_extent() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_client_encode_dset_close

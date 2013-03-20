@@ -85,23 +85,15 @@ CONFIG_CLEAN_FILES = testph5.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
 	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
-	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT) iod_server$(EXEEXT) \
-	iod_client$(EXEEXT)
-iod_client_SOURCES = iod_client.c
-iod_client_OBJECTS = iod_client.$(OBJEXT)
-iod_client_LDADD = $(LDADD)
-iod_client_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-iod_server_SOURCES = iod_server.c
-iod_server_OBJECTS = iod_server.$(OBJEXT)
-iod_server_LDADD = $(LDADD)
-iod_server_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT) test_server$(EXEEXT) \
+	test_client$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
 t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
 t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
 t_mpi_LDADD = $(LDADD)
@@ -122,6 +114,14 @@ t_shapesame_SOURCES = t_shapesame.c
 t_shapesame_OBJECTS = t_shapesame.$(OBJEXT)
 t_shapesame_LDADD = $(LDADD)
 t_shapesame_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+test_client_SOURCES = test_client.c
+test_client_OBJECTS = test_client.$(OBJEXT)
+test_client_LDADD = $(LDADD)
+test_client_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+test_server_SOURCES = test_server.c
+test_server_OBJECTS = test_server.$(OBJEXT)
+test_server_LDADD = $(LDADD)
+test_server_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_file.$(OBJEXT) t_file_image.$(OBJEXT) t_mdset.$(OBJEXT) \
 	t_ph5basic.$(OBJEXT) t_coll_chunk.$(OBJEXT) \
@@ -156,11 +156,11 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
-SOURCES = iod_client.c iod_server.c t_cache.c t_mpi.c t_pflush1.c \
-	t_pflush2.c t_posix_compliant.c t_shapesame.c \
+SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+	t_posix_compliant.c t_shapesame.c test_client.c test_server.c \
 	$(testphdf5_SOURCES)
-DIST_SOURCES = iod_client.c iod_server.c t_cache.c t_mpi.c t_pflush1.c \
-	t_pflush2.c t_posix_compliant.c t_shapesame.c \
+DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+	t_posix_compliant.c t_shapesame.c test_client.c test_server.c \
 	$(testphdf5_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -462,7 +462,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame iod_server iod_client
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame test_server test_client
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
@@ -539,12 +539,6 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-iod_client$(EXEEXT): $(iod_client_OBJECTS) $(iod_client_DEPENDENCIES) $(EXTRA_iod_client_DEPENDENCIES) 
-	@rm -f iod_client$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(iod_client_OBJECTS) $(iod_client_LDADD) $(LIBS)
-iod_server$(EXEEXT): $(iod_server_OBJECTS) $(iod_server_DEPENDENCIES) $(EXTRA_iod_server_DEPENDENCIES) 
-	@rm -f iod_server$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(iod_server_OBJECTS) $(iod_server_LDADD) $(LIBS)
 t_cache$(EXEEXT): $(t_cache_OBJECTS) $(t_cache_DEPENDENCIES) $(EXTRA_t_cache_DEPENDENCIES) 
 	@rm -f t_cache$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_cache_OBJECTS) $(t_cache_LDADD) $(LIBS)
@@ -563,6 +557,12 @@ t_posix_compliant$(EXEEXT): $(t_posix_compliant_OBJECTS) $(t_posix_compliant_DEP
 t_shapesame$(EXEEXT): $(t_shapesame_OBJECTS) $(t_shapesame_DEPENDENCIES) $(EXTRA_t_shapesame_DEPENDENCIES) 
 	@rm -f t_shapesame$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_shapesame_OBJECTS) $(t_shapesame_LDADD) $(LIBS)
+test_client$(EXEEXT): $(test_client_OBJECTS) $(test_client_DEPENDENCIES) $(EXTRA_test_client_DEPENDENCIES) 
+	@rm -f test_client$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_client_OBJECTS) $(test_client_LDADD) $(LIBS)
+test_server$(EXEEXT): $(test_server_OBJECTS) $(test_server_DEPENDENCIES) $(EXTRA_test_server_DEPENDENCIES) 
+	@rm -f test_server$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_server_OBJECTS) $(test_server_LDADD) $(LIBS)
 testphdf5$(EXEEXT): $(testphdf5_OBJECTS) $(testphdf5_DEPENDENCIES) $(EXTRA_testphdf5_DEPENDENCIES) 
 	@rm -f testphdf5$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testphdf5_OBJECTS) $(testphdf5_LDADD) $(LIBS)
@@ -573,8 +573,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iod_client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iod_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_chunk_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_chunk.Po@am__quote@
@@ -591,6 +589,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_shapesame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_span_tree.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testphdf5.Po@am__quote@
 
 .c.o:

@@ -424,6 +424,8 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
                                       H5VL_iod_client_decode_file_create);
     H5VL_FILE_OPEN_ID = fs_register("file_open", H5VL_iod_client_encode_file_open, 
                                       H5VL_iod_client_decode_file_open);
+    H5VL_FILE_FLUSH_ID = fs_register("file_flush", H5VL_iod_client_encode_file_flush, 
+                                      H5VL_iod_client_decode_file_flush);
     H5VL_FILE_CLOSE_ID = fs_register("file_close", H5VL_iod_client_encode_file_close, 
                                       H5VL_iod_client_decode_file_close);
     H5VL_GROUP_CREATE_ID = fs_register("group_create", H5VL_iod_client_encode_group_create, 
@@ -440,6 +442,8 @@ H5VL_iod_client_eff_init(const char *mpi_port_name, MPI_Comm comm, MPI_Info UNUS
                                     H5VL_iod_client_decode_dset_read);
     H5VL_DSET_WRITE_ID = fs_register("dset_write", H5VL_iod_client_encode_dset_io, 
                                      H5VL_iod_client_decode_dset_write);
+    H5VL_DSET_SET_EXTENT_ID = fs_register("dset_set_extent", H5VL_iod_client_encode_dset_set_extent, 
+                                          H5VL_iod_client_decode_dset_set_extent);
     H5VL_DSET_CLOSE_ID = fs_register("dset_close", H5VL_iod_client_encode_dset_close, 
                                      H5VL_iod_client_decode_dset_close);
 
