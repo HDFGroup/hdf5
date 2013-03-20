@@ -36,94 +36,12 @@ const char *FILENAME[] = {
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
-#define KB                      1024
-
-#define FILE_DEFLATE_NAME       "deflate.h5"
 
 /* Dataset names for testing filters */
-#define DSET_DEFAULT_NAME	"default"
-#define DSET_CHUNKED_NAME	"chunked"
-#define DSET_COMPACT_NAME       "compact"
-#define DSET_SIMPLE_IO_NAME	"simple_io"
-#define DSET_USERBLOCK_IO_NAME	"userblock_io"
-#define DSET_COMPACT_IO_NAME    "compact_io"
-#define DSET_COMPACT_MAX_NAME   "max_compact"
-#define DSET_COMPACT_MAX2_NAME   "max_compact_2"
-#define DSET_CONV_BUF_NAME	"conv_buf"
-#define DSET_TCONV_NAME		"tconv"
 #define DSET_DEFLATE_NAME	"deflate"
 #define DSET_BZIP2_NAME	        "bzip2"
 #define DSET_DYNLIB1_NAME	"dynlib1"
 #define DSET_DYNLIB2_NAME       "dynlib2"
-#ifdef H5_HAVE_FILTER_SZIP
-#define DSET_SZIP_NAME          "szip"
-#endif /* H5_HAVE_FILTER_SZIP */
-#define DSET_SHUFFLE_NAME	"shuffle"
-#define DSET_FLETCHER32_NAME	"fletcher32"
-#define DSET_FLETCHER32_NAME_2	"fletcher32_2"
-#define DSET_FLETCHER32_NAME_3	"fletcher32_3"
-#define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+fletcher32"
-#define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+fletcher32_2"
-#if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
-#define DSET_SHUF_SZIP_FLET_NAME	"shuffle+szip+fletcher32"
-#define DSET_SHUF_SZIP_FLET_NAME_2	"shuffle+szip+fletcher32_2"
-#endif /* defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32 */
-
-#define DSET_MISSING_NAME	"missing"
-#define DSET_CAN_APPLY_NAME	"can_apply"
-#define DSET_CAN_APPLY_NAME2	"can_apply2"
-#ifdef H5_HAVE_FILTER_SZIP
-#define DSET_CAN_APPLY_SZIP_NAME	"can_apply_szip"
-#endif /* H5_HAVE_FILTER_SZIP */
-#define DSET_SET_LOCAL_NAME	"set_local"
-#define DSET_SET_LOCAL_NAME_2	"set_local_2"
-#define DSET_ONEBYTE_SHUF_NAME	"onebyte_shuffle"
-#define DSET_NBIT_INT_NAME             "nbit_int"
-#define DSET_NBIT_FLOAT_NAME           "nbit_float"
-#define DSET_NBIT_DOUBLE_NAME          "nbit_double"
-#define DSET_NBIT_ARRAY_NAME           "nbit_array"
-#define DSET_NBIT_COMPOUND_NAME        "nbit_compound"
-#define DSET_NBIT_COMPOUND_NAME_2      "nbit_compound_2"
-#define DSET_NBIT_COMPOUND_NAME_3      "nbit_compound_3"
-#define DSET_NBIT_INT_SIZE_NAME        "nbit_int_size"
-#define DSET_NBIT_FLT_SIZE_NAME        "nbit_flt_size"
-#define DSET_SCALEOFFSET_INT_NAME      "scaleoffset_int"
-#define DSET_SCALEOFFSET_INT_NAME_2    "scaleoffset_int_2"
-#define DSET_SCALEOFFSET_FLOAT_NAME    "scaleoffset_float"
-#define DSET_SCALEOFFSET_FLOAT_NAME_2  "scaleoffset_float_2"
-#define DSET_SCALEOFFSET_DOUBLE_NAME   "scaleoffset_double"
-#define DSET_SCALEOFFSET_DOUBLE_NAME_2 "scaleoffset_double_2"
-#define DSET_COMPARE_DCPL_NAME		"compare_dcpl"
-#define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
-#define DSET_COPY_DCPL_NAME_1		"copy_dcpl_1"
-#define DSET_COPY_DCPL_NAME_2		"copy_dcpl_2"
-#define COPY_DCPL_EXTFILE_NAME          "ext_file"
-#define DSET_DEPREC_NAME		"deprecated"
-#define DSET_DEPREC_NAME_CHUNKED	"deprecated_chunked"
-#define DSET_DEPREC_NAME_COMPACT	"deprecated_compact"
-#define DSET_DEPREC_NAME_FILTER         "deprecated_filter"
-
-#define USER_BLOCK              1024
-#define SIXTY_FOUR_KB           65536
-
-/* Temporary filter IDs used for testing */
-
-/* Flags for testing filters */
-#define DISABLE_FLETCHER32      0
-#define ENABLE_FLETCHER32       1
-#define DATA_CORRUPTED          1
-#define DATA_NOT_CORRUPTED      0
-
-/* Parameters for the "set local" test */
-#define BOGUS2_PERM_NPARMS      2       /* Number of "permanent" parameters */
-#define BOGUS2_PARAM_1          13      /* (No particular meaning, just for checking value) */
-#define BOGUS2_PARAM_2          35      /* (No particular meaning, just for checking value) */
-#define BOGUS2_ALL_NPARMS       4       /* Total number of parameter = permanent + "local" parameters */
-
-/* Dimensionality for conversion buffer test */
-#define DIM1          100  /* Dim. Size of data member # 1 */
-#define DIM2         5000  /* Dim. Size of data member # 2 */
-#define DIM3           10  /* Dim. Size of data member # 3 */
 
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1       2
@@ -132,48 +50,6 @@ const char *FILENAME[] = {
 #define FILTER_HS_OFFSET2       30
 #define FILTER_HS_SIZE1         4
 #define FILTER_HS_SIZE2         50
-
-/* Names for noencoder test */
-#ifdef H5_HAVE_FILTER_SZIP
-#define NOENCODER_FILENAME "noencoder.h5"
-#define NOENCODER_COPY_FILENAME "noencoder.h5.copy"
-#define NOENCODER_TEST_DATASET "noencoder_tdset.h5"
-#define NOENCODER_SZIP_DATASET "noencoder_szip_dset.h5"
-#define NOENCODER_SZIP_SHUFF_FLETCH_DATASET "noencoder_szip_shuffle_fletcher_dset.h5"
-#endif /* H5_HAVE_FILTER_SZIP */
-
-/* Names for zero-dim test */
-#define ZERODIM_DATASET "zerodim"
-
-/* Parameters for zero-dim test */
-#define MISSING_CHUNK_DATASET   "missing_chunk"
-#define MISSING_CHUNK_DIM       100
-
-/* Names for random chunks test */
-#define NPOINTS         50
-
-/* Parameters for huge chunks test */
-#define HUGE_DATASET            "Dataset"
-#define HUGE_DIM                ((hsize_t)16 * 1024 * 1024 * 1024)
-#define HUGE_CHUNK_DIM          ((hsize_t)2 * 1024 * 1024 * 1024)
-#define TOO_HUGE_CHUNK_DIM      ((hsize_t)4 * 1024 * 1024 * 1024)
-#define HUGE_DATASET2           "Dataset2"
-#define HUGE_DIM2_0             ((hsize_t)16 * 1024)
-#define HUGE_DIM2_1             ((hsize_t)16 * 1024)
-#define HUGE_DIM2_2             ((hsize_t)16 * 1024)
-#define HUGE_CHUNK_DIM2_0       ((hsize_t)2 * 1024)
-#define HUGE_CHUNK_DIM2_1       ((hsize_t)1024)
-#define HUGE_CHUNK_DIM2_2       ((hsize_t)1024)
-#define TOO_HUGE_CHUNK_DIM2_0   ((hsize_t)4 * 1024)
-#define TOO_HUGE_CHUNK_DIM2_1   ((hsize_t)1024)
-#define TOO_HUGE_CHUNK_DIM2_2   ((hsize_t)1024)
-
-/* Parameters for testing bypassing chunk cache */
-#define BYPASS_DATASET1          "Dset1"
-#define BYPASS_DATASET2          "Dset2"
-#define BYPASS_DIM               1000
-#define BYPASS_CHUNK_DIM         500
-#define BYPASS_FILL_VALUE        7
 
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -199,7 +75,7 @@ int	points_deflate[DSET_DIM1][DSET_DIM2],
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size)
+test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
 {
     hid_t		dataset;        /* Dataset ID */
     hid_t		dxpl;           /* Dataset xfer property list ID */
@@ -212,7 +88,6 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size
     int	                points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
     size_t		i, j;        /* Local index variables */
     int                 n = 0;
-    herr_t              status;         /* Error status */
 
     /* Create the data space */
     if((sid = H5Screate_simple(2, size, NULL)) < 0) goto error;
@@ -279,8 +154,6 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size
     if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
 	TEST_ERROR;
 
-    if((*dset_size=H5Dget_storage_size(dataset))==0) TEST_ERROR;
-
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -344,7 +217,6 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size
 	   }
         }
 
-    if((*dset_size=H5Dget_storage_size(dataset))==0) TEST_ERROR;
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -433,8 +305,6 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, hsize_t *dset_size
 	}
     }
 
-    /* Get the storage size of the dataset */
-    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
     /* Clean up objects used for this test */
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
@@ -468,12 +338,7 @@ test_filters(hid_t file, hid_t fapl)
 {
     hid_t	dc;                 /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
-    hsize_t     null_size;          /* Size of dataset with null filter */
-    int         compress_level = 9;
-
-#ifdef H5_HAVE_FILTER_DEFLATE
-    hsize_t     deflate_size;       /* Size of dataset with deflate filter */
-#endif /* H5_HAVE_FILTER_DEFLATE */
+    unsigned int         compress_level = 9;
 
     /*----------------------------------------------------------
      * STEP 2: Test deflation by itself.
@@ -485,7 +350,7 @@ test_filters(hid_t file, hid_t fapl)
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
     if(H5Pset_deflate (dc, 6) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc,&deflate_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc) < 0) goto error;
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
 #else /* H5_HAVE_FILTER_DEFLATE */
@@ -501,9 +366,9 @@ test_filters(hid_t file, hid_t fapl)
     puts("Testing DYNLIB1 filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB1, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
+    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB1, H5Z_FLAG_MANDATORY, (size_t)1, &compress_level) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_DYNLIB1_NAME,dc,&deflate_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_DYNLIB1_NAME,dc) < 0) goto error;
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
@@ -523,7 +388,7 @@ test_filters(hid_t file, hid_t fapl)
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
     if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_DYNLIB2_NAME,dc,&deflate_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_DYNLIB2_NAME,dc) < 0) goto error;
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
@@ -543,7 +408,7 @@ test_filters(hid_t file, hid_t fapl)
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
     if(H5Pset_filter (dc, H5Z_FILTER_BZIP2, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_BZIP2_NAME,dc,&deflate_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_BZIP2_NAME,dc) < 0) goto error;
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
@@ -624,12 +489,6 @@ static herr_t
 test_read_with_filters(hid_t file, hid_t fapl)
 {
     hid_t	dset;                 /* Dataset ID */
-    hsize_t     null_size;          /* Size of dataset with null filter */
-    int         compress_level = 9;
-
-#ifdef H5_HAVE_FILTER_DEFLATE
-    hsize_t     deflate_size;       /* Size of dataset with deflate filter */
-#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /*----------------------------------------------------------
      * STEP 2: Test deflation by itself.
@@ -717,7 +576,7 @@ int
 main(void)
 {
     char		filename[FILENAME_BUF_SIZE];
-    hid_t		file, grp, fapl, fapl2;
+    hid_t		file, fapl, fapl2;
     hbool_t new_format;
     int mdc_nelmts;
     size_t rdcc_nelmts;
