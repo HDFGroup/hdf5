@@ -217,6 +217,9 @@ H5VL_iod_server_eff_init(fs_handle_t handle)
     /* MSC - this needs to be changed to be the number of peers connecting to this server */
     num_peers = num_procs;
 
+    if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
+
 done:
     fs_handler_complete(handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -289,10 +292,9 @@ H5VL_iod_server_file_create(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_create_cb, 
                                       input, NULL))
@@ -333,10 +335,9 @@ H5VL_iod_server_file_open(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_open_cb, 
                                       input, NULL))
@@ -377,10 +378,9 @@ H5VL_iod_server_file_flush(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_flush_cb, 
                                       input, NULL))
@@ -421,10 +421,9 @@ H5VL_iod_server_file_close(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_close_cb, 
                                       input, NULL))
@@ -465,10 +464,9 @@ H5VL_iod_server_group_create(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_create_cb, 
                                       input, NULL))
@@ -509,10 +507,9 @@ H5VL_iod_server_group_open(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_open_cb, 
                                       input, NULL))
@@ -553,10 +550,9 @@ H5VL_iod_server_group_close(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_close_cb, 
                                       input, NULL))
@@ -597,10 +593,9 @@ H5VL_iod_server_dset_create(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_create_cb, 
                                       input, NULL))
@@ -641,10 +636,9 @@ H5VL_iod_server_dset_open(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_open_cb, 
                                       input, NULL))
@@ -685,6 +679,9 @@ H5VL_iod_server_dset_read(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_read_cb, 
                                       input, NULL))
@@ -724,6 +721,9 @@ H5VL_iod_server_dset_write(fs_handle_t handle)
 
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
 
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_write_cb, 
@@ -809,10 +809,9 @@ H5VL_iod_server_dset_close(fs_handle_t handle)
     if(S_FAIL == fs_handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, S_FAIL, "can't get input parameters");
 
-    if(NULL == engine) {
-        if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, S_FAIL, "can't start AXE engine");
-    }
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, S_FAIL, "AXE engine not started");
+
     input->fs_handle = handle;
     if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_close_cb, 
                                       input, NULL))
@@ -1658,6 +1657,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     output.scratch_oh = scratch_handle;
 
     free(max_dims);
+    free(array.current_dims);
 
     fprintf(stderr, "Done with dset create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
