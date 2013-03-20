@@ -36,7 +36,7 @@ $(NAME1).o: $(SRCDIR)/$(NAME1).c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(SRCDIR)/$(NAME1).c
 
 lib$(NAME1).so.$(VERSION): $(NAME1).o
-	$(CC) -shared -Wl,-soname,lib$(NAME1).so.$(MAJOR) $^ -o $@
+	$(CC) -shared $^ -o $@
 
 clean:
 	$(RM) *.o *.so* Makefile
