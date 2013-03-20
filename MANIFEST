@@ -697,6 +697,9 @@
 ./src/H5FDstdio.h
 ./src/H5FDwindows.c
 ./src/H5FDwindows.h
+./src/H5FF.c
+./src/H5FFprivate.h
+./src/H5FFpublic.h
 ./src/H5FL.c
 ./src/H5FLprivate.h
 ./src/H5FO.c

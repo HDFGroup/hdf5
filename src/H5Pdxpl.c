@@ -49,8 +49,8 @@
 
 #define H5D_XFER_INJECT_BAD_CHECKSUM_SIZE		sizeof(hbool_t)
 #define H5D_XFER_INJECT_BAD_CHECKSUM_DEF    		FALSE
-#define H5D_XFER_INJECT_BAD_CHECKSUM_ENC                H5P__encode_unsigned
-#define H5D_XFER_INJECT_BAD_CHECKSUM_DEC                H5P__decode_unsigned
+#define H5D_XFER_INJECT_BAD_CHECKSUM_ENC                H5P__encode_hbool_t
+#define H5D_XFER_INJECT_BAD_CHECKSUM_DEC                H5P__decode_hbool_t
 
 /* ======== Data transfer properties ======== */
 /* Definitions for maximum temp buffer size property */

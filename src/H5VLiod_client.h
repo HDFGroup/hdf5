@@ -19,11 +19,13 @@
 #ifndef _H5VLiod_client_H
 #define _H5VLiod_client_H
 
+#include "H5FFprivate.h"     /* FastForward wrappers            */
 #include "H5VLiod.h"         /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
 
 /* forward declaration of file struct */
 struct H5VL_iod_file_t;
+struct H5VL_iod_object_t;
 
 /* types for requests */
 typedef enum H5RQ_type_t {
@@ -42,12 +44,19 @@ typedef enum H5RQ_type_t {
     FS_DSET_CLOSE
 } H5RQ_type_t;
 
+typedef enum H5VL_iod_state_t {
+    H5VL_IOD_PENDING,
+    H5VL_IOD_COMPLETED
+} H5VL_iod_state_t;
+
 /* the client IOD VOL request struct */
 typedef struct H5VL_iod_request_t {
     H5RQ_type_t type;
     void *data;
     void *req;
-    char *obj_name;
+    struct H5VL_iod_object_t *obj;
+    H5VL_iod_state_t state;
+    H5_status_t status;
     struct H5VL_iod_request_t *prev;
     struct H5VL_iod_request_t *next;
 } H5VL_iod_request_t;
@@ -97,7 +106,7 @@ H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t 
 H5_DLL herr_t H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
-H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const char *name);
+H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object);
 H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);

@@ -35,6 +35,11 @@
 /* ========  String creation property names ======== */
 #define H5P_STRCRT_CHAR_ENCODING_NAME  "character_encoding"     /* Character set encoding for string */
 
+/* ========  Root property names ======== */
+#define H5P_ASYNC_FLAG_NAME		"async flag"	/* Async flag */
+#define H5P_ASYNC_FLAG_DEF		FALSE
+#define H5P_ASYNC_REQ_NAME		"async request"	/* Async request */
+
 
 /****************************/
 /* Library Private Typedefs */

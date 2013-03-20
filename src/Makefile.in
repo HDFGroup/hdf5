@@ -141,7 +141,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5VLiod_server_encdec.lo H5FD.lo H5FDcore.lo H5FDdirect.lo \
 	H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
 	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDspace.lo \
-	H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
+	H5FDstdio.lo H5FF.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
 	H5FSsection.lo H5FSstat.lo H5FStest.lo H5G.lo H5Gbtree2.lo \
 	H5Gcache.lo H5Gcompact.lo H5Gdense.lo H5Gdeprec.lo H5Gent.lo \
 	H5Gint.lo H5Glink.lo H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo \
@@ -555,6 +555,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
+        H5FF.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
         H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
@@ -822,6 +823,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDsec2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDspace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FDstdio.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FF.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FL.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FO.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5FS.Plo@am__quote@

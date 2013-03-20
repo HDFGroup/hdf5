@@ -43,6 +43,11 @@
 /* Local Macros */
 /****************/
 
+/* Async. I/O properties */
+#define H5P_ASYNC_FLAG_SIZE		sizeof(hbool_t)
+#define H5P_ASYNC_REQ_SIZE		sizeof(void *)
+#define H5P_ASYNC_REQ_DEF		NULL
+
 
 /******************/
 /* Local Typedefs */
@@ -88,6 +93,9 @@ typedef struct {
 static H5P_genprop_t *H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type);
 static herr_t H5P_free_prop(H5P_genprop_t *prop);
 static int H5P_cmp_prop(const H5P_genprop_t *prop1, const H5P_genprop_t *prop2);
+
+/* Property class callbacks */
+static herr_t H5P__root_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
@@ -142,7 +150,7 @@ const H5P_libclass_t H5P_CLS_ROOT[1] = {{
     NULL,			/* Parent class ID              */
     &H5P_CLS_ROOT_g,		/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
-    NULL,			/* Default property registration routine */
+    H5P__root_reg_prop,		/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */
@@ -285,6 +293,10 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
     NULL                        /* Callback routine for closing auxilary objects of this class */
 }};
 
+/* Property value defaults */
+static const hbool_t H5_def_async_flag_g = H5P_ASYNC_FLAG_DEF;   /* Default async flag */
+static const void *H5_def_async_req_g = H5P_ASYNC_REQ_DEF;       /* Default async request pointer */
+
 
 
 /*--------------------------------------------------------------------------
@@ -383,6 +395,42 @@ H5P_init(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__root_reg_prop
+ *
+ * Purpose:     Initialize the root property list class
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              March 20, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__root_reg_prop(H5P_genclass_t *pclass)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Register async. flag property */
+    if(H5P_register_real(pclass, H5P_ASYNC_FLAG_NAME, H5P_ASYNC_FLAG_SIZE, &H5_def_async_flag_g,
+            NULL, NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register async. request property */
+    if(H5P_register_real(pclass, H5P_ASYNC_REQ_NAME, H5P_ASYNC_REQ_SIZE, &H5_def_async_req_g,
+            NULL, NULL, NULL, NULL, NULL,
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__root_reg_prop() */
 
 
 /*--------------------------------------------------------------------------
