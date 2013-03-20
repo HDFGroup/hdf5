@@ -2421,6 +2421,7 @@
 ./perform/CMakeLists.txt
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
+./test/plugin_lib/CMakeLists.txt
 ./testpar/CMakeLists.txt
 ./tools/CMakeLists.txt
 ./tools/h5copy/CMakeLists.txt
