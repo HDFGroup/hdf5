@@ -751,6 +751,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5repack: Fixed failure for converting a layout of small chunked dataset 
+          (size < 1K) to contiguous layout.  HDFFV-8214 (JKM 2013/03/18)
         - h5diff: Fixed to return correct exit code 1 when detect unique extra
           attribute. Prior to this fix, h5diff returned exit code 0 indicating 
           two files are identical.   HDFFV-7643 (JKM 2013/02/15)

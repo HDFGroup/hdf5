@@ -881,6 +881,18 @@ ADD_H5_VERIFY_TEST (error3 "TEST" 0 h5repack_layout3.h5 chunk_unlimit3 H5S_UNLIM
 # file input - should not fail
 ADD_H5_TEST (error4 "TEST" h5repack_layout3.h5 -f NONE)
 
+#--------------------------------------------------------------------------
+# Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset 
+# (dset size < 64K) and with unlimited max dims on a condition as follow.
+# (HDFFV-8214)
+#--------------------------------------------------------------------------
+# chunk dim is bigger than dataset dim. should succeed.
+ADD_H5_VERIFY_TEST (ckdim_biger "TEST" 0 h5repack_layout3.h5 chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI)
+# chunk dim is smaller than dataset dim. should succeed.  
+ADD_H5_VERIFY_TEST (ckdim_smaller "TEST" 0 h5repack_layout3.h5 chunk_unlimit3 CONTI -l chunk_unlimit3:CONTI)
+
+
+
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.
