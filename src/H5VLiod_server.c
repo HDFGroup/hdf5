@@ -168,7 +168,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Loop tp receive requests from clients */
     while(1) {
-        printf("Server In Loop\n");
+        fprintf(stderr, "Server In Loop\n");
         /* Receive new function calls */
         if(S_SUCCESS != fs_handler_receive())
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to handle client request");
@@ -852,7 +852,7 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start file create\n");
+    fprintf(stderr, "Start file create\n");
 
     /* convert HDF5 flags to IOD flags */
     mode = (input->flags&H5F_ACC_RDWR) ? IOD_CONT_RW : IOD_CONT_RO;
@@ -916,7 +916,7 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
-    printf("Done with file create, sending response to client\n");
+    fprintf(stderr, "Done with file create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -956,7 +956,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start file open\n");
+    fprintf(stderr, "Start file open\n");
 
     if((status = iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
@@ -980,7 +980,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
-    printf("Done with file open, sending response to client\n");
+    fprintf(stderr, "Done with file open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1016,10 +1016,10 @@ H5VL_iod_server_file_flush_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start file flush with scope %d\n", scope);
+    fprintf(stderr, "Start file flush with scope %d\n", scope);
 
 done:
-    printf("Done with file flush, sending response %d to client\n", ret_value);
+    fprintf(stderr, "Done with file flush, sending response %d to client\n", ret_value);
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file flush to client");
 
@@ -1054,7 +1054,7 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start file close\n");
+    fprintf(stderr, "Start file close\n");
 
     if(iod_obj_close(scratch_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close scratch object handle");
@@ -1064,7 +1064,7 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
 
 done:
-    printf("Done with file close, sending response %d to client\n", ret_value);
+    fprintf(stderr, "Done with file close, sending response %d to client\n", ret_value);
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 
@@ -1108,7 +1108,7 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start group create %s\n", name);
+    fprintf(stderr, "Start group create %s\n", name);
 
     cur_oh = loc_handle;
 
@@ -1150,7 +1150,7 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
                             &kv_size, NULL, NULL) >= 0) {
             iod_kv_t kv;
 
-            printf("creating group %s\n",comp);
+            fprintf(stderr, "creating group %s\n",comp);
             /* we don't want to close the handle for the group we start on */
             if(close_handle)
                 if(iod_obj_close(cur_oh, NULL, NULL) < 0)
@@ -1213,7 +1213,7 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
-    printf("Done with group create, sending response to client\n");
+    fprintf(stderr, "Done with group create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1260,7 +1260,7 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start group open %s\n", name);
+    fprintf(stderr, "Start group open %s\n", name);
     cur_oh = loc_handle;
 
     /* Wrap the local buffer for serialized header info */
@@ -1339,7 +1339,7 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
-    printf("Done with group open, sending response to client\n");
+    fprintf(stderr, "Done with group open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1378,7 +1378,7 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start group close\n");
+    fprintf(stderr, "Start group close\n");
 
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
@@ -1386,7 +1386,7 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
 done:
-    printf("Done with group close, sending response to client\n");
+    fprintf(stderr, "Done with group close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
 
     input = H5MM_xfree(input);
@@ -1433,7 +1433,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Create %s\n", name);
+    fprintf(stderr, "Start dataset Create %s\n", name);
     cur_oh = loc_handle;
 
     /* Wrap the local buffer for serialized header info */
@@ -1474,7 +1474,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
         /* MSC - if else need to be flipped when we have a real IOD */
         if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, 
                             &kv_size, NULL, NULL) >= 0) {
-            printf("creating intermediate group %s\n",comp);
+            fprintf(stderr, "creating intermediate group %s\n",comp);
             /* we don't want to close the handle for the group we start on */
             if(close_handle)
                 if(iod_obj_close(cur_oh, NULL, NULL) < 0)
@@ -1538,7 +1538,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     }
 #endif
     array.dims_seq = NULL;
-    printf("now creating the dataset %s cellsize %d num dimenstions %d\n",
+    fprintf(stderr, "now creating the dataset %s cellsize %d num dimenstions %d\n",
            comp, array.cell_size, array.num_dims);
     /* create the dataset */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
@@ -1625,7 +1625,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     free(max_dims);
 
-    printf("Done with dset create, sending response to client\n");
+    fprintf(stderr, "Done with dset create, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1672,7 +1672,7 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Open %s\n", name);
+    fprintf(stderr, "Start dataset Open %s\n", name);
     cur_oh = loc_handle;
 
     /* Wrap the local buffer for serialized header info */
@@ -1767,7 +1767,7 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
 
-    printf("Done with dset open, sending response to client\n");
+    fprintf(stderr, "Done with dset open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
 
 done:
@@ -1820,7 +1820,7 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     FUNC_ENTER_NOAPI_NOINIT
 
     size = bds_handle_get_size(bds_handle);
-    printf("Start dataset Read of size %d\n", size);
+    fprintf(stderr, "Start dataset Read of size %d\n", size);
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
@@ -1844,11 +1844,11 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         if(H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
-            printf("Injecting a bad data value to generate a bad checksum \n");
+            fprintf(stderr, "Injecting a bad data value to generate a bad checksum \n");
             buf_ptr[0] = 10;
         }
         cs = H5_checksum_fletcher32(buf, size);
-        printf("Checksum Generated for data at client: %u\n", cs);
+        fprintf(stderr, "Checksum Generated for data at client: %u\n", cs);
     }
 
 
@@ -1866,7 +1866,7 @@ done:
     output.ret = ret_value;
     output.cs = cs;
 
-    printf("Done with dset read, sending response to client\n");
+    fprintf(stderr, "Done with dset read, sending response to client\n");
 
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
@@ -1918,7 +1918,7 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Write with checksum %u\n", cs);
+    fprintf(stderr, "Start dataset Write with checksum %u\n", cs);
 
     /* Read bulk data here and wait for the data to be here  */
     size = bds_handle_get_size(bds_handle);
@@ -1938,10 +1938,10 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         int i;
         int *buf_ptr = (int *)buf;
 
-        printf("Received a buffer of size %d with values: ", size);
+        fprintf(stderr, "Received a buffer of size %d with values: ", size);
         for(i=0;i<60;++i)
-            printf("%d ", buf_ptr[i]);
-        printf("\n");
+            fprintf(stderr, "%d ", buf_ptr[i]);
+        fprintf(stderr, "\n");
     }
 
     mem_desc.nfrag = 1;
@@ -1955,7 +1955,7 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
 done:
-    printf("Done with dset write, sending response to client\n");
+    fprintf(stderr, "Done with dset write, sending response to client\n");
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(S_SUCCESS != bds_handle_free(input->bds_handle))
@@ -1995,13 +1995,13 @@ H5VL_iod_server_dset_set_extent_cb(size_t UNUSED num_necessary_parents, AXE_task
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Extend on the first dimension to %d\n", input->size[0]);
+    fprintf(stderr, "Start dataset Extend on the first dimension to %d\n", input->size[0]);
 
     if(iod_array_extend(iod_oh, IOD_TID_UNKNOWN, (iod_size_t)input->size[0], NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't extend dataset");
 
 done:
-    printf("Done with dset set_extent, sending response to client\n");
+    fprintf(stderr, "Done with dset set_extent, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
 
     free(input->size);
@@ -2035,7 +2035,7 @@ H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    printf("Start dataset Close\n");
+    fprintf(stderr, "Start dataset Close\n");
 
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
@@ -2043,7 +2043,7 @@ H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
 
 done:
-    printf("Done with dset close, sending response to client\n");
+    fprintf(stderr, "Done with dset close, sending response to client\n");
     fs_handler_complete(input->fs_handle, &ret_value);
 
     input = H5MM_xfree(input);

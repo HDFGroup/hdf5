@@ -357,6 +357,7 @@ EFF_finalize(void)
 
     if(H5VL_iod_client_eff_finalize(PEER) < 0)
         return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown eff stack");
+
     //done:
     //FUNC_LEAVE_API(ret_value)
     return ret_value;
