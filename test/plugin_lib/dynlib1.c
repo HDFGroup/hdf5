@@ -19,7 +19,13 @@
  *
  * Purpose:	Tests the plugin module (H5PL)
  */
-#include "dynlib1.h"
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <hdf5.h>
+
+static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+                const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIB1[1] = {{

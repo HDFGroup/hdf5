@@ -1096,7 +1096,6 @@
 ./test/chunk_info.c
 
 ./test/plugin_lib/dynlib1.c
-./test/plugin_lib/dynlib1.h
 ./test/plugin_lib/Makefile.in
 
 ./test/testfiles/err_compat_1

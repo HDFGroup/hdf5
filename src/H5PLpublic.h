@@ -21,7 +21,7 @@
 #define _H5PLpublic_H
 
 /* Public headers needed by this file */
-#include "H5public.h"
+#include "H5Zpublic.h"
 
 /****************************/
 /* Library Public Typedefs */
@@ -36,12 +36,23 @@ typedef enum H5PL_type_t {
 } H5PL_type_t;
 
 
+/* plugins always export */
+#if defined (_MSC_VER)  /* MSVC Compiler Case */
+  #define H5PLUGIN_DLL __declspec(dllexport)
+#elif (__GNUC__ >= 4)  /* GCC 4.x has support for visibility options */
+  #define H5PLUGIN_DLL __attribute__ ((visibility("default")))
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+    H5PLUGIN_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
+    H5PLUGIN_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
+
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* _H5PLpublic_H */
 

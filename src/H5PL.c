@@ -35,8 +35,6 @@
 /* Local Macros */
 /****************/
 
-#define H5PL_DEFAULT_PATH       "/usr:/usr/lib:/usr/local"
-#define H5PL_PATH_SEPARATOR     ":"
 #define H5PL_MAX_PATH_NUM       16
 
 /****************************/
@@ -45,6 +43,8 @@
 /****************************/
 /* Windows support */
 #ifdef H5_HAVE_WIN32_API
+#define H5PL_DEFAULT_PATH       ".;/ProgramData;/Users/Public"
+#define H5PL_PATH_SEPARATOR     ";"
 /* Handle for dynamic library */
 #define H5PL_HANDLE HINSTANCE
 
@@ -77,6 +77,8 @@ ret_val = get_filter_info();    \
 typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
 
 #else /* H5_HAVE_WIN32_API */
+#define H5PL_DEFAULT_PATH       "/usr:/usr/lib:/usr/local"
+#define H5PL_PATH_SEPARATOR     ":"
 /* Handle for dynamic library */
 #define H5PL_HANDLE void *
 
@@ -425,10 +427,13 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
     HANDLE          hFind;
     char           *pathname = NULL;
     htri_t          ret_value = FALSE;
+    char            service[2048];
 
     FUNC_ENTER_STATIC
 
-    if((hFind = FindFirstFile(dir, &fdFile)) == INVALID_HANDLE_VALUE)
+    /* Specify a file mask. *.* = We want everything! */
+    sprintf(service, "%s*.*", dir);
+    if((hFind = FindFirstFile(service, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 
     do {
