@@ -108,17 +108,17 @@ static void table_attrs_free( table_attrs_t *table )
  *------------------------------------------------------------------------*/
 static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *table)
 {
-    unsigned int new;
+    size_t new_val;
 
     if(table->nattrs == table->size) {
         table->size = MAX(1, table->size * 2);
         table->attrs = (match_attr_t *)HDrealloc(table->attrs, table->size * sizeof(match_attr_t));
     } /* end if */
 
-    new = table->nattrs++;
-    table->attrs[new].exist[0] = exist[0];
-    table->attrs[new].exist[1] = exist[1];
-    table->attrs[new].name = (char *)HDstrdup(name);
+    new_val = table->nattrs++;
+    table->attrs[new_val].exist[0] = exist[0];
+    table->attrs[new_val].exist[1] = exist[1];
+    table->attrs[new_val].name = (char *)HDstrdup(name);
 }
 
 /*-------------------------------------------------------------------------
@@ -459,8 +459,8 @@ hsize_t diff_attr(hid_t loc1_id,
             goto error;
 
         /* format output string */
-        sprintf(np1,"%s of <%s>",name1,path1);
-        sprintf(np2,"%s of <%s>",name2,path2);
+        HDsnprintf(np1, sizeof(np1), "%s of <%s>", name1, path1);
+        HDsnprintf(np2, sizeof(np1), "%s of <%s>", name2, path2);
 
         /*---------------------------------------------------------------------
         * array compare
