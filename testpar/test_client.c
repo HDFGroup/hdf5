@@ -62,12 +62,11 @@ int main(int argc, char **argv) {
         data3[i]=i;
     }
 
-    /* create the file. This is asynchronous. Note this is the original 
-       HDF5 API routine, 
-       so no request is returned. However waiting on requests is built in the 
-       IOD VOL plugin for now (explained as we proceed). */
-    //file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    /* create the file. This is asynchronous. Waiting on requests is built in the 
+       IOD VOL plugin for now (explained as we proceed). We also can wait on
+       a request using the new H5AOwait() routine */
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, &req1);
+    //file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
     assert(H5AOwait(&req1, &status1) == 0);
     assert (status1);
@@ -77,26 +76,33 @@ int main(int argc, char **argv) {
     dims [0] = 60;
     dataspaceId = H5Screate_simple(1, dims, NULL);
 
-    /* create a group G1 on the file. This is asynchronous. 
-       Internally this enforces a wait for the previous H5Fcreate to 
-       complete at the client, 
-       then forwards the call asynchronously to the server. */
+    /* create a group G1 on the file. We created here synchronously just to
+       show that we can intermix the original HDF5 API with the new 
+       Async API.
+       Internally there is a built in wait on the file_id, which has already been
+       completed when we called H5AOwait on the file create request earlier*/
     gid1 = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    //gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, &req2);
+    //gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+    //0, &req2);
     assert(gid1);
+
+    //assert(H5AOwait(&req2, &status2) == 0);
+    //assert (status2);
 
     /* create a Dataset D1 on the file, but in group /G1/G2/G3. This is asynchronous. 
        Internally this call traverses the path G1/G2/G3. 
-       It realizes that a create call is pending on G1, but has no info about 
+       It realizes that group G1 has been created locally, but has no info about 
        G2 and G3.
        This enforces a wait for the previous H5Gcreate on G1 to complete 
-       at the client, 
-       then forwards the call asynchronously to the server, with the path G2/G3/D1 */
+       at the client (which has already completed because the gcreate was done 
+       synchronously), then forwards the call asynchronously to the server, 
+       with the path G2/G3/D1 */
     //did1 = H5Dcreate(file_id,"G1/G2/G3/D1",H5T_NATIVE_INT,dataspaceId,
     //H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",H5T_NATIVE_INT,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req3);
     assert(did1);
+
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 
        (i.e. no dependency)*/
@@ -105,6 +111,7 @@ int main(int argc, char **argv) {
     did2 = H5Dcreate_ff(file_id,"G1/G2/G3/D2",H5T_NATIVE_INT,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req4);
     assert(did2);
+
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 and D2 
        (i.e. no dependency)*/
@@ -114,29 +121,33 @@ int main(int argc, char **argv) {
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req5);
     assert(did3);
 
-    /* NOTE: all raw data reads/writes execute concurrently at the server if they get 
-       scheduled by the AXE (i.e. no dependencies on each other). */
-
     /* Raw data write on D1. This is asynchronous, but it is delayed internally 
        at the client until the create for D1 is completed. Internally we generate 
        a checksum for data and ship it with the write call to the server. */
     //H5Dwrite(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data);
-    H5Dwrite_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data, 0, &req6);
+    H5Dwrite_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
+                0, &req6);
 
     /* Raw data write on D2. This is asynchronous, but it is delayed internally 
        at the client until the create for D2 is completed. Internally we generate 
        a checksum for data2 and ship it with the write call to the server.*/
     //H5Dwrite(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2);
-    H5Dwrite_ff(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 0, &req7);
+    H5Dwrite_ff(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
+                0, &req7);
 
     /* Raw data write on D3. This is asynchronous, but it is delayed internally 
        at the client until the create for D3 is completed. Internally we generate 
        a checksum for data3 and ship it with the write call to the server.*/
     //H5Dwrite(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3);
-    H5Dwrite_ff(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 0, &req8);
+    H5Dwrite_ff(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
+                0, &req8);
 
-    //assert(H5AOwait(&req2, &status2) == 0);
-    //assert (status2);
+    /* NOTE: all raw data reads/writes execute concurrently at the server if they get 
+       scheduled by the AXE (i.e. no dependencies on each other). */
+
+    /* Here we wait for the three H5Dcreates, which have already been completed 
+       since the H5Dwrites internally completed them. However the wait call is 
+       still required to free the request struct internally */
     assert(H5AOwait(&req3, &status3) == 0);
     assert (status3);
     assert(H5AOwait(&req4, &status4) == 0);
@@ -147,13 +158,14 @@ int main(int argc, char **argv) {
     /* Raw data read on D1. This is asynchronous, but it is delayed internally 
        at the client until the create for D1 is completed, which it is since we 
        waited on it in the previous H5Dwrite(D1). 
-       At the server side, since the IOD library is "fake" and there is no container 
-       or data that exists, I am creating an array with the same size and elements 
+       At the server side, since the IOD library is "skeletal" and no 
+       data exists, I am creating an array with the same size and elements 
        as the data that is written.
-       The server returns, along with the data array, a checksum that for the data 
-       that is returned.  */
+       The server returns, along with the data array, a checksum for the data 
+       that should be stored, but for now generated.  */
     //H5Dread(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data);
-    H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 0, &req1);
+    H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
+               0, &req1);
 
     /* try and print the received buffer before a completion call on the read is 
        issued.
@@ -169,11 +181,12 @@ int main(int argc, char **argv) {
        This also detects that we are passing up and down checksum values for 
        raw data to ensure data integrity. The read should fail when we wait on it in
        the H5Dclose(D1) later, but for the demo purposes we are not actually going to 
-       fail the close. */
+       fail the close, but just print a Fatal error. */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
     //H5Dread(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data);
-    H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data, 0, &req2);
+    H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data, 
+               0, &req2);
     H5Pclose(dxpl_id);
 
     H5Sclose(dataspaceId);
@@ -200,15 +213,15 @@ int main(int argc, char **argv) {
     }
 
     /* closing did1 acts as a wait_some on all pending requests that are issued
-       on did1 (the H5Dwrite and 2 H5Dreads above). This call is asynchronous. */
+       on did1 (the H5Dwrite and 2 H5Dreads above). */
     H5Dclose(did1);
 
     /* closing did2 acts as a wait_some on all pending requests that are issued
-       on did2 (the H5Dwrite above). This call is asynchronous. */
+       on did2 (the H5Dwrite above). */
     H5Dclose(did2);
 
     /* closing did3 acts as a wait_some on all pending requests that are issued
-       on did3 (the H5Dwrite above). This call is asynchronous. */
+       on did3 (the H5Dwrite above). */
     H5Dclose(did3);
 
     H5Gclose(gid1);
@@ -216,9 +229,9 @@ int main(int argc, char **argv) {
     H5Pclose(fapl_id);
 
     H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+
     /* closing the container also acts as a wait all on all pending requests 
-       on the container. For now this call is not asynchronous. But once we implement
-       the API to return requests, it will be asynchronous. */
+       on the container. */
     H5Fclose(file_id);
 
     /* Print the data that has been read, after we have issued a wait 
@@ -237,6 +250,7 @@ int main(int argc, char **argv) {
         printf("%d ",r2_data[i]);
     printf("\n");
 
+    /* required waits even if they have been completed in H5Fclose */
     assert(H5AOwait(&req1, &status1) == 0);
     assert (status1);
     assert(H5AOwait(&req2, &status2) == 0);
@@ -258,6 +272,7 @@ int main(int argc, char **argv) {
        and shutsdown the FS server (when all clients send the terminate request) 
        and client */
     EFF_finalize();
+
     MPI_Finalize();
     return 0;
 }
