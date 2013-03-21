@@ -1132,9 +1132,10 @@ H5VL_iod_file_close(void *_file, hid_t UNUSED req)
     /* free everything */
     free(file->file_name);
     free(file->common.obj_name);
-    if(H5Pclose(file->fapl_id) < 0)
+    if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(H5Pclose(file->remote_file.fcpl_id) < 0)
+    if(file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
+       H5Pclose(file->remote_file.fcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     file = H5FL_FREE(H5VL_iod_file_t, file);
 
@@ -1539,9 +1540,10 @@ H5VL_iod_group_close(void *_grp, hid_t UNUSED req)
     free(status);
 
     free(grp->common.obj_name);
-    if(H5Pclose(grp->gapl_id) < 0)
+    if(grp->gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5Pclose(grp->gapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(H5Pclose(grp->remote_group.gcpl_id) < 0)
+    if(grp->remote_group.gcpl_id != H5P_GROUP_CREATE_DEFAULT && 
+       H5Pclose(grp->remote_group.gcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     grp = H5FL_FREE(H5VL_iod_group_t, grp);
 
@@ -2402,9 +2404,11 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
     free(status);
 
     free(dset->common.obj_name);
-    if(H5Pclose(dset->remote_dset.dcpl_id) < 0)
+    if(dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
+       H5Pclose(dset->remote_dset.dcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(H5Pclose(dset->dapl_id) < 0)
+    if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT &&
+       H5Pclose(dset->dapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     if(H5Tclose(dset->remote_dset.type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");

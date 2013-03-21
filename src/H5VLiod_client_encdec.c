@@ -682,7 +682,7 @@ H5VL_iod_client_decode_group_open(fs_proc_t proc, void *_output)
         p += gcpl_size;
     }
     else {
-        output->gcpl_id = H5P_FILE_CREATE_DEFAULT;
+        output->gcpl_id = H5P_GROUP_CREATE_DEFAULT;
     }
 
 done:
@@ -1006,7 +1006,7 @@ H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output)
 {
     H5VL_iod_remote_dset_t *output = (H5VL_iod_remote_dset_t *)_output;
     void *buf=NULL;
-    size_t dcpl_size = 0;
+    size_t dcpl_size = 0, type_size = 0, space_size = 0;
     uint8_t *p;
 
     herr_t ret_value = SUCCEED;
@@ -1037,6 +1037,33 @@ H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output)
     else {
         output->dcpl_id = H5P_FILE_CREATE_DEFAULT;
     }
+
+    /* decode the type size */
+    UINT64DECODE_VARLEN(p, type_size);
+    /* decode the datatype */
+    {
+        H5T_t *dt;
+        /* Create datatype by decoding buffer */
+        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((output->type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
+    }
+    p += type_size;
+
+    /* decode the space size */
+    UINT64DECODE_VARLEN(p, space_size);
+    /* decode the dataspace */
+    {
+        H5S_t *ds = NULL;
+        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+        /* Register the type and return the ID */
+        if((output->space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
+    }
+    p += space_size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

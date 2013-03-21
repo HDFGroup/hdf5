@@ -22,6 +22,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"         /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspaces				*/
+#include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
@@ -984,6 +986,7 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     output.root_oh = root_handle;
     output.scratch_id = scratch_pad;
     output.scratch_oh = scratch_handle;
+    output.fcpl_size = 0;
 
     fprintf(stderr, "Done with file open, sending response to client\n");
     fs_handler_complete(input->fs_handle, &output);
@@ -1338,6 +1341,7 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     /* MSC - need to store the gcpl in create */
     output.gcpl_size = 0;
+    output.gcpl = NULL;
 #if 0 
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_gcpl", NULL, 
                         &output.gcpl_size, NULL, NULL) < 0)
@@ -1757,6 +1761,8 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
         close_handle = TRUE;
+	/* Advance to next component in string */
+	name += nchars;
     }
 
     /* get scratch pad of dataset */
@@ -1767,6 +1773,7 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+#if 0
     /*retrieve all metadata from scratch pad */
     output.dcpl_size = 0;
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dcpl", NULL, 
@@ -1797,6 +1804,45 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "dataset_dspace", output.dspace, 
                         &output.dspace_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dspace lookup failed");
+#endif
+#if 1
+    /* fake a dataspace, type, and dcpl */
+    {
+        hsize_t dims[1];
+        hid_t space_id, type_id;
+        H5S_t *dspace = NULL;
+        H5T_t *dtype = NULL;
+
+        dims [0] = 60;
+        space_id = H5Screate_simple(1, dims, NULL);
+        type_id = H5T_NATIVE_INT;
+
+        output.dcpl_size = 0;
+        output.dcpl = NULL;
+
+        /* get Type size to encode */
+        if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
+        if(H5T_encode(dtype, NULL, &output.dtype_size) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+        if(NULL == (output.dtype = H5MM_malloc (output.dtype_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate datatype buffer");
+        if(H5T_encode(dtype, output.dtype, &output.dtype_size) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+
+        /* get Dataspace size to encode */
+        if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+        if(H5S_encode(dspace, NULL, &output.dspace_size)<0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+        if(NULL == (output.dspace = H5MM_malloc (output.dspace_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate datatype buffer");
+        if(H5S_encode(dspace, output.dspace, &output.dspace_size) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+
+        H5Sclose(space_id);
+    }
+#endif
 
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
@@ -1905,6 +1951,8 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     /* wait for it to complete */
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+    if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
 done:
     output.ret = ret_value;
@@ -1915,8 +1963,6 @@ done:
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(S_SUCCESS != bds_handle_free(input->bds_handle))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
-    if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
@@ -1982,6 +2028,10 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
+    /* free the bds block handle */
+    if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
+        HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+
     { 
         int i;
         int *buf_ptr = (int *)buf;
@@ -2008,8 +2058,6 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(S_SUCCESS != bds_handle_free(input->bds_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
-    //if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
-    //HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
         H5Pclose(input->dxpl_id);

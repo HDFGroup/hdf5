@@ -761,9 +761,20 @@ done:
 herr_t
 H5AOtest(H5_request_t *req, H5_status_t *status)
 {
+    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+
+    *status = request->status;
+
+    if(H5VL_IOD_COMPLETED == request->state) {
+        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
+                request->req = H5MM_xfree(request->req);
+        request = H5MM_xfree(request);
+        req = NULL;
+    }
 
 /* I believe that the VOL interface needs to be expanded with a 'test' callback,
     since the H5_request_t is pointing at a H5VL_iod_request_t [currently]
@@ -795,7 +806,6 @@ herr_t
 H5AOwait(H5_request_t *req, H5_status_t *status)
 {
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    fs_status_t tmp_status;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -805,19 +815,6 @@ H5AOwait(H5_request_t *req, H5_status_t *status)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
     }
     *status = request->status;
-
-#if 0
-
-        fs_wait(*((fs_request_t *)request->req), FS_MAX_IDLE_TIME, &tmp_status);
-        if(tmp_status)
-            *status = H5AO_SUCCEEDED;
-        else
-            *status = H5AO_FAILED;
-    }
-    else if(H5VL_IOD_COMPLETED == request->state) {
-        *status = request->status;
-    }
-#endif
 
     request->req = H5MM_xfree(request->req);
     request = H5MM_xfree(request);
