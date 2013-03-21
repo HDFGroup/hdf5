@@ -132,8 +132,9 @@ H5FL_DEFINE(H5VL_iod_file_t);
 H5FL_DEFINE(H5VL_iod_group_t);
 H5FL_DEFINE(H5VL_iod_dset_t);
 
-na_addr_t PEER;
+static na_addr_t PEER;
 uint32_t write_checksum;
+static na_network_class_t *network_class = NULL;
 
 static H5VL_class_t H5VL_iod_g = {
     IOD,
@@ -270,9 +271,8 @@ EFF_init(MPI_Comm comm, MPI_Info info)
     FILE *config;
     fs_request_t fs_req;
     int num_procs;
+    na_addr_t ion_target;
     herr_t ret_value = SUCCEED;
-
-    //FUNC_ENTER_API(FAIL)
 
     MPI_Comm_size(comm, &num_procs);
 
@@ -282,8 +282,15 @@ EFF_init(MPI_Comm comm, MPI_Info info)
         fclose(config);
     }
 
-    if(NA_UNDEFINED == (PEER = H5VL_iod_client_eff_init(mpi_port_name)))
-        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize eff stack");
+    network_class = na_mpi_init(NULL, 0);
+    if (S_SUCCESS != fs_init(network_class))
+        return FAIL;
+    if (S_SUCCESS != bds_init(network_class))
+        return FAIL;
+    if (S_SUCCESS !=  na_addr_lookup(network_class, mpi_port_name, &ion_target))
+        return FAIL;
+
+    PEER = ion_target;
 
     /* Register function and encoding/decoding functions */
     H5VL_EFF_INIT_ID = fs_register("eff_init", H5VL_iod_client_encode_eff_init, 
@@ -319,12 +326,10 @@ EFF_init(MPI_Comm comm, MPI_Info info)
 
     /* forward the init call to the IONs */
     if(fs_forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &fs_req) < 0)
-        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to ship eff_init");
+        return FAIL;
 
     fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
-    //done:
-    //FUNC_LEAVE_API(ret_value)
     return ret_value;
 } /* end EFF_init() */
 
@@ -347,19 +352,22 @@ EFF_finalize(void)
     fs_request_t fs_req;
     herr_t ret_value = SUCCEED;
 
-    //FUNC_ENTER_API(FAIL)
-
     /* forward the finalize call to the IONs */
     if(fs_forward(PEER, H5VL_EFF_FINALIZE_ID, NULL, &ret_value, &fs_req) < 0)
-        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship eff_finalize");
+        return FAIL;
 
     fs_wait(fs_req, FS_MAX_IDLE_TIME, FS_STATUS_IGNORE);
 
-    if(H5VL_iod_client_eff_finalize(PEER) < 0)
-        return FAIL;//HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown eff stack");
+    /* Free addr id */
+    if (S_SUCCESS != na_addr_free(network_class, PEER))
+        return FAIL;
 
-    //done:
-    //FUNC_LEAVE_API(ret_value)
+    /* Finalize interface */
+    if (S_SUCCESS != bds_finalize())
+        return FAIL;
+    if (S_SUCCESS != fs_finalize())
+        return FAIL;
+
     return ret_value;
 } /* end EFF_finalize() */
 

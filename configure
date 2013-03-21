@@ -687,6 +687,9 @@ BUILD_SHARED_SZIP_CONDITIONAL_TRUE
 LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
+MYIOD_LIBS
+MYSHIPPER_LIBS
+MYAXE_LIBS
 AM_MAKEFLAGS
 LT_STATIC_EXEC
 CPP
@@ -903,7 +906,7 @@ enable_largefile
 with_fnord
 with_dmalloc
 with_axe
-with_iofsl
+with_shipper
 with_iod
 with_zlib
 with_szlib
@@ -1661,7 +1664,7 @@ Optional Packages:
 
   --with-dmalloc=DIR      Use dmalloc memory debugging aid [default=no]
   --with-axe=DIR          Use axe [default=no]
-  --with-iofsl=DIR        Use iofsl [default=no]
+  --with-shipper=DIR      Use shipper [default=no]
   --with-iod=DIR          Use iod [default=no]
   --with-zlib=DIR         Use zlib library for external deflate I/O filter
                           [default=yes]
@@ -25496,6 +25499,56 @@ fi
 
 done
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for AXEcreate_engine in -laxe" >&5
+$as_echo_n "checking for AXEcreate_engine in -laxe... " >&6; }
+if ${ac_cv_lib_axe_AXEcreate_engine+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-laxe  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char AXEcreate_engine ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return AXEcreate_engine ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_axe_AXEcreate_engine=yes
+else
+  ac_cv_lib_axe_AXEcreate_engine=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_axe_AXEcreate_engine" >&5
+$as_echo "$ac_cv_lib_axe_AXEcreate_engine" >&6; }
+if test "x$ac_cv_lib_axe_AXEcreate_engine" = xyes; then :
+  MYAXE_LIBS='-laxe'
+else
+  unset HAVE_AXE
+fi
+
 
     if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find axe library" "$LINENO" 5
@@ -25562,6 +25615,62 @@ done
       AM_LDFLAGS="$AM_LDFLAGS -L$axe_lib"
     fi
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for AXEcreate_engine in -laxe" >&5
+$as_echo_n "checking for AXEcreate_engine in -laxe... " >&6; }
+if ${ac_cv_lib_axe_AXEcreate_engine+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-laxe  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char AXEcreate_engine ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return AXEcreate_engine ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_axe_AXEcreate_engine=yes
+else
+  ac_cv_lib_axe_AXEcreate_engine=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_axe_AXEcreate_engine" >&5
+$as_echo "$ac_cv_lib_axe_AXEcreate_engine" >&6; }
+if test "x$ac_cv_lib_axe_AXEcreate_engine" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBAXE 1
+_ACEOF
+
+  LIBS="-laxe $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_AXE
+fi
+
+
     if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find axe library" "$LINENO" 5
     fi
@@ -25569,15 +25678,15 @@ done
 esac
 
 ## ----------------------------------------------------------------------
-## Is the iofsl present? It has a header file `iofsl.h' and a library
-## `-liofsl' and their locations might be specified with the `--with-iofsl'
+## Is the shipper present? It has a header file `SHIPPER.h' and a library
+## `-lshipper' and their locations might be specified with the `--with-shipper'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
 
-# Check whether --with-iofsl was given.
-if test "${with_iofsl+set}" = set; then :
-  withval=$with_iofsl;
+# Check whether --with-shipper was given.
+if test "${with_shipper+set}" = set; then :
+  withval=$with_shipper;
 else
   withval=no
 fi
@@ -25585,7 +25694,7 @@ fi
 
 case $withval in
   yes)
-    HAVE_IOFSL="yes"
+    HAVE_SHIPPER="yes"
     for ac_header in function_shipper.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "function_shipper.h" "ac_cv_header_function_shipper_h" "$ac_includes_default"
@@ -25610,40 +25719,202 @@ fi
 
 done
 
+    for ac_header in network_abstraction.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "network_abstraction.h" "ac_cv_header_network_abstraction_h" "$ac_includes_default"
+if test "x$ac_cv_header_network_abstraction_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETWORK_ABSTRACTION_H 1
+_ACEOF
 
-    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find iofsl library" "$LINENO" 5
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for na_finalize in -liofsl_shipper_na" >&5
+$as_echo_n "checking for na_finalize in -liofsl_shipper_na... " >&6; }
+if ${ac_cv_lib_iofsl_shipper_na_na_finalize+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liofsl_shipper_na  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char na_finalize ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return na_finalize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iofsl_shipper_na_na_finalize=yes
+else
+  ac_cv_lib_iofsl_shipper_na_na_finalize=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_na_na_finalize" >&5
+$as_echo "$ac_cv_lib_iofsl_shipper_na_na_finalize" >&6; }
+if test "x$ac_cv_lib_iofsl_shipper_na_na_finalize" = xyes; then :
+  MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"
+else
+  unset HAVE_SHIPPER
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for bds_init in -liofsl_shipper_bds" >&5
+$as_echo_n "checking for bds_init in -liofsl_shipper_bds... " >&6; }
+if ${ac_cv_lib_iofsl_shipper_bds_bds_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liofsl_shipper_bds  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char bds_init ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return bds_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iofsl_shipper_bds_bds_init=yes
+else
+  ac_cv_lib_iofsl_shipper_bds_bds_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_bds_bds_init" >&5
+$as_echo "$ac_cv_lib_iofsl_shipper_bds_bds_init" >&6; }
+if test "x$ac_cv_lib_iofsl_shipper_bds_bds_init" = xyes; then :
+  MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"
+else
+  unset HAVE_SHIPPER
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fs_init in -liofsl_shipper_fs" >&5
+$as_echo_n "checking for fs_init in -liofsl_shipper_fs... " >&6; }
+if ${ac_cv_lib_iofsl_shipper_fs_fs_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liofsl_shipper_fs  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char fs_init ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return fs_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iofsl_shipper_fs_fs_init=yes
+else
+  ac_cv_lib_iofsl_shipper_fs_fs_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_fs_fs_init" >&5
+$as_echo "$ac_cv_lib_iofsl_shipper_fs_fs_init" >&6; }
+if test "x$ac_cv_lib_iofsl_shipper_fs_fs_init" = xyes; then :
+  MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"
+else
+  unset HAVE_SHIPPER
+fi
+
+
+    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find shipper library" "$LINENO" 5
     fi
     ;;
   no)
-    HAVE_IOFSL="no"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iofsl library" >&5
-$as_echo_n "checking for iofsl library... " >&6; }
+    HAVE_SHIPPER="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for shipper library" >&5
+$as_echo_n "checking for shipper library... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
     ;;
   *)
-    HAVE_IOFSL="yes"
+    HAVE_SHIPPER="yes"
     case "$withval" in
       *,*)
-        iofsl_inc="`echo $withval |cut -f1 -d,`"
-        iofsl_lib="`echo $withval |cut -f2 -d, -s`"
+        shipper_inc="`echo $withval |cut -f1 -d,`"
+        shipper_lib="`echo $withval |cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
-          iofsl_inc="$withval/include"
-          iofsl_lib="$withval/lib"
+          shipper_inc="$withval/include"
+          shipper_lib="$withval/lib"
         fi
         ;;
     esac
 
     ## Trying to include -I/usr/include and -L/usr/lib is redundant and
     ## can mess some compilers up.
-    if test "X$iofsl_inc" = "X/usr/include"; then
-      iofsl_inc=""
+    if test "X$shipper_inc" = "X/usr/include"; then
+      shipper_inc=""
     fi
-    if test "X$iofsl_lib" = "X/usr/lib"; then
-      iofsl_lib=""
+    if test "X$shipper_lib" = "X/usr/lib"; then
+      shipper_lib=""
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
@@ -25651,9 +25922,9 @@ $as_echo "suppressed" >&6; }
     saved_LDFLAGS="$LDFLAGS"
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
-    if test -n "$iofsl_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$iofsl_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$iofsl_inc"
+    if test -n "$shipper_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$shipper_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$shipper_inc"
     fi
 
     for ac_header in function_shipper.h
@@ -25670,20 +25941,214 @@ fi
 
 done
 
+    for ac_header in function_shipper_handler.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper_handler.h" "ac_cv_header_function_shipper_handler_h" "$ac_includes_default"
+if test "x$ac_cv_header_function_shipper_handler_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FUNCTION_SHIPPER_HANDLER_H 1
+_ACEOF
 
-    if test -n "$iofsl_lib"; then
-      LDFLAGS="$LDFLAGS -L$iofsl_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$iofsl_lib"
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+    for ac_header in network_abstraction.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "network_abstraction.h" "ac_cv_header_network_abstraction_h" "$ac_includes_default"
+if test "x$ac_cv_header_network_abstraction_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NETWORK_ABSTRACTION_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+
+    if test -n "$shipper_lib"; then
+      LDFLAGS="$LDFLAGS -L$shipper_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$shipper_lib"
     fi
 
-    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find iofsl library" "$LINENO" 5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for na_finalize in -liofsl_shipper_na" >&5
+$as_echo_n "checking for na_finalize in -liofsl_shipper_na... " >&6; }
+if ${ac_cv_lib_iofsl_shipper_na_na_finalize+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liofsl_shipper_na -liofsl_shipper_fs -liofsl_shipper_bds $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char na_finalize ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return na_finalize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iofsl_shipper_na_na_finalize=yes
+else
+  ac_cv_lib_iofsl_shipper_na_na_finalize=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_na_na_finalize" >&5
+$as_echo "$ac_cv_lib_iofsl_shipper_na_na_finalize" >&6; }
+if test "x$ac_cv_lib_iofsl_shipper_na_na_finalize" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIOFSL_SHIPPER_NA 1
+_ACEOF
+
+  LIBS="-liofsl_shipper_na $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for bds_init in -liofsl_shipper_bds" >&5
+$as_echo_n "checking for bds_init in -liofsl_shipper_bds... " >&6; }
+if ${ac_cv_lib_iofsl_shipper_bds_bds_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liofsl_shipper_bds -liofsl_shipper_fs -liofsl_shipper_na $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char bds_init ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return bds_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iofsl_shipper_bds_bds_init=yes
+else
+  ac_cv_lib_iofsl_shipper_bds_bds_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_bds_bds_init" >&5
+$as_echo "$ac_cv_lib_iofsl_shipper_bds_bds_init" >&6; }
+if test "x$ac_cv_lib_iofsl_shipper_bds_bds_init" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIOFSL_SHIPPER_BDS 1
+_ACEOF
+
+  LIBS="-liofsl_shipper_bds $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER
+fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fs_init in -liofsl_shipper_fs" >&5
+$as_echo_n "checking for fs_init in -liofsl_shipper_fs... " >&6; }
+if ${ac_cv_lib_iofsl_shipper_fs_fs_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char fs_init ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return fs_init ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iofsl_shipper_fs_fs_init=yes
+else
+  ac_cv_lib_iofsl_shipper_fs_fs_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_fs_fs_init" >&5
+$as_echo "$ac_cv_lib_iofsl_shipper_fs_fs_init" >&6; }
+if test "x$ac_cv_lib_iofsl_shipper_fs_fs_init" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIOFSL_SHIPPER_FS 1
+_ACEOF
+
+  LIBS="-liofsl_shipper_fs $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER
+fi
+
+
+    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find shipper library" "$LINENO" 5
     fi
     ;;
 esac
 
 ## ----------------------------------------------------------------------
-## Is the iod present? It has a header file `iod.h' and a library
+## Is the iod present? It has a header file `IOD.h' and a library
 ## `-liod' and their locations might be specified with the `--with-iod'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
@@ -25711,6 +26176,56 @@ _ACEOF
 fi
 
 done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod_initialize in -liod" >&5
+$as_echo_n "checking for iod_initialize in -liod... " >&6; }
+if ${ac_cv_lib_iod_iod_initialize+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liod  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char iod_initialize ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return iod_initialize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iod_iod_initialize=yes
+else
+  ac_cv_lib_iod_iod_initialize=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iod_iod_initialize" >&5
+$as_echo "$ac_cv_lib_iod_iod_initialize" >&6; }
+if test "x$ac_cv_lib_iod_iod_initialize" = xyes; then :
+  MYIOD_LIBS='-liod'
+else
+  unset HAVE_IOD
+fi
 
 
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
@@ -25777,6 +26292,62 @@ done
       LDFLAGS="$LDFLAGS -L$iod_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
     fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iod_finalize in -liod" >&5
+$as_echo_n "checking for iod_finalize in -liod... " >&6; }
+if ${ac_cv_lib_iod_iod_finalize+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liod  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char iod_finalize ();
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+return iod_finalize ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_iod_iod_finalize=yes
+else
+  ac_cv_lib_iod_iod_finalize=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iod_iod_finalize" >&5
+$as_echo "$ac_cv_lib_iod_iod_finalize" >&6; }
+if test "x$ac_cv_lib_iod_iod_finalize" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBIOD 1
+_ACEOF
+
+  LIBS="-liod $LIBS"
+
+else
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD
+fi
+
 
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       as_fn_error $? "couldn't find iod library" "$LINENO" 5

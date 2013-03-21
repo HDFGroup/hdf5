@@ -90,38 +90,51 @@ am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
-t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+am__DEPENDENCIES_1 =
+t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
 t_mpi_LDADD = $(LDADD)
-t_mpi_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_mpi_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 t_pflush1_SOURCES = t_pflush1.c
 t_pflush1_OBJECTS = t_pflush1.$(OBJEXT)
 t_pflush1_LDADD = $(LDADD)
-t_pflush1_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_pflush1_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 t_pflush2_SOURCES = t_pflush2.c
 t_pflush2_OBJECTS = t_pflush2.$(OBJEXT)
 t_pflush2_LDADD = $(LDADD)
-t_pflush2_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_pflush2_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 t_posix_compliant_SOURCES = t_posix_compliant.c
 t_posix_compliant_OBJECTS = t_posix_compliant.$(OBJEXT)
 t_posix_compliant_LDADD = $(LDADD)
-t_posix_compliant_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_posix_compliant_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 t_shapesame_SOURCES = t_shapesame.c
 t_shapesame_OBJECTS = t_shapesame.$(OBJEXT)
 t_shapesame_LDADD = $(LDADD)
-t_shapesame_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_shapesame_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 test_client_SOURCES = test_client.c
 test_client_OBJECTS = test_client.$(OBJEXT)
 test_client_LDADD = $(LDADD)
-test_client_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+test_client_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 test_server_SOURCES = test_server.c
 test_server_OBJECTS = test_server.$(OBJEXT)
 test_server_LDADD = $(LDADD)
-test_server_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+test_server_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_file.$(OBJEXT) t_file_image.$(OBJEXT) t_mdset.$(OBJEXT) \
 	t_ph5basic.$(OBJEXT) t_coll_chunk.$(OBJEXT) \
@@ -129,7 +142,8 @@ am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_filter_read.$(OBJEXT) t_prop.$(OBJEXT)
 testphdf5_OBJECTS = $(am_testphdf5_OBJECTS)
 testphdf5_LDADD = $(LDADD)
-testphdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+testphdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -292,6 +306,9 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 MPI_GET_SIZE = @MPI_GET_SIZE@
+MYAXE_LIBS = @MYAXE_LIBS@
+MYIOD_LIBS = @MYIOD_LIBS@
+MYSHIPPER_LIBS = @MYSHIPPER_LIBS@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -471,7 +488,7 @@ testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 
 
 # The tests all depend on the hdf5 library and the test library
-LDADD = $(LIBH5TEST) $(LIBHDF5)
+LDADD = $(LIBH5TEST) $(LIBHDF5) $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
 DISTCLEANFILES = testph5.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.

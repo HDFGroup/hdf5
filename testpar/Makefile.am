@@ -36,7 +36,7 @@ testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_prop.c
 
 # The tests all depend on the hdf5 library and the test library
-LDADD = $(LIBH5TEST) $(LIBHDF5)
+LDADD = $(LIBH5TEST) $(LIBHDF5) $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
 
 # Temporary files
 # MPItest.h5 is from t_mpi

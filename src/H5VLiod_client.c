@@ -32,8 +32,6 @@
 #include "H5VLiod_client.h"
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
-na_network_class_t *network_class = NULL;
-
 herr_t
 H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -423,58 +421,3 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_local_traverse */
-
-na_addr_t
-H5VL_iod_client_eff_init(const char *mpi_port_name)
-{
-    na_addr_t ion_target;
-    int fs_ret;
-    na_addr_t ret_value;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    network_class = na_mpi_init(NULL, 0);
-
-    fs_ret = fs_init(network_class);
-    if (fs_ret != S_SUCCESS)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to initialize client function shipper");
-
-    fs_ret = bds_init(network_class);
-    if (fs_ret != S_SUCCESS)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to initialize client function shipper");
-
-    /* Look up addr id */
-    fs_ret = na_addr_lookup(network_class, mpi_port_name, &ion_target);
-    if (fs_ret != S_SUCCESS)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NA_UNDEFINED, "failed to connect to network address");
-
-    ret_value = ion_target;
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-herr_t
-H5VL_iod_client_eff_finalize(na_addr_t ion_target)
-{
-    herr_t ret_value = SUCCEED;
-    int fs_ret;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Free addr id */
-    fs_ret = na_addr_free(network_class, ion_target);
-    if (fs_ret != S_SUCCESS)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to shutdown function shipper address");
-
-    /* Finalize interface */
-    fs_ret = fs_finalize();
-    if (fs_ret != S_SUCCESS) 
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to finalize function shipper");
-
-    fs_ret = bds_finalize();
-    if (fs_ret != S_SUCCESS) 
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to finalize function shipper");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}

@@ -18,7 +18,6 @@ int main(int argc, char **argv) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
-
     printf("Number of server processes = %d, my rank is %d\n", my_size, my_rank);
 
     /* This call intiliazes the FS for the server processes (create metadata and

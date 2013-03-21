@@ -1691,7 +1691,8 @@ case $withval in
   yes)
     HAVE_AXE="yes"
     AC_CHECK_HEADERS([AXE.h])
-
+    AC_CHECK_LIB([axe], [AXEcreate_engine],[MYAXE_LIBS='-laxe'], [unset HAVE_AXE])
+    AC_SUBST([MYAXE_LIBS])
     if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find axe library])
     fi
@@ -1742,6 +1743,9 @@ case $withval in
       AM_LDFLAGS="$AM_LDFLAGS -L$axe_lib"
     fi
 
+    AC_CHECK_LIB([axe], [AXEcreate_engine],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_AXE])
+
     if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find axe library])
     fi
@@ -1749,53 +1753,57 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
-## Is the iofsl present? It has a header file `iofsl.h' and a library
-## `-liofsl' and their locations might be specified with the `--with-iofsl'
+## Is the shipper present? It has a header file `SHIPPER.h' and a library
+## `-lshipper' and their locations might be specified with the `--with-shipper'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
 ##
-AC_ARG_WITH([iofsl],
-            [AS_HELP_STRING([--with-iofsl=DIR],
-                            [Use iofsl [default=no]])],,
+AC_ARG_WITH([shipper],
+            [AS_HELP_STRING([--with-shipper=DIR],
+                            [Use shipper [default=no]])],,
             [withval=no])
 
 case $withval in
   yes)
-    HAVE_IOFSL="yes"
+    HAVE_SHIPPER="yes"
     AC_CHECK_HEADERS([function_shipper.h])
     AC_CHECK_HEADERS([function_shipper_handler.h])
-
-    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find iofsl library])
+    AC_CHECK_HEADERS([network_abstraction.h])
+    AC_CHECK_LIB([iofsl_shipper_na], [na_finalize], [MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"], [unset HAVE_SHIPPER])
+    AC_CHECK_LIB([iofsl_shipper_bds], [bds_init], [MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"], [unset HAVE_SHIPPER])
+    AC_CHECK_LIB([iofsl_shipper_fs], [fs_init], [MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"], [unset HAVE_SHIPPER])
+    AC_SUBST([MYSHIPPER_LIBS])
+    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find shipper library])
     fi
     ;;
   no)
-    HAVE_IOFSL="no"
-    AC_MSG_CHECKING([for iofsl library])
+    HAVE_SHIPPER="no"
+    AC_MSG_CHECKING([for shipper library])
     AC_MSG_RESULT([suppressed])
     ;;
   *)
-    HAVE_IOFSL="yes"
+    HAVE_SHIPPER="yes"
     case "$withval" in
       *,*)
-        iofsl_inc="`echo $withval |cut -f1 -d,`"
-        iofsl_lib="`echo $withval |cut -f2 -d, -s`"
+        shipper_inc="`echo $withval |cut -f1 -d,`"
+        shipper_lib="`echo $withval |cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
-          iofsl_inc="$withval/include"
-          iofsl_lib="$withval/lib"
+          shipper_inc="$withval/include"
+          shipper_lib="$withval/lib"
         fi
         ;;
     esac
 
     ## Trying to include -I/usr/include and -L/usr/lib is redundant and
     ## can mess some compilers up.
-    if test "X$iofsl_inc" = "X/usr/include"; then
-      iofsl_inc=""
+    if test "X$shipper_inc" = "X/usr/include"; then
+      shipper_inc=""
     fi
-    if test "X$iofsl_lib" = "X/usr/lib"; then
-      iofsl_lib=""
+    if test "X$shipper_lib" = "X/usr/lib"; then
+      shipper_lib=""
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
@@ -1803,26 +1811,38 @@ case $withval in
     saved_LDFLAGS="$LDFLAGS"
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
-    if test -n "$iofsl_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$iofsl_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$iofsl_inc"
+    if test -n "$shipper_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$shipper_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$shipper_inc"
     fi
 
-    AC_CHECK_HEADERS([function_shipper.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([function_shipper.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([function_shipper_handler.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([network_abstraction.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
-    if test -n "$iofsl_lib"; then
-      LDFLAGS="$LDFLAGS -L$iofsl_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$iofsl_lib"
+    if test -n "$shipper_lib"; then
+      LDFLAGS="$LDFLAGS -L$shipper_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$shipper_lib"
     fi
 
-    if test -z "$HAVE_IOFSL" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find iofsl library])
+    AC_CHECK_LIB([iofsl_shipper_na], [na_finalize],, 
+                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER],
+		 [-liofsl_shipper_fs -liofsl_shipper_bds])
+    AC_CHECK_LIB([iofsl_shipper_bds], [bds_init],, 
+                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER],
+		 [-liofsl_shipper_fs -liofsl_shipper_na])
+    AC_CHECK_LIB([iofsl_shipper_fs], [fs_init],, 
+                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER],
+		 [-liofsl_shipper_na -liofsl_shipper_bds])
+
+    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find shipper library])
     fi
     ;;
 esac
 
 ## ----------------------------------------------------------------------
-## Is the iod present? It has a header file `iod.h' and a library
+## Is the iod present? It has a header file `IOD.h' and a library
 ## `-liod' and their locations might be specified with the `--with-iod'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
@@ -1836,7 +1856,8 @@ case $withval in
   yes)
     HAVE_IOD="yes"
     AC_CHECK_HEADERS([iod_api.h])
-
+    AC_CHECK_LIB([iod], [iod_initialize],[MYIOD_LIBS='-liod'], [unset HAVE_IOD])
+    AC_SUBST([MYIOD_LIBS])
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find iod library])
     fi
@@ -1886,6 +1907,9 @@ case $withval in
       LDFLAGS="$LDFLAGS -L$iod_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$iod_lib"
     fi
+
+    AC_CHECK_LIB([iod], [iod_finalize],, 
+		[LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_IOD])
 
     if test -z "$HAVE_IOD" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find iod library])

@@ -71,11 +71,6 @@ int main(int argc, char **argv) {
     assert(H5AOwait(&req1, &status1) == 0);
     assert (status1);
 
-    /* create a dataspace. This is a local Bookeeping operation that 
-       does not touch the file */
-    dims [0] = 60;
-    dataspaceId = H5Screate_simple(1, dims, NULL);
-
     /* create a group G1 on the file. We created here synchronously just to
        show that we can intermix the original HDF5 API with the new 
        Async API.
@@ -88,6 +83,11 @@ int main(int argc, char **argv) {
 
     //assert(H5AOwait(&req2, &status2) == 0);
     //assert (status2);
+
+    /* create a dataspace. This is a local Bookeeping operation that 
+       does not touch the file */
+    dims [0] = 60;
+    dataspaceId = H5Screate_simple(1, dims, NULL);
 
     /* create a Dataset D1 on the file, but in group /G1/G2/G3. This is asynchronous. 
        Internally this call traverses the path G1/G2/G3. 
@@ -226,10 +226,9 @@ int main(int argc, char **argv) {
 
     H5Gclose(gid1);
 
-    H5Pclose(fapl_id);
-
     H5Fflush(file_id, H5F_SCOPE_GLOBAL);
 
+    H5Pclose(fapl_id);
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     H5Fclose(file_id);

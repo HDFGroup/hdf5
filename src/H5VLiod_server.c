@@ -35,12 +35,12 @@
  * Purpose:	The IOD plugin server side routines.
  */
 
-AXE_engine_t engine = NULL;
-MPI_Comm iod_comm;
-iod_obj_id_t ROOT_ID;
-int num_peers = 0;
-int terminate_requests = 0;
-hbool_t shutdown = FALSE;
+static AXE_engine_t engine;
+static MPI_Comm iod_comm;
+static iod_obj_id_t ROOT_ID;
+static int num_peers = 0;
+static int terminate_requests = 0;
+static hbool_t shutdown = FALSE;
 
 #define EEXISTS 1
 
@@ -96,9 +96,9 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MPI_Comm_size(comm, &num_procs);
 
     iod_comm = comm;
+
     /* initialize the netwrok class */
     network_class = na_mpi_init(NULL, MPI_INIT_SERVER);
-
     if(S_SUCCESS != fs_handler_init(network_class))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
     if(S_SUCCESS != bds_init(network_class))
@@ -922,10 +922,10 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
-    //if(H5P_FILE_CREATE_DEFAULT != input->fcpl_id)
-    //H5Pclose(input->fcpl_id);
-    //if(H5P_FILE_ACCESS_DEFAULT != input->fapl_id)
-    //H5Pclose(input->fapl_id);
+    if(H5P_FILE_CREATE_DEFAULT != input->fcpl_id)
+        H5Pclose(input->fcpl_id);
+    if(H5P_FILE_ACCESS_DEFAULT != input->fapl_id)
+        H5Pclose(input->fapl_id);
     H5MM_free(input->name);
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -992,8 +992,8 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
-    //if(H5P_FILE_ACCESS_DEFAULT != input->fapl_id)
-    //H5Pclose(input->fapl_id);
+    if(H5P_FILE_ACCESS_DEFAULT != input->fapl_id)
+        H5Pclose(input->fapl_id);
     H5MM_free(input->name);
 
     input = H5MM_xfree(input);
@@ -1232,12 +1232,12 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
-    //if(H5P_GROUP_CREATE_DEFAULT != input->gcpl_id)
-    //H5Pclose(input->gcpl_id);
-    //if(H5P_GROUP_ACCESS_DEFAULT != input->gapl_id)
-    //H5Pclose(input->gapl_id);
-    //if(H5P_LINK_CREATE_DEFAULT != input->lcpl_id)
-    //H5Pclose(input->lcpl_id);
+    if(H5P_GROUP_CREATE_DEFAULT != input->gcpl_id)
+        H5Pclose(input->gcpl_id);
+    if(H5P_GROUP_ACCESS_DEFAULT != input->gapl_id)
+        H5Pclose(input->gapl_id);
+    if(H5P_LINK_CREATE_DEFAULT != input->lcpl_id)
+        H5Pclose(input->lcpl_id);
     H5MM_free(input->name);
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1367,8 +1367,8 @@ done:
 
 
     H5MM_xfree(output.gcpl);
-    //if(H5P_GROUP_ACCESS_DEFAULT != input->gapl_id)
-    //H5Pclose(input->gapl_id);
+    if(H5P_GROUP_ACCESS_DEFAULT != input->gapl_id)
+        H5Pclose(input->gapl_id);
     H5MM_free(input->name);
     input = H5MM_xfree(input);
 
@@ -1609,8 +1609,8 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
     HDfree(kv.key);
     free(kv.value);
-    //if(H5P_DATASET_CREATE_DEFAULT != input->dcpl_id)
-    //H5Pclose(input->dcpl_id);
+    if(H5P_DATASET_CREATE_DEFAULT != input->dcpl_id)
+        H5Pclose(input->dcpl_id);
 
     /* insert datatyoe metadata into scratch pad */
     kv.key = HDstrdup("dataset_dtype");
@@ -1666,10 +1666,10 @@ done:
     if(ret_value < 0)
         fs_handler_complete(input->fs_handle, &ret_value);
 
-    //if(H5P_DATASET_ACCESS_DEFAULT != input->dapl_id)
-    //H5Pclose(input->dapl_id);
-    //if(H5P_LINK_CREATE_DEFAULT != input->lcpl_id)
-    //H5Pclose(input->lcpl_id);
+    if(H5P_DATASET_ACCESS_DEFAULT != input->dapl_id)
+        H5Pclose(input->dapl_id);
+    if(H5P_LINK_CREATE_DEFAULT != input->lcpl_id)
+        H5Pclose(input->lcpl_id);
     H5MM_free(input->name);
 
     input = H5MM_xfree(input);
@@ -1818,8 +1818,8 @@ done:
     H5MM_xfree(output.dtype);
     H5MM_xfree(output.dspace);
 
-    //if(H5P_DATASET_ACCESS_DEFAULT != input->dapl_id)
-    //H5Pclose(input->dapl_id);
+    if(H5P_DATASET_ACCESS_DEFAULT != input->dapl_id)
+        H5Pclose(input->dapl_id);
     H5MM_free(input->name);
 
     input = H5MM_xfree(input);
@@ -1919,8 +1919,8 @@ done:
     if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-    //if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
-    //H5Pclose(input->dxpl_id);
+    if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
+        H5Pclose(input->dxpl_id);
     H5Sclose(input->space_id);
 
     input = H5MM_xfree(input);
@@ -2011,8 +2011,8 @@ done:
     //if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
     //HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-    //if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
-    //H5Pclose(input->dxpl_id);
+    if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
+        H5Pclose(input->dxpl_id);
     H5Sclose(input->space_id);
 
     input = H5MM_xfree(input);
