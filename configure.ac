@@ -434,9 +434,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## --------------------------------------------------------------------
   ## General Fortran flags
-  ##
-  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  ## Only add FFLAGS to FCFLAGS if it's set.
+  if test "x$FFLAGS" != "x" ; then
+    FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
