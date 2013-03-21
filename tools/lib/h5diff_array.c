@@ -106,9 +106,9 @@ static hbool_t not_comparable;
     per = -1;                                        \
     not_comparable = FALSE;                          \
     both_zero = FALSE;                               \
-    if(FP_ZERO == fpclassify(A) && FP_ZERO == fpclassify(B))                                \
+    if(0 == (A) && 0 == (B))                         \
         both_zero = TRUE;                            \
-    if(FP_ZERO != fpclassify(A))                     \
+    if(0 != (A))                                     \
         per = (double)ABS((double)(B - A) / (double)A); \
     else                                             \
         not_comparable = TRUE;                       \
