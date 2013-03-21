@@ -2218,7 +2218,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t UNUSED req)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* wait for the dataset create or open to complete */
-    if(NULL != dset->common.request) {
+    if(NULL != dset->common.request && H5VL_IOD_PENDING == dset->common.request->state) {
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 
@@ -2366,7 +2366,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL != dset->common.request) {
+    if(NULL != dset->common.request && H5VL_IOD_PENDING == dset->common.request->state) {
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 

@@ -20,6 +20,7 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
     printf("Number of server processes = %d, my rank is %d\n", my_size, my_rank);
 
+    H5open();
     /* This call intiliazes the FS for the server processes (create metadata and
        bulk data handles). It also registers with the Function shipper the 
        HDF5 VOL server routines that will be executed when the clients ship the VOL 
@@ -35,7 +36,7 @@ int main(int argc, char **argv) {
        Finally, when all clients send a terminate call, the function shipper interface
        is finalized the operation returns. */
     H5VLiod_start_handler(MPI_COMM_WORLD, MPI_INFO_NULL);
-
+    H5close();
     MPI_Finalize();
 
     return 0;

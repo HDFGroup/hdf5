@@ -93,8 +93,6 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     int num_procs;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_API(FAIL)
-
     MPI_Comm_size(comm, &num_procs);
 
     iod_comm = comm;
@@ -102,9 +100,9 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     /* initialize the netwrok class */
     network_class = na_mpi_init(NULL, MPI_INIT_SERVER);
     if(S_SUCCESS != fs_handler_init(network_class))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
+        return FAIL;
     if(S_SUCCESS != bds_init(network_class))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to initialize server function shipper");
+        return FAIL;
 
     /* Register function and encoding/decoding functions */
     fs_handler_register("eff_init", 
@@ -173,18 +171,17 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
         fprintf(stderr, "Server In Loop\n");
         /* Receive new function calls */
         if(S_SUCCESS != fs_handler_receive())
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to handle client request");
+            return FAIL;
         if(shutdown)
             break;
     }
 
     if(S_SUCCESS != bds_finalize())
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
+        return FAIL;
     if(S_SUCCESS != fs_handler_finalize())
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to finalize");
+        return FAIL;
 
-done:
-    FUNC_LEAVE_API(ret_value)
+    return ret_value;
 }
 
 
@@ -1543,19 +1540,21 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 	name += nchars;
     } /* end while */
 
-    /* setup the array struct */
+    printf("HERE1\n");
     array.cell_size = H5Tget_size(input->type_id);
+    printf("HERE1\n");
     array.num_dims = H5Sget_simple_extent_ndims(input->space_id);
 
     if(NULL == (array.current_dims = (iod_size_t *)malloc (sizeof(iod_size_t) * array.num_dims)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dimention size array");
     if(NULL == (max_dims = (iod_size_t *)malloc (sizeof(iod_size_t) * array.num_dims)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dimention size array");
+
     if(H5Sget_simple_extent_dims(input->space_id, array.current_dims, max_dims) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
     array.firstdim_max = max_dims[0];
-
     array.chunk_dims = NULL;
+
     /* MSC - NEED TO FIX THAT */
 #if 0
     if(layout.type == H5D_CHUNKED) {
@@ -1565,11 +1564,13 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     }
 #endif
     array.dims_seq = NULL;
+
     fprintf(stderr, "now creating the dataset %s cellsize %d num dimenstions %d\n",
-           comp, array.cell_size, array.num_dims);
+            comp, array.cell_size, array.num_dims);
+
     /* create the dataset */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
-                          &cur_id, NULL /*event*/) < 0)
+                       &cur_id, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
 
     kv.key = HDstrdup(comp);
@@ -1599,8 +1600,9 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     /* insert layout metadata into scratch pad */
     kv.key = HDstrdup("dataset_dcpl");
+
     /* determine the buffer size needed to store the encoded dcpl of the dataset */ 
-    if(H5Pencode(input->dcpl_id, NULL, &buf_size) < 0)
+    if(H5Pencode(input->dcpl_id,  NULL, &buf_size) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset dcpl");
     if(NULL == (kv.value = malloc (buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dcpl buffer");
@@ -1915,8 +1917,8 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
     mem_desc.nfrag = 1;
-    mem_desc.frag[0].addr = buf;
-    mem_desc.frag[0].len = (iod_size_t)size;
+    //mem_desc.frag[0].addr = buf;
+    //mem_desc.frag[0].len = (iod_size_t)size;
 
     /* MSC TODO - populate file location hyperslab */
 
@@ -1951,8 +1953,6 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     /* wait for it to complete */
     if(S_SUCCESS != bds_wait(bds_block_handle, BDS_MAX_IDLE_TIME))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-    if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
-        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
 done:
     output.ret = ret_value;
@@ -1963,6 +1963,8 @@ done:
     if(S_SUCCESS != fs_handler_complete(input->fs_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(S_SUCCESS != bds_handle_free(input->bds_handle))
+        HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+    if(S_SUCCESS != bds_block_handle_free(bds_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     if(H5P_DATASET_XFER_DEFAULT != input->dxpl_id)
@@ -2043,8 +2045,8 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     }
 
     mem_desc.nfrag = 1;
-    mem_desc.frag[0].addr = buf;
-    mem_desc.frag[0].len = (iod_size_t)size;
+    //mem_desc.frag[0].addr = buf;
+    //mem_desc.frag[0].len = (iod_size_t)size;
 
     /* MSC TODO - populate file location hyperslab */
 

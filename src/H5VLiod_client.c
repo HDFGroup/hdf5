@@ -109,10 +109,10 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     /* Loop to complete the request while poking through other requests on the 
        container to avoid deadlock. */
     while(1) {
-        //fs_wait(*((fs_request_t *)request->req), FS_MAX_IDLE_TIME, &status);
         /* test the operation status */
         ret = fs_wait(*((fs_request_t *)request->req), 0, &status);
         if(S_FAIL == ret) {
+            fprintf(stderr, "failed to wait on request\n");
             request->status = H5AO_FAILED;
             request->state = H5VL_IOD_COMPLETED;
             H5VL_iod_request_delete(file, request);
@@ -124,6 +124,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                 request->state = H5VL_IOD_COMPLETED;
             }
         }
+
         /* if it has not completed, go through the list of requests on the container to
            test progress */
         if(!status) {
@@ -132,15 +133,71 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
             if(cur_req) {
                 fs_status_t tmp_status;
 
+                if(H5VL_IOD_COMPLETED == cur_req->state) {
+                    cur_req = cur_req->next;
+                    continue;
+                }
                 tmp_req = cur_req->next;
                 ret = fs_wait(*((fs_request_t *)cur_req->req), 0, &tmp_status);
                 if(S_FAIL == ret) {
+                    fprintf(stderr, "failed to wait on request\n");
                     cur_req->status = H5AO_FAILED;
                     cur_req->state = H5VL_IOD_COMPLETED;
                     H5VL_iod_request_delete(file, cur_req);
                 }
                 else {
                     if(tmp_status) {
+                        if(FS_DSET_WRITE == cur_req->type || FS_DSET_READ == cur_req->type) {
+                            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)cur_req->data;
+
+                            /* Free memory handle */
+                            if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
+                                cur_req->status = H5AO_FAILED;
+                                cur_req->state = H5VL_IOD_COMPLETED;
+                                H5VL_iod_request_delete(file, cur_req);
+                                cur_req = tmp_req;
+                                continue;
+                            }
+
+                            if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status)) {
+                                cur_req->status = H5AO_FAILED;
+                                cur_req->state = H5VL_IOD_COMPLETED;
+                                H5VL_iod_request_delete(file, cur_req);
+                                cur_req = tmp_req;
+                                continue;
+                            }
+                            else if(FS_DSET_READ == cur_req->type) {
+                                H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
+
+                                if(SUCCEED != read_status->ret) {
+                                    free(info->status);
+                                    info->status = NULL;
+                                    info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+                                    info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+                                    cur_req->status = H5AO_FAILED;
+                                    cur_req->state = H5VL_IOD_COMPLETED;
+                                    H5VL_iod_request_delete(file, cur_req);
+                                    cur_req = tmp_req;
+                                    continue;
+                                }
+                                if(info->checksum && info->checksum != read_status->cs) {
+                                    //free(info->status);
+                                    //info->status = NULL;
+                                    //info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+                                    //HDfree(cur_req->obj_name);
+                                    //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+                                    /* MSC not returning an error because we injected this failure */
+                                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
+                                            info->checksum, read_status->cs);
+                                    //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, SUCCEED, "Data Integrity Fail - bad Checksum");
+                                }
+                            }
+
+                            free(info->status);
+                            info->status = NULL;
+                            info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+                            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+                        }
                         cur_req->status = H5AO_SUCCEEDED;
                         cur_req->state = H5VL_IOD_COMPLETED;
                         H5VL_iod_request_delete(file, cur_req);
@@ -173,6 +230,11 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
     while(cur_req) {
         H5VL_iod_request_t *tmp_req = NULL;
 
+        if(H5VL_IOD_COMPLETED == cur_req->state) {
+            cur_req = cur_req->next;
+            continue;
+        }
+
         tmp_req = cur_req->next;
         ret = fs_wait(*((fs_request_t *)cur_req->req), FS_MAX_IDLE_TIME, &status);
         if(S_FAIL == ret) {
@@ -189,11 +251,19 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
             H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)cur_req->data;
 
             /* Free memory handle */
-            if(S_SUCCESS != bds_handle_free(*info->bds_handle))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
+            if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
+                fprintf(stderr, "failed to free bds handle\n");
+                cur_req->status = H5AO_FAILED;
+                cur_req->state = H5VL_IOD_COMPLETED;
+                //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
+            }
 
-            if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed")
+            if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status)) {
+                fprintf(stderr, "write failed\n");
+                cur_req->status = H5AO_FAILED;
+                cur_req->state = H5VL_IOD_COMPLETED;
+                //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
+            }
             else if(FS_DSET_READ == cur_req->type) {
                 H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
 
@@ -202,7 +272,10 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
                     info->status = NULL;
                     info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
                     info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
+                    fprintf(stderr, "read failed\n");
+                    cur_req->status = H5AO_FAILED;
+                    cur_req->state = H5VL_IOD_COMPLETED;
+                    //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
                 }
                 if(info->checksum && info->checksum != read_status->cs) {
                     //free(info->status);
@@ -221,6 +294,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
             info->status = NULL;
             info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
             info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            cur_req->data = NULL;
         }
         H5VL_iod_request_delete(file, cur_req);
         cur_req = tmp_req;
@@ -244,6 +318,11 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
     while(cur_req) {
         H5VL_iod_request_t *tmp_req;
 
+        if(H5VL_IOD_COMPLETED == cur_req->state) {
+            cur_req = cur_req->next;
+            continue;
+        }
+
         tmp_req = cur_req->next;
 
         if(FS_DSET_WRITE == cur_req->type || FS_DSET_READ == cur_req->type) {
@@ -253,6 +332,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                 ret = fs_wait(*((fs_request_t *)cur_req->req), FS_MAX_IDLE_TIME, 
                               &status);
                 if(S_FAIL == ret) {
+                    fprintf(stderr, "failed to wait on request\n");
                     cur_req->status = H5AO_FAILED;
                     cur_req->state = H5VL_IOD_COMPLETED;
                 }
@@ -261,13 +341,19 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                     cur_req->status = H5AO_SUCCEEDED;
                     cur_req->state = H5VL_IOD_COMPLETED;
                 }
-
                 /* Free memory handle */
-                if(S_SUCCESS != bds_handle_free(*info->bds_handle))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
-
-                if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status))
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed")
+                if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
+                    fprintf(stderr, "failed to free bds handle\n");
+                    cur_req->status = H5AO_FAILED;
+                    cur_req->state = H5VL_IOD_COMPLETED;
+                    //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "failed to free bds handle");
+                }
+                if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status)) {
+                    fprintf(stderr, "write failed\n");
+                    cur_req->status = H5AO_FAILED;
+                    cur_req->state = H5VL_IOD_COMPLETED;
+                    //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
+                }
                 else if(FS_DSET_READ == cur_req->type) {
                     H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
 
@@ -276,7 +362,10 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                         info->status = NULL;
                         info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
                         info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
+                        fprintf(stderr, "read failed\n");
+                        cur_req->status = H5AO_FAILED;
+                        cur_req->state = H5VL_IOD_COMPLETED;
+                        //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Dataset I/O failed");
                     }
                     if(info->checksum && info->checksum != read_status->cs) {
                         //free(info->status);
@@ -295,6 +384,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                 info->status = NULL;
                 info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
                 info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+                cur_req->data = NULL;
 
                 H5VL_iod_request_delete(file, cur_req);
 

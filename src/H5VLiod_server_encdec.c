@@ -124,7 +124,7 @@ H5VL_iod_server_decode_file_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, fcpl_size);
     /* decode property lists if they are not default*/
     if(fcpl_size) {
-        if((input->fcpl_id = H5P__decode(p)) < 0)
+        if((input->fcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += fcpl_size;
     }
@@ -136,7 +136,7 @@ H5VL_iod_server_decode_file_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, fapl_size);
     /* decode property lists if they are not default*/
     if(fapl_size) {
-        if((input->fapl_id = H5P__decode(p)) < 0)
+        if((input->fapl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += fapl_size;
     }
@@ -224,7 +224,7 @@ H5VL_iod_server_decode_file_open(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, fapl_size);
     /* decode property lists if they are not default*/
     if(fapl_size) {
-        if((input->fapl_id = H5P__decode(p)) < 0)
+        if((input->fapl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += fapl_size;
     }
@@ -446,7 +446,7 @@ H5VL_iod_server_decode_group_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, gcpl_size);
     /* decode property lists if they are not default*/
     if(gcpl_size) {
-        if((input->gcpl_id = H5P__decode(p)) < 0)
+        if((input->gcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += gcpl_size;
     }
@@ -458,7 +458,7 @@ H5VL_iod_server_decode_group_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, gapl_size);
     /* decode property lists if they are not default*/
     if(gapl_size) {
-        if((input->gapl_id = H5P__decode(p)) < 0)
+        if((input->gapl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += gapl_size;
     }
@@ -470,7 +470,7 @@ H5VL_iod_server_decode_group_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, lcpl_size);
     /* decode property lists if they are not default*/
     if(lcpl_size) {
-        if((input->lcpl_id = H5P__decode(p)) < 0)
+        if((input->lcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += lcpl_size;
     }
@@ -561,7 +561,7 @@ H5VL_iod_server_decode_group_open(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, gapl_size);
     /* decode property lists if they are not default*/
     if(gapl_size) {
-        if((input->gapl_id = H5P__decode(p)) < 0)
+        if((input->gapl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += gapl_size;
     }
@@ -724,7 +724,7 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, dcpl_size);
     /* decode property lists if they are not default*/
     if(dcpl_size) {
-        if((input->dcpl_id = H5P__decode(p)) < 0)
+        if((input->dcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += dcpl_size;
     }
@@ -736,7 +736,7 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, dapl_size);
     /* decode property lists if they are not default*/
     if(dapl_size) {
-        if((input->dapl_id = H5P__decode(p)) < 0)
+        if((input->dapl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += dapl_size;
     }
@@ -748,7 +748,7 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, lcpl_size);
     /* decode property lists if they are not default*/
     if(lcpl_size) {
-        if((input->lcpl_id = H5P__decode(p)) < 0)
+        if((input->lcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += lcpl_size;
     }
@@ -758,6 +758,9 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
 
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
+    if((input->type_id = H5Tdecode((const void *)p)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
+#if 0
     /* decode the datatype */
     {
         H5T_t *dt;
@@ -768,10 +771,14 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
         if((input->type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
     }
+#endif
     p += type_size;
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
+    if((input->space_id = H5Sdecode((const void *)p)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
+#if 0
     /* decode the dataspace */
     {
         H5S_t *ds = NULL;
@@ -781,6 +788,7 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
         if((input->space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
     }
+#endif
     p += space_size;
 
 done:
@@ -866,7 +874,7 @@ H5VL_iod_server_decode_dset_open(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, dapl_size);
     /* decode property lists if they are not default*/
     if(dapl_size) {
-        if((input->dapl_id = H5P__decode(p)) < 0)
+        if((input->dapl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += dapl_size;
     }
@@ -976,7 +984,7 @@ H5VL_iod_server_decode_dset_io(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, dxpl_size);
     /* decode property lists if they are not default*/
     if(dxpl_size) {
-        if((input->dxpl_id = H5P__decode(p)) < 0)
+        if((input->dxpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += dxpl_size;
     }
@@ -984,17 +992,10 @@ H5VL_iod_server_decode_dset_io(fs_proc_t proc, void *_input)
         input->dxpl_id = H5P_DATASET_XFER_DEFAULT;
     }
 
-    /* decode the space size */
+    /* decode the space size & dataspace */
     UINT64DECODE_VARLEN(p, space_size);
-    /* decode the dataspace */
-    {
-        H5S_t *ds = NULL;
-        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
-        /* Register the type and return the ID */
-        if((input->space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
-    }
+    if((input->space_id = H5Sdecode((const void *)p)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
     p += space_size;
 
     if(S_FAIL == bds_handle_deserialize(&input->bds_handle, p, BDS_MAX_HANDLE_SIZE))

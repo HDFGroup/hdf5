@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
-        printf("MPI does not have MPI_THREAD_MULTIPLE support\n");
+        fprintf(stderr, "MPI does not have MPI_THREAD_MULTIPLE support\n");
         exit(1);
     }
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
-    printf("APP processes = %d, my rank is %d\n", my_size, my_rank);
+    fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
     /* Choose the IOD VOL plugin to use with this file. 
        First we create a file access property list. Then we call a new routine to set
@@ -167,13 +167,17 @@ int main(int argc, char **argv) {
     H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
                0, &req1);
 
+    /* Test if the Read operation has completed. Since it is asynchronous, It is
+       most likely that the operation is pending */
+    assert(H5AOtest(&req1, &status1) == 0);
+    (status1 == H5AO_PENDING) ? fprintf(stderr, "Read is still pending\n") : fprintf(stderr, "Read has completed\n");
+
     /* try and print the received buffer before a completion call on the read is 
-       issued.
-       This should print 0s or partial data recieved */
-    printf("Printing Before Waiting ");
+       issued. This should print 0s or partial data recieved. */
+    fprintf(stderr, "Printing Just after Test (before waiting) ");
     for(i=0;i<nelem;++i)
-        printf("%d ",r_data[i]);
-    printf("\n");
+        fprintf(stderr, "%d ",r_data[i]);
+    fprintf(stderr, "\n");
 
     /* Here we demo that we can pass hints down to the IOD server. 
        We create a new property, for demo purposes, to tell the server to inject 
@@ -190,7 +194,6 @@ int main(int argc, char **argv) {
     H5Pclose(dxpl_id);
 
     H5Sclose(dataspaceId);
-
     {
         unsigned intent;
         char temp_name[50];
@@ -198,13 +201,14 @@ int main(int argc, char **argv) {
         hsize_t temp = 20;
 
         H5Fget_intent(file_id, &intent);
-        printf("Intent %d   %d\n", intent, H5F_ACC_RDWR);
+        fprintf(stderr, "Intent %d   %d\n", intent, H5F_ACC_RDWR);
         H5Fget_name(gid1, temp_name, 50);
-        printf("File name %s   %s\n", temp_name, file_name);
+        fprintf(stderr, "File name %s   %s\n", temp_name, file_name);
 
         plist_id = H5Fget_access_plist(file_id);
         assert(plist_id);
         H5Pclose(plist_id);
+
         plist_id = H5Fget_create_plist(file_id);
         assert(plist_id);
         H5Pclose(plist_id);
@@ -228,7 +232,6 @@ int main(int argc, char **argv) {
 
     H5Fflush(file_id, H5F_SCOPE_GLOBAL);
 
-    H5Pclose(fapl_id);
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     H5Fclose(file_id);
@@ -236,18 +239,18 @@ int main(int argc, char **argv) {
     /* Print the data that has been read, after we have issued a wait 
        (in the H5Dclose).
        This should printf the correct array (0-59) */
-    printf("Printing After Waiting ");
+    fprintf(stderr, "Printing After Waiting ");
     for(i=0;i<nelem;++i)
-        printf("%d ",r_data[i]);
-    printf("\n");
+        fprintf(stderr, "%d ",r_data[i]);
+    fprintf(stderr, "\n");
 
     /* Print the data that has been read with an injected fault,
        This should print the array similar to the previous one, but with the 
        first value modified to be 10 (the injected error) */
-    printf("Printing Corrupted Data ");
+    fprintf(stderr, "Printing Corrupted Data ");
     for(i=0;i<nelem;++i)
-        printf("%d ",r2_data[i]);
-    printf("\n");
+        fprintf(stderr, "%d ",r2_data[i]);
+    fprintf(stderr, "\n");
 
     /* required waits even if they have been completed in H5Fclose */
     assert(H5AOwait(&req1, &status1) == 0);
@@ -260,6 +263,38 @@ int main(int argc, char **argv) {
     assert (status7);
     assert(H5AOwait(&req8, &status8) == 0);
     assert (status8);
+
+    /* Now we test the Open routines. Since there is no underneath container, 
+       the underlying VOL server is just going to "fake" open calls and
+       assume they exist. However there is no metadata information returned
+       since nothing is stored on disk for now. */
+
+    /* Open the file. This is asynchronous. Waiting on requests is built in the 
+       IOD VOL plugin for now (explained as we proceed). We also can wait on
+       a request using the new H5AOwait() routine */
+    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &req1);
+
+    /* Open a group G1 on the file. 
+       Internally there is a built in wait on the file_id.*/
+    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, &req2);
+    assert(gid1);
+
+    /* Open a dataset D1 on the file in a group hierarchy. 
+       Internally there is a built in wait on group G1.*/
+    did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, &req3);
+    assert(did1);
+
+    H5Pclose(fapl_id);
+    H5Dclose(did1);
+    H5Gclose(gid1);
+    H5Fclose(file_id);
+
+    assert(H5AOwait(&req1, &status1) == 0);
+    assert (status1);
+    assert(H5AOwait(&req2, &status2) == 0);
+    assert (status2);
+    assert(H5AOwait(&req3, &status3) == 0);
+    assert (status3);
 
     free(data);
     free(r_data);
