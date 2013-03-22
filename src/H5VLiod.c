@@ -1915,7 +1915,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* wait for the dataset create or open to complete */
-    if(NULL != dset->common.request) {
+    if(NULL != dset->common.request && H5VL_IOD_PENDING == dset->common.request->state) {
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 
@@ -2053,7 +2053,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL != dset->common.request) {
+    if(NULL != dset->common.request && H5VL_IOD_PENDING == dset->common.request->state) {
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
 

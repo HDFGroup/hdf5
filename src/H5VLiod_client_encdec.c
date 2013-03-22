@@ -18,17 +18,11 @@
  * Purpose:	IOD plugin client encode/decode code
  */
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Oprivate.h"         /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Ppkg.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspaces				*/
-#include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"         /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
@@ -98,7 +92,6 @@ H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input)
     H5VL_iod_file_create_input_t *input = (H5VL_iod_file_create_input_t *)_input;
     size_t size, nalloc;
     size_t len = 0, fcpl_size = 0, fapl_size = 0;
-    H5P_genplist_t *fcpl = NULL, *fapl = NULL;
     hid_t fcpl_id = input->fcpl_id;
     hid_t fapl_id = input->fapl_id;
     unsigned flags = input->flags;
@@ -111,15 +104,11 @@ H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input)
 
     /* get property list sizes */
     if(H5P_FILE_CREATE_DEFAULT != fcpl_id) {
-        if(NULL == (fcpl = (H5P_genplist_t *)H5I_object_verify(fcpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(fcpl, FALSE, NULL, &fcpl_size)) < 0)
+        if((ret_value = H5Pencode(fcpl_id,  NULL, &fcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
-        if(NULL == (fapl = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(fapl, FALSE, NULL, &fapl_size)) < 0)
+        if((ret_value = H5Pencode(fapl_id, NULL, &fapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     len = HDstrlen(name) + 1;
@@ -152,7 +141,7 @@ H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, fcpl_size);
     /* encode property lists if they are not default*/
     if(fcpl_size) {
-        if((ret_value = H5P__encode(fcpl, FALSE, p, &fcpl_size)) < 0)
+        if((ret_value = H5Pencode(fcpl_id, p, &fcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += fcpl_size;
     }
@@ -161,7 +150,7 @@ H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, fapl_size);
     /* encode property lists if they are not default*/
     if(fapl_size) {
-        if((ret_value = H5P__encode(fapl, FALSE, p, &fapl_size)) < 0)
+        if((ret_value = H5Pencode(fapl_id, p, &fapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += fapl_size;
     }
@@ -211,7 +200,6 @@ H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input)
     H5VL_iod_file_open_input_t *input = (H5VL_iod_file_open_input_t *)_input;
     size_t size, nalloc;
     size_t len = 0, fapl_size = 0;
-    H5P_genplist_t *fapl = NULL;
     hid_t fapl_id = input->fapl_id;
     unsigned flags = input->flags;
     const char *name = input->name;
@@ -223,9 +211,7 @@ H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input)
 
     /* get property list sizes */
     if(H5P_FILE_ACCESS_DEFAULT != fapl_id) {
-        if(NULL == (fapl = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(fapl, FALSE, NULL, &fapl_size)) < 0)
+        if((ret_value = H5Pencode(fapl_id, NULL, &fapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     len = HDstrlen(name) + 1;
@@ -255,7 +241,7 @@ H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, fapl_size);
     /* encode property lists if they are not default*/
     if(fapl_size) {
-        if((ret_value = H5P__encode(fapl, FALSE, p, &fapl_size)) < 0)
+        if((ret_value = H5Pencode(fapl_id, p, &fapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += fapl_size;
     }
@@ -297,7 +283,7 @@ H5VL_iod_client_decode_file_open(fs_proc_t proc, void *_output)
     UINT64DECODE_VARLEN(p, fcpl_size);
     /* decode property lists if they are not default*/
     if(fcpl_size) {
-        if((output->fcpl_id = H5P__decode(p)) < 0)
+        if((output->fcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += fcpl_size;
     }
@@ -445,7 +431,6 @@ H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input)
     H5VL_iod_group_create_input_t *input = (H5VL_iod_group_create_input_t *)_input;
     size_t size, nalloc;
     size_t len = 0, gcpl_size = 0, gapl_size = 0, lcpl_size = 0;
-    H5P_genplist_t *gcpl = NULL, *gapl = NULL, *lcpl = NULL;
     const char *name = input->name;
     hid_t gcpl_id = input->gcpl_id;
     hid_t gapl_id = input->gapl_id;
@@ -458,21 +443,15 @@ H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input)
 
     /* get size for property lists to encode */
     if(H5P_GROUP_CREATE_DEFAULT != gcpl_id) {
-        if(NULL == (gcpl = (H5P_genplist_t *)H5I_object_verify(gcpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(gcpl, FALSE, NULL, &gcpl_size)) < 0)
+        if((ret_value = H5Pencode(gcpl_id, NULL, &gcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     if(H5P_GROUP_ACCESS_DEFAULT != gapl_id) {
-        if(NULL == (gapl = (H5P_genplist_t *)H5I_object_verify(gapl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(gapl, FALSE, NULL, &gapl_size)) < 0)
+        if((ret_value = H5Pencode(gapl_id, NULL, &gapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
-        if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+        if((ret_value = H5Pencode(lcpl_id, NULL, &lcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
@@ -515,7 +494,7 @@ H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, gcpl_size);
     /* encode property lists if they are not default*/
     if(gcpl_size) {
-        if((ret_value = H5P__encode(gcpl, FALSE, p, &gcpl_size)) < 0)
+        if((ret_value = H5Pencode(gcpl_id, p, &gcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += gcpl_size;
     }
@@ -524,7 +503,7 @@ H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, gapl_size);
     /* encode property lists if they are not default*/
     if(gapl_size) {
-        if((ret_value = H5P__encode(gapl, FALSE, p, &gapl_size)) < 0)
+        if((ret_value = H5Pencode(gapl_id, p, &gapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += gapl_size;
     }
@@ -533,7 +512,7 @@ H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, lcpl_size);
     /* encode property lists if they are not default*/
     if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
-        if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+        if((ret_value = H5Pencode(lcpl_id, p, &lcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += lcpl_size;
     }
@@ -582,7 +561,6 @@ H5VL_iod_client_encode_group_open(fs_proc_t proc, void *_input)
     H5VL_iod_group_open_input_t *input = (H5VL_iod_group_open_input_t *)_input;
     size_t size, nalloc;
     size_t len = 0, gapl_size = 0;
-    H5P_genplist_t *gapl = NULL;
     const char *name = input->name;
     hid_t gapl_id = input->gapl_id;
     void *buf;
@@ -593,9 +571,7 @@ H5VL_iod_client_encode_group_open(fs_proc_t proc, void *_input)
 
     /* get size for property lists to encode */
     if(H5P_GROUP_ACCESS_DEFAULT != gapl_id) {
-        if(NULL == (gapl = (H5P_genplist_t *)H5I_object_verify(gapl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(gapl, FALSE, NULL, &gapl_size)) < 0)
+        if((ret_value = H5Pencode(gapl_id, NULL, &gapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
@@ -636,7 +612,7 @@ H5VL_iod_client_encode_group_open(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, gapl_size);
     /* encode property lists if they are not default*/
     if(gapl_size) {
-        if((ret_value = H5P__encode(gapl, FALSE, p, &gapl_size)) < 0)
+        if((ret_value = H5Pencode(gapl_id, p, &gapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += gapl_size;
     }
@@ -677,7 +653,7 @@ H5VL_iod_client_decode_group_open(fs_proc_t proc, void *_output)
     UINT64DECODE_VARLEN(p, gcpl_size);
     /* decode property lists if they are not default*/
     if(gcpl_size) {
-        if((output->gcpl_id = H5P__decode(p)) < 0)
+        if((output->gcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += gcpl_size;
     }
@@ -766,9 +742,6 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     size_t size, nalloc;
     size_t len = 0, dcpl_size = 0, dapl_size = 0, lcpl_size = 0;
     size_t type_size = 0, space_size = 0;
-    H5P_genplist_t *dcpl = NULL, *dapl = NULL, *lcpl = NULL;
-    H5T_t *dtype = NULL;
-    H5S_t *dspace = NULL;
     const char *name = input->name;
     hid_t dcpl_id = input->dcpl_id;
     hid_t dapl_id = input->dapl_id;
@@ -783,34 +756,24 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
 
     /* get size for property lists to encode */
     if(H5P_DATASET_CREATE_DEFAULT != dcpl_id) {
-        if(NULL == (dcpl = (H5P_genplist_t *)H5I_object_verify(dcpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(dcpl, FALSE, NULL, &dcpl_size)) < 0)
+        if((ret_value = H5Pencode(dcpl_id, NULL, &dcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     if(H5P_DATASET_ACCESS_DEFAULT != dapl_id) {
-        if(NULL == (dapl = (H5P_genplist_t *)H5I_object_verify(dapl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(dapl, FALSE, NULL, &dapl_size)) < 0)
+        if((ret_value = H5Pencode(dapl_id, NULL, &dapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
     if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
-        if(NULL == (lcpl = (H5P_genplist_t *)H5I_object_verify(lcpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(lcpl, FALSE, NULL, &lcpl_size)) < 0)
+        if((ret_value = H5Pencode(lcpl_id, NULL, &lcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
     /* get Type size to encode */
-    if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-    if(H5T_encode(dtype, NULL, &type_size) < 0)
+    if(H5Tencode(type_id, NULL, &type_size) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     /* get Dataspace size to encode */
-    if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-    if(H5S_encode(dspace, NULL, &space_size)<0)
+    if(H5Sencode(space_id, NULL, &space_size)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
 
     /* get name size to encode */
@@ -854,7 +817,7 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, dcpl_size);
     /* encode property lists if they are not default*/
     if(dcpl_size) {
-        if((ret_value = H5P__encode(dcpl, FALSE, p, &dcpl_size)) < 0)
+        if((ret_value = H5Pencode(dcpl_id, p, &dcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += dcpl_size;
     }
@@ -863,7 +826,7 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, dapl_size);
     /* encode property lists if they are not default*/
     if(dapl_size) {
-        if((ret_value = H5P__encode(dapl, FALSE, p, &dapl_size)) < 0)
+        if((ret_value = H5Pencode(dapl_id, p, &dapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += dapl_size;
     }
@@ -872,7 +835,7 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, lcpl_size);
     /* encode property lists if they are not default*/
     if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
-        if((ret_value = H5P__encode(lcpl, FALSE, p, &lcpl_size)) < 0)
+        if((ret_value = H5Pencode(lcpl_id, p, &lcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += lcpl_size;
     }
@@ -880,14 +843,14 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     /* encode the datatype size */
     UINT64ENCODE_VARLEN(p, type_size);
     /* encode datatype */
-    if((ret_value = H5T_encode(dtype, p, &type_size)) < 0)
+    if((ret_value = H5Tencode(type_id, p, &type_size)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode datatype");
     p += type_size;
 
     /* encode the dataspace size */
     UINT64ENCODE_VARLEN(p, space_size);
     /* encode datatspace */
-    if((ret_value = H5S_encode(dspace, p, &space_size)) < 0)
+    if((ret_value = H5Sencode(space_id, p, &space_size)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
     p += space_size;
 
@@ -935,7 +898,6 @@ H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input)
     H5VL_iod_dset_open_input_t *input = (H5VL_iod_dset_open_input_t *)_input;
     size_t size, nalloc;
     size_t len = 0, dapl_size = 0;
-    H5P_genplist_t *dapl = NULL;
     const char *name = input->name;
     hid_t dapl_id = input->dapl_id;
     void *buf;
@@ -946,9 +908,7 @@ H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input)
 
     /* get size for property lists to encode */
     if(H5P_DATASET_ACCESS_DEFAULT != dapl_id) {
-        if(NULL == (dapl = (H5P_genplist_t *)H5I_object_verify(dapl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(dapl, FALSE, NULL, &dapl_size)) < 0)
+        if((ret_value = H5Pencode(dapl_id, NULL, &dapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
@@ -989,7 +949,7 @@ H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, dapl_size);
     /* encode property lists if they are not default*/
     if(dapl_size) {
-        if((ret_value = H5P__encode(dapl, FALSE, p, &dapl_size)) < 0)
+        if((ret_value = H5Pencode(dapl_id, p, &dapl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += dapl_size;
     }
@@ -1030,7 +990,7 @@ H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output)
     UINT64DECODE_VARLEN(p, dcpl_size);
     /* decode property lists if they are not default*/
     if(dcpl_size) {
-        if((output->dcpl_id = H5P__decode(p)) < 0)
+        if((output->dcpl_id = H5Pdecode(p)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
         p += dcpl_size;
     }
@@ -1041,28 +1001,16 @@ H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output)
     /* decode the type size */
     UINT64DECODE_VARLEN(p, type_size);
     /* decode the datatype */
-    {
-        H5T_t *dt;
-        /* Create datatype by decoding buffer */
-        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
-        /* Register the type and return the ID */
-        if((output->type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
-    }
+    /* Create datatype by decoding buffer */
+    if(FAIL == (output->type_id = H5Tdecode((const void *)p)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
     p += type_size;
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
     /* decode the dataspace */
-    {
-        H5S_t *ds = NULL;
-        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
-        /* Register the type and return the ID */
-        if((output->space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
-    }
+    if((output->space_id = H5Sdecode((const void *)p)) == FAIL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
     p += space_size;
 
 done:
@@ -1079,27 +1027,21 @@ H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
     size_t size, nalloc;
     void *buf;
     uint8_t *p;
-    H5P_genplist_t *dxpl = NULL;
     hid_t dxpl_id = input->dxpl_id;
     hid_t space_id = input->space_id;
     size_t space_size = 0, dxpl_size = 0;
-    H5S_t *dspace = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get size for property lists to encode */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
-        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-        if((ret_value = H5P__encode(dxpl, FALSE, NULL, &dxpl_size)) < 0)
+        if((ret_value = H5Pencode(dxpl_id, NULL, &dxpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
     }
 
     /* get Dataspace size to encode */
-    if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
-    if(H5S_encode(dspace, NULL, &space_size)<0)
+    if(H5Sencode(space_id, NULL, &space_size)<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
     size = BDS_MAX_HANDLE_SIZE + sizeof(uint32_t) + 
@@ -1127,7 +1069,7 @@ H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
     UINT64ENCODE_VARLEN(p, dxpl_size);
     /* encode property lists if they are not default*/
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
-        if((ret_value = H5P__encode(dxpl, FALSE, p, &dxpl_size)) < 0)
+        if((ret_value = H5Pencode(dxpl_id, p, &dxpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += dxpl_size;
     }
@@ -1135,7 +1077,7 @@ H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
     /* encode the dataspace size */
     UINT64ENCODE_VARLEN(p, space_size);
     /* encode datatspace */
-    if((ret_value = H5S_encode(dspace, p, &space_size)) < 0)
+    if(H5Sencode(space_id, p, &space_size) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "unable to encode datatspace");
     p += space_size;
 

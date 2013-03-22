@@ -1,3 +1,8 @@
+/* 
+ * test_client.c: Client side of Milestone 3.3 Asynchronous I/O and initial
+ * IOD VOL plugin demonstration.  This is, in effect, the application program that 
+ * would run on one or more compute nodes and make calls to the HDF5 API.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,43 +67,47 @@ int main(int argc, char **argv) {
         data3[i]=i;
     }
 
-    /* create the file. This is asynchronous. Waiting on requests is built in the 
-       IOD VOL plugin for now (explained as we proceed). We also can wait on
-       a request using the new H5AOwait() routine */
+    /* create the file. This is asynchronous. */
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, &req1);
-    //file_id = H5Fcreate(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
+    /* Wait on the file request. This is not required to be done now
+       in order for the next operation that uses the file_id to be
+       called by the application, because the request engine will
+       detect that in the IOD VOL plugin and will complete the file
+       create if an operation depends on it. */
     assert(H5AOwait(&req1, &status1) == 0);
     assert (status1);
 
-    /* create a group G1 on the file. We created here synchronously just to
+    /* create a group G1 on the file. We creat it here synchronously just to
        show that we can intermix the original HDF5 API with the new 
        Async API.
        Internally there is a built in wait on the file_id, which has already been
        completed when we called H5AOwait on the file create request earlier*/
     gid1 = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    //gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-    //0, &req2);
-    assert(gid1);
 
-    //assert(H5AOwait(&req2, &status2) == 0);
-    //assert (status2);
+    /* this comment block shows how we could create G1 asynchronously and wait
+    *
+    * gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+    *                     0, &req2);
+    *
+    * assert(H5AOwait(&req2, &status2) == 0);
+    * assert (status2);
+    */
+    assert(gid1);
 
     /* create a dataspace. This is a local Bookeeping operation that 
        does not touch the file */
     dims [0] = 60;
     dataspaceId = H5Screate_simple(1, dims, NULL);
 
-    /* create a Dataset D1 on the file, but in group /G1/G2/G3. This is asynchronous. 
-       Internally this call traverses the path G1/G2/G3. 
+    /* create a Dataset D1 on the file, in group /G1/G2/G3. This is asynchronous. 
+       Internally to the IOD-VOL this call traverses the path G1/G2/G3. 
        It realizes that group G1 has been created locally, but has no info about 
        G2 and G3.
        This enforces a wait for the previous H5Gcreate on G1 to complete 
        at the client (which has already completed because the gcreate was done 
        synchronously), then forwards the call asynchronously to the server, 
        with the path G2/G3/D1 */
-    //did1 = H5Dcreate(file_id,"G1/G2/G3/D1",H5T_NATIVE_INT,dataspaceId,
-    //H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",H5T_NATIVE_INT,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req3);
     assert(did1);
@@ -106,8 +115,6 @@ int main(int argc, char **argv) {
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 
        (i.e. no dependency)*/
-    //did2 = H5Dcreate(file_id,"G1/G2/G3/D2",H5T_NATIVE_INT,dataspaceId,
-    //H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     did2 = H5Dcreate_ff(file_id,"G1/G2/G3/D2",H5T_NATIVE_INT,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req4);
     assert(did2);
@@ -115,39 +122,37 @@ int main(int argc, char **argv) {
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 and D2 
        (i.e. no dependency)*/
-    //did3 = H5Dcreate(file_id,"G1/G2/G3/D3",H5T_NATIVE_INT,dataspaceId,
-    //H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     did3 = H5Dcreate_ff(file_id,"G1/G2/G3/D3",H5T_NATIVE_INT,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req5);
     assert(did3);
 
     /* Raw data write on D1. This is asynchronous, but it is delayed internally 
-       at the client until the create for D1 is completed. Internally we generate 
-       a checksum for data and ship it with the write call to the server. */
-    //H5Dwrite(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data);
+       at the IOD-VOL plugin client until the create for D1 is completed. 
+       Internal to the IOD-VOL plugin client we generate a checksum for data 
+       and ship it with the write bulk data function shipper handle to the server. */
     H5Dwrite_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
                 0, &req6);
 
     /* Raw data write on D2. This is asynchronous, but it is delayed internally 
        at the client until the create for D2 is completed. Internally we generate 
        a checksum for data2 and ship it with the write call to the server.*/
-    //H5Dwrite(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2);
     H5Dwrite_ff(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
                 0, &req7);
 
     /* Raw data write on D3. This is asynchronous, but it is delayed internally 
        at the client until the create for D3 is completed. Internally we generate 
        a checksum for data3 and ship it with the write call to the server.*/
-    //H5Dwrite(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3);
     H5Dwrite_ff(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
                 0, &req8);
 
     /* NOTE: all raw data reads/writes execute concurrently at the server if they get 
-       scheduled by the AXE (i.e. no dependencies on each other). */
+       scheduled by the Asynchronous eXecution Engine, AXE, (i.e. no 
+       dependencies on each other). */
 
-    /* Here we wait for the three H5Dcreates, which have already been completed 
-       since the H5Dwrites internally completed them. However the wait call is 
-       still required to free the request struct internally */
+    /* Here we wait for the three requests for the H5Dcreates, which
+       have already been completed since the H5Dwrites internally
+       completed them. However the wait call is still required to free
+       the request struct internally */
     assert(H5AOwait(&req3, &status3) == 0);
     assert (status3);
     assert(H5AOwait(&req4, &status4) == 0);
@@ -163,7 +168,6 @@ int main(int argc, char **argv) {
        as the data that is written.
        The server returns, along with the data array, a checksum for the data 
        that should be stored, but for now generated.  */
-    //H5Dread(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data);
     H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
                0, &req1);
 
@@ -172,7 +176,7 @@ int main(int argc, char **argv) {
     assert(H5AOtest(&req1, &status1) == 0);
     (status1 == H5AO_PENDING) ? fprintf(stderr, "Read is still pending\n") : fprintf(stderr, "Read has completed\n");
 
-    /* try and print the received buffer before a completion call on the read is 
+    /* Print the received buffer before a completion call on the read is 
        issued. This should print 0s or partial data recieved. */
     fprintf(stderr, "Printing Just after Test (before waiting) ");
     for(i=0;i<nelem;++i)
@@ -182,18 +186,20 @@ int main(int argc, char **argv) {
     /* Here we demo that we can pass hints down to the IOD server. 
        We create a new property, for demo purposes, to tell the server to inject 
        corrupted data into the received array, and hence an incorrect checksum. 
-       This also detects that we are passing up and down checksum values for 
+       This also detects that we are passing checksum values in both directions for 
        raw data to ensure data integrity. The read should fail when we wait on it in
        the H5Dclose(D1) later, but for the demo purposes we are not actually going to 
        fail the close, but just print a Fatal error. */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
-    //H5Dread(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data);
     H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data, 
                0, &req2);
     H5Pclose(dxpl_id);
 
     H5Sclose(dataspaceId);
+
+    /* Issue other operations to query certain metadata values or
+       update previously created objects */
     {
         unsigned intent;
         char temp_name[50];
@@ -264,14 +270,16 @@ int main(int argc, char **argv) {
     assert(H5AOwait(&req8, &status8) == 0);
     assert (status8);
 
-    /* Now we test the Open routines. Since there is no underneath container, 
-       the underlying VOL server is just going to "fake" open calls and
-       assume they exist. However there is no metadata information returned
-       since nothing is stored on disk for now. */
+    /* Now we test the Open routines. Since there is no underneath
+       container, the underlying VOL server is just going to "fake"
+       open calls and assume they exist. However there is no metadata
+       information returned since nothing is stored on disk for
+       now. */
 
-    /* Open the file. This is asynchronous. Waiting on requests is built in the 
-       IOD VOL plugin for now (explained as we proceed). We also can wait on
-       a request using the new H5AOwait() routine */
+    /* Open the file. This is asynchronous. Waiting on requests can be
+       left for the IOD VOL plugin to handle as necessary, as we do
+       here. We also can wait on a request using the new H5AOwait()
+       routine */
     file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &req1);
 
     /* Open a group G1 on the file. 

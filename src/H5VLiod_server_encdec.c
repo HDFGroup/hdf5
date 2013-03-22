@@ -19,11 +19,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Oprivate.h"         /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Ppkg.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspaces				*/
-#include "H5Tprivate.h"		/* Datatypes				*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
@@ -760,35 +756,12 @@ H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input)
     UINT64DECODE_VARLEN(p, type_size);
     if((input->type_id = H5Tdecode((const void *)p)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
-#if 0
-    /* decode the datatype */
-    {
-        H5T_t *dt;
-        /* Create datatype by decoding buffer */
-        if(NULL == (dt = H5T_decode((const unsigned char *)p)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object");
-        /* Register the type and return the ID */
-        if((input->type_id = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type");
-    }
-#endif
     p += type_size;
 
     /* decode the space size */
     UINT64DECODE_VARLEN(p, space_size);
     if((input->space_id = H5Sdecode((const void *)p)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
-#if 0
-    /* decode the dataspace */
-    {
-        H5S_t *ds = NULL;
-        if((ds = H5S_decode((const unsigned char *)p)) == NULL)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object");
-        /* Register the type and return the ID */
-        if((input->space_id = H5I_register(H5I_DATASPACE, ds, FALSE)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace");
-    }
-#endif
     p += space_size;
 
 done:
