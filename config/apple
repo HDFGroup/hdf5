@@ -20,17 +20,16 @@
 #
 # See BlankForm in this directory for details.
 
-# The default compiler is `gcc'
+# The default compiler is `clang'
 if test "X-" = "X-$CC"; then
-    CC=gcc
-    CC_BASENAME=gcc
+    CC=clang
+    CC_BASENAME=clang
 fi
 
 # Figure out compiler flags
 . $srcdir/config/gnu-flags
 # temp patch: if GCC 4.2.1 is used in Lion or Mountain Lion systems, do not
 # use -O option as it causes failures in test/dt_arith.
-#echo host_os=$host_os
 case "$host_os" in
     darwin1[12].*)   # lion & mountain lion
 	#echo cc_vendor=$cc_vendor'-'cc_version=$cc_version
@@ -48,6 +47,11 @@ esac
 . $srcdir/config/intel-flags
 if test "X-" = "X-$FC"; then
     case $CC_BASENAME in
+        clang)
+	    # clang has no fortran compiler. Use gfortran.
+            FC=gfortran
+            FC_BASENAME=gfortran
+            ;;
         gcc*)
             FC=gfortran
             FC_BASENAME=gfortran
@@ -59,8 +63,30 @@ if test "X-" = "X-$FC"; then
     esac
 fi
 
+if test "X-" = "X-$CXX"; then
+    case $CC_BASENAME in
+        clang)
+            CXX=clang++
+            CXX_BASENAME=clang++
+            ;;
+        gcc)
+            CXX=g++
+            CXX_BASENAME=g++
+            ;;
+        icc)
+            CXX=icpc
+            CXX_BASENAME=icpc
+            ;;
+    esac
+fi
+
 # compiler version strings
 case $CC in
+    clang)
+        cc_version_info=`$CC $CFLAGS $H5_CFLAGS --version 2>&1 |\
+            grep 'Apple' | sed 's/(.*//'`
+        ;;
+
     *gcc*)
         cc_version_info=`$CC $CFLAGS $H5_CFLAGS --version 2>&1 | grep -v 'PathScale' |\
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
@@ -97,6 +123,11 @@ esac
 
 # get c++ version info
 case $CXX in
+    clang++)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
+            grep 'Apple' | sed 's/(.*//'`
+        ;;
+
     *g++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/.*\((GCC) [-a-z0-9\. ]*.*\)/\1/'`
