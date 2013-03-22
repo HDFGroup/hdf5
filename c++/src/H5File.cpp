@@ -77,11 +77,18 @@ H5File::H5File() : H5Location(), id(0) {}
 ///		please refer to the \b Special \b case section in the C layer
 ///		Reference Manual at:
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html#File-Create
+// Notes	With a PGI compiler (~2012-2013), the exception thrown by p_get_file
+//		could not be caught in the applications.  Added try block here
+//		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(0)
 {
-   p_get_file(name, flags, create_plist, access_plist);
+    try {
+	p_get_file(name, flags, create_plist, access_plist);
+    } catch (FileIException open_file) {
+	throw open_file;
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -95,11 +102,18 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 ///		FileCreatPropList::DEFAULT
 ///\param	access_plist - IN: File access property list.  Default to
 ///		FileCreatPropList::DEFAULT
+// Notes	With a PGI compiler (~2012-2013), the exception thrown by p_get_file
+//		could not be caught in the applications.  Added try block here
+//		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(0)
 {
-   p_get_file(name.c_str(), flags, create_plist, access_plist);
+    try {
+	p_get_file(name.c_str(), flags, create_plist, access_plist);
+    } catch (FileIException open_file) {
+	throw open_file;
+    }
 }
 
 //--------------------------------------------------------------------------

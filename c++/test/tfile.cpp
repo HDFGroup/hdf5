@@ -117,16 +117,16 @@ static void test_file_create()
        "terminate called without an active exception
         Command terminated by signal 6"
    Commenting it out until it's fixed  LK 20120626. 
-#ifndef H5_HAVE_FILE_VERSIONS
+*/
 	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E
+
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "Attempted to create an existing file.");
 	}
 	catch( FileIException E ) // catch truncating existing file
 	{} // do nothing, FAIL expected
 
-#endif
 	// Close file1
 	delete file1;
 	file1 = NULL;
@@ -144,7 +144,6 @@ static void test_file_create()
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
-#ifndef H5_HAVE_FILE_VERSIONS
 	// Try to truncate first file again. This should fail because file1
 	// is the same file and is currently open.
     	try {
@@ -155,19 +154,17 @@ static void test_file_create()
 	}
 	catch( FileIException E ) // catching truncating opened file
 	{} // do nothing, FAIL expected
-#endif
+
      	// Try with H5F_ACC_EXCL. This should fail too because the file already
      	// exists.
     	try {
-//	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
+	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "H5F_ACC_EXCL attempt on an existing file.");
     	}
 	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
 	{} // do nothing, FAIL expected
-*/
-   std::cerr << "SKIPPED for HDFFV-8067" << std::endl;
 
     	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
@@ -627,7 +624,6 @@ void test_file()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing File I/O operations\n"));
-    //MESSAGE("Testing File I/O operations\n");
 
     test_file_create();	// Test file creation (also creation templates)
     test_file_open();	// Test file opening

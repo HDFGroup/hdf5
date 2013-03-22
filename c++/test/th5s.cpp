@@ -569,7 +569,6 @@ extern "C"
 void test_h5s()
 {
     // Output message about test being performed
-    //MESSAGE("Testing Dataspaces\n");
     MESSAGE(5, ("Testing Dataspaces\n"));
 
     test_h5s_basic();		// Test basic H5S code
