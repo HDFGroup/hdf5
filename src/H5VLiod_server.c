@@ -170,7 +170,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     while(1) {
         fprintf(stderr, "Server In Loop\n");
         /* Receive new function calls */
-        if(S_SUCCESS != fs_handler_receive())
+        if(S_SUCCESS != fs_handler_process(FS_HANDLER_MAX_IDLE_TIME))
             return FAIL;
         if(shutdown)
             break;
