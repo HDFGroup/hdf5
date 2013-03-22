@@ -834,7 +834,7 @@ H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input)
     /* encode the plist size */
     UINT64ENCODE_VARLEN(p, lcpl_size);
     /* encode property lists if they are not default*/
-    if(H5P_LINK_CREATE_DEFAULT != lcpl_id) {
+    if(lcpl_size) {
         if((ret_value = H5Pencode(lcpl_id, p, &lcpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += lcpl_size;
@@ -1068,7 +1068,7 @@ H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input)
     /* encode the plist size */
     UINT64ENCODE_VARLEN(p, dxpl_size);
     /* encode property lists if they are not default*/
-    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
+    if(dxpl_size) {
         if((ret_value = H5Pencode(dxpl_id, p, &dxpl_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
         p += dxpl_size;

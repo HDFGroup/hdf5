@@ -1812,8 +1812,6 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     {
         hsize_t dims[1];
         hid_t space_id, type_id;
-        H5S_t *dspace = NULL;
-        H5T_t *dtype = NULL;
 
         dims [0] = 60;
         space_id = H5Screate_simple(1, dims, NULL);
@@ -1823,24 +1821,20 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         output.dcpl = NULL;
 
         /* get Type size to encode */
-        if(NULL == (dtype = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
-        if(H5T_encode(dtype, NULL, &output.dtype_size) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+        if(H5Tencode(type_id, NULL, &output.dtype_size) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset type");
         if(NULL == (output.dtype = H5MM_malloc (output.dtype_size)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate datatype buffer");
-        if(H5T_encode(dtype, output.dtype, &output.dtype_size) < 0)
+        if(H5Tencode(type_id, output.dtype, &output.dtype_size) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 
         /* get Dataspace size to encode */
-        if (NULL==(dspace=(H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
-        if(H5S_encode(dspace, NULL, &output.dspace_size)<0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+        if(H5Sencode(space_id, NULL, &output.dspace_size)<0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
         if(NULL == (output.dspace = H5MM_malloc (output.dspace_size)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate datatype buffer");
-        if(H5S_encode(dspace, output.dspace, &output.dspace_size) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
+        if(H5Sencode(space_id, output.dspace, &output.dspace_size) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace");
 
         H5Sclose(space_id);
     }
@@ -1940,7 +1934,7 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
             buf_ptr[0] = 10;
         }
         cs = H5_checksum_fletcher32(buf, size);
-        fprintf(stderr, "Checksum Generated for data at client: %u\n", cs);
+        fprintf(stderr, "Checksum Generated for data at server: %u\n", cs);
     }
 
 
