@@ -61,7 +61,7 @@ H5File::H5File() : H5Location(), id(0) {}
 ///		modifying default file meta-data.  Default to
 ///		FileCreatPropList::DEFAULT
 ///\param	access_plist - IN: File access property list.  Default to
-///		FileCreatPropList::DEFAULT
+///		FileAccPropList::DEFAULT
 ///\par Description
 ///		Valid values of \a flags include:
 ///		\li \c H5F_ACC_TRUNC - Truncate file, if it already exists,
@@ -101,7 +101,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 ///		modifying default file meta-data.  Default to
 ///		FileCreatPropList::DEFAULT
 ///\param	access_plist - IN: File access property list.  Default to
-///		FileCreatPropList::DEFAULT
+///		FileAccPropList::DEFAULT
 // Notes	With a PGI compiler (~2012-2013), the exception thrown by p_get_file
 //		could not be caught in the applications.  Added try block here
 //		to catch then re-throw it. -BMR 2013/03/21
@@ -201,7 +201,7 @@ bool H5File::isHdf5(const H5std_string& name )
 ///\param	name         - IN: Name of the file
 ///\param	flags        - IN: File access flags
 ///\param	access_plist - IN: File access property list.  Default to
-///		FileCreatPropList::DEFAULT
+///		FileAccPropList::DEFAULT
 ///\par Description
 ///		Valid values of \a flags include:
 ///		H5F_ACC_RDWR:   Open with read/write access. If the file is
