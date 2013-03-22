@@ -1941,6 +1941,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.iod_oh = dset->remote_dset.iod_oh;
     input.scratch_oh = dset->remote_dset.scratch_oh;
     input.bds_handle = *bds_handle;
+    input.checksum = 0;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
 
@@ -2053,17 +2054,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL != dset->common.request && H5VL_IOD_PENDING == dset->common.request->state) {
-        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
-
-        /* Reset object's pointer to request */
-        /* (Request is owned by the request object and will be freed when the
-         *      application calls test or wait on it.)
-         */
-        dset->common.request = NULL;
-    }
-
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
 	if(NULL == (mem_space = (const H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
@@ -2091,6 +2081,17 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
      */
     if(!buf)
         buf = &fake_char;
+
+    if(NULL != dset->common.request && H5VL_IOD_PENDING == dset->common.request->state) {
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+
+        /* Reset object's pointer to request */
+        /* (Request is owned by the request object and will be freed when the
+         *      application calls test or wait on it.)
+         */
+        dset->common.request = NULL;
+    }
 
     /* calculate the size of the buffer needed - MSC we are assuming everything is contiguous now */
     size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);

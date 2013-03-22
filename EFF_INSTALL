@@ -1,19 +1,21 @@
 System pre-requisites: 
-	An MPI implementation that supports MPI_THREAD_MULTIPLE
+	An MPI3 implementation that supports MPI_THREAD_MULTIPLE
+            [i.e. MPICH3 or later - we built with MPICH 3.0.2]
 	Pthreads
 
+
 build opa:
-	It is located in the tarball in the 'openpa' directory, OR get it
+	It is located in the tarball in the 'openpa' subdirectory, OR get it
         from here: git clone git://git.mcs.anl.gov/radix/openpa.git
 
-	./autogen.sh
 	./configure --prefix=/path/to/opa/install/directory
 	make
         make check
 	make install
 
+
 build AXE:
-	It is located in the tarball in the 'axe' directory, OR get it from
+	It is located in the tarball in the 'axe' subdirectory, OR get it from
         here: svn checkout https://svn.hdfgroup.uiuc.edu/axe/trunk
 
 	./configure --prefix=/path/to/axe/install/directory --with-opa=/path/to/opa/install/directory
@@ -21,34 +23,43 @@ build AXE:
         make check
 	make install
 
+
 build Skeletal IOD:
-	It is located in the tarball in the 'iod' directory, OR get the
+	It is located in the tarball in the 'iod' subdirectory, OR get the
         tarball from the FastForward Wiki here:
         https://wiki.hpdd.intel.com/download/attachments/12125118/iod-skeleton.tgz?api=v2
 
-	cp the iodrc file from the iod top level directory to /etc/iodrc
+	Copy the 'iodrc' file from the top level iod directory to /etc/iodrc or
+        the top-level build directory for HDF5 (e.g. hdf5_ff, if you are
+        building "in-place" from the tarball).
+
 	make
 
-	Note the path to the IOD install is actually just the path to the top
-        source directory where you unpacked the tar file.
+	Note the path to the IOD install (for the HDF5 build, below) is
+        actually just the path to the top source directory where you build
+        IOD (i.e. /path/to/your/copy/of/fastforward/iod).
+
 
 build iofsl function shipper
-	The code is located in tarball in the 'iofsl-shipper-*' directory.
+	The code is located in tarball in the 'iofsl' subdirectory.
 
-	refer to Jerome's IOFSL build recipe
+	Refer to Jerome's IOFSL build recipe in that subdirectory for build
+        instructions.
+
 
 build HDF5 IOD VOL plugin:
-        The code is located in the tarball, in the top source directory where
-        the tar file was unpacked, OR get it from here:
+        The code is located in the tarball in the 'hdf5_ff' subdirectory, OR
+        get it from here:
             svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/iod
 
-	./configure --with-iod=/path/to/iod/install/directory --with-axe=/path/to/axe/install/directory --with-shipper=/path/to/iofsl-shipper/install/directory --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/path/to/pthread_library
+	./configure --with-iod=/path/to/iod/install/directory --with-axe=/path/to/axe/install/directory --with-shipper=/path/to/iofsl-shipper/install/directory --enable-parallel --enable-debug --enable-threadsafe --enable-unsupported --with-pthread
 	make
         make check
 	make install
 
-The tests are located in testpar/test_client.c and testpar/test_server.c.  The
-build process should generate the executables.  The client and server need to
+
+The examples are located in testpar/test_client.c and testpar/test_server.c.  The
+HDF5 build process should generate the executables.  The client and server need to
 be launched from the same directory for now.
 
 Launch the server first:

@@ -85,8 +85,7 @@ CONFIG_CLEAN_FILES = testph5.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
 	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
-	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT) test_server$(EXEEXT) \
-	test_client$(EXEEXT)
+	t_pflush2$(EXEEXT) t_shapesame$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
@@ -121,18 +120,6 @@ t_shapesame_SOURCES = t_shapesame.c
 t_shapesame_OBJECTS = t_shapesame.$(OBJEXT)
 t_shapesame_LDADD = $(LDADD)
 t_shapesame_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
-test_client_SOURCES = test_client.c
-test_client_OBJECTS = test_client.$(OBJEXT)
-test_client_LDADD = $(LDADD)
-test_client_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
-test_server_SOURCES = test_server.c
-test_server_OBJECTS = test_server.$(OBJEXT)
-test_server_LDADD = $(LDADD)
-test_server_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
@@ -171,11 +158,9 @@ AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN     " $@;
 SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
-	t_posix_compliant.c t_shapesame.c test_client.c test_server.c \
-	$(testphdf5_SOURCES)
+	t_posix_compliant.c t_shapesame.c $(testphdf5_SOURCES)
 DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
-	t_posix_compliant.c t_shapesame.c test_client.c test_server.c \
-	$(testphdf5_SOURCES)
+	t_posix_compliant.c t_shapesame.c $(testphdf5_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -479,7 +464,8 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame test_server test_client
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame
+BUILD_ALL_PROGS = test_server test_client
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
@@ -574,12 +560,6 @@ t_posix_compliant$(EXEEXT): $(t_posix_compliant_OBJECTS) $(t_posix_compliant_DEP
 t_shapesame$(EXEEXT): $(t_shapesame_OBJECTS) $(t_shapesame_DEPENDENCIES) $(EXTRA_t_shapesame_DEPENDENCIES) 
 	@rm -f t_shapesame$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(t_shapesame_OBJECTS) $(t_shapesame_LDADD) $(LIBS)
-test_client$(EXEEXT): $(test_client_OBJECTS) $(test_client_DEPENDENCIES) $(EXTRA_test_client_DEPENDENCIES) 
-	@rm -f test_client$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(test_client_OBJECTS) $(test_client_LDADD) $(LIBS)
-test_server$(EXEEXT): $(test_server_OBJECTS) $(test_server_DEPENDENCIES) $(EXTRA_test_server_DEPENDENCIES) 
-	@rm -f test_server$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(test_server_OBJECTS) $(test_server_LDADD) $(LIBS)
 testphdf5$(EXEEXT): $(testphdf5_OBJECTS) $(testphdf5_DEPENDENCIES) $(EXTRA_testphdf5_DEPENDENCIES) 
 	@rm -f testphdf5$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(testphdf5_OBJECTS) $(testphdf5_LDADD) $(LIBS)
@@ -606,8 +586,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_prop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_shapesame.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_span_tree.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testphdf5.Po@am__quote@
 
 .c.o:
