@@ -43,8 +43,10 @@
 /****************************/
 /* Windows support */
 #ifdef H5_HAVE_WIN32_API
+
 #define H5PL_DEFAULT_PATH       ".;/ProgramData;/Users/Public"
 #define H5PL_PATH_SEPARATOR     ";"
+
 /* Handle for dynamic library */
 #define H5PL_HANDLE HINSTANCE
 
@@ -60,25 +62,14 @@
 /* Clear error - nothing to do */
 #define H5PL_CLR_ERROR
 
-#define H5PL_GET_PLUGIN_TYPE(H, ret_val) {    \
-typedef const int (__cdecl *get_plugin_type_t)(); \
-get_plugin_type_t get_plugin_type;  \
-get_plugin_type = (get_plugin_type_t)H5PL_GET_LIB_FUNC(H, "H5PL_get_plugin_type");  \
-ret_val = get_plugin_type();    \
-}
-
-#define H5PL_GET_PLUGIN_INFO(H, ret_val) {    \
-typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)(); \
-get_filter_info_t get_filter_info;  \
-get_filter_info = (get_filter_info_t)H5PL_GET_LIB_FUNC(H, "H5PL_get_plugin_info");  \
-ret_val = get_filter_info();    \
-}
-
 typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
 
+/* Unix support */
 #else /* H5_HAVE_WIN32_API */
+
 #define H5PL_DEFAULT_PATH       "/usr:/usr/lib:/usr/local"
 #define H5PL_PATH_SEPARATOR     ":"
+
 /* Handle for dynamic library */
 #define H5PL_HANDLE void *
 
@@ -94,23 +85,11 @@ typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
 /* Clear error */
 #define H5PL_CLR_ERROR dlerror()
 
-#define H5PL_GET_PLUGIN_TYPE(H, ret_val) {   \
-typedef const int (*get_plugin_type_t)(); \
-get_plugin_type_t get_plugin_type;  \
-get_plugin_type = (get_plugin_type_t)H5PL_GET_LIBRARY_FUNCTION(H, "H5PL_get_plugin_type");  \
-ret_val = (*get_plugin_type)();    \
-}
-
-#define H5PL_GET_PLUGIN_INFO(H, ret_val) {   \
-typedef const H5Z_class2_t *(*get_filter_info_t)(); \
-get_filter_info_t get_filter_info;  \
-*(void**)(&get_filter_info) = (get_filter_info_t)H5PL_GET_LIB_FUNC(H, "H5PL_get_plugin_info");  \
-ret_val = get_filter_info();    \
-}
-
 typedef const H5Z_class2_t *(*get_filter_info_t)();
 #endif /* H5_HAVE_WIN32_API */
 
+/* Special symbol to indicate no plugin loading */
+#define H5PL_NO_PLUGIN          "::"
 
 /******************/
 /* Local Typedefs */
@@ -159,6 +138,10 @@ static char             *H5PL_path_table_g[H5PL_MAX_PATH_NUM];
 static size_t           H5PL_num_paths_g = 0;
 static htri_t           H5PL_path_found_g = FALSE;
 
+/* Table of preload pathnames for plugin libraries */
+static char             *H5PL_preload_table_g[H5PL_MAX_PATH_NUM];
+static size_t           H5PL_num_preload_g = 0;
+static hbool_t          H5PL_no_plugin_g = FALSE;
 
 
 /*--------------------------------------------------------------------------
@@ -175,10 +158,53 @@ DESCRIPTION
 static herr_t
 H5PL__init_interface(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    char        *preload_path = NULL;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_ENTER_STATIC
+
+    /* Retrieve pathnames from HDF5_PLUGIN_PRELOAD if the user sets it
+     * to tell the library to load plugin libraries without search.
+     */
+    if(!(preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD")))
+        HGOTO_DONE(ret_value)
+
+    /* Special symbal "::" means no plugin during data reading. */
+    if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN)) {
+        H5PL_no_plugin_g = TRUE;
+        HGOTO_DONE(ret_value)
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__init_interface() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5PL_no_plugin
+ *
+ * Purpose:	Quick way for filter module to query whether to load plugin 
+ *
+ * Return:	TRUE:	No plugin loading during data reading
+ *
+ * 		FALSE:	Load plugin during data reading
+ *
+ * Programmer:	Raymond Lu
+ *              20 February 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t H5PL_no_plugin(void)
+{
+    hbool_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI(ret_value)
+
+    ret_value = H5PL_no_plugin_g;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 
 /*-------------------------------------------------------------------------
@@ -496,7 +522,7 @@ static htri_t
 H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
 {
     H5PL_HANDLE    handle = NULL;
-    get_filter_info_t H5PL_get_plugin_info = NULL;
+    get_filter_info_t get_plugin_info = NULL;
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
@@ -511,7 +537,7 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
         /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
          * The plugin library is suppose to define this function.
          */
-        if(NULL == (H5PL_get_plugin_info = (get_filter_info_t)H5PL_GET_LIB_FUNC(handle, "H5PL_get_plugin_info"))) {
+        if(NULL == (get_plugin_info = (get_filter_info_t)H5PL_GET_LIB_FUNC(handle, "H5PL_get_plugin_info"))) {
             if(H5PL__close(handle) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
         } /* end if */
@@ -521,7 +547,7 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
             /* Invoke H5PL_get_plugin_info to verify this is the right library we are looking for.
              * Move on if it isn't.
              */
-            if(NULL == (plugin_info = (*H5PL_get_plugin_info)())) {
+            if(NULL == (plugin_info = (*get_plugin_info)())) {
                 if(H5PL__close(handle) < 0)
                     HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
@@ -583,7 +609,7 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
 {
     size_t         i;
     H5Z_class2_t   *plugin_info;
-    get_filter_info_t H5PL_get_plugin_info = NULL;
+    get_filter_info_t get_plugin_info = NULL;
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
@@ -592,10 +618,10 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
     if(H5PL_table_used_g > 0) {
         for(i = 0; i < H5PL_table_used_g; i++) {
             if((plugin_type == (H5PL_table_g[i]).pl_type) && (type_id == (H5PL_table_g[i]).pl_id)) {
-                if(NULL == (H5PL_get_plugin_info = (get_filter_info_t)H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
+                if(NULL == (get_plugin_info = (get_filter_info_t)H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PL_get_plugin_info")
 
-	        if(NULL == (plugin_info = (*H5PL_get_plugin_info)()))
+	        if(NULL == (plugin_info = (*get_plugin_info)()))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
 
 	        *info = (void *)plugin_info;

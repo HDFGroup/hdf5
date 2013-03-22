@@ -38,6 +38,9 @@ DIRNAME='dirname'
 LS='ls'
 AWK='awk'
 
+# Skip plugin module to test missing filter
+ENVCMD="env HDF5_PLUGIN_PRELOAD=::"
+
 nerrors=0
 verbose=yes
 
@@ -675,7 +678,7 @@ TOOLTEST4() {
     TESTING $DUMPER $@
     (
       cd $TESTDIR
-      $RUNSERIAL $DUMPER_BIN "$@"
+      $ENVCMD $RUNSERIAL $DUMPER_BIN "$@"
     ) >$actual 2>$actual_err
 
     # save actual and actual_err in case they are needed later.

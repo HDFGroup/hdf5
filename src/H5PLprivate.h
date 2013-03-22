@@ -47,6 +47,7 @@
 /***************************************/
 
 /* Internal API routines */
-H5_DLL void *H5PL_load(H5PL_type_t plugin_type, int type_id);
+H5_DLL void    *H5PL_load(H5PL_type_t plugin_type, int type_id);
+H5_DLL hbool_t H5PL_no_plugin(void);
 
 #endif /* _H5PLprivate_H */

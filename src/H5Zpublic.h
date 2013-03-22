@@ -47,9 +47,6 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_DYNLIB1      257
 #define H5Z_FILTER_DYNLIB2      258 
 
-/* Registered third-party filters */
-#define H5Z_FILTER_BZIP2        307
-
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 
 /* General macros */

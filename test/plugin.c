@@ -31,6 +31,13 @@
 #define H5Z_PACKAGE
 #include "H5Zpkg.h"
 
+/* Filters for HDF5 internal test */
+#define H5Z_FILTER_DYNLIB1      257
+#define H5Z_FILTER_DYNLIB2      258 
+
+/* Bzip2 filter */
+#define H5Z_FILTER_BZIP2        307
+
 const char *FILENAME[] = {
     "plugin",
     NULL
