@@ -61,6 +61,9 @@ double          prop4_def=1.41;   /* Property 4 default value */
 #define PROP4_SIZE      sizeof(prop4_def)
 #define PROP4_DEF_VALUE (&prop4_def)
 
+#define PROP5_NAME      "async request"
+#define PROP6_NAME      "async flag"
+
 /****************************************************************
 **
 **  test_genprop_basic_class(): Test basic generic property list code.
@@ -476,7 +479,7 @@ test_genprop_class_callback(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 3, "H5Pget_nprops");
+    VERIFY(nprops, 5, "H5Pget_nprops");
 
     /* Create another property list from the class */
     lid2 = H5Pcreate(cid1);
@@ -489,7 +492,7 @@ test_genprop_class_callback(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid2,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 3, "H5Pget_nprops");
+    VERIFY(nprops, 5, "H5Pget_nprops");
 
     /* Create another property list by copying an existing list */
     lid3 = H5Pcopy(lid1);
@@ -502,7 +505,7 @@ test_genprop_class_callback(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid3, &nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 3, "H5Pget_nprops");
+    VERIFY(nprops, 5, "H5Pget_nprops");
 
     /* Close first list */
     ret = H5Pclose(lid1);
@@ -553,7 +556,7 @@ test_genprop_class_callback(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1, &nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 4, "H5Pget_nprops");
+    VERIFY(nprops, 6, "H5Pget_nprops");
 
     /* Create another property list by copying existing list */
     lid2 = H5Pcopy(lid1);
@@ -566,7 +569,7 @@ test_genprop_class_callback(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid2, &nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 4, "H5Pget_nprops");
+    VERIFY(nprops, 6, "H5Pget_nprops");
 
     /* Close first list */
     ret = H5Pclose(lid1);
@@ -658,7 +661,7 @@ test_genprop_basic_list(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 2, "H5Pget_nprops");
+    VERIFY(nprops, 4, "H5Pget_nprops");
 
     /* Check existence of properties */
     ret = H5Pexist(lid1, PROP1_NAME);
@@ -739,7 +742,7 @@ test_genprop_basic_list_prop(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 2, "H5Pget_nprops");
+    VERIFY(nprops, 4, "H5Pget_nprops");
 
     /* Add temporary properties */
 
@@ -754,7 +757,7 @@ test_genprop_basic_list_prop(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 4, "H5Pget_nprops");
+    VERIFY(nprops, 6, "H5Pget_nprops");
 
     /* Check existence of all properties */
     ret = H5Pexist(lid1, PROP1_NAME);
@@ -797,7 +800,7 @@ test_genprop_basic_list_prop(void)
     /* Check number of properties */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 3, "H5Pget_nprops");
+    VERIFY(nprops, 5, "H5Pget_nprops");
 
     /* Delete temporary property */
     ret = H5Premove(lid1, PROP3_NAME);
@@ -806,7 +809,7 @@ test_genprop_basic_list_prop(void)
     /* Check number of properties */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 2, "H5Pget_nprops");
+    VERIFY(nprops, 4, "H5Pget_nprops");
 
     /* Check existence of remaining properties */
     ret = H5Pexist(lid1, PROP1_NAME);
@@ -873,11 +876,13 @@ test_genprop_list_iter(void)
         int iter_count;
         const char **names;
     } iter_struct;
-    const char *pnames[4]={ /* Names of properties for iterator */
+    const char *pnames[6]={ /* Names of properties for iterator */
         PROP3_NAME,
         PROP4_NAME,
         PROP1_NAME,
-        PROP2_NAME
+        PROP2_NAME,
+        PROP5_NAME,
+        PROP6_NAME
         };
     herr_t		ret;		/* Generic return value	*/
 
@@ -905,7 +910,7 @@ test_genprop_list_iter(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 2, "H5Pget_nprops");
+    VERIFY(nprops, 4, "H5Pget_nprops");
 
     /* Add temporary properties */
 
@@ -920,7 +925,7 @@ test_genprop_list_iter(void)
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
     CHECK_I(ret, "H5Pget_nprops");
-    VERIFY(nprops, 4, "H5Pget_nprops");
+    VERIFY(nprops, 6, "H5Pget_nprops");
 
     /* Iterate over all properties in list */
     iter_struct.iter_count=0;
@@ -928,7 +933,7 @@ test_genprop_list_iter(void)
     ret = H5Piterate(lid1,NULL,test_genprop_iter2,&iter_struct);
     VERIFY(ret, 0, "H5Piterate");
 
-    /* Iterate over last three properties in list */
+    /* Iterate over last five properties in list */
     idx=iter_struct.iter_count=1;
     ret = H5Piterate(lid1,&idx,test_genprop_iter2,&iter_struct);
     VERIFY(ret, 0, "H5Piterate");
