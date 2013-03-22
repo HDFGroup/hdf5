@@ -1,3 +1,7 @@
+/* 
+ * test_server.c: Server side of Milestone 3.3 Asynchronous I/O and initial
+ * IOD VOL plugin demonstration.
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +25,7 @@ int main(int argc, char **argv) {
     printf("Number of server processes = %d, my rank is %d\n", my_size, my_rank);
 
     H5open();
-    /* This call intiliazes the FS for the server processes (create metadata and
+    /* This call initiliazes the FS for the server processes (create metadata and
        bulk data handles). It also registers with the Function shipper the 
        HDF5 VOL server routines that will be executed when the clients ship the VOL 
        routines. Then it executes a loop to receive requests from clients that map 
