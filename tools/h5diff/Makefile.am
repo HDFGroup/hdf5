@@ -27,7 +27,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 # is enabled.
 if BUILD_PARALLEL_CONDITIONAL
   H5PDIFF=ph5diff
-  TEST_SCRIPT_PARA=testph5diff.sh
+#  TEST_SCRIPT_PARA=testph5diff.sh
 endif
 
 # Our main target, h5diff

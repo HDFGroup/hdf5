@@ -101,6 +101,8 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     network_class = na_mpi_init(NULL, MPI_INIT_SERVER);
     if(S_SUCCESS != fs_handler_init(network_class))
         return FAIL;
+    if(S_SUCCESS != fs_handler_use_manual_proc())
+        return FAIL;
     if(S_SUCCESS != bds_init(network_class))
         return FAIL;
 

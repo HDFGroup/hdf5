@@ -22,7 +22,9 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  EXAMPLE_PROG_PARA = ph5example
+  INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
+  LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
+  EXAMPLE_PROG_PARA = ph5example test_server test_client
 endif
 
 # Example programs.

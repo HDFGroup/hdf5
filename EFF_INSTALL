@@ -41,30 +41,33 @@ build Skeletal IOD:
 
 
 build iofsl function shipper
-	The code is located in tarball in the 'iofsl' subdirectory.
+	The code is located in tarball in the 'iofsl-shipper-*' directory.
 
-	Refer to Jerome's IOFSL build recipe in that subdirectory for build
-        instructions.
+	refer to the function shipper build recipe in the iofsl shipper directory:
+	iofsl_shipper-0.5.0/README
 
 
 build HDF5 IOD VOL plugin:
         The code is located in the tarball in the 'hdf5_ff' subdirectory, OR
         get it from here:
-            svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/iod
+            svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/hdf5_ff
 
 	./configure --with-iod=/path/to/iod/install/directory --with-axe=/path/to/axe/install/directory --with-shipper=/path/to/iofsl-shipper/install/directory --enable-parallel --enable-debug --enable-threadsafe --enable-unsupported --with-pthread
 	make
         make check
 	make install
 
+build the example programs:
 
-The examples are located in testpar/test_client.c and testpar/test_server.c.  The
-HDF5 build process should generate the executables.  The client and server need to
-be launched from the same directory for now.
+	The examples are located in hdf5_ff/examples/.
+	The client is the test_client.c and the server is test_server.c. 
 
-Launch the server first:
- mpiexec -n 1 ./test_server
-then launch the client
- mpiexec -n <x> ./test_client
+	cd into hdf5_ff/examples/
+	make
+	The client and server need to be launched from the same directory for now.
+	Launch the server first:
+ 	mpiexec -n 1 ./test_server
+	then launch the client
+ 	mpiexec -n <x> ./test_client
 
 END

@@ -26,7 +26,6 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
 # Test programs and scripts.  These are our main targets.
 #
 TEST_PROG_PARA=t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2 t_shapesame
-BUILD_ALL_PROGS=test_server test_client
 TEST_SCRIPT_PARA=testph5.sh
 
 check_PROGRAMS = $(TEST_PROG_PARA)
@@ -37,7 +36,7 @@ testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_prop.c
 
 # The tests all depend on the hdf5 library and the test library
-LDADD = $(LIBH5TEST) $(LIBHDF5) $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
+LDADD = $(LIBH5TEST) $(LIBHDF5)
 
 # Temporary files
 # MPItest.h5 is from t_mpi

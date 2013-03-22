@@ -441,7 +441,6 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 # Always build and test h5diff but build and test ph5diff only if parallel
 # is enabled.
 @BUILD_PARALLEL_CONDITIONAL_TRUE@H5PDIFF = ph5diff
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_SCRIPT_PARA = testph5diff.sh
 
 # Add h5diff specific linker flags here
 h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
