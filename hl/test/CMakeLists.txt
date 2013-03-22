@@ -31,6 +31,9 @@ MACRO (HL_ADD_TEST hl_name files)
   SET_TARGET_PROPERTIES (hl_${hl_name} PROPERTIES FOLDER test/hl)
 
   ADD_TEST (NAME hl_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+  IF (NOT "${last_test}" STREQUAL "")
+    SET_TESTS_PROPERTIES (hl_${hl_name} PROPERTIES DEPENDS ${last_test})
+  ENDIF (NOT "${last_test}" STREQUAL "")
 
   # --------------------------------------------------------------------
   #-- Copy the necessary files.
@@ -75,6 +78,10 @@ ADD_TEST (
         test_packet_table.h5
         test_table.h5
 )
+IF (NOT "${last_test}" STREQUAL "")
+  SET_TESTS_PROPERTIES (hl_test-clear-objects PROPERTIES DEPENDS ${last_test})
+ENDIF (NOT "${last_test}" STREQUAL "")
+SET (last_test "hl_test-clear-objects")
 
 HL_ADD_TEST (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
 HL_ADD_TEST (test_dset_opt "")

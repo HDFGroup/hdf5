@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.148], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.149], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -434,9 +434,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## --------------------------------------------------------------------
   ## General Fortran flags
-  ##
-  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  ## Only add FFLAGS to FCFLAGS if it's set.
+  if test "x$FFLAGS" != "x" ; then
+    FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
