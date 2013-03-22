@@ -1,0 +1,43 @@
+Pre-requisites: 
+	MPI library that supports MPI_THREAD_MULTIPLE
+	Pthreads
+
+build opa:
+	It is located in the tarball in dir openpa. OR get it from here: git clone git://git.mcs.anl.gov/radix/openpa.git
+	./autogen.sh
+	./configure --prefix=/path/to/opa/
+	make
+	make install
+
+build AXE:
+	It is located in the tarball in dir axe OR get it from here: svn checkout https://svn.hdfgroup.uiuc.edu/axe/trunk
+	./configure --prefix=/path/to/axe/ --with-opa=/path/to/opa/
+	make
+	make install
+
+build Skeletal IOD:
+	It is located in the tarball in dir iod. OR get tarball from FF Wiki https://wiki.hpdd.intel.com/download/attachments/12125118/iod-skeleton.tgz?api=v2
+	cp iodrc from iod top level dir to /etc/iodrc
+	make
+	Note the path to IOD is actually just the path to the top source directory where you unpacked the tar file.
+
+build iofsl function shipper
+	code is located in tarball in dir iofsl
+	refer to Jerome's build IOFSL recipe
+
+build HDF5 IOD plugin:
+	svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/iod
+	./configure --with-iod=/path/to/iod --with-axe=/path/to/axe/ --with-shipper=/path/to/iofsl-shipper --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/path/to/pthread_library
+	make
+	make install
+
+The tests are located in testpar/test_client.c and testpar/test_server.c. The makefile should generate the executables.
+The client and server need to be launched from the same directory for now.
+
+Launch the server first:
+ mpiexec -n 1 ./test_server
+then launch the client
+ mpiexec -n x ./test_client
+
+END
+
