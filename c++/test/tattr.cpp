@@ -252,14 +252,19 @@ static void test_attr_rename()
     int read_data1[ATTR1_DIM1]={0}; // Buffer for reading the attribute
     int i;
 
-	// Output message about test being performed
-    SUBTEST("Rename Attribute Function");
+    // Output message about test being performed
+    SUBTEST("Checking for Existence and Renaming Attribute");
 
     try {
 	// Open file
 	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
 
-	// Check rename of attribute belonging to a file
+	// Check and rename attribute belonging to a file
+
+	// Check for existence of attribute
+	bool attr_exists = fid1.attrExists(FATTR1_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
 	// Change attribute name
 	fid1.renameAttr(FATTR1_NAME, FATTR_TMP_NAME);
@@ -280,7 +285,12 @@ static void test_attr_rename()
 	// Open the dataset
 	DataSet dataset = fid1.openDataSet(DSET1_NAME);
 
-	// Check rename of attribute belonging to a dataset
+	// Check and rename attribute belonging to a dataset
+
+	// Check for existence of attribute
+	attr_exists = dataset.attrExists(ATTR1_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
 	// Change attribute name
 	dataset.renameAttr(ATTR1_NAME, ATTR_TMP_NAME);
@@ -303,6 +313,11 @@ static void test_attr_rename()
 	// Close attribute
     	attr1.close();
 
+	// Check for existence of second attribute
+	attr_exists = dataset.attrExists(ATTR2_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
+
 	// Open the second attribute
 	Attribute attr2(dataset.openAttribute(ATTR2_NAME));
 
@@ -323,6 +338,11 @@ static void test_attr_rename()
 
 	// Change first attribute back to the original name
 	dataset.renameAttr(ATTR_TMP_NAME, ATTR1_NAME);
+
+	// Check for existence of attribute after renaming
+	attr_exists = dataset.attrExists(ATTR1_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "Attribute should exist but does not");
 
 	PASSED();
     } // end try block
@@ -1354,6 +1374,53 @@ static void test_string_attr()
 
 /****************************************************************
 **
+**  test_attr_exists(): Test checking for attribute existence.
+**	(additional attrExists tests are in test_attr_rename())
+**
+****************************************************************/
+static void test_attr_exists()
+{
+    // Output message about test being performed
+    SUBTEST("Check Attribute Existence");
+
+    try {
+	// Open file.
+	H5File fid1(FILE_BASIC, H5F_ACC_RDWR);
+
+	// Open the root group.
+	Group root = fid1.openGroup("/");
+
+	// Check for existence of attribute
+	bool attr_exists = fid1.attrExists(ATTR1_FL_STR_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "fid1, ATTR1_FL_STR_NAMEAttribute should exist but does not");
+
+	// Check for existence of attribute
+	attr_exists = fid1.attrExists(FATTR1_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "fid1,FATTR2_NAMEAttribute should exist but does not");
+
+	// Open a group.
+	Group group = fid1.openGroup(GROUP1_NAME);
+
+	// Check for existence of attribute
+	attr_exists = group.attrExists(ATTR2_NAME);
+	if (attr_exists == false)
+	    throw InvalidActionException("H5File::attrExists", "group, ATTR2_NAMEAttribute should exist but does not");
+
+	PASSED();
+    } // end try block
+
+    catch (InvalidActionException E) {
+	issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+    catch (Exception E) {
+	issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+}   // test_attr_exists()
+
+/****************************************************************
+**
 **  test_attr(): Main attribute testing routine.
 **
 ****************************************************************/
@@ -1382,6 +1449,7 @@ void test_attr()
     test_attr_dtype_shared();	// Test using shared datatypes in attributes
 
     test_string_attr();		// Test read/write string attribute
+    test_attr_exists();		// Test H5Location::attrExists
 
 }   // test_attr()
 
