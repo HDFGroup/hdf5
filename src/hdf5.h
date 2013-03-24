@@ -39,6 +39,7 @@
 #include "H5Tpublic.h"		/* Datatypes				*/
 #include "H5Zpublic.h"		/* Data filters				*/
 #include "H5VLpublic.h"		/* VOL plugins			        */
+#include "H5VLmds.h"		/* VOL plugins			        */
 
 /* Predefined VOL plugins */
 #include "H5VLnative.h"		/* Native HDF5 plugin           	*/
