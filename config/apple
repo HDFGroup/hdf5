@@ -20,10 +20,19 @@
 #
 # See BlankForm in this directory for details.
 
-# The default compiler is `clang'
+# The default compiler is `clang'.
+# No support for OS older than darwin 10.X.
 if test "X-" = "X-$CC"; then
-    CC=clang
-    CC_BASENAME=clang
+    case "$host_os" in
+	darwin10.*)	# Snow Leopard. Use gcc/g++ because clang++ is not available.
+	    CC=gcc
+	    CC_BASENAME=gcc
+	    ;;
+	*)
+	    CC=clang
+	    CC_BASENAME=clang
+	    ;;
+    esac
 fi
 
 # Figure out compiler flags
