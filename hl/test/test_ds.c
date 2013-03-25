@@ -1127,9 +1127,9 @@ herr_t test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *sc
     if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if(H5DSis_attached(did, dsid, idx) == 1) {
             if((name_len=H5DSget_scale_name(dsid,NULL,(size_t)0)) > 0) {
-                name_out = (char*)HDmalloc(name_len * sizeof (char));
+	        name_out = (char*)HDmalloc((name_len+1) * sizeof (char));
                 if(name_out != NULL) {
-                    if(H5DSget_scale_name(dsid, name_out, (size_t)name_len) >= 0) {
+                    if(H5DSget_scale_name(dsid, name_out, (size_t)name_len+1) >= 0) {
                         if(HDstrcmp(scalename,name_out)==0) {
                             ret_value = SUCCEED;
                         }
@@ -3232,12 +3232,12 @@ static int test_simple(void)
         goto out;
 
     /* allocate a  buffer */
-    name_out = (char*)HDmalloc(name_len * sizeof (char));
+    name_out = (char*)HDmalloc((name_len+1) * sizeof (char));
     if(name_out == NULL)
         goto out;
 
     /* get the scale name using this buffer */
-    if(H5DSget_scale_name(dsid, name_out, (size_t)name_len) < 0)
+    if(H5DSget_scale_name(dsid, name_out, (size_t)name_len+1) < 0)
         goto out;
 
     if(HDstrcmp("Latitude set 0",name_out)!=0)

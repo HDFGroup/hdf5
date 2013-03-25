@@ -331,12 +331,8 @@ nh5dsget_scale_name_c(hid_t_f *did, _fcd name, size_t_f *size)
   /*
    * Convert C name to FORTRAN and place it in the given buffer
    */
-  if(size_c != 0) {
-    HD5packFstring(c_scale_name, _fcdtocp(name), (size_t)*size);
-    *size = (size_t_f)size_c-1; /* (-1) because we don't include the NULL ending in the length*/
-  } else {
-    *size = (size_t_f)size_c;   /* if NULL then no name was found */
-  }
+  HD5packFstring(c_scale_name, _fcdtocp(name), (size_t)*size);
+  *size = (size_t_f)size_c;
 
 done:
   if(c_scale_name) HDfree(c_scale_name);

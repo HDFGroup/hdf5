@@ -57,7 +57,7 @@ IF (${TEST_EXPECT} STREQUAL "1")
   IF (NOT ${TEST_RESULT} STREQUAL "0")
     MESSAGE (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
   ENDIF (NOT ${TEST_RESULT} STREQUAL "0")
-ENDIF (${TEST_EXPECT} STREQUAL "0")
+ENDIF (${TEST_EXPECT} STREQUAL "1")
 
 # everything went fine...
 MESSAGE ("Passed: The output of ${TEST_PROGRAM} matched")

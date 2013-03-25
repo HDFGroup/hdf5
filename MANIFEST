@@ -293,6 +293,8 @@
 ./fortran/src/H5FDmpioff.f90
 ./fortran/src/H5Ff.c
 ./fortran/src/H5Fff.f90
+./fortran/src/H5Fff_F90.f90
+./fortran/src/H5Fff_F03.f90
 ./fortran/src/H5Gf.c
 ./fortran/src/H5Gff.f90
 ./fortran/src/H5If.c
@@ -354,6 +356,7 @@
 ./fortran/test/tH5E_F03.f90
 ./fortran/test/tH5E.f90
 ./fortran/test/tH5F.f90
+./fortran/test/tH5F_F03.f90
 ./fortran/test/tH5G.f90
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
@@ -1311,6 +1314,8 @@
 ./tools/misc/talign.c
 ./tools/misc/testfiles/h5mkgrp_help.txt
 ./tools/misc/testfiles/h5mkgrp_version.txt.in
+./tools/misc/h5perf_gentest.c
+
 
 # h5stat sources
 ./tools/h5stat/Makefile.am
@@ -2137,16 +2142,18 @@
 ./tools/h5copy/testfiles/h5copy_misc1.out
 
 # test files for h5mkgrp
-./tools/testfiles/h5mkgrp_help.ls
-./tools/testfiles/h5mkgrp_nested.ls
-./tools/testfiles/h5mkgrp_nested_latest.ls
-./tools/testfiles/h5mkgrp_nested_mult.ls
-./tools/testfiles/h5mkgrp_nested_mult_latest.ls
+./tools/testfiles/h5mkgrp_nested_p.ls
+./tools/testfiles/h5mkgrp_nested_lp.ls
+./tools/testfiles/h5mkgrp_nested_mult_p.ls
+./tools/testfiles/h5mkgrp_nested_mult_lp.ls
 ./tools/testfiles/h5mkgrp_several.ls
-./tools/testfiles/h5mkgrp_several_latest.ls
+./tools/testfiles/h5mkgrp_several_v.ls
+./tools/testfiles/h5mkgrp_several_p.ls
+./tools/testfiles/h5mkgrp_several_l.ls
 ./tools/testfiles/h5mkgrp_single.ls
-./tools/testfiles/h5mkgrp_single_latest.ls
-./tools/testfiles/h5mkgrp_version.ls
+./tools/testfiles/h5mkgrp_single_v.ls
+./tools/testfiles/h5mkgrp_single_p.ls
+./tools/testfiles/h5mkgrp_single_l.ls
 
 
 # high level libraries

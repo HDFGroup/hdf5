@@ -725,7 +725,7 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     if(NULL == (c_name = (char *)HDmalloc(c_size)))
         HGOTO_DONE(FAIL)
 
-    if((*size = (size_t)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
+    if((*size = (size_t_f)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
             (H5_iter_order_t)*order, (hsize_t)*n,c_name, c_size, (hid_t)*lapl_id)) < 0)
         HGOTO_DONE(FAIL)
 

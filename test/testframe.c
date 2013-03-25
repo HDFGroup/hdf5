@@ -155,8 +155,8 @@ void TestUsage(void)
 
 	print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n",
 	    TestProgName, (TestPrivateUsage ? "<extra options>" : ""));
-	print_func("              [-[e]x[clude] name+] \n");
-	print_func("              [-o[nly] name+] \n");
+	print_func("              [-[e]x[clude] name]+ \n");
+	print_func("              [-o[nly] name]+ \n");
 	print_func("              [-b[egin] name] \n");
 	print_func("              [-s[ummary]]  \n");
 	print_func("              [-c[leanoff]]  \n");

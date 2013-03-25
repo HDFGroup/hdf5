@@ -302,7 +302,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
          */
         curr_pos = ctx->sm_pos;
 
-        if (region_output && H5Tequal(type, H5T_STD_REF_DSETREG)) {
+        if (region_output && (size == H5R_DSET_REG_REF_BUF_SIZE)) {
             for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
                 void* memref = mem + i * size;
                 char ref_name[1024];

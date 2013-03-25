@@ -1779,6 +1779,8 @@ out:
 * Comments:
 *
 * Modifications:
+*  The size of the name returned should not include the NULL termination
+*  in its value so as to be consistent with other HDF5 APIs.
 *
 *-------------------------------------------------------------------------
 */
@@ -1875,7 +1877,7 @@ ssize_t H5DSget_scale_name(hid_t did,
         buf=NULL;
     }
 
-    return (ssize_t) nbytes;
+    return (ssize_t) MAX(0,nbytes-1);
 
     /* error zone */
 out:

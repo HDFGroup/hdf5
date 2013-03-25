@@ -52,6 +52,7 @@
  * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
  */
+#if 0
 #define TEST_ALIGNMENT
 
 /* Alignment test stuff */
@@ -61,6 +62,9 @@
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
+#endif
+ /* #include "H5Tpkg.h"
+ */ 
 
 const char *FILENAME[] = {
     "dtypes1.h5",

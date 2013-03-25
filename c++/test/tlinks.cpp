@@ -226,6 +226,7 @@ typedef struct {
     hbool_t *visited;           /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
 
+#if 0
 /* Link visit structs */
 typedef struct {
     const char *path;           /* Path to link */
@@ -374,6 +375,7 @@ typedef struct {
     unsigned idx;               /* Index in object visit structure */
     const obj_visit_t *info;    /* Pointer to the object visit structure to use */
 } ovisit_ud_t;
+#endif
 
 static const char *FILENAME[] = {
     "link0",
@@ -529,7 +531,6 @@ void test_links()
     fapl_id = h5_fileaccess();
 
     // Output message about test being performed
-    //MESSAGE("Testing Various Links\n");
     MESSAGE(5, ("Testing Various Links\n"));
     try
     {

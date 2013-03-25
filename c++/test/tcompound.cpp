@@ -749,7 +749,6 @@ extern "C"
 void test_compound()
 {
     // Output message about test being performed
-    //MESSAGE("Testing Compound Data Type operations\n");
     MESSAGE(5, ("Testing Compound Data Type operations\n"));
 
     test_compound_1();	// various things about compound data types

@@ -285,13 +285,7 @@ test_simple_io( H5File& file)
 static herr_t
 test_datasize()
 {
-
     SUBTEST("DataSet::getInMemDataSize()");
-
-    int	points[100][200];
-    int	check[100][200];
-    int		i, j, n;
-
     try
     {
 	// Open FILE1.

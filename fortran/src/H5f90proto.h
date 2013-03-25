@@ -93,6 +93,7 @@ typedef struct H5O_info_t_f {
 #define nh5fget_obj_count_c       H5_FC_FUNC_(h5fget_obj_count_c, H5FGET_OBJ_COUNT_C)
 #define nh5fget_obj_ids_c         H5_FC_FUNC_(h5fget_obj_ids_c, H5FGET_OBJ_IDS_C)
 #define nh5fget_freespace_c       H5_FC_FUNC_(h5fget_freespace_c, H5FGET_FREESPACE_C)
+#define nh5fget_file_image_c      H5_FC_FUNC_(h5fget_file_image_c, H5FGET_FILE_IMAGE_C)
 #define nh5fget_name_c            H5_FC_FUNC_(h5fget_name_c, H5FGET_NAME_C)
 #define nh5fget_filesize_c        H5_FC_FUNC_(h5fget_filesize_c, H5FGET_FILESIZE_C)
 
@@ -108,6 +109,7 @@ H5_FCDLL int_f nh5fget_access_plist_c (hid_t_f *file_id, hid_t_f *access_id);
 H5_FCDLL int_f nh5fget_obj_count_c (hid_t_f *file_id, int_f *obj_type, size_t_f *obj_count);
 H5_FCDLL int_f nh5fget_obj_ids_c (hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f *obj_ids, size_t_f *num_objs);
 H5_FCDLL int_f nh5fget_freespace_c (hid_t_f *file_id, hssize_t_f *free_space);
+H5_FCDLL int_f nh5fget_file_image_c(hid_t_f *file_id, void *buf_ptr, size_t_f *buf_len, size_t_f *buf_req);
 H5_FCDLL int_f nh5fflush_c (hid_t_f *obj_id, int_f *scope);
 H5_FCDLL int_f nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen);
 H5_FCDLL int_f nh5fget_filesize_c(hid_t_f *file_id, hsize_t_f *size);
@@ -1063,9 +1065,9 @@ H5_FCDLL int_f nh5pmodify_filter_c (hid_t_f *prp_id, int_f* filter, int_f* flags
 H5_FCDLL int_f nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters);
 H5_FCDLL int_f nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id);
 H5_FCDLL int_f nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name);
-H5_FCDLL int_f nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, int_f* offset, hsize_t_f*bytes);
+H5_FCDLL int_f nh5pset_external_c (hid_t_f *prp_id, _fcd name, int_f* namelen, off_t_f* offset, hsize_t_f*bytes);
 H5_FCDLL int_f nh5pget_external_count_c (hid_t_f *prp_id, int_f* count);
-H5_FCDLL int_f nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, int_f* offset, hsize_t_f*bytes);
+H5_FCDLL int_f nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, off_t_f* offset, hsize_t_f*bytes);
 H5_FCDLL int_f nh5pget_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_FCDLL int_f nh5pset_btree_ratios_c(hid_t_f *prp_id, real_f* left, real_f* middle, real_f* right);
 H5_FCDLL int_f nh5pget_fapl_mpio_c(hid_t_f *prp_id, int_f* comm, int_f* info);

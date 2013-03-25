@@ -377,7 +377,7 @@ JAMTEST() {
 			compare_orig="xxofile.h5"
 			cleanup="$cleanup $compare_orig"
 		else
-			# output goes to $4,  compare ofile to ubfile
+			# output goes to $3,  compare ofile to ubfile
 			ofile="$3"
 			compare_test="$ofile"
 			compare_orig="$ifile"
@@ -539,19 +539,22 @@ JAMTEST $TESTDIR/u513.txt $TESTDIR/tall.h5 ta5.h5
 CHECKFILE $TESTDIR/tall.h5 ta5.h5
 CLEANUP ta5.h5
 
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u10.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u511.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u512.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-SETUP $TESTDIR/tall.h5 ta.h5
-JAMTEST $TESTDIR/u513.txt ta.h5 
-CHECKFILE $TESTDIR/tall.h5 ta.h5
-CLEANUP ta.h5
+SETUP $TESTDIR/tall.h5 ta6.h5
+JAMTEST $TESTDIR/u10.txt ta6.h5 
+CHECKFILE $TESTDIR/tall.h5 ta6.h5
+CLEANUP ta6.h5
+SETUP $TESTDIR/tall.h5 ta7.h5
+JAMTEST $TESTDIR/u511.txt ta7.h5 
+CHECKFILE $TESTDIR/tall.h5 ta7.h5
+CLEANUP ta7.h5
+SETUP $TESTDIR/tall.h5 ta8.h5
+JAMTEST $TESTDIR/u512.txt ta8.h5 
+CHECKFILE $TESTDIR/tall.h5 ta8.h5
+CLEANUP ta8.h5
+SETUP $TESTDIR/tall.h5 ta9.h5
+JAMTEST $TESTDIR/u513.txt ta9.h5 
+CHECKFILE $TESTDIR/tall.h5 ta9.h5
+CLEANUP ta9.h5
 
 JAMTEST $TESTDIR/u10.txt $TESTDIR/twithub.h5 tax2.h5
 CHECKFILE $TESTDIR/tall.h5 tax2.h5
