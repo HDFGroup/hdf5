@@ -339,24 +339,24 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
+    Debian6.0.7 2.6.32-5-686 #1 SMP i686 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
                                   (cmake and autotools)
 
-    Debian6.0.3 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
+    Debian6.0.7 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
                                   (cmake and autotools)
 
-    Fedora17 3.5.2-1.fc17.i6866 #1 SMP i686 i686 i386 GNU/Linux
-                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
-                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+    Fedora18 3.7.9-205.fc18.i6866 #1 SMP i686 i686 i386 GNU/Linux
+                                  gcc (GCC) 4.7.2 20121109 (Red Hat 4.7.2-8)
+                                  GNU Fortran (GCC) 4.7.2 20120507 (Red Hat 4.7.2-8)
                                   (cmake and autotools)
 
-    Fedora17 3.5.2-1.fc17.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
-                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+    Fedora18 3.7.9-205.fc18.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.7.2 20121109 (Red Hat 4.7.2-8)
+                                  GNU Fortran (GCC) 4.7.2 20120507 (Red Hat 4.7.2-8)
                                   (cmake and autotools)
 
     SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
@@ -369,16 +369,15 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.7.1 
                                   (cmake and autotools)
 
-    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
-                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+    Ubuntu 12.10 3.5.0-25-generic #39-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
+                                  GNU Fortran (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
                                   (cmake and autotools)
 
-    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
-                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+    Ubuntu 12.10 3.5.0-25-generic #39-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
+                                  GNU Fortran (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
                                   (cmake and autotools)
-                                  (Use optimization level -O1)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
     hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
@@ -432,7 +431,7 @@ Known Problems
   (MSC - 2012/04/18)
 
 * The data conversion test dt_arith.c fails in "long double" to integer
-  conversion on Ubuntu 11.10 (3.0.0.13 kernal) with GCC 4.6.1 if the library
+  conversion on Ubuntu 11.10 (3.0.0.13 kernel) with GCC 4.6.1 if the library
   is built with optimization -O3 or -O2.  The older GCC (4.5) or newer kernal
   (3.2.2 on Fedora) doesn't have the problem.  Users should lower the 
   optimization level (-O1 or -O0) by defining CFLAGS in the command line of 
@@ -442,6 +441,8 @@ Known Problems
 
   This will overwrite the library's default optimization level.
   (SLU - 2012/02/07 - HDFFV-7829)
+  This issue is no longer present on Ubuntu 12.10 (3.5.0 kernel) with 
+  gcc 4.7.2.
 
 * The STDIO VFD does not work on some architectures, possibly due to 32/64
   bit or large file issues.  The basic STDIO VFD test is known to fail on
