@@ -570,6 +570,14 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     ret_value = (H5FD_t *)file;
 
 done:
+    if(!ret_value && file) {
+        if(file->fd >= 0)
+            HDclose(file->fd);
+        H5MM_xfree(file->name);
+        H5MM_xfree(file->mem);
+        H5MM_xfree(file);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_open() */
 

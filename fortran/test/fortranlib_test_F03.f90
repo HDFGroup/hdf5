@@ -82,6 +82,10 @@ PROGRAM fortranlibtest_F03
   CALL write_test_status(ret_total_error, ' Testing writing/reading enum dataset, using C_LOC', total_error)  
 
   ret_total_error = 0
+  CALL t_enum_conv(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing enumeration conversions', total_error)  
+
+  ret_total_error = 0
   CALL t_bit(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing writing/reading bitfield dataset, using C_LOC', total_error)
 
@@ -141,7 +145,10 @@ PROGRAM fortranlibtest_F03
   CALL test_nbit(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing nbit filter', total_error)
 
- 
+  ret_total_error = 0
+  CALL external_test_offset(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing external dataset with offset', total_error)
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing GROUP interface             '
@@ -158,6 +165,11 @@ PROGRAM fortranlibtest_F03
   ret_total_error = 0
   CALL obj_info(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing object info functions ', total_error)
+
+  ret_total_error = 0
+  CALL test_get_file_image(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing get file image ', total_error)
+
 
   WRITE(*,*)
 

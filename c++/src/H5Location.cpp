@@ -250,6 +250,39 @@ int H5Location::getNumAttrs() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	H5Location::attrExists
+///\brief	Checks whether the named attribute exists at this location.
+///\param	name - IN: Name of the attribute to be queried
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - 2013
+//--------------------------------------------------------------------------
+bool H5Location::attrExists(const char* name) const
+{
+   // Call C routine H5Aexists to determine whether an attribute exists
+   // at this location, which could be specified by a file, group, dataset,
+   // or named datatype.
+   herr_t ret_value = H5Aexists(getId(), name);
+   if( ret_value > 0 )
+      return true;
+   else if(ret_value == 0)
+      return false;
+   else // Raise exception when H5Aexists returns a negative value
+      throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Location::attrExists
+///\brief	This is an overloaded member function, provided for convenience.
+///		It differs from the above function in that it takes
+///		a reference to an \c H5std_string for \a name.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+bool H5Location::attrExists(const H5std_string& name) const
+{
+   attrExists(name.c_str());
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5Location::removeAttr
 ///\brief	Removes the named attribute from this object.
 ///\param	name - IN: Name of the attribute to be removed

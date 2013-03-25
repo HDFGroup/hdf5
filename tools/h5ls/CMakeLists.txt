@@ -145,10 +145,9 @@ IF (BUILD_TESTING)
       IF (NOT "${last_test}" STREQUAL "")
         SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       ENDIF (NOT "${last_test}" STREQUAL "")
-      SET (last_test "H5LS-${resultfile}")
     ELSE (HDF5_ENABLE_USING_MEMCHECKER)
       ADD_TEST (
-          NAME H5LS-clear-${resultfile}-objects
+          NAME H5LS-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
       )
@@ -163,7 +162,7 @@ IF (BUILD_TESTING)
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
       )
-      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-clear-${resultfile}-objects")
+      SET_TESTS_PROPERTIES (H5LS-${resultfile} PROPERTIES DEPENDS "H5LS-${resultfile}-clear-objects")
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST file)
 

@@ -58,7 +58,7 @@ EOF
 #==========
 #==========
 cat > $cfgfile <<'EOF'
-cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 ########################################################
 # This dashboard is maintained by The HDF Group
 # For any comments please contact cdashhelp@hdfgroup.org
@@ -84,7 +84,12 @@ set (REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
 set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 # Use multiple CPU cores to build
-SET (CTEST_BUILD_FLAGS "-j4")
+include(ProcessorCount)
+ProcessorCount(N)
+if(NOT N EQUAL 0)
+  set(CTEST_BUILD_FLAGS -j${N})
+  set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
+endif()
 
 # -----------------------------------------------------------  
 # -- Get environment

@@ -1,7 +1,4 @@
-#############################
-Expected output for 'h5ls ../testfiles/h5mkgrp_nested_mult_latest.h5'
-#############################
-Opened "../testfiles/h5mkgrp_nested_mult_latest.h5" with sec2 driver.
+Opened "h5mkgrp_nested_mult_lp.h5" with sec2 driver.
 /                        Group
     Location:  1:48
     Links:     1

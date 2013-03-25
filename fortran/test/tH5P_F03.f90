@@ -362,3 +362,144 @@ SUBROUTINE test_genprop_class_callback(total_error)
   CALL check("h5pclose_class_f", error, total_error)
 
 END SUBROUTINE test_genprop_class_callback
+
+!-------------------------------------------------------------------------
+! Function: external_test_offset
+!
+! Purpose: Tests APIs:
+!      h5pset_external_f (with offsets not equal to zero), h5pget_external_f
+!
+! Return:      Success: 0
+!              Failure: -1
+!
+! FORTRAN Programmer: M. Scot Breitenfeld
+!                     January 10, 2012
+!-------------------------------------------------------------------------
+!
+SUBROUTINE external_test_offset(cleanup,total_error)
+
+  USE ISO_C_BINDING
+  USE HDF5 ! This module contains all necessary modules
+
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: total_error
+  LOGICAL, INTENT(IN)  :: cleanup
+
+  INTEGER(hid_t) :: fapl=-1   ! file access property list
+  INTEGER(hid_t) :: file=-1   ! file to write to		
+  INTEGER(hid_t) :: dcpl=-1   ! dataset creation properties	
+  INTEGER(hid_t) :: space=-1  ! data space			
+  INTEGER(hid_t) :: dset=-1   ! dataset			
+  INTEGER(hid_t) :: grp=-1    ! group to emit diagnostics
+  INTEGER(size_t) :: i, j     ! miscellaneous counters	
+  CHARACTER(LEN=180) :: filename   ! file names			
+  INTEGER, DIMENSION(1:25) :: part ! raw data buffers
+  INTEGER, DIMENSION(1:100), TARGET :: whole ! raw data buffers		
+  INTEGER(hsize_t), DIMENSION(1:1) :: cur_size ! current data space size	
+  INTEGER(hid_t) :: hs_space  ! hyperslab data space		
+  INTEGER(hsize_t), DIMENSION(1:1) :: hs_start = (/30/) ! hyperslab starting offset	
+  INTEGER(hsize_t), DIMENSION(1:1) :: hs_count = (/25/) ! hyperslab size
+  CHARACTER(LEN=1) :: ichr1 ! character conversion holder
+  INTEGER :: error ! error status
+  TYPE(C_PTR) :: f_ptr ! fortran pointer
+
+  CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:30) :: temparray
+
+  temparray(1:30)(1:1) = '0' ! 1 byte character
+
+  ! Write the data to external files directly
+  DO i = 1, 4
+     DO j = 1, 25
+        part(j) = (i-1)*25+(j-1)
+     ENDDO
+     WRITE(ichr1,'(I1.1)') i
+     filename = "extern_"//ichr1//"a.raw"
+     OPEN(10, FILE=filename, ACCESS='STREAM', form='UNFORMATTED')
+     
+     WRITE(10) temparray(1:(i-1)*10)
+     WRITE(10) part
+     CLOSE(10)
+  ENDDO
+  !
+  ! Create the file and an initial group. 
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
+  CALL h5fcreate_f('extren_raw.h5', H5F_ACC_TRUNC_F, file, error, access_prp=fapl)
+  CALL check("h5fcreate_f",error,total_error)
+  
+  CALL h5gcreate_f(file, "emit-diagnostics", grp, error)
+  CALL check("h5gcreate_f",error, total_error)
+  
+  ! Create the dataset
+  CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+  CALL check("h5pcreate_f", error, total_error)
+  CALL h5pset_external_f(dcpl, "extern_1a.raw", INT(0,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL check("h5pset_external_f",error,total_error)
+  CALL h5pset_external_f(dcpl, "extern_2a.raw", INT(10,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL check("h5pset_external_f",error,total_error)
+  CALL h5pset_external_f(dcpl, "extern_3a.raw", INT(20,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL check("h5pset_external_f",error,total_error)
+  CALL h5pset_external_f(dcpl, "extern_4a.raw", INT(30,off_t), INT(SIZEOF(part), hsize_t), error)
+  CALL check("h5pset_external_f",error,total_error)
+  
+  cur_size(1) = 100
+  CALL h5screate_simple_f(1, cur_size, space, error)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5dcreate_f(file, "dset1", H5T_NATIVE_INTEGER, space, dset,error,dcpl_id=dcpl)
+  CALL check("h5dcreate_f", error, total_error)
+
+  !
+  ! Read the entire dataset and compare with the original
+  whole(:) = 0
+  f_ptr = C_LOC(whole(1))
+  CALL h5dread_f(dset, H5T_NATIVE_INTEGER, f_ptr, error, mem_space_id=space, file_space_id=space)
+  CALL check("h5dread_f", error, total_error)
+
+  DO i = 1, 100
+     IF(whole(i) .NE. i-1)THEN
+        WRITE(*,*) "Incorrect value(s) read."
+        total_error =  total_error + 1
+        EXIT
+     ENDIF
+  ENDDO
+  !
+  ! Read the middle of the dataset
+  CALL h5scopy_f(space, hs_space, error)
+  CALL check("h5scopy_f", error, total_error)
+  CALL h5sselect_hyperslab_f(hs_space, H5S_SELECT_SET_F, hs_start, hs_count, error)
+  CALL check("h5sselect_hyperslab_f", error, total_error)
+
+  whole(:) = 0
+  f_ptr = C_LOC(whole(1))
+  CALL h5dread_f(dset, H5T_NATIVE_INTEGER, f_ptr, error, mem_space_id=hs_space, file_space_id=hs_space)
+  CALL check("h5dread_f", error, total_error)
+
+  CALL h5sclose_f(hs_space, error)
+  CALL check("h5sclose_f", error, total_error)
+  DO i = hs_start(1)+1, hs_start(1)+hs_count(1)
+     IF(whole(i) .NE. i-1)THEN
+        WRITE(*,*) "Incorrect value(s) read."
+        total_error =  total_error + 1
+        EXIT
+     ENDIF
+  ENDDO
+  
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f", error, total_error)
+  CALL h5pclose_f(dcpl, error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5sclose_f(space, error)
+  CALL check("h5sclose_f", error, total_error)
+  CALL h5fclose_f(file, error)
+  CALL check("h5fclose_f", error, total_error)
+
+  ! cleanup
+  DO i = 1, 4
+     WRITE(ichr1,'(I1.1)') i
+     filename = "extern_"//ichr1//"a.raw"
+     CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+     CALL check("h5_cleanup_f", error, total_error)
+  ENDDO
+  IF(cleanup) CALL h5_cleanup_f("extren_raw.h5", H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
+
+END SUBROUTINE external_test_offset

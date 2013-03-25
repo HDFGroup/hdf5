@@ -1,6 +1,6 @@
 Error: 'recursive' option not compatible with 'group info' option!
 
-usage: h5ls [OPTIONS] [OBJECTS...]
+usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
   OPTIONS
    -h, -?, --help  Print a usage message and exit
    -a, --address   Print raw data address.  If dataset is contiguous, address
@@ -40,7 +40,7 @@ usage: h5ls [OPTIONS] [OBJECTS...]
    --vfd=DRIVER    Use the specified virtual file driver
    -x, --hexdump   Show raw data in hexadecimal format
 
-  OBJECTS
+  file/OBJECT
     Each object consists of an HDF5 file name optionally followed by a
     slash and an object name within the file (if no object is specified
     within the file then the contents of the root group are displayed).

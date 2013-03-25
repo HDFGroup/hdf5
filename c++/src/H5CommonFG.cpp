@@ -130,9 +130,7 @@ Group CommonFG::openGroup( const char* name ) const
 
    // If the opening of the group failed, throw an exception
    if( group_id < 0 )
-   {
       throwException("openGroup", "H5Gopen2 failed");
-   }
 
    // No failure, create and return the Group object
    Group group( group_id );
@@ -174,9 +172,7 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
 
    // If the creation of the dataset failed, throw an exception
    if( dataset_id < 0 )
-   {
       throwException("createDataSet", "H5Dcreate2 failed");
-   }
 
    // No failure, create and return the DataSet object
    DataSet dataset( dataset_id );
@@ -270,9 +266,8 @@ void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* ne
             break;
     } /* end switch */
 
-   if( ret_value < 0 ) {
+   if( ret_value < 0 )
       throwException("link", "creating link failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -300,9 +295,7 @@ void CommonFG::unlink( const char* name ) const
 {
    herr_t ret_value = H5Ldelete( getLocId(), name, H5P_DEFAULT );
    if( ret_value < 0 )
-   {
       throwException("unlink", "H5Ldelete failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -336,9 +329,7 @@ void CommonFG::move( const char* src, const char* dst ) const
 {
    herr_t ret_value = H5Lmove( getLocId(), src, H5L_SAME_LOC, dst, H5P_DEFAULT, H5P_DEFAULT );
    if( ret_value < 0 )
-   {
       throwException("move", "H5Lmove failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -371,9 +362,7 @@ void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& st
 {
    herr_t ret_value = H5Gget_objinfo( getLocId(), name, follow_link, &statbuf );
    if( ret_value < 0 )
-   {
       throwException("getObjinfo", "H5Gget_objinfo failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -400,9 +389,7 @@ void CommonFG::getObjinfo( const char* name, H5G_stat_t& statbuf ) const
 {
    herr_t ret_value = H5Gget_objinfo( getLocId(), name, 0, &statbuf );
    if( ret_value < 0 )
-   {
       throwException("getObjinfo", "H5Gget_objinfo failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -440,9 +427,8 @@ H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
     {
 	ret_value = H5Lget_info(getLocId(), name, &linkinfo, H5P_DEFAULT);
 	if( ret_value < 0 )
-	{
 	    throwException("getLinkval", "H5Lget_info to find buffer size failed");
-	}
+
 	val_size = linkinfo.u.val_size;
     }
 
@@ -453,9 +439,8 @@ H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 
 	ret_value = H5Lget_val(getLocId(), name, value_C, val_size, H5P_DEFAULT);
 	if( ret_value < 0 )
-	{
 	    throwException("getLinkval", "H5Lget_val failed");
-	}
+
 	value = H5std_string(value_C);
 	delete []value_C;
     }
@@ -498,9 +483,7 @@ void CommonFG::setComment( const char* name, const char* comment ) const
 {
    herr_t ret_value = H5Oset_comment_by_name( getLocId(), name, comment, H5P_DEFAULT );
    if( ret_value < 0 )
-   {
       throwException("setComment", "H5Oset_comment_by_name failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -530,9 +513,7 @@ void CommonFG::removeComment(const char* name) const
 {
    herr_t ret_value = H5Oset_comment_by_name(getLocId(), name, NULL, H5P_DEFAULT);
    if( ret_value < 0 )
-   {
       throwException("removeComment", "H5Oset_comment_by_name failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -588,9 +569,8 @@ H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
    // if H5Oget_comment_by_name returns SUCCEED, return the string comment,
    // otherwise, throw an exception
    if( ret_value < 0 )
-   {
       throwException("getComment", "H5Oget_comment_by_name failed");
-   }
+
    H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
    return (comment);
@@ -628,9 +608,7 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
 
    // Raise exception if H5Fmount returns negative value
    if( ret_value < 0 )
-   {
       throwException("mount", "H5Fmount failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -659,9 +637,7 @@ void CommonFG::unmount( const char* name ) const
 
    // Raise exception if H5Funmount returns negative value
    if( ret_value < 0 )
-   {
       throwException("unmount", "H5Funmount failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -1006,9 +982,7 @@ hsize_t CommonFG::getNumObjs() const
 
    herr_t ret_value = H5Gget_info(getLocId(), &ginfo);
    if(ret_value < 0)
-   {
       throwException("getNumObjs", "H5Gget_info failed");
-   }
    return (ginfo.nlinks);
 }
 
@@ -1032,9 +1006,7 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
     // call H5Lget_name_by_idx with name as NULL to get its length
     ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, NULL, 0, H5P_DEFAULT);
     if(name_len < 0)
-    {
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
-    }
 
     // now, allocate C buffer to get the name
     char* name_C = new char[name_len+1];
@@ -1067,9 +1039,8 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, char* name, size_t size) const
 {
    ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name, size, H5P_DEFAULT);
    if(name_len < 0)
-   {
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
-   }
+
    return (name_len);
 }
 
@@ -1085,9 +1056,8 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
    char* name_C = new char[size];
    ssize_t name_len = getObjnameByIdx(idx, name_C, size);
    if(name_len < 0)
-   {
       throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
-   }
+
    name = H5std_string(name_C);
    delete []name_C;
    return (name_len);
@@ -1107,9 +1077,8 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
 {
    H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
    if (obj_type == H5G_UNKNOWN)
-   {
       throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-   }
+
    return (obj_type);
 }
 
@@ -1135,9 +1104,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
 	case H5G_TYPE: HDstrcpy(type_name, "datatype"); break;
 	case H5G_UNKNOWN:
 	default:
-   	{
 	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-	}
    }
    return (obj_type);
 }
@@ -1163,9 +1130,7 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
 	case H5G_TYPE: type_name = H5std_string("datatype"); break;
 	case H5G_UNKNOWN:
 	default:
-   	{
 	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-	}
    }
    return (obj_type);
 }

@@ -129,7 +129,7 @@ void test_vlstr_free_custom(void *_mem, void *info)
  *-------------------------------------------------------------------------
  */
 // String for testing datasets
-static char stastring_ds_write[1]={'A'};
+// static char stastring_ds_write[1]={'A'};
 
 // Info for a string dataset
 const H5std_string DSET1_NAME("String_ds");
@@ -687,6 +687,7 @@ static void test_vlstring_attribute()
     }
 }   // test_vlstring_attribute()
 
+#if 0
 /*-------------------------------------------------------------------------
  * Function:	test_read_vl_string_attribute
  *
@@ -746,6 +747,7 @@ static void test_read_vl_string_attribute()
 	issue_fail_msg("test_read_vl_string_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_read_vl_string_attribute
+#endif // 2013: need to verify before adding to test
 
 /*-------------------------------------------------------------------------
  * Function:	test_vlstring_array_attribute
@@ -957,7 +959,6 @@ extern "C"
 void test_vlstrings()
 {
     // Output message about test being performed
-    //MESSAGE("Testing Variable-Length Strings");
     MESSAGE(5, ("Testing Variable-Length Strings"));
 
     // These tests use the same file

@@ -111,6 +111,8 @@ test_h5o_open(void)
     CHECK(dspace, FAIL, "H5Dget_space");
 
     /* Close the IDs */
+    ret = H5Sclose(dspace);
+    CHECK(ret, FAIL, "H5Sclose");
     ret = H5Gclose(grp);
     CHECK(ret, FAIL, "H5Gclose");
     ret = H5Tclose(dtype);
@@ -324,6 +326,8 @@ test_h5o_open_by_addr(void)
     CHECK(dspace, FAIL, "H5Dget_space");
 
     /* Close the IDs */
+    ret = H5Sclose(dspace);
+    CHECK(ret, FAIL, "H5Sclose");
     ret = H5Gclose(grp);
     CHECK(ret, FAIL, "H5Gclose");
     ret = H5Tclose(dtype);
