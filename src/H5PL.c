@@ -74,7 +74,7 @@ typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
 #define H5PL_HANDLE void *
 
 /* Get a handle to a plugin library.  Windows: TEXT macro handles Unicode strings */
-#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_NOW|RTLD_LAZY)
+#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_NOW)
 
 /* Get the address of a symbol in dynamic library */
 #define H5PL_GET_LIB_FUNC(H,N) dlsym(H,N)
