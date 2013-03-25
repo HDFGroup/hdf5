@@ -36,6 +36,11 @@ static struct long_options l_opts[] = {
     { "version", no_arg, 'V' },
     { NULL, 0, '\0' }
 };
+char         *fname_src = NULL;
+char         *fname_dst = NULL;
+char         *oname_src = NULL;
+char         *oname_dst = NULL;
+char         *str_flag = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:    leave
@@ -54,6 +59,17 @@ static struct long_options l_opts[] = {
 static void
 leave(int ret)
 {
+    if (fname_src)
+        HDfree(fname_src);
+    if (fname_dst)
+        HDfree(fname_dst);
+    if (oname_dst)
+        HDfree(oname_dst);
+    if (oname_src)
+        HDfree(oname_src);
+    if (str_flag)
+        HDfree(str_flag);
+
     h5tools_close();
     HDexit(ret);
 }
@@ -201,11 +217,6 @@ main (int argc, const char *argv[])
 {
     hid_t        fid_src = -1;
     hid_t        fid_dst = -1;
-    char         *fname_src = NULL;
-    char         *fname_dst = NULL;
-    char         *oname_src = NULL;
-    char         *oname_dst = NULL;
-    char         *str_flag = NULL;
     unsigned     flag = 0;
     unsigned     verbose = 0;
     unsigned     parents = 0;
@@ -339,8 +350,6 @@ main (int argc, const char *argv[])
     if (fid_src==-1)
     {
         error_msg("Could not open input file <%s>...Exiting\n", fname_src);
-        if (fname_src)
-            HDfree(fname_src);
         leave(EXIT_FAILURE);
     }
 
@@ -360,10 +369,6 @@ main (int argc, const char *argv[])
     if (fid_dst==-1)
     {
         error_msg("Could not open output file <%s>...Exiting\n", fname_dst);
-        if (fname_src)
-            HDfree(fname_src);
-        if (fname_dst)
-            HDfree(fname_dst);
         leave(EXIT_FAILURE);
     }
 
@@ -484,18 +489,7 @@ main (int argc, const char *argv[])
     if (H5Fclose(fid_dst)<0)
         goto error;
 
-    if (fname_src)
-        HDfree(fname_src);
-    if (fname_dst)
-        HDfree(fname_dst);
-    if (oname_dst)
-        HDfree(oname_dst);
-    if (oname_src)
-        HDfree(oname_src);
-
-    h5tools_close();
-
-    return EXIT_SUCCESS;
+    leave(EXIT_SUCCESS);
 
 error:
     printf("Error in copy...Exiting\n");
@@ -510,19 +504,7 @@ error:
     H5Fclose(fid_src);
     H5Fclose(fid_dst);
  } H5E_END_TRY;
-    if (fname_src)
-        HDfree(fname_src);
-    if (fname_dst)
-        HDfree(fname_dst);
-    if (oname_dst)
-        HDfree(oname_dst);
-    if (oname_src)
-        HDfree(oname_src);
-    if (str_flag)
-        HDfree(str_flag);
 
-    h5tools_close();
-
-    return EXIT_FAILURE;
+ leave(EXIT_FAILURE);
 }
 
