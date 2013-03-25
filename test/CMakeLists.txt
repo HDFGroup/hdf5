@@ -523,6 +523,7 @@ ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
     -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
 )
 SET_TESTS_PROPERTIES(error_test PROPERTIES DEPENDS h5test-clear-error_test-objects)
+SET_TESTS_PROPERTIES (error_test PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PRELOAD=::")
 
 #-- Adding test for links_env
 ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)

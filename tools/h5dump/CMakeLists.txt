@@ -1656,6 +1656,7 @@ IF (BUILD_TESTING)
 
   # test for error stack display (BZ2048)
   ADD_H5ERR_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
+  SET_TESTS_PROPERTIES (H5DUMP-filter_fail PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PRELOAD=::")
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST_EXPORT (tall-6 tall.h5 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y -o)
