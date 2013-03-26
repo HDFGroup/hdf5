@@ -23,7 +23,6 @@
 
 /* Public headers needed by this file */
 
-
 /*****************/
 /* Public Macros */
 /*****************/
@@ -31,6 +30,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifdef H5_HAVE_EFF
 
 /*******************/
 /* Public Typedefs */
@@ -50,7 +51,6 @@ typedef enum {
 /********************/
 /* Public Variables */
 /********************/
-
 
 /*********************/
 /* Public Prototypes */
@@ -83,9 +83,11 @@ H5_DLL herr_t H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 H5_DLL herr_t H5AOtest(H5_request_t *req, H5_status_t *status);
 H5_DLL herr_t H5AOwait(H5_request_t *req, H5_status_t *status);
 
+#endif /* H5_HAVE_EFF */
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* _H5FFpublic_H */
 

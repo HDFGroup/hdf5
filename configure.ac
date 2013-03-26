@@ -183,6 +183,7 @@ AC_SUBST([HDF_CXX]) HDF_CXX=no
 AC_SUBST([CXX]) HDF_CXX=no
 AC_SUBST([HDF5_HL]) HDF5_HL=yes
 AC_SUBST([GPFS]) GPFS=no
+AC_SUBST([EFF]) EFF=no
 AC_SUBST([LARGEFILE]) LARGEFILE=yes
 AC_SUBST([INSTRUMENT])
 AC_SUBST([CODESTACK]) CODESTACK=no
@@ -2837,6 +2838,52 @@ case "X-$CLEARFILEBUF" in
       AC_MSG_RESULT([no])
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check if they would like to enable building the IOD plugin
+##
+AC_MSG_CHECKING([whether to enable the EFF plugins])
+AC_ARG_ENABLE([eff],
+              [AS_HELP_STRING([--enable-eff],
+                              [Enable EFF stack [default=no]])],[EFF=yes],
+              [enableval=no])
+
+AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test "X-$enableval" = "X-yes"])
+
+case "X-$enableval" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_EFF], [1],
+                    [Define if we have IOD VOL plugin support.])
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    ;;
+
+esac
+
+#AC_SUBST([EFF])
+#AC_MSG_CHECKING([whether to build the IOD VOL plugin])
+#AC_ARG_ENABLE([eff],
+#              [AS_HELP_STRING([--enable-eff],
+#                              [Build the IOD VOL plugin.  Default=no.])],
+#              [EFF=$enableval],
+#	      [EFF=NO])
+#AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test -n "$EFF"])
+#
+#case "X-$EFF" in
+#  *)
+#      EFF=yes
+#      AC_MSG_RESULT([yes])
+#      AC_DEFINE([HAVE_EFF], [1],
+#                [Define if we have IOD VOL plugin support.])
+#    ;;
+#  X-no)
+#      EFF=no
+#      AC_MSG_RESULT([no])
+#    ;;
+#
+#esac
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to use a memory checking tool (like valgrind's

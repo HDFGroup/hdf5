@@ -28,6 +28,8 @@
 #include "H5VLiod_common.h"
 #include "H5VLiod_client.h"
 
+#ifdef H5_HAVE_EFF
+
 /*-------------------------------------------------------------------------
  * Function:	H5VL_client_encode_eff_init
  *------------------------------------------------------------------------- */
@@ -1267,3 +1269,5 @@ H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_client_decode_dset_close() */
+
+#endif /* H5_HAVE_EFF */

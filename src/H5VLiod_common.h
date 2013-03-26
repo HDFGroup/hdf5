@@ -22,6 +22,8 @@
 #include "H5VLpublic.h"
 #include "H5VLiod.h"         /* Iod VOL plugin			*/
 
+#ifdef H5_HAVE_EFF
+
 #define NA_UNDEFINED NULL
 
 /* struct that contains the information about the IOD container */
@@ -281,4 +283,5 @@ static inline int fs_proc_remote_object_t(fs_proc_t proc, void *data)
 }
 #endif
 
+#endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_common_H */

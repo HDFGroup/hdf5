@@ -25,6 +25,8 @@
 #include "H5VLiod_common.h"
 #include "H5VLiod_server.h"
 
+#ifdef H5_HAVE_EFF
+
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2012
@@ -1168,3 +1170,5 @@ H5VL_iod_server_encode_dset_close(fs_proc_t proc, void *_output)
 done:
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_server_encode_dset_close() */
+
+#endif /* H5_HAVE_EFF */

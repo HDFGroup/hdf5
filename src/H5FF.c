@@ -39,7 +39,7 @@
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
 #include "H5VLiod_client.h"	/* Client IOD - tmp			*/
 
-
+#ifdef H5_HAVE_EFF
 /****************/
 /* Local Macros */
 /****************/
@@ -832,3 +832,4 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5AOwait() */
 
+#endif /* H5_HAVE_EFF */

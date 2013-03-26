@@ -35,6 +35,8 @@
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_client.h"     /* Client IOD helper			*/
 
+#ifdef H5_HAVE_EFF
+
 /* function shipper IDs for different routines */
 static fs_id_t H5VL_EFF_INIT_ID;
 static fs_id_t H5VL_EFF_FINALIZE_ID;
@@ -2421,3 +2423,5 @@ H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_close() */
+
+#endif /* H5_HAVE_EFF */

@@ -20,9 +20,6 @@
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD
 
-/* Define the default vol plugin to compile */
-#undef DEFAULT_VOL
-
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
@@ -61,6 +58,9 @@
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
 
+/* Define to 1 if you have the <AXE.h> header file. */
+#undef HAVE_AXE_H
+
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 #undef HAVE_BSDGETTIMEOFDAY
 
@@ -95,6 +95,9 @@
 
 /* Define to 1 if you have the <dmalloc.h> header file. */
 #undef HAVE_DMALLOC_H
+
+/* Define if we have IOD VOL plugin support. */
+#undef HAVE_EFF
 
 /* Define if library information should be embedded in the executables */
 #undef HAVE_EMBEDDED_LIBINFO
@@ -150,6 +153,12 @@
 /* Define if the compiler understands the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
+/* Define to 1 if you have the <function_shipper.h> header file. */
+#undef HAVE_FUNCTION_SHIPPER_H
+
+/* Define to 1 if you have the <function_shipper_handler.h> header file. */
+#undef HAVE_FUNCTION_SHIPPER_HANDLER_H
+
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 #undef HAVE_GETCONSOLESCREENBUFFERINFO
 
@@ -187,11 +196,32 @@
 /* Define to 1 if you have the `ioctl' function. */
 #undef HAVE_IOCTL
 
+/* Define to 1 if you have the <iod_api.h> header file. */
+#undef HAVE_IOD_API_H
+
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
+/* Define to 1 if you have the `axe' library (-laxe). */
+#undef HAVE_LIBAXE
+
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
+
+/* Define to 1 if you have the `iod' library (-liod). */
+#undef HAVE_LIBIOD
+
+/* Define to 1 if you have the `iofsl_shipper_bds' library
+   (-liofsl_shipper_bds). */
+#undef HAVE_LIBIOFSL_SHIPPER_BDS
+
+/* Define to 1 if you have the `iofsl_shipper_fs' library
+   (-liofsl_shipper_fs). */
+#undef HAVE_LIBIOFSL_SHIPPER_FS
+
+/* Define to 1 if you have the `iofsl_shipper_na' library
+   (-liofsl_shipper_na). */
+#undef HAVE_LIBIOFSL_SHIPPER_NA
 
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
 #undef HAVE_LIBLMPE
@@ -258,6 +288,9 @@
 
 /* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
 #undef HAVE_MPI_MULTI_LANG_Info
+
+/* Define to 1 if you have the <network_abstraction.h> header file. */
+#undef HAVE_NETWORK_ABSTRACTION_H
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL

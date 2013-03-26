@@ -23,6 +23,8 @@
 #include "H5VLiod.h"         /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
 
+#ifdef H5_HAVE_EFF
+
 /* forward declaration of file struct */
 struct H5VL_iod_file_t;
 struct H5VL_iod_object_t;
@@ -139,5 +141,5 @@ H5_DLL herr_t H5VL_iod_client_decode_dset_set_extent(fs_proc_t proc, void *_outp
 H5_DLL herr_t H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output);
 
-
+#endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */

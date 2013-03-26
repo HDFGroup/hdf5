@@ -44,12 +44,12 @@
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES=*.raw *.meta *.o
 CHECK_CLEANFILES+=*.h5
-CLEANFILES=$(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+CLEANFILES=$(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
 
 # How to create EXAMPLEDIR if it doesn't already exist
 $(EXAMPLEDIR):

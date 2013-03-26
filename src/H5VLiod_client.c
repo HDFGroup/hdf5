@@ -32,6 +32,8 @@
 #include "H5VLiod_client.h"
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
+#ifdef H5_HAVE_EFF
+
 herr_t
 H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -484,3 +486,5 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_local_traverse */
+
+#endif /* H5_HAVE_EFF */

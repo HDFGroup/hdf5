@@ -676,6 +676,8 @@ FILTERS
 MPI_GET_SIZE
 ADD_PARALLEL_FILES
 USINGMEMCHECKER
+BUILD_EFF_CONDITIONAL_FALSE
+BUILD_EFF_CONDITIONAL_TRUE
 CLEARFILEBUF
 INSTRUMENT_LIBRARY
 TRACE_API
@@ -784,6 +786,7 @@ HAVE_DMALLOC
 CODESTACK
 INSTRUMENT
 LARGEFILE
+EFF
 GPFS
 HDF5_HL
 CXX
@@ -919,6 +922,7 @@ enable_metadata_trace_file
 enable_trace
 enable_instrument
 enable_clear_file_buffers
+enable_eff
 enable_using_memchecker
 enable_parallel
 with_mpe
@@ -1612,6 +1616,7 @@ Optional Features:
   --enable-clear-file-buffers
                           Securely clear file buffers before writing to file.
                           Default=yes.
+  --enable-eff            Enable EFF stack [default=no]
   --enable-using-memchecker
                           Enable this option if a memory allocation and/or
                           bounds checking tool will be used on the HDF5
@@ -3995,6 +4000,7 @@ $as_echo "done" >&6; }
  HDF_CXX=no
  HDF5_HL=yes
  GPFS=no
+ EFF=no
  LARGEFILE=yes
 
  CODESTACK=no
@@ -5251,9 +5257,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## --------------------------------------------------------------------
   ## General Fortran flags
-  ##
-  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  ## Only add FFLAGS to FCFLAGS if it's set.
+  if test "x$FFLAGS" != "x" ; then
+    FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
@@ -28767,6 +28774,66 @@ $as_echo "no" >&6; }
 esac
 
 ## ----------------------------------------------------------------------
+## Check if they would like to enable building the IOD plugin
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the EFF plugins" >&5
+$as_echo_n "checking whether to enable the EFF plugins... " >&6; }
+# Check whether --enable-eff was given.
+if test "${enable_eff+set}" = set; then :
+  enableval=$enable_eff; EFF=yes
+else
+  enableval=no
+fi
+
+
+ if test "X-$enableval" = "X-yes"; then
+  BUILD_EFF_CONDITIONAL_TRUE=
+  BUILD_EFF_CONDITIONAL_FALSE='#'
+else
+  BUILD_EFF_CONDITIONAL_TRUE='#'
+  BUILD_EFF_CONDITIONAL_FALSE=
+fi
+
+
+case "X-$enableval" in
+  X-yes)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_EFF 1" >>confdefs.h
+
+    ;;
+  X-no|*)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+
+esac
+
+#AC_SUBST([EFF])
+#AC_MSG_CHECKING([whether to build the IOD VOL plugin])
+#AC_ARG_ENABLE([eff],
+#              [AS_HELP_STRING([--enable-eff],
+#                              [Build the IOD VOL plugin.  Default=no.])],
+#              [EFF=$enableval],
+#	      [EFF=NO])
+#AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test -n "$EFF"])
+#
+#case "X-$EFF" in
+#  *)
+#      EFF=yes
+#      AC_MSG_RESULT([yes])
+#      AC_DEFINE([HAVE_EFF], [1],
+#                [Define if we have IOD VOL plugin support.])
+#    ;;
+#  X-no)
+#      EFF=no
+#      AC_MSG_RESULT([no])
+#    ;;
+#
+#esac
+
+## ----------------------------------------------------------------------
 ## Check if they would like to use a memory checking tool (like valgrind's
 ##     'memcheck' tool, or Rational Purify, etc) and the library should be
 ##     more scrupulous with it's memory operations.  Enabling this also
@@ -32220,6 +32287,10 @@ fi
 
 if test -z "${BUILD_SHARED_SZIP_CONDITIONAL_TRUE}" && test -z "${BUILD_SHARED_SZIP_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_SHARED_SZIP_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_EFF_CONDITIONAL_TRUE}" && test -z "${BUILD_EFF_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_EFF_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${DIRECT_VFD_CONDITIONAL_TRUE}" && test -z "${DIRECT_VFD_CONDITIONAL_FALSE}"; then

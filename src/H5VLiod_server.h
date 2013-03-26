@@ -22,6 +22,8 @@
 #include "H5VLiod.h"         /* Iod VOL plugin                  */
 #include "H5VLiod_common.h"
 
+#ifdef H5_HAVE_EFF
+
 /* struct that contains the information about the IOD container */
 typedef struct H5VL_iod_server_remote_file_t {
     iod_handle_t coh;
@@ -101,4 +103,5 @@ H5_DLL herr_t H5VL_iod_server_decode_dset_set_extent(fs_proc_t proc, void *_inpu
 H5_DLL herr_t H5VL_iod_server_encode_dset_close(fs_proc_t proc, void *_input);
 H5_DLL herr_t H5VL_iod_server_decode_dset_close(fs_proc_t proc, void *_input);
 
+#endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

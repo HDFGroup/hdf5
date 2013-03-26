@@ -158,6 +158,7 @@ DYNAMIC_DIRS = @DYNAMIC_DIRS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EFF = @EFF@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 EXTERNAL_FILTERS = @EXTERNAL_FILTERS@
@@ -386,9 +387,12 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
+@BUILD_EFF_CONDITIONAL_TRUE@INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 @BUILD_PARALLEL_CONDITIONAL_TRUE@INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
-@BUILD_PARALLEL_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example test_server test_client
+@BUILD_EFF_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
+@BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = test_server test_client
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,
@@ -427,11 +431,11 @@ EXAMPLETOPDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

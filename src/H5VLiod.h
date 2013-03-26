@@ -29,7 +29,7 @@
 #include "function_shipper_handler.h"
 #include "network_mpi.h"
 
-#ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_EFF
 #define H5VL_IOD	(H5VL_iod_init())
 #else
 #define H5VL_IOD	(-1)
@@ -39,7 +39,7 @@
 extern "C" {
 #endif
 
-#ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_EFF
 
 #define H5D_XFER_INJECT_BAD_CHECKSUM_NAME "inject_bad_checksum"
 
@@ -50,7 +50,7 @@ H5_DLL herr_t EFF_init(MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t EFF_finalize(void);
 H5_DLL herr_t H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag);
 H5_DLL herr_t H5Pget_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t *flag);
-#endif /* H5_HAVE_PARALLEL */
+#endif /* H5_HAVE_EFF */
 
 #ifdef __cplusplus
 }

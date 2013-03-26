@@ -23,8 +23,14 @@ include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
   INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
+  LDADD = $(LIBH5TEST) $(LIBHDF5)
+  EXAMPLE_PROG_PARA = ph5example
+endif
+
+if BUILD_EFF_CONDITIONAL
+  INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
   LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
-  EXAMPLE_PROG_PARA = ph5example test_server test_client
+  EXAMPLE_PROG_EFF = test_server test_client
 endif
 
 # Example programs.
@@ -60,6 +66,7 @@ else
 $(EXTRA_PROG): $(H5CC)
 	$(H5CC) $(H5CCFLAGS) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
+
 
 # Some examples depend on files created by other examples.
 h5_read.chkexe_: h5_write.chkexe_

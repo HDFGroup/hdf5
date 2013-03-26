@@ -2589,6 +2589,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_id() */
 
+#ifdef H5_HAVE_EFF
 
 /*-------------------------------------------------------------------------
  * Function:	H5I_search_name
@@ -2636,7 +2637,8 @@ H5I_search_name(char *name, H5I_type_t type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5I_get_id() */
+} /* end H5I_search_name() */
+#endif /* H5_HAVE_EFF */
 
 
 /*-------------------------------------------------------------------------

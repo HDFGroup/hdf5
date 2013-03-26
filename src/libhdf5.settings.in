@@ -57,6 +57,7 @@ Languages:
 Features:
 ---------
                   Parallel HDF5: @PARALLEL@
+    Exascale Fast Forward Stack: @EFF@
              High Level library: @HDF5_HL@
                    Threadsafety: @THREADSAFE@
             Default API Mapping: @DEFAULT_API_VERSION@

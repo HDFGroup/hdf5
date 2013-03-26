@@ -158,6 +158,7 @@ DYNAMIC_DIRS = @DYNAMIC_DIRS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EFF = @EFF@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 EXTERNAL_FILTERS = @EXTERNAL_FILTERS@
@@ -407,11 +408,11 @@ EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/c++
 
 # Assume that all tests in this directory are examples, and tell
 # conclude.am when to build them.
-EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+EXTRA_PROG = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
 
 # We need to tell automake what to clean
 MOSTLYCLEANFILES = *.raw *.meta *.o
-CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA)
+CLEANFILES = $(EXAMPLE_PROG) $(EXAMPLE_PROG_PARA) $(EXAMPLE_PROG_EFF)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

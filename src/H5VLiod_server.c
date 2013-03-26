@@ -30,6 +30,8 @@
 #include "H5VLiod_server.h"
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
+#ifdef H5_HAVE_EFF
+
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2012
@@ -2147,3 +2149,5 @@ done:
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close_cb() */
+
+#endif /* H5_HAVE_EFF */
