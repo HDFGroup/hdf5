@@ -269,6 +269,7 @@ VERIFY_LAYOUT_DSET()
         echo " PASSED"
     else
         echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
     fi
 
     # clean up tmp files
@@ -537,6 +538,7 @@ TOOLTEST_META()
     else
 	#fail
 	echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
     fi
     
     rm -f $outfile
