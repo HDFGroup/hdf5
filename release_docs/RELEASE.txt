@@ -87,7 +87,14 @@ New Features
 
     Fortran API
     -----------
-    - None
+    - New API functions added (MSB - 2013/3/23):
+
+      h5odecr_refcount_f, h5oexists_by_name_f, h5oget_comment_f,
+      h5oget_comment_by_name_f, h5oincr_refcount_f, h5oopen_by_idx_f, h5oset_comment_f,
+      h5oset_comment_by_name_f, h5oset_comment_by_name_f
+
+      F2003: h5oget_info_f, h5oget_info_by_idx_f, h5ovisit_by_name_f
+    
 
     C++ API
     -------
@@ -147,7 +154,11 @@ Bug Fixes since HDF5-1.8.10
 
     F90 API
     -------
-    - None
+    - The integer type of the 'offset' argument in h5pset_external_f and
+      h5pget_external_f was changed to INTEGER(KIND=OFF_T) to support 8-byte
+      integers, matching the C type definition of off_t. (MSB - 2013/3/23)
+
+    - h5fc updated to recognize .f95, .f03 and .f08 file extensions. 
 
     C++ API
     ------
