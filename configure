@@ -28780,13 +28780,74 @@ esac
 $as_echo_n "checking whether to enable the EFF plugins... " >&6; }
 # Check whether --enable-eff was given.
 if test "${enable_eff+set}" = set; then :
-  enableval=$enable_eff; EFF=yes
+  enableval=$enable_eff;
 else
   enableval=no
 fi
 
 
- if test "X-$enableval" = "X-yes"; then
+case "X-$enableval" in
+  X-yes)
+    for ac_header in AXE.h iod_api.h iod_types.h function_shipper.h function_shipper_handler.h network_abstraction.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for EFF support" >&5
+$as_echo_n "checking for EFF support... " >&6; }
+                     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <AXE.h> #include <iod_api.h> #include <iod_types.h>
+		                     #include <function_shipper.h> #include <function_shipper_handler.h>
+                                     #include <network_abstraction.h>
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+AXEend_try(); iod_finalize(NULL, NULL); bds_finalize();
+				     fs_handler_finalize();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+$as_echo "#define HAVE_EFF 1" >>confdefs.h
+
+                                       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+                                       EFF="yes"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+                                       EFF="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+done
+
+
+#    AC_MSG_RESULT([yes])
+#    AC_DEFINE([HAVE_EFF], [1],
+#                    [Define if we have IOD VOL plugin support.])
+    ;;
+  X-no|*)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+esac
+ if test "X-$EFF" = "X-yes"; then
   BUILD_EFF_CONDITIONAL_TRUE=
   BUILD_EFF_CONDITIONAL_FALSE='#'
 else
@@ -28794,21 +28855,6 @@ else
   BUILD_EFF_CONDITIONAL_FALSE=
 fi
 
-
-case "X-$enableval" in
-  X-yes)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define HAVE_EFF 1" >>confdefs.h
-
-    ;;
-  X-no|*)
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    ;;
-
-esac
 
 #AC_SUBST([EFF])
 #AC_MSG_CHECKING([whether to build the IOD VOL plugin])

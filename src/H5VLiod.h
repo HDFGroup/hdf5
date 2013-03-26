@@ -22,6 +22,8 @@
 #ifndef H5VLiod_H
 #define H5VLiod_H
 
+#ifdef H5_HAVE_EFF
+
 #include "AXE.h"
 #include "iod_api.h"
 #include "iod_types.h"
@@ -29,7 +31,6 @@
 #include "function_shipper_handler.h"
 #include "network_mpi.h"
 
-#ifdef H5_HAVE_EFF
 #define H5VL_IOD	(H5VL_iod_init())
 #else
 #define H5VL_IOD	(-1)

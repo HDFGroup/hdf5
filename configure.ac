@@ -2845,22 +2845,34 @@ esac
 AC_MSG_CHECKING([whether to enable the EFF plugins])
 AC_ARG_ENABLE([eff],
               [AS_HELP_STRING([--enable-eff],
-                              [Enable EFF stack [default=no]])],[EFF=yes],
+                              [Enable EFF stack [default=no]])],,
               [enableval=no])
-
-AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test "X-$enableval" = "X-yes"])
 
 case "X-$enableval" in
   X-yes)
-    AC_MSG_RESULT([yes])
-    AC_DEFINE([HAVE_EFF], [1],
-                    [Define if we have IOD VOL plugin support.])
+    AC_CHECK_HEADERS([AXE.h iod_api.h iod_types.h function_shipper.h function_shipper_handler.h network_abstraction.h],
+                     [AC_MSG_CHECKING([for EFF support])
+                     AC_TRY_COMPILE([#include <AXE.h> #include <iod_api.h> #include <iod_types.h> 
+		                     #include <function_shipper.h> #include <function_shipper_handler.h> 
+                                     #include <network_abstraction.h>],
+				    [AXEend_try(); iod_finalize(NULL, NULL); bds_finalize(); 
+				     fs_handler_finalize();],
+                                    [AC_DEFINE([HAVE_EFF], [1],
+                                               [Define if we have EFF VOL plugins support])
+                                       AC_MSG_RESULT([yes])
+                                       EFF="yes"],
+                                    [AC_MSG_RESULT([no])
+                                       EFF="no"])])
+
+#    AC_MSG_RESULT([yes])
+#    AC_DEFINE([HAVE_EFF], [1],
+#                    [Define if we have IOD VOL plugin support.])
     ;;
   X-no|*)
     AC_MSG_RESULT([no])
     ;;
-
 esac
+AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test "X-$EFF" = "X-yes"])
 
 #AC_SUBST([EFF])
 #AC_MSG_CHECKING([whether to build the IOD VOL plugin])

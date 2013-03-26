@@ -96,7 +96,7 @@
 /* Define to 1 if you have the <dmalloc.h> header file. */
 #undef HAVE_DMALLOC_H
 
-/* Define if we have IOD VOL plugin support. */
+/* Define if we have EFF VOL plugins support */
 #undef HAVE_EFF
 
 /* Define if library information should be embedded in the executables */
@@ -198,6 +198,9 @@
 
 /* Define to 1 if you have the <iod_api.h> header file. */
 #undef HAVE_IOD_API_H
+
+/* Define to 1 if you have the <iod_types.h> header file. */
+#undef HAVE_IOD_TYPES_H
 
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
