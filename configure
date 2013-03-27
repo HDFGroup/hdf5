@@ -689,6 +689,8 @@ USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 AM_MAKEFLAGS
 LT_STATIC_EXEC
+HAVE_SHARED_CONDITIONAL_FALSE
+HAVE_SHARED_CONDITIONAL_TRUE
 CPP
 OTOOL64
 OTOOL
@@ -5242,9 +5244,10 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## --------------------------------------------------------------------
   ## General Fortran flags
-  ##
-  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  ## Only add FFLAGS to FCFLAGS if it's set.
+  if test "x$FFLAGS" != "x" ; then
+    FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
@@ -22019,6 +22022,18 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 ## ----------------------------------------------------------------------
+## Set a macro if shared library is enabled.
+##
+ if test "X$enable_shared" = "Xyes"; then
+  HAVE_SHARED_CONDITIONAL_TRUE=
+  HAVE_SHARED_CONDITIONAL_FALSE='#'
+else
+  HAVE_SHARED_CONDITIONAL_TRUE='#'
+  HAVE_SHARED_CONDITIONAL_FALSE=
+fi
+
+
+## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
 ##   This check needs to occur after libtool is initialized because
 ##   we check a libtool cache value and may issue a warning based
@@ -31223,7 +31238,7 @@ if test -n "$TESTPARALLEL"; then
   fi
 fi
 
-ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh test/plugin_lib/Makefile testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
+ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/test_plugin.sh testpar/Makefile testpar/testph5.sh perform/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/h5stat/testh5stat.sh tools/h5stat/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
 cat >confcache <<\_ACEOF
@@ -31385,6 +31400,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CXX_SHARED_CONDITIONAL_TRUE}" && test -z "${CXX_SHARED_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"CXX_SHARED_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_SHARED_CONDITIONAL_TRUE}" && test -z "${HAVE_SHARED_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_SHARED_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -32485,7 +32504,6 @@ do
     "test/testlibinfo.sh") CONFIG_FILES="$CONFIG_FILES test/testlibinfo.sh" ;;
     "test/testlinks_env.sh") CONFIG_FILES="$CONFIG_FILES test/testlinks_env.sh" ;;
     "test/test_plugin.sh") CONFIG_FILES="$CONFIG_FILES test/test_plugin.sh" ;;
-    "test/plugin_lib/Makefile") CONFIG_FILES="$CONFIG_FILES test/plugin_lib/Makefile" ;;
     "testpar/Makefile") CONFIG_FILES="$CONFIG_FILES testpar/Makefile" ;;
     "testpar/testph5.sh") CONFIG_FILES="$CONFIG_FILES testpar/testph5.sh" ;;
     "perform/Makefile") CONFIG_FILES="$CONFIG_FILES perform/Makefile" ;;

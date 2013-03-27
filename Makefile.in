@@ -88,10 +88,9 @@ DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(top_srcdir)/bin/ltmain.sh $(top_srcdir)/bin/missing \
 	$(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/config/commence.am $(top_srcdir)/configure \
-	$(top_srcdir)/test/plugin_lib/Makefile.in COPYING bin/COPYING \
-	bin/README bin/compile bin/config.guess bin/config.sub \
-	bin/depcomp bin/install-sh bin/ltmain.sh bin/missing \
-	bin/mkinstalldirs
+	COPYING bin/COPYING bin/README bin/compile bin/config.guess \
+	bin/config.sub bin/depcomp bin/install-sh bin/ltmain.sh \
+	bin/missing bin/mkinstalldirs
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -101,7 +100,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = test/plugin_lib/Makefile
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -520,8 +519,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
-test/plugin_lib/Makefile: $(top_builddir)/config.status $(top_srcdir)/test/plugin_lib/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -24,10 +24,15 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
-check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) plugin$(EXEEXT)
+if HAVE_SHARED_CONDITIONAL
+  TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
+  SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) plugin$(EXEEXT)
+else
+  TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+  SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
+endif
 
+check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -50,8 +55,11 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env plugin
-
+if HAVE_SHARED_CONDITIONAL
+  check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env plugin
+else
+  check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
+endif
 
 # These programs generate test files for the tests.  They don't need to be
 # compiled every time we want to test the library.  However, putting
@@ -69,8 +77,19 @@ if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
 endif
 
-# The libh5test library provides common support code for the tests.
-noinst_LTLIBRARIES=libh5test.la
+if HAVE_SHARED_CONDITIONAL
+  # The libh5test library provides common support code for the tests.
+  noinst_LTLIBRARIES=libh5test.la libdynlib1.la
+
+  # The libdynlib1 library for testing plugin module plugin.c.
+  # Build it as shared library if configure is enabled for shared library.
+  libdynlib1_la_SOURCES=dynlib1.c
+  libdynlib1_la_LDFLAGS=-rpath /tmp
+else
+  # The libh5test library provides common support code for the tests.
+  noinst_LTLIBRARIES=libh5test.la
+endif
+
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
@@ -120,7 +139,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
     family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
-    multi_file-[rs].h5 core_file \
+    multi_file-[rs].h5 core_file plugin.h5 \
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
@@ -128,7 +147,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     earray.h5 efc[0-5].h5 log_vfd_out.log                            \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
-    file_image_core_test.h5.copy plugin.h5
+    file_image_core_test.h5.copy
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

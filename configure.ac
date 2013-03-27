@@ -1037,6 +1037,11 @@ LT_PREREQ([2.2])
 LT_INIT([dlopen])
 
 ## ----------------------------------------------------------------------
+## Set a macro if shared library is enabled.
+##
+AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
+
+## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
 ##   This check needs to occur after libtool is initialized because
 ##   we check a libtool cache value and may issue a warning based 
@@ -4446,7 +4451,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testlibinfo.sh
                  test/testlinks_env.sh
                  test/test_plugin.sh
-                 test/plugin_lib/Makefile
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile

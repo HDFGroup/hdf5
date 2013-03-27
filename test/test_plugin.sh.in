@@ -30,20 +30,12 @@ DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 nerrors=0
 verbose=yes
 
-#test -d ./plugin_lib
-MAKE_CMD=make
-CD=cd
 TEST_NAME=plugin
 TEST_BIN=`pwd`/$TEST_NAME
-ENVCMD="env HDF5_PLUGIN_PATH=`pwd`/plugin_lib"
+ENVCMD="env HDF5_PLUGIN_PATH=`pwd`/.libs"
 
 # Run the test
-$CD ./plugin_lib
-echo "$MAKE_CMD"
-$MAKE_CMD 
-$CD ../
 $ENVCMD $TEST_BIN
-echo "$HDF5_PLUGIN_PATH"
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
