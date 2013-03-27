@@ -44,7 +44,7 @@
 /* Windows support */
 #ifdef H5_HAVE_WIN32_API
 
-#define H5PL_DEFAULT_PATH       ".;/ProgramData;/Users/Public"
+#define H5PL_DEFAULT_PATH       "%ALLUSERSPROFILE%/hdf5/lib/plugin"
 #define H5PL_PATH_SEPARATOR     ";"
 
 /* Handle for dynamic library */
@@ -67,7 +67,7 @@ typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
 /* Unix support */
 #else /* H5_HAVE_WIN32_API */
 
-#define H5PL_DEFAULT_PATH       "/usr:/usr/lib:/usr/local"
+#define H5PL_DEFAULT_PATH       "/usr/local/hdf5/lib/plugin"
 #define H5PL_PATH_SEPARATOR     ":"
 
 /* Handle for dynamic library */
