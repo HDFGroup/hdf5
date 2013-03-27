@@ -2998,7 +2998,7 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
+static herr_t
 H5AC_construct_candidate_list(H5AC_t * cache_ptr,
                               H5AC_aux_t * aux_ptr,
                               int sync_point_op)
@@ -3212,7 +3212,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
                              H5C_auto_size_ctl_t * int_conf_ptr)
 {
@@ -4157,7 +4157,7 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
+static herr_t
 H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
                                                     hid_t    dxpl_id,
                                                     H5AC_t * cache_ptr)
