@@ -513,7 +513,7 @@ COPY_REFERENCES()
     TESTFILE="$TESTDIR/h5copy_ref.h5"
 
     echo "Test copying object and region references"
-    TOOLTEST_F -f ref -i $TESTFILE -o $TESTDIR/region_ref.out.h5 -v -s / -d /COPY
+    TOOLTEST -f ref -i $TESTFILE -o $TESTDIR/region_ref.out.h5 -v -s / -d /COPY
 }
 
 # Copy external links.
@@ -529,25 +529,25 @@ COPY_EXT_LINKS()
     TOOLTEST -v -i $TESTFILE -o $TESTDIR/ext_link.out.h5 -s /group_ext/extlink_dset -d /copy1_dset
 
     echo "Test copying external link directly with -f ext"
-    TOOLTEST_F -f ext -i $TESTFILE -o $TESTDIR/ext_link_f.out.h5 -v -s /group_ext/extlink_dset -d /copy2_dset
+    TOOLTEST -f ext -i $TESTFILE -o $TESTDIR/ext_link_f.out.h5 -v -s /group_ext/extlink_dset -d /copy2_dset
 
     echo "Test copying dangling external link (no obj) directly without -f ext"
     TOOLTEST -v -i $TESTFILE -o $TESTDIR/ext_dangle_noobj.out.h5 -s /group_ext/extlink_notyet1 -d /copy_dangle1_1
 
     echo "Test copying dangling external link (no obj) directly with -f ext"
-    TOOLTEST_F -f ext -i $TESTFILE -o $TESTDIR/ext_dangle_noobj_f.out.h5 -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
+    TOOLTEST -f ext -i $TESTFILE -o $TESTDIR/ext_dangle_noobj_f.out.h5 -v -s /group_ext/extlink_notyet1 -d /copy_dangle1_2
 
     echo "Test copying dangling external link (no file) directly without -f ext"
     TOOLTEST -v -i $TESTFILE -o $TESTDIR/ext_dangle_nofile.out.h5 -s /group_ext/extlink_notyet2 -d /copy_dangle2_1
 
     echo "Test copying dangling external link (no file) directly with -f ext"
-    TOOLTEST_F -f ext -i $TESTFILE -o $TESTDIR/ext_dangle_nofile_f.out.h5 -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2
+    TOOLTEST -f ext -i $TESTFILE -o $TESTDIR/ext_dangle_nofile_f.out.h5 -v -s /group_ext/extlink_notyet2 -d /copy_dangle2_2
 
     echo "Test copying a group contains external links without -f ext"
     TOOLTEST -v -i $TESTFILE -o $TESTDIR/ext_link_group.out.h5 -s /group_ext -d /copy1_group
 
     echo "Test copying a group contains external links with -f ext"
-    TOOLTEST_F -f ext -i $TESTFILE -o $TESTDIR/ext_link_group_f.out.h5 -v -s /group_ext -d /copy2_group
+    TOOLTEST -f ext -i $TESTFILE -o $TESTDIR/ext_link_group_f.out.h5 -v -s /group_ext -d /copy2_group
 }
 
 # Test misc.
