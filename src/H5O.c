@@ -255,7 +255,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Open the object through the VOL */
     if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
-                                              H5_REQUEST_NULL)))
+                                              H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
@@ -332,7 +332,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
@@ -403,7 +403,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
@@ -511,7 +511,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
                                      (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                     lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
+                                     lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -562,7 +562,7 @@ H5Oincr_refcount(hid_t object_id)
 
     /* change the ref count through the VOL */
     if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_CHANGE_REF_COUNT, 
-                        H5_REQUEST_NULL, 1) < 0)
+                        H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -612,7 +612,7 @@ H5Odecr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* change the ref count through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_CHANGE_REF_COUNT, H5_REQUEST_NULL, -1) < 0)
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_CHANGE_REF_COUNT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, -1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -666,7 +666,7 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* change the ref count through the VOL */
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
 
 done:
@@ -714,7 +714,7 @@ H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    H5_REQUEST_NULL, oinfo)) < 0)
+                                    H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, oinfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -772,7 +772,7 @@ H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lap
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    H5_REQUEST_NULL, oinfo)) < 0)
+                                    H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, oinfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -839,7 +839,7 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                                    H5_REQUEST_NULL, oinfo)) < 0)
+                                    H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, oinfo)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -886,7 +886,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* set comment on object through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, comment) < 0)
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -945,7 +945,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* set comment on object through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, comment) < 0)
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -990,7 +990,7 @@ H5Oget_comment(hid_t loc_id, char *comment, size_t bufsize)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, H5_REQUEST_NULL, 
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                        comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
 
@@ -1048,7 +1048,7 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t buf
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, H5_REQUEST_NULL, 
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                        comment, bufsize, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
 
@@ -1121,7 +1121,7 @@ H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* iterate over the objects through the VOL */
     if((ret_value = H5VL_object_visit(obj, loc_params, vol_plugin, idx_type, order, op, op_data, 
-                                      H5_REQUEST_NULL)) < 0)
+                                      H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1203,7 +1203,7 @@ H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 
     /* iterate over the objects through the VOL */
     if((ret_value = H5VL_object_visit(obj, loc_params, vol_plugin, idx_type, order, op, 
-                                      op_data, H5_REQUEST_NULL)) < 0)
+                                      op_data, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1268,7 +1268,7 @@ H5Oclose(hid_t object_id)
 
 #if 0
     /* Close the object through the VOL */
-    if(H5VL_object_close(object_id, H5_REQUEST_NULL) < 0)
+    if(H5VL_object_close(object_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
 #endif
 

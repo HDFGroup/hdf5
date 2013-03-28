@@ -143,7 +143,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                      file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
+                                      file_space_id, plist_id, buf, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 
@@ -215,7 +215,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Write the data through the VOL */
     if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                       file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
+                                       file_space_id, dxpl_id, buf, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:

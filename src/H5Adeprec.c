@@ -181,7 +181,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, name, plist_id, H5P_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, name, plist_id, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     /* Get an atom for the attribute */
@@ -190,7 +190,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate1() */
@@ -248,7 +248,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, name, H5P_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, name, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
@@ -257,7 +257,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_name() */
@@ -317,7 +317,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, NULL, H5P_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, NULL, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
@@ -326,7 +326,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close (attr, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_idx() */
@@ -374,7 +374,7 @@ H5Aget_num_attrs(hid_t loc_id)
 
     /* Get the group info through the VOL using the location token */
     if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
-                       H5_REQUEST_NULL, &oinfo) < 0)
+                       H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, &oinfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
     ret_value = oinfo.num_attrs;

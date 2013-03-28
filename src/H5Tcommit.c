@@ -175,7 +175,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 
     /* commit the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, lcpl_id, 
-                                           tcpl_id, tapl_id, H5_REQUEST_NULL)))
+                                           tcpl_id, tapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* attach the vol object created using the commit call to the 
@@ -336,7 +336,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 
     /* commite the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, NULL, type_id, H5P_DEFAULT, 
-                                           tcpl_id, tapl_id, H5_REQUEST_NULL)))
+                                           tcpl_id, tapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* attach the vol object created using the commit call to the 
@@ -624,16 +624,17 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the datatype through the VOL */
-    if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, H5_REQUEST_NULL)))
+    if(NULL == (dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, 
+                                        H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     /* Get an atom for the datatype */
-    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, TRUE, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_create_datatype(dt, vol_plugin, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle")
 
 done:
     if (ret_value < 0 && dt)
-        if(H5VL_datatype_close (dt, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_datatype_close (dt, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */
@@ -956,7 +957,7 @@ H5T_get_named_type(const H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref, hid_t req)
+H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref)
 {
     ssize_t        nalloc;
     unsigned char *buf = NULL;
@@ -965,8 +966,9 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref, hid_t re
 
     FUNC_ENTER_NOAPI(FAIL)
 
-   /* get required buf size for encoding the datatype */
-   if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, NULL, 0, req)) < 0)
+    /* get required buf size for encoding the datatype */
+    if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, NULL, 0, 
+                                          H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     /* allocate buffer to store binary description of the datatype */
@@ -974,7 +976,8 @@ H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref, hid_t re
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate space for datatype")
 
     /* get binary description of the datatype */
-    if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, buf, (size_t) nalloc, req)) < 0)
+    if((nalloc = H5VL_datatype_get_binary(dt_obj, vol_plugin, buf, (size_t) nalloc, 
+                                          H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get datatype size")
 
     if(NULL == (dt = H5T_decode(buf)))
@@ -1016,7 +1019,7 @@ H5T_close_datatype(void *type, H5VL_t *vol_plugin)
 
     /* Close the datatype through the VOL*/
     if (NULL != dt->vol_obj)
-        if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, H5_REQUEST_NULL)) < 0)
+        if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
 done:
