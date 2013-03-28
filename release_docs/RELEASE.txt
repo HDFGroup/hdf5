@@ -57,6 +57,7 @@ New Features
 
     Configuration
     -------------
+    - CMake minimum is now 2.8.10. (ADB 2013/1/14)
     - A new tool, cmakehdf5, which is a build command script similar to
       buildhdf5 is added and is available in the bin directory.
       (AKC - 2013/01/16)
@@ -76,7 +77,9 @@ New Features
  
     Tools
     -----
-    - None
+    - h5dump: added new option -O or -ddl to output the ddl text to a file. This
+      is a complement to the -o or --output option, which redirects the data to
+      a file. HDFFV-8229 (ADB - 2013/2/25)
 
     High-Level APIs
     ---------------
@@ -110,6 +113,12 @@ Bug Fixes since HDF5-1.8.10
 
     Configuration
     -------------
+    - Configure will check the result of header searches before searching for
+      the library. 
+      Fixes HDFFV-8257 (ADB 2013/03/04)
+    - HDF does not support building SHARED Fortran libraries on OSX. Added CMake
+      code to check for this condition. 
+      Fixes HDFFV-8227 (ADB 2013/03/04)
     - CMake builds on Windows will no longer use legacy naming for libraries, 
       the "dll" tag will no longer be added to the name of *.lib and *.dll.
       The option HDF_LEGACY_NAMING is now OFF by default.
@@ -121,9 +130,9 @@ Bug Fixes since HDF5-1.8.10
       Mac OS-X.  Previously, single I/O operations > 2 GB would fail since the
       Darwin read/write calls cannot handle the number of bytes that their
       parameter types imply.
-      Fixes HDFFV-7975 and HDFFV-8240 (DER - 07 JAN 2013)
+      Fixes HDFFV-7975 and HDFFV-8240 (DER 2013/01/07)
     - Fixed a bug in the core VFD that cause failures when opening files > 2 GB.
-      Fixes HDFFV-8124 and HDFFV-8158 (DER - 07 JAN 2013)
+      Fixes HDFFV-8124 and HDFFV-8158 (DER 2013/01/07)
 
     Parallel Library
     ----------------
@@ -137,13 +146,15 @@ Bug Fixes since HDF5-1.8.10
     -----
     - h5repack: Fixed failure for converting a layout of small chunked dataset 
       (size < 1K) to contiguous layout.  HDFFV-8214 (JKM 2013/03/26)
-    - h5dump: Fixed displaying comporession ratio for unknown or user-defined 
+    - h5dump: Fixed displaying compression ratio for unknown or user-defined 
       filters. HDFFV-8344 (XCAO 2013/03/19)
     - h5dump: Changed UNKNOWN_FILTER to USER_DEFINED_FILTER for user defined filter.
       HDFFV-8346 (XCAO 2013/03/19)
     - h5diff: Fixed to return correct exit code 1 when detect unique extra
       attribute. Prior to this fix, h5diff returned exit code 0 indicating 
       two files are identical.   HDFFV-7643 (JKM 2013/02/15)
+    - h5dump: Fixed writing nulls to a binary file when exporting a dataset
+      with compound string datatype. HDFFV-8169 (ADB 2013/1/31)
     - The following h5stat test case failed in BG/P machines (and potentially
       other machines that display extra output if an MPI task returns with a
       non-zero code.)
@@ -178,17 +189,17 @@ Bug Fixes since HDF5-1.8.10
 
     Testing
     -------
-      - In some Mac system, testlibinfo.sh failed with this error:
-           Check file ../src/.libs/libhdf5.7.dylib
-           strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
-	   (unknown load command 15)
-        The strings command of Mac inspects library files and older
-	versions of strings may not know newer library format, resulting
-	in errors.  Fixed by sending the library file as stdin to the strings
-	coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
+    - In some Mac system, testlibinfo.sh failed with this error:
+         Check file ../src/.libs/libhdf5.7.dylib
+         strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
+         (unknown load command 15)
+      The strings command of Mac inspects library files and older
+      versions of strings may not know newer library format, resulting
+      in errors.  Fixed by sending the library file as stdin to the strings
+      command to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
 
-      - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
-        faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
+    - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
+      faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
 
 Supported Platforms
 ===================
@@ -243,13 +254,15 @@ Supported Platforms
                                   Sun Fortran 95 8.5 SunOS_sparc
                                   Sun C++ 5.11 SunOS_sparc
 
-    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
 
-    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
 
@@ -293,8 +306,8 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.10 32-bit                      n        y/y    n        y    y     y
 Solaris2.10 64-bit                      n        y/n    n        y    y     y
-Windows 7                               y        y/n    n        y    y     y
-Windows 7     x64                       y        y/n    n        y    y     y
+Windows 7                               y        y/y    n        y    y     y
+Windows 7     x64                       y        y/y    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 32-bit     n        y/y    n        y    y     n 
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
