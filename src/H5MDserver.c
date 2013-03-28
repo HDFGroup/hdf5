@@ -116,13 +116,13 @@ static herr_t H5MD__get_eoa_func(uint8_t *p, int source);
 
 typedef herr_t (*H5VL_mds_op)(uint8_t *p, int source);
 
-static herr_t H5MD__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...);
-static herr_t H5MD__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...);
-static herr_t H5MD__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...);
-static herr_t H5MD__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...);
-static herr_t H5MD__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t req, ...);
-static herr_t H5MD__temp_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, ...);
-static herr_t H5MD__temp_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, ...);
+static herr_t H5MD__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5MD__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5MD__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5MD__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5MD__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5MD__temp_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, ...);
+static herr_t H5MD__temp_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...);
 static herr_t H5MD_multi_query(const H5FD_t *_f, unsigned long *flags /* out */);
 
 static H5VL_mds_op mds_ops[H5VL_NUM_OPS] = {
@@ -381,7 +381,7 @@ H5MD__file_create_func(uint8_t *p, int source)
     }
 
     /* call the native plugin file create callback*/
-    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, split_fapl, -1)))
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_create(mds_filename, flags, fcpl_id, split_fapl, -1, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
     /* register atom for file */
@@ -490,7 +490,7 @@ H5MD__file_open_func(uint8_t *p, int source)
     }
 
     /* call the native plugin file open callback*/
-    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, split_fapl, -1)))
+    if(NULL == (new_file = (H5F_t *)H5VL_native_file_open(mds_filename, flags, split_fapl, -1, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
     /* register atom for file */
@@ -536,7 +536,7 @@ H5MD__file_flush_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file flush params");
 
     /* call the native plugin file create callback*/
-    if(H5VL_native_file_flush(H5I_object(obj_id), loc_params, scope, -1) < 0)
+    if(H5VL_native_file_flush(H5I_object(obj_id), loc_params, scope, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 
 done:
@@ -578,8 +578,8 @@ H5MD__file_misc_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr get params");
 
                 /* get value through the native plugin */
-                ret_value = H5MD__temp_file_misc(H5I_object(obj_id), misc_type, H5_REQUEST_NULL, type, name,
-                                           H5I_object(child_id), plist_id);
+                ret_value = H5MD__temp_file_misc(H5I_object(obj_id), misc_type, -1, H5_REQUEST_NULL, type, name,
+                                                 H5I_object(child_id), plist_id);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                            H5MD_RETURN_TAG, MPI_COMM_WORLD))
@@ -601,7 +601,7 @@ H5MD__file_misc_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr get params");
 
                 /* get value through the native plugin */
-                ret_value = H5MD__temp_file_misc(H5I_object(obj_id), misc_type, H5_REQUEST_NULL, 
+                ret_value = H5MD__temp_file_misc(H5I_object(obj_id), misc_type, -1, H5_REQUEST_NULL, 
                                                  type, name);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
@@ -646,7 +646,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* get value through the native plugin */
                 ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, 
-                                                     H5_REQUEST_NULL, &ret);
+                                                     -1, H5_REQUEST_NULL, &ret);
 
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, 
                                            H5MD_RETURN_TAG, MPI_COMM_WORLD))
@@ -679,7 +679,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
                 /* get value through the native plugin */
-                ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL,
+                ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, -1, H5_REQUEST_NULL,
                                                      sect_info, &ret, type, nsects);
                 if(ret < 0 || ret_value < 0){
                     if(MPI_SUCCESS != MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, 
@@ -732,7 +732,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* get value through the native plugin */
                 if((ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, 
-                                                         H5_REQUEST_NULL, type, &finfo)) < 0) {
+                                                         -1, H5_REQUEST_NULL, type, &finfo)) < 0) {
                     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int), MPI_BYTE, source, 
                                                H5MD_RETURN_TAG, MPI_COMM_WORLD))
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
@@ -786,7 +786,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* get value through the native plugin */
                 if((ret_value = H5MD__temp_file_optional(H5I_object(file_id), optional_type, 
-                                                         H5_REQUEST_NULL, &config_ptr)) < 0) {
+                                                         -1, H5_REQUEST_NULL, &config_ptr)) < 0) {
                     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int), MPI_BYTE, source, 
                                                H5MD_RETURN_TAG, MPI_COMM_WORLD))
                         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to send message");
@@ -825,7 +825,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* get value through the native plugin */
                 ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, 
-                                                     H5_REQUEST_NULL, &ret);
+                                                     -1, H5_REQUEST_NULL, &ret);
 
                 if(MPI_SUCCESS != MPI_Send(&ret, sizeof(double), MPI_BYTE, source, 
                                            H5MD_RETURN_TAG, MPI_COMM_WORLD))
@@ -851,7 +851,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* get value through the native plugin */
                 if((ret_value = H5MD__temp_file_optional(H5I_object(file_id), optional_type, 
-                                         H5_REQUEST_NULL, &max_size_ptr, &min_clean_size_ptr, 
+                                         -1, H5_REQUEST_NULL, &max_size_ptr, &min_clean_size_ptr, 
                                          &cur_size_ptr, &cur_num_entries_ptr)) < 0) {
                     if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(int), MPI_BYTE, source, 
                                                H5MD_RETURN_TAG, MPI_COMM_WORLD))
@@ -893,7 +893,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
 
                 /* get value through the native plugin */
                 ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, 
-                                                     H5_REQUEST_NULL);
+                                                     -1, H5_REQUEST_NULL);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                            H5MD_RETURN_TAG, MPI_COMM_WORLD))
@@ -912,7 +912,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 INT32DECODE(p, obj_id);
 
                 /* get value through the native plugin */
-                if(H5MD__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL,
+                if(H5MD__temp_file_optional(H5I_object(obj_id), optional_type, -1, H5_REQUEST_NULL,
                                             &new_file) < 0) {
                     MPI_Send(&file_id, sizeof(hid_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to reopen file");
@@ -938,7 +938,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 INT32DECODE(p, obj_id);
 
                 /* get value through the native plugin */
-                ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL);
+                ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, -1, H5_REQUEST_NULL);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
                                            H5MD_RETURN_TAG, MPI_COMM_WORLD))
@@ -962,7 +962,7 @@ H5MD__file_optional_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, H5_REQUEST_NULL,
+                ret_value = H5MD__temp_file_optional(H5I_object(obj_id), optional_type, -1, H5_REQUEST_NULL,
                                                      &config_ptr);
 
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
@@ -1009,7 +1009,7 @@ H5MD__file_close_func(uint8_t *p, int source)
 
 #if 0
     /* call the native plugin file create callback*/
-    if(H5VL_native_file_close(H5I_object(file_id), -1) < 0)
+    if(H5VL_native_file_close(H5I_object(file_id), -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file");
 #endif
 done:
@@ -1054,7 +1054,7 @@ H5MD__attr_create_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id");
 
     if(NULL == (attr = (H5A_t *)H5VL_native_attr_create(H5I_object(obj_id), loc_params, name,
-                                                        acpl_id, aapl_id, -1)))
+                                                        acpl_id, aapl_id, -1, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute");
 
     if((attr_id = H5VL_native_register(H5I_ATTR, attr, FALSE)) < 0)
@@ -1104,7 +1104,7 @@ H5MD__attr_open_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr open params");
 
     if(NULL == (attr = (H5A_t *)H5VL_native_attr_open(H5I_object(obj_id), loc_params, name, 
-                                                      aapl_id, -1)))
+                                                      aapl_id, -1, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute");
 
     if((attr_id = H5VL_native_register(H5I_ATTR, attr, FALSE)) < 0)
@@ -1221,7 +1221,7 @@ H5MD__attr_read_func(uint8_t *p, int source)
     if(NULL == (buf = H5MM_malloc(buf_size + sizeof(int))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    if(H5VL_native_attr_read(attr, type_id, buf, -1) < 0)
+    if(H5VL_native_attr_read(attr, type_id, buf, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute");
 
 done:
@@ -1265,7 +1265,7 @@ H5MD__attr_write_func(uint8_t *p, int source)
     if(NULL == (attr = (H5A_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier");
 
-    if(H5VL_native_attr_write(attr, type_id, (const void *)buf, -1) < 0)
+    if(H5VL_native_attr_write(attr, type_id, (const void *)buf, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute");
 
 done:
@@ -1295,7 +1295,7 @@ H5MD__attr_remove_func(uint8_t *p, int source)
     if(H5VL__decode_attr_remove_params(p, &obj_id, &loc_params, &name) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr remove params");
 
-    if(H5VL_native_attr_remove(H5I_object(obj_id), loc_params, name, -1) < 0)
+    if(H5VL_native_attr_remove(H5I_object(obj_id), loc_params, name, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to remove attribute");
 
 done:
@@ -1337,7 +1337,7 @@ H5MD__attr_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode attr get params");
                 }
                 /* get value through the native plugin */
-                if(H5MD__temp_attr_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, loc_params,
+                if(H5MD__temp_attr_get(H5I_object(obj_id), get_type, -1, H5_REQUEST_NULL, loc_params,
                                        attr_name, &ret) < 0) {
                     MPI_Send(&ret, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists");
@@ -1377,7 +1377,7 @@ H5MD__attr_get_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                if(H5MD__temp_attr_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, loc_params,
+                if(H5MD__temp_attr_get(H5I_object(obj_id), get_type, -1, H5_REQUEST_NULL, loc_params,
                                        size, name, &ret) < 0) {
                     MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists");
@@ -1427,14 +1427,14 @@ H5MD__attr_get_func(uint8_t *p, int source)
                 if(H5VL_OBJECT_BY_SELF == loc_params.type || H5VL_OBJECT_BY_IDX == loc_params.type) {
                     /* get value through the native plugin */
                     if((ret_value = H5MD__temp_attr_get(H5I_object(obj_id), get_type, 
-                                                        H5_REQUEST_NULL, loc_params, &ainfo)) < 0) {
+                                                        -1, H5_REQUEST_NULL, loc_params, &ainfo)) < 0) {
                         MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to dget attribute info");
                     }
                 }
                 else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
                     /* get value through the native plugin */
-                    if((ret_value = H5MD__temp_attr_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, 
+                    if((ret_value = H5MD__temp_attr_get(H5I_object(obj_id), get_type, -1, H5_REQUEST_NULL, 
                                                         loc_params, &ainfo, attr_name)) < 0) {
                         MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to dget attribute info");
@@ -1557,7 +1557,7 @@ H5MD__dataset_create_func(uint8_t *p, int source)
 
     /* Create the dataset through the native VOL */
     if(NULL == (dset = (H5D_t *)H5VL_native_dataset_create(H5I_object(obj_id), loc_params, name, 
-                                                           dcpl_id, dapl_id, H5_REQUEST_NULL)))
+                                                           dcpl_id, dapl_id, -1, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
@@ -1651,7 +1651,7 @@ H5MD__dataset_open_func(uint8_t *p, int source)
 
     /* Open the dataset through the native VOL */
     if(NULL == (dset = (H5D_t *)H5VL_native_dataset_open(H5I_object(obj_id), loc_params, name, 
-                                                         dapl_id, H5_REQUEST_NULL)))
+                                                         dapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset")
 
     if((dset_id = H5VL_native_register(H5I_DATASET, dset, FALSE)) < 0)
@@ -1789,7 +1789,7 @@ H5MD__dataset_set_extent_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a dataset");
 
     /* Set_Extent the dataset through the native VOL */
-    if(H5VL_native_dataset_set_extent(dset, size, H5_REQUEST_NULL) < 0)
+    if(H5VL_native_dataset_set_extent(dset, size, -1, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set_extent dataset");
 
     /* increment current version of dataset */
@@ -2130,7 +2130,7 @@ H5MD__datatype_open_func(uint8_t *p, int source)
 
     /* Open the datatype through the native VOL */
     if(NULL == (type = (H5T_t *)H5VL_native_datatype_open(H5I_object(obj_id), loc_params, name, 
-                                                          tapl_id, H5_REQUEST_NULL)))
+                                                          tapl_id, -1, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to open datatype")
 
     if((type_id = H5I_register(H5I_DATATYPE, type, FALSE)) < 0)
@@ -2237,7 +2237,7 @@ H5MD__group_create_func(uint8_t *p, int source)
 
     /* Create the group through the native VOL */
     if(NULL == (grp = (H5G_t *)H5VL_native_group_create(H5I_object(obj_id), loc_params, name, 
-                                                        gcpl_id, gapl_id, H5_REQUEST_NULL)))
+                                                        gcpl_id, gapl_id, -1, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -2293,7 +2293,7 @@ H5MD__group_open_func(uint8_t *p, int source)
 
     /* Open the group through the native VOL */
     if(NULL == (grp = (H5G_t *)H5VL_native_group_open(H5I_object(obj_id), loc_params, name, 
-                                                      gapl_id, H5_REQUEST_NULL)))
+                                                      gapl_id, -1, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open group")
 
     if((grp_id = H5VL_native_register(H5I_GROUP, grp, FALSE)) < 0)
@@ -2352,7 +2352,7 @@ H5MD__group_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group get params");
 
                 /* get value through the native plugin */
-                if(H5MD__temp_group_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, &gcpl_id) < 0)
+                if(H5MD__temp_group_get(H5I_object(obj_id), get_type, -1, H5_REQUEST_NULL, &gcpl_id) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists");
 
                 /* get size for property lists to encode */
@@ -2403,7 +2403,7 @@ H5MD__group_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode group get params");
 
                 /* get value through the native plugin */
-                if(H5MD__temp_group_get(H5I_object(obj_id), get_type, H5_REQUEST_NULL, loc_params,
+                if(H5MD__temp_group_get(H5I_object(obj_id), get_type, -1, H5_REQUEST_NULL, loc_params,
                                         &ginfo) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to dget groupibute info");
 
@@ -2499,7 +2499,7 @@ H5MD__link_create_func(uint8_t *p, int source)
         obj = H5I_object(obj_id);
 
     /* Create the link through the native VOL */
-    if(H5VL_native_link_create(create_type, obj, loc_params, lcpl_id, lapl_id, H5_REQUEST_NULL) < 0)
+    if(H5VL_native_link_create(create_type, obj, loc_params, lcpl_id, lapl_id, -1, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link");
 
 done:
@@ -2587,7 +2587,7 @@ H5MD__link_move_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link move params");
 
     if(H5VL_native_link_move(H5I_object(src_id), loc_params1, H5I_object(dst_id), loc_params2,
-                             copy_flag, lcpl_id, lapl_id, H5_REQUEST_NULL) < 0)
+                             copy_flag, lcpl_id, lapl_id, -1, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to move link");
 
 done:
@@ -2701,7 +2701,7 @@ H5MD__link_iterate_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link iterate params");
 
     if(H5VL_native_link_iterate(H5I_object(obj_id), loc_params, recursive, idx_type, order, idx,
-                                H5L__iterate_cb, &source, H5_REQUEST_NULL) < 0)
+                                H5L__iterate_cb, &source, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed");
 
 done:
@@ -2748,7 +2748,7 @@ H5MD__link_get_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                if(H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                        &ret) < 0) {
                     ret = -1;
                     MPI_Send(&ret, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
@@ -2781,7 +2781,7 @@ H5MD__link_get_func(uint8_t *p, int source)
 
                 /* get info through the native plugin */
                 if((ret_value = H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, 
-                                                    H5_REQUEST_NULL, &linfo)) < 0) {
+                                                    -1, H5_REQUEST_NULL, &linfo)) < 0) {
                     MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to dget link info");
                 }
@@ -2848,7 +2848,7 @@ H5MD__link_get_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                if(H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                        name, size, &ret) < 0) {
                     MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine link name");
@@ -2899,7 +2899,7 @@ H5MD__link_get_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                if(H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_link_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                        val, size) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine link val");
 
@@ -2935,7 +2935,7 @@ H5MD__link_remove_func(uint8_t *p, int source)
     if(H5VL__decode_link_remove_params(p, &obj_id, &loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link remove params");
 
-    if(H5VL_native_link_remove(H5I_object(obj_id), loc_params, H5_REQUEST_NULL) < 0)
+    if(H5VL_native_link_remove(H5I_object(obj_id), loc_params, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link");
 
 done:
@@ -2972,7 +2972,7 @@ H5MD__object_open_func(uint8_t *p, int source)
 
     /* Open the object through the native VOL */
     if(NULL == (object = H5VL_native_object_open(H5I_object(obj_id), loc_params, &opened_type,
-                                                 H5_REQUEST_NULL)))
+                                                 -1, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     if((new_id = H5VL_native_register(opened_type, object, FALSE)) < 0)
@@ -3172,7 +3172,7 @@ H5MD__object_copy_func(uint8_t *p, int source)
 
     if(H5VL_native_object_copy(H5I_object(src_id), loc_params1, src_name,
                                H5I_object(dst_id), loc_params2, dst_name,
-                               ocpypl_id, lcpl_id, H5_REQUEST_NULL) < 0)
+                               ocpypl_id, lcpl_id, -1, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to copy object");
 
 done:
@@ -3277,7 +3277,7 @@ H5MD__object_visit_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object visit params");
 
     if(H5VL_native_object_visit(H5I_object(obj_id), loc_params, idx_type, order, 
-                                H5O__visit_cb, &source, H5_REQUEST_NULL) < 0)
+                                H5O__visit_cb, &source, -1, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "object visit failed");
 
 done:
@@ -3318,7 +3318,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* perform operation through native plugin */
                 ret_value = H5MD__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, 
-                                                   H5_REQUEST_NULL, old_name, new_name);
+                                                   -1, H5_REQUEST_NULL, old_name, new_name);
 
                 /* send status to client */
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
@@ -3343,7 +3343,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* perform operation through native plugin */
                 ret_value = H5MD__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, 
-                                                   H5_REQUEST_NULL, update_ref);
+                                                   -1, H5_REQUEST_NULL, update_ref);
 
                 /* send status to client */
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
@@ -3365,7 +3365,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
 
                 /* perform operation through native plugin */
                 ret_value = H5MD__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, 
-                                                   H5_REQUEST_NULL, comment);
+                                                   -1, H5_REQUEST_NULL, comment);
 
                 /* send status to client */
                 if(MPI_SUCCESS != MPI_Send(&ret_value, sizeof(herr_t), MPI_BYTE, source, 
@@ -3399,7 +3399,7 @@ H5MD__object_misc_func(uint8_t *p, int source)
                 ref = HDmalloc(ref_size);
 
                 /* perform operation through native plugin */
-                if(H5MD__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, H5_REQUEST_NULL,
+                if(H5MD__temp_object_misc(H5I_object(obj_id), loc_params, misc_type, -1, H5_REQUEST_NULL,
                                           ref, name, ref_type, space_id) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to create reference");
 
@@ -3450,7 +3450,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object get params");
 
                 /* perform operation through native plugin */
-                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL, 
+                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL, 
                                          &ret) < 0) {
                     MPI_Send(&ret, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to determine if object exists");
@@ -3477,7 +3477,7 @@ H5MD__object_get_func(uint8_t *p, int source)
 
                 /* perform operation through native plugin */
                 if((ret_value = H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, 
-                                                      H5_REQUEST_NULL, &obj_info)) < 0) {
+                                                      -1, H5_REQUEST_NULL, &obj_info)) < 0) {
                     MPI_Send(&ret_value, sizeof(int32_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
                     HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object info");
                 }
@@ -3531,7 +3531,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                          comment, size, &ret) < 0) {
                     ret = -1;
                     MPI_Send(&ret, sizeof(int64_t), MPI_BYTE, source, H5MD_RETURN_TAG, MPI_COMM_WORLD);
@@ -3579,7 +3579,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object get params");
 
                 /* get value through the native plugin */
-                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                          &space_id, ref_type, ref) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine ref region");
 
@@ -3629,7 +3629,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode object get params");
 
                 /* get value through the native plugin */
-                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                          &obj_type, ref_type, ref) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine reference type");
 
@@ -3663,7 +3663,7 @@ H5MD__object_get_func(uint8_t *p, int source)
                 }
 
                 /* get value through the native plugin */
-                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, H5_REQUEST_NULL,
+                if(H5MD__temp_object_get(H5I_object(obj_id), loc_params, get_type, -1, H5_REQUEST_NULL,
                                          &ret, name, size, ref_type, ref) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to determine ref region");
 
@@ -4201,7 +4201,7 @@ done:
  * Just a temporary routine to create a var_args to pass through the native MDS get routine
  */
 static herr_t
-H5MD__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...)
+H5MD__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4209,7 +4209,7 @@ H5MD__temp_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, ...)
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_attr_get(obj, get_type, req, arguments) < 0)
+    if(H5VL_native_attr_get(obj, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -4220,7 +4220,7 @@ done:
  * Just a temporary routine to create a var_args to pass through the native MDS get routine
  */
 static herr_t
-H5MD__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...)
+H5MD__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4228,7 +4228,7 @@ H5MD__temp_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, ...)
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_group_get(obj, get_type, req, arguments) < 0)
+    if(H5VL_native_group_get(obj, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -4239,7 +4239,7 @@ done:
  * Just a temporary routine to create a var_args to pass through the native MDS get routine
  */
 static herr_t
-H5MD__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, ...)
+H5MD__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4247,7 +4247,7 @@ H5MD__temp_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_link_get(obj, loc_params, get_type, req, arguments) < 0)
+    if(H5VL_native_link_get(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -4258,7 +4258,7 @@ done:
  * Just a temporary routine to create a var_args to pass through the native MDS file misc routine
  */
 static herr_t
-H5MD__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...)
+H5MD__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4266,7 +4266,7 @@ H5MD__temp_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t req, ...)
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_file_misc(obj, misc_type, req, arguments) < 0)
+    if(H5VL_native_file_misc(obj, misc_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -4277,7 +4277,7 @@ done:
  * Just a temporary routine to create a var_args to pass through the native MDS file optional routine
  */
 static herr_t
-H5MD__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t req, ...)
+H5MD__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4285,7 +4285,7 @@ H5MD__temp_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t re
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_file_optional(obj, optional_type, req, arguments) < 0)
+    if(H5VL_native_file_optional(obj, optional_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -4297,7 +4297,7 @@ done:
  */
 static herr_t
 H5MD__temp_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, 
-                       hid_t req, ...)
+                       hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4305,7 +4305,7 @@ H5MD__temp_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_object_misc(obj, loc_params, misc_type, req, arguments) < 0)
+    if(H5VL_native_object_misc(obj, loc_params, misc_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:
@@ -4317,7 +4317,7 @@ done:
  */
 static herr_t
 H5MD__temp_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
-                      hid_t req, ...)
+                      hid_t dxpl_id, void **req, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
@@ -4325,7 +4325,7 @@ H5MD__temp_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t
     FUNC_ENTER_NOAPI(FAIL)
 
     va_start (arguments, req);
-    if(H5VL_native_object_get(obj, loc_params, get_type, req, arguments) < 0)
+    if(H5VL_native_object_get(obj, loc_params, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 done:

@@ -30,6 +30,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspace			  	*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 
 #ifdef H5_HAVE_PARALLEL
@@ -103,11 +104,14 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_t     *vol_plugin;
     void       *dset;
-    herr_t                  ret_value = SUCCEED;  /* Return value */
+    herr_t      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
+
+    if(mem_space_id < 0 || file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == plist_id)
@@ -125,7 +129,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                      file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
+                                      file_space_id, plist_id, buf, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 
@@ -171,13 +175,15 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_t     *vol_plugin;
     void       *dset;
-    herr_t                  ret_value = SUCCEED;  /* Return value */
+    herr_t      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 
     /* check arguments */
+    if(!dset_id)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -195,12 +201,103 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Write the data through the VOL */
     if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, 
-                                       file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
+                                       file_space_id, dxpl_id, buf, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__pre_write
+ *
+ * Purpose:	Preparation for writing data.  
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		2 November 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__pre_write(H5D_t *dset, hid_t mem_type_id, const H5S_t *mem_space,
+	const H5S_t *file_space, hid_t dxpl_id, const void *buf)
+{
+    H5P_genplist_t 	   *plist;      /* Property list pointer */
+    hbool_t		    direct_write = FALSE;
+    herr_t                  ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+    if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME, &direct_write) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting flag for direct chunk write")
+
+    /* Direct chunk write */
+    if(direct_write) {
+        uint32_t direct_filters = 0;
+        hsize_t *direct_offset;
+        size_t   direct_datasize = 0;
+	int      ndims = 0;
+	hsize_t  dims[H5O_LAYOUT_NDIMS];
+	hsize_t  internal_offset[H5O_LAYOUT_NDIMS];
+	int      i;
+
+        if(H5D_CHUNKED != dset->shared->layout.type)
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+        if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME, &direct_filters) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting filter info for direct chunk write")
+
+        if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_OFFSET_NAME, &direct_offset) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting offset info for direct chunk write")
+
+        if(H5P_get(plist, H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_NAME, &direct_datasize) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data size for direct chunk write")
+
+	/* The library's chunking code requires the offset terminates with a zero. So transfer the 
+         * offset array to an internal offset array */ 
+	if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dims, NULL)) < 0)
+	    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
+
+	for(i=0; i<ndims; i++) {
+	    /* Make sure the offset doesn't exceed the dataset's dimensions */
+            if(direct_offset[i] > dims[i])
+		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
+
+            /* Make sure the offset fall right on a chunk's boundary */
+	    if(direct_offset[i] % dset->shared->layout.u.chunk.dim[i])
+		HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
+
+	    internal_offset[i] = direct_offset[i]; 
+	}
+	   
+	/* Terminate the offset with a zero */ 
+	internal_offset[ndims] = 0;
+
+	/* write raw data */
+	if(H5D__chunk_direct_write(dset, dxpl_id, direct_filters, internal_offset, direct_datasize, buf) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write chunk directly")
+    } else {     /* Normal write */
+        /* write raw data */
+        if(H5D__write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    } 
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__pre_write() */
 
 
 /*-------------------------------------------------------------------------

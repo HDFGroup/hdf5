@@ -374,7 +374,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* create the ref through the VOL */
-    if(ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_REF_CREATE, H5_REQUEST_NULL, 
+    if(ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_REF_CREATE, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                                     ref, name, ref_type, space_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
@@ -602,7 +602,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */
@@ -734,7 +734,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Get the space id through the VOL */
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_REF_GET_REGION, H5_REQUEST_NULL, 
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_REF_GET_REGION, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                        &ret_value, ref_type, ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -882,7 +882,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
 
     /* get the object type through the VOL */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_REF_GET_TYPE, 
-                                    H5_REQUEST_NULL, obj_type, ref_type, ref)) < 0)
+                                    H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, obj_type, ref_type, ref)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -1049,7 +1049,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* get the object type through the VOL */
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_REF_GET_NAME, H5_REQUEST_NULL, 
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_REF_GET_NAME, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                        &ret_value, name, size, ref_type, _ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 done:

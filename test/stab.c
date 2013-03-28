@@ -539,7 +539,7 @@ long_compact(hid_t fapl2)
     hid_t	fid = (-1);             /* File ID */
     hid_t	gid = (-1);             /* Group ID */
     hid_t	gid2 = (-1);            /* Group ID */
-    char        *objname;               /* Object name */
+    char        *objname = NULL;        /* Object name */
     char	filename[NAME_BUF_SIZE];
     h5_stat_size_t       empty_size;             /* Size of an empty file */
     h5_stat_size_t       file_size;              /* Size of each file created */
@@ -557,7 +557,7 @@ long_compact(hid_t fapl2)
     if((empty_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Construct very long object name template */
-    if((objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))) == NULL) TEST_ERROR
+    if(NULL == (objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1)))) TEST_ERROR
     HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
@@ -620,6 +620,7 @@ long_compact(hid_t fapl2)
 
     /* Free object name */
     HDfree(objname);
+    objname = NULL;
 
     /* Close top group */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -645,6 +646,10 @@ error:
     	H5Gclose(gid);
     	H5Fclose(fid);
     } H5E_END_TRY;
+
+    if(objname)
+        HDfree(objname);
+
     return 1;
 } /* end long_compact() */
 

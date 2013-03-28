@@ -70,68 +70,68 @@ static void *H5VL_mds_fapl_copy(const void *_old_fa);
 static herr_t H5VL_mds_fapl_free(void *_fa);
 
 /* Atrribute callbacks */
-static void *H5VL_mds_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
-static void *H5VL_mds_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
-static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
-static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
-static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
-static herr_t H5VL_mds_attr_close(void *attr, hid_t req);
+static void *H5VL_mds_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_mds_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_attr_close(void *attr, hid_t dxpl_id, void **req);
 
 /* Datatype callbacks */
-static void *H5VL_mds_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
-static void *H5VL_mds_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
-static ssize_t H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t req);
-static herr_t H5VL_mds_datatype_close(void *dt, hid_t req);
+static void *H5VL_mds_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_mds_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
+static ssize_t H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
-static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
-static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
+static void *H5VL_mds_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_mds_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_mds_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                    hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
+                                    hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 static herr_t H5VL_mds_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                     hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
-static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
-static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_dataset_close(void *dset, hid_t req);
+                                     hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
+static herr_t H5VL_mds_dataset_set_extent(void *dset, const hsize_t size[], hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
 /* File callbacks */
-static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
-static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
-static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
-static herr_t H5VL_mds_file_close(void *file, hid_t req);
+static void *H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_file_optional(void *file, H5VL_file_optional_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
-static void *H5VL_mds_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
-static void *H5VL_mds_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t req);
-static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_group_close(void *grp, hid_t req);
+static void *H5VL_mds_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_mds_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
 static herr_t H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *obj, 
-                                      H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+                                      H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_mds_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                     void *dst_obj, H5VL_loc_params_t loc_params2,
-                                    hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+                                    hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_mds_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
                                     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                                    H5L_iterate_t op, void *op_data, hid_t req);
-static herr_t H5VL_mds_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+                                    H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 
 /* Object callbacks */
-static void *H5VL_mds_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t req);
+static void *H5VL_mds_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 static herr_t H5VL_mds_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
                                    void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_mds_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
-static herr_t H5VL_mds_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_mds_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
+                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+static herr_t H5VL_mds_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_mds_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
 
 /* MDS-specific file access properties */
 typedef struct H5VL_mds_fapl_t {
@@ -211,7 +211,12 @@ static H5VL_class_t H5VL_mds_g = {
         H5VL_mds_object_get,                 /* get */
         H5VL_mds_object_misc,                /* misc */
         H5VL_mds_object_optional,            /* optional */
-        NULL,//H5VL_mds_object_close                /* close */
+        NULL//H5VL_mds_object_close                /* close */
+    },
+    {
+        NULL,
+        NULL,
+        NULL
     }
 };
 
@@ -603,7 +608,7 @@ done:
  */
 static void *
 H5VL_mds_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
-                     hid_t UNUSED req)
+                     hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     void *send_buf;
     size_t buf_size;
@@ -732,7 +737,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED req)
+H5VL_mds_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     void *send_buf;
     size_t buf_size;
@@ -851,7 +856,7 @@ done:
  */
 static herr_t
 H5VL_mds_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, 
-                    hid_t UNUSED req)
+                    hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     hid_t obj_id = obj->obj_id;
@@ -909,7 +914,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_mds_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     H5F_t *f = obj->raw_file;
@@ -1054,7 +1059,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
+H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
@@ -1136,13 +1141,13 @@ H5VL_mds_file_misc(void *_obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_
 
                 /* attempt to open the file through the MDS plugin */
                 if(NULL == (file = (H5MD_file_t *)H5VL_mds_file_open(name, H5F_ACC_RDONLY, fapl_id,
-                                                                         H5_REQUEST_NULL)))
+                                                                     -1, H5_REQUEST_NULL)))
                     *ret = FALSE;
                 else
                     *ret = TRUE;
 
                 /* close the file if it was succesfully opened */
-                if(file && H5VL_mds_file_close((void*)file, H5_REQUEST_NULL) < 0)
+                if(file && H5VL_mds_file_close((void*)file, -1, H5_REQUEST_NULL) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file");
                 break;
             }
@@ -1169,7 +1174,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNUSED req, va_list arguments)
+H5VL_mds_file_optional(void *_obj, H5VL_file_optional_t optional_type, hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     size_t buf_size = 0;
@@ -1669,7 +1674,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_file_close(void *obj, hid_t UNUSED req)
+H5VL_mds_file_close(void *obj, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_file_t *file = (H5MD_file_t *)obj;
     H5F_t *f = file->common.raw_file;
@@ -1712,7 +1717,7 @@ done:
  */
 static void *
 H5VL_mds_attr_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t acpl_id, 
-                     hid_t aapl_id, hid_t UNUSED req)
+                     hid_t aapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the attr */
     H5MD_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
@@ -1815,7 +1820,7 @@ done:
  */
 static void *
 H5VL_mds_attr_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                   hid_t aapl_id, hid_t UNUSED req)
+                   hid_t aapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the attr */
     H5MD_attr_t *attr = NULL; /* the attr object that is created and passed to the user */
@@ -1950,7 +1955,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_mds_attr_read(void *obj, hid_t dtype_id, void *buf, hid_t UNUSED req)
+H5VL_mds_attr_read(void *obj, hid_t dtype_id, void *buf, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_attr_t *attr = (H5MD_attr_t *)obj;
     void            *send_buf = NULL;
@@ -2016,7 +2021,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_mds_attr_write(void *obj, hid_t dtype_id, const void *buf, hid_t UNUSED req)
+H5VL_mds_attr_write(void *obj, hid_t dtype_id, const void *buf, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_attr_t *attr = (H5MD_attr_t *)obj;
     void            *send_buf = NULL;
@@ -2075,7 +2080,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t UNUSED req)
+H5VL_mds_attr_remove(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void            *send_buf = NULL;
@@ -2125,7 +2130,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_mds_attr_get(void *_obj, H5VL_attr_get_t get_type, hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -2389,7 +2394,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_attr_close(void *obj, hid_t UNUSED req)
+H5VL_mds_attr_close(void *obj, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_attr_t *attr = (H5MD_attr_t *)obj;
     void            *send_buf = NULL;
@@ -2443,7 +2448,7 @@ done:
  */
 static void *
 H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, 
-                        hid_t dapl_id, hid_t UNUSED req)
+                        hid_t dapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the dataset */
     H5MD_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
@@ -2656,7 +2661,7 @@ done:
  */
 static void *
 H5VL_mds_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                      hid_t dapl_id, hid_t UNUSED req)
+                      hid_t dapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the dataset */
     H5MD_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
@@ -2814,7 +2819,7 @@ done:
  */
 static herr_t
 H5VL_mds_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id,
-                      hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t UNUSED req)
+                      hid_t file_space_id, hid_t dxpl_id, void *buf, void UNUSED **req)
 {
     H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
@@ -2886,7 +2891,7 @@ done:
  */
 static herr_t
 H5VL_mds_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id,
-                       hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
+                       hid_t file_space_id, hid_t dxpl_id, const void *buf, void UNUSED **req)
 {
     H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     hid_t          dset_id = dset->common.obj_id; /* the dataset ID at the MDS */
@@ -2957,7 +2962,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED req)
+H5VL_mds_dataset_set_extent(void *obj, const hsize_t size[], hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     void           *send_buf = NULL;
@@ -3117,7 +3122,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
+H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5MD_dset_t *dataset = (H5MD_dset_t *)obj;
     H5D_t       *dset = dataset->dset;
@@ -3146,7 +3151,7 @@ H5VL_mds_dataset_get(void *obj, H5VL_dataset_get_t get_type, hid_t req, va_list 
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
     }
 
-    if(H5VL_native_dataset_get((void *)dset, get_type, req, arguments) < 0)
+    if(H5VL_native_dataset_get((void *)dset, get_type, dxpl_id, req, arguments) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed");
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3167,7 +3172,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_dataset_close(void *obj, hid_t UNUSED req)
+H5VL_mds_dataset_close(void *obj, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_dset_t *dset = (H5MD_dset_t *)obj;
     void            *send_buf = NULL;
@@ -3222,7 +3227,7 @@ done:
  */
 static void *
 H5VL_mds_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, 
-                         hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t UNUSED req)
+                         hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the datatype */
     H5MD_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
@@ -3296,7 +3301,7 @@ done:
  */
 static void *
 H5VL_mds_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                       hid_t tapl_id, hid_t UNUSED req)
+                       hid_t tapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the datatype */
     H5MD_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
@@ -3388,7 +3393,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t UNUSED req)
+H5VL_mds_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_dtype_t *dtype = (H5MD_dtype_t *)obj;
     H5T_t       *type = dtype->dtype;
@@ -3421,7 +3426,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_datatype_close(void *obj, hid_t UNUSED req)
+H5VL_mds_datatype_close(void *obj, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_dtype_t *dtype = (H5MD_dtype_t *)obj;
     void            *send_buf = NULL;
@@ -3474,7 +3479,7 @@ done:
  */
 static void *
 H5VL_mds_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, 
-                      hid_t gapl_id, hid_t UNUSED req)
+                      hid_t gapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the group */
     H5MD_group_t *grp = NULL; /* the group object that is created and passed to the user */
@@ -3551,7 +3556,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *H5VL_mds_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                                 hid_t gapl_id, hid_t UNUSED req)
+                                 hid_t gapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to open the group */
     H5MD_group_t *grp = NULL; /* the group object that is opend and passed to the user */
@@ -3615,7 +3620,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_mds_group_get(void *_obj, H5VL_group_get_t get_type, hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3781,7 +3786,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_mds_group_close(void *obj, hid_t UNUSED req)
+H5VL_mds_group_close(void *obj, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_group_t *grp = (H5MD_group_t *)obj;
     void            *send_buf = NULL;
@@ -3832,7 +3837,7 @@ done:
  */
 herr_t
 H5VL_mds_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_params_t loc_params,
-                     hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
+                     hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to create the group */
     H5P_genplist_t  *plist;                     /* Property list pointer */
@@ -3979,7 +3984,7 @@ done:
 herr_t
 H5VL_mds_link_move(void *_src_obj, H5VL_loc_params_t loc_params1, 
                    void *_dst_obj, H5VL_loc_params_t loc_params2,
-                   hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED req)
+                   hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *src_obj = (H5MD_object_t *)_src_obj;
     H5MD_object_t *dst_obj = (H5MD_object_t *)_dst_obj;
@@ -4033,7 +4038,7 @@ done:
  */
 static herr_t H5VL_mds_link_iterate(void *_obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
                                     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                                    H5L_iterate_t op, void *op_data, hid_t UNUSED req)
+                                    H5L_iterate_t op, void *op_data, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
@@ -4186,7 +4191,7 @@ done:
  */
 herr_t
 H5VL_mds_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, 
-                  hid_t UNUSED req, va_list arguments)
+                  hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
@@ -4417,7 +4422,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_mds_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t UNUSED req)
+H5VL_mds_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void            *send_buf = NULL;
@@ -4467,7 +4472,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *H5VL_mds_object_open(void *_obj, H5VL_loc_params_t loc_params, 
-                                  H5I_type_t *opened_type, hid_t UNUSED req)
+                                  H5I_type_t *opened_type, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj; /* location object to open the group */
     void *send_buf = NULL; /* buffer where the group open request is encoded and sent to the mds */
@@ -4686,7 +4691,7 @@ done:
 herr_t 
 H5VL_mds_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
                      void *_dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-                     hid_t ocpypl_id, hid_t lcpl_id, hid_t UNUSED req)
+                     hid_t ocpypl_id, hid_t lcpl_id, hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *src_obj = (H5MD_object_t *)_src_obj;
     H5MD_object_t *dst_obj = (H5MD_object_t *)_dst_obj;
@@ -4742,7 +4747,7 @@ done:
  */
 static herr_t H5VL_mds_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
                                     H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
-                                    hid_t UNUSED req)
+                                    hid_t UNUSED dxpl_id, void UNUSED **req)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
@@ -4880,7 +4885,7 @@ done:
  */
 herr_t
 H5VL_mds_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, 
-                     hid_t UNUSED req, va_list arguments)
+                     hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;
@@ -5043,7 +5048,7 @@ done:
  */
 herr_t
 H5VL_mds_object_optional(void UNUSED *obj, H5VL_loc_params_t UNUSED loc_params, 
-                         H5VL_object_optional_t optional_type, hid_t UNUSED req, 
+                         H5VL_object_optional_t optional_type, hid_t UNUSED dxpl_id, void UNUSED **req, 
                          va_list UNUSED arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -5076,7 +5081,7 @@ done:
  */
 herr_t
 H5VL_mds_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
-                    hid_t UNUSED req, va_list arguments)
+                    hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
 {
     H5MD_object_t *obj = (H5MD_object_t *)_obj;
     void *send_buf = NULL;

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5_F90_EXAMPLES C CXX Fortran)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
@@ -14,13 +14,15 @@ INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${HDF5_F90_BINARY_DIR} ${
 # Define Sources
 #-----------------------------------------------------------------------------
 SET (examples
-    dsetexample
-    fileexample
-    rwdsetexample
-    attrexample
-    groupexample
-    grpsexample
-    grpdsetexample
+    h5_cmprss
+    h5_crtdat
+    h5_rdwt
+    h5_crtatt
+    h5_crtgrp
+    h5_crtgrpar
+    h5_crtgrpd
+    h5_extend
+    h5_subset
     hyperslab
     selectele
     refobjexample
@@ -63,7 +65,7 @@ FOREACH (example ${examples})
 
 ENDFOREACH (example ${examples})
 
-IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+IF (HDF5_ENABLE_F2003)
   FOREACH (example ${F2003_examples})
     ADD_EXECUTABLE (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
     TARGET_NAMING (f03_ex_${example} ${LIB_TYPE})
@@ -88,7 +90,7 @@ IF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
       SET (last_test "f03_ex_${example}")
     ENDIF (BUILD_TESTING)
   ENDFOREACH (example ${F2003_examples})
-ENDIF (FORTRAN_HAVE_ISO_C_BINDING AND HDF5_ENABLE_F2003)
+ENDIF (HDF5_ENABLE_F2003)
 
 IF (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   ADD_EXECUTABLE (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)

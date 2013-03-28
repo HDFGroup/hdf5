@@ -324,7 +324,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the group through the VOL */
-    if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, name, gcpl_id, gapl_id, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, name, gcpl_id, gapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -333,7 +333,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate2() */
@@ -412,7 +412,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the group through the VOL */
-    if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, NULL, gcpl_id, gapl_id, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, NULL, gcpl_id, gapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -421,7 +421,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_anon() */
@@ -479,7 +479,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the group through the VOL */
-    if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, gapl_id, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, gapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -488,7 +488,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen2() */
@@ -527,7 +527,7 @@ H5Gget_create_plist(hid_t grp_id)
     if(NULL == (grp = (void *)H5I_object(grp_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
 
-    if(H5VL_group_get(grp, vol_plugin, H5VL_GROUP_GET_GCPL, H5_REQUEST_NULL, &ret_value) < 0)
+    if(H5VL_group_get(grp, vol_plugin, H5VL_GROUP_GET_GCPL, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group creation properties")
 
 done:
@@ -578,7 +578,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
     loc_params.obj_type = id_type;
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, 
+    if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                                    loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -636,7 +636,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, 
+    if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                                    loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -703,7 +703,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5_REQUEST_NULL, 
+    if((ret_value = H5VL_group_get(obj, vol_plugin, H5VL_GROUP_GET_INFO, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                                    loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -745,7 +745,7 @@ H5Gclose(hid_t group_id)
     	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
 #if 0
     /* Close the group through the VOL */
-    if(H5VL_group_close(group_id, H5_REQUEST_NULL) < 0)
+    if(H5VL_group_close(group_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
 #endif
 
@@ -776,7 +776,7 @@ H5G_close_group(void *grp, H5VL_t *vol_plugin)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Close the group through the VOL*/
-    if((ret_value = H5VL_group_close(grp, vol_plugin, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_group_close(grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
 
 done:

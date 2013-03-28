@@ -161,7 +161,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* get the object type through the VOL */
     if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_REF_GET_TYPE,
-                                    H5_REQUEST_NULL, &obj_type, ref_type, ref)) < 0)
+                                    H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, &obj_type, ref_type, ref)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
     /* Set return value */
@@ -227,7 +227,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 
     /* Get an atom for the object */

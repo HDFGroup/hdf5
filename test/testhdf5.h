@@ -142,7 +142,7 @@
     if(VERBOSE_HI)					                      \
 	print_func("   Call to routine: %15s at line %4d in %s returned "     \
            "invalid result\n", where, (int)__LINE__, __FILE__);               \
-    TestErrPrintf("*** UNEXPECTED RESULT from %s at line %4d in %s\n"         \
+    TestErrPrintf("*** UNEXPECTED RESULT from %s at line %4d in %s\n",        \
                where, (int)__LINE__, __FILE__);                               \
 } while(0)
 

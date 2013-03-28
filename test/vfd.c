@@ -28,17 +28,20 @@
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
 #define CORE_INCREMENT  (4*KB)
+#define DSET1_NAME   "dset1"
+#define DSET1_DIM1   1024
+#define DSET1_DIM2   32
+#define DSET3_NAME   "dset3"
 
-/*Macros for Direct VFD*/
+/* Macros for Direct VFD */
+#ifdef H5_HAVE_DIRECT
 #define MBOUNDARY    512
 #define FBSIZE       (4*KB)
 #define CBSIZE       (8*KB)
 #define THRESHOLD    1
-#define DSET1_NAME   "dset1"
-#define DSET1_DIM1   1024
-#define DSET1_DIM2   32
 #define DSET2_NAME   "dset2"
 #define DSET2_DIM    4
+#endif /* H5_HAVE_DIRECT */
 
 const char *FILENAME[] = {
     "sec2_file",         /*0*/
@@ -165,7 +168,7 @@ test_direct(void)
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
-    int    *points, *check, *p1, *p2;
+    int    *points = NULL, *check = NULL, *p1, *p2;
     int    wdata2[DSET2_DIM] = {11,12,13,14};
     int    rdata2[DSET2_DIM];
     int    i, j, n;
@@ -189,10 +192,10 @@ test_direct(void)
     if(H5Pget_fapl_direct(fapl, &mbound, &fbsize, &cbsize) < 0)
         TEST_ERROR;
     if(mbound != MBOUNDARY || fbsize != FBSIZE || cbsize != CBSIZE)
-  TEST_ERROR;
+        TEST_ERROR;
 
     if(H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
-  TEST_ERROR;
+        TEST_ERROR;
 
     H5E_BEGIN_TRY {
         file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -235,17 +238,16 @@ test_direct(void)
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
      * memory address, size of data, and file address. */
-    if(posix_memalign(&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
+    if(0 != HDposix_memalign(&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         TEST_ERROR;
-
-    if(posix_memalign(&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
+    if(0 != HDposix_memalign(&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
         TEST_ERROR;
 
     /* Initialize the dset1 */
     p1 = points;
     for(i = n = 0; i < DSET1_DIM1; i++)
-  for(j = 0; j < DSET1_DIM2; j++)
-      *p1++ = n++;
+        for(j = 0; j < DSET1_DIM2; j++)
+            *p1++ = n++;
 
     /* Create the data space1 */
     dims1[0] = DSET1_DIM1;
@@ -275,13 +277,13 @@ test_direct(void)
     p1 = points;
     p2 = check;
     for(i = 0; i < DSET1_DIM1; i++)
-  for(j = 0; j < DSET1_DIM2; j++)
-      if(*p1++ != *p2++) {
-    H5_FAILED();
-    printf("    Read different values than written in data set 1.\n");
-    printf("    At index %d,%d\n", i, j);
-          TEST_ERROR;
-      } /* end if */
+        for(j = 0; j < DSET1_DIM2; j++)
+            if(*p1++ != *p2++) {
+                H5_FAILED();
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+              } /* end if */
 
     /* Create the data space2. For data set 2, memory address and data size are not aligned. */
     dims2[0] = DSET2_DIM;
@@ -308,12 +310,12 @@ test_direct(void)
 
     /* Check that the values read are the same as the values written */
     for(i = 0; i < DSET2_DIM; i++)
-  if(wdata2[i] != rdata2[i]) {
-      H5_FAILED();
-      printf("    Read different values than written in data set 2.\n");
-      printf("    At index %d\n", i);
+        if(wdata2[i] != rdata2[i]) {
+            H5_FAILED();
+            printf("    Read different values than written in data set 2.\n");
+            printf("    At index %d\n", i);
             TEST_ERROR;
-  } /* end if */
+        } /* end if */
 
     if(H5Sclose(space1) < 0)
         TEST_ERROR;
@@ -325,10 +327,10 @@ test_direct(void)
         TEST_ERROR;
     if(H5Fclose(file) < 0)
         TEST_ERROR;
-    if(points)
-  free(points);
-    if(check)
-  free(check);
+    HDassert(points);
+    HDfree(points);
+    HDassert(check);
+    HDfree(check);
 
     h5_cleanup(FILENAME, fapl);
     PASSED();
@@ -336,13 +338,19 @@ test_direct(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose (fapl);
+        H5Pclose(fapl);
         H5Sclose(space1);
         H5Dclose(dset1);
         H5Sclose(space2);
         H5Dclose(dset2);
         H5Fclose(file);
     } H5E_END_TRY;
+
+    if(points)
+        HDfree(points);
+    if(check)
+        HDfree(check);
+
     return -1;
 #endif /*H5_HAVE_DIRECT*/
 }
@@ -368,7 +376,7 @@ test_core(void)
     char        filename[1024];
     void        *fhandle=NULL;
     hsize_t     file_size;
-    int    *points, *check, *p1, *p2;
+    int    *points = NULL, *check = NULL, *p1, *p2;
     hid_t  dset1=-1, space1=-1;
     hsize_t  dims1[2];
     int    i, j, n;
@@ -427,14 +435,16 @@ test_core(void)
         TEST_ERROR;
 
     /* Allocate memory for data set. */
-    points=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
-    check=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
+    if(NULL == (points = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        TEST_ERROR;
+    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        TEST_ERROR;
 
     /* Initialize the dset1 */
     p1 = points;
     for(i = n = 0; i < DSET1_DIM1; i++)
-  for(j = 0; j < DSET1_DIM2; j++)
-      *p1++ = n++;
+        for(j = 0; j < DSET1_DIM2; j++)
+            *p1++ = n++;
 
     /* Create the data space1 */
     dims1[0] = DSET1_DIM1;
@@ -464,13 +474,13 @@ test_core(void)
     p1 = points;
     p2 = check;
     for(i = 0; i < DSET1_DIM1; i++)
-  for(j = 0; j < DSET1_DIM2; j++)
-      if(*p1++ != *p2++) {
-    H5_FAILED();
-    printf("    Read different values than written in data set 1.\n");
-    printf("    At index %d,%d\n", i, j);
-          TEST_ERROR;
-      } /* end if */
+        for(j = 0; j < DSET1_DIM2; j++)
+            if(*p1++ != *p2++) {
+                H5_FAILED();
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
 
     if(H5Dclose(dset1) < 0)
         TEST_ERROR;
@@ -501,10 +511,10 @@ test_core(void)
         TEST_ERROR;
 
     /* Reallocate memory for reading buffer. */
-    if(check)
-  free(check);
-
-    check = (int*)malloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int));
+    HDassert(check);
+    HDfree(check);
+    if(NULL == (check = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
+        TEST_ERROR;
 
     /* Read the data back from dset1 */
     if(H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check) < 0)
@@ -514,13 +524,13 @@ test_core(void)
     p1 = points;
     p2 = check;
     for(i = 0; i < DSET1_DIM1; i++)
-  for(j = 0; j < DSET1_DIM2; j++)
-      if(*p1++ != *p2++) {
-    H5_FAILED();
-    printf("    Read different values than written in data set 1.\n");
-    printf("    At index %d,%d\n", i, j);
-          TEST_ERROR;
-      } /* end if */
+        for(j = 0; j < DSET1_DIM2; j++)
+            if(*p1++ != *p2++) {
+                H5_FAILED();
+                printf("    Read different values than written in data set 1.\n");
+                printf("    At index %d,%d\n", i, j);
+                TEST_ERROR;
+            } /* end if */
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
@@ -537,10 +547,10 @@ test_core(void)
         TEST_ERROR;
     if(H5Fclose(file) < 0)
         TEST_ERROR;
-    if(points)
-  free(points);
-    if(check)
-  free(check);
+    HDassert(points);
+    HDfree(points);
+    HDassert(check);
+    HDfree(check);
 
     h5_cleanup(FILENAME, fapl);
 
@@ -549,9 +559,15 @@ test_core(void)
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose (fapl);
+        H5Pclose(fapl);
         H5Fclose(file);
     } H5E_END_TRY;
+
+    if(points)
+        HDfree(points);
+    if(check)
+        HDfree(check);
+
     return -1;
 }
 
@@ -579,27 +595,30 @@ test_family_opens(char *fname, hid_t fa_pl)
     int i;
 
     /* Case 1: reopen file with 1st member file name and default property list */
-    sprintf(first_name, fname, 0);
+    HDsnprintf(first_name, sizeof(first_name), fname, 0);
 
     H5E_BEGIN_TRY {
-        file=H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
-    if(file >= 0) TEST_ERROR
+    if(file >= 0)
+        TEST_ERROR
 
     /* Case 2: reopen file with correct name template but default property list */
     H5E_BEGIN_TRY {
-        file=H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
+        file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
-    if(file >= 0) TEST_ERROR
+    if(file >= 0)
+        TEST_ERROR
 
     /* Case 3: reopen file with wrong member size */
     if(H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     H5E_BEGIN_TRY {
-        file=H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
+        file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
     } H5E_END_TRY;
-    if(file >= 0) TEST_ERROR
+    if(file >= 0)
+        TEST_ERROR
 
     /* Case 4: reopen file with wrong name template */
     HDstrcpy(wrong_name, fname);
@@ -613,9 +632,10 @@ test_family_opens(char *fname, hid_t fa_pl)
         TEST_ERROR;
 
     H5E_BEGIN_TRY {
-        file=H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
+        file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
     } H5E_END_TRY;
-    if(file >= 0) TEST_ERROR
+    if(file >= 0)
+        TEST_ERROR
 
     return 0;
 
@@ -704,44 +724,44 @@ test_family(void)
     if((dset=H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    for(i=0; i<FAMILY_NUMBER; i++)
-        for(j=0; j<FAMILY_SIZE; j++)
-            buf[i][j] = i*10000+j;
+    for(i = 0; i < FAMILY_NUMBER; i++)
+        for(j = 0; j < FAMILY_SIZE; j++)
+            buf[i][j] = (int)((i * 10000) + j);
 
     if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         TEST_ERROR;
 
     /* check file handle API */
-    if((fapl2=H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl2 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
     if(H5Pset_family_offset(fapl2, (hsize_t)0) < 0)
         TEST_ERROR;
 
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle) < 0)
         TEST_ERROR;
-    if(*fhandle<0)
+    if(*fhandle < 0)
         TEST_ERROR;
 
     if(H5Pset_family_offset(fapl2, (hsize_t)(FAMILY_SIZE*2)) < 0)
         TEST_ERROR;
     if(H5Fget_vfd_handle(file, fapl2, (void **)&fhandle2) < 0)
         TEST_ERROR;
-    if(*fhandle2<0)
+    if(*fhandle2 < 0)
         TEST_ERROR;
 
     /* Check file size API */
     if(H5Fget_filesize(file, &file_size) < 0)
         TEST_ERROR;
 
-    /* Some data has been written.  The file size should be bigger(18KB+976
+    /* Some data has been written.  The file size should be bigger (18KB+976)
      * bytes if int size is 4 bytes) now. */
-    if(sizeof(int)<=4) {
-        if(file_size<18*KB || file_size>20*KB)
-            TEST_ERROR;
-    } else if(sizeof(int)>=8) {
-        if(file_size<32*KB || file_size>40*KB)
-            TEST_ERROR;
-    }
+#if H5_SIZEOF_INT <= 4
+    if(file_size < (18 * KB) || file_size > (20 * KB))
+        TEST_ERROR;
+#elif H5_SIZEOF_INT >= 8
+    if(file_size < (32 * KB) || file_size > (40 * KB))
+        TEST_ERROR;
+#endif
 
     if(H5Sclose(space) < 0)
         TEST_ERROR;
@@ -761,7 +781,7 @@ test_family(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
@@ -829,13 +849,13 @@ test_family_compat(void)
      * Since we're going to open the files with write mode, this protects the original
      * files.
      */
-    sprintf(newname_individual, newname, counter);
-    sprintf(pathname_individual, pathname, counter);
+    HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
+    HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
 
-    while (h5_make_local_copy(pathname_individual, newname_individual) >= 0) {
+    while(h5_make_local_copy(pathname_individual, newname_individual) >= 0) {
         counter++;
-        sprintf(newname_individual, newname, counter);
-        sprintf(pathname_individual, pathname, counter);
+        HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
+        HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
     }
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
@@ -888,7 +908,7 @@ error:
  *              reopening multi file.
  *
  * Return:      Success:        0
- *              Failure:        1
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
@@ -903,14 +923,14 @@ test_multi_opens(char *fname)
     char  sf_name[1024];        /*name string "multi_file-s.h5"*/
 
     /* Case: reopen with the name of super file and default property list */
-    sprintf(super_name, "%%s-%c.h5", 's');
-    sprintf(sf_name, super_name, fname);
+    HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
+    HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
     H5E_BEGIN_TRY {
-        file=H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+        file = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    return 0;
+    return(file >= 0 ? -1 : 0);
 }
 
 
@@ -999,11 +1019,11 @@ test_multi(void)
         TEST_ERROR;
 
     /* Reopen the file */
-    if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
     /* Create and write data set */
-    if((space=H5Screate_simple(2, dims, NULL)) < 0)
+    if((space = H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR;
 
     /* Retrieve the access property list... */
@@ -1146,19 +1166,16 @@ error:
 static herr_t
 test_multi_compat(void)
 {
-    hid_t       file=(-1), fapl, fapl2=(-1), dset=(-1), space=(-1);
-    hid_t       access_fapl = -1;
+    hid_t       file=(-1), fapl, dset=(-1), space=(-1);
     char        newname[1024];
     char        filename_s[1024], newname_s[1024];
     char        filename_r[1024], newname_r[1024];
-    int         *fhandle2=NULL, *fhandle=NULL;
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
     const char  *memb_name[H5FD_MEM_NTYPES];
     char        sv[H5FD_MEM_NTYPES][32];
     hsize_t     dims[2]={MULTI_SIZE, MULTI_SIZE};
-    char        dname[]="dataset2";
     int         i, j;
     int         buf[MULTI_SIZE][MULTI_SIZE];
 
@@ -1238,7 +1255,7 @@ test_multi_compat(void)
     if((space=H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR;
 
-    if((dset=H5Dcreate2(file, DSET2_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((dset=H5Dcreate2(file, DSET3_NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for(i=0; i<MULTI_SIZE; i++)
@@ -1267,7 +1284,7 @@ test_multi_compat(void)
     if(H5Dclose(dset) < 0)
         TEST_ERROR;
 
-    if((dset = H5Dopen2(file, DSET2_NAME, H5P_DEFAULT)) < 0)
+    if((dset = H5Dopen2(file, DSET3_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dset) < 0)
@@ -1315,13 +1332,13 @@ test_log(void)
     int          *fhandle        = NULL;
     hsize_t      file_size       = 0;
     unsigned int flags           = H5FD_LOG_ALL;
-    size_t       buf_size        = 0;
+    size_t       buf_size        = 4 * KB;
 
     TESTING("LOG file driver");
 
     /* Set property list and file name for log driver. */
     fapl = h5_fileaccess();
-    if(H5Pset_fapl_log(fapl, LOG_FILENAME, 0, buf_size) < 0)
+    if(H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
 

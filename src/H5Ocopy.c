@@ -254,7 +254,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Open the object through the VOL */
     if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1, src_name, 
                                      obj2, loc_params2, vol_plugin2, dst_name, 
-                                     ocpypl_id, lcpl_id, H5_REQUEST_NULL)) < 0)
+                                     ocpypl_id, lcpl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1285,7 +1285,7 @@ H5O_copy_obj_by_ref(H5O_loc_t *src_oloc, hid_t dxpl_id, H5O_loc_t *dst_oloc,
         new_oloc.addr = dst_oloc->addr;
 
         /* Pick a default name for the new object */
-        sprintf(tmp_obj_name, "~obj_pointed_by_%llu", (unsigned long long)dst_oloc->addr);
+        HDsnprintf(tmp_obj_name, sizeof(tmp_obj_name), "~obj_pointed_by_%llu", (unsigned long long)dst_oloc->addr);
 
         /* Create a link to the newly copied object */
         /* Note: since H5O_copy_header_map actually copied the target object, it

@@ -263,7 +263,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_create(obj, loc_params, vol_plugin, name, tmp_gcpl, 
-                                        H5P_GROUP_ACCESS_DEFAULT, H5_REQUEST_NULL)))
+                                        H5P_GROUP_ACCESS_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -275,7 +275,7 @@ done:
         if(H5I_dec_ref(tmp_gcpl) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
@@ -327,7 +327,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the group through the VOL */
-    if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, H5P_DEFAULT, H5_REQUEST_NULL)))
+    if(NULL == (grp = H5VL_group_open(obj, loc_params, vol_plugin, name, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -336,7 +336,7 @@ H5Gopen1(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, vol_plugin, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
@@ -400,7 +400,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, NULL, loc_params2, vol_plugin,
-                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -426,7 +426,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin, 
-                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
     else
@@ -507,7 +507,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
                                          (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
-                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end if */
     else if(type == H5L_TYPE_SOFT) {
@@ -538,7 +538,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 
         /* Create the link through the VOL */
         if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj, loc_params, vol_plugin, 
-                                         lcpl_id, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+                                         lcpl_id, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
     } /* end else if */
     else
@@ -586,7 +586,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_move(obj, loc_params1, NULL, loc_params2, vol_plugin,
-                                   FALSE, H5P_DEFAULT, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+                                   FALSE, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -652,7 +652,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Move the link through the VOL */
     if((ret_value = H5VL_link_move(obj1, loc_params1, obj2, loc_params2, 
                                    (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2), 
-                                   FALSE, H5P_DEFAULT, H5P_DEFAULT, H5_REQUEST_NULL)) < 0)
+                                   FALSE, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -694,7 +694,7 @@ H5Gunlink(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Delete the link through the VOL */
-    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5_REQUEST_NULL)) < 0)
+    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -739,7 +739,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 
     /* Get the link info through the VOL */
     if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
-                                  H5_REQUEST_NULL, buf, size)) < 0)
+                                  H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, buf, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -791,7 +791,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* set comment on object through the VOL */
-    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, H5_REQUEST_NULL, comment) < 0)
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, comment) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -851,7 +851,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
     if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
-    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, H5_REQUEST_NULL, 
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                        buf, bufsize, &size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
 

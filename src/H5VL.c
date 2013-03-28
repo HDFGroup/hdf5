@@ -108,7 +108,7 @@ done:
 static herr_t
 H5VL_init_interface(void)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -227,7 +227,7 @@ done:
 hid_t
 H5VLregister(const H5VL_class_t *cls)
 {
-    hid_t		ret_value;
+    hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "*x", cls);
@@ -266,7 +266,7 @@ done:
 herr_t
 H5VLunregister(hid_t vol_id)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", vol_id);
@@ -395,7 +395,7 @@ done:
  */
 void *
 H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                hid_t acpl_id, hid_t aapl_id, hid_t req)
+                hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value = NULL;  /* Return value */
 
@@ -403,7 +403,7 @@ H5VLattr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, con
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_attr_create(obj, loc_params, vol_plugin, name, acpl_id, aapl_id, req)))
+    if(NULL == (ret_value = H5VL_attr_create(obj, loc_params, vol_plugin, name, acpl_id, aapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create attribute")
 
 done:
@@ -427,7 +427,7 @@ done:
  */
 void *
 H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-              hid_t aapl_id, hid_t req)
+              hid_t aapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value;  /* Return value */
 
@@ -435,7 +435,7 @@ H5VLattr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_attr_open(obj, loc_params, vol_plugin, name, aapl_id, req)))
+    if(NULL == (ret_value = H5VL_attr_open(obj, loc_params, vol_plugin, name, aapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open attribute")
 
 done:
@@ -457,15 +457,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VLattr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *buf, hid_t req)
+herr_t H5VLattr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *buf, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_read(attr, vol_plugin, mem_type_id, buf, req)) < 0)
+    if((ret_value = H5VL_attr_read(attr, vol_plugin, mem_type_id, buf, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read attribute")
 
 done:
@@ -487,15 +487,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5VLattr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const void *buf, hid_t req)
+herr_t H5VLattr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_write(attr, vol_plugin, mem_type_id, buf, req)) < 0)
+    if((ret_value = H5VL_attr_write(attr, vol_plugin, mem_type_id, buf, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write attribute")
 
 done:
@@ -518,7 +518,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req, va_list arguments)
+H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -535,7 +535,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
                 char    *attr_name      = va_arg (arguments, char *);
                 htri_t	*ret       = va_arg (arguments, htri_t *);
 
-                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, 
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, 
                                               loc_params, attr_name, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 break;
@@ -545,7 +545,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 break;
             }
@@ -554,7 +554,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 break;
             }
@@ -563,7 +563,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 break;
             }
@@ -575,7 +575,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
                 char    *buf = va_arg (arguments, char *);
                 ssize_t	*ret_val = va_arg (arguments, ssize_t *);
 
-                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, 
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, 
                                               loc_params, buf_size, buf, ret_val)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 break;
@@ -587,17 +587,17 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
                 H5A_info_t   *ainfo = va_arg (arguments, H5A_info_t *);
 
                 if(H5VL_OBJECT_BY_SELF == loc_params.type) {
-                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, loc_params, ainfo)) < 0)
+                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, loc_params, ainfo)) < 0)
                         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 }
                 else if(H5VL_OBJECT_BY_NAME == loc_params.type) {
                     char *attr_name = va_arg (arguments, char *);
 
-                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, loc_params, ainfo, attr_name)) < 0)
+                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, loc_params, ainfo, attr_name)) < 0)
                         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 }
                 else if(H5VL_OBJECT_BY_IDX == loc_params.type) {
-                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, loc_params, ainfo)) < 0)
+                    if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, loc_params, ainfo)) < 0)
                         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 }
                 else
@@ -608,7 +608,7 @@ H5VLattr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t req,
         case H5VL_ATTR_GET_STORAGE_SIZE:
             {
                 hsize_t *ret = va_arg (arguments, hsize_t *);
-                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, req, ret)) < 0)
+                if((ret_value = H5VL_attr_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get attribute information")
                 break;
             }
@@ -637,15 +637,15 @@ done:
  */
 herr_t 
 H5VLattr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 const char *attr_name, hid_t req)
+                 const char *attr_name, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_remove(obj, loc_params, vol_plugin, attr_name, req)) < 0)
+    if((ret_value = H5VL_attr_remove(obj, loc_params, vol_plugin, attr_name, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to remove attribute")
 
 done:
@@ -668,15 +668,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_close(void *attr, H5VL_t *vol_plugin, hid_t req)
+H5VLattr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == attr || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_attr_close(attr, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_attr_close(attr, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close attribute")
 
 done:
@@ -700,7 +700,7 @@ done:
  */
 void *
 H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                     hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req)
+                     hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -709,7 +709,7 @@ H5VLdatatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
     if(NULL == (ret_value = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, 
-                                                 lcpl_id, tcpl_id, tapl_id, req)))
+                                                 lcpl_id, tcpl_id, tapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to commit datatype")
 
 done:
@@ -733,7 +733,7 @@ done:
  */
 void *
 H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                   hid_t tapl_id, hid_t req)
+                   hid_t tapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -741,7 +741,7 @@ H5VLdatatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, req)))
+    if(NULL == (ret_value = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open datatype")
 
 done:
@@ -764,7 +764,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t 
-H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t req)
+H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t dxpl_id, void UNUSED **req)
 {
     ssize_t ret_value = FAIL;
 
@@ -772,7 +772,7 @@ H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_datatype_get_binary(obj, vol_plugin, buf, size, req)) < 0)
+    if((ret_value = H5VL_datatype_get_binary(obj, vol_plugin, buf, size, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to encode datatype")
 
 done:
@@ -794,7 +794,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t req)
+H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
     herr_t		ret_value = SUCCEED;    /* Return value */
 
@@ -802,7 +802,7 @@ H5VLdatatype_close(void *dt, H5VL_t *vol_plugin, hid_t req)
 
     if (NULL == dt || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_datatype_close(dt, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_datatype_close(dt, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close datatype")
 
 done:
@@ -826,7 +826,7 @@ done:
  */
 void *
 H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                    hid_t dcpl_id, hid_t dapl_id, hid_t req)
+                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value; /* Return value */
 
@@ -835,7 +835,7 @@ H5VLdataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
     if(NULL == (ret_value = H5VL_dataset_create(obj, loc_params, vol_plugin, name, 
-                                                dcpl_id, dapl_id, req)))
+                                                dcpl_id, dapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create dataset")
 
 done:
@@ -859,7 +859,7 @@ done:
  */
 void *
 H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t dapl_id, hid_t req)
+                  hid_t dapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value; /* Return value */
 
@@ -867,7 +867,7 @@ H5VLdataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, co
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, req)))
+    if(NULL == (ret_value = H5VL_dataset_open(obj, loc_params, vol_plugin, name, dapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open dataset")
 
 done:
@@ -891,16 +891,16 @@ done:
  */
 herr_t 
 H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                  hid_t file_space_id, hid_t plist_id, void *buf, hid_t req)
+                  hid_t file_space_id, hid_t plist_id, void *buf, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
     if((ret_value = H5VL_dataset_read(dset, vol_plugin, mem_type_id, mem_space_id, file_space_id, 
-                                      plist_id, buf, req)) < 0)
+                                      plist_id, buf, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to read dataset")
 
 done:
@@ -924,16 +924,16 @@ done:
  */
 herr_t 
 H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                   hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req)
+                   hid_t file_space_id, hid_t plist_id, const void *buf, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
     if((ret_value = H5VL_dataset_write(dset, vol_plugin, mem_type_id, mem_space_id, file_space_id, 
-                                       plist_id, buf, req)) < 0)
+                                       plist_id, buf, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to write dataset")
 
 done:
@@ -956,15 +956,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VLdataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], hid_t req)
+H5VLdataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, req)) < 0)
+    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
 done:
@@ -987,7 +987,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
+H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1002,7 +1002,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1011,7 +1011,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 H5D_space_status_t *allocation = va_arg (arguments, H5D_space_status_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, allocation)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, allocation)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1020,7 +1020,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1029,7 +1029,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1038,7 +1038,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret_id)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1047,7 +1047,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 hsize_t *ret = va_arg (arguments, hsize_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1056,7 +1056,7 @@ H5VLdataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type, hid
             {
                 haddr_t *ret = va_arg (arguments, haddr_t *);
 
-                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, req, ret)) < 0)
+                if((ret_value = H5VL_dataset_get(dset, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get dataset information")
                 break;
             }
@@ -1084,15 +1084,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t req)
+H5VLdataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == dset || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_dataset_close(dset, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_dataset_close(dset, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close dataset")
 
 done:
@@ -1116,13 +1116,13 @@ done:
  */
 void *
 H5VLfile_create(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, 
-                hid_t fapl_id, hid_t req)
+                hid_t fapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void	       *ret_value;             /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if(NULL == (ret_value = H5VL_file_create(vol_plugin, name, flags, fcpl_id, fapl_id, req)))
+    if(NULL == (ret_value = H5VL_file_create(vol_plugin, name, flags, fcpl_id, fapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create file")
 
 done:
@@ -1145,13 +1145,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLfile_open(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t req)
+H5VLfile_open(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void	       *ret_value;             /* Return value */
 
     FUNC_ENTER_API(NULL)
 
-    if(NULL == (ret_value = H5VL_file_open(vol_plugin, name, flags, fapl_id, req)))
+    if(NULL == (ret_value = H5VL_file_open(vol_plugin, name, flags, fapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create file")
 
 done:
@@ -1175,15 +1175,15 @@ done:
  */
 herr_t
 H5VLfile_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-               H5F_scope_t scope, hid_t req)
+               H5F_scope_t scope, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_file_flush(obj, loc_params, vol_plugin, scope, req)) < 0)
+    if((ret_value = H5VL_file_flush(obj, loc_params, vol_plugin, scope, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to flush file")
 
 done:
@@ -1206,7 +1206,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req, va_list arguments)
+H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1221,7 +1221,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
             {
                 hid_t *plist_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, plist_id)) < 0)
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, plist_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
             }
@@ -1230,7 +1230,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
             {
                 hid_t *plist_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, plist_id)) < 0)
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, plist_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
             }
@@ -1240,7 +1240,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
                 unsigned types = va_arg (arguments, unsigned);
                 ssize_t *ret = va_arg (arguments, ssize_t *);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, types, ret)) < 0)
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, types, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
             }
@@ -1252,7 +1252,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
                 hid_t *oid_list = va_arg (arguments, hid_t *);
                 ssize_t *ret = va_arg (arguments, ssize_t *);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, types, max_objs, 
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, types, max_objs, 
                                               oid_list, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
@@ -1262,7 +1262,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
             {
                 unsigned *ret = va_arg (arguments, unsigned *);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, ret)) < 0)
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
             }
@@ -1274,7 +1274,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
                 char      *name = va_arg (arguments, char *);
                 ssize_t   *ret  = va_arg (arguments, ssize_t *);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, type, size, 
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, type, size, 
                                               name, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
@@ -1285,7 +1285,7 @@ H5VLfile_get(void *file, H5VL_t *vol_plugin, H5VL_file_get_t get_type, hid_t req
                 H5I_type_t type = va_arg (arguments, H5I_type_t);
                 void      **ret = va_arg (arguments, void **);
 
-                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, req, type, ret)) < 0)
+                if((ret_value = H5VL_file_get(file, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, type, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get file information")
                 break;
             }
@@ -1312,7 +1312,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t req, va_list arguments)
+H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1330,7 +1330,7 @@ H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t 
                 H5F_t      *child      = va_arg (arguments, H5F_t *);
                 hid_t       plist_id   = va_arg (arguments, hid_t);
 
-                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req, 
+                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL, 
                                                type, name, child, plist_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
 
@@ -1342,7 +1342,7 @@ H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t 
                 H5I_type_t  type       = va_arg (arguments, H5I_type_t);
                 const char *name       = va_arg (arguments, const char *);
 
-                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req, type, name)) < 0)
+                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL, type, name)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1353,7 +1353,7 @@ H5VLfile_misc(void *file, H5VL_t *vol_plugin, H5VL_file_misc_t misc_type, hid_t 
                 const char *name    = va_arg (arguments, const char *);
                 htri_t     *ret     = va_arg (arguments, htri_t *);
 
-                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, req, fapl_id, name, ret)) < 0)
+                if((ret_value = H5VL_file_misc(file, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL, fapl_id, name, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1380,7 +1380,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, hid_t req, va_list arguments)
+H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_type, hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1395,7 +1395,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
             {
                 hsize_t    *ret = va_arg (arguments, hsize_t *);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, ret)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1406,7 +1406,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
                 ssize_t    *ret       = va_arg (arguments, ssize_t *);
                 size_t      buf_len   = va_arg (arguments, size_t );
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, 
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, 
                                                    buf_ptr, ret, buf_len)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
@@ -1416,7 +1416,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
             {
                 hssize_t    *ret = va_arg (arguments, hssize_t *);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, ret)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1427,7 +1427,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
                 H5F_mem_t       type       = va_arg (arguments, H5F_mem_t);
                 size_t          nsects     = va_arg (arguments, size_t);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req,
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                    sect_info, ret, type, nsects)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
@@ -1438,7 +1438,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
                 H5I_type_t  type   = va_arg (arguments, H5I_type_t);
                 H5F_info2_t *finfo = va_arg (arguments, H5F_info2_t *);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, type, finfo)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, type, finfo)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1447,7 +1447,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
             {
                 H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, config_ptr)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, config_ptr)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1456,7 +1456,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
             {
                 double *hit_rate_ptr = va_arg (arguments, double *);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, hit_rate_ptr)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, hit_rate_ptr)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1468,7 +1468,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
                 size_t *cur_size_ptr        = va_arg (arguments, size_t *); 
                 int    *cur_num_entries_ptr = va_arg (arguments, int *); 
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, max_size_ptr, 
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, max_size_ptr, 
                                                    min_clean_size_ptr, cur_size_ptr, cur_num_entries_ptr)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
@@ -1479,14 +1479,14 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
                 void **file_handle = va_arg (arguments, void **);
                 hid_t  fapl        = va_arg (arguments, hid_t);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, file_handle, fapl)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, file_handle, fapl)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
         /* H5Fclear_elink_file_cache */
         case H5VL_FILE_CLEAR_ELINK_CACHE:
             {
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1495,14 +1495,14 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
             {
                 void   **ret = va_arg (arguments, void **);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, ret)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
         /* H5Freset_mdc_hit_rate_stats */
         case H5VL_FILE_RESET_MDC_HIT_RATE:
             {
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1510,7 +1510,7 @@ H5VLfile_optional(void *file, H5VL_t *vol_plugin, H5VL_file_optional_t optional_
             {
                 H5AC_cache_config_t *config_ptr = va_arg (arguments, H5AC_cache_config_t *);
 
-                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, req, config_ptr)) < 0)
+                if((ret_value = H5VL_file_optional(file, vol_plugin, optional_type, dxpl_id, H5_EVENT_QUEUE_NULL, config_ptr)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to operate on the file")
                 break;
             }
@@ -1538,15 +1538,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_close(void *file, H5VL_t *vol_plugin, hid_t req)
+H5VLfile_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == file || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_file_close(file, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_file_close(file, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close file")
 
 done:
@@ -1570,7 +1570,7 @@ done:
  */
 void *
 H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                 hid_t gcpl_id, hid_t gapl_id, hid_t req)
+                 hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value = NULL; /* Return value */
 
@@ -1579,7 +1579,7 @@ H5VLgroup_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, co
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
     if(NULL == (ret_value = H5VL_group_create(obj, loc_params, vol_plugin, name, 
-                                              gcpl_id, gapl_id, req)))
+                                              gcpl_id, gapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create group")
 
 done:
@@ -1603,7 +1603,7 @@ done:
  */
 void *
 H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                hid_t gapl_id, hid_t req)
+                hid_t gapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value; /* Return value */
 
@@ -1612,7 +1612,7 @@ H5VLgroup_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, cons
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
     if(NULL == (ret_value = H5VL_group_open(obj, loc_params, vol_plugin, name, 
-                                              gapl_id, req)))
+                                              gapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open group")
 
 done:
@@ -1635,7 +1635,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t req, va_list arguments)
+H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1650,7 +1650,7 @@ H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t re
             {
                 hid_t *new_gcpl_id = va_arg (arguments, hid_t *);
 
-                if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, req, new_gcpl_id)) < 0)
+                if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, new_gcpl_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get group information")
                 break;
             }
@@ -1660,7 +1660,7 @@ H5VLgroup_get(void *obj, H5VL_t *vol_plugin, H5VL_group_get_t get_type, hid_t re
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
                 H5G_info_t  *grp_info = va_arg (arguments, H5G_info_t *);
 
-                if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, req, loc_params, grp_info)) < 0)
+                if((ret_value = H5VL_group_get(obj, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, loc_params, grp_info)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get group information")
                 break;
             }
@@ -1688,15 +1688,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLgroup_close(void *grp, H5VL_t *vol_plugin, hid_t req)
+H5VLgroup_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == grp || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_group_close(grp, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_group_close(grp, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close group")
 
 done:
@@ -1718,7 +1718,7 @@ done:
  */
 herr_t
 H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
-                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t req)
+                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     herr_t               ret_value = SUCCEED;  /* Return value */
 
@@ -1726,7 +1726,7 @@ H5VLlink_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_link_create(create_type, obj, loc_params, vol_plugin, lcpl_id, lapl_id, req)) < 0)
+    if((ret_value = H5VL_link_create(create_type, obj, loc_params, vol_plugin, lcpl_id, lapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -1748,7 +1748,7 @@ done:
  */
 H5_DLL herr_t H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj, 
                              H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, 
-                             hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req)
+                             hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void UNUSED **req)
 {
     herr_t               ret_value = SUCCEED;  /* Return value */
 
@@ -1757,7 +1757,7 @@ H5_DLL herr_t H5VLlink_move(void *src_obj, H5VL_loc_params_t loc_params1, void *
     if(NULL == src_obj || NULL == dst_obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
     if((ret_value = H5VL_link_move(src_obj, loc_params1, dst_obj, loc_params2, vol_plugin, 
-                                   copy_flag, lcpl_id, lapl_id, req)) < 0)
+                                   copy_flag, lcpl_id, lapl_id, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to move object")
 
 done:
@@ -1780,7 +1780,7 @@ done:
  */
 herr_t H5VLlink_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
                          hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                         H5L_iterate_t op, void *op_data, hid_t req)
+                         H5L_iterate_t op, void *op_data, hid_t dxpl_id, void UNUSED **req)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1789,7 +1789,7 @@ herr_t H5VLlink_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plu
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
     if((ret_value = H5VL_link_iterate(obj, loc_params, vol_plugin, recursive, idx_type, order, idx,
-                                      op, op_data, req)) < 0)
+                                      op, op_data, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Link iteration failed")
 
 done:
@@ -1813,7 +1813,7 @@ done:
  */
 herr_t
 H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, 
-              hid_t req, va_list arguments)
+              hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1828,7 +1828,7 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_l
             {
                 htri_t     *ret    = va_arg (arguments, htri_t *);
 
-                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, ret)) < 0)
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
                 break;
             }
@@ -1837,7 +1837,7 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_l
             {
                 H5L_info_t *linfo  = va_arg (arguments, H5L_info_t *);
 
-                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, linfo)) < 0)
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, linfo)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
                 break;
             }
@@ -1848,7 +1848,7 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_l
                 size_t      size   = va_arg (arguments, size_t);
                 ssize_t    *ret    = va_arg (arguments, ssize_t *);
 
-                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, 
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, 
                                               name, size, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
                 break;
@@ -1859,7 +1859,7 @@ H5VLlink_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_l
                 void       *buf    = va_arg (arguments, void *);
                 size_t     size    = va_arg (arguments, size_t);
 
-                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, req, buf, size)) < 0)
+                if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, buf, size)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get link information")
                 break;
             }
@@ -1884,7 +1884,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5_DLL herr_t H5VLlink_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t req)
+H5_DLL herr_t H5VLlink_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
     herr_t             ret_value = SUCCEED;    /* Return value */
 
@@ -1892,7 +1892,7 @@ H5_DLL herr_t H5VLlink_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *v
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_link_remove(obj, loc_params, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to remove link")
 
 done:
@@ -1916,7 +1916,7 @@ done:
  */
 void *
 H5VLobject_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_type_t *opened_type,
-                hid_t req)
+                hid_t dxpl_id, void UNUSED **req)
 {
     void *ret_value;              /* Return value */
 
@@ -1924,7 +1924,7 @@ H5VLobject_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_typ
 
     if (NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid object/VOL class pointer")
-    if(NULL == (ret_value = H5VL_object_open(obj, params, vol_plugin, opened_type, req)))
+    if(NULL == (ret_value = H5VL_object_open(obj, params, vol_plugin, opened_type, dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to create group")
 
 done:
@@ -1948,9 +1948,9 @@ done:
 herr_t 
 H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
                 void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
-                hid_t ocpypl_id, hid_t lcpl_id, hid_t req)
+                hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
@@ -1959,7 +1959,7 @@ H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
     if((ret_value = H5VL_object_copy(src_obj, loc_params1, vol_plugin1, src_name, 
                                      dst_obj, loc_params2, vol_plugin2, dst_name,
-                                     ocpypl_id, lcpl_id, req)) < 0)
+                                     ocpypl_id, lcpl_id, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to move object")
 
 done:
@@ -1981,7 +1981,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5VLobject_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5_index_t idx_type,
-                         H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req)
+                         H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void UNUSED **req)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1990,7 +1990,7 @@ herr_t H5VLobject_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plu
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
     if((ret_value = H5VL_object_visit(obj, loc_params, vol_plugin, idx_type, order, 
-                                      op, op_data, req)) < 0)
+                                      op, op_data, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
 
 done:
@@ -2014,7 +2014,7 @@ done:
  */
 herr_t
 H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, 
-               hid_t req, va_list arguments)
+               hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -2029,7 +2029,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
             {
                 htri_t	  *ret      = va_arg (arguments, htri_t *);
 
-                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req, ret)) < 0)
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
             }
@@ -2038,7 +2038,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
             {
                 H5O_info_t  *obj_info = va_arg (arguments, H5O_info_t *);
 
-                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req, obj_info)) < 0)
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL, obj_info)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
             }
@@ -2049,7 +2049,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
                 size_t   bufsize  =  va_arg (arguments, size_t);
                 ssize_t  *ret     =  va_arg (arguments, ssize_t *);
 
-                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                 comment, bufsize, ret)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
@@ -2061,7 +2061,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
                 H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
                 void        *ref     =  va_arg (arguments, void *);
 
-                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                 ret, ref_type, ref)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
@@ -2073,7 +2073,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
                 H5R_type_t  ref_type   =  va_arg (arguments, H5R_type_t);
                 void        *ref       =  va_arg (arguments, void *);
 
-                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                 obj_type, ref_type, ref)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
@@ -2087,7 +2087,7 @@ H5VLobject_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL
                 H5R_type_t  ref_type   = va_arg (arguments, H5R_type_t);
                 void        *ref       = va_arg (arguments, void *);
 
-                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, req,
+                if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, get_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                 ret, name, size, ref_type, ref)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
@@ -2116,7 +2116,7 @@ done:
  */
 herr_t
 H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, 
-                hid_t req, va_list arguments)
+                hid_t dxpl_id, void UNUSED **req, va_list arguments)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -2132,7 +2132,7 @@ H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
                 const char    *old_name  = va_arg (arguments, const char *);
                 const char    *new_name  = va_arg (arguments, const char *);
 
-                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req,
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                  old_name, new_name)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
@@ -2142,7 +2142,7 @@ H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
             {
                 int update_ref  = va_arg (arguments, int);
 
-                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req, update_ref)) < 0)
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL, update_ref)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
             }
@@ -2151,7 +2151,7 @@ H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
             {
                 const char    *comment  = va_arg (arguments, char *);
 
-                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req, comment)) < 0)
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL, comment)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
             }
@@ -2162,7 +2162,7 @@ H5VLobject_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5V
                 H5R_type_t  ref_type  = va_arg (arguments, H5R_type_t);
                 hid_t       space_id  = va_arg (arguments, hid_t);
 
-                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, req,
+                if((ret_value = H5VL_object_misc(obj, loc_params, vol_plugin, misc_type, dxpl_id, H5_EVENT_QUEUE_NULL,
                                                  ref, name, ref_type, space_id)) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Object Visit Failed")
                 break;
@@ -2191,17 +2191,107 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t req)
+H5VLobject_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, hid_t dxpl_id, void UNUSED **req)
 {
-    herr_t              ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
 
     if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
-    if((ret_value = H5VL_object_close(obj, loc_params, vol_plugin, req)) < 0)
+    if((ret_value = H5VL_object_close(obj, loc_params, vol_plugin, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to close object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLobject_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLrequest_cancel
+ *
+ * Purpose:	Cancels a request through the VOL
+ *
+ * Return:	Success:	Non Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_cancel(void **req, H5VL_t *vol_plugin, H5_status_t *status)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == vol_plugin || NULL == vol_plugin->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
+    if((ret_value = H5VL_request_cancel(req, vol_plugin, status)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to cancel request")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_cancel() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLrequest_test
+ *
+ * Purpose:	Tests a request through the VOL
+ *
+ * Return:	Success:	Non Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_test(void **req, H5VL_t *vol_plugin, H5_status_t *status)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == vol_plugin || NULL == vol_plugin->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
+    if((ret_value = H5VL_request_test(req, vol_plugin, status)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to test request")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLrequest_wait
+ *
+ * Purpose:	Waits on a request through the VOL
+ *
+ * Return:	Success:	Non Negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_wait(void **req, H5VL_t *vol_plugin, H5_status_t *status)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == vol_plugin || NULL == vol_plugin->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request/VOL class pointer")
+    if((ret_value = H5VL_request_wait(req, vol_plugin, status)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to wait on request")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_wait() */

@@ -17,12 +17,14 @@ of running the parallel test suites.
 
 1.1. Requirements
 -----------------
-PHDF5 requires an MPI compiler with MPI-IO support and a parallel file system.
-If you don't know yet, you should first consult with your system support staff
-of information how to compile an MPI program, how to run an MPI application,
-and how to access the parallel file system.  There are sample MPI-IO C and
-Fortran programs in the appendix section of "Sample programs".  You can use
-them to run simple tests of your MPI compilers and the parallel file system.
+PHDF5 requires an MPI compiler with MPI-IO support and a POSIX compliant
+(Ref. 1) parallel file system.  If you don't know yet, you should first consult
+with your system support staff of information how to compile an MPI program,
+how to run an MPI application, and how to access the parallel file system.
+There are sample MPI-IO C and Fortran programs in the appendix section of
+"Sample programs".  You can use them to run simple tests of your MPI compilers
+and the parallel file system. Also, the t_posix_compliant test in testpar
+verifies if the file system is POSIX compliant.
 
 
 1.2. Further Help
@@ -184,6 +186,73 @@ TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
 echo SKIP TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
 ======== end of bypass ========
 
+2.5. Hopper (Cray XE6) (for v1.8 and later)
+-------------------------
+
+2.5.1 Building HDF5 for Hopper
+------------------------------------------ 
+The following steps are for building HDF5 for the Hopper compute
+nodes.  They would probably work for other Cray XE6 systems but have
+not been verified.
+
+Obtain a copy from the HDF ftp server:
+http://www.hdfgroup.org/ftp/HDF5/current/src/
+(link might change, so always double check the HDF group website).
+
+$ wget http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-x.x.x.tar.gz
+
+unpack the tarball
+
+$ cd hdf5-x.x.x/
+$ CC=cc FC=ftn ./configure \
+--prefix=/project/hdf5/hdf5 --enable-parallel --enable-fortran \
+--disable-shared --disable-production 
+$ make 
+
+Run make check. make check should be run on the compute nodes, not the
+front end nodes.  So using a PBS batch script, allocate 4 or more
+cores. Always consult with the machine's website on how to create PBS
+scripts and allocate nodes for your job. For Hopper, all the
+information can be found on:
+http://www.nersc.gov/systems/hopper-cray-xe6/
+
+save the PBS script into your HDF5 build directory. The PBS script
+should contain (besides the PBS node allocation requests)the
+following:
+
+--------------------------------------------------------------
+cd $PBS_O_WORKDIR
+
+##set RUNSERIAL and RUNPARALLEL like this in the PBS script:
+export RUNPARALLEL="aprun -n 6"
+export RUNSERIAL="aprun -n 1"
+
+##execute make check:
+make check
+--------------------------------------------------------------
+
+Once the job runs and all is well, install the binary:
+$ make install
+
+2.5.2 Hopper known issues
+------------------------------
+Sometimes when building the library with make, you might get this problem:
+
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo | \
+sed -e 's/-L/:/g' -e 's/
+//g'`" \
+./H5make_libsettings > H5lib_settings.c
+|| \
+(test $HDF5_Make_Ignore && echo "*** Error ignored")
+|| \
+(rm -f H5lib_settings.c ; exit 1)
+/bin/sh: line 4: 9644 Segmentation fault
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo | sed -e 's/-L/:/g' -e 's/
+//g'`" ./H5make_libsettings > H5lib_settings.c
+
+If that happens, you are probable running with make -j <x>. In that
+case, you need to cleanup everything and start again as detailed above
+but use serial make (do not use -j <x>).
 
 3. Detail explanation
 ---------------------
@@ -272,6 +341,20 @@ if the tests should use directory /PFS/user/me, do
 
 (In some batch job system, you many need to hardset HDF5_PARAPREFIX in the
 shell initial files like .profile, .cshrc, etc.)
+
+
+Reference
+---------
+1. POSIX Compliant. A good explanation is by Donald Lewin,
+    After a write() to a regular file has successfully returned, any
+    successful read() from each byte position on the file that was modified
+    by that write() will return the date that was written by the write(). A
+    subsequent write() to the same byte will overwrite the file data. If a
+    read() of a file data can be proven by any means [e.g., MPI_Barrier()]
+    to occur after a write() of that data, it must reflect that write(),
+    even if the calls are made by a different process.
+	Lewin, D. (1994). "POSIX Programmer's Guide (pg. 513-4)". O'Reilly
+	& Associates.
 
 
 Appendix A. Sample programs

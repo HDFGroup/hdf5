@@ -30,7 +30,7 @@
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: verify_real
+!DEC$attributes dllexport :: verify_real_kind_7
 !DEC$endif
 SUBROUTINE verify_real_kind_7(string,value,correct_value,total_error)
   USE HDF5
