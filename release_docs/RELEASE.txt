@@ -372,14 +372,14 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (GCC) 4.7.2 20120507 (Red Hat 4.7.2-8)
                                   (cmake and autotools)
 
-    SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
-                                  gcc (SUSE Linux) 4.7.1
-                                  GNU Fortran (SUSE Linux) 4.7.1
+    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.2
+                                  GNU Fortran (SUSE Linux) 4.7.2
                                   (cmake and autotools)
 
-    SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (SUSE Linux) 4.7.1
-                                  GNU Fortran (SUSE Linux) 4.7.1 
+    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (SUSE Linux) 4.7.2
+                                  GNU Fortran (SUSE Linux) 4.7.2 
                                   (cmake and autotools)
 
     Ubuntu 12.10 3.5.0-25-generic #39-Ubuntu SMP i686 GNU/Linux
