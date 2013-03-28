@@ -2174,7 +2174,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 {
     FUNC_ENTER_PACKAGE_NOERR

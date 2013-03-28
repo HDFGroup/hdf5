@@ -279,7 +279,7 @@ bool H5Location::attrExists(const char* name) const
 //--------------------------------------------------------------------------
 bool H5Location::attrExists(const H5std_string& name) const
 {
-   attrExists(name.c_str());
+   return(attrExists(name.c_str()));
 }
 
 //--------------------------------------------------------------------------

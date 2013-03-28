@@ -2500,7 +2500,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_file_image_info_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UNUSED size, void *value)
 {
     H5FD_file_image_info_t info;        /* Image info struct */
@@ -2554,7 +2554,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_file_image_info_copy(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2629,7 +2629,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5P_file_image_info_close(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
