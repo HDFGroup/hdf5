@@ -604,6 +604,7 @@ H5_DLL herr_t H5D__contig_alloc(H5F_t *f, hid_t dxpl_id,
     H5O_storage_contig_t *storage);
 H5_DLL hbool_t H5D__contig_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL herr_t H5D__contig_fill(H5D_t *dset, hid_t dxpl_id);
+H5_DLL herr_t H5D__contig_mds_dset_fill(H5D_t *new_dset, H5O_fill_t fill);
 H5_DLL herr_t H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);

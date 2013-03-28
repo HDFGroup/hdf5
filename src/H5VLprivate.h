@@ -33,6 +33,8 @@
 
 #define H5VL_NUM_OPS 42
 
+#define H5VL_DSET_IS_MDS_NAME    "dataset_is_mds"
+
 /* Enum contiaing all possible VOL Operations */
 typedef enum H5VL_op_type_t {
     H5VL_FILE_CREATE = 0,

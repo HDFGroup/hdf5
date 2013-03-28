@@ -1532,6 +1532,7 @@ H5MD__dataset_create_func(uint8_t *p, int source)
     void *send_buf = NULL; /* buffer to hold the dataset id and layout to be sent to client */
     size_t buf_size = 0; /* send_buf size */
     uint8_t *p1 = NULL; /* temporary pointer into send_buf for encoding */
+    hbool_t is_mds = TRUE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1551,6 +1552,8 @@ H5MD__dataset_create_func(uint8_t *p, int source)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id");
     if(H5P_set(plist, H5VL_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id");
+    if(H5P_set(plist, H5VL_DSET_IS_MDS_NAME, &is_mds) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for mds boolean");
 
     /* Create the dataset through the native VOL */
     if(NULL == (dset = (H5D_t *)H5VL_native_dataset_create(H5I_object(obj_id), loc_params, name, 

@@ -86,6 +86,7 @@ H5_DLL herr_t H5MD_dset_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem
                              const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/);
 H5_DLL herr_t H5MD_dset_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                              const H5S_t *file_space, hid_t dxpl_id, const void *buf);
+
 H5_DLL herr_t H5MD_dset_close(H5D_t *dataset);
 H5_DLL H5F_t *H5MD_file_open(const char *name, unsigned flags, hid_t fcpl_id,
                            hid_t fapl_id, hid_t dxpl_id);

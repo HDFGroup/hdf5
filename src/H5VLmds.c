@@ -2550,6 +2550,64 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     if(H5D_CHUNKED == new_dset->shared->layout.type)
         new_dset->shared->layout.storage.u.chunk.ops = H5D_COPS_CLIENT;
 
+    new_dset->oloc.file = obj->raw_file;
+
+    /* Check if the dataset has a non-default DCPL & get fill value property to see if dataset needs
+       to be filled. MSC - ONLY supporting CONTIG layout filling now. */
+    if(layout.type == H5D_CONTIGUOUS && new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
+        H5O_fill_t      fill;          /* Dataset's fill value info */
+        H5P_genplist_t 	*dc_plist = NULL;       /* New Property list */
+
+        /* Get new dataset's property list object */
+        if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't get dataset creation property list");
+
+        /* Retrieve the properties we need */
+        if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, &fill) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve fill value info");
+
+        /* Check if the alloc_time is the default and error out */
+        if(fill.alloc_time == H5D_ALLOC_TIME_DEFAULT)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "invalid space allocation state");
+
+        switch(layout.type) {
+            case H5D_CONTIGUOUS:
+                /* Check if we have a zero-sized dataset */
+                if(layout.storage.u.contig.size > 0) {
+                    H5D_fill_value_t	fill_status;    /* The fill value status */
+
+                    /* Check the dataset's fill-value status */
+                    if(H5P_is_fill_value_defined(&fill, &fill_status) < 0)
+                        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined");
+
+                    /* If we are filling the dataset on allocation or "if set" and
+                     * the fill value _is_ set, do that now */
+                    if(fill.fill_time == H5D_FILL_TIME_ALLOC ||
+                       (fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                        if(H5D__contig_mds_dset_fill(new_dset, fill) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to fill dataset");
+                    } /* end if */
+                }
+                break;
+
+            case H5D_CHUNKED:
+#if 0
+                /*
+                 * Allocate file space
+                 * for all chunks now and initialize each chunk with the fill value.
+                 */
+                if(H5D__chunk_mds_allocate(new_dset, fill) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
+                break;
+#endif
+            case H5D_COMPACT:
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
+            default:
+                HDassert("not supported yet" && 0);
+        } /* end switch */
+    }
+
 #if 0
     {
         unsigned u;
@@ -2567,7 +2625,6 @@ H5VL_mds_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     }
 #endif
 
-    new_dset->oloc.file = obj->raw_file;
     /* set the dataset struct in the high level object */
     dset->dset = new_dset;
 

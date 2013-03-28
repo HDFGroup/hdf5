@@ -344,6 +344,101 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__contig_mds_dset_fill
+ *
+ * Purpose:	Write fill values to a contiguously stored dataset.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		March 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__contig_mds_dset_fill(H5D_t *dset, H5O_fill_t fill)
+{
+    H5D_io_info_t ioinfo;       /* Dataset I/O info */
+    H5D_storage_t store;        /* Union of storage info for dataset */
+    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    hssize_t    snpoints;       /* Number of points in space (for error checking) */
+    size_t      npoints;        /* Number of points in space */
+    hsize_t	offset;         /* Offset of dataset */
+    H5D_fill_buf_info_t fb_info;        /* Dataset's fill buffer info */
+    hbool_t     fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
+    hid_t       my_dxpl_id;     /* DXPL ID to use for this operation */
+    herr_t	ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    my_dxpl_id = H5AC_ind_dxpl_id;
+
+    /* Fill the DXPL cache values for later use */
+    if(H5D__get_dxpl_cache(my_dxpl_id, &dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+
+    /* Initialize storage info for this dataset */
+    store.contig.dset_addr = dset->shared->layout.storage.u.contig.addr;
+    store.contig.dset_size = dset->shared->layout.storage.u.contig.size;
+
+    /* Get the number of elements in the dataset's dataspace */
+    if((snpoints = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "dataset has negative number of elements")
+    H5_ASSIGN_OVERFLOW(npoints, snpoints, hssize_t, size_t);
+
+    /* Initialize the fill value buffer */
+    if(H5D__fill_init(&fb_info, NULL, NULL, NULL, NULL, NULL,
+                      &fill,
+                      dset->shared->type, dset->shared->type_id, npoints,
+                      dxpl_cache->max_temp_buf, my_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
+    fb_info_init = TRUE;
+
+    /* Start at the beginning of the dataset */
+    offset = 0;
+
+    /* Simple setup for dataset I/O info struct */
+    H5D_BUILD_IO_INFO_WRT(&ioinfo, dset, dxpl_cache, my_dxpl_id, &store, fb_info.fill_buf);
+
+    /*
+     * Fill the entire current extent with the fill value.  We can do
+     * this quite efficiently by making sure we copy the fill value
+     * in relatively large pieces.
+     */
+
+    /* Loop through writing the fill value to the dataset */
+    while(npoints > 0) {
+        size_t curr_points;     /* Number of elements to write on this iteration of the loop */
+        size_t size;            /* Size of buffer to write */
+
+        /* Compute # of elements and buffer size to write for this iteration */
+        curr_points = MIN(fb_info.elmts_per_buf, npoints);
+        size = curr_points * fb_info.file_elmt_size;
+
+        /* Check for VL datatype & non-default fill value */
+        if(fb_info.has_vlen_fill_type)
+            /* Re-fill the buffer to use for this I/O operation */
+            if(H5D__fill_refill_vl(&fb_info, curr_points, my_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer");
+
+        if(H5D__contig_write_one(&ioinfo, offset, size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset");
+
+        npoints -= curr_points;
+        offset += size;
+    } /* end while */
+
+done:
+    /* Release the fill buffer info, if it's been initialized */
+    if(fb_info_init && H5D__fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__contig_mds_dset_fill() */ 
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__contig_delete
  *
  * Purpose:	Delete the file space for a contiguously stored dataset

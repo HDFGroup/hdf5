@@ -1707,6 +1707,26 @@ H5D__alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_a
 #endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
+        /* check if the MDS plugin is used and the dataset is being initialized at the MDS server.
+         * If Yes, then do not intitialize storage here, because the server cannot write raw data.
+         * The client will be responsible to do that.
+         */
+        {
+            H5P_genplist_t *plist;
+            hbool_t is_mds = FALSE;
+
+            /* Get the dcpl plist structure */
+            if(NULL == (plist = (H5P_genplist_t *)H5I_object(dset->shared->dcpl_id)))
+                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+            /* get datatype, dataspace, and lcpl IDs that were added in the dcpl at the API layer */
+            if(H5P_get(plist, H5VL_DSET_IS_MDS_NAME, &is_mds) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for datatype id");
+
+            if(TRUE == is_mds && layout->type == H5D_CONTIGUOUS)
+                must_init_space = FALSE;
+        }
+
         /* Check if we need to initialize the space */
         if(must_init_space) {
             if(layout->type == H5D_CHUNKED) {

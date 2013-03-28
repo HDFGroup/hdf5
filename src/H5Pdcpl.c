@@ -43,6 +43,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Tprivate.h"		/* Datatypes 				*/
+#include "H5VLprivate.h"	/* VOL   				*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
 
@@ -176,7 +177,8 @@ static const unsigned H5D_def_alloc_time_state_g = H5D_CRT_ALLOC_TIME_STATE_DEF;
 static const H5O_efl_t H5D_def_efl_g = H5D_CRT_EXT_FILE_LIST_DEF;                 /* Default external file list */
 static const hid_t H5D_type_id_g = FAIL;
 static const hid_t H5D_space_id_g = FAIL;
-static const hid_t H5D_lcpl_id_g = FAIL;//H5P_LINK_CREATE_DEFAULT;
+static const hid_t H5D_lcpl_id_g = FAIL;
+static const hbool_t H5D_is_mds_g = FALSE;
 
 /* Defaults for each type of layout */
 #ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
@@ -246,6 +248,11 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the lcpl ID property */
     if(H5P_register_real(pclass, H5VL_DSET_LCPL_ID, sizeof(hid_t), &H5D_lcpl_id_g, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the is_mds_dset property */
+    if(H5P_register_real(pclass, H5VL_DSET_IS_MDS_NAME, sizeof(hbool_t), &H5D_is_mds_g, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -664,6 +671,24 @@ H5P__fill_value_enc(const void *value, void **_pp, size_t *size)
     HDassert(fill);
     HDassert(size);
 
+    /* Calculate size needed for encoding */
+    *size += 2;
+    *size += sizeof(int64_t);
+    if(fill->size > 0) {
+        /* The size of the fill value buffer */
+        *size += (size_t)fill->size;
+
+        /* Get the size of the encoded datatype */
+        if(fill->type) {
+            if(H5T_encode(fill->type, NULL, &dt_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+        }
+        enc_value = (uint64_t)dt_size;
+        enc_size = H5V_limit_enc_size(enc_value);
+        *size += (1 + enc_size);
+        *size += dt_size;
+    } /* end if */
+
     if(NULL != *pp) {
         /* Encode alloc and fill time */
         *(*pp)++ = (uint8_t)fill->alloc_time;
@@ -678,47 +703,22 @@ H5P__fill_value_enc(const void *value, void **_pp, size_t *size)
             HDmemcpy(*pp, (uint8_t *)fill->buf, (size_t)fill->size);
             *pp += fill->size;
 
-            /* Encode fill value datatype */
-            HDassert(fill->type);
-
-            if(H5T_encode(fill->type, NULL, &dt_size) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
-
             /* Encode the size of a size_t */
             enc_value = (uint64_t)dt_size;
             enc_size = H5V_limit_enc_size(enc_value);
             HDassert(enc_size < 256);
-
             /* Encode the size */
             *(*pp)++ = (uint8_t)enc_size;
 
             /* Encode the size of the encoded datatype */
             UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
-            if(H5T_encode(fill->type, *pp, &dt_size) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
-            *pp += dt_size;
+            if(fill->type) {
+                if(H5T_encode(fill->type, *pp, &dt_size) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+                *pp += dt_size;
+            }
         } /* end if */
-    } /* end if */
-
-    /* Calculate size needed for encoding */
-    *size += 2;
-    *size += sizeof(int64_t);
-    if(fill->size > 0) {
-        /* The size of the fill value buffer */
-        *size += (size_t)fill->size;
-
-        /* calculate those if they were not calculated earlier */
-        if(NULL == *pp) {
-            /* Get the size of the encoded datatype */
-            HDassert(fill->type);
-            if(H5T_encode(fill->type, NULL, &dt_size) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
-            enc_value = (uint64_t)dt_size;
-            enc_size = H5V_limit_enc_size(enc_value);
-        }
-        *size += (1 + enc_size);
-        *size += dt_size;
     } /* end if */
 
 done:
@@ -782,10 +782,14 @@ H5P__fill_value_dec(const void **_pp, void *_value)
         UINT64DECODE_VAR(*pp, enc_value, enc_size);
         dt_size = (size_t)enc_value;
 
-        /* Decode type */
-        if(NULL == (fill->type = H5T_decode(*pp)))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode fill value datatype")
-        *pp += dt_size;
+        if(dt_size) {
+            /* Decode type */
+            if(NULL == (fill->type = H5T_decode(*pp)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "can't decode fill value datatype")
+            *pp += dt_size;
+        }
+        else
+            fill->type = NULL;
     } /* end if */
 
 done:
