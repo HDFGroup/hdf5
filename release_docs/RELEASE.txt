@@ -243,10 +243,6 @@ Supported Platforms
                                   Sun Fortran 95 8.5 SunOS_sparc
                                   Sun C++ 5.11 SunOS_sparc
 
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-
     Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
