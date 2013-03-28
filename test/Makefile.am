@@ -24,12 +24,11 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
-  TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
-  SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) plugin$(EXEEXT)
-else
-  TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
-  SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
+  TEST_SCRIPT += test_plugin.sh
+  SCRIPT_DEPEND += plugin$(EXEEXT)
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -55,10 +54,10 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
 if HAVE_SHARED_CONDITIONAL
-  check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env plugin
+  check_PROGRAMS+= plugin
 else
-  check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -99,10 +98,9 @@ LDADD=libh5test.la $(LIBHDF5)
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
 
+VFD_LIST = sec2 stdio core split multi family
 if DIRECT_VFD_CONDITIONAL
-  VFD_LIST = sec2 stdio core split multi family direct
-else
-  VFD_LIST = sec2 stdio core split multi family
+  VFD_LIST += direct
 endif
 
 # Additional target for running timing test

@@ -1037,11 +1037,6 @@ LT_PREREQ([2.2])
 LT_INIT([dlopen])
 
 ## ----------------------------------------------------------------------
-## Set a macro if shared library is enabled.
-##
-AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
-
-## ----------------------------------------------------------------------
 ## Check if we should install only statically linked executables.
 ##   This check needs to occur after libtool is initialized because
 ##   we check a libtool cache value and may issue a warning based 
@@ -4440,6 +4435,64 @@ if test -n "$TESTPARALLEL"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
   fi
 fi
+LT_OUTPUT
+no_create=$saved_no_create
+
+## Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+## Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+## Post processing to patch up some deficiencies in libtool
+case $host_os in
+  linux* | freebsd* )
+    ## If gcc is not used, need to set $wl to use "-Wl,"
+    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
+      : using gcc
+    else
+      echo 'fixing $wl in' $ofile
+ed - $ofile <<EOF 2> /dev/null
+g/^wl=""/s//wl="-Wl,"/
+w
+q
+EOF
+    fi
+    ;;
+esac
+
+## Are we compiling static libraries, shared libraries, or both?  This
+## is only used for the libhdf5.settings file. We can't just look at
+## $enable_static and $enable_shared because if they're yes the ltconfig
+## might have decided that one or the other is simply not possible.
+## Therefore we have to ask the generated `libtool' shell script
+## which 'features' it has enabled.
+if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
+  enable_shared=yes
+else
+  enable_shared=no
+fi
+
+if (./libtool --features | grep '^enable static libraries' > /dev/null); then
+  enable_static=yes
+else
+  enable_static=no
+fi
+
+if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="static, shared"
+elif test "X$enable_static" = "Xyes"; then
+  STATIC_SHARED="static"
+elif test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="shared"
+else
+  STATIC_SHARED="none"
+fi
+
+## ----------------------------------------------------------------------
+## Set a macro if shared library is enabled.
+##
+AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
@@ -4519,59 +4572,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_OUTPUT
-LT_OUTPUT
-no_create=$saved_no_create
-
-## Then the stamp2 file for H5config.h
-touch ./config/stamp2
-
-## Finally the makefiles
-test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-## Post processing to patch up some deficiencies in libtool
-case $host_os in
-  linux* | freebsd* )
-    ## If gcc is not used, need to set $wl to use "-Wl,"
-    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
-      : using gcc
-    else
-      echo 'fixing $wl in' $ofile
-ed - $ofile <<EOF 2> /dev/null
-g/^wl=""/s//wl="-Wl,"/
-w
-q
-EOF
-    fi
-    ;;
-esac
-
-## Are we compiling static libraries, shared libraries, or both?  This
-## is only used for the libhdf5.settings file. We can't just look at
-## $enable_static and $enable_shared because if they're yes the ltconfig
-## might have decided that one or the other is simply not possible.
-## Therefore we have to ask the generated `libtool' shell script
-## which 'features' it has enabled.
-if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
-  enable_shared=yes
-else
-  enable_shared=no
-fi
-
-if (./libtool --features | grep '^enable static libraries' > /dev/null); then
-  enable_static=yes
-else
-  enable_static=no
-fi
-
-if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="static, shared"
-elif test "X$enable_static" = "Xyes"; then
-  STATIC_SHARED="static"
-elif test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="shared"
-else
-  STATIC_SHARED="none"
-fi
 
 chmod 755 tools/misc/h5cc
 
