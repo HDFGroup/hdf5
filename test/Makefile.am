@@ -78,12 +78,16 @@ endif
 
 if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
-  noinst_LTLIBRARIES=libh5test.la libdynlib1.la
+  noinst_LTLIBRARIES=libh5test.la
 
   # The libdynlib1 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
+  lib_LTLIBRARIES=libdynlib1.la
   libdynlib1_la_SOURCES=dynlib1.c
-  libdynlib1_la_LDFLAGS=-rpath /tmp
+
+install-data-local:
+	$(RM) $(DESTDIR)$(libdir)/*dynlib1*
+
 else
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
