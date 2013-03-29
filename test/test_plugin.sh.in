@@ -34,9 +34,6 @@ TEST_NAME=plugin
 TEST_BIN=`pwd`/$TEST_NAME
 ENVCMD="env HDF5_PLUGIN_PATH=`pwd`/.libs"
 
-# Run the test
-$ENVCMD $TEST_BIN
-
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
 #
@@ -45,8 +42,18 @@ TESTING() {
     echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
-if test $nerrors -eq 0 ; then
-   echo "All Plugin API tests passed."
+# Main Body
+# Run the test
+$ENVCMD $TEST_BIN
+if [ $? != 0 ]; then
+    nerrors=`expr $nerrors + 1`
 fi
 
-exit $nerrors
+# print results
+if test $nerrors -ne 0 ; then
+    echo "$nerrors errors encountered"
+    exit 1
+else
+    echo "All Plugin API tests passed."
+    exit 0
+fi
