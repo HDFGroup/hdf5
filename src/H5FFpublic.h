@@ -22,6 +22,7 @@
 /* System headers needed by this file */
 
 /* Public headers needed by this file */
+#include "H5VLpublic.h" 	/* Public VOL header file		*/
 
 /*****************/
 /* Public Macros */
@@ -39,13 +40,6 @@ extern "C" {
 
 /* An asynchronous request object */
 typedef void *H5_request_t;
-
-/* Asynchronous operation status */
-typedef enum {
-    H5AO_PENDING,       /* Operation has not yet completed */
-    H5AO_SUCCEEDED,     /* Operation has completed, successfully */
-    H5AO_FAILED         /* Operation has completed, but failed */
-} H5_status_t;
 
 
 /********************/

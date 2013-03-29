@@ -34,6 +34,7 @@ SET (examples
     h5_extlink
     h5_elink_unix2win
     h5_shared_mesg
+    h5_external_log_native_vol
 )
 
 FOREACH (example ${examples})

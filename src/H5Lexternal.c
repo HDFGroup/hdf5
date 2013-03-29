@@ -630,7 +630,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
 
     /* Create the link through the VOL */
     if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_UD, obj, loc_params, vol_plugin,
-                                     lcpl_id, lapl_id, H5_REQUEST_NULL)) < 0)
+                                     lcpl_id, lapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

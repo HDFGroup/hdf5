@@ -141,7 +141,7 @@ H5_DLL herr_t H5T_set_latest_version(H5T_t *dt);
 H5_DLL herr_t H5T_patch_file(H5T_t *dt, H5F_t *f);
 H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
 H5_DLL void * H5T_get_named_type(const H5T_t *dt);
-H5_DLL hid_t H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref, hid_t req);
+H5_DLL hid_t H5VL_create_datatype(void *dt_obj, H5VL_t *vol_plugin, hbool_t app_ref);
 H5_DLL herr_t H5T_set_vol_object(H5T_t *type, void *vol_obj);
 
 /* Reference specific functions */

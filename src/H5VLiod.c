@@ -59,70 +59,70 @@ static void *H5VL_iod_fapl_copy(const void *_old_fa);
 static herr_t H5VL_iod_fapl_free(void *_fa);
 
 /* Atrribute callbacks */
-static void *H5VL_iod_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t req);
-static void *H5VL_iod_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t req);
-static herr_t H5VL_iod_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t req);
-static herr_t H5VL_iod_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t req);
-static herr_t H5VL_iod_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t req);
-static herr_t H5VL_iod_attr_close(void *attr, hid_t req);
+static void *H5VL_iod_attr_create(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_iod_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_attr_close(void *attr, hid_t dxpl_id, void **req);
 
 /* Datatype callbacks */
-static void *H5VL_iod_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t req);
-static void *H5VL_iod_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t req);
-static ssize_t H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t req);
-static herr_t H5VL_iod_datatype_close(void *dt, hid_t req);
+static void *H5VL_iod_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_iod_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
+static ssize_t H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
-static void *H5VL_iod_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t req);
-static void *H5VL_iod_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t req);
+static void *H5VL_iod_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_iod_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                    hid_t file_space_id, hid_t plist_id, void *buf, hid_t req);
+                                    hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 static herr_t H5VL_iod_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                     hid_t file_space_id, hid_t plist_id, const void *buf, hid_t req);
-static herr_t H5VL_iod_dataset_set_extent(void *dset, const hsize_t size[], hid_t req);
-static herr_t H5VL_iod_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_dataset_close(void *dset, hid_t req);
+                                     hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
+static herr_t H5VL_iod_dataset_set_extent(void *dset, const hsize_t size[], hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
 /* File callbacks */
-static void *H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t req);
-static void *H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t req);
-static herr_t H5VL_iod_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t req);
-static herr_t H5VL_iod_file_get(void *file, H5VL_file_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_file_close(void *file, hid_t req);
+static void *H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_file_flush(void *obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_file_misc(void *file, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
-static void *H5VL_iod_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t req);
-static void *H5VL_iod_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t req);
-static herr_t H5VL_iod_group_get(void *obj, H5VL_group_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_group_close(void *grp, hid_t req);
+static void *H5VL_iod_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_iod_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
 static herr_t H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *obj, 
-                                   H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+                                   H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_link_move(void *src_obj, H5VL_loc_params_t loc_params1,
                                  void *dst_obj, H5VL_loc_params_t loc_params2,
-                                 hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t req);
+                                 hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_link_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive, 
                                     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                                    H5L_iterate_t op, void *op_data, hid_t req);
-static herr_t H5VL_iod_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+                                    H5L_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_link_remove(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 
 /* Object callbacks */
-static void *H5VL_iod_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t req);
+static void *H5VL_iod_object_open(void *obj, H5VL_loc_params_t loc_params, H5I_type_t *opened_type, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
                                    void *dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
-                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t req);
+                                   hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t req);
-//static herr_t H5VL_iod_object_lookup(hid_t loc_id, H5VL_loc_type_t lookup_type, void **location, hid_t req, va_list arguments);
-//static herr_t H5VL_iod_object_free_loc(void *location, hid_t req);
-static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t req, va_list arguments);
-static herr_t H5VL_iod_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t req);
+                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
+//static herr_t H5VL_iod_object_lookup(hid_t loc_id, H5VL_loc_type_t lookup_type, void **location, hid_t dxpl_id, void **req, va_list arguments);
+//static herr_t H5VL_iod_object_free_loc(void *location, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL_iod_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 
 /* IOD-specific file access properties */
 typedef struct H5VL_iod_fapl_t {
@@ -147,59 +147,64 @@ static H5VL_class_t H5VL_iod_g = {
     H5VL_iod_fapl_copy,			        /*fapl_copy */
     H5VL_iod_fapl_free, 		        /*fapl_free */
     {                                           /* attribute_cls */
-        NULL,//H5VL_iod_attr_create,                /* create */
-        NULL,//H5VL_iod_attr_open,                  /* open */
-        NULL,//H5VL_iod_attr_read,                  /* read */
-        NULL,//H5VL_iod_attr_write,                 /* write */
-        NULL,//H5VL_iod_attr_get,                   /* get */
-        NULL,//H5VL_iod_attr_remove,                /* remove */
-        NULL//H5VL_iod_attr_close                  /* close */
+        NULL,//H5VL_iod_attr_create,            /* create */
+        NULL,//H5VL_iod_attr_open,              /* open */
+        NULL,//H5VL_iod_attr_read,              /* read */
+        NULL,//H5VL_iod_attr_write,             /* write */
+        NULL,//H5VL_iod_attr_get,               /* get */
+        NULL,//H5VL_iod_attr_remove,            /* remove */
+        NULL//H5VL_iod_attr_close               /* close */
     },
     {                                           /* datatype_cls */
-        NULL,//H5VL_iod_datatype_commit,            /* commit */
-        NULL,//H5VL_iod_datatype_open,              /* open */
-        NULL,//H5VL_iod_datatype_get_binary,        /* get_size */
-        NULL//H5VL_iod_datatype_close              /* close */
+        NULL,//H5VL_iod_datatype_commit,        /* commit */
+        NULL,//H5VL_iod_datatype_open,          /* open */
+        NULL,//H5VL_iod_datatype_get_binary,    /* get_size */
+        NULL//H5VL_iod_datatype_close           /* close */
     },
     {                                           /* dataset_cls */
-        H5VL_iod_dataset_create,             /* create */
-        H5VL_iod_dataset_open,               /* open */
-        H5VL_iod_dataset_read,               /* read */
-        H5VL_iod_dataset_write,              /* write */
-        H5VL_iod_dataset_set_extent,         /* set extent */
-        H5VL_iod_dataset_get,                /* get */
-        H5VL_iod_dataset_close               /* close */
+        H5VL_iod_dataset_create,                /* create */
+        H5VL_iod_dataset_open,                  /* open */
+        H5VL_iod_dataset_read,                  /* read */
+        H5VL_iod_dataset_write,                 /* write */
+        H5VL_iod_dataset_set_extent,            /* set extent */
+        H5VL_iod_dataset_get,                   /* get */
+        H5VL_iod_dataset_close                  /* close */
     },
     {                                           /* file_cls */
-        H5VL_iod_file_create,                /* create */
-        H5VL_iod_file_open,                  /* open */
-        H5VL_iod_file_flush,                 /* flush */
-        H5VL_iod_file_get,                   /* get */
-        H5VL_iod_file_misc,                  /* misc */
-        NULL,                                /* optional */
-        H5VL_iod_file_close                  /* close */
+        H5VL_iod_file_create,                   /* create */
+        H5VL_iod_file_open,                     /* open */
+        H5VL_iod_file_flush,                    /* flush */
+        H5VL_iod_file_get,                      /* get */
+        H5VL_iod_file_misc,                     /* misc */
+        NULL,                                   /* optional */
+        H5VL_iod_file_close                     /* close */
     },
     {                                           /* group_cls */
-        H5VL_iod_group_create,               /* create */
-        H5VL_iod_group_open,                 /* open */
-        H5VL_iod_group_get,                  /* get */
-        H5VL_iod_group_close                 /* close */
+        H5VL_iod_group_create,                  /* create */
+        H5VL_iod_group_open,                    /* open */
+        H5VL_iod_group_get,                     /* get */
+        H5VL_iod_group_close                    /* close */
     },
     {                                           /* link_cls */
-        NULL,//H5VL_iod_link_create,                /* create */
-        NULL,//H5VL_iod_link_move,                  /* move */
-        NULL,//H5VL_iod_link_iterate,               /* iterate */
-        NULL,//H5VL_iod_link_get,                   /* get */
-        NULL//H5VL_iod_link_remove                 /* remove */
+        NULL,//H5VL_iod_link_create,            /* create */
+        NULL,//H5VL_iod_link_move,              /* move */
+        NULL,//H5VL_iod_link_iterate,           /* iterate */
+        NULL,//H5VL_iod_link_get,               /* get */
+        NULL//H5VL_iod_link_remove              /* remove */
     },
     {                                           /* object_cls */
-        NULL,//H5VL_iod_object_open,                /* open */
-        NULL,//H5VL_iod_object_copy,                /* copy */
-        NULL,//H5VL_iod_object_visit,               /* visit */
-        NULL,//H5VL_iod_object_get,                 /* get */
-        NULL,//H5VL_iod_object_misc,                /* misc */
-        NULL,//H5VL_iod_object_optional,            /* optional */
-        NULL//H5VL_iod_object_close                /* close */
+        NULL,//H5VL_iod_object_open,            /* open */
+        NULL,//H5VL_iod_object_copy,            /* copy */
+        NULL,//H5VL_iod_object_visit,           /* visit */
+        NULL,//H5VL_iod_object_get,             /* get */
+        NULL,//H5VL_iod_object_misc,            /* misc */
+        NULL,//H5VL_iod_object_optional,        /* optional */
+        NULL//H5VL_iod_object_close             /* close */
+    },
+    {
+        NULL,
+        NULL,
+        NULL
     }
 };
 
@@ -554,7 +559,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t UNUSED req)
+H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
+                     hid_t dxpl_id, void **req)
 {
     H5VL_iod_fapl_t *fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -695,7 +701,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t UNUSED req)
+H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_fapl_t *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -824,7 +830,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, hid_t UNUSED req)
+H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope, 
+                    hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5VL_iod_file_t *file = obj->file;
@@ -889,7 +896,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5VL_iod_file_t *file = obj->file;
@@ -1026,7 +1033,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t UNUSED req, va_list arguments)
+H5VL_iod_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     herr_t       ret_value = SUCCEED;    /* Return value */
 
@@ -1091,7 +1098,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_file_close(void *_file, hid_t UNUSED req)
+H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
 {
     H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
     fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
@@ -1161,7 +1168,7 @@ done:
  */
 static void *
 H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, 
-                      hid_t gapl_id, hid_t UNUSED req)
+                      hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
     H5VL_iod_group_t *grp = NULL; /* the group object that is created and passed to the user */
@@ -1311,7 +1318,7 @@ done:
  */
 static void *
 H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                    hid_t gapl_id, hid_t UNUSED req)
+                    hid_t gapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
     H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
@@ -1447,7 +1454,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_group_get(void *_grp, H5VL_group_get_t get_type, hid_t UNUSED req, va_list arguments)
+H5VL_iod_group_get(void *_grp, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1493,7 +1500,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_group_close(void *_grp, hid_t UNUSED req)
+H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
     fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
@@ -1569,7 +1576,7 @@ done:
  */
 static void *
 H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, 
-                        hid_t dapl_id, hid_t UNUSED req)
+                        hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the dataset */
     H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
@@ -1730,7 +1737,7 @@ done:
  */
 static void *
 H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                      hid_t dapl_id, hid_t UNUSED req)
+                      hid_t dapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the dataset */
     H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
@@ -1867,7 +1874,7 @@ done:
  */
 static herr_t
 H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
-                      hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t UNUSED req)
+                      hid_t file_space_id, hid_t dxpl_id, void *buf, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_io_input_t input;
@@ -2034,7 +2041,7 @@ done:
  */
 static herr_t
 H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
-                       hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t UNUSED req)
+                       hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_io_input_t input;
@@ -2205,7 +2212,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t UNUSED req)
+H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     H5VL_iod_dset_set_extent_input_t input;
@@ -2283,7 +2290,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t req, va_list arguments)
+H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, 
+                     void **req, va_list arguments)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -2357,7 +2365,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_dataset_close(void *_dset, hid_t UNUSED req)
+H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */

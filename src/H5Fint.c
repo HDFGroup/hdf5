@@ -227,7 +227,7 @@ H5F_get_obj_count_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
     if(NULL == (obj = (void *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5_REQUEST_NULL, 
+    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_COUNT, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
                      udata->types, &obj_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
 
@@ -303,7 +303,7 @@ H5F_get_obj_ids_cb(void UNUSED *obj_ptr, hid_t obj_id, void *key)
     if(NULL == (obj = (void *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_IDS, H5_REQUEST_NULL, udata->types,
+    if(H5VL_file_get(obj, vol_plugin, H5VL_FILE_GET_OBJ_IDS, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, udata->types,
                      udata->max_objs, udata->oid_list, &obj_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, H5_ITER_ERROR, "unable to get object count in file(s)")
 

@@ -125,7 +125,9 @@ then
         RunTest h5_elink_unix2win &&\
         rm h5_elink_unix2win &&\
         RunTest h5_shared_mesg &&\
-        rm h5_shared_mesg); then
+        rm h5_shared_mesg)&&\
+        RunTest h5_external_log_native_vol &&\
+        rm h5_external_log_native_vol; then
         EXIT_VALUE=${EXIT_SUCCESS}
     else
         EXIT_VALUE=${EXIT_FAILURE}
