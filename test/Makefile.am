@@ -57,7 +57,6 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
-else
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -159,5 +158,8 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
+if HAVE_SHARED_CONDITIONAL
+  DISTCLEANFILES += test_plugin.sh
+endif
 
 include $(top_srcdir)/config/conclude.am
