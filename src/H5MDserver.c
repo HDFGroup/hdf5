@@ -41,6 +41,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Fpkg.h"             /* File pkg                             */
+#include "H5FDcore.h"           /* Core file driver                    */
 #include "H5FDmpi.h"            /* MPI-based file drivers		*/
 #include "H5FDmulti.h"          /* MULTI-based file drivers		*/
 #include "H5FDmds.h"            /* MDS file driver      		*/
@@ -323,6 +324,11 @@ H5MD__file_create_func(uint8_t *p, int source)
     if(H5VL__decode_file_create_params(p, &mds_filename, &flags, &fcpl_id, &fapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file create params");
 
+    /* use the core driver for the metadata file for now */
+    if(H5Pset_fapl_core(fapl_id, 1048576, TRUE) < 0){
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set core vfd");
+    }
+
     /* Create a split fapl with the decoded fapl used for the metadata file access and
        a stub fapl (temp_fapl) used for raw data file to manage the EOA */
     split_fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -430,6 +436,11 @@ H5MD__file_open_func(uint8_t *p, int source)
     /* decode the file open parameters */
     if(H5VL__decode_file_open_params(p, &mds_filename, &flags, &fapl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode file open params");
+
+    /* use the core driver for the metadata file for now */
+    if(H5Pset_fapl_core(fapl_id, 1048576, TRUE) < 0){
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "failed to set core vfd");
+    }
 
     /* Create a split fapl with the decoded fapl used for the metadata file access and
        a stub fapl (temp_fapl) used for raw data file to manage the EOA */
