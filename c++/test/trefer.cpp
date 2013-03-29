@@ -244,7 +244,6 @@ static void test_reference_obj(void)
 	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(std::string)buf,buf_len)", __LINE__, __FILE__);
 
 	// Test getObjnameByIdx(hsize_t idx, char* name, size_t size)
-	char name_C[DSET1_LEN+1];
 	group.getObjnameByIdx(0, name, name_size+1);
 	verify_val(name, DSET1_NAME, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);
 	verify_val(name_size, DSET1_LEN, "Group::getObjnameByIdx(index,(char*)buf,buf_len)", __LINE__, __FILE__);

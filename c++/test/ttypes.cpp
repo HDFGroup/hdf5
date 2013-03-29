@@ -52,6 +52,7 @@
  * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
  */
+#if 0
 #define TEST_ALIGNMENT
 
 /* Alignment test stuff */
@@ -61,6 +62,7 @@
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
+#endif
 
 const char *FILENAME[] = {
     "dtypes1.h5",
@@ -143,9 +145,6 @@ static void test_classes()
  */
 static void test_copy()
 {
-    hid_t               a_copy;
-    herr_t		status;
-
     SUBTEST("DataType::copy() and DataType::operator=");
     try {
 	// Test copying from a predefined datatype using DataType::operator=
@@ -212,7 +211,6 @@ static void test_query()
 	long   c;
 	double d;
     } s_type_t;
-    char	filename[1024];
     short	enum_val;
 
     // Output message about test being performed
@@ -387,7 +385,6 @@ static void test_transient ()
 const H5std_string filename2("dtypes2.h5");
 static void test_named ()
 {
-    herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
     hsize_t		i;
     unsigned 		attr_data[10][20];

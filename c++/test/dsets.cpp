@@ -288,11 +288,6 @@ test_datasize()
 {
 
     SUBTEST("DataSet::getInMemDataSize()");
-
-    int	points[100][200];
-    int	check[100][200];
-    int		i, j, n;
-
     try
     {
 	// Open FILE1.

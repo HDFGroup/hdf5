@@ -111,22 +111,15 @@ static void test_file_create()
 	// try to create the same file with H5F_ACC_TRUNC. This should fail
 	// because file1 is the same file and is currently open.
 
-/* These three are failing with new/PGI compiler, HDFFV-8067
-   The line "H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E"
-   Results in this message:
-       "terminate called without an active exception
-        Command terminated by signal 6"
-   Commenting it out until it's fixed  LK 20120626. 
-#ifndef H5_HAVE_FILE_VERSIONS
 	try {
 	    H5File file2 (FILE1, H5F_ACC_TRUNC);  // should throw E
+
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "Attempted to create an existing file.");
 	}
 	catch( FileIException E ) // catch truncating existing file
 	{} // do nothing, FAIL expected
 
-#endif
 	// Close file1
 	delete file1;
 	file1 = NULL;
@@ -141,10 +134,10 @@ static void test_file_create()
 	}
 	catch( FileIException E ) // catching creating existing file
 	{} // do nothing, FAIL expected
+
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
 	file1 = new H5File (FILE1, H5F_ACC_TRUNC);
 
-#ifndef H5_HAVE_FILE_VERSIONS
 	// Try to truncate first file again. This should fail because file1
 	// is the same file and is currently open.
     	try {
@@ -155,19 +148,17 @@ static void test_file_create()
 	}
 	catch( FileIException E ) // catching truncating opened file
 	{} // do nothing, FAIL expected
-#endif
+
      	// Try with H5F_ACC_EXCL. This should fail too because the file already
      	// exists.
     	try {
-//	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
+	    H5File file3 (FILE1, H5F_ACC_EXCL);  // should throw E
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "H5F_ACC_EXCL attempt on an existing file.");
     	}
 	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
 	{} // do nothing, FAIL expected
-*/
-   std::cerr << "SKIPPED for HDFFV-8067" << std::endl;
 
     	// Get the file-creation template
 	FileCreatPropList tmpl1 = file1->getCreatePlist();
@@ -333,6 +324,7 @@ static void test_file_open()
         tmpl1.getSymk( iparm1, iparm2);
         verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
         verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+
 	PASSED();
     }   // end of try block
 
@@ -381,8 +373,16 @@ static void test_file_size()
         hsize_t file_size = file4.getFileSize();
 
         // Check if file size is reasonable.  It's supposed to be 2KB now.
-        if(file_size<1*KB || file_size>4*KB)
-            issue_fail_msg("test_file_size()", __LINE__, __FILE__);
+        if (file_size < 1*KB || file_size > 4*KB)
+            issue_fail_msg("test_file_size()", __LINE__, __FILE__, "getFileSize() returned unreasonable value");
+
+	// Get the amount of free space in the file
+	hssize_t free_space = file4.getFreeSpace();
+
+	// Check if it's reasonable.  It's 0 now.
+	if (free_space < 0 || free_space > 4*KB)
+	    issue_fail_msg("test_file_size()", __LINE__, __FILE__, "getFreeSpace returned unreasonable value");
+
 	PASSED();
     }   // end of try block
 
@@ -415,7 +415,8 @@ const int	NX = 4;
 const int	NY = 5;
 const H5std_string	GROUPNAME ("group");
 const H5std_string	DSETNAME ("dataset");
-const H5std_string	ATTRNAME ("attribute");
+const H5std_string	DATTRNAME ("dataset attribute");
+const H5std_string	FATTRNAME ("file attribute");
 const H5std_string	DTYPENAME ("compound");
 
 // Compound datatype
@@ -426,7 +427,7 @@ typedef struct s1_t {
 
 static void test_file_name()
 {
-    // Output message about test being performed
+    // Output message about test being performed.
     SUBTEST("File Name");
 
     H5std_string file_name;
@@ -438,42 +439,42 @@ static void test_file_name()
         file_name = file4.getFileName();
 	verify_val(file_name, FILE4, "H5File::getFileName", __LINE__, __FILE__);
 
-	// Create a group in the root group
+	// Create a group in the root group.
 	Group group(file4.createGroup(GROUPNAME, 0));
 
-	// Get and verify file name
+	// Get and verify file name via a group.
 	file_name = group.getFileName();
 	verify_val(file_name, FILE4, "Group::getFileName", __LINE__, __FILE__);
 
-	// Create the data space
+	// Create the data space.
 	hsize_t dims[RANK] = {NX, NY};
 	DataSpace space(RANK, dims);
 
-	// Create a new dataset
+	// Create a new dataset.
 	DataSet dataset(file4.createDataSet (DSETNAME, PredType::NATIVE_INT, space));
 
-	// Get and verify file name
+	// Get and verify file name via a dataset.
 	file_name = dataset.getFileName();
 	verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__);
 
-	// Create an attribute for the dataset
-	Attribute attr(dataset.createAttribute(ATTRNAME, PredType::NATIVE_INT, space));
+	// Create an attribute for the dataset.
+	Attribute attr(dataset.createAttribute(DATTRNAME, PredType::NATIVE_INT, space));
 
-	// Get and verify file name
+	// Get and verify file name via an attribute.
 	file_name = attr.getFileName();
 	verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
 
-	// Create a compound datatype
+	// Create a compound datatype.
 	CompType comp_type (sizeof(s1_t));
 
-	// Insert fields
+	// Insert fields.
 	comp_type.insertMember("a", HOFFSET(s1_t, a), PredType::NATIVE_INT);
 	comp_type.insertMember("b", HOFFSET(s1_t, b), PredType::NATIVE_FLOAT);
 
-	// Save it on file
+	// Save it on file.
 	comp_type.commit(file4, DTYPENAME);
 
-	// Get and verify file name
+	// Get and verify file name via a committed datatype.
 	comp_type.getFileName();
 	verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
 	PASSED();
@@ -507,7 +508,6 @@ void test_file()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing File I/O operations\n"));
-    //MESSAGE("Testing File I/O operations\n");
 
     test_file_create();	// Test file creation (also creation templates)
     test_file_open();	// Test file opening
