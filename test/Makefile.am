@@ -158,8 +158,5 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
-if HAVE_SHARED_CONDITIONAL
-  DISTCLEANFILES += test_plugin.sh
-endif
 
 include $(top_srcdir)/config/conclude.am
