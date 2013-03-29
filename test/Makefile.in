@@ -69,16 +69,20 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/testcheck_version.sh.in \
-	$(srcdir)/testerror.sh.in $(srcdir)/testlibinfo.sh.in \
-	$(srcdir)/testlinks_env.sh.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/mkinstalldirs \
+	$(srcdir)/Makefile.in $(srcdir)/test_plugin.sh.in \
+	$(srcdir)/testcheck_version.sh.in $(srcdir)/testerror.sh.in \
+	$(srcdir)/testlibinfo.sh.in $(srcdir)/testlinks_env.sh.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
+@HAVE_SHARED_CONDITIONAL_TRUE@am__append_1 = test_plugin.sh
+@HAVE_SHARED_CONDITIONAL_TRUE@am__append_2 = plugin$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
-	links_env$(EXEEXT)
-@BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
+	links_env$(EXEEXT) $(am__EXEEXT_2)
+@HAVE_SHARED_CONDITIONAL_TRUE@am__append_3 = plugin
+@BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_3)
+@DIRECT_VFD_CONDITIONAL_TRUE@am__append_4 = direct
 TESTS = $(am__EXEEXT_1) $(TEST_SCRIPT)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -88,16 +92,58 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh H5srcdir_str.h \
-	testlibinfo.sh testlinks_env.sh
+	testlibinfo.sh testlinks_env.sh test_plugin.sh
 CONFIG_CLEAN_VPATH_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libh5test_la_LIBADD =
-am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
-libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(libdir)"
+LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
+libdynlib1_la_LIBADD =
+am__libdynlib1_la_SOURCES_DIST = dynlib1.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib1_la_OBJECTS = dynlib1.lo
+libdynlib1_la_OBJECTS = $(am_libdynlib1_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib1_la_rpath = -rpath \
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
+libdynlib2_la_LIBADD =
+am__libdynlib2_la_SOURCES_DIST = dynlib2.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_OBJECTS = dynlib2.lo
+libdynlib2_la_OBJECTS = $(am_libdynlib2_la_OBJECTS)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_rpath = -rpath \
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
+libh5test_la_LIBADD =
+am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
+libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
+@HAVE_SHARED_CONDITIONAL_FALSE@am_libh5test_la_rpath =
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libh5test_la_rpath =
 am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	stab$(EXEEXT) gheap$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	cache_tagging$(EXEEXT) pool$(EXEEXT) accum$(EXEEXT) \
@@ -114,7 +160,8 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	freespace$(EXEEXT) mf$(EXEEXT) farray$(EXEEXT) earray$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT) file_image$(EXEEXT)
-am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
+@HAVE_SHARED_CONDITIONAL_TRUE@am__EXEEXT_2 = plugin$(EXEEXT)
+am__EXEEXT_3 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
 	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
 	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
 	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
@@ -377,6 +424,10 @@ ohdr_SOURCES = ohdr.c
 ohdr_OBJECTS = ohdr.$(OBJEXT)
 ohdr_LDADD = $(LDADD)
 ohdr_DEPENDENCIES = libh5test.la $(LIBHDF5)
+plugin_SOURCES = plugin.c
+plugin_OBJECTS = plugin.$(OBJEXT)
+plugin_LDADD = $(LDADD)
+plugin_DEPENDENCIES = libh5test.la $(LIBHDF5)
 pool_SOURCES = pool.c
 pool_OBJECTS = pool.$(OBJEXT)
 pool_LDADD = $(LDADD)
@@ -465,7 +516,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
+SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
+	$(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	btree2.c cache.c cache_api.c cache_tagging.c cmpd_dset.c \
 	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
 	earray.c efc.c enc_dec_plist.c enc_dec_plist_with_endianess.c \
@@ -477,26 +529,28 @@ SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_plist.c \
 	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
 	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
-	mount.c mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c tcheck_version.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
-DIST_SOURCES = $(libh5test_la_SOURCES) accum.c app_ref.c big.c \
-	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
-	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
-	enc_dec_plist_with_endianess.c enum.c err_compat.c \
-	error_test.c extend.c external.c farray.c fheap.c file_image.c \
-	fillval.c filter_fail.c flush1.c flush2.c freespace.c \
-	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
-	gen_file_image.c gen_filespace.c gen_filters.c gen_new_array.c \
-	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
-	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c tcheck_version.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
+	reserved.c set_extent.c space_overflow.c stab.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
+DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
+	$(am__libdynlib2_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
+	accum.c app_ref.c big.c bittests.c btree2.c cache.c \
+	cache_api.c cache_tagging.c cmpd_dset.c cross_read.c dangle.c \
+	dsets.c dt_arith.c dtransform.c dtypes.c earray.c efc.c \
+	enc_dec_plist.c enc_dec_plist_with_endianess.c enum.c \
+	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
+	file_image.c fillval.c filter_fail.c flush1.c flush2.c \
+	freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
+	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
+	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
+	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_plist.c \
+	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
+	gheap.c hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
+	mount.c mtime.c ntypes.c objcopy.c ohdr.c plugin.c pool.c \
+	reserved.c set_extent.c space_overflow.c stab.c \
+	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
+	$(ttsafe_SOURCES) unlink.c vfd.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -810,8 +864,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin getname.h5 \
 	getname[1-3].h5 sec2_file.h5 direct_file.h5 \
 	family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5 \
-	multi_file-[rs].h5 core_file new_move_[ab].h5 ntypes.h5 \
-	dangle.h5 error_test.h5 err_compat.h5 dtransform.h5 \
+	multi_file-[rs].h5 core_file plugin.h5 new_move_[ab].h5 \
+	ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 dtransform.h5 \
 	test_filters.h5 get_file_name.h5 tstint[1-2].h5 \
 	unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5 \
 	objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 \
@@ -821,9 +875,11 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
+	testlinks_env.sh $(am__append_1)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
+	links_env$(EXEEXT) $(am__append_2)
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -853,9 +909,11 @@ BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_n
     gen_nullspace gen_udlinks space_overflow gen_filespace gen_specmetaread \
     gen_sizes_lheap gen_file_image gen_plist
 
-
-# The libh5test library provides common support code for the tests.
-noinst_LTLIBRARIES = libh5test.la
+@HAVE_SHARED_CONDITIONAL_FALSE@noinst_LTLIBRARIES = libh5test.la
+@HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libh5test.la
+@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlib1.la libdynlib2.la
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_SOURCES = dynlib1.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_SOURCES = dynlib2.c
 libh5test_la_SOURCES = h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
@@ -865,8 +923,7 @@ LDADD = libh5test.la $(LIBHDF5)
 ttsafe_SOURCES = ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
 
-@DIRECT_VFD_CONDITIONAL_FALSE@VFD_LIST = sec2 stdio core split multi family
-@DIRECT_VFD_CONDITIONAL_TRUE@VFD_LIST = sec2 stdio core split multi family direct
+VFD_LIST = sec2 stdio core split multi family $(am__append_4)
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
@@ -876,7 +933,7 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 
 # Temporary files.
-DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+DISTCLEANFILES = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -942,6 +999,42 @@ testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testlinks_env.sh: $(top_builddir)/config.status $(srcdir)/testlinks_env.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_plugin.sh: $(top_builddir)/config.status $(srcdir)/test_plugin.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
@@ -953,8 +1046,12 @@ clean-noinstLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+libdynlib1.la: $(libdynlib1_la_OBJECTS) $(libdynlib1_la_DEPENDENCIES) $(EXTRA_libdynlib1_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD) $(LIBS)
+libdynlib2.la: $(libdynlib2_la_OBJECTS) $(libdynlib2_la_DEPENDENCIES) $(EXTRA_libdynlib2_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD) $(LIBS)
 libh5test.la: $(libh5test_la_OBJECTS) $(libh5test_la_DEPENDENCIES) $(EXTRA_libh5test_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK)  $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(am_libh5test_la_rpath) $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -1162,6 +1259,9 @@ objcopy$(EXEEXT): $(objcopy_OBJECTS) $(objcopy_DEPENDENCIES) $(EXTRA_objcopy_DEP
 ohdr$(EXEEXT): $(ohdr_OBJECTS) $(ohdr_DEPENDENCIES) $(EXTRA_ohdr_DEPENDENCIES) 
 	@rm -f ohdr$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(ohdr_OBJECTS) $(ohdr_LDADD) $(LIBS)
+plugin$(EXEEXT): $(plugin_OBJECTS) $(plugin_DEPENDENCIES) $(EXTRA_plugin_DEPENDENCIES) 
+	@rm -f plugin$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(plugin_OBJECTS) $(plugin_LDADD) $(LIBS)
 pool$(EXEEXT): $(pool_OBJECTS) $(pool_DEPENDENCIES) $(EXTRA_pool_DEPENDENCIES) 
 	@rm -f pool$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(pool_OBJECTS) $(pool_LDADD) $(LIBS)
@@ -1218,6 +1318,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dt_arith.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtransform.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtypes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enc_dec_plist.Po@am__quote@
@@ -1267,6 +1369,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ntypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/objcopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ohdr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reserved.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
@@ -1437,6 +1540,9 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
+	for dir in "$(DESTDIR)$(libdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -1468,10 +1574,12 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@HAVE_SHARED_CONDITIONAL_FALSE@install-data-local:
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1491,13 +1599,13 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-data-local
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1537,24 +1645,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-libLTLIBRARIES
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS cscopelist ctags \
-	distclean distclean-compile distclean-generic \
+	clean clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
+	cscopelist ctags distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
-	pdf-am ps ps-am tags uninstall uninstall-am
+	install-data-am install-data-local install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool mostlyclean-local pdf pdf-am ps ps-am tags \
+	uninstall uninstall-am uninstall-libLTLIBRARIES
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
@@ -1567,6 +1676,16 @@ uninstall-am:
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+@HAVE_SHARED_CONDITIONAL_TRUE@  # The libh5test library provides common support code for the tests.
+
+@HAVE_SHARED_CONDITIONAL_TRUE@  # The libdynlib1 and libdynlib2 library for testing plugin module plugin.c.
+@HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
+
+@HAVE_SHARED_CONDITIONAL_TRUE@install-data-local:
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+
+@HAVE_SHARED_CONDITIONAL_FALSE@  # The libh5test library provides common support code for the tests.
 
 # Additional target for running timing test
 timings _timings: testmeta

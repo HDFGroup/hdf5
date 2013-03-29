@@ -25,9 +25,13 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
-check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
+if HAVE_SHARED_CONDITIONAL
+  TEST_SCRIPT += test_plugin.sh
+  SCRIPT_DEPEND += plugin$(EXEEXT)
+endif
 
+check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -51,7 +55,9 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
-
+if HAVE_SHARED_CONDITIONAL
+  check_PROGRAMS+= plugin
+endif
 
 # These programs generate test files for the tests.  They don't need to be
 # compiled every time we want to test the library.  However, putting
@@ -69,8 +75,24 @@ if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
 endif
 
-# The libh5test library provides common support code for the tests.
-noinst_LTLIBRARIES=libh5test.la
+if HAVE_SHARED_CONDITIONAL
+  # The libh5test library provides common support code for the tests.
+  noinst_LTLIBRARIES=libh5test.la
+
+  # The libdynlib1 and libdynlib2 library for testing plugin module plugin.c.
+  # Build it as shared library if configure is enabled for shared library.
+  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la
+  libdynlib1_la_SOURCES=dynlib1.c
+  libdynlib2_la_SOURCES=dynlib2.c
+
+install-data-local:
+	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+
+else
+  # The libh5test library provides common support code for the tests.
+  noinst_LTLIBRARIES=libh5test.la
+endif
+
 libh5test_la_SOURCES=h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
@@ -80,10 +102,9 @@ LDADD=libh5test.la $(LIBHDF5)
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
 
+VFD_LIST = sec2 stdio core split multi family
 if DIRECT_VFD_CONDITIONAL
-  VFD_LIST = sec2 stdio core split multi family direct
-else
-  VFD_LIST = sec2 stdio core split multi family
+  VFD_LIST += direct
 endif
 
 # Additional target for running timing test
@@ -120,7 +141,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
     family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
-    multi_file-[rs].h5 core_file \
+    multi_file-[rs].h5 core_file plugin.h5 \
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
@@ -137,6 +158,6 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
 
 include $(top_srcdir)/config/conclude.am

@@ -7,7 +7,14 @@ PROJECT (HDF5_TEST)
 ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
 
 #-----------------------------------------------------------------------------
-# Define Sources
+# Generate the H5srcdir_str.h file containing user settings needed by compilation
+#-----------------------------------------------------------------------------
+SET (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
+CONFIGURE_FILE (${HDF5_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
+INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
+
+#-----------------------------------------------------------------------------
+# Define Test Library Sources
 #-----------------------------------------------------------------------------
 SET (TEST_LIB_SRCS
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
@@ -19,13 +26,6 @@ SET (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
 )
 
-#-----------------------------------------------------------------------------
-# Generate the H5srcdir_str.h file containing user settings needed by compilation
-#-----------------------------------------------------------------------------
-SET (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
-CONFIGURE_FILE (${HDF5_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
-
 ADD_LIBRARY (${HDF5_TEST_LIB_TARGET} ${LIB_TYPE} ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
 IF (MSVC)
   TARGET_LINK_LIBRARIES (${HDF5_TEST_LIB_TARGET} "ws2_32.lib")
@@ -36,6 +36,50 @@ ENDIF (MINGW)
 TARGET_LINK_LIBRARIES (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} ${LIB_TYPE})
 SET_TARGET_PROPERTIES (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test)
+
+#-----------------------------------------------------------------------------
+# If plugin library tests can be tested
+#-----------------------------------------------------------------------------
+IF (BUILD_SHARED_LIBS)
+  SET (HDF5_TEST_PLUGIN_LIB_CORENAME         "dynlib1")
+  SET (HDF5_TEST_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_LIB_CORENAME}")
+  SET (HDF5_TEST_PLUGIN_LIB_TARGET           ${HDF5_TEST_PLUGIN_LIB_CORENAME})
+  ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+  INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
+
+  #-----------------------------------------------------------------------------
+  # Define Sources
+  #-----------------------------------------------------------------------------
+
+  SET (H5_TEST_PLUGIN_LIB_SRCS
+      ${HDF5_TEST_SOURCE_DIR}/dynlib1.c
+  )
+
+  ADD_LIBRARY (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${H5_TEST_PLUGIN_LIB_SRCS})
+  TARGET_LINK_LIBRARIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+  H5_SET_LIB_OPTIONS (
+      ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
+      ${LIB_TYPE}
+      HDF5_TEST_PLUGIN_LIB_NAME_RELEASE
+      HDF5_TEST_PLUGIN_LIB_NAME_DEBUG
+  )
+  SET_TARGET_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+  #-----------------------------------------------------------------------------
+  # Copy plugin library to a plugins folder
+  #-----------------------------------------------------------------------------
+
+  # make plugins dir
+  FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+  ADD_CUSTOM_COMMAND (
+      TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different 
+        "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+        "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+  )
+ENDIF (BUILD_SHARED_LIBS)
 
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the test directory into the source directory
@@ -508,6 +552,7 @@ ADD_TEST (NAME error_test COMMAND "${CMAKE_COMMAND}"
     -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
 )
 SET_TESTS_PROPERTIES(error_test PROPERTIES DEPENDS h5test-clear-error_test-objects)
+SET_TESTS_PROPERTIES (error_test PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PRELOAD=::")
 
 #-- Adding test for links_env
 ADD_EXECUTABLE (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
@@ -551,6 +596,25 @@ ENDIF (\${TEST_RESULT} STREQUAL \"0\")
 )
 
 ADD_TEST (NAME testlibinfo COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FILE:${HDF5_LIB_TARGET}>" -P "${GREP_RUNNER}")
+
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+IF (BUILD_SHARED_LIBS)
+  ADD_EXECUTABLE (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
+  TARGET_NAMING (plugin ${LIB_TYPE})
+  TARGET_LINK_LIBRARIES (plugin ${HDF5_TEST_PLUGIN_LIB_TARGET})
+  SET_TARGET_PROPERTIES (plugin PROPERTIES FOLDER test)
+
+  ADD_TEST (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
+  SET_TESTS_PROPERTIES (H5PLUGIN-plugin PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/plugins")
+ELSE (BUILD_SHARED_LIBS)
+  MESSAGE (STATUS " **** Plugins libraries must be built as shared libraries **** ")
+  ADD_TEST (
+      NAME H5PLUGIN-SKIPPED
+      COMMAND ${CMAKE_COMMAND} -E echo "SKIP H5PLUGIN TESTING"
+  )
+ENDIF (BUILD_SHARED_LIBS)
 
 ##############################################################################
 ##############################################################################

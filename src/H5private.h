@@ -149,6 +149,17 @@
 #   include <io.h>
 #endif
 
+/*
+ * Dynamic library handling.  These are needed for dynamically loading I/O
+ * filters and VFDs.
+ */
+#ifdef H5_HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+#ifdef H5_HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
@@ -2351,6 +2362,7 @@ H5_DLL int H5G_term_interface(void);
 H5_DLL int H5I_term_interface(void);
 H5_DLL int H5L_term_interface(void);
 H5_DLL int H5P_term_interface(void);
+H5_DLL int H5PL_term_interface(void);
 H5_DLL int H5R_term_interface(void);
 H5_DLL int H5S_term_interface(void);
 H5_DLL int H5T_term_interface(void);

@@ -25,6 +25,7 @@ hid_t H5E_FUNC_g           = FAIL;      /* Function entry/exit */
 hid_t H5E_FILE_g           = FAIL;      /* File accessibilty */
 hid_t H5E_SOHM_g           = FAIL;      /* Shared Object Header Messages */
 hid_t H5E_SYM_g            = FAIL;      /* Symbol table */
+hid_t H5E_PLUGIN_g         = FAIL;      /* Plugin for dynamically loaded library */
 hid_t H5E_VFL_g            = FAIL;      /* Virtual File Layer */
 hid_t H5E_INTERNAL_g       = FAIL;      /* Internal error (too specific to document in detail) */
 hid_t H5E_BTREE_g          = FAIL;      /* B-Tree node */
@@ -130,6 +131,9 @@ hid_t H5E_PATH_g           = FAIL;      /* Problem with path to object */
 
 /* No error */
 hid_t H5E_NONE_MINOR_g     = FAIL;      /* No error */
+
+/* Plugin errors */
+hid_t H5E_OPENERROR_g      = FAIL;      /* Can't open directory or file */
 
 /* File accessibilty errors */
 hid_t H5E_FILEEXISTS_g     = FAIL;      /* File already exists */
