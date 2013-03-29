@@ -21,9 +21,6 @@
 srcdir=@srcdir@
 TOP_BUILDDIR=@top_builddir@
 
-echo $srcdir
-echo $TOP_BUILDDIR
-
 # Determine backward compatibility options enabled
 DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
@@ -32,7 +29,8 @@ verbose=yes
 
 TEST_NAME=plugin
 TEST_BIN=`pwd`/$TEST_NAME
-ENVCMD="env HDF5_PLUGIN_PATH=`pwd`/.libs"
+CP="cp .libs/libdynlib2.so.* /tmp"
+ENVCMD="env HDF5_PLUGIN_PATH=/tmp:`pwd`/.libs"
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -44,7 +42,7 @@ TESTING() {
 
 # Main Body
 # Run the test
-$ENVCMD $TEST_BIN
+$CP; $ENVCMD $TEST_BIN
 if [ $? != 0 ]; then
     nerrors=`expr $nerrors + 1`
 fi

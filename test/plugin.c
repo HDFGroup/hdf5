@@ -62,6 +62,9 @@ const char *FILENAME[] = {
 #define DSET_DIM1       100
 #define DSET_DIM2       200
 
+/* Limit random number within 20000 */
+#define RANDOM_LIMIT    20000
+
 int	points_deflate[DSET_DIM1][DSET_DIM2], 
         points_dynlib1[DSET_DIM1][DSET_DIM2],
         points_dynlib2[DSET_DIM1][DSET_DIM2],
@@ -200,8 +203,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
 
     for(i=0; i<size[0]; i++) {
 	for(j=0; j<size[1]/2; j++) {
-	    /*points[i][j] = (int)7;*/
-	    points[i][j] = (int)HDrandom ();
+	    points[i][j] = (int)HDrandom () % RANDOM_LIMIT;
 	}
     }
     if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
@@ -263,7 +265,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
 
     for(i=0; i<(size_t)hs_size[0]; i++) {
 	for(j=0; j<(size_t)hs_size[1]; j++) {
-	    points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] = (int)HDrandom();
+	    points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] = (int)HDrandom() % RANDOM_LIMIT;
 	}
     }
     if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
@@ -348,7 +350,7 @@ test_filters(hid_t file, hid_t fapl)
     unsigned int         compress_level = 9;
 
     /*----------------------------------------------------------
-     * STEP 2: Test deflation by itself.
+     * STEP 1: Test deflation by itself.
      *----------------------------------------------------------
      */
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -385,15 +387,14 @@ test_filters(hid_t file, hid_t fapl)
      * for this filter. */
     if(H5Zunregister(H5Z_FILTER_DYNLIB1) < 0) goto error;
 
-#ifdef TMP
     /*----------------------------------------------------------
-     * STEP 2: Test Bogus2 by itself.
+     * STEP 3: Test DYNLIB2 by itself.
      *----------------------------------------------------------
      */
     puts("Testing DYNLIB2 filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
+    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 0, NULL) < 0) goto error;
 
     if(test_filter_internal(file,DSET_DYNLIB2_NAME,dc) < 0) goto error;
 
@@ -404,27 +405,6 @@ test_filters(hid_t file, hid_t fapl)
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
      * for this filter. */
     if(H5Zunregister(H5Z_FILTER_DYNLIB2) < 0) goto error;
-
-
-    /*----------------------------------------------------------
-     * STEP 3: Test BZIP2 by itself.
-     *----------------------------------------------------------
-     */
-    puts("Testing BZIP2 filter");
-    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_filter (dc, H5Z_FILTER_BZIP2, H5Z_FLAG_MANDATORY, 1, &compress_level) < 0) goto error;
-
-    if(test_filter_internal(file,DSET_BZIP2_NAME,dc) < 0) goto error;
-
-    /* Clean up objects used for this test */
-    if(H5Pclose (dc) < 0) goto error;
-
-    /* Unregister the dynamic filter BOGUS for testing purpose. The next time when this test is run for 
-     * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
-     * for this filter. */
-    if(H5Zunregister(H5Z_FILTER_BZIP2) < 0) goto error;
-#endif
 
     return 0;
 
@@ -498,7 +478,7 @@ test_read_with_filters(hid_t file, hid_t fapl)
     hid_t	dset;                 /* Dataset ID */
 
     /*----------------------------------------------------------
-     * STEP 2: Test deflation by itself.
+     * STEP 1: Test deflation by itself.
      *----------------------------------------------------------
      */
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -531,9 +511,8 @@ test_read_with_filters(hid_t file, hid_t fapl)
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
-#ifdef TMP
     /*----------------------------------------------------------
-     * STEP 2: Test Bogus2 by itself.
+     * STEP 3: Test Bogus2 by itself.
      *----------------------------------------------------------
      */
     TESTING("Testing DYNLIB2 filter");
@@ -543,20 +522,6 @@ test_read_with_filters(hid_t file, hid_t fapl)
     if(test_read_data(dset, points_dynlib2) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
-
-    /*----------------------------------------------------------
-     * STEP 3: Test BZIP2 by itself.
-     *----------------------------------------------------------
-     */
-    TESTING("Testing BZIP2 filter");
-
-    if((dset = H5Dopen2(file,DSET_BZIP2_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
-
-    if(test_read_data(dset, points_bzip2) < 0) TEST_ERROR
-
-    if(H5Dclose(dset) < 0) TEST_ERROR
-
-#endif
 
     return 0;
 

@@ -22,72 +22,69 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include <hdf5.h>
 
-static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+static size_t H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DYNLIB1[1] = {{
+const H5Z_class2_t H5Z_DYNLIB2[1] = {{
     H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIB1,		     /* Filter id number		*/
+    H5Z_FILTER_DYNLIB2,		     /* Filter id number		*/
     1, 1,                            /* Encoding and decoding enabled   */
-    "dynlib1",			     /* Filter name for debugging	*/
+    "dynlib2",			     /* Filter name for debugging	*/
     NULL,                            /* The "can apply" callback        */
     NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlib1,    /* The actual filter function	*/
+    (H5Z_func_t)H5Z_filter_dynlib2,    /* The actual filter function	*/
 }};
 
 const H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB1;}
+const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB2;}
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_dynlib1
+ * Function:	H5Z_filter_dynlib2
  *
- * Purpose:	A dynlib1 filter method that adds on and subtract from
- *              the original value with another value.  It will be built 
- *              as a shared library.  plugin.c test will load and use 
- *              this filter library.    
+ * Purpose:	A dynlib2 filter method that assigns the power of 2 of the
+ *              original value during write and calculates the square root
+ *              of the original value during read. It will be built as a 
+ *              shared library.  plugin.c test will load and use this filter 
+ *              library.    
  *
  * Return:	Success:	Data chunk size
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
+ * Programmer:	Raymond Lu
  *              29 March 2013
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
     int *int_ptr=(int *)*buf;          /* Pointer to the data values */
     size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
-    int         add_on = 0;
 
     /* Check for the correct number of parameters */
-    if(cd_nelmts==0)
+    if(cd_nelmts>0)
         return(0);
-
-    /* Check that permanent parameters are set correctly */
-    if(cd_values[0]<0 || cd_values[0]>9)
-        return(0);
-  
-    add_on = cd_values[0];
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Substract the "add on" value to all the data values */
+        /* Calculate and assign the square root for all the data values */
         while(buf_left>0) {
-            *int_ptr++ -= add_on;
+            *int_ptr = (int)sqrt((double)*int_ptr);
+            *int_ptr++;
             buf_left -= sizeof(int);
         } /* end while */
     } /* end if */
     else { /*write*/
-        /* Add the "add on" value to all the data values */
+        /* Calculate and assign the power of 2 to all the data values */
         while(buf_left>0) {
-            *int_ptr++ += add_on;
+            *int_ptr = (int)pow((double)*int_ptr, 2);
+            *int_ptr++;
             buf_left -= sizeof(int);
         } /* end while */
     } /* end else */
