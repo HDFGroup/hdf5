@@ -4,10 +4,10 @@ DATASET "myfilter" {
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE 800
+      SIZE 800 (1.000:1 COMPRESSION)
    }
    FILTERS {
-      UNKNOWN_FILTER {
+      USER_DEFINED_FILTER {
          FILTER_ID 405
          COMMENT myfilter
          PARAMS { 5 6 }

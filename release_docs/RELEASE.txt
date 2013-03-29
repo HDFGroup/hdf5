@@ -276,6 +276,10 @@ New Features
 
     Tools:
     ------
+     - h5dump: Fixed displaying comporession ratio for unknown or user-defined 
+               filters. HDFFV-8344 (XCAO 2013/03/19)
+     - h5dump: Changed UNKNOWN_FILTER to USER_DEFINED_FILTER for user defined filter.
+               HDFFV-8346 (XCAO 2013/03/19)
      - h5dump: Added capability for "-a" option to show attributes containing "/" 
                by using an escape character. For example, for a dataset "/dset" 
                containing attribute "speed(m/h)", use "h5dump -a "/dset/speed(\/h)" 

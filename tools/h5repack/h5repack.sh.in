@@ -244,8 +244,11 @@ VERIFY_LAYOUT_DSET()
     shift
     shift
     shift
-    
-    $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+   
+    TESTING  $H5REPACK $@
+    ( 
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    )
     RET=$?
     if [ $RET != 0 ] ; then
         echo "*FAILED*"
@@ -266,6 +269,7 @@ VERIFY_LAYOUT_DSET()
         echo " PASSED"
     else
         echo " FAILED"
+        nerrors="`expr $nerrors + 1`"
     fi
 
     # clean up tmp files
@@ -277,6 +281,7 @@ VERIFY_LAYOUT_DSET()
 # Verifying layouts from entire file
 VERIFY_LAYOUT_ALL()
 {
+    infile=$2
     outfile=$TESTDIR/out-$1.$2
     layoutfile=$TESTDIR/layout-$1.$2
     expectlayout=$3
@@ -284,7 +289,10 @@ VERIFY_LAYOUT_ALL()
     shift
     shift
     
-    $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    TESTING  $H5REPACK $@
+    ( 
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    )
     RET=$?
     if [ $RET != 0 ] ; then
         echo "*FAILED*"
@@ -300,6 +308,7 @@ VERIFY_LAYOUT_ALL()
     # check if the other layouts still exsit
     VERIFY  "layouts"
     (
+        echo
         # if CONTIGUOUS
         if [ $expectlayout = "CONTIGUOUS" ]; then
             TESTING $H5DUMP_BIN -pH $outfile
@@ -309,10 +318,12 @@ VERIFY_LAYOUT_ALL()
             $GREP "COMPACT" $layoutfile  > /dev/null
             if [ $? -eq 0 ]; then
                 echo " FAILED"
+                nerrors="`expr $nerrors + 1`"
             else
                 $GREP "CHUNKED" $layoutfile  > /dev/null
                 if [ $? -eq 0 ]; then
                     echo " FAILED"
+                    nerrors="`expr $nerrors + 1`"
                 else
                     echo " PASSED"
                 fi
@@ -327,10 +338,12 @@ VERIFY_LAYOUT_ALL()
                 $GREP "CHUNKED" $layoutfile  > /dev/null
                 if [ $? -eq 0 ]; then
                     echo " FAILED"
+                    nerrors="`expr $nerrors + 1`"
                 else
                     $GREP "CONTIGUOUS" $layoutfile  > /dev/null
                     if [ $? -eq 0 ]; then
                         echo " FAILED"
+                        nerrors="`expr $nerrors + 1`"
                     else
                         echo " PASSED"
                     fi
@@ -345,10 +358,12 @@ VERIFY_LAYOUT_ALL()
                     $GREP "CONTIGUOUS" $layoutfile  > /dev/null
                     if [ $? -eq 0 ]; then
                         echo " FAILED"
+                        nerrors="`expr $nerrors + 1`"
                     else
                         $GREP "COMPACT" $layoutfile  > /dev/null
                         if [ $? -eq 0 ]; then
                             echo " FAILED"
+                            nerrors="`expr $nerrors + 1`"
                         else
                             echo " PASSED"
                         fi
@@ -523,6 +538,7 @@ TOOLTEST_META()
     else
 	#fail
 	echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
     fi
     
     rm -f $outfile
