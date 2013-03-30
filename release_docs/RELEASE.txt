@@ -133,6 +133,9 @@ Bug Fixes since HDF5-1.8.10
       Fixes HDFFV-7975 and HDFFV-8240 (DER 2013/01/07)
     - Fixed a bug in the core VFD that cause failures when opening files > 2 GB.
       Fixes HDFFV-8124 and HDFFV-8158 (DER 2013/01/07)
+    - Fixed a bug where unintialized memory was read during variable-length
+      type conversion.  This caused segfaults in netCDF.  Fixes HDFFV-8159.
+      (DER 2013/03/30)
 
     Parallel Library
     ----------------
