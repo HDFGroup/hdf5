@@ -14,9 +14,10 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 
-## Update HDF5 compiler tools after the HDF5 software has been installed
-## in a new location.
-## For help page, use "h5redeploy -help"
+## Update HDF5 compiler tools after the HDF5 software has been installed  ##
+## in a new location.							  ##
+## For help page, use "h5redeploy -help"				  ##
+##									  ##
 
 # Constants definitions
 EXIT_SUCCESS=0
@@ -70,17 +71,38 @@ ERROR()
 
 # Main
 #
+############################################################################
+## Installation directories:						  ##
+## prefix	architecture-independent files.				  ##
+## exec_prefix	architecture-dependent files, default is <prefix>.	  ##
+## libdir	libraries, default is <exec_prefix>/lib.		  ##
+## includedir	header files, default is <prefix/include>.		  ##
+## Not used here:							  ##
+## bindir	executables, <exec_prefix/bin>.				  ##
+############################################################################
 # Initialization
 h5tools="h5cc h5pcc h5fc h5pfc h5c++"	# possible hdf5 tools
 foundtools=		# tools found and will be modified
 fmode=			# force mode, default is off
-prefix=`(cd ..;pwd)`
+prefix=
+eprefix=
+libdir=
+includedir=
 
 # Parse options
 for arg in $@ ; do
   case "$arg" in
     -prefix=*)
-      prefix="`expr "$arg" : '-prefix=\(.*\)'`"
+      prefix="`echo $arg | cut -f2 -d=`"
+      ;;
+    -eprefix=*)
+      eprefix="`echo $arg | cut -f2 -d=`"
+      ;;
+    -libdir=*)
+      libdir="`echo $arg | cut -f2 -d=`"
+      ;;
+    -includedir=*)
+      includedir="`echo $arg | cut -f2 -d=`"
       ;;
     -echo)
       set -x
@@ -89,7 +111,7 @@ for arg in $@ ; do
       SHOW="echo"
       ;;
     -tool=*)
-      h5tools="`expr "$arg" : '-tool=\(.*\)'`"
+      h5tools="`echo $arg | cut -f2 -d=`"
       ;;
     -help|help)
       usage
@@ -105,7 +127,33 @@ for arg in $@ ; do
   esac
 done
 
+# Set to default value if not given by user
+if [ -z "$prefix" ]; then
+    prefix=`(cd ..;pwd)`
+fi
+if [ -z "$eprefix" ]; then
+    eprefix=$prefix
+fi
+if [ -z "$libdir" ]; then
+    libdir=$eprefix/lib
+fi
+if [ -z "$includedir" ]; then
+    includedir=$prefix/include
+fi
+
 # Sanity checks
+if [ ! -d $prefix ]; then
+    ERROR "prefix($prefix) is not an existing directory"
+    exit $EXIT_FAILURE
+fi
+if [ ! -d $prefix ]; then
+    ERROR "prefix($prefix) is not an existing directory"
+    exit $EXIT_FAILURE
+fi
+if [ ! -d $prefix ]; then
+    ERROR "prefix($prefix) is not an existing directory"
+    exit $EXIT_FAILURE
+fi
 if [ ! -d $prefix ]; then
     ERROR "prefix($prefix) is not an existing directory"
     exit $EXIT_FAILURE
@@ -144,8 +192,17 @@ fi
 CMDFILE=/tmp/h5redeploy.$$
 touch $CMDFILE
 chmod 0600 $CMDFILE
-echo "/^prefix/c"                 >> $CMDFILE
+echo "/^prefix=/c"                >> $CMDFILE
 echo prefix=\""$prefix"\"         >> $CMDFILE
+echo .                            >> $CMDFILE
+echo "/^exec_prefix=/c"           >> $CMDFILE
+echo exec_prefix=\""$eprefix"\"   >> $CMDFILE
+echo .                            >> $CMDFILE
+echo "/^libdir=/c"                >> $CMDFILE
+echo libdir=\""$libdir"\"         >> $CMDFILE
+echo .                            >> $CMDFILE
+echo "/^includedir=/c"            >> $CMDFILE
+echo includedir=\""$includedir"\" >> $CMDFILE
 echo .                            >> $CMDFILE
 (echo w; echo q)                  >> $CMDFILE
 
