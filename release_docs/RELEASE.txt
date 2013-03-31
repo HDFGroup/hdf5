@@ -183,7 +183,14 @@ Bug Fixes since HDF5-1.8.10
 
     C++ API
     ------
-    - None
+    - An exception thrown by an internal function was not propagating to the
+      test program during stack unwinding, so it couldn't be caught by the
+      test and the program terminated "without an active exception."  It seemed
+      that the problem happened when c_str() was used to generate an equivalant
+      const char* from a std::string and the resulting string was passed to 
+      the internal function.  As a work-around, we added a try/catch around
+      the the call to the internal function and when the exception is caught there,
+      it is re-thrown.
 
     High-Level APIs:
     ------
