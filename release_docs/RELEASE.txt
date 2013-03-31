@@ -183,6 +183,9 @@ Bug Fixes since HDF5-1.8.10
 
     C++ API
     ------
+    - The C++ wrappers DSetMemXferPropList::setMulti/getMulti are removed because
+      the C functions H5Pset/get_dxpl_multi functions are removed from the library.
+      Fixes HDFFV-8296 by DER.  (BMR 2013/03/30)
     - An exception thrown by an internal function was not propagating to the
       test program during stack unwinding, so it couldn't be caught by the
       test and the program terminated "without an active exception."  It seemed
@@ -190,7 +193,7 @@ Bug Fixes since HDF5-1.8.10
       const char* from a std::string and the resulting string was passed to 
       the internal function.  As a work-around, we added a try/catch around
       the the call to the internal function and when the exception is caught there,
-      it is re-thrown.
+      it is re-thrown.  Fixes HDFFV-8067.  (BMR 2013/03/30)
 
     High-Level APIs:
     ------
