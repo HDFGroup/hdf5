@@ -136,6 +136,11 @@ Bug Fixes since HDF5-1.8.10
     - Fixed a bug where unintialized memory was read during variable-length
       type conversion.  This caused segfaults in netCDF.  Fixes HDFFV-8159.
       (DER 2013/03/30)
+    - Removed the H5Pset/get_dxpl_multi functions from the library.  The
+      intended functionality for them was never fully implemented and they
+      have always been fundamentally broken.  NOTE: This does not affect setting
+      the multi VFD or any expected VFD functionality.  Multi VFD usage
+      remains unchanged.  Fixes HDFFV-8296.  (DER 2013/03/30)
 
     Parallel Library
     ----------------
