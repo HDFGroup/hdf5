@@ -85,7 +85,7 @@ if HAVE_SHARED_CONDITIONAL
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
 
-install-data-local:
+install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
 
 else

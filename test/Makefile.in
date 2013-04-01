@@ -1574,7 +1574,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@HAVE_SHARED_CONDITIONAL_FALSE@install-data-local:
+@HAVE_SHARED_CONDITIONAL_FALSE@install-exec-hook:
 clean: clean-am
 
 clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -1599,14 +1599,15 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local
+install-data-am:
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
 install-exec-am: install-libLTLIBRARIES
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -1647,7 +1648,7 @@ ps-am:
 
 uninstall-am: uninstall-libLTLIBRARIES
 
-.MAKE: check-am install-am install-strip
+.MAKE: check-am install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
 	clean clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -1655,8 +1656,8 @@ uninstall-am: uninstall-libLTLIBRARIES
 	cscopelist ctags distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-data-local install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-hook install-html install-html-am \
 	install-info install-info-am install-libLTLIBRARIES \
 	install-man install-pdf install-pdf-am install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
@@ -1682,7 +1683,7 @@ help:
 @HAVE_SHARED_CONDITIONAL_TRUE@  # The libdynlib1 and libdynlib2 library for testing plugin module plugin.c.
 @HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
 
-@HAVE_SHARED_CONDITIONAL_TRUE@install-data-local:
+@HAVE_SHARED_CONDITIONAL_TRUE@install-exec-hook:
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(RM) $(DESTDIR)$(libdir)/*dynlib*
 
 @HAVE_SHARED_CONDITIONAL_FALSE@  # The libh5test library provides common support code for the tests.
