@@ -139,6 +139,12 @@ am__libdynlib2_la_SOURCES_DIST = dynlib2.c
 libdynlib2_la_OBJECTS = $(am_libdynlib2_la_OBJECTS)
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib2_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
+libdynlib3_la_LIBADD =
+am__libdynlib3_la_SOURCES_DIST = dynlib3.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_OBJECTS = dynlib3.lo
+libdynlib3_la_OBJECTS = $(am_libdynlib3_la_OBJECTS)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlib3_la_rpath = -rpath \
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
 libh5test_la_OBJECTS = $(am_libh5test_la_OBJECTS)
@@ -517,12 +523,13 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
-	$(libh5test_la_SOURCES) accum.c app_ref.c big.c bittests.c \
-	btree2.c cache.c cache_api.c cache_tagging.c cmpd_dset.c \
-	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
-	earray.c efc.c enc_dec_plist.c enc_dec_plist_with_endianess.c \
-	enum.c err_compat.c error_test.c extend.c external.c farray.c \
-	fheap.c file_image.c fillval.c filter_fail.c flush1.c flush2.c \
+	$(libdynlib3_la_SOURCES) $(libh5test_la_SOURCES) accum.c \
+	app_ref.c big.c bittests.c btree2.c cache.c cache_api.c \
+	cache_tagging.c cmpd_dset.c cross_read.c dangle.c dsets.c \
+	dt_arith.c dtransform.c dtypes.c earray.c efc.c \
+	enc_dec_plist.c enc_dec_plist_with_endianess.c enum.c \
+	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
+	file_image.c fillval.c filter_fail.c flush1.c flush2.c \
 	freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
 	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
 	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
@@ -534,7 +541,8 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	tcheck_version.c $(testhdf5_SOURCES) testmeta.c \
 	$(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
-	$(am__libdynlib2_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
+	$(am__libdynlib2_la_SOURCES_DIST) \
+	$(am__libdynlib3_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
 	accum.c app_ref.c big.c bittests.c btree2.c cache.c \
 	cache_api.c cache_tagging.c cmpd_dset.c cross_read.c dangle.c \
 	dsets.c dt_arith.c dtransform.c dtypes.c earray.c efc.c \
@@ -911,9 +919,10 @@ BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_n
 
 @HAVE_SHARED_CONDITIONAL_FALSE@noinst_LTLIBRARIES = libh5test.la
 @HAVE_SHARED_CONDITIONAL_TRUE@noinst_LTLIBRARIES = libh5test.la
-@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlib1.la libdynlib2.la
+@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlib1.la libdynlib2.la libdynlib3.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib1_la_SOURCES = dynlib1.c
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlib2_la_SOURCES = dynlib2.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlib3_la_SOURCES = dynlib3.c
 libh5test_la_SOURCES = h5test.c testframe.c cache_common.c
 
 # Use libhd5test.la to compile all of the tests
@@ -1050,6 +1059,8 @@ libdynlib1.la: $(libdynlib1_la_OBJECTS) $(libdynlib1_la_DEPENDENCIES) $(EXTRA_li
 	$(AM_V_CCLD)$(LINK) $(am_libdynlib1_la_rpath) $(libdynlib1_la_OBJECTS) $(libdynlib1_la_LIBADD) $(LIBS)
 libdynlib2.la: $(libdynlib2_la_OBJECTS) $(libdynlib2_la_DEPENDENCIES) $(EXTRA_libdynlib2_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) $(am_libdynlib2_la_rpath) $(libdynlib2_la_OBJECTS) $(libdynlib2_la_LIBADD) $(LIBS)
+libdynlib3.la: $(libdynlib3_la_OBJECTS) $(libdynlib3_la_DEPENDENCIES) $(EXTRA_libdynlib3_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) $(am_libdynlib3_la_rpath) $(libdynlib3_la_OBJECTS) $(libdynlib3_la_LIBADD) $(LIBS)
 libh5test.la: $(libh5test_la_OBJECTS) $(libh5test_la_DEPENDENCIES) $(EXTRA_libh5test_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) $(am_libh5test_la_rpath) $(libh5test_la_OBJECTS) $(libh5test_la_LIBADD) $(LIBS)
 
@@ -1320,6 +1331,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dtypes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/earray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/efc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/enc_dec_plist.Po@am__quote@
