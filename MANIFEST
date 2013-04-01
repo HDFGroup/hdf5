@@ -737,6 +737,9 @@
 ./src/H5Ppublic.h
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
+./src/H5PL.c
+./src/H5PLprivate.h
+./src/H5PLpublic.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
 ./src/H5Rpkg.h
@@ -845,6 +848,8 @@
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
+./test/dynlib1.c
+./test/dynlib2.c
 ./test/efc.c
 ./test/enum.c
 ./test/extend.c
@@ -910,6 +915,7 @@
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/objcopy.c
+./test/plugin.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -932,6 +938,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_plugin.sh.in
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
