@@ -436,6 +436,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## General Fortran flags
   ## Only add FFLAGS to FCFLAGS if it's set.
   if test "x$FFLAGS" != "x" ; then
+    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
     FCFLAGS="${FCFLAGS} ${FFLAGS}"
   fi
 
