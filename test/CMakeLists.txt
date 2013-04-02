@@ -41,44 +41,48 @@ SET_TARGET_PROPERTIES (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test)
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------
 IF (BUILD_SHARED_LIBS)
-  SET (HDF5_TEST_PLUGIN_LIB_CORENAME         "dynlib1")
-  SET (HDF5_TEST_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_LIB_CORENAME}")
-  SET (HDF5_TEST_PLUGIN_LIB_TARGET           ${HDF5_TEST_PLUGIN_LIB_CORENAME})
-  ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
-  INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
-
-  #-----------------------------------------------------------------------------
-  # Define Sources
-  #-----------------------------------------------------------------------------
-
-  SET (H5_TEST_PLUGIN_LIB_SRCS
-      ${HDF5_TEST_SOURCE_DIR}/dynlib1.c
-  )
-
-  ADD_LIBRARY (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${H5_TEST_PLUGIN_LIB_SRCS})
-  TARGET_LINK_LIBRARIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  H5_SET_LIB_OPTIONS (
-      ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
-      ${LIB_TYPE}
-      HDF5_TEST_PLUGIN_LIB_NAME_RELEASE
-      HDF5_TEST_PLUGIN_LIB_NAME_DEBUG
-  )
-  SET_TARGET_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
-
-  #-----------------------------------------------------------------------------
-  # Copy plugin library to a plugins folder
-  #-----------------------------------------------------------------------------
 
   # make plugins dir
   FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
-  ADD_CUSTOM_COMMAND (
-      TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different 
-        "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
-        "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+
+  #-----------------------------------------------------------------------------
+  # Define Test Library Sources
+  #-----------------------------------------------------------------------------
+  SET (TEST_PLUGIN_LIBS
+      dynlib1
+      dynlib2
+      dynlib3
   )
+
+  FOREACH (test_lib ${TEST_PLUGIN_LIBS})
+    SET (HDF5_TEST_PLUGIN_LIB_CORENAME         "${test_lib}")
+    SET (HDF5_TEST_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_LIB_CORENAME}")
+    SET (HDF5_TEST_PLUGIN_LIB_TARGET           ${HDF5_TEST_PLUGIN_LIB_CORENAME})
+    ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+    INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
+
+    ADD_LIBRARY (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
+    TARGET_LINK_LIBRARIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (
+        ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
+        ${LIB_TYPE}
+        HDF5_TEST_PLUGIN_LIB_NAME_RELEASE
+        HDF5_TEST_PLUGIN_LIB_NAME_DEBUG
+    )
+    SET_TARGET_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Copy plugin library to a plugins folder
+    #-----------------------------------------------------------------------------
+    ADD_CUSTOM_COMMAND (
+        TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different 
+          "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+    )
+  ENDFOREACH (test_lib ${TEST_PLUGIN_LIBS})
 ENDIF (BUILD_SHARED_LIBS)
 
 # --------------------------------------------------------------------
