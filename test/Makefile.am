@@ -79,11 +79,12 @@ if HAVE_SHARED_CONDITIONAL
   # The libh5test library provides common support code for the tests.
   noinst_LTLIBRARIES=libh5test.la
 
-  # The libdynlib1 and libdynlib2 library for testing plugin module plugin.c.
+  # The libdynlib1, libdynlib2, and libdynlib3 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la
+  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
+  libdynlib3_la_SOURCES=dynlib3.c
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*

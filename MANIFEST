@@ -850,6 +850,7 @@
 ./test/dtransform.c
 ./test/dynlib1.c
 ./test/dynlib2.c
+./test/dynlib3.c
 ./test/efc.c
 ./test/enum.c
 ./test/extend.c

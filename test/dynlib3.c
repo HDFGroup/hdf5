@@ -15,84 +15,88 @@
 
 /*
  * Programmer:	Raymond Lu
- *		13 February 2013
+ *		1 April 2013
  *
  * Purpose:	Tests the plugin module (H5PL)
  */
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <hdf5.h>
 
-#define H5Z_FILTER_DYNLIB1      257
+#define H5Z_FILTER_DYNLIB3      259
+#define SUFFIX_LEN              8
+#define GROUP_SUFFIX            ".h5group"
 
-static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+static size_t H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DYNLIB1[1] = {{
+const H5Z_class2_t H5Z_DYNLIB3[1] = {{
     H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIB1,		     /* Filter id number		*/
+    H5Z_FILTER_DYNLIB3,		     /* Filter id number		*/
     1, 1,                            /* Encoding and decoding enabled   */
-    "dynlib1",			     /* Filter name for debugging	*/
+    "dynlib3",			     /* Filter name for debugging	*/
     NULL,                            /* The "can apply" callback        */
     NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlib1,    /* The actual filter function	*/
+    (H5Z_func_t)H5Z_filter_dynlib3,    /* The actual filter function	*/
 }};
 
 const H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB1;}
+const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB3;}
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_dynlib1
+ * Function:	H5Z_filter_dynlib3
  *
- * Purpose:	A dynlib1 filter method that adds on and subtract from
- *              the original value with another value.  It will be built 
- *              as a shared library.  plugin.c test will load and use 
- *              this filter library.    
+ * Purpose:	A dynlib3 filter method that is used to test groups.  It 
+ *              appends the suffix ".h5group" to each group name during 
+ *              write and takes it out during read.
  *
  * Return:	Success:	Data chunk size
  *
  *		Failure:	0
  *
  * Programmer:	Raymond Lu
- *              29 March 2013
+ *              1 April 2013
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
+H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
-    int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
-    int         add_on = 0;
+    size_t   ret_value;         /* Return value */
 
     /* Check for the correct number of parameters */
-    if(cd_nelmts==0)
+    if(cd_nelmts>0)
         return(0);
-
-    /* Check that permanent parameters are set correctly */
-    if(cd_values[0]<0 || cd_values[0]>9)
-        return(0);
-  
-    add_on = cd_values[0];
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Substract the "add on" value to all the data values */
-        while(buf_left>0) {
-            *int_ptr++ -= add_on;
-            buf_left -= sizeof(int);
-        } /* end while */
-    } /* end if */
-    else { /*write*/
-        /* Add the "add on" value to all the data values */
-        while(buf_left>0) {
-            *int_ptr++ += add_on;
-            buf_left -= sizeof(int);
-        } /* end while */
+        ret_value = *buf_size = nbytes - SUFFIX_LEN;
+    } else { /*write*/
+        void    *outbuf = NULL;     /* Pointer to new buffer */
+        unsigned char *dst;         /* Temporary pointer to destination buffer */
+
+	dst=outbuf=malloc(nbytes+SUFFIX_LEN);
+
+        /* Copy raw data */
+        memcpy((void*)dst, (void*)(*buf), nbytes);
+
+        /* Append suffix to raw data for storage */
+        dst += nbytes;
+        memcpy((void*)dst, (void*)GROUP_SUFFIX, SUFFIX_LEN);
+
+        /* Free input buffer */
+ 	free(*buf);
+
+        /* Set return values */
+        *buf_size = nbytes + SUFFIX_LEN;
+	*buf = outbuf;
+	outbuf = NULL;
+	ret_value = *buf_size;
     } /* end else */
 
-    return nbytes;
+    return ret_value;
 }
