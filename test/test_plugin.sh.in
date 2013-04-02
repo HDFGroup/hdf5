@@ -34,7 +34,9 @@ exit_code=$EXIT_SUCCESS
 TEST_NAME=plugin
 TEST_BIN=`pwd`/$TEST_NAME
 FROM_DIR=`pwd`/.libs
-PLUGIN_LIB2="$FROM_DIR/libdynlib2.so.*"
+PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
+PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
+PLUGIN_LIBDIR1=testdir1
 PLUGIN_LIBDIR2=testdir2
 CP="cp -p"	# Use -p to preserve mode,ownership,timestamps
 RM="rm -rf"
@@ -48,7 +50,13 @@ TESTING() {
 }
 
 # Main Body
-# Create test directory if not exists yet.
+# Create test directories if not exists yet.
+test -d $PLUGIN_LIBDIR1 || mkdir -p $PLUGIN_LIBDIR1
+if [ $? != 0 ]; then
+    echo "Failed to create test directory($PLUGIN_LIBDIR1)"
+    exit $EXIT_FAILURE
+fi
+
 test -d $PLUGIN_LIBDIR2 || mkdir -p $PLUGIN_LIBDIR2
 if [ $? != 0 ]; then
     echo "Failed to create test directory($PLUGIN_LIBDIR2)"
@@ -56,6 +64,12 @@ if [ $? != 0 ]; then
 fi
 
 # copy plugin library for test
+$CP $PLUGIN_LIB1 $PLUGIN_LIBDIR1
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB1) for test."
+    exit $EXIT_FAILURE
+fi
+
 $CP $PLUGIN_LIB2 $PLUGIN_LIBDIR2
 if [ $? != 0 ]; then
     echo "Failed to copy plugin library ($PLUGIN_LIB2) for test."
@@ -63,7 +77,7 @@ if [ $? != 0 ]; then
 fi
 
 # setup plugin path
-ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR2}:$FROM_DIR"
+ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR1}:${PLUGIN_LIBDIR2}"
 
 # Run the test
 $ENVCMD $TEST_BIN
