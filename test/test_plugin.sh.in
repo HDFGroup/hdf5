@@ -24,13 +24,20 @@ TOP_BUILDDIR=@top_builddir@
 # Determine backward compatibility options enabled
 DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
 nerrors=0
 verbose=yes
+exit_code=$EXIT_SUCCESS
 
 TEST_NAME=plugin
 TEST_BIN=`pwd`/$TEST_NAME
-CP="cp .libs/libdynlib2.so.* /tmp"
-ENVCMD="env HDF5_PLUGIN_PATH=/tmp:`pwd`/.libs"
+FROM_DIR=`pwd`/.libs
+PLUGIN_LIB2="$FROM_DIR/libdynlib2.so.*"
+PLUGIN_LIBDIR2=testdir2
+CP="cp -p"	# Use -p to preserve mode,ownership,timestamps
+RM="rm -rf"
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -41,8 +48,25 @@ TESTING() {
 }
 
 # Main Body
+# Create test directory if not exists yet.
+test -d $PLUGIN_LIBDIR2 || mkdir -p $PLUGIN_LIBDIR2
+if [ $? != 0 ]; then
+    echo "Failed to create test directory($PLUGIN_LIBDIR2)"
+    exit $EXIT_FAILURE
+fi
+
+# copy plugin library for test
+$CP $PLUGIN_LIB2 $PLUGIN_LIBDIR2
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB2) for test."
+    exit $EXIT_FAILURE
+fi
+
+# setup plugin path
+ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR2}:$FROM_DIR"
+
 # Run the test
-$CP; $ENVCMD $TEST_BIN
+$ENVCMD $TEST_BIN
 if [ $? != 0 ]; then
     nerrors=`expr $nerrors + 1`
 fi
@@ -50,8 +74,12 @@ fi
 # print results
 if test $nerrors -ne 0 ; then
     echo "$nerrors errors encountered"
-    exit 1
+    exit_code=$EXIT_FAILURE
 else
     echo "All Plugin API tests passed."
-    exit 0
+    exit_code=$EXIT_SUCCESS
 fi
+
+# Clean up temporary files/directories and leave
+$RM $PLUGIN_LIBDIR2
+exit $exit_code
