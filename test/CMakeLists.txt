@@ -41,17 +41,19 @@ SET_TARGET_PROPERTIES (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test)
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------
 IF (BUILD_SHARED_LIBS)
-
   # make plugins dir
-  FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
+  FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir1")
+  FILE (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
 
   #-----------------------------------------------------------------------------
   # Define Test Library Sources
   #-----------------------------------------------------------------------------
   SET (TEST_PLUGIN_LIBS
       dynlib1
-      dynlib2
       dynlib3
+  )
+  SET (TEST2_PLUGIN_LIBS
+      dynlib2
   )
 
   FOREACH (test_lib ${TEST_PLUGIN_LIBS})
@@ -80,9 +82,39 @@ IF (BUILD_SHARED_LIBS)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different 
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
-          "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/testdir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
   ENDFOREACH (test_lib ${TEST_PLUGIN_LIBS})
+
+  FOREACH (test_lib ${TEST2_PLUGIN_LIBS})
+    SET (HDF5_TEST_PLUGIN_LIB_CORENAME         "${test_lib}")
+    SET (HDF5_TEST_PLUGIN_LIB_NAME             "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_TEST_PLUGIN_LIB_CORENAME}")
+    SET (HDF5_TEST_PLUGIN_LIB_TARGET           ${HDF5_TEST_PLUGIN_LIB_CORENAME})
+    ADD_DEFINITIONS (${HDF5_EXTRA_C_FLAGS})
+    INCLUDE_DIRECTORIES (${HDF5_SRC_DIR})
+
+    ADD_LIBRARY (${HDF5_TEST_PLUGIN_LIB_TARGET} ${LIB_TYPE} ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
+    TARGET_LINK_LIBRARIES (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+    H5_SET_LIB_OPTIONS (
+        ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
+        ${LIB_TYPE}
+        HDF5_TEST_PLUGIN_LIB_NAME_RELEASE
+        HDF5_TEST_PLUGIN_LIB_NAME_DEBUG
+    )
+    SET_TARGET_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Copy plugin library to a plugins folder
+    #-----------------------------------------------------------------------------
+    ADD_CUSTOM_COMMAND (
+        TARGET     ${HDF5_TEST_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different 
+          "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
+    )
+  ENDFOREACH (test_lib ${TEST2_PLUGIN_LIBS})
 ENDIF (BUILD_SHARED_LIBS)
 
 # --------------------------------------------------------------------
@@ -335,7 +367,7 @@ ADD_TEST (
         extlinks19B00003.h5
         extlinks19B00004.h5
         extlinks19B00005.h5
-        extlinks19B00006.h5
+        extlinks19B00006.h5plugins
         extlinks19B00007.h5
         extlinks19B00008.h5
         extlinks19B00009.h5
@@ -605,13 +637,20 @@ ADD_TEST (NAME testlibinfo COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FI
 ###    P L U G I N  T E S T S
 ##############################################################################
 IF (BUILD_SHARED_LIBS)
+
+  IF (WIN32 AND NOT CYGWIN)
+    SET(CMAKE_SEP ";")
+  ELSE (WIN32 AND NOT CYGWIN)
+    SET(CMAKE_SEP ":")
+  ENDIF(WIN32 AND NOT CYGWIN)
+
   ADD_EXECUTABLE (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
   TARGET_NAMING (plugin ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (plugin ${HDF5_TEST_PLUGIN_LIB_TARGET})
   SET_TARGET_PROPERTIES (plugin PROPERTIES FOLDER test)
 
   ADD_TEST (NAME H5PLUGIN-plugin COMMAND $<TARGET_FILE:plugin>)
-  SET_TESTS_PROPERTIES (H5PLUGIN-plugin PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/plugins")
+  SET_TESTS_PROPERTIES (H5PLUGIN-plugin PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2")
 ELSE (BUILD_SHARED_LIBS)
   MESSAGE (STATUS " **** Plugins libraries must be built as shared libraries **** ")
   ADD_TEST (
