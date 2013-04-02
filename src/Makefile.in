@@ -141,9 +141,9 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5VLiod_server_encdec.lo H5FD.lo H5FDcore.lo H5FDdirect.lo \
 	H5FDfamily.lo H5FDint.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
 	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDspace.lo \
-	H5FDstdio.lo H5FF.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo \
-	H5FSdbg.lo H5FSsection.lo H5FSstat.lo H5FStest.lo H5G.lo \
-	H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo H5Gdense.lo \
+	H5FDstdio.lo H5FF.lo H5EQ.lo H5FL.lo H5FO.lo H5FS.lo \
+	H5FScache.lo H5FSdbg.lo H5FSsection.lo H5FSstat.lo H5FStest.lo \
+	H5G.lo H5Gbtree2.lo H5Gcache.lo H5Gcompact.lo H5Gdense.lo \
 	H5Gdeprec.lo H5Gent.lo H5Gint.lo H5Glink.lo H5Gloc.lo \
 	H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Groot.lo H5Gstab.lo \
 	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo \
@@ -560,7 +560,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
-        H5FF.c \
+        H5FF.c H5EQ.c \
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
         H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
@@ -615,7 +615,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
-        H5VLpublic.h H5VLnative.h H5VLiod.h H5FFpublic.h \
+        H5VLpublic.h H5VLnative.h H5VLiod.h H5FFpublic.h H5EQpublic.h\
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h
@@ -804,6 +804,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAsblock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAstat.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAtest.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EQ.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Edeprec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Eint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5F.Plo@am__quote@

@@ -1941,7 +1941,6 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         fprintf(stderr, "Checksum Generated for data at server: %u\n", cs);
     }
 
-
     /* Create a new block handle to write the data */
     bds_block_handle_create(buf, size, BDS_READ_ONLY, &bds_block_handle);
 

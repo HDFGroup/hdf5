@@ -29,8 +29,6 @@
 /****************************/
 /* Library Private Typedefs */
 /****************************/
-#define H5_REQUEST_NULL NULL
-#define H5_EVENT_QUEUE_NULL -1
 
 /*****************************/
 /* Library Private Variables */

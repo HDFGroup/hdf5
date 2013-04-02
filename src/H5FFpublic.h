@@ -38,10 +38,6 @@ extern "C" {
 /* Public Typedefs */
 /*******************/
 
-/* An asynchronous request object */
-typedef void *H5_request_t;
-
-
 /********************/
 /* Public Variables */
 /********************/
@@ -52,30 +48,25 @@ typedef void *H5_request_t;
 
 /* API wrappers */
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
-    hid_t fapl,
-    H5_request_t *req);
+                          hid_t fapl, hid_t eq_id);
 H5_DLL hid_t H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
-    H5_request_t *req);
+                        hid_t eq_id);
 H5_DLL hid_t H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id,
-    hid_t gcpl_id, hid_t gapl_id,
-    uint64_t /* UNUSED */ trans, H5_request_t *req);
+                          hid_t gcpl_id, hid_t gapl_id,
+                          uint64_t /* UNUSED */ trans, hid_t eq_id);
 H5_DLL hid_t H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
-    uint64_t /* UNUSED */ trans, H5_request_t *req);
+                        uint64_t /* UNUSED */ trans, hid_t eq_id);
 H5_DLL hid_t H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id,
-    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id,
-    uint64_t /* UNUSED */ trans, H5_request_t *req);
+                          hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id,
+                          uint64_t /* UNUSED */ trans, hid_t eq_id);
 H5_DLL hid_t H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id,
-    uint64_t /* UNUSED */ trans, H5_request_t *req);
+                        uint64_t /* UNUSED */ trans, hid_t eq_id);
 H5_DLL herr_t H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, const void *buf,
-    uint64_t /* UNUSED */ trans, H5_request_t *req);
+                          hid_t file_space_id, hid_t dxpl_id, const void *buf,
+                          uint64_t /* UNUSED */ trans, hid_t eq_id);
 H5_DLL herr_t H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-    hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/,
-    uint64_t /* UNUSED */ trans, H5_request_t *req);
-
-/* Asynchronous test & wait operations */
-H5_DLL herr_t H5AOtest(H5_request_t *req, H5_status_t *status);
-H5_DLL herr_t H5AOwait(H5_request_t *req, H5_status_t *status);
+                         hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/,
+                         uint64_t /* UNUSED */ trans, hid_t eq_id);
 
 #endif /* H5_HAVE_EFF */
 

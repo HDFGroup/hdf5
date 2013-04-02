@@ -39,6 +39,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5EQprivate.h"        /* Event Queues                         */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Ipkg.h"		/* IDs Package header	  		*/
 #include "H5Lprivate.h"		/* Links        		  	*/
@@ -399,6 +400,7 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t
         case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
+        case H5I_EQ:
         case H5I_GENPROP_CLS:
         case H5I_GENPROP_LST:
         case H5I_ERROR_CLASS:
@@ -467,7 +469,7 @@ done:
  */
 void *
 H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                 hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id, hid_t eq_id)
 {
     void *ret_value;  /* Return value */
 
@@ -504,7 +506,7 @@ done:
  */
 void *
 H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-               hid_t aapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+               hid_t aapl_id, hid_t dxpl_id, hid_t eq_id)
 {
     void *ret_value;  /* Return value */
 
@@ -538,7 +540,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5VL_attr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *buf, 
-                      hid_t dxpl_id, hid_t UNUSED event_q)
+                      hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -569,7 +571,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5VL_attr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const void *buf, 
-                       hid_t dxpl_id, hid_t UNUSED event_q)
+                       hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -651,7 +653,7 @@ done:
  */
 herr_t 
 H5VL_attr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 const char *attr_name, hid_t dxpl_id, hid_t UNUSED event_q)
+                 const char *attr_name, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -682,7 +684,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -729,7 +731,7 @@ done:
 void *
 H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
-                     hid_t dxpl_id, hid_t UNUSED event_q)
+                     hid_t dxpl_id, hid_t eq_id)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -766,7 +768,7 @@ done:
  */
 void *
 H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                   hid_t tapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                   hid_t tapl_id, hid_t dxpl_id, hid_t eq_id)
 {
     void *ret_value = NULL;              /* Return value */
 
@@ -812,7 +814,7 @@ done:
  */
 ssize_t 
 H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, 
-                         hid_t dxpl_id, hid_t UNUSED event_q)
+                         hid_t dxpl_id, hid_t eq_id)
 {
     ssize_t ret_value = FAIL;
 
@@ -844,7 +846,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t		ret_value = SUCCEED;    /* Return value */
 
@@ -885,19 +887,37 @@ done:
  */
 void *
 H5VL_dataset_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_plugin->cls->dataset_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `dataset create' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.create)(obj, loc_params, name, dcpl_id, dapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.create)(obj, loc_params, name, dcpl_id, 
+                                                                  dapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
     vol_plugin->nrefs ++;
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -920,11 +940,23 @@ done:
  */
 void *
 H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t dapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                  hid_t dapl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->dataset_cls.open) {
@@ -937,11 +969,18 @@ H5VL_dataset_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, c
     }
     else {
         /* call the corresponding VOL open callback */
-        if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.open)(obj, loc_params, name, dapl_id, dxpl_id, H5_REQUEST_NULL)))
+        if(NULL == (ret_value = (vol_plugin->cls->dataset_cls.open)(obj, loc_params, name, 
+                                                                    dapl_id, dxpl_id, req)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
         vol_plugin->nrefs ++;
 
     }
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_dataset_open() */
@@ -963,17 +1002,34 @@ done:
  */
 herr_t 
 H5VL_dataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                  hid_t file_space_id, hid_t plist_id, void *buf, hid_t UNUSED event_q)
+                  hid_t file_space_id, hid_t plist_id, void *buf, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->dataset_cls.read)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset read' method")
     if((ret_value = (vol_plugin->cls->dataset_cls.read)
-        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
+        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "read failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -996,17 +1052,34 @@ done:
  */
 herr_t 
 H5VL_dataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
-                   hid_t file_space_id, hid_t plist_id, const void *buf, hid_t UNUSED event_q)
+                   hid_t file_space_id, hid_t plist_id, const void *buf, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->dataset_cls.write)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset write' method")
     if((ret_value = (vol_plugin->cls->dataset_cls.write)
-        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, H5_REQUEST_NULL)) < 0)
+        (dset, mem_type_id, mem_space_id, file_space_id, plist_id, buf, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "write failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1029,7 +1102,7 @@ done:
  */
 herr_t 
 H5VL_dataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], 
-                        hid_t dxpl_id, hid_t UNUSED event_q)
+                        hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1072,7 +1145,8 @@ H5VL_dataset_get(void *dset, H5VL_t *vol_plugin, H5VL_dataset_get_t get_type,
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset get' method")
 
     va_start (arguments, event_q);
-    if((ret_value = (vol_plugin->cls->dataset_cls.get)(dset, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    if((ret_value = (vol_plugin->cls->dataset_cls.get)(dset, get_type, dxpl_id, 
+                                                       H5_REQUEST_NULL, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -1113,7 +1187,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1159,38 +1233,55 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_create(H5VL_t **plugin, const char *name, unsigned flags, hid_t fcpl_id, 
-                 hid_t fapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_file_create(H5VL_t **plugin, const char *filename, unsigned flags, hid_t fcpl_id, 
+                 hid_t fapl_id, hid_t dxpl_id, hid_t eq_id)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
     H5VL_class_t       *vol_cls;               /* VOL class attached to fapl_id */
     H5VL_t             *vol_plugin = NULL;     /* the public VOL struct */
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void	       *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* get the VOL info from the fapl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
     if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID");
+
+    /* Build the vol plugin struct */
+    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    vol_plugin = *plugin;
+    vol_plugin->cls = vol_cls;
+    vol_plugin->nrefs = 1;
+    if((vol_plugin->container_name = H5MM_xstrdup(filename)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed");
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_cls->file_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file create' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, H5_REQUEST_NULL)))
-	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
+    if(NULL == (ret_value = (vol_cls->file_cls.create)(filename, flags, fcpl_id, fapl_id, 
+                                                       dxpl_id, req)))
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed");
 
-    /* Build the vol plugin struct */
-    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    vol_plugin = *plugin;
-    vol_plugin->cls = vol_cls;
-    vol_plugin->nrefs = 1;
-    if((vol_plugin->container_name = H5MM_xstrdup(name)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed")
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1212,12 +1303,14 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(H5VL_t **plugin, const char *name, unsigned flags, hid_t fapl_id, 
-               hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_file_open(H5VL_t **plugin, const char *filename, unsigned flags, hid_t fapl_id, 
+               hid_t dxpl_id, hid_t eq_id)
 {
     H5P_genplist_t     *plist;                 /* Property list pointer */
     H5VL_class_t       *vol_cls;               /* VOL class attached to fapl_id */
     H5VL_t             *vol_plugin = NULL;     /* the public VOL struct */
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void	       *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1228,22 +1321,37 @@ H5VL_file_open(H5VL_t **plugin, const char *name, unsigned flags, hid_t fapl_id,
     if(H5P_get(plist, H5F_ACS_VOL_NAME, &vol_cls) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get vol plugin ID")
 
+    /* Build the vol plugin struct */
+    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    vol_plugin = *plugin;
+    vol_plugin->cls = vol_cls;
+    vol_plugin->nrefs = 1;
+    if((vol_plugin->container_name = H5MM_xstrdup(filename)) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed")
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_cls->file_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `file open' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_cls->file_cls.open)(name, flags, fapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_cls->file_cls.open)(filename, flags, fapl_id, 
+                                                     dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
 
-    /* Build the vol plugin struct */
-    if(NULL == (*plugin = (H5VL_t *)H5MM_calloc(sizeof(H5VL_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    vol_plugin = *plugin;
-    vol_plugin->cls = vol_cls;
-    vol_plugin->nrefs = 1;
-    if((vol_plugin->container_name = H5MM_xstrdup(name)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE,H5E_NOSPACE,NULL,"memory allocation failed")
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1266,7 +1374,7 @@ done:
  */
 herr_t
 H5VL_file_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5F_scope_t scope, 
-                hid_t dxpl_id, hid_t UNUSED event_q)
+                hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1431,7 +1539,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1469,19 +1577,37 @@ done:
  */
 void *
 H5VL_group_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                  hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_plugin->cls->group_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `group create' method")
     /* call the corresponding VOL create callback */
-    if(NULL == (ret_value = (vol_plugin->cls->group_cls.create)(obj, loc_params, name, gcpl_id, gapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_plugin->cls->group_cls.create)(obj, loc_params, name, gcpl_id, 
+                                                                gapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
     vol_plugin->nrefs ++;
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1504,11 +1630,23 @@ done:
  */
 void *
 H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
-                hid_t gapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                hid_t gapl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void               **req = NULL;           /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->group_cls.open) {
@@ -1521,10 +1659,17 @@ H5VL_group_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, con
     }
     else {
         /* call the corresponding VOL open callback */
-        if(NULL == (ret_value = (vol_plugin->cls->group_cls.open)(obj, loc_params, name, gapl_id, dxpl_id, H5_REQUEST_NULL)))
+        if(NULL == (ret_value = (vol_plugin->cls->group_cls.open)(obj, loc_params, name, 
+                                                                  gapl_id, dxpl_id, req)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
         vol_plugin->nrefs ++;
     }
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_open() */
@@ -1580,7 +1725,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1625,7 +1770,7 @@ done:
  */
 herr_t
 H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
-                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                 H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t               ret_value = SUCCEED;  /* Return value */
 
@@ -1659,7 +1804,7 @@ done:
 herr_t 
 H5VL_link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
                H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, hbool_t copy_flag, 
-               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+               hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t               ret_value = SUCCEED;  /* Return value */
 
@@ -1694,7 +1839,7 @@ done:
 herr_t 
 H5VL_link_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
                   hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
-                  H5L_iterate_t op, void *op_data, hid_t dxpl_id, hid_t UNUSED event_q)
+                  H5L_iterate_t op, void *op_data, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1760,7 +1905,7 @@ done:
  */
 herr_t 
 H5VL_link_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                 hid_t dxpl_id, hid_t UNUSED event_q)
+                 hid_t dxpl_id, hid_t eq_id)
 {
     herr_t             ret_value = SUCCEED;    /* Return value */
 
@@ -1794,7 +1939,7 @@ done:
  */
 void *
 H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_type_t *opened_type,
-                 hid_t dxpl_id, hid_t UNUSED event_q)
+                 hid_t dxpl_id, hid_t eq_id)
 {
     void *ret_value;              /* Return value */
 
@@ -1829,7 +1974,7 @@ done:
 herr_t 
 H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
                  void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
-                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, hid_t UNUSED event_q)
+                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 
@@ -1865,7 +2010,7 @@ done:
  */
 herr_t H5VL_object_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
                          H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op, 
-                         void *op_data, hid_t dxpl_id, hid_t UNUSED event_q)
+                         void *op_data, hid_t dxpl_id, hid_t eq_id)
 {
     herr_t            ret_value = SUCCEED;
 
@@ -1937,7 +2082,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_free_loc(hid_t id, void *location, hid_t dxpl_id, hid_t UNUSED event_q)
+H5VL_object_free_loc(hid_t id, void *location, hid_t dxpl_id, hid_t eq_id)
 {
     H5VL_class_t       *vol_plugin;            /* VOL structure attached to id */
     herr_t            ret_value = SUCCEED;
@@ -2045,7 +2190,7 @@ done:
  */
 herr_t
 H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
-                  hid_t dxpl_id, hid_t UNUSED event_q)
+                  hid_t dxpl_id, hid_t eq_id)
 {
     herr_t              ret_value = SUCCEED;
 

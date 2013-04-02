@@ -24,6 +24,9 @@ int main(int argc, char **argv) {
     hsize_t dims[1];
     int my_rank, my_size;
     int provided;
+    hid_t event_q;
+    H5_status_t *status = NULL;
+    int num_requests = 0;
     H5_request_t req1, req2, req3, req4, req5, req6, req7, req8;
     H5_status_t status1, status2, status3, status4, status5, status6, status7, status8;
 
@@ -67,16 +70,12 @@ int main(int argc, char **argv) {
         data3[i]=i;
     }
 
-    /* create the file. This is asynchronous. */
-    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, &req1);
+    /* create an event Queue for managing asynchronous requests */
+    event_q = H5EQcreate(fapl_id);
+    assert(event_q);
 
-    /* Wait on the file request. This is not required to be done now
-       in order for the next operation that uses the file_id to be
-       called by the application, because the request engine will
-       detect that in the IOD VOL plugin and will complete the file
-       create if an operation depends on it. */
-    assert(H5AOwait(&req1, &status1) == 0);
-    assert (status1);
+    /* create the file. This is asynchronous. */
+    file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, event_q);
 
     /* create a group G1 on the file. We creat it here synchronously just to
        show that we can intermix the original HDF5 API with the new 
@@ -109,71 +108,86 @@ int main(int argc, char **argv) {
        synchronously), then forwards the call asynchronously to the server, 
        with the path G2/G3/D1 */
     did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",H5T_NATIVE_INT,dataspaceId,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req3);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did1);
 
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 
        (i.e. no dependency)*/
     did2 = H5Dcreate_ff(file_id,"G1/G2/G3/D2",H5T_NATIVE_INT,dataspaceId,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req4);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did2);
 
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 and D2 
        (i.e. no dependency)*/
     did3 = H5Dcreate_ff(file_id,"G1/G2/G3/D3",H5T_NATIVE_INT,dataspaceId,
-                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, &req5);
+                        H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did3);
 
-    /* Raw data write on D1. This is asynchronous, but it is delayed internally 
-       at the IOD-VOL plugin client until the create for D1 is completed. 
-       Internal to the IOD-VOL plugin client we generate a checksum for data 
-       and ship it with the write bulk data function shipper handle to the server. */
+    /* Raw data write on D1. This is asynchronous, but it is delayed
+       internally at the IOD-VOL plugin client until the create for D1
+       is completed.  Internal to the IOD-VOL plugin client we
+       generate a checksum for data and ship it with the write bulk
+       data function shipper handle to the server. */
     H5Dwrite_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
-                0, &req6);
+                0, event_q);
 
-    /* Raw data write on D2. This is asynchronous, but it is delayed internally 
-       at the client until the create for D2 is completed. Internally we generate 
-       a checksum for data2 and ship it with the write call to the server.*/
+    /* Raw data write on D2. This is asynchronous, but it is delayed
+       internally at the client until the create for D2 is
+       completed. Internally we generate a checksum for data2 and ship
+       it with the write call to the server.*/
     H5Dwrite_ff(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
-                0, &req7);
+                0, event_q);
 
-    /* Raw data write on D3. This is asynchronous, but it is delayed internally 
-       at the client until the create for D3 is completed. Internally we generate 
-       a checksum for data3 and ship it with the write call to the server.*/
+    /* Raw data write on D3. This is asynchronous, but it is delayed
+       internally at the client until the create for D3 is
+       completed. Internally we generate a checksum for data3 and ship
+       it with the write call to the server.*/
     H5Dwrite_ff(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
-                0, &req8);
+                0, event_q);
 
-    /* NOTE: all raw data reads/writes execute concurrently at the server if they get 
-       scheduled by the Asynchronous eXecution Engine, AXE, (i.e. no 
-       dependencies on each other). */
+    /* NOTE: all raw data reads/writes execute concurrently at the
+       server if they get scheduled by the Asynchronous eXecution
+       Engine, AXE, (i.e. no dependencies on each other). */
 
-    /* Here we wait for the three requests for the H5Dcreates, which
-       have already been completed since the H5Dwrites internally
-       completed them. However the wait call is still required to free
-       the request struct internally */
-    assert(H5AOwait(&req3, &status3) == 0);
-    assert (status3);
-    assert(H5AOwait(&req4, &status4) == 0);
-    assert (status4);
-    assert(H5AOwait(&req5, &status5) == 0);
-    assert (status5);
 
-    /* Raw data read on D1. This is asynchronous, but it is delayed internally 
-       at the client until the create for D1 is completed, which it is since we 
-       waited on it in the previous H5Dwrite(D1). 
-       At the server side, since the IOD library is "skeletal" and no 
-       data exists, I am creating an array with the same size and elements 
-       as the data that is written.
-       The server returns, along with the data array, a checksum for the data 
-       that should be stored, but for now generated.  */
+    /* Pop the request from the event queue to wait on it next. This
+       will return the request associated with the last H5Dwrite_ff
+       call on D3. Note that this also removes the request from the
+       event queue, so the user now owns the request and is
+       responsible to ensure its completion. */
+    if(H5EQpop(event_q, &req1) < 0)
+        exit(1);
+
+    /* Wait on the write request. This is not required to be done now.
+       But we are demoing how a particular request of interest can be
+       obtained and waited on. */
+    assert(H5AOwait(req1, &status1) == 0);
+    assert (status1);
+
+
+    /* Raw data read on D1. This is asynchronous, but it is delayed
+       internally at the client until the create for D1 is completed,
+       which it is since we waited on it in the previous H5Dwrite(D1).
+
+       At the server side, since the IOD library is "skeletal" and no
+       data exists, I am creating an array with the same size and
+       elements as the data that is written.
+
+       The server returns, along with the data array, a checksum for
+       the data that should be stored, but for now generated.  */
     H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
-               0, &req1);
+               0, event_q);
+
+    /* Pop head request from the event queue to test it next. This is the 
+       request that belongs to the previous H5Dread_ff call. */
+    if(H5EQpop(event_q, &req1) < 0)
+    exit(1);
 
     /* Test if the Read operation has completed. Since it is asynchronous, It is
        most likely that the operation is pending */
-    assert(H5AOtest(&req1, &status1) == 0);
+    assert(H5AOtest(req1, &status1) == 0);
     (status1 == H5AO_PENDING) ? fprintf(stderr, "Read is still pending\n") : fprintf(stderr, "Read has completed\n");
 
     /* Print the received buffer before a completion call on the read is 
@@ -193,7 +207,7 @@ int main(int argc, char **argv) {
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
     H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data, 
-               0, &req2);
+               0, event_q);
     H5Pclose(dxpl_id);
 
     H5Sclose(dataspaceId);
@@ -238,9 +252,31 @@ int main(int argc, char **argv) {
 
     H5Fflush(file_id, H5F_SCOPE_GLOBAL);
 
+
+    H5EQwait(event_q, &num_requests, &status);
+    fprintf(stderr, "%d requests in event queue. Expecting 7. Completions: ", num_requests);
+    for(i=0 ; i<num_requests; i++)
+        fprintf(stderr, "%d ",status[i]);
+    fprintf(stderr, "\n");
+    free(status);
+
+    H5EQwait(event_q, &num_requests, &status);
+    fprintf(stderr, "%d requests in event queue. Expecting 0. Completions: ", num_requests);
+    for(i=0 ; i<num_requests; i++)
+        fprintf(stderr, "%d ",status[i]);
+    fprintf(stderr, "\n");
+    free(status);
+
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     H5Fclose(file_id);
+
+    /* If the read request did no complete earlier when we tested it, Wait on it now.
+       We have to do this since we popped it earlier from the event queue */
+    if(H5AO_PENDING != status1) {
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+    }
 
     /* Print the data that has been read, after we have issued a wait 
        (in the H5Dclose).
@@ -258,17 +294,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",r2_data[i]);
     fprintf(stderr, "\n");
 
-    /* required waits even if they have been completed in H5Fclose */
-    assert(H5AOwait(&req1, &status1) == 0);
-    assert (status1);
-    assert(H5AOwait(&req2, &status2) == 0);
-    assert (status2);
-    assert(H5AOwait(&req6, &status6) == 0);
-    assert (status6);
-    assert(H5AOwait(&req7, &status7) == 0);
-    assert (status7);
-    assert(H5AOwait(&req8, &status8) == 0);
-    assert (status8);
 
     /* Now we test the Open routines. Since there is no underneath
        container, the underlying VOL server is just going to "fake"
@@ -280,30 +305,41 @@ int main(int argc, char **argv) {
        left for the IOD VOL plugin to handle as necessary, as we do
        here. We also can wait on a request using the new H5AOwait()
        routine */
-    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, &req1);
+    file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, event_q);
 
     /* Open a group G1 on the file. 
        Internally there is a built in wait on the file_id.*/
-    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, &req2);
+    gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
     assert(gid1);
 
     /* Open a dataset D1 on the file in a group hierarchy. 
        Internally there is a built in wait on group G1.*/
-    did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, &req3);
+    did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
 
-    H5Pclose(fapl_id);
+    H5EQwait(event_q, &num_requests, &status);
+    fprintf(stderr, "%d requests in event queue. Expecting 3. Completions: ", num_requests);
+    for(i=0 ; i<num_requests; i++)
+        fprintf(stderr, "%d ",status[i]);
+    fprintf(stderr, "\n");
+    free(status);
+
     H5Dclose(did1);
     H5Gclose(gid1);
     H5Fclose(file_id);
 
+    H5EQclose(event_q);
+    H5Pclose(fapl_id);
+
+
+    /*
     assert(H5AOwait(&req1, &status1) == 0);
     assert (status1);
     assert(H5AOwait(&req2, &status2) == 0);
     assert (status2);
     assert(H5AOwait(&req3, &status3) == 0);
     assert (status3);
-
+    */
     free(data);
     free(r_data);
     free(data2);

@@ -124,6 +124,9 @@ static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL
 static herr_t H5VL_iod_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 
+static herr_t H5VL_iod_test(void **req, H5_status_t *status);
+static herr_t H5VL_iod_wait(void **req, H5_status_t *status);
+
 /* IOD-specific file access properties */
 typedef struct H5VL_iod_fapl_t {
     MPI_Comm		comm;		/*communicator			*/
@@ -203,8 +206,8 @@ static H5VL_class_t H5VL_iod_g = {
     },
     {
         NULL,
-        NULL,
-        NULL
+        H5VL_iod_test,
+        H5VL_iod_wait
     }
 };
 
@@ -571,7 +574,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
     H5VL_iod_file_create_input_t input;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE;  /* Whether we're performing async. I/O */
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -602,10 +605,6 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     input.flags = flags;
     input.fcpl_id = fcpl_id;
     input.fapl_id = fapl_id;
-
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* get a function shipper request */
     if(do_async) {
@@ -661,9 +660,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to set request");
+        *req = request;
 
         /* Track request */
         file->common.request = request;
@@ -712,7 +709,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
     H5VL_iod_file_open_input_t input;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -733,10 +730,6 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     input.name = name;
     input.flags = flags;
     input.fapl_id = fapl_id;
-
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* get a function shipper request */
     if(do_async) {
@@ -790,9 +783,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to set request")
+        *req = request;
 
         /* Track request */
         file->common.request = request;
@@ -841,7 +832,7 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     H5VL_iod_file_flush_input_t input;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = &_request;
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -903,7 +894,7 @@ H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **re
     fs_request_t *fs_req;
     int *status;
     H5VL_iod_request_t *request;
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1182,7 +1173,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     fs_request_t *fs_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1217,10 +1208,6 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* Get the group access plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
-
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* get a function shipper request */
     if(do_async) {
@@ -1276,9 +1263,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, NULL, "unable to set request")
+        *req = request;
 
         /* Track request */
         grp->common.request = request;
@@ -1330,7 +1315,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     fs_request_t *fs_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     H5VL_iod_group_open_input_t input;
     void           *ret_value = NULL;
 
@@ -1356,10 +1341,6 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     /* Get the group access plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
-
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* get a function shipper request */
     if(do_async) {
@@ -1413,9 +1394,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSET, NULL, "unable to set request")
+        *req = request;
 
         /* Track request */
         grp->common.request = request;
@@ -1590,7 +1569,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
     hid_t type_id, space_id, lcpl_id;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1631,10 +1610,6 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     /* Get the dapl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, NULL, "can't find object for ID")
-
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* get a function shipper request */
     if(do_async) {
@@ -1695,9 +1670,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to set request")
+        *req = request;
 
         /* Track request */
         dset->common.request = request;
@@ -1750,7 +1723,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     fs_request_t *fs_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1775,10 +1748,6 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* Get the dapl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dapl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, NULL, "can't find object for ID")
-
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get property value for lcpl id");
 
     /* get a function shipper request */
     if(do_async) {
@@ -1832,9 +1801,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "unable to set request")
+        *req = request;
 
         /* Track request */
         dset->common.request = request;
@@ -1890,7 +1857,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     char fake_char;
     size_t size;
     H5VL_iod_io_info_t *info;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1961,10 +1928,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get property value for lcpl id");
-
     /* get a function shipper request */
     if(do_async) {
         if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
@@ -1999,6 +1962,8 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     request->data = info;
     request->req = fs_req;
     request->obj = dset;
+    request->status = 0;
+    request->state = 0;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
@@ -2008,9 +1973,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set request")
+        *req = request;
     } /* end if */
     else {
         /* Sanity check */
@@ -2058,7 +2021,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     size_t size;
     H5VL_iod_io_info_t *info;
     uint32_t cs;
-    hbool_t do_async;           /* Whether we're performing async. I/O */
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2133,10 +2096,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get async flag */
-    if(H5P_get(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get property value for lcpl id");
-
     /* get a function shipper request */
     if(do_async) {
         if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
@@ -2180,9 +2139,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         /* Sanity check */
         HDassert(request != &_request);
 
-        /* Set async. request property, for higher layer to retrieve */
-        if(H5P_set(plist, H5P_ASYNC_REQ_NAME, &request) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set request")
+        *req = request;
     } /* end if */
     else {
         /* Sanity check */
@@ -2373,7 +2330,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     int *status;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = &_request;
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2431,5 +2388,79 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_test
+ *
+ * Purpose:	Test for an asynchronous operation's completion
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, March 20, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_test(void **req, H5_status_t *status)
+{
+    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    *status = request->status;
+
+    printf("status %d state %d\n", request->status, request->state);
+
+    if(H5VL_IOD_COMPLETED == request->state) {
+        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
+        request->req = H5MM_xfree(request->req);
+        request = H5MM_xfree(request);
+        //req = NULL;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_test() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_wait
+ *
+ * Purpose:	Wait for an asynchronous operation to complete
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, March 20, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_wait(void **req, H5_status_t *status)
+{
+    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5VL_IOD_PENDING == request->state) {
+        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
+    }
+    *status = request->status;
+
+    request->req = H5MM_xfree(request->req);
+    request = H5MM_xfree(request);
+    //req = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_wait() */
 
 #endif /* H5_HAVE_EFF */

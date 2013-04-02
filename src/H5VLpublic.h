@@ -23,18 +23,11 @@
 #include "stdarg.h"
 
 #include "H5public.h"
+#include "H5EQpublic.h"
 #include "H5Fpublic.h"
 #include "H5Lpublic.h"
 #include "H5Opublic.h"
 #include "H5Rpublic.h"
-
-/* Asynchronous operation status */
-typedef enum {
-    H5AO_PENDING,       /* Operation has not yet completed */
-    H5AO_SUCCEEDED,     /* Operation has completed, successfully */
-    H5AO_FAILED,        /* Operation has completed, but failed */
-    H5AO_CANCELLED      /* Operation has no completed and has been cancelled */
-} H5_status_t;
 
 /* Dataset creation property names */
 #define H5VL_DSET_TYPE_ID        "dataset_type_id"
