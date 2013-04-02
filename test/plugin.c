@@ -66,7 +66,7 @@ const char *FILENAME[] = {
 /* Limit random number within 20000 */
 #define RANDOM_LIMIT    20000
 
-#define ITER            100
+#define GROUP_ITERATION 1000
 
 int	points_deflate[DSET_DIM1][DSET_DIM2], 
         points_dynlib1[DSET_DIM1][DSET_DIM2],
@@ -550,20 +550,22 @@ test_filters_for_groups(hid_t file, hid_t fapl)
 {
     hid_t	gcpl, gid, group;
     int         i;
-    char        name[256];
+    char        gname[256];
 
-    puts("Testing DYNLIB3 filter for group");
+    TESTING("Testing DYNLIB3 filter for group");
 
     if((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0) goto error;
-   
+  
+    /* Use DYNLIB3 for creating groups */ 
     if(H5Pset_filter (gcpl, H5Z_FILTER_DYNLIB3, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0) goto error;
 
     /* Create a group using this filter */
     if((gid = H5Gcreate2(file, "group1", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) goto error;
 
-    for (i=0; i < ITER; i++) {
-        sprintf(name, "group_%d", i);
-        if((group = H5Gcreate (gid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+    /* Create multiple groups under "group1" */
+    for (i=0; i < GROUP_ITERATION; i++) {
+        sprintf(gname, "group_%d", i);
+        if((group = H5Gcreate2(gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
         if(H5Gclose(group) < 0) goto error; 
     }
 
@@ -572,6 +574,49 @@ test_filters_for_groups(hid_t file, hid_t fapl)
 
     /* Clean up objects used for this test */
     if(H5Pclose (gcpl) < 0) goto error;
+
+    PASSED();
+
+    return 0;
+
+error:
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:	test_groups_with_filters
+ *
+ * Purpose:	Tests opening group with dynamically loaded filters
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Raymond Lu
+ *              1 April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_groups_with_filters(hid_t file, hid_t fapl)
+{
+    hid_t	gcpl, gid, group;
+    int         i;
+    char        gname[256];
+
+    TESTING("Testing opening groups with DYNLIB3 filter");
+
+    /* Open the top group */
+    if((gid = H5Gopen2(file, "group1", H5P_DEFAULT)) < 0) goto error;
+
+    /* Create multiple groups under "group1" */
+    for (i=0; i < GROUP_ITERATION; i++) {
+        sprintf(gname, "group_%d", i);
+        if((group = H5Gopen2(gid, gname, H5P_DEFAULT)) < 0) goto error;
+        if(H5Gclose(group) < 0) goto error; 
+    }
+
+    /* Close the group */
+    if(H5Gclose(gid) < 0) goto error;
 
     PASSED();
 
@@ -670,6 +715,9 @@ main(void)
 
     /* Read the data with filters */
     nerrors += (test_read_with_filters(file, fapl) < 0		? 1 : 0);
+
+    /* Open the groups with filters */
+    nerrors += (test_groups_with_filters(file, fapl) < 0	? 1 : 0);
 
     if(H5Fclose(file) < 0)
         TEST_ERROR 

@@ -55,7 +55,7 @@ const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB1;}
  *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
+ * Programmer:	Raymond Lu
  *              29 March 2013
  *
  *-------------------------------------------------------------------------
