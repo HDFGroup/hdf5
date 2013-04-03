@@ -22,10 +22,10 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <hdf5.h>
 
 #define H5Z_FILTER_DYNLIB2      258 
+#define MULTIPLIER              3
 
 static size_t H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
@@ -47,11 +47,10 @@ const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB2;}
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_dynlib2
  *
- * Purpose:	A dynlib2 filter method that assigns the power of 2 of the
- *              original value during write and calculates the square root
- *              of the original value during read. It will be built as a 
- *              shared library.  plugin.c test will load and use this filter 
- *              library.    
+ * Purpose:	A dynlib2 filter method that multiplies the original value 
+ *              during write and divide the original value during read. It
+ *              will be built as a shared library.  plugin.c test will load 
+ *              and use this filter library.    
  *
  * Return:	Success:	Data chunk size
  *
@@ -75,17 +74,17 @@ H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
         return(0);
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Calculate and assign the square root for all the data values */
+        /* Divide the original value with MULTIPLIER */
         while(buf_left>0) {
-            *int_ptr = (int)sqrt((double)*int_ptr);
+            *int_ptr /= MULTIPLIER;
             *int_ptr++;
             buf_left -= sizeof(int);
         } /* end while */
     } /* end if */
     else { /*write*/
-        /* Calculate and assign the power of 2 to all the data values */
+        /* Multiply the original value with MULTIPLIER */
         while(buf_left>0) {
-            *int_ptr = (int)pow((double)*int_ptr, 2);
+            *int_ptr *= MULTIPLIER;
             *int_ptr++;
             buf_left -= sizeof(int);
         } /* end while */

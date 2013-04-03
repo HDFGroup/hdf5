@@ -691,9 +691,10 @@ main(void)
             TEST_ERROR 
 
         /* Test dynamically loaded filters for chunked dataset */
-        nerrors += (test_filters_for_datasets(file, my_fapl) < 0		? 1 : 0);
+        nerrors += (test_filters_for_datasets(file, my_fapl) < 0	? 1 : 0);
 
-        nerrors += (test_filters_for_groups(file, my_fapl) < 0	? 1 : 0);
+        /* Test dynamically loaded filters for groups */
+        nerrors += (test_filters_for_groups(file, my_fapl) < 0	        ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             TEST_ERROR 
