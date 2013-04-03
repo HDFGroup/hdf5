@@ -906,6 +906,33 @@ IF (BUILD_TESTING)
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5ERR_MASK_TEST file)
 
+  MACRO (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode envvar envval)
+    IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DUMP-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}.out ${resultfile}.out.err
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      ADD_TEST (
+          NAME H5DUMP-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ERRREF=${resultfile}.err"
+              -D "TEST_MASK_ERROR=true"
+              -D "TEST_ENV_VAR:STRING=${envvar}"
+              -D "TEST_ENV_VALUE:STRING=${envval}"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
+    ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5ERR_MASK_TEST file)
+
   MACRO (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     # If using memchecker add tests without using scripts
     IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -1655,8 +1682,7 @@ IF (BUILD_TESTING)
   ADD_H5ERR_MASK_TEST (textlink 0 --enable-error-stack textlink.h5)
 
   # test for error stack display (BZ2048)
-  ADD_H5ERR_MASK_TEST (filter_fail 1 --enable-error-stack filter_fail.h5)
-  SET_TESTS_PROPERTIES (H5DUMP-filter_fail PROPERTIES ENVIRONMENT "HDF5_PLUGIN_PRELOAD=::")
+  ADD_H5ERR_MASK_ENV_TEST (filter_fail 1 "HDF5_PLUGIN_PRELOAD" "::" --enable-error-stack filter_fail.h5)
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST_EXPORT (tall-6 tall.h5 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y -o)
