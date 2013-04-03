@@ -2519,20 +2519,31 @@ static herr_t
 H5VL_iod_test(void **req, H5_status_t *status)
 {
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
+    fs_status_t fs_status;
+    int         ret;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    *status = request->status;
-
-    printf("status %d state %d\n", request->status, request->state);
-
-    if(H5VL_IOD_COMPLETED == request->state) {
-        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
-        request->req = H5MM_xfree(request->req);
-        request = H5MM_xfree(request);
-        //req = NULL;
+    ret = fs_wait(*((fs_request_t *)request->req), 0, &fs_status);
+    if(S_FAIL == ret) {
+        fprintf(stderr, "failed to wait on request\n");
+        request->status = H5AO_FAILED;
+        request->state = H5VL_IOD_COMPLETED;
+        H5VL_iod_request_delete(request->obj->file, request);
+    }
+    else {
+        if(fs_status) {
+            request->status = H5AO_SUCCEEDED;
+            request->state = H5VL_IOD_COMPLETED;
+            if(H5VL_iod_request_wait(request->obj->file, request) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
+            *status = request->status;
+            request->req = H5MM_xfree(request->req);
+            request = H5MM_xfree(request);
+        }
+        else
+            *status = request->status;
     }
 
 done:
@@ -2569,7 +2580,6 @@ H5VL_iod_wait(void **req, H5_status_t *status)
 
     request->req = H5MM_xfree(request->req);
     request = H5MM_xfree(request);
-    //req = NULL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
