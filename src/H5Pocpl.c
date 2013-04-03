@@ -804,6 +804,9 @@ done:
  *		If this bit is set but encoding is disabled for a filter,
  *		attempting to write will generate an error.
  *
+ *              If the filter is not registered, this function tries to load 
+ *              it dynamically during run time.
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
