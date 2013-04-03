@@ -34,6 +34,10 @@
 
 #ifdef H5_HAVE_EFF
 
+H5FL_EXTERN(H5VL_iod_file_t);
+H5FL_EXTERN(H5VL_iod_group_t);
+H5FL_EXTERN(H5VL_iod_dset_t);
+
 herr_t
 H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -146,72 +150,20 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                 }
                 else {
                     if(tmp_status) {
-                        if(FS_DSET_WRITE == cur_req->type || FS_DSET_READ == cur_req->type) {
-                            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)cur_req->data;
-
-                            /* Free memory handle */
-                            if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
-                                fprintf(stderr, "failed to free bds handle\n");
-                                cur_req->status = H5AO_FAILED;
-                                cur_req->state = H5VL_IOD_COMPLETED;
-                                H5VL_iod_request_delete(file, cur_req);
-                                cur_req = tmp_req;
-                                continue;
-                            }
-
-                            if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status)) {
-                                fprintf(stderr, "Dataset Write operation failed\n");
-                                cur_req->status = H5AO_FAILED;
-                                cur_req->state = H5VL_IOD_COMPLETED;
-                                H5VL_iod_request_delete(file, cur_req);
-                                cur_req = tmp_req;
-                                continue;
-                            }
-                            else if(FS_DSET_READ == cur_req->type) {
-                                H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
-
-                                if(SUCCEED != read_status->ret) {
-                                    fprintf(stderr, "Dataset READ operation failed\n");
-                                    free(info->status);
-                                    info->status = NULL;
-                                    info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-                                    info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                                    cur_req->status = H5AO_FAILED;
-                                    cur_req->state = H5VL_IOD_COMPLETED;
-                                    H5VL_iod_request_delete(file, cur_req);
-                                    cur_req = tmp_req;
-                                    continue;
-                                }
-                                if(info->checksum && info->checksum != read_status->cs) {
-                                    //free(info->status);
-                                    //info->status = NULL;
-                                    //info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-                                    //HDfree(cur_req->obj_name);
-                                    //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                                    /* MSC not returning an error because we injected this failure */
-                                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
-                                            info->checksum, read_status->cs);
-                                    //HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, SUCCEED, "Data Integrity Fail - bad Checksum");
-                                }
-                            }
-
-                            free(info->status);
-                            info->status = NULL;
-                            info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-                            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                        }
                         cur_req->status = H5AO_SUCCEEDED;
                         cur_req->state = H5VL_IOD_COMPLETED;
-                        H5VL_iod_request_delete(file, cur_req);
+                        if(H5VL_iod_request_complete(file, cur_req) < 0)
+                            fprintf(stderr, "Operation Failed!\n");
                     }
                 }
                 /* next time, test the next request in the list */
                 cur_req = tmp_req;
             }
         }
-        /* request complete, remove it from list break */
+        /* request complete, remove it from list & break */
         else {
-            H5VL_iod_request_delete(file, request);
+            if(H5VL_iod_request_complete(file, request) < 0)
+                fprintf(stderr, "Operation Failed!\n");
             break;
         }
     }
@@ -245,48 +197,9 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
             cur_req->state = H5VL_IOD_COMPLETED;
         }
 
-        if(FS_DSET_WRITE == cur_req->type || FS_DSET_READ == cur_req->type) {
-            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)cur_req->data;
+        if(H5VL_iod_request_complete(file, cur_req) < 0)
+            fprintf(stderr, "Operation Failed!\n");
 
-            /* Free memory handle */
-            if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
-                fprintf(stderr, "failed to free bds handle\n");
-                cur_req->status = H5AO_FAILED;
-                cur_req->state = H5VL_IOD_COMPLETED;
-            }
-
-            if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "write failed\n");
-                cur_req->status = H5AO_FAILED;
-                cur_req->state = H5VL_IOD_COMPLETED;
-            }
-            else if(FS_DSET_READ == cur_req->type) {
-                H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
-
-                if(SUCCEED != read_status->ret) {
-                    fprintf(stderr, "read failed\n");
-                    cur_req->status = H5AO_FAILED;
-                    cur_req->state = H5VL_IOD_COMPLETED;
-                }
-                if(info->checksum && info->checksum != read_status->cs) {
-                    //free(info->status);
-                    //info->status = NULL;
-                    //info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-                    //HDfree(cur_req->obj_name);
-                    //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                    /* MSC not returning an error because we injected this failure */
-                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
-                            info->checksum, read_status->cs);
-                }
-            }
-
-            free(info->status);
-            info->status = NULL;
-            info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-            cur_req->data = NULL;
-        }
-        H5VL_iod_request_delete(file, cur_req);
         cur_req = tmp_req;
     }
 
@@ -324,47 +237,9 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                 cur_req->status = H5AO_SUCCEEDED;
                 cur_req->state = H5VL_IOD_COMPLETED;
             }
-            if(FS_DSET_WRITE == cur_req->type || FS_DSET_READ == cur_req->type) {
-                H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)cur_req->data;
 
-                /* Free memory handle */
-                if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
-                    fprintf(stderr, "failed to free bds handle\n");
-                    cur_req->status = H5AO_FAILED;
-                    cur_req->state = H5VL_IOD_COMPLETED;
-                }
-                if(FS_DSET_WRITE == cur_req->type && SUCCEED != *((int *)info->status)) {
-                    fprintf(stderr, "write failed\n");
-                    cur_req->status = H5AO_FAILED;
-                    cur_req->state = H5VL_IOD_COMPLETED;
-                }
-                else if(FS_DSET_READ == cur_req->type) {
-                    H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
-
-                    if(SUCCEED != read_status->ret) {
-                        fprintf(stderr, "read failed\n");
-                        cur_req->status = H5AO_FAILED;
-                        cur_req->state = H5VL_IOD_COMPLETED;
-                    }
-                    if(info->checksum && info->checksum != read_status->cs) {
-                        //free(info->status);
-                        //info->status = NULL;
-                        //info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-                        //HDfree(cur_req->obj_name);
-                        //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                        /* MSC not returning an error because we injected this failure */
-                        fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
-                                info->checksum, read_status->cs);
-                    }
-                }
-
-                free(info->status);
-                info->status = NULL;
-                info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
-                info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                cur_req->data = NULL;
-            }
-            H5VL_iod_request_delete(file, cur_req);
+            if(H5VL_iod_request_complete(file, cur_req) < 0)
+                fprintf(stderr, "Operation Failed!\n");
         }
         cur_req = tmp_req;
     }
@@ -372,6 +247,175 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_request_wait_some */
+
+herr_t
+H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch(req->type) {
+    case FS_FILE_CREATE:
+    case FS_FILE_OPEN:
+    case FS_GROUP_CREATE:
+    case FS_GROUP_OPEN:
+    case FS_DSET_CREATE:
+    case FS_DSET_OPEN:
+        H5VL_iod_request_delete(file, req);
+        break;
+    case FS_DSET_WRITE:
+    case FS_DSET_READ:
+        {
+            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)req->data;
+
+            /* Free memory handle */
+            if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
+                fprintf(stderr, "failed to free bds handle\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            if(FS_DSET_WRITE == req->type && SUCCEED != *((int *)info->status)) {
+                fprintf(stderr, "write failed\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            else if(FS_DSET_READ == req->type) {
+                H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
+
+                if(SUCCEED != read_status->ret) {
+                    fprintf(stderr, "read failed\n");
+                    req->status = H5AO_FAILED;
+                    req->state = H5VL_IOD_COMPLETED;
+                }
+                if(info->checksum && info->checksum != read_status->cs) {
+                    //free(info->status);
+                    //info->status = NULL;
+                    //info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+                    //HDfree(req->obj_name);
+                    //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+                    /* MSC not returning an error because we injected this failure */
+                    fprintf(stderr, "Fatal Error!  Data integrity failure (expecting %u got %u).\n",
+                            info->checksum, read_status->cs);
+                }
+            }
+
+            free(info->status);
+            info->status = NULL;
+            info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case FS_FILE_FLUSH:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "file flush failed at the server");
+
+            free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case FS_FILE_CLOSE:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "file close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free everything */
+            free(file->file_name);
+            free(file->common.obj_name);
+            if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
+               H5Pclose(file->remote_file.fcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            file = H5FL_FREE(H5VL_iod_file_t, file);
+            break;
+        }
+    case FS_GROUP_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_group_t *grp = (H5VL_iod_group_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "group close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            grp->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free group components */
+            free(grp->common.obj_name);
+            if(grp->gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5Pclose(grp->gapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(grp->remote_group.gcpl_id != H5P_GROUP_CREATE_DEFAULT && 
+               H5Pclose(grp->remote_group.gcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            grp = H5FL_FREE(H5VL_iod_group_t, grp);
+            break;
+        }
+    case FS_DSET_SET_EXTENT:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "Dataset set extent failed at the server");
+
+            free(status);
+            req->data = NULL;
+            dset->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case FS_DSET_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "dset close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            dset->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free dset components */
+            free(dset->common.obj_name);
+            if(dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
+               H5Pclose(dset->remote_dset.dcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT &&
+               H5Pclose(dset->dapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(H5Tclose(dset->remote_dset.type_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(H5Sclose(dset->remote_dset.space_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
+            dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+            break;
+        }
+    default:
+        H5VL_iod_request_delete(file, req);
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 herr_t
 H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_params, const char *name,

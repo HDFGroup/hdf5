@@ -394,6 +394,7 @@ done:
 herr_t
 H5Dclose(hid_t dset_id)
 {
+    H5VL_t      *vol_plugin = NULL;
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -402,6 +403,13 @@ H5Dclose(hid_t dset_id)
     /* Check/fix arguments. */
     if(H5I_DATASET != H5I_get_type(dset_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = H5_EVENT_QUEUE_NULL;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
@@ -1021,7 +1029,8 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* set the extent through the VOL */
-    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, H5AC_dxpl_id, 
+                                            H5_EVENT_QUEUE_NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
 
 done:
@@ -1051,7 +1060,8 @@ H5D_close_dataset(void *dset, H5VL_t *vol_plugin)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Close the dataset through the VOL*/
-    if((ret_value = H5VL_dataset_close(dset, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+    if((ret_value = H5VL_dataset_close(dset, vol_plugin, vol_plugin->close_dxpl_id, 
+                                       vol_plugin->close_eq_id)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset")
 
 done:

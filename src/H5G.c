@@ -729,6 +729,7 @@ done:
 herr_t
 H5Gclose(hid_t group_id)
 {
+    H5VL_t  *vol_plugin = NULL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -737,6 +738,13 @@ H5Gclose(hid_t group_id)
     /* Check args */
     if(NULL == H5I_object_verify(group_id,H5I_GROUP))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(group_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = H5_EVENT_QUEUE_NULL;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
 
     /*
      * Decrement the counter on the group atom.	 It will be freed if the count
@@ -777,7 +785,8 @@ H5G_close_group(void *grp, H5VL_t *vol_plugin)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Close the group through the VOL*/
-    if((ret_value = H5VL_group_close(grp, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+    if((ret_value = H5VL_group_close(grp, vol_plugin, vol_plugin->close_dxpl_id, 
+                                     vol_plugin->close_eq_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
 
 done:

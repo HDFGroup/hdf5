@@ -827,11 +827,12 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5VL_iod_file_t *file = obj->file;
     fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
-    fs_request_t *fs_req = &_fs_req;
+    fs_request_t *fs_req = NULL;
     int *status;
     H5VL_iod_file_flush_input_t input;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = &_request;
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -847,9 +848,25 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
 
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
+    } /* end if */
+    else
+        fs_req = &_fs_req;
+
     /* forward the call to the ION */
     if(fs_forward(PEER, H5VL_FILE_FLUSH_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
@@ -861,12 +878,23 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     /* add request to container's linked list */
     H5VL_iod_request_add(file, request);
 
-    /* Synchronously wait on the request (no way to return request object currently) */
-    if(H5VL_iod_request_wait(file, request) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on FS request");
-    if(SUCCEED != *status)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "file flush failed at the server")
-    free(status);
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        file->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on FS request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -894,6 +922,7 @@ H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **re
     fs_request_t *fs_req;
     int *status;
     H5VL_iod_request_t *request;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1026,6 +1055,7 @@ done:
 static herr_t
 H5VL_iod_file_misc(void *obj, H5VL_file_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments)
 {
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t       ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1093,10 +1123,11 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
 {
     H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
     fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
-    fs_request_t *fs_req = &_fs_req;
+    fs_request_t *fs_req = NULL;
     int *status;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = &_request;
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1108,9 +1139,25 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
     /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
 
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
+    } /* end if */
+    else
+        fs_req = &_fs_req;
+
     /* forward the call to the ION */
     if(fs_forward(PEER, H5VL_FILE_CLOSE_ID, &file->remote_file, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
@@ -1122,22 +1169,23 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
     /* add request to container's linked list */
     H5VL_iod_request_add(file, request);
 
-    /* MSC - just wait for the file close here for now, till we give requests to the API */
-    if(H5VL_iod_request_wait(file, request) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
-    if(SUCCEED != *status)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "File close failed at the server");
-    free(status);
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
 
-    /* free everything */
-    free(file->file_name);
-    free(file->common.obj_name);
-    if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
-       H5Pclose(file->remote_file.fcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    file = H5FL_FREE(H5VL_iod_file_t, file);
+        *req = request;
+
+        /* Track request */
+        file->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on FS request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1436,6 +1484,7 @@ static herr_t
 H5VL_iod_group_get(void *_grp, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1482,11 +1531,12 @@ static herr_t
 H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
-    fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
-    fs_request_t *fs_req = &_fs_req;
     int *status;
+    fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
+    fs_request_t *fs_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = &_request;
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1506,9 +1556,25 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     /* allocate an integer to receive the return value if the group close succeeded or not */
     status = (int *)malloc(sizeof(int));
 
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
+    } /* end if */
+    else
+        fs_req = &_fs_req;
+
     /* forward the call to the IONs */
     if(fs_forward(PEER, H5VL_GROUP_CLOSE_ID, &grp->remote_group, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship group close");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
@@ -1520,20 +1586,23 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     /* add request to container's linked list */
     H5VL_iod_request_add(grp->common.file, request);
 
-    /* Synchronously wait on the request (no way to return request object currently) */
-    if(H5VL_iod_request_wait(grp->common.file, request) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on FS request");
-    if(SUCCEED != *status)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "group close failed at the server")
-    free(status);
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
 
-    free(grp->common.obj_name);
-    if(grp->gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5Pclose(grp->gapl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(grp->remote_group.gcpl_id != H5P_GROUP_CREATE_DEFAULT && 
-       H5Pclose(grp->remote_group.gcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    grp = H5FL_FREE(H5VL_iod_group_t, grp);
+        *req = request;
+
+        /* Track request */
+        grp->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(grp->common.file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on FS request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2176,9 +2245,10 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
-    fs_request_t *fs_req = &_fs_req;
+    fs_request_t *fs_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = &_request;
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     int *status = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -2207,9 +2277,25 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
 
     status = (int *)malloc(sizeof(int));
 
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
+    } /* end if */
+    else
+        fs_req = &_fs_req;
+
     /* forward the call to the IONs */
     if(fs_forward(PEER, H5VL_DSET_SET_EXTENT_ID, &input, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
@@ -2221,12 +2307,23 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
 
-    /* Synchronously wait on the request (no way to return request object currently) */
-    if(H5VL_iod_request_wait(dset->common.file, request) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on FS request");
-    if(SUCCEED != *status)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "dataset close failed at the server")
-    free(status);
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        dset->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(dset->common.file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on FS request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2251,6 +2348,7 @@ H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t dxpl_id,
                      void **req, va_list arguments)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t       ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2325,11 +2423,12 @@ static herr_t
 H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
-    fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
-    fs_request_t *fs_req = &_fs_req;
     int *status;
+    fs_request_t _fs_req;       /* Local function shipper request, for sync. operations */
+    fs_request_t *fs_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = &_request;
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2350,9 +2449,25 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 
     status = (int *)malloc(sizeof(int));
 
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (fs_req = (fs_request_t *)H5MM_malloc(sizeof(fs_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a FS request");
+    } /* end if */
+    else
+        fs_req = &_fs_req;
+
     /* forward the call to the IONs */
     if(fs_forward(PEER, H5VL_DSET_CLOSE_ID, &dset->remote_dset, status, fs_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship dset close");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
@@ -2364,26 +2479,23 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     /* add request to container's linked list */
     H5VL_iod_request_add(dset->common.file, request);
 
-    /* Synchronously wait on the request (no way to return request object currently) */
-    if(H5VL_iod_request_wait(dset->common.file, request) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on FS request");
-    if(SUCCEED != *status)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "dataset close failed at the server")
-    free(status);
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
 
-    free(dset->common.obj_name);
-    if(dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
-       H5Pclose(dset->remote_dset.dcpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT &&
-       H5Pclose(dset->dapl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(H5Tclose(dset->remote_dset.type_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
-    if(H5Sclose(dset->remote_dset.space_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
+        *req = request;
 
-    dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+        /* Track request */
+        dset->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(dset->common.file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on FS request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

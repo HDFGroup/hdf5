@@ -64,7 +64,7 @@ herr_t H5EQ_init(void);
 /* API wrappers */
 H5_DLL H5EQ_t *H5EQ_create(H5VL_t **plugin, H5P_genplist_t *plist);
 H5_DLL herr_t H5EQ_insert(H5EQ_t *eq, H5_priv_request_t *req);
-H5_DLL herr_t H5EQ_wait(H5EQ_t *eq, int *num_requests, H5_status_t **status);
+H5_DLL herr_t H5EQ_wait(H5EQ_t *eq, H5VL_t *vol_plugin, int *num_requests, H5_status_t **status);
 H5_DLL herr_t H5EQ_test(H5EQ_t *eq, int *num_remaining);
 H5_DLL herr_t H5EQ_close(void *grp, H5VL_t *vol_plugin);
 

@@ -1544,9 +1544,7 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 	name += nchars;
     } /* end while */
 
-    printf("HERE1\n");
     array.cell_size = H5Tget_size(input->type_id);
-    printf("HERE1\n");
     array.num_dims = H5Sget_simple_extent_ndims(input->space_id);
 
     if(NULL == (array.current_dims = (iod_size_t *)malloc (sizeof(iod_size_t) * array.num_dims)))

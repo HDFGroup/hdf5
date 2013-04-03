@@ -331,7 +331,8 @@ herr_t
 H5EQwait(hid_t eq_id, int *num_requests/*OUT*/, H5_status_t **status/*OUT*/)
 {
     void *eq = NULL;                    /* event queue token */
-    herr_t ret_value = SUCCEED;          /* Return value */
+    H5VL_t *vol_plugin = NULL;          /* VOL plugin pointer this event queue should use */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
 
@@ -343,8 +344,12 @@ H5EQwait(hid_t eq_id, int *num_requests/*OUT*/, H5_status_t **status/*OUT*/)
     if(NULL == (eq = (void *)H5I_object(eq_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event queue identifier")
 
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(eq_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+
     /* Wait request in the event queue */
-    if(H5EQ_wait((H5EQ_t *)eq, num_requests, status) < 0)
+    if(H5EQ_wait((H5EQ_t *)eq, vol_plugin, num_requests, status) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait request into event queue")
 
 done:
@@ -559,7 +564,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5EQ_wait(H5EQ_t *eq, int *num_requests/*OUT*/, H5_status_t **_status/*OUT*/)
+H5EQ_wait(H5EQ_t *eq, H5VL_t *vol_plugin, int *num_requests/*OUT*/, H5_status_t **_status/*OUT*/)
 {
     H5_priv_request_t *cur = NULL, *head = NULL, *next = NULL;
     int i = 0;
@@ -587,7 +592,7 @@ H5EQ_wait(H5EQ_t *eq, int *num_requests/*OUT*/, H5_status_t **_status/*OUT*/)
             eq->tail = eq->head;
 
         /* wait on and free the request */
-        if(head->req && H5VL_request_wait(&head->req, head->vol_plugin, &status[i++]) < 0)
+        if(head->req && H5VL_request_wait(&head->req, vol_plugin, &status[i++]) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
         head->req = NULL;
         head->vol_plugin = NULL;

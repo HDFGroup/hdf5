@@ -109,6 +109,7 @@ H5_DLL herr_t H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *re
 H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
 H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object);
+H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
 H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);

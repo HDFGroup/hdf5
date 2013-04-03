@@ -326,6 +326,8 @@ struct H5VL_t {
     const char         *container_name; /* name of the underlying storage container */
     unsigned long       feature_flags;  /* VOL Driver feature Flags */
     int                 nrefs;          /* number of references by objects using this struct */
+    hid_t               close_eq_id;
+    hid_t               close_dxpl_id;
 };
 
 #ifdef __cplusplus

@@ -233,28 +233,35 @@ int main(int argc, char **argv) {
         assert(plist_id);
         H5Pclose(plist_id);
 
-        assert(H5Dset_extent(did1, &temp) == 0);
+        /* change the dataset dimensions for Dataset D1. This is
+           asynchronous, but internally there is a built in
+           "wait_some" on operations pending on that dataset */
+        H5Dset_extent_ff(did1, &temp, event_q);
     }
 
     /* closing did1 acts as a wait_some on all pending requests that are issued
-       on did1 (the H5Dwrite and 2 H5Dreads above). */
-    H5Dclose(did1);
+       on did1 (the H5Dwrite and 2 H5Dreads above). This is asynchronous. */
+    H5Dclose_ff(did1, event_q);
 
     /* closing did2 acts as a wait_some on all pending requests that are issued
-       on did2 (the H5Dwrite above). */
-    H5Dclose(did2);
+       on did2 (the H5Dwrite above). This is asynchronous. */
+    H5Dclose_ff(did2, event_q);
 
     /* closing did3 acts as a wait_some on all pending requests that are issued
-       on did3 (the H5Dwrite above). */
-    H5Dclose(did3);
+       on did3 (the H5Dwrite above). This is asynchronous. */
+    H5Dclose_ff(did3, event_q);
 
-    H5Gclose(gid1);
+    H5Gclose_ff(gid1, event_q);
 
-    H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+    /* flush all the contents of file to disk. This is asynchronous. */
+    H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q);
 
+    /* closing the container also acts as a wait all on all pending requests 
+       on the container. */
+    H5Fclose_ff(file_id, event_q);
 
     H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Expecting 7. Completions: ", num_requests);
+    fprintf(stderr, "%d requests in event queue. Expecting 14. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
@@ -266,10 +273,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
     free(status);
-
-    /* closing the container also acts as a wait all on all pending requests 
-       on the container. */
-    H5Fclose(file_id);
 
     /* If the read request did no complete earlier when we tested it, Wait on it now.
        We have to do this since we popped it earlier from the event queue */
@@ -317,16 +320,16 @@ int main(int argc, char **argv) {
     did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
 
+    H5Dclose(did1);
+    H5Gclose(gid1);
+    H5Fclose(file_id);
+
     H5EQwait(event_q, &num_requests, &status);
     fprintf(stderr, "%d requests in event queue. Expecting 3. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
     free(status);
-
-    H5Dclose(did1);
-    H5Gclose(gid1);
-    H5Fclose(file_id);
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);

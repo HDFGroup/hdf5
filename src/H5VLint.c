@@ -1104,14 +1104,31 @@ herr_t
 H5VL_dataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], 
                         hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->dataset_cls.set_extent)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `dataset set_extent' method")
-    if((ret_value = (vol_plugin->cls->dataset_cls.set_extent)(dset, size, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->dataset_cls.set_extent)(dset, size, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "set_extent failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1189,9 +1206,21 @@ done:
 herr_t
 H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* if the VOL class does not implement a specific dataset close
        callback, try the object close */    
@@ -1203,8 +1232,13 @@ H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 #endif
     }
     else {
-        if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, H5_REQUEST_NULL)) < 0)
+        if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+    }
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
     vol_plugin->nrefs --;
@@ -1376,14 +1410,32 @@ herr_t
 H5VL_file_flush(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5F_scope_t scope, 
                 hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->file_cls.flush)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file flush' method")
-    if((ret_value = (vol_plugin->cls->file_cls.flush)(obj, loc_params, scope, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->file_cls.flush)(obj, loc_params, scope, 
+                                                      dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTFLUSH, FAIL, "flush failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1541,14 +1593,31 @@ done:
 herr_t
 H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->file_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `file close' method")
-    if((ret_value = (vol_plugin->cls->file_cls.close)(file, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->file_cls.close)(file, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "close failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
     vol_plugin->nrefs --;
     if (0 == vol_plugin->nrefs) {
@@ -1727,9 +1796,21 @@ done:
 herr_t
 H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL;        /* private request struct inserted in event queue */
+    void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* if the VOL class does not implement a specific group close
        callback, try the object close */
@@ -1741,9 +1822,14 @@ H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 #endif
     }
     else {
-        if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, H5_REQUEST_NULL)) < 0)
+        if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, req)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
    }
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
     vol_plugin->nrefs --;
     if (0 == vol_plugin->nrefs) {

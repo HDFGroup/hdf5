@@ -195,6 +195,102 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Fflush_ff
+ *
+ * Purpose:	FF version of H5Fflush()
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fflush_ff(hid_t object_id, H5F_scope_t scope, hid_t eq_id)
+{
+    H5VL_t     *vol_plugin;
+    void       *obj;
+    H5I_type_t obj_type;
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    obj_type = H5I_get_type(object_id);
+    if(H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
+       H5I_DATASET != obj_type && H5I_ATTR != obj_type) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    }
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(object_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = obj_type;
+
+    if((ret_value = H5VL_file_flush(obj, loc_params, vol_plugin, scope, 
+                                    H5AC_dxpl_id, eq_id)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fflush_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fclose_ff
+ *
+ * Purpose:	This function closes the file specified by FILE_ID by
+ *		flushing all data to storage, and terminating access to the
+ *		file through FILE_ID.  If objects (e.g., datasets, groups,
+ *		etc.) are open in the file then the underlying storage is not
+ *		closed until those objects are closed; however, all data for
+ *		the file and the open objects is flushed.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fclose_ff(hid_t file_id, hid_t eq_id)
+{
+    H5VL_t  *vol_plugin = NULL;
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check/fix arguments. */
+    if(H5I_FILE != H5I_get_type(file_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = eq_id;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+
+    /* Decrement reference count on atom.  When it reaches zero the file will be closed. */
+    if(H5I_dec_app_ref(file_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fclose_ff() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Gcreate_ff
  *
  * Purpose:	Asynchronous wrapper around H5Gcreate().
@@ -345,6 +441,50 @@ H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gclose_ff
+ *
+ * Purpose:	Closes the specified group.  The group ID will no longer be
+ *		valid for accessing the group.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gclose_ff(hid_t group_id, hid_t eq_id)
+{
+    H5VL_t  *vol_plugin = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == H5I_object_verify(group_id,H5I_GROUP))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(group_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = eq_id;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+
+    /*
+     * Decrement the counter on the group atom.	 It will be freed if the count
+     * reaches zero.
+     */
+    if(H5I_dec_app_ref(group_id) < 0)
+    	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gclose_ff() */
 
 
 /*-------------------------------------------------------------------------
@@ -608,6 +748,96 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dset_extent_ff
+ *
+ * Purpose:	Modifies the dimensions of a dataset.
+ *		Can change to a smaller dimension.
+ *
+ * Return:	Non-negative on success, negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t eq_id)
+{
+    H5VL_t *vol_plugin;
+    void   *dset;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(!size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+
+    /* set the extent through the VOL */
+    if((ret_value = H5VL_dataset_set_extent(dset, vol_plugin, size, H5AC_dxpl_id, eq_id)) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset")
+
+done:
+        FUNC_LEAVE_API(ret_value)
+} /* end H5Dset_extent_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dclose_ff
+ *
+ * Purpose:	Closes access to a dataset (DATASET_ID) and releases
+ *		resources used by it. It is illegal to subsequently use that
+ *		same dataset ID in calls to other dataset functions.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dclose_ff(hid_t dset_id, hid_t eq_id)
+{
+    H5VL_t      *vol_plugin = NULL;
+    herr_t       ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check/fix arguments. */
+    if(H5I_DATASET != H5I_get_type(dset_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset ID")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = eq_id;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+
+    /*
+     * Decrement the counter on the dataset.  It will be freed if the count
+     * reaches zero.  
+     *
+     * Pass in TRUE for the 3rd parameter to tell the function to remove
+     * dataset's ID even though the freeing function might fail.  Please
+     * see the comments in H5I_dec_ref for details. (SLU - 2010/9/7)
+     */
+    if(H5I_dec_app_ref_always_close(dset_id) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dclose() */
 
 #if 0
 
