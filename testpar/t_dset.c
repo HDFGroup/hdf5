@@ -4038,3 +4038,63 @@ dataset_atomicity(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
 }
+
+/* Function: dense_attr_test
+ *
+ * Purpose: Test cases for writing dense attributes in parallel
+ *
+ * Programmer: Quincey Koziol
+ * Date: April, 2013
+ */
+void 
+test_dense_attr(void) 
+{
+    int mpi_size, mpi_rank;
+    hid_t fpid, fid;
+    hid_t gid, gpid;
+    hid_t atFileSpace, atid;
+    hsize_t atDims[1] = {10000};
+    herr_t status;
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    fpid = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fpid > 0), "H5Pcreate succeeded");
+    status = H5Pset_libver_bounds(fpid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    VRFY((status >= 0), "H5Pset_libver_bounds succeeded");
+    status = H5Pset_fapl_mpio(fpid, MPI_COMM_WORLD, MPI_INFO_NULL);
+    VRFY((status >= 0), "H5Pset_fapl_mpio succeeded");
+    fid = H5Fcreate("ph5Dense.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fpid);
+    VRFY((fid > 0), "H5Fcreate succeeded");
+    status = H5Pclose(fpid);
+    VRFY((status >= 0), "H5Pclose succeeded");
+
+    gpid = H5Pcreate(H5P_GROUP_CREATE);
+    VRFY((gpid > 0), "H5Pcreate succeeded");
+    status = H5Pset_attr_phase_change(gpid, 0, 0);
+    VRFY((status >= 0), "H5Pset_attr_phase_change succeeded");
+    gid = H5Gcreate2(fid, "foo", H5P_DEFAULT, gpid, H5P_DEFAULT);
+    VRFY((gid > 0), "H5Gcreate2 succeeded");
+    status = H5Pclose(gpid);
+    VRFY((status >= 0), "H5Pclose succeeded");
+
+    atFileSpace = H5Screate_simple(1, atDims, NULL);  
+    VRFY((atFileSpace > 0), "H5Screate_simple succeeded");
+    atid = H5Acreate(gid, "bar", H5T_STD_U64LE, atFileSpace, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((atid > 0), "H5Acreate succeeded");
+    status = H5Sclose(atFileSpace);
+    VRFY((status >= 0), "H5Sclose succeeded");
+
+    status = H5Aclose(atid);
+    VRFY((status >= 0), "H5Aclose succeeded");
+
+    status = H5Gclose(gid);
+    VRFY((status >= 0), "H5Gclose succeeded");
+    status = H5Fclose(fid);
+    VRFY((status >= 0), "H5Fclose succeeded");
+
+    return;
+}
+

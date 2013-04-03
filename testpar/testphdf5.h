@@ -289,6 +289,7 @@ void file_image_daisy_chain_test(void);
 #ifdef H5_HAVE_FILTER_DEFLATE
 void compress_readAll(void);
 #endif /* H5_HAVE_FILTER_DEFLATE */
+void test_dense_attr(void);
 
 /* commonly used prototypes */
 hid_t create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type, hbool_t use_gpfs);

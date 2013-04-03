@@ -532,6 +532,10 @@ int main(int argc, char **argv)
                 "dataset atomic updates", PARATESTFILE);
     }
 
+    AddTest("denseattr", test_dense_attr, NULL,
+	    "Store Dense Attributes", NULL);
+
+
     /* Display testing information */
     TestInfo(argv[0]);
 
