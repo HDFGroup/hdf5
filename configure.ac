@@ -1851,7 +1851,7 @@ case $withval in
     
     AC_CHECK_HEADERS([szlib.h],
                      [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZIP])
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"

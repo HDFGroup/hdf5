@@ -25927,7 +25927,7 @@ if test "x$ac_cv_header_szlib_h" = xyes; then :
 _ACEOF
  HAVE_SZLIB_H="yes"
 else
-  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZIP
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS" unset HAVE_SZLIB
 fi
 
 done
