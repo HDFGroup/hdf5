@@ -38,8 +38,8 @@ const H5Z_class2_t H5Z_DYNLIB1[1] = {{
     (H5Z_func_t)H5Z_filter_dynlib1,    /* The actual filter function	*/
 }};
 
-const H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB1;}
+H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
+H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB1;}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_dynlib1

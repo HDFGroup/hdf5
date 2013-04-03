@@ -74,12 +74,11 @@ typedef enum H5PL_type_t {
 extern "C" {
 #endif
 
-    H5PLUGIN_DLL const H5PL_type_t   H5PL_get_plugin_type(void);
-    H5PLUGIN_DLL const H5Z_class2_t* H5PL_get_plugin_info(void);
+    H5PLUGIN_DLL H5PL_type_t   H5PL_get_plugin_type(void);
+    H5PLUGIN_DLL H5Z_class2_t* H5PL_get_plugin_info(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _H5PLpublic_H */
-
