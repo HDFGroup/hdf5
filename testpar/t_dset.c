@@ -4082,7 +4082,7 @@ test_dense_attr(void)
 
     atFileSpace = H5Screate_simple(1, atDims, NULL);  
     VRFY((atFileSpace > 0), "H5Screate_simple succeeded");
-    atid = H5Acreate(gid, "bar", H5T_STD_U64LE, atFileSpace, H5P_DEFAULT, H5P_DEFAULT);
+    atid = H5Acreate2(gid, "bar", H5T_STD_U64LE, atFileSpace, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((atid > 0), "H5Acreate succeeded");
     status = H5Sclose(atFileSpace);
     VRFY((status >= 0), "H5Sclose succeeded");
