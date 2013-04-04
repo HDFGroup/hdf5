@@ -61,7 +61,7 @@
 /* Clear error - nothing to do */
 #define H5PL_CLR_ERROR
 
-typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
+typedef const H5Z_class2_t *(__cdecl *H5PL_get_filter_info_t)(void);
 
 /* Unix support */
 #else /* H5_HAVE_WIN32_API */
@@ -84,7 +84,7 @@ typedef const H5Z_class2_t *(__cdecl *get_filter_info_t)();
 /* Clear error */
 #define H5PL_CLR_ERROR dlerror()
 
-typedef const H5Z_class2_t *(*get_filter_info_t)();
+typedef const H5Z_class2_t *(*H5PL_get_filter_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
 
 /* Special symbol to indicate no plugin loading */
@@ -135,11 +135,9 @@ static H5PL_table_t     *H5PL_table_g = NULL;
 /* Table of location paths for plugin libraries */
 static char             *H5PL_path_table_g[H5PL_MAX_PATH_NUM];
 static size_t           H5PL_num_paths_g = 0;
-static htri_t           H5PL_path_found_g = FALSE;
+static hbool_t          H5PL_path_found_g = FALSE;
 
-/* Table of preload pathnames for plugin libraries */
-static char             *H5PL_preload_table_g[H5PL_MAX_PATH_NUM];
-static size_t           H5PL_num_preload_g = 0;
+/* Whether to preload pathnames for plugin libraries */
 static hbool_t          H5PL_no_plugin_g = FALSE;
 
 
@@ -157,25 +155,20 @@ DESCRIPTION
 static herr_t
 H5PL__init_interface(void)
 {
-    char        *preload_path = NULL;
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    char        *preload_path;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Retrieve pathnames from HDF5_PLUGIN_PRELOAD if the user sets it
      * to tell the library to load plugin libraries without search.
      */
-    if(!(preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD")))
-        HGOTO_DONE(ret_value)
+    if(NULL != (preload_path = HDgetenv("HDF5_PLUGIN_PRELOAD"))) {
+        /* Special symbal "::" means no plugin during data reading. */
+        if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN))
+            H5PL_no_plugin_g = TRUE;
+    } /* end if */
 
-    /* Special symbal "::" means no plugin during data reading. */
-    if(!HDstrcmp(preload_path, H5PL_NO_PLUGIN)) {
-        H5PL_no_plugin_g = TRUE;
-        HGOTO_DONE(ret_value)
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__init_interface() */
 
 
@@ -193,17 +186,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hbool_t H5PL_no_plugin(void)
+htri_t
+H5PL_no_plugin(void)
 {
-    hbool_t ret_value = FALSE;
+    htri_t ret_value;
 
-    FUNC_ENTER_NOAPI(ret_value)
+    FUNC_ENTER_NOAPI(FAIL)
 
     ret_value = H5PL_no_plugin_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5PL_no_plugin() */
 
 
 /*-------------------------------------------------------------------------
@@ -351,6 +345,9 @@ H5PL__init_path_table(void)
     /* Put paths in the path table.  They are separated by ":" */
     dir = HDstrtok(dl_path, H5PL_PATH_SEPARATOR);
     while(dir) {
+        /* Check for too many directories in path */
+        if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
         if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = HDstrdup(dir)))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
         H5PL_num_paths_g++;
@@ -400,20 +397,23 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 
     /* Iterates through all entries in the directory to find the right plugin library */
-    while((dp = HDreaddir(dirp)) != NULL) {
+    while(NULL != (dp = HDreaddir(dirp))) {
         /* The library we are looking for should be called libxxx.so... on Unix 
          * or libxxx.xxx.dylib on Mac.
          */ 
         if(!HDstrncmp(dp->d_name, "lib", (size_t)3) && 
                 (HDstrstr(dp->d_name, ".so") || HDstrstr(dp->d_name, ".dylib"))) {
             h5_stat_t   my_stat;
+            size_t      pathname_len;
             htri_t      found_in_dir;
 
-            pathname = (char *)H5MM_malloc(HDstrlen(dir) + HDstrlen(dp->d_name) + 2); 
-            HDstrncpy(pathname, dir, HDstrlen(dir) + 1);
-            HDstrcat(pathname, "/");
-            HDstrcat(pathname, dp->d_name);
+            /* Allocate & initialize the path name */
+            pathname_len = HDstrlen(dir) + HDstrlen(dp->d_name) + 2;
+            if(NULL == (pathname = (char *)H5MM_malloc(pathname_len)))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+            HDsnprintf(pathname, pathname_len, "%s/%s", dir, dp->d_name);
 
+            /* Get info for directory entry */
             if(HDstat(pathname, &my_stat) == -1)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file: %s", strerror(errno))
 
@@ -426,12 +426,11 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if(found_in_dir) {
                 /* Indicate success */
-                ret_value = TRUE;
-                break;
+                HGOTO_DONE(TRUE)
             } /* end if */
             else
-                if(pathname) 
-                    pathname = (char *)H5MM_xfree(pathname);
+                HDassert(pathname);
+                pathname = (char *)H5MM_xfree(pathname);
         } /* end if */
     } /* end while */
 
@@ -444,15 +443,15 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find() */
-#else
+#else /* H5_HAVE_WIN32_API */
 static htri_t
 H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
 {
     WIN32_FIND_DATA fdFile;
     HANDLE          hFind;
     char           *pathname = NULL;
-    htri_t          ret_value = FALSE;
     char            service[2048];
+    htri_t          ret_value = FALSE;
 
     FUNC_ENTER_STATIC
 
@@ -466,27 +465,28 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, void **info)
          * and ".." as the first two directories.
          */
         if(HDstrcmp(fdFile.cFileName, ".") != 0 && HDstrcmp(fdFile.cFileName, "..") != 0) {
-            htri_t         found_in_dir;
+            size_t      pathname_len;
+            htri_t      found_in_dir;
 
-	    pathname = (char *)H5MM_malloc(HDstrlen(dir) + HDstrlen(fdFile.cFileName) + 2); 
-	    HDstrncpy(pathname, dir, HDstrlen(dir)+1);
-	    HDstrcat(pathname, "\\");
-	    HDstrcat(pathname, fdFile.cFileName);
+            /* Allocate & initialize the path name */
+            pathname_len = HDstrlen(dir) + HDstrlen(fdFile.cFileName) + 2;
+	    if(NULL == (pathname = (char *)H5MM_malloc(pathname_len)))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
+            HDsnprintf(pathname, pathname_len, "%s\\%s", dir, fdFile.cFileName);
 
             /* Is the entity a File or Folder? */
-            if(fdFile.dwFileAttributes &FILE_ATTRIBUTE_DIRECTORY)
+            if(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 continue;
 
             if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if(found_in_dir) {
                 /* Indicate success */
-                ret_value = TRUE;
-                break;
+                HGOTO_DONE(TRUE)
             } /* end if */
             else
-	        if(pathname) 
-		    pathname = (char *)H5MM_xfree(pathname);
+	        HDassert(pathname);
+                pathname = (char *)H5MM_xfree(pathname);
         } /* end if */
     } while(FindNextFile(hFind, &fdFile)); /* Find the next file. */
 
@@ -498,7 +498,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find() */
-#endif
+#endif /* H5_HAVE_WIN32_API */
 
 
 /*-------------------------------------------------------------------------
@@ -521,7 +521,6 @@ static htri_t
 H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
 {
     H5PL_HANDLE    handle = NULL;
-    get_filter_info_t get_plugin_info = NULL;
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
@@ -533,10 +532,12 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
         H5PL_CLR_ERROR; /* clear error */
     } /* end if */
     else {
+        H5PL_get_filter_info_t get_plugin_info = NULL;
+
         /* Return a handle for the function H5PL_get_plugin_info in the dynamic library.
          * The plugin library is suppose to define this function.
          */
-        if(NULL == (get_plugin_info = (get_filter_info_t)H5PL_GET_LIB_FUNC(handle, "H5PL_get_plugin_info"))) {
+        if(NULL == (get_plugin_info = (H5PL_get_filter_info_t)H5PL_GET_LIB_FUNC(handle, "H5PL_get_plugin_info"))) {
             if(H5PL__close(handle) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CLOSEERROR, FAIL, "can't close dynamic library")
         } /* end if */
@@ -560,7 +561,7 @@ H5PL__open(H5PL_type_t pl_type, char *libname, int pl_id, void **pl_info)
                     H5PL_table_t *table = (H5PL_table_t *)H5MM_realloc(H5PL_table_g, n * sizeof(H5PL_table_t));
 
                     if(!table)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend dynamic library table")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to extend dynamic library table")
 
                     H5PL_table_g = table;
                     H5PL_table_alloc_g = n;
@@ -606,26 +607,27 @@ done:
 static htri_t
 H5PL__search_table(H5PL_type_t plugin_type, int type_id, void **info)
 {
-    size_t         i;
-    H5Z_class2_t   *plugin_info;
-    get_filter_info_t get_plugin_info = NULL;
     htri_t         ret_value = FALSE;
 
     FUNC_ENTER_STATIC
 
     /* Search in the table of already opened dynamic libraries */
     if(H5PL_table_used_g > 0) {
+        size_t         i;
+
         for(i = 0; i < H5PL_table_used_g; i++) {
             if((plugin_type == (H5PL_table_g[i]).pl_type) && (type_id == (H5PL_table_g[i]).pl_id)) {
-                if(NULL == (get_plugin_info = (get_filter_info_t)H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
+                H5PL_get_filter_info_t get_plugin_info;
+                H5Z_class2_t   *plugin_info;
+
+                if(NULL == (get_plugin_info = (H5PL_get_filter_info_t)H5PL_GET_LIB_FUNC((H5PL_table_g[i]).handle, "H5PL_get_plugin_info")))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get function for H5PL_get_plugin_info")
 
 	        if(NULL == (plugin_info = (*get_plugin_info)()))
 		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get plugin info")
 
 	        *info = (void *)plugin_info;
-	        ret_value = TRUE;
-                break;
+                HGOTO_DONE(TRUE)
             } /* end if */
         } /* end for */
     } /* end if */
