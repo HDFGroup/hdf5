@@ -931,7 +931,7 @@ IF (BUILD_TESTING)
       )
       SET_TESTS_PROPERTIES (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5ERR_MASK_TEST file)
+  ENDMACRO (ADD_H5ERR_MASK_ENV_TEST)
 
   MACRO (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     # If using memchecker add tests without using scripts
