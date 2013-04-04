@@ -324,7 +324,7 @@ ADD_TEST (
         extlinks19B00003.h5
         extlinks19B00004.h5
         extlinks19B00005.h5
-        extlinks19B00006.h5plugins
+        extlinks19B00006.h5
         extlinks19B00007.h5
         extlinks19B00008.h5
         extlinks19B00009.h5
@@ -577,7 +577,7 @@ ADD_TEST (NAME testlibinfo COMMAND ${CMAKE_COMMAND} -D "TEST_PROGRAM=$<TARGET_FI
 IF (BUILD_SHARED_LIBS)
 
   IF (WIN32 AND NOT CYGWIN)
-    SET(CMAKE_SEP ";")
+    SET(CMAKE_SEP "\;")
   ELSE (WIN32 AND NOT CYGWIN)
     SET(CMAKE_SEP ":")
   ENDIF(WIN32 AND NOT CYGWIN)
