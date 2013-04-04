@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <hdf5.h>
+#include "H5PLextern.h"
 
 #define H5Z_FILTER_DYNLIB3      259
 #define SUFFIX_LEN              8
@@ -41,8 +41,8 @@ const H5Z_class2_t H5Z_DYNLIB3[1] = {{
     (H5Z_func_t)H5Z_filter_dynlib3,    /* The actual filter function	*/
 }};
 
-H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
-H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB3;}
+H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
+const void   *H5PLget_plugin_info(void) {return H5Z_DYNLIB3;}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_dynlib3
@@ -68,23 +68,24 @@ H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts,
     size_t   ret_value;         /* Return value */
 
     /* Check for the correct number of parameters */
-    if(cd_nelmts>0)
+    if(cd_nelmts > 0)
         return(0);
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
         ret_value = *buf_size = nbytes - SUFFIX_LEN;
-    } else { /*write*/
+    } /* end if */
+    else { /*write*/
         void    *outbuf = NULL;     /* Pointer to new buffer */
         unsigned char *dst;         /* Temporary pointer to destination buffer */
 
-	dst=outbuf=malloc(nbytes+SUFFIX_LEN);
+	dst = (unsigned char *)(outbuf = malloc(nbytes + SUFFIX_LEN));
 
         /* Copy raw data */
         memcpy((void*)dst, (void*)(*buf), nbytes);
 
         /* Append suffix to raw data for storage */
         dst += nbytes;
-        memcpy((void*)dst, (void*)GROUP_SUFFIX, SUFFIX_LEN);
+        memcpy(dst, (void*)GROUP_SUFFIX, SUFFIX_LEN);
 
         /* Free input buffer */
  	free(*buf);
@@ -97,4 +98,5 @@ H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts,
     } /* end else */
 
     return ret_value;
-}
+} /* H5Z_filter_dynlib3() */
+
