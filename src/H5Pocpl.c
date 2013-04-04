@@ -752,7 +752,6 @@ H5Pset_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags,
 	       size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/])
 {
     H5P_genplist_t  *plist;             /* Property list */
-    H5O_pline_t     pline;              /* Filter pipeline */
     herr_t          ret_value=SUCCEED;  /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -830,9 +829,9 @@ H5P__set_filter(H5P_genplist_t *plist, H5Z_filter_t filter, unsigned int flags,
 
     /* If filter is not available, try to dynamically load it */
     if(!filter_avail) {
-        H5Z_class2_t    *filter_info;
+        const H5Z_class2_t *filter_info;
 
-        if(NULL == (filter_info = (H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)filter)))
+        if(NULL == (filter_info = (const H5Z_class2_t *)H5PL_load(H5PL_TYPE_FILTER, (int)filter)))
             HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, FAIL, "failed to load dynamically loaded plugin")
         if(H5Z_register(filter_info) < 0)
 	    HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")

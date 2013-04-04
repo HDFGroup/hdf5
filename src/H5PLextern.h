@@ -16,22 +16,21 @@
  * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
  *              13 February 2013
  */
-#ifndef _H5PLpublic_H
-#define _H5PLpublic_H
+#ifndef _H5PLextern_H
+#define _H5PLextern_H
 
-/* Public headers needed by this file */
-#include "H5Zpublic.h"
+/* Include HDF5 header */
+#include "hdf5.h"
 
-/****************************/
-/* Library Public Typedefs */
-/****************************/
+/*******************/
+/* Public Typedefs */
+/*******************/
 
 /* Plugin type */
 typedef enum H5PL_type_t {
     H5PL_TYPE_ERROR        = -1,  /*error                    */
     H5PL_TYPE_FILTER       = 0,   /*filter                   */
-    H5PL_TYPE_VFD          = 1,   /*virtual file driver      */
-    H5PL_TYPE_NONE         = 2    /*this must be last!       */
+    H5PL_TYPE_NONE         = 1    /*this must be last!       */
 } H5PL_type_t;
 
 
@@ -74,11 +73,12 @@ typedef enum H5PL_type_t {
 extern "C" {
 #endif
 
-    H5PLUGIN_DLL H5PL_type_t   H5PL_get_plugin_type(void);
-    H5PLUGIN_DLL H5Z_class2_t* H5PL_get_plugin_info(void);
+H5PLUGIN_DLL H5PL_type_t H5PLget_plugin_type(void);
+H5PLUGIN_DLL const void *H5PLget_plugin_info(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _H5PLpublic_H */
+#endif /* _H5PLextern_H */
+

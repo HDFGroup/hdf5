@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <hdf5.h>
+#include "H5PLextern.h"
 
 #define H5Z_FILTER_DYNLIB2      258 
 #define MULTIPLIER              3
@@ -39,8 +39,8 @@ const H5Z_class2_t H5Z_DYNLIB2[1] = {{
     (H5Z_func_t)H5Z_filter_dynlib2,    /* The actual filter function	*/
 }};
 
-H5PL_type_t   H5PL_get_plugin_type(void) {return H5PL_TYPE_FILTER;}
-H5Z_class2_t* H5PL_get_plugin_info(void) {return H5Z_DYNLIB2;}
+H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
+const void   *H5PLget_plugin_info(void) {return H5Z_DYNLIB2;}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_dynlib2
@@ -64,29 +64,28 @@ H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
-    int *int_ptr=(int *)*buf;          /* Pointer to the data values */
-    size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
+    int *int_ptr = (int *)*buf;          /* Pointer to the data values */
+    size_t buf_left = *buf_size;  /* Amount of data buffer left to process */
 
     /* Check for the correct number of parameters */
-    if(cd_nelmts>0)
+    if(cd_nelmts > 0)
         return(0);
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Divide the original value with MULTIPLIER */
-        while(buf_left>0) {
-            *int_ptr /= MULTIPLIER;
-            *int_ptr++;
+        while(buf_left > 0) {
+            *int_ptr++ /= MULTIPLIER;
             buf_left -= sizeof(int);
         } /* end while */
     } /* end if */
     else { /*write*/
         /* Multiply the original value with MULTIPLIER */
-        while(buf_left>0) {
-            *int_ptr *= MULTIPLIER;
-            *int_ptr++;
+        while(buf_left > 0) {
+            *int_ptr++ *= MULTIPLIER;
             buf_left -= sizeof(int);
         } /* end while */
     } /* end else */
 
     return nbytes;
-}
+} /* end H5Z_filter_dynlib2() */
+

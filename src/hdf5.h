@@ -34,7 +34,6 @@
 #include "H5MMpublic.h"		/* Memory management			*/
 #include "H5Opublic.h"		/* Object headers			*/
 #include "H5Ppublic.h"		/* Property lists			*/
-#include "H5PLpublic.h"		/* Plugin				*/
 #include "H5Rpublic.h"		/* References				*/
 #include "H5Spublic.h"		/* Dataspaces				*/
 #include "H5Tpublic.h"		/* Datatypes				*/

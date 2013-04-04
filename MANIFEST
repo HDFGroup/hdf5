@@ -851,7 +851,7 @@
 ./src/H5Ptest.c
 ./src/H5PL.c
 ./src/H5PLprivate.h
-./src/H5PLpublic.h
+./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
 ./src/H5Rpkg.h

@@ -34,9 +34,6 @@
 #define H5Z_FILTER_DYNLIB2      258 
 #define H5Z_FILTER_DYNLIB3      259
 
-/* Bzip2 filter */
-#define H5Z_FILTER_BZIP2        307
-
 const char *FILENAME[] = {
     "plugin",
     NULL
@@ -45,7 +42,6 @@ const char *FILENAME[] = {
 
 /* Dataset names for testing filters */
 #define DSET_DEFLATE_NAME	"deflate"
-#define DSET_BZIP2_NAME	        "bzip2"
 #define DSET_DYNLIB1_NAME	"dynlib1"
 #define DSET_DYNLIB2_NAME       "dynlib2"
 
@@ -156,7 +152,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
      */
     TESTING("    filters (write)");
 
-    for(i=n=0; i<size[0]; i++) {
+    n = 0;
+    for(i=0; i<size[0]; i++) {
 	for(j=0; j<size[1]; j++) {
 	    points[i][j] = (int)(n++);
 	}
@@ -309,8 +306,6 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
 	        points_dynlib1[i][j] = points[i][j];
             } else if(!HDstrcmp(name, DSET_DYNLIB2_NAME)) {
 	        points_dynlib2[i][j] = points[i][j];
-            } else if(!HDstrcmp(name, DSET_BZIP2_NAME)) {
-	        points_bzip2[i][j] = points[i][j];
             }
 	}
     }
@@ -344,7 +339,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters_for_datasets(hid_t file, hid_t fapl)
+test_filters_for_datasets(hid_t file)
 {
     hid_t	dc;                 /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
@@ -474,7 +469,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_read_with_filters(hid_t file, hid_t fapl)
+test_read_with_filters(hid_t file)
 {
     hid_t	dset;                 /* Dataset ID */
 
@@ -489,7 +484,7 @@ test_read_with_filters(hid_t file, hid_t fapl)
 
     if((dset = H5Dopen2(file,DSET_DEFLATE_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(test_read_data(dset, points_deflate) < 0) TEST_ERROR
+    if(test_read_data(dset, (int *)points_deflate) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
@@ -508,7 +503,7 @@ test_read_with_filters(hid_t file, hid_t fapl)
 
     if((dset = H5Dopen2(file,DSET_DYNLIB1_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(test_read_data(dset, points_dynlib1) < 0) TEST_ERROR
+    if(test_read_data(dset, (int *)points_dynlib1) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
@@ -520,7 +515,7 @@ test_read_with_filters(hid_t file, hid_t fapl)
 
     if((dset = H5Dopen2(file,DSET_DYNLIB2_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(test_read_data(dset, points_dynlib2) < 0) TEST_ERROR
+    if(test_read_data(dset, (int *)points_dynlib2) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 
@@ -544,7 +539,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters_for_groups(hid_t file, hid_t fapl)
+test_filters_for_groups(hid_t file)
 {
     hid_t	gcpl, gid, group;
     int         i;
@@ -595,9 +590,9 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_groups_with_filters(hid_t file, hid_t fapl)
+test_groups_with_filters(hid_t file)
 {
-    hid_t	gcpl, gid, group;
+    hid_t	gid, group;
     int         i;
     char        gname[256];
 
@@ -689,10 +684,10 @@ main(void)
             TEST_ERROR 
 
         /* Test dynamically loaded filters for chunked dataset */
-        nerrors += (test_filters_for_datasets(file, my_fapl) < 0	? 1 : 0);
+        nerrors += (test_filters_for_datasets(file) < 0	? 1 : 0);
 
         /* Test dynamically loaded filters for groups */
-        nerrors += (test_filters_for_groups(file, my_fapl) < 0	        ? 1 : 0);
+        nerrors += (test_filters_for_groups(file) < 0 ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             TEST_ERROR 
@@ -713,10 +708,10 @@ main(void)
         TEST_ERROR 
 
     /* Read the data with filters */
-    nerrors += (test_read_with_filters(file, fapl) < 0		? 1 : 0);
+    nerrors += (test_read_with_filters(file) < 0		? 1 : 0);
 
     /* Open the groups with filters */
-    nerrors += (test_groups_with_filters(file, fapl) < 0	? 1 : 0);
+    nerrors += (test_groups_with_filters(file) < 0	? 1 : 0);
 
     if(H5Fclose(file) < 0)
         TEST_ERROR 
