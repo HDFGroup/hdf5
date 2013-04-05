@@ -1303,6 +1303,14 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* The h5dump and h5diff utilities occasionally produce different output
+  between Linux and Windows systems. This is caused by lower-level library
+  routines that fail to write fill values to the user's buffer when reading
+  unallocated chunks from datasets that have a fill value set to
+  H5D_FILL_VALUE_DEFAULT. Due to platform differences the return of
+  spurious data values have only been encountered on Windows 32-bit systems.
+  (Issue HDFFV-8247; JP - 2013/03/27)
+
 * The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It
   complains with this message:
       "/home/hdf5/src/H5Vprivate.h", line 130: Error: __func__ is not defined.
