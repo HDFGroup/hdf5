@@ -311,4 +311,46 @@ void print_found(hsize_t nfound)
 }
 
 
+/*-----------------------------------------------------------------
+ * Function: match_up_memsize
+ *  
+ * Purpose: match smaller memory size up to bigger memory size
+ *------------------------------------------------------------------
+ */
+herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
+                         hid_t *m_tid1, hid_t *m_tid2, 
+                         size_t *m_size1, size_t  *m_size2)
+{
+    herr_t ret = SUCCEED;
 
+    if( (*m_size1) != (*m_size2) )
+    {
+        if( (*m_size1) < (*m_size2) )
+        {
+            H5Tclose( *m_tid1 );
+
+            if(( (*m_tid1) = h5tools_get_native_type(f_tid2_id)) < 0)
+            {
+                ret = FAIL;
+                goto out;
+            }
+
+            *m_size1 = H5Tget_size( *m_tid1 );
+        } /* end if */
+        else {
+            H5Tclose(*m_tid2);
+
+            if(( (*m_tid2) = h5tools_get_native_type(f_tid1_id)) < 0)
+            {
+                ret = FAIL;
+                goto out;
+            }
+
+            *m_size2 = H5Tget_size(*m_tid2);
+        } /* end else */
+    } /* end if */
+    HDassert( (*m_size1) == (*m_size2) );
+
+out:
+    return ret;
+}

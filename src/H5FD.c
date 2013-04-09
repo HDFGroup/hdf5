@@ -71,7 +71,6 @@ static herr_t H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *),
     void *pl);
 static herr_t H5FD_free_cls(H5FD_class_t *cls);
 static herr_t H5FD_fapl_copy(hid_t driver_id, const void *fapl, void **copied_fapl);
-static herr_t H5FD_dxpl_copy(hid_t driver_id, const void *dxpl, void **copied_dxpl);
 static int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
 static int H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*out*/);
 
@@ -456,13 +455,9 @@ H5FD_get_class(hid_t id)
             if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
             ret_value = H5FD_get_class(driver_id);
-        } else if(TRUE == H5P_isa_class(id, H5P_DATASET_XFER)) {
-            if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
-            ret_value = H5FD_get_class(driver_id);
-        } else {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id, file access property list or data transfer property list")
-        }
+        } /* end if */
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a driver id or file access property list")
     } /* end if */
 
 done:
@@ -823,125 +818,6 @@ H5FD_fapl_close(hid_t driver_id, void *fapl)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_fapl_close() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_dxpl_open
- *
- * Purpose:	Mark a driver as used by a data transfer property list
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, October 23, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
-{
-    void *copied_driver_info = NULL;           /* Temporary VFL driver info */
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Increment the reference count on the driver and copy the driver info */
-    if(H5I_inc_ref(driver_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "can't increment VFL driver ID")
-    if(H5FD_dxpl_copy(driver_id, driver_info, &copied_driver_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "can't copy VFL driver")
-
-    /* Set the driver information for the new property list */
-    if(H5P_set(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VFL driver ID")
-    if(H5P_set(plist, H5D_XFER_VFL_INFO_NAME, &copied_driver_info) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VFL driver info")
-
-done:
-    if(ret_value < 0)
-        if(copied_driver_info && H5FD_dxpl_close(driver_id, copied_driver_info) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close copy of driver info")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_dxpl_open() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_dxpl_copy
- *
- * Purpose:	Copies the driver-specific part of the data transfer property
- *		list.
- *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  3, 1999
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl, void **copied_dxpl)
-{
-    H5FD_class_t *driver;
-    herr_t ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check args */
-    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-
-    /* Copy the file access property list */
-    if(H5FD_pl_copy(driver->dxpl_copy, driver->dxpl_size, old_dxpl, copied_dxpl) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't copy driver data transfer property list")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_dxpl_copy() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_dxpl_close
- *
- * Purpose:	Closes a driver for a dataset transfer property list
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  3, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_dxpl_close(hid_t driver_id, void *dxpl)
-{
-    H5FD_class_t *driver;
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Check args */
-    if(driver_id > 0) {
-        if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
-
-        /* Close the driver for the property list */
-        if(H5FD_pl_close(driver_id, driver->dxpl_free, dxpl) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_dxpl_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -1456,9 +1332,9 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     if(size == 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "zero-size request")
     if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list")
 
     /* Do the real work */
@@ -1508,9 +1384,9 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
     if(type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request type")
     if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
@@ -1796,7 +1672,7 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
         if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
@@ -1965,7 +1841,7 @@ H5FDtruncate(H5FD_t *file, hid_t dxpl_id, unsigned closing)
     if(H5P_DEFAULT == dxpl_id)
         dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
