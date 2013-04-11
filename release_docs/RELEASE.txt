@@ -238,6 +238,7 @@ Supported Platforms
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
                                       Version 11.9-0
+                                      Version 12.5-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
                                       Version 12.1
@@ -245,7 +246,7 @@ Supported Platforms
                                       gcc 4.1.2 and gfortran 4.1.2
 
     Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers for 32-bit applications;
+    #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
     (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-52)
                                       Version 4.6.3
                                   PGI C, Fortran, C++ for 64-bit target on 
@@ -258,6 +259,13 @@ Supported Platforms
                                       Version 12.1 (Build 20120212)
                                   MPICH mpich2-1.4.1p1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
+
+    Linux 2.6.32-358.2.1.el6      GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (platypus)                       Version 4.4.7 20120313
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 12.1 20120212
 
     Linux 2.6.32-220.7.1.el6.ppc64 gcc (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
