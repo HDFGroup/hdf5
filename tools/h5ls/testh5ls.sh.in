@@ -15,6 +15,8 @@
 #
 # Tests for the h5ls tool
 
+srcdir=@srcdir@
+
 TESTNAME=h5ls
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
@@ -35,13 +37,11 @@ WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
 nerrors=0
 verbose=yes
 h5haveexitcode=yes      # default is yes
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
+
 # source dirs
 SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
 # testfiles source dirs for tools
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"

@@ -20,7 +20,7 @@
 #
 
 ## Makefile.am template
-## When automake is run, it scans configure.in to find all Makefiles used by
+## When automake is run, it scans configure.ac to find all Makefiles used by
 ## the build that come from Makefile.in files.  If there are Makefile.am's 
 ## in any of those locations, it parses the Makefile.am's to produce
 ## Makefile.in's, which configure uses to create Makefiles.

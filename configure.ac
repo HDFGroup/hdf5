@@ -16,7 +16,7 @@ dnl access to either file, you may request a copy from help@hdfgroup.org.
 dnl ----------------------------------------------------------------------
 dnl Initialize configure.
 dnl
-AC_REVISION($Id$)
+AC_REVISION($Id: configure.ac 22697 2012-08-19 14:35:47Z hdftest $)
 AC_PREREQ([2.53])
 
 dnl AC_INIT takes the name of the package, the version number, and an
@@ -922,7 +922,7 @@ fi
 
 dnl ----------------------------------------------------------------------
 dnl Fortran libraries are not currently supported on Mac. Disable them.
-dnl this is overridable with '--enable-unsupported'.
+dnl (this is overridable with --enable-unsupported).
 dnl
 AC_SUBST([H5_FORTRAN_SHARED])
 H5_FORTRAN_SHARED="no"
@@ -4393,7 +4393,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/Makefile
                  test/testcheck_version.sh
                  test/testerror.sh
-                 test/testflushrefresh.sh
+		 test/testflushrefresh.sh
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
@@ -4407,16 +4407,21 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5dump/testh5dumpxml.sh
                  tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
+                 tools/h5import/h5importtestutil.sh
                  tools/h5diff/Makefile
+                 tools/h5diff/testh5diff.sh
+                 tools/h5diff/testph5diff.sh
                  tools/h5jam/Makefile
                  tools/h5jam/testh5jam.sh
                  tools/h5repack/Makefile
                  tools/h5repack/h5repack.sh
                  tools/h5ls/Makefile
                  tools/h5copy/Makefile
+                 tools/h5copy/testh5copy.sh
                  tools/lib/Makefile
                  tools/misc/Makefile
                  tools/misc/h5cc
+                 tools/misc/testh5mkgrp.sh
                  tools/misc/testh5repart.sh
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
@@ -4443,11 +4448,12 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/src/Makefile
                  hl/test/Makefile
                  hl/test/H5srcdir_str.h
-                 hl/test/test_ld.sh
+		 hl/test/test_ld.sh
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
+                 hl/tools/gif2h5/h52giftest.sh
 		 hl/tools/h5watch/Makefile
-               	 hl/tools/h5watch/testh5watch.sh
+                 hl/tools/h5watch/testh5watch.sh
                  hl/examples/Makefile
                  hl/examples/run-hlc-ex.sh
                  hl/c++/Makefile

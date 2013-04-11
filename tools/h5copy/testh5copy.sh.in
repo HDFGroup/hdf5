@@ -19,10 +19,7 @@
 # Thursday, July 20, 2006
 #
 
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-    srcdir=.
-fi
+srcdir=@srcdir@
 
 # source dirs
 SRC_TOOLS="$srcdir/.."
@@ -148,7 +145,7 @@ TESTING()
 VERIFY() 
 {
     SPACES="                                                               "
-    echo "Verifying h5diff output `basename $1` `basename $2` `basename $3` `basename $4` $SPACES" | cut -c1-70 | tr -d '\012'
+    echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -198,7 +195,7 @@ TOOLTEST()
       runh5diff=no
      fi
   
-    TESTING $H5COPY $5 $6 $7 $8 $9
+    TESTING $H5COPY $@
     (
     echo "#############################"
     echo " output for '$H5COPY $@'"
@@ -268,7 +265,7 @@ TOOLTEST_FAIL()
       outputfile=$4
     fi
 
-    TESTING $H5COPY $5 $6 $7 $8 $9
+    TESTING $H5COPY $@
     (
     #echo "#############################"
     #echo " output for '$H5COPY $@'"
@@ -550,8 +547,6 @@ COPY_REFERENCES
 COPY_EXT_LINKS
 TEST_MISC
 
-# Add newline for nicer formatting
-echo " "
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

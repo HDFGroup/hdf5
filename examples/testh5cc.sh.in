@@ -23,6 +23,8 @@
 #	Added version compatibility tests.
 #
 
+srcdir=@srcdir@
+
 # Initializations
 TESTNAME=h5cc
 EXIT_SUCCESS=0
@@ -52,11 +54,6 @@ H5_USE_16_API_DEFAULT=`grep '#define H5_USE_16_API_DEFAULT ' ../src/H5pubconf.h`
 # setup my machine information.
 myos=`uname -s`
 myhostnama=`uname -n`
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 # Generate some source files and library for tests.
 suffix=c		# source file suffix
