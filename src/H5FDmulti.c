@@ -657,16 +657,16 @@ H5FD_multi_dxpl_cmp_cb(const void *_dx1, const void *_dx2, size_t size)
                     return(cmp_status);
             } /* end if */
             else
-                return(1);
+                return(-1);
         } /* end if */
         else {
             if(dx2->memb_dxpl[mt] >= 0)
-                return(-1);
+                return(1);
             else
                 if(dx1->memb_dxpl[mt] > dx2->memb_dxpl[mt])
-                    return(1);
-                else if(dx1->memb_dxpl[mt] < dx2->memb_dxpl[mt])
                     return(-1);
+                else if(dx1->memb_dxpl[mt] < dx2->memb_dxpl[mt])
+                    return(1);
                 else
                     continue;
         } /* end else */

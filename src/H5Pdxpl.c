@@ -124,6 +124,7 @@
 #define H5D_XFER_XFORM_DEF          NULL
 #define H5D_XFER_XFORM_DEL          H5P__dxfr_xform_del
 #define H5D_XFER_XFORM_COPY         H5P__dxfr_xform_copy
+#define H5D_XFER_XFORM_CMP          H5P__dxfr_xform_cmp
 #define H5D_XFER_XFORM_CLOSE        H5P__dxfr_xform_close
 
 /******************/
@@ -146,6 +147,7 @@ static herr_t H5P__dxfr_reg_prop(H5P_genclass_t *pclass);
 /* Property list callbacks */
 static herr_t H5P__dxfr_xform_del(hid_t prop_id, const char* name, size_t size, void* value);
 static herr_t H5P__dxfr_xform_copy(const char* name, size_t size, void* value);
+static int H5P__dxfr_xform_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__dxfr_xform_close(const char* name, size_t size, void* value);
 
 
@@ -294,7 +296,6 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE, 
                          &ftype, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
 #endif /* H5_HAVE_PARALLEL */
 
     /* Register the EDC property */
@@ -310,7 +311,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data transform property */
-    if(H5P_register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &def_xfer_xform, NULL, NULL, NULL, H5D_XFER_XFORM_DEL, H5D_XFER_XFORM_COPY, NULL, H5D_XFER_XFORM_CLOSE) < 0)
+    if(H5P_register_real(pclass, H5D_XFER_XFORM_NAME, H5D_XFER_XFORM_SIZE, &def_xfer_xform, NULL, NULL, NULL, H5D_XFER_XFORM_DEL, H5D_XFER_XFORM_COPY, H5D_XFER_XFORM_CMP, H5D_XFER_XFORM_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -384,6 +385,60 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5P__dxfr_xform_cmp
+ *
+ * Purpose: Compare two data transforms.
+ *
+ * Return: positive if VALUE1 is greater than VALUE2, negative if VALUE2 is
+ *		greater than VALUE1 and zero if VALUE1 and VALUE2 are equal.
+ *
+ * Programmer:     Quincey Koziol
+ *                 Wednesday, August 15, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__dxfr_xform_cmp(const void *_xform1, const void *_xform2, size_t UNUSED size)
+{
+    const H5Z_data_xform_t * const *xform1 = (const H5Z_data_xform_t * const *)_xform1; /* Create local aliases for values */
+    const H5Z_data_xform_t * const *xform2 = (const H5Z_data_xform_t * const *)_xform2; /* Create local aliases for values */
+    const char *pexp1, *pexp2;          /* Pointers to transform expressions */
+    herr_t ret_value = 0;               /* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(xform1);
+    HDassert(xform2);
+    HDassert(size == sizeof(H5Z_data_xform_t *));
+
+    /* Check for a property being set */
+    if(*xform1 == NULL && *xform2 != NULL) HGOTO_DONE(-1);
+    if(*xform1 != NULL && *xform2 == NULL) HGOTO_DONE(1);
+
+    if(*xform1) {
+        HDassert(*xform2);
+    
+        /* Get the transform expressions */
+        pexp1 = H5Z_xform_extract_xform_str(*xform1);
+        pexp2 = H5Z_xform_extract_xform_str(*xform2);
+
+        /* Check for property expressions */
+        if(pexp1 == NULL && pexp2 != NULL) HGOTO_DONE(-1);
+        if(pexp1 != NULL && pexp2 == NULL) HGOTO_DONE(1);
+
+        if(pexp1) {
+            HDassert(pexp2);
+            ret_value = HDstrcmp(pexp1, pexp2);
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__dxfr_xform_copy() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5P__dxfr_xform_close
  *
  * Purpose: Frees memory allocated by H5P_dxfr_xform_set
@@ -445,8 +500,12 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* See if a data transform is already set, and free it if it is */
-    if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) >= 0)
-	H5Z_xform_destroy(data_xform_prop);
+    if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression")
+
+    /* Destroy previous data transform property */
+    if(H5Z_xform_destroy(data_xform_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release data transform expression")
 
     /* Create data transform info from expression */
     if(NULL == (data_xform_prop = H5Z_xform_create(expression)))
@@ -494,7 +553,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     H5P_genplist_t *plist;      /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL;    /* New data xform property */
     size_t	len;
-    char*	pexp;
+    const char*	pexp;
     ssize_t 	ret_value;   /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -508,11 +567,11 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "error getting data transform expression")
 
     if(NULL == data_xform_prop)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "data transform has not been set")
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "data transform has not been set")
 
     /* Get the data transform string */
     if(NULL == (pexp = H5Z_xform_extract_xform_str(data_xform_prop)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "failed to retrieve transform expression")
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "failed to retrieve transform expression")
 
     len = HDstrlen(pexp);
     if(expression) {
