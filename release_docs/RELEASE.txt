@@ -1129,10 +1129,11 @@ Supported Platforms
                                   MPICH mpich2-1.4.1p1 compiled with
                                       gcc 4.1.2 and gfortran 4.1.2
 
-    Linux 2.6.32-220.7.1.el6.ppc64 gcc (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
-    (ostrich)                     GNU Fortran (GCC) 4.4.6 20120305 (Red Hat 4.4.6-4)
-
+    Linux 2.6.32-358.2.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
+                                  IBM XL C/C++ V11.1
+                                  IBM XL Fortran V13.1
     Linux 2.6.32-220.23.1.1chaos  Intel C, C++, Fortran Compilers
     ch5.x86_64 GNU/Linux              Version 12.1.5.339
     (LLNL Aztec)
@@ -1141,12 +1142,9 @@ Supported Platforms
     (LLNL uDawn)                  XL C++ for Blue Gene/P, bgxlC V9.0
                                   XL Fortran for Blue Gene/P, bgxlf90 V11.1
 
-    SunOS 5.10 32- and 64-bit     Sun C 5.9 Sun OS_sparc Patch 124867-16
-    (linew)                       Sun Fortran 95 8.3 Sun OS_sparc Patch 127000-13
-                                  Sun C++ 5.9 Sun OS_sparc Patch 124863-26
-                                  Sun C 5.11 SunOS_sparc
-                                  Sun Fortran 95 8.5 SunOS_sparc
-                                  Sun C++ 5.11 SunOS_sparc
+    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                                  Sun C++ 5.12 SunOS_sparc
 
     Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
 
@@ -1164,15 +1162,9 @@ Supported Platforms
 
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    (fred)                        gfortran GNU Fortran (GCC) 4.6.2
-                                  Intel C (icc), Fortran (ifort), C++ (icpc)
-                                      12.1.0.038 Build 20110811
-
-    Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
-    Intel 32-bit                  gfortran GNU Fortran (GCC) 4.6.1
-    (tejeda)                      Intel C (icc), Fortran (ifort), C++ (icpc)
-                                      12.1.0.038 Build 20110811
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    (fred)                        Intel C (icc), Fortran (ifort), C++ (icpc)
+                                      12.1 Build 20120928
 
     Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
     32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
@@ -1200,11 +1192,10 @@ Tested Configuration Features Summary
 
 Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
-Solaris2.10 32-bit                      n        y/y    n        y    y     y
-Solaris2.10 64-bit                      n        y/n    n        y    y     y
+Solaris2.11 32-bit                      n        y/y    n        y    y     y
+Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 7                               y        y/n    n        y    y     y
 Windows 7     x64                       y        y/n    n        y    y     y
-Mac OS X Snow Leopard 10.6.8 32-bit     n        y/y    n        y    y     n 
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
@@ -1216,16 +1207,15 @@ CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
 CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
 CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
-Linux 2.6.32-220.7.1.el6.ppc64          n        y/n    n        y    y     y
+Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-  
                                          C libs  F90 libs  C++ libs  safe     
-Solaris2.10 32-bit                         y       y         y         y        
-Solaris2.10 64-bit                         n       n         n         n        
+Solaris2.11 32-bit                         y       y         y         y        
+Solaris2.11 64-bit                         y       y         y         y        
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
-Mac OS X Snow Leopard 10.6.8 32-bit        y       n         y         n        
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
@@ -1237,7 +1227,7 @@ CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n
 CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
 CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
 CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
-Linux 2.6.32-220.7.1.el6.ppc64             y       y         y         n 
+Linux 2.6.32-358.2.1.el6.ppc64             y       y         y         n 
 
 Compiler versions for each platform are listed in the preceding
 "Supported Platforms" table.
