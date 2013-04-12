@@ -29,7 +29,7 @@ endif
 
 if BUILD_EFF_CONDITIONAL
   INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
-  LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYSHIPPER_LIBS)
+  LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS) $(MYMERCURY_LIBS)
   EXAMPLE_PROG_EFF = test_server test_client
 endif
 

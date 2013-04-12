@@ -19,7 +19,6 @@
 #ifndef _H5VLiod_server_H
 #define _H5VLiod_server_H
 
-#include "H5VLiod.h"         /* Iod VOL plugin                  */
 #include "H5VLiod_common.h"
 
 #ifdef H5_HAVE_EFF
@@ -59,49 +58,21 @@ typedef struct H5VL_iod_server_remote_dset_t {
     void *dspace;
 } H5VL_iod_server_remote_dset_t;
 
-H5_DLL int H5VL_iod_server_eff_init(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_eff_finalize(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_file_create(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_file_open(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_file_flush(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_file_close(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_group_create(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_group_open(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_group_close(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_create(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_open(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_read(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_write(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_set_extent(fs_handle_t handle);
-H5_DLL int H5VL_iod_server_dset_close(fs_handle_t handle);
-
-H5_DLL herr_t H5VL_iod_server_encode_eff_init(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_eff_init(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_file_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_file_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_file_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_file_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_file_flush(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_file_flush(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_file_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_file_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_group_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_group_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_group_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_group_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_group_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_group_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_dset_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_dset_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_dset_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_dset_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_dset_read(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_dset_write(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_dset_io(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_dset_set_extent(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_dset_set_extent(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_encode_dset_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_server_decode_dset_close(fs_proc_t proc, void *_input);
+H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_flush(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_file_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_group_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_group_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_group_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_read(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_write(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_set_extent(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_close(hg_handle_t handle);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

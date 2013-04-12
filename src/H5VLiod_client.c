@@ -105,7 +105,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
     H5VL_iod_request_t *cur_req = file->request_list_head;
     int ret;
-    fs_status_t status;
+    hg_status_t status;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -115,9 +115,10 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     /* Loop to complete the request while poking through other requests on the 
        container to avoid deadlock. */
     while(1) {
+        HDassert(request->state == H5VL_IOD_PENDING);
         /* test the operation status */
-        ret = fs_wait(*((fs_request_t *)request->req), 0, &status);
-        if(S_FAIL == ret) {
+        ret = HG_Wait(*((hg_request_t *)request->req), 0, &status);
+        if(HG_FAIL == ret) {
             fprintf(stderr, "failed to wait on request\n");
             request->status = H5AO_FAILED;
             request->state = H5VL_IOD_COMPLETED;
@@ -137,23 +138,26 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
             H5VL_iod_request_t *tmp_req = NULL;
 
             if(cur_req) {
-                fs_status_t tmp_status;
+                if(cur_req->req != request->req) {
+                    hg_status_t tmp_status;
 
-                tmp_req = cur_req->next;
+                    tmp_req = cur_req->next;
 
-                ret = fs_wait(*((fs_request_t *)cur_req->req), 0, &tmp_status);
-                if(S_FAIL == ret) {
-                    fprintf(stderr, "failed to wait on request\n");
-                    cur_req->status = H5AO_FAILED;
-                    cur_req->state = H5VL_IOD_COMPLETED;
-                    H5VL_iod_request_delete(file, cur_req);
-                }
-                else {
-                    if(tmp_status) {
-                        cur_req->status = H5AO_SUCCEEDED;
+                    HDassert(cur_req->state == H5VL_IOD_PENDING);
+                    ret = HG_Wait(*((hg_request_t *)cur_req->req), 0, &tmp_status);
+                    if(HG_FAIL == ret) {
+                        fprintf(stderr, "failed to wait on request\n");
+                        cur_req->status = H5AO_FAILED;
                         cur_req->state = H5VL_IOD_COMPLETED;
-                        if(H5VL_iod_request_complete(file, cur_req) < 0)
-                            fprintf(stderr, "Operation Failed!\n");
+                        H5VL_iod_request_delete(file, cur_req);
+                    }
+                    else {
+                        if(tmp_status) {
+                            cur_req->status = H5AO_SUCCEEDED;
+                            cur_req->state = H5VL_IOD_COMPLETED;
+                            if(H5VL_iod_request_complete(file, cur_req) < 0)
+                                fprintf(stderr, "Operation Failed!\n");
+                        }
                     }
                 }
                 /* next time, test the next request in the list */
@@ -174,7 +178,7 @@ herr_t
 H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
 {
     H5VL_iod_request_t *cur_req = file->request_list_head;
-    fs_status_t status;
+    hg_status_t status;
     int ret;
     herr_t ret_value = SUCCEED;
 
@@ -186,8 +190,10 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
 
         tmp_req = cur_req->next;
 
-        ret = fs_wait(*((fs_request_t *)cur_req->req), FS_MAX_IDLE_TIME, &status);
-        if(S_FAIL == ret) {
+        HDassert(cur_req->state == H5VL_IOD_PENDING);
+        ret = HG_Wait(*((hg_request_t *)cur_req->req), HG_MAX_IDLE_TIME, &status);
+        if(HG_FAIL == ret) {
+            fprintf(stderr, "failed to wait on request\n");
             cur_req->status = H5AO_FAILED;
             cur_req->state = H5VL_IOD_COMPLETED;
         }
@@ -211,7 +217,7 @@ herr_t
 H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
 {
     H5VL_iod_request_t *cur_req = file->request_list_head;
-    fs_status_t status;
+    hg_status_t status;
     int ret;
     herr_t ret_value = SUCCEED;
 
@@ -223,11 +229,12 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
 
         tmp_req = cur_req->next;
 
+        /* If the request is pending on the object we want, complete it */
         if(cur_req->obj == object) {
-
-            ret = fs_wait(*((fs_request_t *)cur_req->req), FS_MAX_IDLE_TIME, 
+            HDassert(cur_req->state == H5VL_IOD_PENDING);
+            ret = HG_Wait(*((hg_request_t *)cur_req->req), HG_MAX_IDLE_TIME, 
                           &status);
-            if(S_FAIL == ret) {
+            if(HG_FAIL == ret) {
                 fprintf(stderr, "failed to wait on request\n");
                 cur_req->status = H5AO_FAILED;
                 cur_req->state = H5VL_IOD_COMPLETED;
@@ -255,32 +262,34 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    HDassert(req->state == H5VL_IOD_COMPLETED);
+
     switch(req->type) {
-    case FS_FILE_CREATE:
-    case FS_FILE_OPEN:
-    case FS_GROUP_CREATE:
-    case FS_GROUP_OPEN:
-    case FS_DSET_CREATE:
-    case FS_DSET_OPEN:
+    case HG_FILE_CREATE:
+    case HG_FILE_OPEN:
+    case HG_GROUP_CREATE:
+    case HG_GROUP_OPEN:
+    case HG_DSET_CREATE:
+    case HG_DSET_OPEN:
         H5VL_iod_request_delete(file, req);
         break;
-    case FS_DSET_WRITE:
-    case FS_DSET_READ:
+    case HG_DSET_WRITE:
+    case HG_DSET_READ:
         {
             H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)req->data;
 
             /* Free memory handle */
-            if(S_SUCCESS != bds_handle_free(*info->bds_handle)) {
-                fprintf(stderr, "failed to free bds handle\n");
+            if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
+                fprintf(stderr, "failed to free bulk handle\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
-            if(FS_DSET_WRITE == req->type && SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "write failed\n");
+            if(HG_DSET_WRITE == req->type && SUCCEED != *((int *)info->status)) {
+                fprintf(stderr, "write failed %d\n", *((int *)info->status));
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
-            else if(FS_DSET_READ == req->type) {
+            else if(HG_DSET_READ == req->type) {
                 H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
 
                 if(SUCCEED != read_status->ret) {
@@ -291,7 +300,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 if(info->checksum && info->checksum != read_status->cs) {
                     //free(info->status);
                     //info->status = NULL;
-                    //info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+                    //info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
                     //HDfree(req->obj_name);
                     //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
                     /* MSC not returning an error because we injected this failure */
@@ -302,13 +311,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             free(info->status);
             info->status = NULL;
-            info->bds_handle = (bds_handle_t *)H5MM_xfree(info->bds_handle);
+            info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
             info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
             break;
         }
-    case FS_FILE_FLUSH:
+    case HG_FILE_FLUSH:
         {
             int *status = (int *)req->data;
 
@@ -321,12 +330,12 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
-    case FS_FILE_CLOSE:
+    case HG_FILE_CLOSE:
         {
             int *status = (int *)req->data;
 
             if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "file close failed at the server");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "file close failed at the server");
 
             free(status);
             req->data = NULL;
@@ -344,13 +353,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             file = H5FL_FREE(H5VL_iod_file_t, file);
             break;
         }
-    case FS_GROUP_CLOSE:
+    case HG_GROUP_CLOSE:
         {
             int *status = (int *)req->data;
             H5VL_iod_group_t *grp = (H5VL_iod_group_t *)req->obj;
 
             if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "group close failed at the server");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "group close failed at the server");
 
             free(status);
             req->data = NULL;
@@ -367,13 +376,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             grp = H5FL_FREE(H5VL_iod_group_t, grp);
             break;
         }
-    case FS_DSET_SET_EXTENT:
+    case HG_DSET_SET_EXTENT:
         {
             int *status = (int *)req->data;
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "Dataset set extent failed at the server");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "Dataset set extent failed at the server");
 
             free(status);
             req->data = NULL;
@@ -381,13 +390,13 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
-    case FS_DSET_CLOSE:
+    case HG_DSET_CLOSE:
         {
             int *status = (int *)req->data;
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
             if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "dset close failed at the server");
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "dset close failed at the server");
 
             free(status);
             req->data = NULL;
@@ -442,7 +451,7 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
 
     if(NULL != obj->request) {
         if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
 
         /* Reset object's pointer to request */
         /* (Request is owned by the request object and will be freed when the
@@ -503,7 +512,7 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
 
         if(NULL != cur_grp->common.request) {
             if(H5VL_iod_request_wait(obj->file, cur_grp->common.request) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on FS request");
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
 
             /* Reset object's pointer to request */
             /* (Request is owned by the request object and will be freed when the

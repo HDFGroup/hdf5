@@ -28,6 +28,8 @@
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
+/* Interface initialization */
+#define H5_INTERFACE_INIT_FUNC	H5FF__init_interface
 
 /***********/
 /* Headers */
@@ -73,6 +75,13 @@
 /* Local Variables */
 /*******************/
 
+static herr_t
+H5FF__init_interface(void)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    FUNC_LEAVE_NOAPI(H5F_init())
+} /* H5FF__init_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -99,8 +108,6 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-
-    H5F_init();
 
     /* Check/fix arguments */
     if(!filename || !*filename)
@@ -268,7 +275,6 @@ H5Fclose_ff(hid_t file_id, hid_t eq_id)
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", file_id);
 
     /* Check/fix arguments. */
     if(H5I_FILE != H5I_get_type(file_id))

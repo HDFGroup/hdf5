@@ -27,8 +27,9 @@ int main(int argc, char **argv) {
     hid_t event_q;
     H5_status_t *status = NULL;
     int num_requests = 0;
-    H5_request_t req1, req2, req3, req4, req5, req6, req7, req8;
-    H5_status_t status1, status2, status3, status4, status5, status6, status7, status8;
+    hsize_t extent = 20;
+    H5_request_t req1;
+    H5_status_t status1;
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -183,7 +184,7 @@ int main(int argc, char **argv) {
     /* Pop head request from the event queue to test it next. This is the 
        request that belongs to the previous H5Dread_ff call. */
     if(H5EQpop(event_q, &req1) < 0)
-    exit(1);
+        exit(1);
 
     /* Test if the Read operation has completed. Since it is asynchronous, It is
        most likely that the operation is pending */
@@ -210,15 +211,12 @@ int main(int argc, char **argv) {
                0, event_q);
     H5Pclose(dxpl_id);
 
-    H5Sclose(dataspaceId);
-
     /* Issue other operations to query certain metadata values or
        update previously created objects */
     {
         unsigned intent;
         char temp_name[50];
         hid_t plist_id;
-        hsize_t temp = 20;
 
         H5Fget_intent(file_id, &intent);
         fprintf(stderr, "Intent %d   %d\n", intent, H5F_ACC_RDWR);
@@ -236,30 +234,44 @@ int main(int argc, char **argv) {
         /* change the dataset dimensions for Dataset D1. This is
            asynchronous, but internally there is a built in
            "wait_some" on operations pending on that dataset */
-        H5Dset_extent_ff(did1, &temp, event_q);
+        assert(H5Dset_extent_ff(did1, &extent, event_q) == 0);
     }
 
     /* closing did1 acts as a wait_some on all pending requests that are issued
        on did1 (the H5Dwrite and 2 H5Dreads above). This is asynchronous. */
-    H5Dclose_ff(did1, event_q);
+    assert(H5Dclose_ff(did1, event_q) == 0);
 
     /* closing did2 acts as a wait_some on all pending requests that are issued
        on did2 (the H5Dwrite above). This is asynchronous. */
-    H5Dclose_ff(did2, event_q);
+    assert(H5Dclose_ff(did2, event_q) == 0);
 
     /* closing did3 acts as a wait_some on all pending requests that are issued
        on did3 (the H5Dwrite above). This is asynchronous. */
-    H5Dclose_ff(did3, event_q);
+    assert(H5Dclose_ff(did3, event_q) == 0);
 
-    H5Gclose_ff(gid1, event_q);
+    H5Sclose(dataspaceId);
 
+    assert(H5Gclose_ff(gid1, event_q) == 0);
+
+    if(my_rank == 4)
+        sleep(5);
     /* flush all the contents of file to disk. This is asynchronous. */
-    H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q);
+    assert(H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q) == 0);
+
+    /* If the read request did no complete earlier when we tested it, Wait on it now.
+       We have to do this since we popped it earlier from the event queue */
+    if(H5AO_PENDING == status1) {
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+    }
+    else
+        assert(H5AO_SUCCEEDED == status1);
+
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    H5Fclose_ff(file_id, event_q);
-
+    assert(H5Fclose_ff(file_id, event_q) == 0);
+    fprintf(stderr, "%d: done fclose\n", my_rank);
     H5EQwait(event_q, &num_requests, &status);
     fprintf(stderr, "%d requests in event queue. Expecting 14. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
@@ -273,13 +285,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
     free(status);
-
-    /* If the read request did no complete earlier when we tested it, Wait on it now.
-       We have to do this since we popped it earlier from the event queue */
-    if(H5AO_PENDING != status1) {
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
-    }
 
     /* Print the data that has been read, after we have issued a wait 
        (in the H5Dclose).
@@ -297,7 +302,6 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",r2_data[i]);
     fprintf(stderr, "\n");
 
-
     /* Now we test the Open routines. Since there is no underneath
        container, the underlying VOL server is just going to "fake"
        open calls and assume they exist. However there is no metadata
@@ -309,7 +313,7 @@ int main(int argc, char **argv) {
        here. We also can wait on a request using the new H5AOwait()
        routine */
     file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, event_q);
-
+    assert(file_id);
     /* Open a group G1 on the file. 
        Internally there is a built in wait on the file_id.*/
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
@@ -320,9 +324,9 @@ int main(int argc, char **argv) {
     did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
 
-    H5Dclose(did1);
-    H5Gclose(gid1);
-    H5Fclose(file_id);
+    assert(H5Dclose(did1) == 0);
+    assert(H5Gclose(gid1) == 0);
+    assert(H5Fclose(file_id) == 0);
 
     H5EQwait(event_q, &num_requests, &status);
     fprintf(stderr, "%d requests in event queue. Expecting 3. Completions: ", num_requests);

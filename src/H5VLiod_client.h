@@ -20,7 +20,6 @@
 #define _H5VLiod_client_H
 
 #include "H5FFprivate.h"     /* FastForward wrappers            */
-#include "H5VLiod.h"         /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
 
 #ifdef H5_HAVE_EFF
@@ -31,19 +30,19 @@ struct H5VL_iod_object_t;
 
 /* types for requests */
 typedef enum H5RQ_type_t {
-    FS_FILE_CREATE,
-    FS_FILE_OPEN,
-    FS_FILE_FLUSH,
-    FS_FILE_CLOSE,
-    FS_GROUP_CREATE,
-    FS_GROUP_OPEN,
-    FS_GROUP_CLOSE,
-    FS_DSET_CREATE,
-    FS_DSET_OPEN,
-    FS_DSET_READ,
-    FS_DSET_WRITE,
-    FS_DSET_SET_EXTENT,
-    FS_DSET_CLOSE
+    HG_FILE_CREATE,
+    HG_FILE_OPEN,
+    HG_FILE_FLUSH,
+    HG_FILE_CLOSE,
+    HG_GROUP_CREATE,
+    HG_GROUP_OPEN,
+    HG_GROUP_CLOSE,
+    HG_DSET_CREATE,
+    HG_DSET_OPEN,
+    HG_DSET_READ,
+    HG_DSET_WRITE,
+    HG_DSET_SET_EXTENT,
+    HG_DSET_CLOSE
 } H5RQ_type_t;
 
 typedef enum H5VL_iod_state_t {
@@ -100,7 +99,7 @@ typedef struct H5VL_iod_dset_t {
 /* information about a dataset read/write request */
 typedef struct H5VL_iod_io_info_t {
     void *status;
-    bds_handle_t *bds_handle;
+    hg_bulk_t *bulk_handle;
     uint32_t checksum;
 } H5VL_iod_io_info_t;
 
@@ -113,34 +112,6 @@ H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_
 H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                       const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
                                       char **new_name);
-
-H5_DLL herr_t H5VL_iod_client_encode_eff_init(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_eff_init(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_file_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_file_create(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_file_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_file_open(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_file_flush(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_file_flush(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_file_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_file_close(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_group_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_group_create(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_group_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_group_open(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_group_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_group_close(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_dset_create(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_dset_create(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_dset_open(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_dset_open(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_dset_io(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_dset_read(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_decode_dset_write(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_dset_set_extent(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_dset_set_extent(fs_proc_t proc, void *_output);
-H5_DLL herr_t H5VL_iod_client_encode_dset_close(fs_proc_t proc, void *_input);
-H5_DLL herr_t H5VL_iod_client_decode_dset_close(fs_proc_t proc, void *_output);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */

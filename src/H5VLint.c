@@ -1210,7 +1210,7 @@ H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
     void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
@@ -1221,20 +1221,8 @@ H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
         request->next = NULL;
         request->vol_plugin = vol_plugin;
     }
-
-    /* if the VOL class does not implement a specific dataset close
-       callback, try the object close */    
-    if(NULL == vol_plugin->cls->dataset_cls.close){
-        ;
-#if 0
-        if(H5VL_object_close(id, dxpl_id, dxpl_id, event_q) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
-#endif
-    }
-    else {
-        if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-    }
+    if((ret_value = (vol_plugin->cls->dataset_cls.close)(dset, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     if(request && *req) {
         if(H5EQinsert(eq_id, request) < 0)
@@ -1597,7 +1585,7 @@ H5VL_file_close(void *file, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
     void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
@@ -1800,7 +1788,7 @@ H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
     void              **req = NULL;            /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(eq_id != H5_EVENT_QUEUE_NULL) {
         /* create the private request */
@@ -1812,19 +1800,8 @@ H5VL_group_close(void *grp, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
         request->vol_plugin = vol_plugin;
     }
 
-    /* if the VOL class does not implement a specific group close
-       callback, try the object close */
-    if(NULL == vol_plugin->cls->group_cls.close) {
-        ;
-#if 0
-        if(H5VL_object_close(id, dxpl_id, event_q) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close object")
-#endif
-    }
-    else {
-        if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, req)) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
-   }
+    if((ret_value = (vol_plugin->cls->group_cls.close)(grp, dxpl_id, req)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     if(request && *req) {
         if(H5EQinsert(eq_id, request) < 0)

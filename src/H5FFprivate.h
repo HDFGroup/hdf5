@@ -44,6 +44,5 @@
 /* Library Private Prototypes */
 /******************************/
 
-
 #endif /* _H5FFprivate_H */
 

@@ -214,23 +214,14 @@
 /* Define to 1 if you have the `iod' library (-liod). */
 #undef HAVE_LIBIOD
 
-/* Define to 1 if you have the `iofsl_shipper_bds' library
-   (-liofsl_shipper_bds). */
-#undef HAVE_LIBIOFSL_SHIPPER_BDS
-
-/* Define to 1 if you have the `iofsl_shipper_fs' library
-   (-liofsl_shipper_fs). */
-#undef HAVE_LIBIOFSL_SHIPPER_FS
-
-/* Define to 1 if you have the `iofsl_shipper_na' library
-   (-liofsl_shipper_na). */
-#undef HAVE_LIBIOFSL_SHIPPER_NA
-
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
 #undef HAVE_LIBLMPE
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
+
+/* Define to 1 if you have the `mercury' library (-lmercury). */
+#undef HAVE_LIBMERCURY
 
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #undef HAVE_LIBMPE
@@ -277,6 +268,18 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the <mercury_bulk.h> header file. */
+#undef HAVE_MERCURY_BULK_H
+
+/* Define to 1 if you have the <mercury.h> header file. */
+#undef HAVE_MERCURY_H
+
+/* Define to 1 if you have the <mercury_handler.h> header file. */
+#undef HAVE_MERCURY_HANDLER_H
+
+/* Define to 1 if you have the <mercury_proc.h> header file. */
+#undef HAVE_MERCURY_PROC_H
+
 /* Define if we have MPE support */
 #undef HAVE_MPE
 
@@ -291,6 +294,9 @@
 
 /* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
 #undef HAVE_MPI_MULTI_LANG_Info
+
+/* Define to 1 if you have the <na.h> header file. */
+#undef HAVE_NA_H
 
 /* Define to 1 if you have the <network_abstraction.h> header file. */
 #undef HAVE_NETWORK_ABSTRACTION_H

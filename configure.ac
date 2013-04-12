@@ -1758,57 +1758,54 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
-## Is the shipper present? It has a header file `SHIPPER.h' and a library
-## `-lshipper' and their locations might be specified with the `--with-shipper'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is the mercury library present? 
 ##
-AC_ARG_WITH([shipper],
-            [AS_HELP_STRING([--with-shipper=DIR],
-                            [Use shipper [default=no]])],,
+AC_ARG_WITH([mercury],
+            [AS_HELP_STRING([--with-mercury=DIR],
+                            [Use mercury [default=no]])],,
             [withval=no])
 
 case $withval in
   yes)
-    HAVE_SHIPPER="yes"
-    AC_CHECK_HEADERS([function_shipper.h])
-    AC_CHECK_HEADERS([function_shipper_handler.h])
-    AC_CHECK_HEADERS([network_abstraction.h])
-    AC_CHECK_LIB([iofsl_shipper_na], [na_finalize], [MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"], [unset HAVE_SHIPPER])
-    AC_CHECK_LIB([iofsl_shipper_bds], [bds_init], [MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"], [unset HAVE_SHIPPER])
-    AC_CHECK_LIB([iofsl_shipper_fs], [fs_init], [MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"], [unset HAVE_SHIPPER])
-    AC_SUBST([MYSHIPPER_LIBS])
-    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find shipper library])
+    HAVE_MERCURY="yes"
+    AC_CHECK_HEADERS([mercury.h])
+    AC_CHECK_HEADERS([mercury_handler.h])
+    AC_CHECK_HEADERS([mercury_proc.h])
+    AC_CHECK_HEADERS([mercury_bulk.h])
+    AC_CHECK_HEADERS([na.h])
+    AC_CHECK_LIB([mercury], [HG_Init], [MYMERCURY_LIBS='-lmercury'], [unset HAVE_MERCURY])
+    AC_SUBST([MYMERCURY_LIBS])
+    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find mercury library])
     fi
     ;;
   no)
-    HAVE_SHIPPER="no"
-    AC_MSG_CHECKING([for shipper library])
+    HAVE_MERCURY="no"
+    AC_MSG_CHECKING([for mercury library])
     AC_MSG_RESULT([suppressed])
     ;;
   *)
-    HAVE_SHIPPER="yes"
+    HAVE_MERCURY="yes"
     case "$withval" in
       *,*)
-        shipper_inc="`echo $withval |cut -f1 -d,`"
-        shipper_lib="`echo $withval |cut -f2 -d, -s`"
+        mercury_inc="`echo $withval |cut -f1 -d,`"
+        mercury_lib="`echo $withval |cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
-          shipper_inc="$withval/include"
-          shipper_lib="$withval/lib"
+          mercury_inc="$withval/include"
+          mercury_lib="$withval/lib"
         fi
         ;;
     esac
 
     ## Trying to include -I/usr/include and -L/usr/lib is redundant and
     ## can mess some compilers up.
-    if test "X$shipper_inc" = "X/usr/include"; then
-      shipper_inc=""
+    if test "X$mercury_inc" = "X/usr/include"; then
+      mercury_inc=""
     fi
-    if test "X$shipper_lib" = "X/usr/lib"; then
-      shipper_lib=""
+    if test "X$mercury_lib" = "X/usr/lib"; then
+      mercury_lib=""
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
@@ -1816,32 +1813,27 @@ case $withval in
     saved_LDFLAGS="$LDFLAGS"
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
-    if test -n "$shipper_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$shipper_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$shipper_inc"
+    if test -n "$mercury_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$mercury_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
     fi
 
-    AC_CHECK_HEADERS([function_shipper.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-    AC_CHECK_HEADERS([function_shipper_handler.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-    AC_CHECK_HEADERS([network_abstraction.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([mercury.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([mercury_handler.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([mercury_proc.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([mercury_bulk.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([na.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
-    if test -n "$shipper_lib"; then
-      LDFLAGS="$LDFLAGS -L$shipper_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$shipper_lib"
+    if test -n "$mercury_lib"; then
+      LDFLAGS="$LDFLAGS -L$mercury_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$mercury_lib"
     fi
 
-    AC_CHECK_LIB([iofsl_shipper_na], [na_finalize],, 
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER],
-		 [-liofsl_shipper_fs -liofsl_shipper_bds])
-    AC_CHECK_LIB([iofsl_shipper_bds], [bds_init],, 
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER],
-		 [-liofsl_shipper_fs -liofsl_shipper_na])
-    AC_CHECK_LIB([iofsl_shipper_fs], [fs_init],, 
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER],
-		 [-liofsl_shipper_na -liofsl_shipper_bds])
+    AC_CHECK_LIB([mercury], [HG_Init],, 
+                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_MERCURY])
 
-    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find shipper library])
+    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find mercury library])
     fi
     ;;
 esac
@@ -2853,10 +2845,10 @@ case "X-$enableval" in
     AC_CHECK_HEADERS([AXE.h iod_api.h iod_types.h function_shipper.h function_shipper_handler.h network_abstraction.h],
                      [AC_MSG_CHECKING([for EFF support])
                      AC_TRY_COMPILE([#include <AXE.h> #include <iod_api.h> #include <iod_types.h> 
-		                     #include <function_shipper.h> #include <function_shipper_handler.h> 
-                                     #include <network_abstraction.h>],
-				    [AXEend_try(); iod_finalize(NULL, NULL); bds_finalize(); 
-				     fs_handler_finalize();],
+		                     #include <mercury.h> #include <mercury_handler.h> 
+                                     #include <na.h>],
+				    [AXEend_try(); iod_finalize(NULL, NULL); HG_Bulk_finalize(); 
+				     HG_Handler_finalize();],
                                     [AC_DEFINE([HAVE_EFF], [1],
                                                [Define if we have EFF VOL plugins support])
                                        AC_MSG_RESULT([yes])
@@ -2864,38 +2856,12 @@ case "X-$enableval" in
                                     [AC_MSG_RESULT([no])
                                        EFF="no"])])
 
-#    AC_MSG_RESULT([yes])
-#    AC_DEFINE([HAVE_EFF], [1],
-#                    [Define if we have IOD VOL plugin support.])
     ;;
   X-no|*)
     AC_MSG_RESULT([no])
     ;;
 esac
 AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test "X-$EFF" = "X-yes"])
-
-#AC_SUBST([EFF])
-#AC_MSG_CHECKING([whether to build the IOD VOL plugin])
-#AC_ARG_ENABLE([eff],
-#              [AS_HELP_STRING([--enable-eff],
-#                              [Build the IOD VOL plugin.  Default=no.])],
-#              [EFF=$enableval],
-#	      [EFF=NO])
-#AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test -n "$EFF"])
-#
-#case "X-$EFF" in
-#  *)
-#      EFF=yes
-#      AC_MSG_RESULT([yes])
-#      AC_DEFINE([HAVE_EFF], [1],
-#                [Define if we have IOD VOL plugin support.])
-#    ;;
-#  X-no)
-#      EFF=no
-#      AC_MSG_RESULT([no])
-#    ;;
-#
-#esac
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to use a memory checking tool (like valgrind's

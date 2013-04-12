@@ -690,7 +690,7 @@ LL_PATH
 USE_FILTER_SZIP
 USE_FILTER_DEFLATE
 MYIOD_LIBS
-MYSHIPPER_LIBS
+MYMERCURY_LIBS
 MYAXE_LIBS
 AM_MAKEFLAGS
 LT_STATIC_EXEC
@@ -909,7 +909,7 @@ enable_largefile
 with_fnord
 with_dmalloc
 with_axe
-with_shipper
+with_mercury
 with_iod
 with_zlib
 with_szlib
@@ -1669,7 +1669,7 @@ Optional Packages:
 
   --with-dmalloc=DIR      Use dmalloc memory debugging aid [default=no]
   --with-axe=DIR          Use axe [default=no]
-  --with-shipper=DIR      Use shipper [default=no]
+  --with-mercury=DIR      Use mercury [default=no]
   --with-iod=DIR          Use iod [default=no]
   --with-zlib=DIR         Use zlib library for external deflate I/O filter
                           [default=yes]
@@ -25690,15 +25690,12 @@ fi
 esac
 
 ## ----------------------------------------------------------------------
-## Is the shipper present? It has a header file `SHIPPER.h' and a library
-## `-lshipper' and their locations might be specified with the `--with-shipper'
-## command-line switch. The value is an include path and/or a library path.
-## If the library path is specified then it must be preceded by a comma.
+## Is the mercury library present?
 ##
 
-# Check whether --with-shipper was given.
-if test "${with_shipper+set}" = set; then :
-  withval=$with_shipper;
+# Check whether --with-mercury was given.
+if test "${with_mercury+set}" = set; then :
+  withval=$with_mercury;
 else
   withval=no
 fi
@@ -25706,50 +25703,74 @@ fi
 
 case $withval in
   yes)
-    HAVE_SHIPPER="yes"
-    for ac_header in function_shipper.h
+    HAVE_MERCURY="yes"
+    for ac_header in mercury.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper.h" "ac_cv_header_function_shipper_h" "$ac_includes_default"
-if test "x$ac_cv_header_function_shipper_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury.h" "ac_cv_header_mercury_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_FUNCTION_SHIPPER_H 1
+#define HAVE_MERCURY_H 1
 _ACEOF
 
 fi
 
 done
 
-    for ac_header in function_shipper_handler.h
+    for ac_header in mercury_handler.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper_handler.h" "ac_cv_header_function_shipper_handler_h" "$ac_includes_default"
-if test "x$ac_cv_header_function_shipper_handler_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury_handler.h" "ac_cv_header_mercury_handler_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_handler_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_FUNCTION_SHIPPER_HANDLER_H 1
+#define HAVE_MERCURY_HANDLER_H 1
 _ACEOF
 
 fi
 
 done
 
-    for ac_header in network_abstraction.h
+    for ac_header in mercury_proc.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "network_abstraction.h" "ac_cv_header_network_abstraction_h" "$ac_includes_default"
-if test "x$ac_cv_header_network_abstraction_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury_proc.h" "ac_cv_header_mercury_proc_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_proc_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_NETWORK_ABSTRACTION_H 1
+#define HAVE_MERCURY_PROC_H 1
 _ACEOF
 
 fi
 
 done
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for na_finalize in -liofsl_shipper_na" >&5
-$as_echo_n "checking for na_finalize in -liofsl_shipper_na... " >&6; }
-if ${ac_cv_lib_iofsl_shipper_na_na_finalize+:} false; then :
+    for ac_header in mercury_bulk.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury_bulk.h" "ac_cv_header_mercury_bulk_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_bulk_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MERCURY_BULK_H 1
+_ACEOF
+
+fi
+
+done
+
+    for ac_header in na.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "na.h" "ac_cv_header_na_h" "$ac_includes_default"
+if test "x$ac_cv_header_na_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NA_H 1
+_ACEOF
+
+fi
+
+done
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HG_Init in -lmercury" >&5
+$as_echo_n "checking for HG_Init in -lmercury... " >&6; }
+if ${ac_cv_lib_mercury_HG_Init+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-liofsl_shipper_na  $LIBS"
+LIBS="-lmercury  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -25759,7 +25780,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char na_finalize ();
+char HG_Init ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -25771,162 +25792,62 @@ char na_finalize ();
 int
 main ()
 {
-return na_finalize ();
+return HG_Init ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_iofsl_shipper_na_na_finalize=yes
+  ac_cv_lib_mercury_HG_Init=yes
 else
-  ac_cv_lib_iofsl_shipper_na_na_finalize=no
+  ac_cv_lib_mercury_HG_Init=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_na_na_finalize" >&5
-$as_echo "$ac_cv_lib_iofsl_shipper_na_na_finalize" >&6; }
-if test "x$ac_cv_lib_iofsl_shipper_na_na_finalize" = xyes; then :
-  MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mercury_HG_Init" >&5
+$as_echo "$ac_cv_lib_mercury_HG_Init" >&6; }
+if test "x$ac_cv_lib_mercury_HG_Init" = xyes; then :
+  MYMERCURY_LIBS='-lmercury'
 else
-  unset HAVE_SHIPPER
-fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for bds_init in -liofsl_shipper_bds" >&5
-$as_echo_n "checking for bds_init in -liofsl_shipper_bds... " >&6; }
-if ${ac_cv_lib_iofsl_shipper_bds_bds_init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-liofsl_shipper_bds  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bds_init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return bds_init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_iofsl_shipper_bds_bds_init=yes
-else
-  ac_cv_lib_iofsl_shipper_bds_bds_init=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_bds_bds_init" >&5
-$as_echo "$ac_cv_lib_iofsl_shipper_bds_bds_init" >&6; }
-if test "x$ac_cv_lib_iofsl_shipper_bds_bds_init" = xyes; then :
-  MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"
-else
-  unset HAVE_SHIPPER
-fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fs_init in -liofsl_shipper_fs" >&5
-$as_echo_n "checking for fs_init in -liofsl_shipper_fs... " >&6; }
-if ${ac_cv_lib_iofsl_shipper_fs_fs_init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-liofsl_shipper_fs  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char fs_init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return fs_init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_iofsl_shipper_fs_fs_init=yes
-else
-  ac_cv_lib_iofsl_shipper_fs_fs_init=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_fs_fs_init" >&5
-$as_echo "$ac_cv_lib_iofsl_shipper_fs_fs_init" >&6; }
-if test "x$ac_cv_lib_iofsl_shipper_fs_fs_init" = xyes; then :
-  MYSHIPPER_LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds"
-else
-  unset HAVE_SHIPPER
+  unset HAVE_MERCURY
 fi
 
 
-    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find shipper library" "$LINENO" 5
+    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find mercury library" "$LINENO" 5
     fi
     ;;
   no)
-    HAVE_SHIPPER="no"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for shipper library" >&5
-$as_echo_n "checking for shipper library... " >&6; }
+    HAVE_MERCURY="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mercury library" >&5
+$as_echo_n "checking for mercury library... " >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
 $as_echo "suppressed" >&6; }
     ;;
   *)
-    HAVE_SHIPPER="yes"
+    HAVE_MERCURY="yes"
     case "$withval" in
       *,*)
-        shipper_inc="`echo $withval |cut -f1 -d,`"
-        shipper_lib="`echo $withval |cut -f2 -d, -s`"
+        mercury_inc="`echo $withval |cut -f1 -d,`"
+        mercury_lib="`echo $withval |cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
-          shipper_inc="$withval/include"
-          shipper_lib="$withval/lib"
+          mercury_inc="$withval/include"
+          mercury_lib="$withval/lib"
         fi
         ;;
     esac
 
     ## Trying to include -I/usr/include and -L/usr/lib is redundant and
     ## can mess some compilers up.
-    if test "X$shipper_inc" = "X/usr/include"; then
-      shipper_inc=""
+    if test "X$mercury_inc" = "X/usr/include"; then
+      mercury_inc=""
     fi
-    if test "X$shipper_lib" = "X/usr/lib"; then
-      shipper_lib=""
+    if test "X$mercury_lib" = "X/usr/lib"; then
+      mercury_lib=""
     fi
 
     saved_CPPFLAGS="$CPPFLAGS"
@@ -25934,17 +25855,17 @@ $as_echo "suppressed" >&6; }
     saved_LDFLAGS="$LDFLAGS"
     saved_AM_LDFLAGS="$AM_LDFLAGS"
 
-    if test -n "$shipper_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$shipper_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$shipper_inc"
+    if test -n "$mercury_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$mercury_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
     fi
 
-    for ac_header in function_shipper.h
+    for ac_header in mercury.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper.h" "ac_cv_header_function_shipper_h" "$ac_includes_default"
-if test "x$ac_cv_header_function_shipper_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury.h" "ac_cv_header_mercury_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_FUNCTION_SHIPPER_H 1
+#define HAVE_MERCURY_H 1
 _ACEOF
 
 else
@@ -25953,12 +25874,12 @@ fi
 
 done
 
-    for ac_header in function_shipper_handler.h
+    for ac_header in mercury_handler.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "function_shipper_handler.h" "ac_cv_header_function_shipper_handler_h" "$ac_includes_default"
-if test "x$ac_cv_header_function_shipper_handler_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury_handler.h" "ac_cv_header_mercury_handler_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_handler_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_FUNCTION_SHIPPER_HANDLER_H 1
+#define HAVE_MERCURY_HANDLER_H 1
 _ACEOF
 
 else
@@ -25967,12 +25888,40 @@ fi
 
 done
 
-    for ac_header in network_abstraction.h
+    for ac_header in mercury_proc.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "network_abstraction.h" "ac_cv_header_network_abstraction_h" "$ac_includes_default"
-if test "x$ac_cv_header_network_abstraction_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury_proc.h" "ac_cv_header_mercury_proc_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_proc_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_NETWORK_ABSTRACTION_H 1
+#define HAVE_MERCURY_PROC_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+    for ac_header in mercury_bulk.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "mercury_bulk.h" "ac_cv_header_mercury_bulk_h" "$ac_includes_default"
+if test "x$ac_cv_header_mercury_bulk_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MERCURY_BULK_H 1
+_ACEOF
+
+else
+  CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"
+fi
+
+done
+
+    for ac_header in na.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "na.h" "ac_cv_header_na_h" "$ac_includes_default"
+if test "x$ac_cv_header_na_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_NA_H 1
 _ACEOF
 
 else
@@ -25982,18 +25931,18 @@ fi
 done
 
 
-    if test -n "$shipper_lib"; then
-      LDFLAGS="$LDFLAGS -L$shipper_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$shipper_lib"
+    if test -n "$mercury_lib"; then
+      LDFLAGS="$LDFLAGS -L$mercury_lib"
+      AM_LDFLAGS="$AM_LDFLAGS -L$mercury_lib"
     fi
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for na_finalize in -liofsl_shipper_na" >&5
-$as_echo_n "checking for na_finalize in -liofsl_shipper_na... " >&6; }
-if ${ac_cv_lib_iofsl_shipper_na_na_finalize+:} false; then :
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HG_Init in -lmercury" >&5
+$as_echo_n "checking for HG_Init in -lmercury... " >&6; }
+if ${ac_cv_lib_mercury_HG_Init+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-liofsl_shipper_na -liofsl_shipper_fs -liofsl_shipper_bds $LIBS"
+LIBS="-lmercury  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -26003,7 +25952,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char na_finalize ();
+char HG_Init ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26015,146 +25964,36 @@ char na_finalize ();
 int
 main ()
 {
-return na_finalize ();
+return HG_Init ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_iofsl_shipper_na_na_finalize=yes
+  ac_cv_lib_mercury_HG_Init=yes
 else
-  ac_cv_lib_iofsl_shipper_na_na_finalize=no
+  ac_cv_lib_mercury_HG_Init=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_na_na_finalize" >&5
-$as_echo "$ac_cv_lib_iofsl_shipper_na_na_finalize" >&6; }
-if test "x$ac_cv_lib_iofsl_shipper_na_na_finalize" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mercury_HG_Init" >&5
+$as_echo "$ac_cv_lib_mercury_HG_Init" >&6; }
+if test "x$ac_cv_lib_mercury_HG_Init" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBIOFSL_SHIPPER_NA 1
+#define HAVE_LIBMERCURY 1
 _ACEOF
 
-  LIBS="-liofsl_shipper_na $LIBS"
+  LIBS="-lmercury $LIBS"
 
 else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER
-fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for bds_init in -liofsl_shipper_bds" >&5
-$as_echo_n "checking for bds_init in -liofsl_shipper_bds... " >&6; }
-if ${ac_cv_lib_iofsl_shipper_bds_bds_init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-liofsl_shipper_bds -liofsl_shipper_fs -liofsl_shipper_na $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char bds_init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return bds_init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_iofsl_shipper_bds_bds_init=yes
-else
-  ac_cv_lib_iofsl_shipper_bds_bds_init=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_bds_bds_init" >&5
-$as_echo "$ac_cv_lib_iofsl_shipper_bds_bds_init" >&6; }
-if test "x$ac_cv_lib_iofsl_shipper_bds_bds_init" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBIOFSL_SHIPPER_BDS 1
-_ACEOF
-
-  LIBS="-liofsl_shipper_bds $LIBS"
-
-else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER
-fi
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fs_init in -liofsl_shipper_fs" >&5
-$as_echo_n "checking for fs_init in -liofsl_shipper_fs... " >&6; }
-if ${ac_cv_lib_iofsl_shipper_fs_fs_init+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-liofsl_shipper_fs -liofsl_shipper_na -liofsl_shipper_bds $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char fs_init ();
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-return fs_init ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_iofsl_shipper_fs_fs_init=yes
-else
-  ac_cv_lib_iofsl_shipper_fs_fs_init=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_iofsl_shipper_fs_fs_init" >&5
-$as_echo "$ac_cv_lib_iofsl_shipper_fs_fs_init" >&6; }
-if test "x$ac_cv_lib_iofsl_shipper_fs_fs_init" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBIOFSL_SHIPPER_FS 1
-_ACEOF
-
-  LIBS="-liofsl_shipper_fs $LIBS"
-
-else
-  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SHIPPER
+  LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_MERCURY
 fi
 
 
-    if test -z "$HAVE_SHIPPER" -a -n "$HDF5_CONFIG_ABORT"; then
-      as_fn_error $? "couldn't find shipper library" "$LINENO" 5
+    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
+      as_fn_error $? "couldn't find mercury library" "$LINENO" 5
     fi
     ;;
 esac
@@ -28801,8 +28640,8 @@ $as_echo_n "checking for EFF support... " >&6; }
                      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <AXE.h> #include <iod_api.h> #include <iod_types.h>
-		                     #include <function_shipper.h> #include <function_shipper_handler.h>
-                                     #include <network_abstraction.h>
+		                     #include <mercury.h> #include <mercury_handler.h>
+                                     #include <na.h>
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -28814,8 +28653,8 @@ $as_echo_n "checking for EFF support... " >&6; }
 int
 main ()
 {
-AXEend_try(); iod_finalize(NULL, NULL); bds_finalize();
-				     fs_handler_finalize();
+AXEend_try(); iod_finalize(NULL, NULL); HG_Bulk_finalize();
+				     HG_Handler_finalize();
   ;
   return 0;
 }
@@ -28838,9 +28677,6 @@ fi
 done
 
 
-#    AC_MSG_RESULT([yes])
-#    AC_DEFINE([HAVE_EFF], [1],
-#                    [Define if we have IOD VOL plugin support.])
     ;;
   X-no|*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -28855,29 +28691,6 @@ else
   BUILD_EFF_CONDITIONAL_FALSE=
 fi
 
-
-#AC_SUBST([EFF])
-#AC_MSG_CHECKING([whether to build the IOD VOL plugin])
-#AC_ARG_ENABLE([eff],
-#              [AS_HELP_STRING([--enable-eff],
-#                              [Build the IOD VOL plugin.  Default=no.])],
-#              [EFF=$enableval],
-#	      [EFF=NO])
-#AM_CONDITIONAL([BUILD_EFF_CONDITIONAL], [test -n "$EFF"])
-#
-#case "X-$EFF" in
-#  *)
-#      EFF=yes
-#      AC_MSG_RESULT([yes])
-#      AC_DEFINE([HAVE_EFF], [1],
-#                [Define if we have IOD VOL plugin support.])
-#    ;;
-#  X-no)
-#      EFF=no
-#      AC_MSG_RESULT([no])
-#    ;;
-#
-#esac
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to use a memory checking tool (like valgrind's

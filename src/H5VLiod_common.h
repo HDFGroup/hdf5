@@ -19,8 +19,9 @@
 #ifndef _H5VLiod_common_H
 #define _H5VLiod_common_H
 
+#include "H5Pprivate.h"		/* Property lists			*/
 #include "H5VLpublic.h"
-#include "H5VLiod.h"         /* Iod VOL plugin			*/
+#include "H5VLiod.h"            /* Iod VOL plugin			*/
 
 #ifdef H5_HAVE_EFF
 
@@ -34,7 +35,7 @@ typedef struct H5VL_iod_remote_file_t {
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
     hid_t fcpl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_remote_file_t;
 
 /* struct that contains the information about the IOD group */
@@ -44,7 +45,7 @@ typedef struct H5VL_iod_remote_group_t {
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
     hid_t gcpl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_remote_group_t;
 
 /* struct that contains the information about the IOD dset */
@@ -56,7 +57,7 @@ typedef struct H5VL_iod_remote_dset_t {
     hid_t dcpl_id;
     hid_t space_id;
     hid_t type_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_remote_dset_t;
 
 typedef struct H5VL_iod_file_create_input_t {
@@ -64,20 +65,20 @@ typedef struct H5VL_iod_file_create_input_t {
     unsigned flags;
     hid_t fcpl_id;
     hid_t fapl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_file_create_input_t;
 
 typedef struct H5VL_iod_file_open_input_t {
     const char *name;
     unsigned flags;
     hid_t fapl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_file_open_input_t;
 
 typedef struct H5VL_iod_file_flush_input_t {
     iod_handle_t coh;
     H5F_scope_t scope;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_file_flush_input_t;
 
 typedef struct H5VL_iod_group_create_input_t {
@@ -88,7 +89,7 @@ typedef struct H5VL_iod_group_create_input_t {
     hid_t gcpl_id;
     hid_t gapl_id;
     hid_t lcpl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_group_create_input_t;
 
 typedef struct H5VL_iod_group_open_input_t {
@@ -97,7 +98,7 @@ typedef struct H5VL_iod_group_open_input_t {
     iod_obj_id_t loc_id;
     const char *name;
     hid_t gapl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_group_open_input_t;
 
 typedef struct H5VL_iod_dset_create_input_t {
@@ -110,7 +111,7 @@ typedef struct H5VL_iod_dset_create_input_t {
     hid_t lcpl_id;
     hid_t type_id;
     hid_t space_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_dset_create_input_t;
 
 typedef struct H5VL_iod_dset_open_input_t {
@@ -119,7 +120,7 @@ typedef struct H5VL_iod_dset_open_input_t {
     iod_obj_id_t loc_id;
     const char *name;
     hid_t dapl_id;
-    fs_handle_t fs_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_dset_open_input_t;
 
 typedef struct H5VL_iod_dset_io_input_t {
@@ -128,15 +129,21 @@ typedef struct H5VL_iod_dset_io_input_t {
     hid_t space_id;
     hid_t dxpl_id;
     uint32_t checksum;
-    bds_handle_t bds_handle;
-    fs_handle_t fs_handle;
+    hg_bulk_t bulk_handle;
+    hg_handle_t hg_handle;
 } H5VL_iod_dset_io_input_t;
+
+typedef struct dims_t {
+    int rank;
+    hsize_t *size;
+} dims_t;
 
 typedef struct H5VL_iod_dset_set_extent_input_t {
     iod_handle_t iod_oh;
-    int rank;
-    hsize_t *size;
-    fs_handle_t fs_handle;
+    //int rank;
+    //hsize_t *size;
+    dims_t dims;
+    hg_handle_t hg_handle;
 } H5VL_iod_dset_set_extent_input_t;
 
 typedef struct H5VL_iod_read_status_t {
@@ -144,143 +151,89 @@ typedef struct H5VL_iod_read_status_t {
     uint32_t cs;
 } H5VL_iod_read_status_t;
 
+H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_hid_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_iod_obj_id_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_iod_handle_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dims_t(hg_proc_t proc, void *data);
+
+
+MERCURY_GEN_PROC(eff_init_in_t, ((uint32_t)(proc_num)))
+
+MERCURY_GEN_PROC(file_create_in_t, ((hg_string_t)(name)) ((uint32_t)(flags)) 
+                 ((hid_t)(fapl_id)) ((hid_t)(fcpl_id)))
+MERCURY_GEN_PROC(file_create_out_t, ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
+                 ((iod_obj_id_t)(root_id)) ((iod_handle_t)(scratch_oh)) 
+                 ((iod_obj_id_t)(scratch_id)))
+MERCURY_GEN_PROC(file_open_in_t, ((hg_string_t)(name)) ((uint32_t)(flags)) 
+                 ((hid_t)(fapl_id)))
+MERCURY_GEN_PROC(file_open_out_t, ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
+                 ((iod_obj_id_t)(root_id)) ((iod_handle_t)(scratch_oh)) 
+                 ((iod_obj_id_t)(scratch_id)) ((hid_t)(fcpl_id)))
+MERCURY_GEN_PROC(file_flush_in_t, ((uint8_t)(scope)) ((iod_handle_t)(coh)))
+MERCURY_GEN_PROC(file_close_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
+                 ((iod_obj_id_t)(root_id)) ((iod_handle_t)(scratch_oh)) 
+                 ((iod_obj_id_t)(scratch_id)))
+
+MERCURY_GEN_PROC(group_create_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(name))
+                 ((hid_t)(gapl_id)) ((hid_t)(gcpl_id)) ((hid_t)(lcpl_id)))
+MERCURY_GEN_PROC(group_create_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id)))
+MERCURY_GEN_PROC(group_open_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(name))
+                 ((hid_t)(gapl_id)))
+MERCURY_GEN_PROC(group_open_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id))
+                 ((hid_t)(gcpl_id)))
+MERCURY_GEN_PROC(group_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id)))
+
+MERCURY_GEN_PROC(dset_create_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(name))
+                 ((hid_t)(dapl_id)) ((hid_t)(dcpl_id)) ((hid_t)(lcpl_id))
+                 ((hid_t)(type_id)) ((hid_t)(space_id)))
+MERCURY_GEN_PROC(dset_create_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id)))
+MERCURY_GEN_PROC(dset_open_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(name))
+                 ((hid_t)(dapl_id)))
+MERCURY_GEN_PROC(dset_open_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id))
+                 ((hid_t)(dcpl_id)) ((hid_t)(type_id)) ((hid_t)(space_id)))
+MERCURY_GEN_PROC(dset_set_extent_in_t, ((iod_handle_t)(iod_oh)) ((dims_t)(dims)))
+MERCURY_GEN_PROC(dset_io_in_t, ((iod_handle_t)(iod_oh)) ((iod_handle_t)(scratch_oh)) 
+                 ((hid_t)(space_id)) ((hid_t)(dxpl_id)) ((uint32_t)(checksum))
+                 ((hg_bulk_t)(bulk_handle)))
+MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint32_t)(cs)))
+MERCURY_GEN_PROC(dset_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id)))
+
 #if 0
-/* Define fs_proc_iod_handle_t */
-static inline int fs_proc_iod_handle_t(fs_proc_t proc, void *data)
-{
-    int ret = S_SUCCESS;
-    iod_handle_t *struct_data = (iod_handle_t *)data;
+H5_DLL int hg_proc_eff_init_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_eff_fin_in_t(hg_proc_t proc, void *data);
 
-    ret = fs_proc_uint64_t(proc, &struct_data->cookie);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    return ret;
-}
+H5_DLL int hg_proc_file_create_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_file_create_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_file_open_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_file_open_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_file_flush_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_file_close_in_t(hg_proc_t proc, void *data);
 
-/* Define fs_proc_iod_obj_id_t */
-static inline int fs_proc_iod_obj_id_t(fs_proc_t proc, void *data)
-{
-    int ret = S_SUCCESS;
-    iod_obj_id_t *struct_data = (iod_obj_id_t *)data;
+H5_DLL int hg_proc_group_create_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_group_create_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_group_open_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_group_open_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_group_close_in_t(hg_proc_t proc, void *data);
 
-    ret = fs_proc_uint64_t(proc, &struct_data->oid_hi);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-
-    ret = fs_proc_uint64_t(proc, &struct_data->oid_lo);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-
-    return ret;
-}
-
-/* Define fs_proc_iod_handle_t */
-static inline int fs_proc_plist_t(fs_proc_t proc, void *data)
-{
-    int ret = S_SUCCESS;
-    size_t plist_size = 0;
-    H5P_genplist_t *plist = NULL;
-    void *buf = NULL;
-    hid_t plist_id = *((hid_t *)data);
-
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if((ret = H5P__encode(plist, FALSE, NULL, &plist_size)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-    buf = H5MM_malloc(plist_size);
-    if((ret = H5P__encode(plist, FALSE, buf, &plist_size)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
-
-
-    ret = fs_proc_memcpy(proc, buf, plist_size);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-
-    H5MM_xfree(buf);
-    return ret;
-}
-
-static inline int fs_proc_remote_file_t(fs_proc_t proc, void *data)
-{
-    int ret = S_SUCCESS;
-    H5VL_iod_remote_file_t *struct_data = (H5VL_iod_remote_file_t *) data;
-
-    ret = fs_proc_iod_handle_t(proc, &struct_data->coh);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_handle_t(proc, &struct_data->root_oh);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_obj_id_t(proc, &struct_data->root_id);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_handle_t(proc, &struct_data->scratch_oh);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_obj_id_t(proc, &struct_data->scratch_id);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    return ret;
-}
-
-static inline int fs_proc_remote_object_t(fs_proc_t proc, void *data)
-{
-    int ret = S_SUCCESS;
-    H5VL_iod_remote_group_t *struct_data = (H5VL_iod_remote_group_t *) data;
-
-    ret = fs_proc_iod_handle_t(proc, &struct_data->iod_oh);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_handle_t(proc, &struct_data->iod_id);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_handle_t(proc, &struct_data->scratch_oh);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    ret = fs_proc_iod_obj_id_t(proc, &struct_data->scratch_id);
-    if (ret != S_SUCCESS) {
-        S_ERROR_DEFAULT("Proc error");
-        ret = S_FAIL;
-        return ret;
-    }
-    return ret;
-}
+H5_DLL int hg_proc_dset_create_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_create_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_open_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_open_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_set_extent_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_io_in_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_read_out_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_close_in_t(hg_proc_t proc, void *data);
 #endif
 
 #endif /* H5_HAVE_EFF */
