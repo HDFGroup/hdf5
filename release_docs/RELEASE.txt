@@ -1,4 +1,4 @@
-HDF5 version 1.9.127-FA_a5 currently under development
+HDF5 version 1.9.131-FA_a5 currently under development
 
 
 INTRODUCTION
@@ -166,6 +166,9 @@ New Features
 
     Parallel Library:
     -----------------
+    - Add H5Pget_mpio_no_collective_cause() function that retrive reasons
+      why the collective I/O was broken during read/write IO access. 
+      (JKM - 2012/08/30 HDFFV-8143)
     - Special Collective IO (IO when some processes do not contribute to the
       IO) and Complex Derived Datatype MPI functionalities are no longer
       conditionally enabled in the library by configure. They are always
@@ -694,6 +697,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - Retired program perform/mpi-perf. Its purpose has been incorporated
+	into h5perf before. (AKC 2012/09/20)
       - ifdefs added to tests around include unistd.h and function to simulate
         getlogin() on Windows. 
         (ADB - 2011/08/15)
@@ -708,9 +713,15 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed not to accumulate attribute difference to dataset
+          difference in verbose mode (-v, -r), which caused incorrect 
+          difference between dataset and group/datatype object if attribute 
+          exist with any differences. This also lead to fix inconsistent
+          format indicating difference between dataset and group/datatype
+          object. HDFFV-5919 (JKM 2012/09/05)
         - h5diff: Fixed the incorrect result when comparing attribute data 
           values and the data type has same class but different size.
-          HDFFV-7942  (JKM 08/15/2012)
+          HDFFV-7942  (JKM 2012/08/15)
         - ph5diff: Fixed intermittent hang issue on a certain operation in 
           parallel mode. It was detected by daily test for comparing 
           non-comparable objects, but it could have occurred in other 

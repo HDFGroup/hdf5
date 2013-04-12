@@ -58,7 +58,7 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_gcrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__gcrt_reg_prop(H5P_genclass_t *pclass);
 
 
 /*********************/
@@ -72,7 +72,7 @@ const H5P_libclass_t H5P_CLS_GCRT[1] = {{
     &H5P_CLS_OBJECT_CREATE_g,	/* Parent class ID              */
     &H5P_CLS_GROUP_CREATE_g,	/* Pointer to class ID          */
     &H5P_LST_GROUP_CREATE_g,	/* Pointer to default property list ID */
-    H5P_gcrt_reg_prop,		/* Default property registration routine */
+    H5P__gcrt_reg_prop,		/* Default property registration routine */
     NULL,		        /* Class creation callback      */
     NULL,		        /* Class creation callback info */
     NULL,			/* Class copy callback          */
@@ -94,7 +94,7 @@ const H5P_libclass_t H5P_CLS_GCRT[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_gcrt_reg_prop
+ * Function:    H5P__gcrt_reg_prop
  *
  * Purpose:     Initialize the group creation property list class
  *
@@ -105,25 +105,25 @@ const H5P_libclass_t H5P_CLS_GCRT[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_gcrt_reg_prop(H5P_genclass_t *pclass)
+H5P__gcrt_reg_prop(H5P_genclass_t *pclass)
 {
     H5O_ginfo_t ginfo = H5G_CRT_GROUP_INFO_DEF;     /* Default group info settings */
     H5O_linfo_t linfo = H5G_CRT_LINK_INFO_DEF;      /* Default link info settings */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Register group info property */
     if(H5P_register_real(pclass, H5G_CRT_GROUP_INFO_NAME, H5G_CRT_GROUP_INFO_SIZE, &ginfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register link info property */
     if(H5P_register_real(pclass, H5G_CRT_LINK_INFO_NAME, H5G_CRT_LINK_INFO_SIZE, &linfo, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_gcrt_reg_prop() */
+} /* end H5P__gcrt_reg_prop() */
 
 
 /*-------------------------------------------------------------------------
@@ -156,7 +156,7 @@ H5Pset_local_heap_size_hint(hid_t plist_id, size_t size_hint)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
     /* Update field */
-    ginfo.lheap_size_hint = size_hint;
+    H5_ASSIGN_OVERFLOW(ginfo.lheap_size_hint, size_hint, size_t, uint32_t);
 
     /* Set value */
     if(H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)

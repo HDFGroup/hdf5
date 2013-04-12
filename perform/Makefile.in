@@ -90,8 +90,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
-@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = benchpar$(EXEEXT) \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	mpi-perf$(EXEEXT)
+@BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = benchpar$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
 PROGRAMS = $(bin_PROGRAMS)
 benchpar_SOURCES = benchpar.c
@@ -123,10 +122,6 @@ h5perf_serial_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 iopipe_SOURCES = iopipe.c
 iopipe_OBJECTS = iopipe.$(OBJEXT)
 iopipe_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
-mpi_perf_SOURCES = mpi-perf.c
-mpi_perf_OBJECTS = mpi-perf.$(OBJEXT)
-mpi_perf_LDADD = $(LDADD)
-mpi_perf_DEPENDENCIES = $(LIBHDF5)
 overhead_SOURCES = overhead.c
 overhead_OBJECTS = overhead.$(OBJEXT)
 overhead_LDADD = $(LDADD)
@@ -175,10 +170,10 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
-	$(h5perf_serial_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c \
+	$(h5perf_serial_SOURCES) iopipe.c overhead.c perf.c \
 	perf_meta.c zip_perf.c
 DIST_SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
-	$(h5perf_serial_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c \
+	$(h5perf_serial_SOURCES) iopipe.c overhead.c perf.c \
 	perf_meta.c zip_perf.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -482,7 +477,7 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
-@BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = benchpar mpi-perf
+@BUILD_PARALLEL_CONDITIONAL_TRUE@PARA_BUILD_ALL = benchpar
 @BUILD_ALL_CONDITIONAL_TRUE@BUILD_ALL_PROGS = $(PARA_BUILD_ALL)
 
 # Define programs that will be run in 'make check'
@@ -632,9 +627,6 @@ h5perf_serial$(EXEEXT): $(h5perf_serial_OBJECTS) $(h5perf_serial_DEPENDENCIES) $
 iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) $(EXTRA_iopipe_DEPENDENCIES) 
 	@rm -f iopipe$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)
-mpi-perf$(EXEEXT): $(mpi_perf_OBJECTS) $(mpi_perf_DEPENDENCIES) $(EXTRA_mpi_perf_DEPENDENCIES) 
-	@rm -f mpi-perf$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(mpi_perf_OBJECTS) $(mpi_perf_LDADD) $(LIBS)
 overhead$(EXEEXT): $(overhead_OBJECTS) $(overhead_DEPENDENCIES) $(EXTRA_overhead_DEPENDENCIES) 
 	@rm -f overhead$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(overhead_OBJECTS) $(overhead_LDADD) $(LIBS)
@@ -657,7 +649,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/benchpar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iopipe.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpi-perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/overhead.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf_meta.Po@am__quote@

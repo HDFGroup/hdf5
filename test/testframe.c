@@ -124,12 +124,6 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
  */
 void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]))
 {
-#if !(defined MAC)
-    /* Un-buffer the stdout and stderr */
-    setbuf(stderr, NULL);
-    setbuf(stdout, NULL);
-#endif
-
     /*
      * Turn off automatic error reporting since we do it ourselves.  Besides,
      * half the functions this test calls are private, so automatic error

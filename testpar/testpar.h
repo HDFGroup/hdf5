@@ -18,6 +18,9 @@
 #ifndef TESTPAR_H
 #define TESTPAR_H
 
+/* Indicate that these are parallel tests, for the testing framework */
+#define H5_PARALLEL_TEST
+
 #include "h5test.h"
 
 /* Constants definitions */

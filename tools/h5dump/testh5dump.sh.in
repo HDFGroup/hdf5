@@ -143,6 +143,8 @@ $SRC_H5DUMP_TESTFILES/zerodim.h5
 $SRC_H5DUMP_TESTFILES/torderattr.h5
 $SRC_H5DUMP_TESTFILES/tordergr.h5
 $SRC_H5DUMP_TESTFILES/tsaf.h5
+$SRC_H5DUMP_TESTFILES/tscalarintsize.h5
+$SRC_H5DUMP_TESTFILES/tscalarattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tslink.h5
 $SRC_H5DUMP_TESTFILES/tsplit_file-m.h5
 $SRC_H5DUMP_TESTFILES/tsplit_file-r.h5
@@ -277,6 +279,8 @@ $SRC_H5DUMP_TESTFILES/torderlinks2.ddl
 $SRC_H5DUMP_TESTFILES/tperror.ddl
 $SRC_H5DUMP_TESTFILES/treference.ddl
 $SRC_H5DUMP_TESTFILES/tsaf.ddl
+$SRC_H5DUMP_TESTFILES/tscalarintsize.ddl
+$SRC_H5DUMP_TESTFILES/tscalarattrintsize.ddl
 $SRC_H5DUMP_TESTFILES/tscaleoffset.ddl
 $SRC_H5DUMP_TESTFILES/tshuffle.ddl
 $SRC_H5DUMP_TESTFILES/tslink-1.ddl
@@ -678,10 +682,14 @@ TOOLTEST twidedisplay.ddl --enable-error-stack -w0 packedbits.h5
 TOOLTEST packedbits.ddl --enable-error-stack packedbits.h5
 # test for compound signed/unsigned datasets
 TOOLTEST tcmpdintsize.ddl --enable-error-stack tcmpdintsize.h5
+# test for signed/unsigned scalar datasets
+TOOLTEST tscalarintsize.ddl --enable-error-stack tscalarintsize.h5
 # test for signed/unsigned attributes
 TOOLTEST tattrintsize.ddl --enable-error-stack tattrintsize.h5
 # test for compound signed/unsigned attributes
 TOOLTEST tcmpdattrintsize.ddl --enable-error-stack tcmpdattrintsize.h5
+# test for signed/unsigned scalar attributes
+TOOLTEST tscalarattrintsize.ddl --enable-error-stack tscalarattrintsize.h5
 # test for displaying groups
 TOOLTEST tgroup-1.ddl --enable-error-stack tgroup.h5
 # test for displaying the selected groups

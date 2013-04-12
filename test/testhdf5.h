@@ -125,7 +125,17 @@
 } while(0)
 
 /* Used to document process through a test */
-#define MESSAGE(V,A) {if (HDGetTestVerbosity()>(V)) print_func A;}
+#if defined(H5_HAVE_PARALLEL) && defined(H5_PARALLEL_TEST)
+#define MESSAGE(V,A) {                                                        \
+    int mpi_rank;                                                             \
+                                                                              \
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);                                 \
+    if(mpi_rank == 0 && HDGetTestVerbosity() > (V))                           \
+        print_func A ;                                                        \
+}
+#else /* H5_HAVE_PARALLEL */
+#define MESSAGE(V,A) {if (HDGetTestVerbosity() > (V)) print_func A;}
+#endif /* H5_HAVE_PARALLEL */
 
 /* Used to indicate an error that is complex to check for */
 #define ERROR(where) do {						      \

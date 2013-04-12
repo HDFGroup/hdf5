@@ -48,6 +48,7 @@
 /* Definitions for number of soft links to traverse */
 #define H5L_ACS_NLINKS_SIZE        sizeof(size_t)
 #define H5L_ACS_NLINKS_DEF         H5L_NUM_LINKS /*max symlinks to follow per lookup  */
+
 /* Definitions for external link prefix */
 #define H5L_ACS_ELINK_PREFIX_SIZE        sizeof(char *)
 #define H5L_ACS_ELINK_PREFIX_DEF         NULL /*default is no prefix */
@@ -297,8 +298,12 @@ H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t UNUSED si
     /* Check for NULL property lists */
     if(obj1 == NULL && obj2 != NULL) HGOTO_DONE(1);
     if(obj1 != NULL && obj2 == NULL) HGOTO_DONE(-1);
-    if(obj1 && obj2)
-        ret_value = H5P_cmp_plist(obj1, obj2);
+    if(obj1 && obj2) {
+        herr_t status;
+
+        status = H5P_cmp_plist(obj1, obj2, &ret_value);
+        HDassert(status >= 0);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

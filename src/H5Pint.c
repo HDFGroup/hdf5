@@ -59,7 +59,7 @@ typedef struct {
 typedef struct {
     H5P_iterate_int_t cb_func;  /* Iterator callback */
     void *udata;                /* Iterator callback pointer */
-    H5P_genplist_t *plist;      /* Property list pointer */
+    const H5P_genplist_t *plist;      /* Property list pointer */
     H5SL_t *seen;               /* Skip list to hold names of properties already seen */
     int *curr_idx_ptr;          /* Pointer to current iteration index */
     int prev_idx;               /* Previous iteration index */
@@ -72,6 +72,12 @@ typedef struct {
     int *curr_idx_ptr;          /* Pointer to current iteration index */
     int prev_idx;               /* Previous iteration index */
 } H5P_iter_pclass_ud_t;
+
+/* Typedef for property list comparison callback */
+typedef struct {
+    const H5P_genplist_t *plist2;       /* Pointer to second property list */
+    int cmp_value;              /* Value from property comparison */
+} H5P_plist_cmp_ud_t;
 
 
 /********************/
@@ -1101,7 +1107,7 @@ done:
     Internal routine to check for a property in a property list's skip list
  USAGE
     H5P_genprop_t *H5P_find_prop(plist, name)
-        H5P_genplist_t *plist;  IN: Pointer to property list to check
+        const H5P_genplist_t *plist;  IN: Pointer to property list to check
         const char *name;       IN: Name of property to check for
  RETURNS
     Returns pointer to property on success, NULL on failure.
@@ -1113,7 +1119,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 H5P_genprop_t *
-H5P__find_prop_plist(H5P_genplist_t *plist, const char *name)
+H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
 
@@ -2572,7 +2578,7 @@ done:
     Internal routine to query the existance of a property in a property list.
  USAGE
     herr_t H5P_exist_plist(plist, name)
-        H5P_genplist_t *plist;  IN: Property list to check
+        const H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to check for
  RETURNS
     Success: Positive if the property exists in the property list, zero
@@ -2587,7 +2593,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5P_exist_plist(H5P_genplist_t *plist, const char *name)
+H5P_exist_plist(const H5P_genplist_t *plist, const char *name)
 {
     htri_t ret_value = FAIL;     /* return value */
 
@@ -2687,7 +2693,7 @@ done:
     Internal routine to query the size of a property in a property list.
  USAGE
     herr_t H5P_get_size_plist(plist, name)
-        H5P_genplist_t *plist;  IN: Property list to check
+        const H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to query
         size_t *size;           OUT: Size of property
  RETURNS
@@ -2703,7 +2709,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_get_size_plist(H5P_genplist_t *plist, const char *name, size_t *size)
+H5P_get_size_plist(const H5P_genplist_t *plist, const char *name, size_t *size)
 {
     H5P_genprop_t *prop;        /* Temporary property pointer */
     herr_t ret_value=SUCCEED;      /* return value */
@@ -3086,105 +3092,141 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_cmp_plist
+    H5P__cmp_plist_cb
  PURPOSE
-    Internal routine to compare two generic property lists
+    Internal callback routine when iterating over properties in property list
+    to compare them for equality
  USAGE
-    int H5P_cmp_plist(plist1, plist2)
-        H5P_genplist_t *plist1;    IN: 1st property list to compare
-        H5P_genplist_t *plist2;    IN: 2nd property list to compare
+    int H5P__cmp_plist_cb(prop, udata)
+        H5P_genprop_t *prop;        IN: Pointer to the property
+        void *udata;                IN/OUT: Pointer to iteration data from user
  RETURNS
-    Success: negative if list1 "less" than list2, positive if list1 "greater"
-        than list2, zero if list1 is "equal" to list2
-    Failure: can't fail
+    Success: Returns whether to continue (H5_ITER_CONT) or stop (H5_ITER_STOP)
+            iterating over the property lists.
+    Failure: Negative value (H5_ITER_ERROR)
  DESCRIPTION
-        This function compares two generic property lists together to see if
-    they are the same list.
-
+    This routine compares a property from one property list (the one being
+    iterated over, to a property from the second property list (which is
+    looked up).  Iteration is stopped if the comparison is non-equal.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-int
-H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2)
+static int
+H5P__cmp_plist_cb(H5P_genprop_t *prop, void *_udata)
 {
-    H5SL_node_t *tnode1, *tnode2;       /* Temporary pointer to property nodes */
-    int cmp_value;                      /* Value from comparison */
-    int ret_value = 0;                  /* return value */
+    H5P_plist_cmp_ud_t *udata = (H5P_plist_cmp_ud_t *)_udata;   /* Pointer to user data */
+    htri_t prop2_exist;                 /* Whether the property exists in the second property list */
+    int ret_value = H5_ITER_CONT;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(prop);
+    HDassert(udata);
+
+    /* Check if the property exists in the second property list */
+    if((prop2_exist = H5P_exist_plist(udata->plist2, prop->name)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5_ITER_ERROR, "can't lookup existance of property?")
+    if(prop2_exist) {
+        const H5P_genprop_t *prop2;         /* Pointer to property in second plist */
+
+        /* Look up same property in second property list */
+        if(NULL == (prop2 = H5P__find_prop_plist(udata->plist2, prop->name)))
+            HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, H5_ITER_ERROR, "property doesn't exist")
+
+        /* Compare the two properties */
+        if((udata->cmp_value = H5P_cmp_prop(prop, prop2)) != 0)
+            HGOTO_DONE(H5_ITER_STOP);
+    } /* end if */
+    else {
+        /* Property exists in first list, but not second */
+        udata->cmp_value = 1;
+        HGOTO_DONE(H5_ITER_STOP);
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__cmp_plist_cb() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5P_cmp_plist
+ PURPOSE
+    Internal routine to compare two generic property lists
+ USAGE
+    herr_t H5P_cmp_plist(plist1, plist2, cmp_ret)
+        H5P_genplist_t *plist1;    IN: 1st property list to compare
+        H5P_genplist_t *plist2;    IN: 2nd property list to compare
+        int *cmp_ret;              OUT: Comparison value for two property lists
+                                        Negative if list1 "less" than list2,
+                                        positive if list1 "greater" than list2,
+                                        zero if list1 is "equal" to list2
+ RETURNS
+    Success: non-negative value
+    Failure: negative value
+ DESCRIPTION
+        This function compares two generic property lists together to see if
+    they are equal.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2,
+    int *cmp_ret)
+{
+    H5P_plist_cmp_ud_t udata;   /* User data for callback */
+    int idx = 0;                /* Index of property to begin with */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(plist1);
     HDassert(plist2);
+    HDassert(cmp_ret);
 
     /* Check the number of properties */
-    if(plist1->nprops < plist2->nprops) HGOTO_DONE(-1);
-    if(plist1->nprops > plist2->nprops) HGOTO_DONE(1);
+    if(plist1->nprops < plist2->nprops) {
+        *cmp_ret = -1;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
+    if(plist1->nprops > plist2->nprops) {
+        *cmp_ret = 1;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
 
     /* Check whether they've been initialized */
-    if(plist1->class_init < plist2->class_init) HGOTO_DONE(-1);
-    if(plist1->class_init > plist2->class_init) HGOTO_DONE(1);
-
-    /* Check for identical deleted properties */
-    if(H5SL_count(plist1->del) > 0) {
-        /* Check for no deleted properties in plist2 */
-        if(H5SL_count(plist2->del) == 0) HGOTO_DONE(1);
-
-        tnode1 = H5SL_first(plist1->del);
-        tnode2 = H5SL_first(plist2->del);
-        while(tnode1 || tnode2) {
-            const char *name1, *name2;   /* Name for node */
-
-            /* Check if they both have properties in this node */
-            if(tnode1 == NULL && tnode2 != NULL) HGOTO_DONE(-1);
-            if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
-
-            /* Compare the two deleted properties */
-            name1 = (const char *)H5SL_item(tnode1);
-            name2 = (const char *)H5SL_item(tnode2);
-            if((cmp_value = HDstrcmp(name1, name2)) != 0)
-                HGOTO_DONE(cmp_value);
-
-            /* Advance the pointers */
-            tnode1 = H5SL_next(tnode1);
-            tnode2 = H5SL_next(tnode2);
-        } /* end while */
+    if(plist1->class_init < plist2->class_init) {
+        *cmp_ret = -1;
+        HGOTO_DONE(SUCCEED);
     } /* end if */
-    else
-        if(H5SL_count(plist2->del) > 0) HGOTO_DONE (-1);
-
-    /* Cycle through the changed properties and compare them also */
-    if(H5SL_count(plist1->props) > 0) {
-        /* Check for no changed properties in plist2 */
-        if(H5SL_count(plist2->props) == 0) HGOTO_DONE(1);
-
-        tnode1 = H5SL_first(plist1->props);
-        tnode2 = H5SL_first(plist2->props);
-        while(tnode1 || tnode2) {
-            H5P_genprop_t *prop1, *prop2;   /* Property for node */
-
-            /* Check if they both have properties in this node */
-            if(tnode1 == NULL && tnode2 != NULL) HGOTO_DONE(-1);
-            if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
-
-            /* Compare the two properties */
-            prop1 = (H5P_genprop_t *)H5SL_item(tnode1);
-            prop2 = (H5P_genprop_t *)H5SL_item(tnode2);
-            if((cmp_value = H5P_cmp_prop(prop1, prop2)) != 0)
-                HGOTO_DONE(cmp_value);
-
-            /* Advance the pointers */
-            tnode1 = H5SL_next(tnode1);
-            tnode2 = H5SL_next(tnode2);
-        } /* end while */
+    if(plist1->class_init > plist2->class_init) {
+        *cmp_ret = 1;
+        HGOTO_DONE(SUCCEED);
     } /* end if */
-    else
-        if(H5SL_count(plist2->props)>0) HGOTO_DONE (-1);
+
+    /* Set up iterator callback info */
+    udata.cmp_value = 0;
+    udata.plist2 = plist2;
+
+    /* Iterate over properties in first property list */
+    if((ret_value = H5P_iterate_plist(plist1, TRUE, &idx, H5P__cmp_plist_cb, &udata)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to iterate over list")
+    if(ret_value != 0) {
+        *cmp_ret = udata.cmp_value;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
 
     /* Check the parent classes */
-    if((cmp_value = H5P_cmp_class(plist1->pclass, plist2->pclass)) != 0)
-        HGOTO_DONE(cmp_value);
+    if((*cmp_ret = H5P_cmp_class(plist1->pclass, plist2->pclass)) != 0)
+        HGOTO_DONE(SUCCEED);
+
+    /* Property lists must be equal, set comparison value to 0 */
+    *cmp_ret = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3363,7 +3405,7 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
     char *key = (char *)_key;                           /* Pointer to the property's name */
     H5P_iter_plist_ud_t *udata = (H5P_iter_plist_ud_t *)_udata;     /* Pointer to user data */
-    int ret_value = 0;                                  /* Return value */
+    int ret_value = H5_ITER_CONT;                       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3382,9 +3424,9 @@ H5P__iterate_plist_cb(void *_item, void *_key, void *_udata)
     /* Increment the current index */
     (*udata->curr_idx_ptr)++;
 
-    /* Add property name to "seen" list */
+    /* Add property name to 'seen' list */
     if(H5SL_insert(udata->seen, key, key) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into seen skip list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert property into 'seen' skip list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3417,7 +3459,7 @@ H5P__iterate_plist_pclass_cb(void *_item, void *_key, void *_udata)
     H5P_genprop_t *item = (H5P_genprop_t *)_item;       /* Pointer to the property */
     char *key = (char *)_key;                           /* Pointer to the property's name */
     H5P_iter_plist_ud_t *udata = (H5P_iter_plist_ud_t *)_udata;     /* Pointer to user data */
-    int ret_value = 0;                                  /* Return value */
+    int ret_value = H5_ITER_CONT;                       /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3662,7 +3704,7 @@ H5P_iterate_pclass(const H5P_genclass_t *pclass, int *idx,
     int curr_idx = 0;           /* Current iteration index */
     int ret_value = 0;          /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(pclass);

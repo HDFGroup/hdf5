@@ -713,6 +713,7 @@ position        vlen3D of </>   vlen3D of </>   difference
 
 dataset: </dset> and </dset>
 Not comparable: </dset> or </dset> is an empty dataset
+0 differences found
    obj1   obj2
  --------------------------------------
     x      x    VLstring       
@@ -1424,7 +1425,6 @@ position        vlen3D of </dset> vlen3D of </dset> difference
 [ 3 2 1 ]          58              0               58             
 [ 3 2 1 ]          59              0               59             
 59 differences found
-519 differences found
 
 group  : </g1> and </g1>
 0 differences found
