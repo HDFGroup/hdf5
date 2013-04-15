@@ -410,6 +410,8 @@ Support for new platforms, languages and compilers.
     - Intel V11.1 uses now -O3 optimization in production mode (EIP - 2010/10/08)
     - PathScale compilers are recognized and can build the HDF5 library
       properly. AKC - 2009/7/28 -
+    - SunOS 5.11 (emu) 32-bit and 64-bit with Sun C/C++ 5.12 compiler and
+      Sun Fortran 95 8.6 compiler. (SLU - 2013/04/15)
 
 Bug Fixes since HDF5-1.8.0 release
 ==================================
