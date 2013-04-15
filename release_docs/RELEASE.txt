@@ -86,7 +86,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - None
+    - SunOS 5.11 (emu) 32-bit and 64-bit with Sun C/C++ 5.12 compiler and
+      Sun Fortran 95 8.6 compiler.
 
 Bug Fixes since HDF5-1.8.11
 ===========================
