@@ -147,53 +147,6 @@ Group::Group(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
     }
 }
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-//--------------------------------------------------------------------------
-// Function:	Group::getObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param	ref      - IN: Reference to query
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT         - Reference is an object reference.
-///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
-///\return	An object type, which can be one of the following:
-///		\li \c H5G_LINK (0)    - Object is a symbolic link.
-///		\li \c H5G_GROUP (1)   - Object is a group.
-///		\li \c H5G_DATASET (2) - Object is a dataset.
-///		\li \c H5G_TYPE (3)    - Object is a named datatype
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      return(p_get_obj_type(ref, ref_type));
-   }
-   catch (IdComponentException E) {
-      throw GroupIException("Group::getObjType", E.getDetailMsg());
-   }
-}
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-//--------------------------------------------------------------------------
-// Function:	Group::getRegion
-///\brief	Retrieves a dataspace with the region pointed to selected.
-///\param	ref      - IN: Reference to get region of
-///\param	ref_type - IN: Type of reference to get region of - default
-///\return	DataSpace instance
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      DataSpace dataspace(p_get_region(ref, ref_type));
-      return(dataspace);
-   }
-   catch (IdComponentException E) {
-      throw GroupIException("Group::getRegion", E.getDetailMsg());
-   }
-}
-
 //--------------------------------------------------------------------------
 // Function:    Group::getId
 // Purpose:     Get the id of this attribute

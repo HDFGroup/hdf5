@@ -160,6 +160,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarattrintsize.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarstring.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscaleoffset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tshuffle.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink-1.ddl
@@ -263,6 +264,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarattrintsize.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tscalarstring.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file-m.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tsplit_file-r.h5
@@ -1023,6 +1025,8 @@ IF (BUILD_TESTING)
           tscalarintsize.out.err
           tscalarattrintsize.out
           tscalarattrintsize.out.err
+          tscalarstring.out
+          tscalarstring.out.err
           tscaleoffset.out
           tscaleoffset.out.err
           tshuffle.out
@@ -1094,6 +1098,8 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tcmpdattrintsize 0 --enable-error-stack tcmpdattrintsize.h5)
   # test for signed/unsigned scalar attributes
   ADD_H5_TEST (tscalarattrintsize 0 --enable-error-stack tscalarattrintsize.h5)
+  # test for string scalar dataset and attribute
+  ADD_H5_TEST (tscalarstring 0 --enable-error-stack tscalarstring.h5)
   # test for displaying groups
   ADD_H5_TEST (tgroup-1 0 --enable-error-stack tgroup.h5)
   # test for displaying the selected groups

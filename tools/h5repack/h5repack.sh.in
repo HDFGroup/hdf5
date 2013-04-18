@@ -818,6 +818,27 @@ VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CONTI
 TOOLTEST_MAIN h5repack_layout3.h5 -l chunk_unlimit1:COMPA
 VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 CHUNK
 
+#--------------------------------------------------------------------------
+# Test -f for some specific cases. Chunked dataset with unlimited max dims.
+# (HDFFV-8012)
+#--------------------------------------------------------------------------
+# - should not fail 
+# - should not change max dims from unlimit
+
+# chunk dim is bigger than dataset dim. ( dset size < 64k )
+TOOLTEST_MAIN h5repack_layout3.h5 -f chunk_unlimit1:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit1 H5S_UNLIMITED
+# chunk dim is bigger than dataset dim. ( dset size > 64k )
+TOOLTEST_MAIN h5repack_layout3.h5 -f chunk_unlimit2:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit2 H5S_UNLIMITED
+
+# chunk dims are smaller than dataset dims. ( dset size < 64k )
+TOOLTEST_MAIN h5repack_layout3.h5  -f chunk_unlimit3:NONE
+VERIFY_LAYOUT_DSET h5repack_layout3.h5 chunk_unlimit3 H5S_UNLIMITED
+
+# file input - should not fail
+TOOLTEST h5repack_layout3.h5 -f NONE
+
 # Native option
 # Do not use FILE1, as the named dtype will be converted to native, and h5diff will
 # report a difference.

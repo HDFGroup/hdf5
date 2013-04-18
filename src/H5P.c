@@ -462,7 +462,7 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value,
 
     /* Create the new property list class */
     orig_pclass = pclass;
-    if((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close)) < 0)
+    if((ret_value = H5P_register(&pclass, name, size, def_value, prp_create, prp_set, prp_get, NULL, NULL, prp_delete, prp_copy, prp_cmp, prp_close)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in class")
 
     /* Check if the property class changed and needs to be substituted in the ID */
@@ -645,7 +645,8 @@ H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *value,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default")
 
     /* Create the new property list class */
-    if((ret_value = H5P_insert(plist, name, size, value, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close)) < 0)
+    if((ret_value = H5P_insert(plist, name, size, value, prp_set, prp_get,
+            NULL, NULL, prp_delete, prp_copy, prp_cmp, prp_close)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
 
 done:
@@ -834,6 +835,89 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
 done:
     FUNC_LEAVE_API(ret_value)
 }   /* H5Pget_size() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pencode
+ PURPOSE
+    Routine to convert the property values in a property list into a binary buffer
+ USAGE
+    herr_t H5Pencode(plist_id, buf, nalloc)
+        hid_t plist_id;         IN: Identifier to property list to encode
+        void *buf:              OUT: buffer to gold the encoded plist
+        size_t *nalloc;         IN/OUT: size of buffer needed to encode plist
+ RETURNS
+    Returns non-negative on success, negative on failure.
+ DESCRIPTION
+    Encodes a property list into a binary buffer. If the buffer is NULL, then
+    the call will set the size needed to encode the plist in nalloc. Otherwise
+    the routine will encode the plist in buf.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5Pencode(hid_t plist_id, void *buf, size_t *nalloc)
+{
+    H5P_genplist_t	*plist;         /* Property list to query */
+    hid_t ret_value = SUCCEED;          /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*x*z", plist_id, buf, nalloc);
+
+    /* Check arguments. */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+
+    /* Call the internal encode routine */
+    if((ret_value = H5P__encode(plist, TRUE, buf, nalloc)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to encode property list");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Pencode() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Pdecode
+ PURPOSE
+    API routine to decode a property list from a binary buffer.
+ USAGE
+    hid_t H5Pdecode(buf)
+        void *buf;    IN: buffer that holds the encoded plist
+ RETURNS
+    Returns non-negative ID of new property list object on success, negative
+        on failure.
+ DESCRIPTION
+     Decodes a property list from a binary buffer. The contents of the buffer
+     contain the values for the correponding properties of the plist. The decode 
+     callback of a certain property decodes its value from the buffer and sets it
+     in the property list.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Properties in the property list that are not encoded in the serialized
+     form retain their default value.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+hid_t
+H5Pdecode(const void *buf)
+{
+    hid_t ret_value = SUCCEED;          /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("i", "*x", buf);
+
+    /* Call the internal decode routine */
+    if((ret_value = H5P__decode(buf)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTDECODE, FAIL, "unable to decode property list");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Pdecode() */
 
 
 /*--------------------------------------------------------------------------

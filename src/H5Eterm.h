@@ -133,7 +133,7 @@ H5E_PATH_g=
 /* No error */    
 H5E_NONE_MINOR_g=
 
-/* File accessability errors */    
+/* File accessibilty errors */    
 H5E_FILEEXISTS_g=    
 H5E_FILEOPEN_g=    
 H5E_CANTCREATE_g=    

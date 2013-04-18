@@ -96,6 +96,7 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest,
     options->min_comp = 1024;
     options->verbose  = verbose;
     options->latest = latest;
+    options->layout_g = H5D_LAYOUT_ERROR;
 
     for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
     {

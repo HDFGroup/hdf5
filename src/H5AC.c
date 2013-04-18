@@ -129,7 +129,7 @@ static herr_t H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
                                            H5C_auto_size_ctl_t * int_conf_ptr);
                                            
 #if H5AC_DO_TAGGING_SANITY_CHECKS
-static herr_t H5AC_verify_tag(hid_t dxpl_id, H5AC_class_t * type);
+static herr_t H5AC_verify_tag(hid_t dxpl_id, const H5AC_class_t * type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
 #ifdef H5_HAVE_PARALLEL
@@ -286,11 +286,13 @@ H5AC_init_interface(void)
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=1;
-    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,
+                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
-    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,
+                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Set the transfer mode */
@@ -308,11 +310,13 @@ H5AC_init_interface(void)
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=0;
-    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,
+                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
-    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,
+                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Set the transfer mode */
@@ -330,11 +334,13 @@ H5AC_init_interface(void)
 
     /* Insert 'block before metadata write' property */
     block_before_meta_write=0;
-    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(xfer_plist,H5AC_BLOCK_BEFORE_META_WRITE_NAME,H5AC_BLOCK_BEFORE_META_WRITE_SIZE,&block_before_meta_write,
+                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Insert 'library internal' property */
-    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,NULL,NULL,NULL,NULL,NULL,NULL)<0)
+    if(H5P_insert(xfer_plist,H5AC_LIBRARY_INTERNAL_NAME,H5AC_LIBRARY_INTERNAL_SIZE,&library_internal,
+                  NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
     /* Set the transfer mode */
@@ -5408,7 +5414,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC_verify_tag(hid_t dxpl_id, H5AC_class_t * type)
+H5AC_verify_tag(hid_t dxpl_id, const H5AC_class_t * type)
 {
     H5C_tag_t tag;
     H5P_genplist_t * dxpl;

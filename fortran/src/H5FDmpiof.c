@@ -300,3 +300,40 @@ nh5pget_fapl_mpiposix_c(hid_t_f *prp_id, int_f* comm, int_f* flag)
      ret_value = 0;
      return ret_value;
 }
+
+/****if* H5Pf/h5pget_mpio_actual_io_mode_c
+ * NAME
+ *  h5pget_mpio_actual_io_mode_c
+ * PURPOSE
+ *  Calls H5Pget_mpio_actual_io_mode
+ *
+ * INPUTS
+ *  dxpl_id        - Dataset transfer property list identifier.
+ * OUTPUTS
+ *  actual_io_mode - The type of I/O performed by this process.
+ *
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M. Scot Breitenfeld
+ *  July 27, 2012
+ * SOURCE
+*/
+int_f
+nh5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode)
+/******/
+{
+  int ret_value = -1;
+  H5D_mpio_actual_io_mode_t c_actual_io_mode;
+
+  /*
+   * Call H5Pget_mpio_actual_io_mode_f function.
+   */
+  if( (H5Pget_mpio_actual_io_mode((hid_t)*dxpl_id, &c_actual_io_mode)) <0 )
+    return ret_value; /* error occurred */
+
+  *actual_io_mode =(int_f)c_actual_io_mode;
+
+  ret_value = 0;
+  return ret_value;
+}

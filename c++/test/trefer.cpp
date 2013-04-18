@@ -149,34 +149,25 @@ static void test_reference_obj(void)
 	// Create a dataset
 	dataset = file1->createDataSet("Dataset3", PredType::STD_REF_OBJ, sid1);
 
-	// Create reference to dataset
+	// Create reference to dataset and test getRefObjType
 	file1->reference(&wbuf[0], "/Group1/Dataset1");
+	H5O_type_t refobj_type = dataset.getRefObjType(&wbuf[0], H5R_OBJECT);
+	verify_val(refobj_type, H5O_TYPE_DATASET, "DataSet::getRefObjType", __LINE__, __FILE__);
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	H5G_obj_t obj_type = dataset.getObjType(&wbuf[0], H5R_OBJECT);
-	verify_val(obj_type, H5G_DATASET, "DataSet::getObjType", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-	// Create reference to dataset
+	// Create reference to dataset and test getRefObjType
 	file1->reference(&wbuf[1], "/Group1/Dataset2");
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	obj_type = dataset.getObjType(&wbuf[1], H5R_OBJECT);
-	verify_val(obj_type, H5G_DATASET, "DataSet::getObjType", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+	refobj_type = dataset.getRefObjType(&wbuf[1], H5R_OBJECT);
+	verify_val(refobj_type, H5O_TYPE_DATASET, "DataSet::getRefObjType", __LINE__, __FILE__);
 
 	// Create reference to group
 	file1->reference(&wbuf[2], "/Group1");
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	obj_type = dataset.getObjType(&wbuf[2], H5R_OBJECT);
-	verify_val(obj_type, H5G_GROUP, "DataSet::getObjType", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+	refobj_type = dataset.getRefObjType(&wbuf[2], H5R_OBJECT);
+	verify_val(refobj_type, H5O_TYPE_GROUP, "DataSet::getRefObjType", __LINE__, __FILE__);
 
 	// Create reference to named datatype
 	file1->reference(&wbuf[3], "/Group1/Datatype1");
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	obj_type = dataset.getObjType(&wbuf[3], H5R_OBJECT);
-	verify_val(obj_type, H5G_TYPE, "DataSet::getObjType", __LINE__, __FILE__);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+	refobj_type = dataset.getRefObjType(&wbuf[3], H5R_OBJECT);
+	verify_val(refobj_type, H5O_TYPE_NAMED_DATATYPE, "DataSet::getRefObjType", __LINE__, __FILE__);
 
 	// Write selection to disk
 	dataset.write(wbuf, PredType::STD_REF_OBJ);
@@ -253,7 +244,7 @@ static void test_reference_obj(void)
 	// Test getting the type of objects
 	
 	// Test getObjTypeByIdx(hsize_t idx)
-	obj_type = group.getObjTypeByIdx(0);
+	H5G_obj_t obj_type = group.getObjTypeByIdx(0);
 	verify_val(obj_type, H5G_DATASET, "Group::getObjTypeByIdx(index)", __LINE__, __FILE__);
 
 	// Test getObjTypeByIdx(hsize_t idx, char* type_name)
@@ -333,6 +324,18 @@ static void test_reference_obj(void)
 
 /****************************************************************
 **
+**  test_reference_compat(): Test basic object reference functionality.
+**      Tests references to various kinds of objects using deprecated API.
+**
+****************************************************************/
+static void test_reference_compat(void)
+{
+   // Not yet
+}   // test_reference_compat()
+
+
+/****************************************************************
+**
 **  test_reference(): Main reference testing routine.
 **
 ****************************************************************/
@@ -346,6 +349,7 @@ void test_reference(void)
     MESSAGE(5, ("Testing References\n"));
 
     test_reference_obj();       // Test basic object reference functionality
+    test_reference_compat();    // Tests deprecated reference routines (not yet)
 
 }   // test_reference()
 

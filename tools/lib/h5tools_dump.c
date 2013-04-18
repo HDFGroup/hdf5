@@ -30,10 +30,6 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
-#define SANITY_CHECK
-
-#define ALIGN(A,Z)  ((((A) + (Z) - 1) / (Z)) * (Z))
-
 h5tool_format_t h5tools_dataformat = {
 0, /*raw */
 
@@ -215,6 +211,12 @@ hbool_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
                 hsize_t *curr_pos/*total data element position*/,
                 size_t ncols, hsize_t region_elmt_counter/*element counter*/,
                 hsize_t elmt_counter);
+
+void h5tools_print_dims(h5tools_str_t *buffer, hsize_t *s, int dims);
+
+void h5tools_dump_subsetting_header(FILE *stream, const h5tool_format_t *info,
+        h5tools_context_t *ctx, struct subset_t *sset, int dims);
+
 void
 h5tools_dump_init(void)
 {
@@ -628,7 +630,11 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
     alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
     HDassert(alloc_size == (hsize_t) ((size_t) alloc_size)); /*check for overflow*/
     if((ptdata = (hsize_t*) HDmalloc((size_t) alloc_size)) == NULL)
-        HGOTO_ERROR(dimension_break, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
+{
+        HERROR(H5E_tools_g, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
+        HGOTO_DONE(dimension_break);
+        //HGOTO_ERROR(dimension_break, H5E_tools_min_id_g, "Could not allocate buffer for ptdata");
+}
 
     H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
     if(H5Sget_select_hyper_blocklist(region_space, (hsize_t) 0, (hsize_t) nblocks, ptdata) < 0)
@@ -689,7 +695,7 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
     h5tools_str_reset(buffer);
     h5tools_str_append(buffer, "%s ", h5tools_dump_header_format->dataspacebegin);
 
-    h5tools_print_dataspace(stream, buffer, info, ctx, region_space);
+    h5tools_print_dataspace(buffer, region_space);
 
     if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
@@ -1008,7 +1014,7 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
     ctx->need_prefix = TRUE;
     h5tools_str_append(buffer, "%s ", h5tools_dump_header_format->dataspacebegin);
 
-    h5tools_print_dataspace(stream, buffer, info, ctx, region_space);
+    h5tools_print_dataspace(buffer, region_space);
 
     if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
@@ -2215,7 +2221,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         /* Check C variable-length string first. Are the two types equal? */
         if (H5Tequal(tmp_type, str_type)) {
             h5tools_str_append(buffer, "H5T_C_S1;");
-            goto done;
+            goto found_string_type;
         }
 
         /* Change the endianness and see if they're equal. */
@@ -2227,7 +2233,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
         if (H5Tequal(tmp_type, str_type)) {
             h5tools_str_append(buffer, "H5T_C_S1;");
-            goto done;
+            goto found_string_type;
         }
 
         /* If not equal to C variable-length string, check Fortran type. */
@@ -2242,7 +2248,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         /* Are the two types equal? */
         if (H5Tequal(tmp_type, str_type)) {
             h5tools_str_append(buffer, "H5T_FORTRAN_S1;");
-            goto done;
+            goto found_string_type;
         }
 
         /* Change the endianness and see if they're equal. */
@@ -2254,13 +2260,13 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
 
         if (H5Tequal(tmp_type, str_type)) {
             h5tools_str_append(buffer, "H5T_FORTRAN_S1;");
-            goto done;
+            goto found_string_type;
         }
 
         /* Type doesn't match any of above. */
         h5tools_str_append(buffer, "unknown_one_character_type;");
 
-  done:
+  found_string_type:
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
         ctx->indent_level--;
 
@@ -2311,7 +2317,10 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
         h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
         ctx->indent_level++;
         {
-           char *ttag = H5Tget_tag(type);
+           char *ttag;
+
+           if(NULL == (ttag = H5Tget_tag(type)))
+              H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Tget_tag failed");
 
            ctx->need_prefix = TRUE;
            h5tools_simple_prefix(stream, info, ctx, 0, 0);
@@ -2320,8 +2329,7 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
            h5tools_str_append(buffer, "OPAQUE_TAG \"%s\";", ttag);
            h5tools_render_element(stream, info, ctx, buffer, &curr_pos, ncols, 0, 0);
            
-           if (ttag)
-              HDfree(ttag);
+           HDfree(ttag);
         } 
         ctx->indent_level--;
 
@@ -2482,8 +2490,7 @@ CATCH
  *-------------------------------------------------------------------------
  */
 int
-h5tools_print_dataspace(FILE *stream, h5tools_str_t *buffer, const h5tool_format_t *info,
-        h5tools_context_t *ctx, hid_t space)
+h5tools_print_dataspace(h5tools_str_t *buffer, hid_t space)
 {
     HERR_INIT(int, SUCCEED)
     hsize_t     size[H5TOOLS_DUMP_MAX_RANK];
@@ -2773,7 +2780,7 @@ h5tools_dump_dataspace(FILE *stream, const h5tool_format_t *info,
     h5tools_str_append(&buffer, "%s ",
                         h5tools_dump_header_format->dataspacebegin);
 
-    h5tools_print_dataspace(stream, &buffer, info, ctx, type);
+    h5tools_print_dataspace(&buffer, type);
 
     if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
         h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->dataspaceblockend);
@@ -2845,7 +2852,6 @@ h5tools_print_fill_value(h5tools_str_t *buffer/*in,out*/, const h5tool_format_t 
 {
     size_t            size;
     hid_t             n_type;
-    hsize_t           nelmts = 1;
     void             *buf = NULL;
 
     n_type = h5tools_get_native_type(type_id);
@@ -3567,7 +3573,8 @@ h5tools_print_dims(h5tools_str_t *buffer, hsize_t *s, int dims)
     for (i = 0; i < dims; i++) {
         h5tools_str_append(buffer, HSIZE_T_FORMAT, s[i]);
 
-        if (i + 1 != dims) h5tools_str_append(buffer, ", ");
+        if (i + 1 != dims)
+            h5tools_str_append(buffer, ", ");
     }
 }
 
@@ -3870,7 +3877,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
                 buf = HDmalloc((size_t)alloc_size);
                 HDassert(buf);
 
-                if (H5Aread(obj_id, p_type, buf) >= 0)
+                if (H5Aread(obj_id, p_type, buf) >= 0) {
                     if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {
                         /*
                          * Print 1-byte integer data as an ASCII character string
@@ -3899,6 +3906,7 @@ h5tools_dump_data(FILE *stream, const h5tool_format_t *info,
                     }
                     else
                         datactx.need_prefix = TRUE;
+                }
 
                 status = h5tools_dump_mem(stream, info, &datactx, obj_id, p_type, space, buf);
                 if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {

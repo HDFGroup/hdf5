@@ -161,10 +161,10 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Orefcount.lo H5Osdspace.lo H5Oshared.lo H5Oshmesg.lo \
 	H5Ostab.lo H5Ostorage.lo H5Otest.lo H5Ounknown.lo H5P.lo \
 	H5Pacpl.lo H5Pdapl.lo H5Pdcpl.lo H5Pdeprec.lo H5Pdxpl.lo \
-	H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo H5Pgcpl.lo H5Pint.lo \
-	H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo H5Pstrcpl.lo \
-	H5Ptest.lo H5R.lo H5Rdeprec.lo H5RC.lo H5RS.lo H5S.lo \
-	H5Sall.lo H5Sdbg.lo H5Shyper.lo H5Smpio.lo H5Snone.lo \
+	H5Pencdec.lo H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo H5Pgcpl.lo \
+	H5Pint.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo \
+	H5Pstrcpl.lo H5Ptest.lo H5R.lo H5Rdeprec.lo H5RC.lo H5RS.lo \
+	H5S.lo H5Sall.lo H5Sdbg.lo H5Shyper.lo H5Smpio.lo H5Snone.lo \
 	H5Spoint.lo H5Sselect.lo H5Stest.lo H5SL.lo H5SM.lo \
 	H5SMbtree2.lo H5SMcache.lo H5SMmessage.lo H5SMtest.lo H5ST.lo \
 	H5T.lo H5Tarray.lo H5Tbit.lo H5Tcommit.lo H5Tcompound.lo \
@@ -525,7 +525,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 121
+LT_VERS_REVISION = 127
 LT_VERS_AGE = 0
 H5detect_CFLAGS = -g $(AM_CFLAGS)
 
@@ -590,7 +590,8 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Ostorage.c \
         H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
-        H5Pdeprec.c H5Pdxpl.c H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
+        H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
+        H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c H5Pint.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
         H5R.c H5Rdeprec.c \
@@ -959,6 +960,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pdcpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pdeprec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pdxpl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pencdec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pfapl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pfcpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Pfmpl.Plo@am__quote@

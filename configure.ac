@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.131-FA_a5], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.137-FA_a5], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -2233,11 +2233,18 @@ AC_CACHE_CHECK([if lone colon can be used as an argument],
                [
   echo "int main(int argc, char * argv[]) {return 0;}" > conftest.c
   $CC $CFLAGS conftest.c > /dev/null 2> /dev/null
-  echo "./a.out :" > conftest.sh
+case "`uname`" in
+  CYGWIN*)
+    echo "./a.exe :" > conftest.sh
+    ;;
+  *)
+    echo "./a.out :" > conftest.sh
+    ;;
+esac
   chmod 700 conftest.sh
 
   ./conftest.sh 2> conftest.out
-  rm a.out
+  rm -f a.out a.exe
   TEST_OUTPUT=`cat conftest.out`
 
   if test "X$TEST_OUTPUT" = "X"; then
@@ -2821,7 +2828,7 @@ if test -n "$PARALLEL"; then
     X-yes)
       AC_CHECK_HEADERS([mpe.h],, [unset MPE])
       AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      AC_CHECK_LIB([lmpe], [CLOG_Init],, [unset MPE])
+      AC_CHECK_LIB([lmpe], [MPE_Init_mpi_io],, [unset MPE])
       ;;
     *)
       case "$withval" in
@@ -2863,12 +2870,12 @@ if test -n "$PARALLEL"; then
         AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
         AC_CHECK_LIB([mpe], [MPE_Init_log],,
                      [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-        AC_CHECK_LIB([lmpe], [CLOG_Init],,
+        AC_CHECK_LIB([lmpe], [MPE_Init_mpi_io],,
                      [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
 
       else
         AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-        AC_CHECK_LIB([lmpe], [CLOG_Init],, [unset MPE])
+        AC_CHECK_LIB([lmpe], [MPE_Init_mpi_io],, [unset MPE])
       fi
       ;;
   esac

@@ -104,6 +104,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 #define H5_FAILED()  {puts("*FAILED*");fflush(stdout);}
 #define H5_WARNING()  {puts("*WARNING*");fflush(stdout);}
 #define SKIPPED()  {puts(" -SKIP-");fflush(stdout);}
+#define PUTS_ERROR(s)   {puts(s); AT(); goto error;}
 #define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 #define STACK_ERROR     {H5Eprint2(H5E_DEFAULT, stdout); goto error;}
 #define FAIL_STACK_ERROR {H5_FAILED(); AT(); H5Eprint2(H5E_DEFAULT, stdout); \

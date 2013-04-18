@@ -174,24 +174,23 @@ CONTAINS
 !  access property list.
 !
 ! INPUTS
-!  prp_id 	 - file access property list identifier
-!  comm 	 - MPI-2 communicator
-!  use_gpfs 	 - logical flag to use the GPFS hints
+!  prp_id    - File access property list identifier.
+!  comm      - MPI-2 communicator.
+!  use_gpfs  - Logical flag to use the GPFS hints.
 ! OUTPUTS
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  hdferr    - Returns 0 if successful and -1 if fails.
 !
 ! AUTHOR
 !  Elena Pourmal
 !  May 6, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER, INTENT(IN) :: comm ! MPI communicator to be used for file open
-                                ! as defined in MPI_FILE_OPEN of MPI-2
-    LOGICAL, INTENT(IN) :: use_gpfs
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER,        INTENT(IN)  :: comm
+    LOGICAL,        INTENT(IN)  :: use_gpfs
+    INTEGER,        INTENT(OUT) :: hdferr
 !*****
     INTEGER :: flag
     INTEGER, EXTERNAL :: h5pset_fapl_mpiposix_c
@@ -209,22 +208,22 @@ CONTAINS
 !  Returns MPI communicator information.
 !
 ! INPUTS
-!  prp_id 	 - file access property list identifier
+!  prp_id    - File access property list identifier.
 ! OUTPUTS
-!  comm 	 - MPI-2 communicator
-!  use_gpfs 	 - flag to use GPFS hints
-!  hdferr 	 - Returns 0 if successful and -1 if fails
+!  comm      - MPI-2 communicator.
+!  use_gpfs  - Flag to use GPFS hints.
+!  hdferr    - Returns 0 if successful and -1 if fails.
 ! AUTHOR
 !  Elena Pourmal
 !  May 6, 2003
 !
-! SOURCE
+! Fortran90 Interface:
   SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
-    INTEGER, INTENT(OUT) :: comm         ! Buffer to return communicator
-    LOGICAL, INTENT(OUT) :: use_gpfs
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER,        INTENT(OUT) :: comm
+    LOGICAL,        INTENT(OUT) :: use_gpfs
+    INTEGER,        INTENT(OUT) :: hdferr
 !*****
     INTEGER :: flag
 
@@ -233,5 +232,50 @@ CONTAINS
     use_gpfs = .FALSE.
     IF (flag .EQ. 1) use_gpfs = .TRUE.
   END SUBROUTINE h5pget_fapl_mpiposix_f
+
+
+!****s* H5P/h5pget_mpio_actual_io_mode_f
+! NAME
+!  h5pget_mpio_actual_io_mode_f
+!
+! PURPOSE
+!  Retrieves the type of I/O that HDF5 actually performed on the last 
+!  parallel I/O call. This is not necessarily the type of I/O requested. 
+!
+! INPUTS
+!  dxpl_id        - Dataset transfer property list identifier.
+! OUTPUTS
+!  actual_io_mode - The type of I/O performed by this process.
+!  hdferr         - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  July 27, 2012
+!
+! HISTORY
+!
+! Fortran90 Interface:
+  SUBROUTINE h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: dxpl_id
+    INTEGER       , INTENT(OUT) :: actual_io_mode
+    INTEGER       , INTENT(OUT) :: hdferr
+!***** 
+    INTERFACE
+       INTEGER FUNCTION h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_MPIO_ACTUAL_IO_MODE_C'::h5pget_mpio_actual_io_mode_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN)  :: dxpl_id
+         INTEGER       , INTENT(OUT) :: actual_io_mode
+       END FUNCTION h5pget_mpio_actual_io_mode_c
+    END INTERFACE
+
+    actual_io_mode = -1
+
+    hdferr = h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
+
+  END SUBROUTINE h5pget_mpio_actual_io_mode_f
 
 END MODULE H5FDMPIO

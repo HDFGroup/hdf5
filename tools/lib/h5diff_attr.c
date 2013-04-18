@@ -207,6 +207,12 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
             table_lp->nattrs_only2++;
             curr2++;
         }
+
+        /* close for next turn */
+        H5Aclose(attr1_id);
+        attr1_id = -1;
+        H5Aclose(attr2_id);
+        attr2_id = -1;
     } /* end while */
 
     /* list1 did not end */
@@ -225,6 +231,10 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         table_attr_mark_exist(infile, name1, table_lp);
         table_lp->nattrs_only1++;
         curr1++;
+
+        /* close for next turn */
+        H5Aclose(attr1_id);
+        attr1_id = -1;
     }
 
     /* list2 did not end */
@@ -243,6 +253,9 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
         table_attr_mark_exist(infile, name2, table_lp);
         table_lp->nattrs_only2++;
         curr2++;
+
+        /* close for next turn */
+        H5Aclose(attr2_id);
     }
 
     /*------------------------------------------------------
@@ -272,6 +285,11 @@ static herr_t build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t
     return 0;
 
 error:
+    if (0 < attr1_id)
+        H5Aclose(attr1_id);
+    if (0 < attr2_id)
+        H5Aclose(attr2_id);
+
     return -1;
 }
 

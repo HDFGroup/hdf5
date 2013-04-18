@@ -53,7 +53,7 @@ HD5f2cstring(_fcd fdesc, size_t len)
 
     /* Search for the end of the string */
     str = _fcdtocp(fdesc);
-    for(i = (int)len - 1; i >= 0 && !HDisgraph((int)str[i]); i--)
+    for(i = (int)len - 1; i >= 0 && HDisspace((int)str[i]) && str[i] == ' '; i--)
         /*EMPTY*/;
 
     /* Allocate C string */
