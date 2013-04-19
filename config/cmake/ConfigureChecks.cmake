@@ -205,6 +205,7 @@ ENDIF (CYGWIN)
 #-----------------------------------------------------------------------------
 IF (NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     H5_HAVE_LIBM)
+  CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     H5_HAVE_LIBDL)
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  H5_HAVE_LIBWS2_32)
   CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname H5_HAVE_LIBWSOCK32)
 ENDIF (NOT WINDOWS)
@@ -367,6 +368,7 @@ CHECK_INCLUDE_FILE_CONCAT ("sys/types.h"     H5_HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        H5_HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT ("setjmp.h"        H5_HAVE_SETJMP_H)
 CHECK_INCLUDE_FILE_CONCAT ("features.h"      H5_HAVE_FEATURES_H)
+CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        H5_HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdint.h"        H5_HAVE_STDINT_H)
 
 # IF the c compiler found stdint, check the C++ as well. On some systems this

@@ -535,7 +535,7 @@ SUBROUTINE test_h5o_link(total_error)
 
   ! close the datatype
   CALL h5tclose_f(tid, error)
-  CALL check("h5tclose_f",error)
+  CALL check("h5tclose_f",error, total_error)
 
   CALL h5ocopy_f(file_id, NAME_DATATYPE_SIMPLE, file_id, NAME_DATATYPE_SIMPLE2, error)
   CALL check("h5ocopy_f",error,total_error)

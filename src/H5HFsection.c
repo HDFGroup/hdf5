@@ -449,7 +449,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5HF_sect_node_free(H5HF_free_section_t *sect, H5HF_indirect_t *iblock)
 {
     herr_t ret_value = SUCCEED;               /* Return value */

@@ -263,6 +263,7 @@ H5AC_init_interface(void)
     H5P_genclass_t  *xfer_pclass;   /* Dataset transfer property list class object */
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
     unsigned block_before_meta_write; /* "block before meta write" property value */
+    unsigned coll_meta_write;       /* "collective metadata write" property value */
     unsigned library_internal=1;    /* "library internal" property value */
     H5FD_mpio_xfer_t xfer_mode;     /* I/O transfer mode property value */
     herr_t ret_value=SUCCEED;           /* Return value */
@@ -275,6 +276,7 @@ H5AC_init_interface(void)
     /* Get the dataset transfer property list class object */
     if (NULL == (xfer_pclass = H5I_object(H5P_CLS_DATASET_XFER_g)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class")
+
 
     /* Get an ID for the blocking, collective H5AC dxpl */
     if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
@@ -295,10 +297,12 @@ H5AC_init_interface(void)
                   NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
-    /* Set the transfer mode */
-    xfer_mode=H5FD_MPIO_COLLECTIVE;
-    if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    /* Insert 'collective metadata write' property */
+    coll_meta_write = 1;
+    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+
 
     /* Get an ID for the non-blocking, collective H5AC dxpl */
     if ((H5AC_noblock_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
@@ -319,10 +323,12 @@ H5AC_init_interface(void)
                   NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
-    /* Set the transfer mode */
-    xfer_mode=H5FD_MPIO_COLLECTIVE;
-    if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    /* Insert 'collective metadata write' property */
+    coll_meta_write = 1;
+    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+
 
     /* Get an ID for the non-blocking, independent H5AC dxpl */
     if ((H5AC_ind_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
@@ -343,10 +349,11 @@ H5AC_init_interface(void)
                   NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
-    /* Set the transfer mode */
-    xfer_mode=H5FD_MPIO_INDEPENDENT;
-    if (H5P_set(xfer_plist,H5D_XFER_IO_XFER_MODE_NAME,&xfer_mode)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+    /* Insert 'collective metadata write' property */
+    coll_meta_write = 0;
+    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
+                  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3014,7 +3021,7 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
+static herr_t
 H5AC_construct_candidate_list(H5AC_t * cache_ptr,
                               H5AC_aux_t * aux_ptr,
                               int sync_point_op)
@@ -3228,7 +3235,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5AC_ext_config_2_int_config(H5AC_cache_config_t * ext_conf_ptr,
                              H5C_auto_size_ctl_t * int_conf_ptr)
 {
@@ -4173,7 +4180,7 @@ done:
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_PARALLEL
-herr_t
+static herr_t
 H5AC_propagate_flushed_and_still_clean_entries_list(H5F_t  * f,
                                                     hid_t    dxpl_id,
                                                     H5AC_t * cache_ptr)
