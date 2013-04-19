@@ -1977,7 +1977,7 @@ AC_ARG_WITH([pthread],
 case "$withval" in
   yes)
     AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
     fi
     ;;
@@ -2019,7 +2019,7 @@ case "$withval" in
       AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
     fi
 
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       if test -n "$pthread_lib"; then
         saved_LDFLAGS="$LDFLAGS"
         saved_AM_LDFLAGS="$AM_LDFLAGS"
