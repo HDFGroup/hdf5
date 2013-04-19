@@ -526,6 +526,9 @@ test_file_open(void)
     /* Close dataset from first open */
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Pclose(fapl_id);
+    CHECK(ret, FAIL, "H5Pclose");
 }   /* test_file_open() */
 
 /****************************************************************
@@ -1060,6 +1063,9 @@ test_get_file_id(void)
     VERIFY(fid2, FAIL, "H5Iget_file_id");
 
     /* Close objects */
+    ret = H5Pclose(plist);
+    CHECK(ret, FAIL, "H5Pclose");
+
     ret = H5Tclose(datatype_id);
     CHECK(ret, FAIL, "H5Tclose");
 
@@ -2855,7 +2861,7 @@ test_filespace_sects(void)
     test_free_sections(fapl_stdio, filename);
 
     /* close fapl and remove the file */
-    h5_cleanup(FILENAME, fapl_split);
+    h5_cleanup(FILENAME, fapl_stdio);
 
     /* CORE */
     MESSAGE(5, ("Testing File free space information for a core file\n"));
@@ -3223,6 +3229,9 @@ test_libver_bounds_real(H5F_libver_t libver_create, unsigned oh_vers_create,
 
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 } /* end test_libver_bounds_real() */
 
 /****************************************************************

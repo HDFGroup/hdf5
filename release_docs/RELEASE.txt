@@ -1,4 +1,4 @@
-HDF5 version 1.9.137-FA_a5 currently under development
+HDF5 version 1.9.148-FA_a5 currently under development
 
 
 INTRODUCTION
@@ -40,6 +40,10 @@ New Features
 
     Configuration:
     -------------
+    - CMake minimum is now 2.8.10. (ADB 2013/1/14)
+    - A new tool, cmakehdf5, which is a build command script similar to
+      buildhdf5 is added and is available in the bin directory.
+      (AKC - 2012/12/12)
     - Fixed AIX Fortran compiler flags to use appropriate settings for
       debugging, profiling, optimization situations. HDFFV-8069. (AKC
       2012/09/27)
@@ -101,6 +105,9 @@ New Features
 
     Library:
     --------
+    - Added new API functions H5Dscatter and H5Dgather to scatter data to and
+      and gather data from a selection within a memory buffer.
+      (NAF - 2013/02/05)
     - The library now supports the data conversion from enumeration to numeric
       (integer and floating-point number) datatypes. See Issue 8221.
       (SLU - 2012/10/23)  
@@ -363,9 +370,9 @@ New Features
     High-Level APIs:
     ------
      - Table: In version 3.0 of Table, "NROWS" (used to store number of records) was 
-           deprecated (PVN - 2008/11/24)
+            deprecated (PVN - 2008/11/24)
 
-      - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
+     - Added Fortran wrappers for Dimension Scale APIs. HDFFV-3797
           h5dsset_scale_f
           h5dsattach_scale_f
           h5dsdetach_scale_f
@@ -378,9 +385,15 @@ New Features
                   (EIP for SB - 2011/10/13)
 
      - New API: h5ltpath_valid (Fortran: h5ltpath_valid_f) which checks
-       if a path is correct and determines if a link resolves to a valid
-       object and checks that the link does not dangle. (MSB- 2012/3/15)
-    
+            if a path is correct and determines if a link resolves to a valid
+            object and checks that the link does not dangle. (MSB- 2012/3/15)
+     
+     - A new API function H5DOwrite_chunk.  It writes a data chunk directly
+            into a file bypassing hyperslab selection, data conversion, and
+            filter pipeline.  The user must be careful with the function and
+            clearly understand the I/O process of the library. 
+            (SLU - 2013/2/11)
+
     Documentation 
     ------------- 
 
@@ -737,9 +750,12 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5diff: Fixed to return correct exit code 1 when detect unique extra
+          attribute. Prior to this fix, h5diff returned exit code 0 indicating 
+          two files are identical.   HDFFV-7643 (JKM 2013/02/15)
         - h5diff: Improved speed when comparing HDF5 files with lots of
-          attributes. Much slower performance was identified with release version 
-          from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
+          attributes. Much slower performance was identified with release 
+          version from 1.8.7 to 1.8.10 compared to 1.8.6. (JKM 2012/10/19)
         - h5repack: "h5repack -f NONE file1.h5 out.h5" command failed if
           source file contains chunked dataset and a chunk dim is bigger than 
           the dataset dim. Another issue is that the command changed max dims
@@ -967,7 +983,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
-
+      - Fixed problem with H5DSget_scale_name including the NULL terminator in
+        the size calculation returned by the function. The API does not
+      	include the NULL terminator in the size returned (MSB- 2013/2/10)
+ 
       - Fixed problem with H5TBdelete_record destroying all data following the deletion
         of a row. (MSB- 2012/7/26)
 
@@ -1051,6 +1070,19 @@ Bug Fixes since HDF5-1.8.0 release
           in "New Features" section.
           (BMR - 2008/08/10)
 
+    Testing
+    -------
+      - In some Mac system, testlibinfo.sh failed with this error:
+           Check file ../src/.libs/libhdf5.7.dylib
+           strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
+	   (unknown load command 15)
+        The strings command of Mac inspects library files and older
+	versions of strings may not know newer library format, resulting
+	in errors.  Fixed by sending the library file as stdin to the strings
+	coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
+
+      - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
+        faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
 
 
 Supported Platforms

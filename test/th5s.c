@@ -182,14 +182,13 @@ test_h5s_basic(void)
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
     if (fid1 >= 0){
-	dset1 = H5Dopen2(fid1, "dset", H5P_DEFAULT);
-	VERIFY(dset1, FAIL, "H5Dopen2");
-	ret = H5Fclose(fid1);
-	CHECK_I(ret, "H5Fclose");
+        dset1 = H5Dopen2(fid1, "dset", H5P_DEFAULT);
+        VERIFY(dset1, FAIL, "H5Dopen2");
+        ret = H5Fclose(fid1);
+        CHECK_I(ret, "H5Fclose");
     }
     else
-	printf("***cannot open the pre-created H5S_MAX_RANK test file (%s)\n",
-	    testfile);
+        printf("***cannot open the pre-created H5S_MAX_RANK test file (%s)\n", testfile);
     }
 
     /* Verify that incorrect dimensions don't work */
@@ -725,8 +724,8 @@ test_h5s_zero_dim(void)
         ret = H5Pset_chunk(plist_id, SPACE1_RANK, chunk_dims);
         CHECK(ret, FAIL, "H5Pset_chunk");
 
-        // ret = H5Pset_alloc_time(plist_id, alloc_time);
-        // CHECK(ret, FAIL, "H5Pset_alloc_time");
+        /* ret = H5Pset_alloc_time(plist_id, alloc_time); */
+        /* CHECK(ret, FAIL, "H5Pset_alloc_time"); */
 
         dset1 = H5Dcreate2(fid1, BASICDATASET1, H5T_NATIVE_INT, sid_chunk, H5P_DEFAULT, plist_id, H5P_DEFAULT);
         CHECK(dset1, FAIL, "H5Dcreate2");

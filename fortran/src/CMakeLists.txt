@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5_F90_SRC C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -188,6 +188,7 @@ SET (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Fff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Lff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Off${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff${F_STATUS}.f90

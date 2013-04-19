@@ -10,4 +10,4 @@ datatype: </ntype> and </ntype>
     x           integer1       
            x    integer4       
 Attributes status:  0 common, 3 only in obj1, 3 only in obj2
-EXIT CODE: 0
+EXIT CODE: 1

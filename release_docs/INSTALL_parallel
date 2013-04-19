@@ -17,12 +17,14 @@ of running the parallel test suites.
 
 1.1. Requirements
 -----------------
-PHDF5 requires an MPI compiler with MPI-IO support and a parallel file system.
-If you don't know yet, you should first consult with your system support staff
-of information how to compile an MPI program, how to run an MPI application,
-and how to access the parallel file system.  There are sample MPI-IO C and
-Fortran programs in the appendix section of "Sample programs".  You can use
-them to run simple tests of your MPI compilers and the parallel file system.
+PHDF5 requires an MPI compiler with MPI-IO support and a POSIX compliant
+(Ref. 1) parallel file system.  If you don't know yet, you should first consult
+with your system support staff of information how to compile an MPI program,
+how to run an MPI application, and how to access the parallel file system.
+There are sample MPI-IO C and Fortran programs in the appendix section of
+"Sample programs".  You can use them to run simple tests of your MPI compilers
+and the parallel file system. Also, the t_posix_compliant test in testpar
+verifies if the file system is POSIX compliant.
 
 
 1.2. Further Help
@@ -272,6 +274,20 @@ if the tests should use directory /PFS/user/me, do
 
 (In some batch job system, you many need to hardset HDF5_PARAPREFIX in the
 shell initial files like .profile, .cshrc, etc.)
+
+
+Reference
+---------
+1. POSIX Compliant. A good explanation is by Donald Lewin,
+    After a write() to a regular file has successfully returned, any
+    successful read() from each byte position on the file that was modified
+    by that write() will return the date that was written by the write(). A
+    subsequent write() to the same byte will overwrite the file data. If a
+    read() of a file data can be proven by any means [e.g., MPI_Barrier()]
+    to occur after a write() of that data, it must reflect that write(),
+    even if the calls are made by a different process.
+	Lewin, D. (1994). "POSIX Programmer's Guide (pg. 513-4)". O'Reilly
+	& Associates.
 
 
 Appendix A. Sample programs

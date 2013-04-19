@@ -29,7 +29,9 @@ endif
 # Don't tell automake about them, because if it knew they were programs,
 # it would try to compile them instead of using the h5cc script.
 # Use the boilerplate in config/examples.am instead.
-EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
+EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
+           h5_crtgrpd h5_subset h5_cmprss h5_rdwt h5_crtgrpar h5_extend \
+           h5_crtatt h5_crtgrp h5_crtdat \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
            h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg
 TEST_SCRIPT=testh5cc.sh
@@ -37,6 +39,8 @@ TEST_SCRIPT=testh5cc.sh
 # Install files
 # List all file that should be installed in examples directory
 INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
+          h5_crtgrpd.c h5_subset.c h5_cmprss.c h5_rdwt.c h5_crtgrpar.c \
+          h5_extend.c h5_crtatt.c h5_crtgrp.c h5_crtdat.c \
           h5_compound.c h5_group.c h5_select.c h5_attribute.c h5_mount.c \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c
@@ -55,9 +59,14 @@ $(EXTRA_PROG): $(H5CC)
 	$(H5CC) $(H5CCFLAGS) $(CFLAGS) -o $@ $(srcdir)/$@.c;
 endif
 
-# Two of the examples depend on files created by other examples.
+# Some examples depend on files created by other examples.
 h5_read.chkexe_: h5_write.chkexe_
 h5_chunk_read.chkexe_: h5_extend_write.chkexe_
+h5_crtgrpd.chkexe_: h5_crtgrpar.chkexe_
+# h5_rdwt and h5_crtatt both modify the same file created by
+# h5_crtdat. Serialize them.
+h5_rdwt.chkexe_: h5_crtdat.chkexe_
+h5_crtatt.chkexe_: h5_rdwt.chkexe_
 
 # The external link examples demonstrate how to use paths; they need
 # directories to be created to do this.
@@ -82,6 +91,15 @@ EXAMPLETOPDIR=${DESTDIR}$(exec_prefix)/share/hdf5_examples
 # library above.
 h5_chunk_read: $(srcdir)/h5_chunk_read.c
 h5_compound: $(srcdir)/h5_compound.c
+h5_crtgrpd: $(srcdir)/h5_crtgrpd.c
+h5_subset: $(srcdir)/h5_subset.c
+h5_cmprss: $(srcdir)/h5_cmprss.c
+h5_rdwt: $(srcdir)/h5_rdwt.c
+h5_crtgrpar: $(srcdir)/h5_crtgrpar.c
+h5_extend: $(srcdir)/h5_extend.c
+h5_crtatt: $(srcdir)/h5_crtatt.c
+h5_crtgrp: $(srcdir)/h5_crtgrp.c
+h5_crtdat: $(srcdir)/h5_crtdat.c
 h5_extend_write: $(srcdir)/h5_extend_write.c
 h5_group: $(srcdir)/h5_group.c
 h5_write: $(srcdir)/h5_write.c

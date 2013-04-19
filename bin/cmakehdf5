@@ -1,0 +1,223 @@
+#! /bin/sh
+# Build and Test HDF5 using cmake.
+# Author: Allen Byrne
+#         Albert Cheng
+# Creation Date: Nov 2012
+
+# Copyright: The HDF Group, 2012
+
+# Debug: remove the comment hash if you want DPRINT to do echo
+DPRINT=:
+#DPRINT=echo
+
+# variable names
+progname=`basename $0`	# program name
+cminfile="cmakemin.$$" # Cmake minimum file
+cfgfile=$progname.$$	# configure file
+$DPRINT $cfgfile
+
+# Remove temporary generated files if exit 0
+trap "rm -f $cminfile $cfgfile" 0
+
+#=============
+# Function definitions
+#=============
+TIMESTAMP()
+{
+    echo "=====" "`date`" "====="
+}
+
+
+#==========
+# main
+#==========
+# Show a start time stamp
+TIMESTAMP
+
+# Explain what and where log files are.
+cat <<EOF
+ctest.log: output of ctest script.
+Log files will be stored in Testing/Temporary:
+    LastConfigure_<timestamp>.log: output of configure
+    LastBuild_<timestamp>.log: output of build
+    LastTest_<timestamp>.log: output of testing
+    LastTestsFailed_<timestamp>.log: list of failed tests
+
+EOF
+
+# First generate the two needed input files, the $cimnfile and $cfgfile.
+# Then use ctest to use the two input files.
+
+#==========
+# create the configure file
+#==========
+# Create the cmake minimum required file to be used by the following
+# configure file. Though not absolute needed, it is better to generate
+# this file before the configure file.  Quote the EOF to preven substitution
+# in the text.
+#==========
+#==========
+cat > $cfgfile <<'EOF'
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+########################################################
+# This dashboard is maintained by The HDF Group
+# For any comments please contact cdashhelp@hdfgroup.org
+#
+########################################################
+
+set (CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
+set (CTEST_SOURCE_DIRECTORY "../hdf5")
+set (CTEST_BINARY_DIRECTORY ".")
+set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+set (CTEST_BUILD_CONFIGURATION "Release")
+
+# -- CDash variables
+set (LOCAL_NO_SUBMIT TRUE)	# No CDash submit.
+set (MODEL "Experimental")
+set (CDASH_LOCAL TRUE)
+set (SITE_BUILDNAME_SUFFIX "SHARED")
+
+# -- URL set for internal check, default is to not update
+set (LOCAL_SKIP_UPDATE TRUE)
+set (REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8")
+# -- Standard build options  
+set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=/usr/local/hdf5.1.8 -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
+
+# Use multiple CPU cores to build
+include(ProcessorCount)
+ProcessorCount(N)
+if(NOT N EQUAL 0)
+  set(CTEST_BUILD_FLAGS -j${N})
+  set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
+endif()
+
+# -----------------------------------------------------------  
+# -- Get environment
+# -----------------------------------------------------------  
+  ## -- set hostname
+  ## --------------------------
+  find_program (HOSTNAME_CMD NAMES hostname)
+  exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
+  set (CTEST_SITE "${HOSTNAME}${CTEST_SITE_EXT}")
+  find_program (UNAME NAMES uname)
+  macro (getuname name flag)
+    exec_program ("${UNAME}" ARGS "${flag}" OUTPUT_VARIABLE "${name}")
+  endmacro (getuname)
+
+  getuname (osname -s)
+  getuname (osrel  -r)
+  getuname (cpu    -m)
+
+  if (SITE_BUILDNAME_SUFFIX)
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}-${SITE_BUILDNAME_SUFFIX}")
+  else (SITE_BUILDNAME_SUFFIX)
+    set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
+  endif (SITE_BUILDNAME_SUFFIX)
+# -----------------------------------------------------------  
+  
+set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
+ 
+#-----------------------------------------------------------------------------
+# MAC machines need special option
+#-----------------------------------------------------------------------------
+if (APPLE)
+  # Compiler choice
+  execute_process(COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
+  SET(ENV{CC} "${XCODE_CC}")
+  SET(ENV{CXX} "${XCODE_CXX}")
+  # Shared fortran is not supported, build static 
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
+  set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
+endif (APPLE)
+
+
+# -----------------------------------------------------------  
+find_package (Subversion)
+set (CTEST_UPDATE_COMMAND "${Subversion_SVN_EXECUTABLE}")
+# -- Only clean build folder if LOCAL_CLEAR_BUILD is set  
+if (LOCAL_CLEAR_BUILD)
+  set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
+  ctest_empty_binary_directory (${CTEST_BINARY_DIRECTORY})
+endif (LOCAL_CLEAR_BUILD)
+
+#-----------------------------------------------------------------------------
+# Send the main script as a note.
+list (APPEND CTEST_NOTES_FILES
+  "${CMAKE_CURRENT_LIST_FILE}"
+  "${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake"
+  )
+
+# Check for required variables.
+foreach (req
+    CTEST_CMAKE_GENERATOR
+    CTEST_SITE
+    CTEST_BUILD_NAME
+    )
+  if (NOT DEFINED ${req})
+    message(FATAL_ERROR "The containing script must set ${req}")
+  endif (NOT DEFINED ${req})
+endforeach (req)
+
+## -- set output to english
+set($ENV{LC_MESSAGES}  "en_EN")
+ 
+#-----------------------------------------------------------------------------
+# Initialize the CTEST commands
+#------------------------------
+SET (CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
+SET (CTEST_CONFIGURE_COMMAND
+    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
+
+# Print summary information.
+foreach (v
+    CTEST_SITE
+    CTEST_BUILD_NAME
+    CTEST_SOURCE_DIRECTORY
+    CTEST_BINARY_DIRECTORY
+    CTEST_CMAKE_GENERATOR
+    CTEST_BUILD_CONFIGURATION
+    CTEST_CONFIGURE_COMMAND
+    CTEST_SCRIPT_DIRECTORY
+    )
+  set (vars "${vars}  ${v}=[${${v}}]\n")
+endforeach (v)
+message ("Dashboard script configuration:\n${vars}\n")
+
+CTEST_START (${MODEL} TRACK ${MODEL})
+if (NOT LOCAL_SKIP_UPDATE)
+  CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
+endif (NOT LOCAL_SKIP_UPDATE)
+CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
+message ("Configure DONE")
+CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
+if (NOT LOCAL_NO_SUBMIT)
+  CTEST_SUBMIT (PARTS Update Configure Notes)
+endif (NOT LOCAL_NO_SUBMIT)
+CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+if (NOT LOCAL_NO_SUBMIT)
+  CTEST_SUBMIT (PARTS Build)
+endif (NOT LOCAL_NO_SUBMIT)
+message ("build DONE")
+if (NOT LOCAL_SKIP_TEST)
+  CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+  if (NOT LOCAL_NO_SUBMIT)
+    CTEST_SUBMIT (PARTS Test)
+  endif (NOT LOCAL_NO_SUBMIT)
+  message ("test DONE")
+endif (NOT LOCAL_SKIP_TEST)
+
+message ("DONE")
+EOF
+
+
+# Run ctest
+ctest -S $cfgfile -C Release -O ctest.log
+exit_code=$?
+if [ $exit_code = 0 ]; then
+    echo Complete without error
+else
+    echo Error encountered
+fi
+TIMESTAMP
+exit $exit_code

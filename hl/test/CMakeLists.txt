@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5_HL_TEST)
 # --------------------------------------------------------------------
 # Notes: When creating unit test executables they should be prefixed
@@ -65,6 +65,7 @@ ADD_TEST (
         test_ds7.h5
         test_ds8.h5
         test_ds9.h5
+        test_dectris.h5
         test_image1.h5
         test_image2.h5
         test_image3.h5
@@ -76,10 +77,11 @@ ADD_TEST (
 )
 
 HL_ADD_TEST (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
+HL_ADD_TEST (test_dset_opt "")
 HL_ADD_TEST (test_image "image8.txt;sepia.pal;earth.pal;image24pixel.txt;image24plane.txt;usa.wri")
 HL_ADD_TEST (test_lite "dtype_file.txt")
 HL_ADD_TEST (test_packet "")
-HL_ADD_TEST (test_table "test_table_be.hdf5;test_table_cray.hdf5;test_table_le.hdf5")
+HL_ADD_TEST (test_table "test_table_be.h5;test_table_cray.h5;test_table_le.h5")
 
 # --------------------------------------------------------------------
 # This executable is used to generate test files for the test_ds test.

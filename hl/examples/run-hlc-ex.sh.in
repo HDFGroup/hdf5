@@ -76,8 +76,6 @@ then
         rm ex_lite3 &&\
         RunTest ptExampleFL &&\
         rm ptExampleFL &&\
-        RunTest ptExampleVL &&\
-        rm ptExampleVL &&\
         RunTest ex_image1 &&\
         rm ex_image1 &&\
         RunTest ex_image2 &&\

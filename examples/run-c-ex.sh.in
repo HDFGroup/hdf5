@@ -78,7 +78,25 @@ fi
 # Run tests
 if [ $? -eq 0 ]
 then
-    if (RunTest h5_write &&\
+    if (RunTest h5_crtdat &&\
+        rm h5_crtdat &&\
+        RunTest h5_extend &&\
+        rm h5_extend &&\
+        RunTest h5_rdwt &&\
+        rm h5_rdwt &&\
+        RunTest h5_crtatt &&\
+        rm h5_crtatt &&\
+        RunTest h5_crtgrp &&\
+        rm h5_crtgrp &&\
+        RunTest h5_crtgrpar &&\
+        rm h5_crtgrpar &&\
+        RunTest h5_crtgrpd &&\
+        rm h5_crtgrpd &&\
+        RunTest h5_subset &&\
+        rm h5_subset &&\
+        RunTest h5_cmprss &&\
+        rm h5_cmprss &&\
+        RunTest h5_write &&\
         rm h5_write &&\
         RunTest h5_read &&\
         rm h5_read &&\

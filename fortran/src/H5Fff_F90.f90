@@ -1,3 +1,16 @@
+!****h* ROBODoc/H5F (F90)
+!
+! NAME
+!  H5F_PROVISIONAL
+!
+! PURPOSE
+!  This file contains Fortran 90 interfaces for H5F functions. It 
+!  containsthe same functions as H5Fff_F03.f90, when applicable,
+!  but excludes the Fortran 2003 functions and the interface listings. 
+!  This file will be compiled instead of H5Fff_F03.f90 if Fortran 2003 
+!  functions are not enabled.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,37 +26,18 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+! NOTES
+!                         *** IMPORTANT ***
+!  If you add a new H5F function you must add the function name to the
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
+!  This is needed for Windows based operating systems.
 !
-! The following example demonstrates how to create and close an HDF5 file.
-! It creates a file called 'file.h5',  and then closes the file.
-!
+!*****
 
-     PROGRAM FILEEXAMPLE
 
-     USE HDF5 ! This module contains all necessary modules
+MODULE H5F_PROVISIONAL
 
-     IMPLICIT NONE
+  USE H5GLOBAL
+  IMPLICIT NONE
 
-     CHARACTER(LEN=8), PARAMETER :: filename = "filef.h5" ! File name
-     INTEGER(HID_T) :: file_id                            ! File identifier
-
-     INTEGER     ::   error  ! Error flag
-
-!
-!    Initialize FORTRAN interface.
-!
-     CALL h5open_f (error)
-     !
-     ! Create a new file using default properties.
-     !
-     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
-
-     !
-     ! Terminate access to the file.
-     !
-     CALL h5fclose_f(file_id, error)
-!
-!    Close FORTRAN interface.
-!
-     CALL h5close_f(error)
-     END PROGRAM FILEEXAMPLE
+END MODULE H5F_PROVISIONAL

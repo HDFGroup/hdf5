@@ -284,9 +284,9 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                                      *to the ctx->size_last_dim.   */
 
     /* binary dump */
-    if (bin_output) {
+    if (bin_output && (rawdatastream != NULL)) {
         if (render_bin_output(rawdatastream, container, type, _mem, nelmts) < 0) {
-            HDfprintf(rawoutstream,"\nError in writing binary stream\n");
+            PRINTVALSTREAM(rawoutstream, "\nError in writing binary stream\n");
         }
     } /* end if */
     else {
@@ -303,7 +303,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
          */
         curr_pos = ctx->sm_pos;
 
-        if (region_output && H5Tequal(type, H5T_STD_REF_DSETREG)) {
+        if (region_output && (size == H5R_DSET_REG_REF_BUF_SIZE)) {
             for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
                 void* memref = mem + i * size;
                 char ref_name[1024];
@@ -1838,7 +1838,7 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, h5tools_context_t *c
     if (H5Sis_simple(space) <= 0)
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sis_simple failed")
 
-     H5_LEAVE(h5tools_dump_simple_mem(stream, info, ctx, obj_id, type, space, mem))
+     H5_LEAVE(h5tools_dump_simple_mem(rawattrstream, info, ctx, obj_id, type, space, mem))
 
 CATCH
     return ret_value;

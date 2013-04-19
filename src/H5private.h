@@ -430,6 +430,24 @@
 #define HSSIZET_MIN  (~(HSSIZET_MAX))
 
 /*
+ * Types and max sizes for POSIX I/O.
+ * OS X (Darwin) is odd since the max I/O size does not match the types.
+ */
+#if defined(H5_HAVE_WIN32_API)
+#   define h5_posix_io_t                unsigned int
+#   define h5_posix_io_ret_t            int
+#   define H5_POSIX_MAX_IO_BYTES        INT_MAX
+#elif defined(H5_HAVE_DARWIN)
+#   define h5_posix_io_t                size_t
+#   define h5_posix_io_ret_t            ssize_t
+#   define H5_POSIX_MAX_IO_BYTES        INT_MAX
+#else
+#   define h5_posix_io_t                size_t
+#   define h5_posix_io_ret_t            ssize_t
+#   define H5_POSIX_MAX_IO_BYTES        SSIZET_MAX
+#endif
+
+/*
  * A macro to portably increment enumerated types.
  */
 #ifndef H5_INC_ENUM
@@ -1455,19 +1473,20 @@ extern char *strdup(const char *s);
 #if defined(H5_HAVE_WINDOW_PATH)
 
 /* directory delimiter for Windows: slash and backslash are acceptable on Windows */
-#define  DIR_SLASH_SEPC     '/'
-#define  DIR_SEPC     '\\'
-#define  DIR_SEPS     "\\"
-#define CHECK_DELIMITER(SS)     ((SS == DIR_SEPC)||(SS == DIR_SLASH_SEPC))
-#define CHECK_ABSOLUTE(NAME)    ((isalpha(NAME[0])) && (NAME[1] == ':') && (CHECK_DELIMITER(NAME[2])))
-#define CHECK_ABS_DRIVE(NAME)   ((isalpha(NAME[0])) && (NAME[1] == ':'))
-#define CHECK_ABS_PATH(NAME)    (CHECK_DELIMITER(NAME[0]))
+#define H5_DIR_SLASH_SEPC       '/'
+#define H5_DIR_SEPC             '\\'
+#define H5_DIR_SEPS             "\\"
+#define H5_CHECK_DELIMITER(SS)     ((SS == H5_DIR_SEPC) || (SS == H5_DIR_SLASH_SEPC))
+#define H5_CHECK_ABSOLUTE(NAME)    ((HDisalpha(NAME[0])) && (NAME[1] == ':') && (H5_CHECK_DELIMITER(NAME[2])))
+#define H5_CHECK_ABS_DRIVE(NAME)   ((HDisalpha(NAME[0])) && (NAME[1] == ':'))
+#define H5_CHECK_ABS_PATH(NAME)    (H5_CHECK_DELIMITER(NAME[0]))
 
-#define GET_LAST_DELIMITER(NAME, ptr) {                 \
+#define H5_GET_LAST_DELIMITER(NAME, ptr) {                 \
     char        *slash, *backslash;                     \
-    slash = strrchr(NAME, DIR_SLASH_SEPC);              \
-    backslash = strrchr(NAME, DIR_SEPC);                \
-    if (backslash > slash)                              \
+                                                        \
+    slash = HDstrrchr(NAME, H5_DIR_SLASH_SEPC);         \
+    backslash = HDstrrchr(NAME, H5_DIR_SEPC);           \
+    if(backslash > slash)                               \
         (ptr = backslash);                              \
     else                                                \
         (ptr = slash);                                  \
@@ -1477,27 +1496,27 @@ extern char *strdup(const char *s);
 
 /* OpenVMS pathname: <disk name>$<partition>:[path]<file name>
  *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c */
-#define         DIR_SEPC        ']'
-#define         DIR_SEPS        "]"
-#define         CHECK_DELIMITER(SS)             (SS == DIR_SEPC)
-#define         CHECK_ABSOLUTE(NAME)            (strrchr(NAME, ':') && strrchr(NAME, '['))
-#define         CHECK_ABS_DRIVE(NAME)           (0)
-#define         CHECK_ABS_PATH(NAME)            (0)
-#define         GET_LAST_DELIMITER(NAME, ptr)   ptr = strrchr(NAME, DIR_SEPC);
+#define H5_DIR_SEPC                     ']'
+#define H5_DIR_SEPS                     "]"
+#define H5_CHECK_DELIMITER(SS)             (SS == H5_DIR_SEPC)
+#define H5_CHECK_ABSOLUTE(NAME)            (HDstrrchr(NAME, ':') && HDstrrchr(NAME, '['))
+#define H5_CHECK_ABS_DRIVE(NAME)           (0)
+#define H5_CHECK_ABS_PATH(NAME)            (0)
+#define H5_GET_LAST_DELIMITER(NAME, ptr)   ptr = HDstrrchr(NAME, H5_DIR_SEPC);
 
 #else
 
-#define    DIR_SEPC  '/'
-#define    DIR_SEPS  "/"
-#define         CHECK_DELIMITER(SS)             (SS == DIR_SEPC)
-#define         CHECK_ABSOLUTE(NAME)            (CHECK_DELIMITER(*NAME))
-#define   CHECK_ABS_DRIVE(NAME)     (0)
-#define   CHECK_ABS_PATH(NAME)      (0)
-#define         GET_LAST_DELIMITER(NAME, ptr)   ptr = strrchr(NAME, DIR_SEPC);
+#define H5_DIR_SEPC             '/'
+#define H5_DIR_SEPS             "/"
+#define H5_CHECK_DELIMITER(SS)     (SS == H5_DIR_SEPC)
+#define H5_CHECK_ABSOLUTE(NAME)    (H5_CHECK_DELIMITER(*NAME))
+#define H5_CHECK_ABS_DRIVE(NAME)   (0)
+#define H5_CHECK_ABS_PATH(NAME)    (0)
+#define H5_GET_LAST_DELIMITER(NAME, ptr)   ptr = HDstrrchr(NAME, H5_DIR_SEPC);
 
 #endif
 
-#define   COLON_SEPC  ':'
+#define   H5_COLON_SEPC  ':'
 
 
 /* Use FUNC to safely handle variations of C99 __func__ keyword handling */

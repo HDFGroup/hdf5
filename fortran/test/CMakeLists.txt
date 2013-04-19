@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.6)
+cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5_FORTRAN_TESTS C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -105,6 +105,7 @@ IF (HDF5_ENABLE_F2003)
       fortranlib_test_F03.f90
       tH5F.f90
       tH5E_F03.f90
+      tH5F_F03.f90
       tH5L_F03.f90
       tH5O_F03.f90
       tH5P_F03.f90
