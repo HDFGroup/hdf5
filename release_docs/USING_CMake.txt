@@ -47,13 +47,16 @@ Notes: This short instruction is written for users who want to quickly build
       HDF Install Utility (The *.exe file in the binary package for Windows). 
       If you are using a Windows platform, you can obtain a pre-built Windows 
       binary from The HDF Group's website at www.hdfgroup.org.
+      (See the appendix at the bottom of this file for an example of using
+      a non-cmake built HDF5 binary)
 
    3. On Windows with Visual Studio, if you have installed the static HDF5
       library, you will need to add the HDF5\lib folder to the library
       search list. See the "Using Static Libraries with Visual Studio" section.
  
-   4. Set the environment variable HDF5_ROOT to the installed location of HDF5.
-      On Windows HDF5_ROOT=C:\Program Files\HDF Group\HDF5\hdf5-1.8.x
+   4. Set the environment variable HDF5_DIR to the installed location of the 
+      config files for HDF5. On Windows 
+         HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.8.x/cmake/hdf5
       (Note there are no quote characters used on windows)
                                                                          
 ========================================================================
@@ -153,15 +156,17 @@ Notes: This short instruction is written for users who want to quickly build
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
       CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing 
       performed by The HDF Group. It should be altered for the users 
-      installation and needs.
+      installation and needs. The cacheinit.cmake file settings are used by
+      The HDF Group for daily testing. It should be altered/ignored for the users 
+      installation and needs. 
 
    7. More information about using CMake can be found at the KitWare site, 
       www.cmake.org.
                          
                                                                          
-========================================================================
-   Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
-========================================================================
+==========================================================================
+Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
+==========================================================================
 
    8. Set up path for external libraries and headers
 
@@ -172,11 +177,11 @@ Notes: This short instruction is written for users who want to quickly build
           and select "x64".
 
       8.2 Find the box "Show directories for", choose "Include files", add the 
-          header path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.x\include)
+          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\include)
           to the included directories.
 
       8.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF Group\HDF5\hdf5-1.8.x\lib)
+          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\lib)
           to the library directories.
           
       8.4 If using Fortran libraries, you will also need to setup the path
@@ -210,7 +215,8 @@ Notes: This short instruction is written for users who want to quickly build
 cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5MyApp C CXX)
 
-FIND_PACKAGE (HDF5 REQURIED)
+FIND_PACKAGE (HDF5 NAMES hdf5)
+# FIND_PACKAGE (HDF5) # Find non-cmake built HDF5
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRS})
 SET (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
 
@@ -222,7 +228,7 @@ TARGET_LINK_LIBRARIES (hdf_example ${LINK_LIBS})
 ************************************************************************
                       APPENDIX
 
-Below ia an example of the ctest script used by The HDF Group. See the
+Below is an example of the ctest script used by The HDF Group. See the
 Appendix in the CMake.txt file for the CTestScript.cmake file used by this
 script.
 
@@ -233,7 +239,7 @@ CTestScript.cmake file (see Appendix in the CMake.txt). Usage:
 where hdf518Examples is the source folder relative to the location of these scripts
 ========================================================================
 
-cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)

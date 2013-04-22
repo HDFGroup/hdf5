@@ -263,6 +263,8 @@ Notes: This short instruction is written for users who want to quickly build
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
       CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing 
       performed by The HDF Group. It should be altered for the users 
+      installation and needs. The cacheinit.cmake file settings are used by
+      The HDF Group for daily testing. It should be altered/ignored for the users 
       installation and needs.
 
    7. More information about using CMake can be found at the KitWare site, 
@@ -356,10 +358,11 @@ product specific script.
  
 ************************************************************************
 
+========================================================================
 CTestScript.cmake:  common ctest script used to build, test and package
 ========================================================================
 
-cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 ########################################################
 # This dashboard is maintained by The HDF Group
 # For any comments please contact cdashhelp@hdfgroup.org
@@ -569,103 +572,70 @@ endforeach(v)
 message("Dashboard script configuration:\n${vars}\n")
  
 #-----------------------------------------------------------------------------
-if(${MODEL} STREQUAL "Continuous")
-  ## Continuous mode is used for commit test processing
-  ## --------------------------
-  while (${CTEST_ELAPSED_TIME} LESS 36000)
-    set(START_TIME ${CTEST_ELAPSED_TIME})
-    CTEST_START (Continuous)
-    CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}" RETURN_VALUE res)
-    set (CTEST_CHECKOUT_COMMAND) # checkout on first iteration only
-    message("Dashboard updated files: ${res}\n")
-    if(res GREATER 0)
-      CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
-      CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
-      CTEST_SUBMIT (PARTS Update Configure Notes)
-      CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
-      CTEST_SUBMIT (PARTS Build)
-      CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
-      CTEST_SUBMIT (PARTS Test)
- 
-      execute_process (COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION}
-        WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
-        RESULT_VARIABLE cpackResult
-        OUTPUT_VARIABLE cpackLog
-        ERROR_VARIABLE cpackLog.err
-      )
-      file (WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
-    endif(${res} GREATER 0)
- 
-    CTEST_SLEEP(${START_TIME} 300 ${CTEST_ELAPSED_TIME})
-  endwhile (${CTEST_ELAPSED_TIME} LESS 36000)
-#-----------------------------------------------------------------------------
-else(${MODEL} STREQUAL "Continuous")
-#-----------------------------------------------------------------------------
-  ## NORMAL process
-  ## -- LOCAL_SKIP_UPDATE skips updating the source folder from svn
-  ## -- LOCAL_NO_SUBMIT skips reporting to CDash server
-  ## -- LOCAL_SKIP_TEST skips the test process (only builds)
-  ## -- LOCAL_MEMCHECK_TEST executes the Valgrind testing
-  ## -- LOCAL_COVERAGE_TEST executes code coverage process
-  ## --------------------------
-  CTEST_START (${MODEL} TRACK ${MODEL})
-  if(NOT LOCAL_SKIP_UPDATE)
-    CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
-  endif(NOT LOCAL_SKIP_UPDATE)
-  CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
-  CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
-  if(NOT LOCAL_NO_SUBMIT)
-    CTEST_SUBMIT (PARTS Update Configure Notes)
-  endif(NOT LOCAL_NO_SUBMIT)
-   CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
-  if(NOT LOCAL_NO_SUBMIT)
-    CTEST_SUBMIT (PARTS Build)
-  endif(NOT LOCAL_NO_SUBMIT)
-  if(NOT LOCAL_SKIP_TEST)
-    if(NOT LOCAL_MEMCHECK_TEST)
-      CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
-      if(NOT LOCAL_NO_SUBMIT)
-        CTEST_SUBMIT (PARTS Test)
-      endif(NOT LOCAL_NO_SUBMIT)
-    else(NOT LOCAL_MEMCHECK_TEST)
-      CTEST_MEMCHECK (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
-      if(NOT LOCAL_NO_SUBMIT)
-        CTEST_SUBMIT (PARTS MemCheck)
-      endif(NOT LOCAL_NO_SUBMIT)
-    endif(NOT LOCAL_MEMCHECK_TEST)
-    if(LOCAL_COVERAGE_TEST)
-      CTEST_COVERAGE (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
-      if(NOT LOCAL_NO_SUBMIT)
-        CTEST_SUBMIT (PARTS Coverage)
-      endif(NOT LOCAL_NO_SUBMIT)
-    endif(LOCAL_COVERAGE_TEST)
-  endif(NOT LOCAL_SKIP_TEST)
+## NORMAL process
+## -- LOCAL_SKIP_UPDATE skips updating the source folder from svn
+## -- LOCAL_NO_SUBMIT skips reporting to CDash server
+## -- LOCAL_SKIP_TEST skips the test process (only builds)
+## -- LOCAL_MEMCHECK_TEST executes the Valgrind testing
+## -- LOCAL_COVERAGE_TEST executes code coverage process
+## --------------------------
+CTEST_START (${MODEL} TRACK ${MODEL})
+if(NOT LOCAL_SKIP_UPDATE)
+  CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
+endif(NOT LOCAL_SKIP_UPDATE)
+CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}")
+CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
+if(NOT LOCAL_NO_SUBMIT)
+  CTEST_SUBMIT (PARTS Update Configure Notes)
+endif(NOT LOCAL_NO_SUBMIT)
+  CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+if(NOT LOCAL_NO_SUBMIT)
+  CTEST_SUBMIT (PARTS Build)
+endif(NOT LOCAL_NO_SUBMIT)
+if(NOT LOCAL_SKIP_TEST)
   if(NOT LOCAL_MEMCHECK_TEST)
-    ##-----------------------------------------------
-    ## Package the product
-    ##-----------------------------------------------
-    execute_process(COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION} -V
-      WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
-      RESULT_VARIABLE cpackResult
-      OUTPUT_VARIABLE cpackLog
-      ERROR_VARIABLE cpackLog.err
-    )
-    file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
+    CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
+    if(NOT LOCAL_NO_SUBMIT)
+      CTEST_SUBMIT (PARTS Test)
+    endif(NOT LOCAL_NO_SUBMIT)
+  else(NOT LOCAL_MEMCHECK_TEST)
+    CTEST_MEMCHECK (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args})
+    if(NOT LOCAL_NO_SUBMIT)
+      CTEST_SUBMIT (PARTS MemCheck)
+    endif(NOT LOCAL_NO_SUBMIT)
   endif(NOT LOCAL_MEMCHECK_TEST)
-endif(${MODEL} STREQUAL "Continuous")
+  if(LOCAL_COVERAGE_TEST)
+    CTEST_COVERAGE (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+    if(NOT LOCAL_NO_SUBMIT)
+      CTEST_SUBMIT (PARTS Coverage)
+    endif(NOT LOCAL_NO_SUBMIT)
+  endif(LOCAL_COVERAGE_TEST)
+endif(NOT LOCAL_SKIP_TEST)
+if(NOT LOCAL_MEMCHECK_TEST)
+  ##-----------------------------------------------
+  ## Package the product
+  ##-----------------------------------------------
+  execute_process(COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION} -V
+    WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
+    RESULT_VARIABLE cpackResult
+    OUTPUT_VARIABLE cpackLog
+    ERROR_VARIABLE cpackLog.err
+  )
+  file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
+endif(NOT LOCAL_MEMCHECK_TEST)
 #-----------------------------------------------------------------------------
  
 message("DONE:CTestScript")
 ************************************************************************
-
 ************************************************************************
+========================================================================
 Product specific script, HDF518Static.cmake, that uses the 
 CTestScript.cmake file (see above). Usage:
 "ctest -S HDF518Static.cmake,hdf518 -C Release -O hdf518static.log"
 where hdf518 is the source folder relative to the location of these scripts
 ========================================================================
 
-cmake_minimum_required(VERSION 2.8.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 
 # CTEST_SCRIPT_ARG is the source folder passed on the command line
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
