@@ -3620,7 +3620,7 @@ test_no_collective_cause_mode_filter(int selection_mode)
     VRFY((fapl_read >= 0), "create_faccess_plist() succeeded");
 
     fid = H5Fopen (filename, H5F_ACC_RDONLY, fapl_read);
-    dataset = H5Dopen (fid, DSET_NOCOLCAUSE, H5P_DEFAULT);
+    dataset = H5Dopen2 (fid, DSET_NOCOLCAUSE, H5P_DEFAULT);
 
     /* Set collective I/O properties in the dxpl. */
     ret = H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE);
