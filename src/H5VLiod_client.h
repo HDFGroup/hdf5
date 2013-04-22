@@ -42,7 +42,10 @@ typedef enum H5RQ_type_t {
     HG_DSET_READ,
     HG_DSET_WRITE,
     HG_DSET_SET_EXTENT,
-    HG_DSET_CLOSE
+    HG_DSET_CLOSE,
+    HG_DTYPE_COMMIT,
+    HG_DTYPE_OPEN,
+    HG_DTYPE_CLOSE
 } H5RQ_type_t;
 
 typedef enum H5VL_iod_state_t {
@@ -95,6 +98,13 @@ typedef struct H5VL_iod_dset_t {
     H5VL_iod_remote_dset_t remote_dset;
     hid_t dapl_id;
 } H5VL_iod_dset_t;
+
+/* the client side datatype struct */
+typedef struct H5VL_iod_dtype_t {
+    H5VL_iod_object_t common; /* must be first */
+    H5VL_iod_remote_dtype_t remote_dtype;
+    hid_t tapl_id;
+} H5VL_iod_dtype_t;
 
 /* information about a dataset read/write request */
 typedef struct H5VL_iod_io_info_t {

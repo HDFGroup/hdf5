@@ -1751,6 +1751,7 @@ herr_t
 H5Tclose(hid_t type_id)
 {
     H5T_t	*dt;                    /* Pointer to datatype to close */
+    H5VL_t      *vol_plugin = NULL;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1761,6 +1762,15 @@ H5Tclose(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(H5T_STATE_IMMUTABLE == dt->shared->state)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+
+    /* get the plugin pointer - 
+     * if it exists, then we know that the datatype is committed, 
+     * so we attach synchronous event q to it so it can pass through the VL layer. */
+    if (NULL != (vol_plugin = (H5VL_t *)H5I_get_aux(type_id))) {
+        /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+        vol_plugin->close_eq_id = H5_EVENT_QUEUE_NULL;
+        vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+    }
 
     /* When the reference count reaches zero the resources are freed */
     if(H5I_dec_app_ref(type_id) < 0)

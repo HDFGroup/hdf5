@@ -75,6 +75,12 @@ H5_DLL herr_t H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 H5_DLL herr_t H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t eq_id);
 H5_DLL herr_t H5Dclose_ff(hid_t dset_id, hid_t eq_id);
 
+H5_DLL herr_t H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
+                           hid_t tcpl_id, hid_t tapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL hid_t H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, 
+                        uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Tclose_ff(hid_t type_id, hid_t eq_id);
+
 #endif /* H5_HAVE_EFF */
 
 #ifdef __cplusplus

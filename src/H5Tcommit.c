@@ -1019,7 +1019,8 @@ H5T_close_datatype(void *type, H5VL_t *vol_plugin)
 
     /* Close the datatype through the VOL*/
     if (NULL != dt->vol_obj)
-        if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+        if((ret_value = H5VL_datatype_close(dt->vol_obj, vol_plugin, 
+                                            vol_plugin->close_dxpl_id, vol_plugin->close_eq_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
 done:

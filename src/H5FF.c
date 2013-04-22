@@ -27,6 +27,7 @@
 /****************/
 
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5FF__init_interface
@@ -41,6 +42,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Tpkg.h"             /* Datatype access			*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
 #include "H5VLiod_client.h"	/* Client IOD - tmp			*/
@@ -844,6 +846,202 @@ H5Dclose_ff(hid_t dset_id, hid_t eq_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dclose() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tcommit_ff
+ *
+ * Purpose:	Save a transient datatype to a file and turn the type handle
+ *		into a "named", immutable type.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
+             hid_t tcpl_id, hid_t tapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *dt = NULL;
+    H5T_t   *type = NULL;
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (H5Tcommitted(type_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_CANTSET, FAIL, "datatype is already committed")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tcpl_id)
+        tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the object from the loc_id */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* commit the datatype through the VOL */
+    if (NULL == (dt = H5VL_datatype_commit(obj, loc_params, vol_plugin, name, type_id, lcpl_id, 
+                                           tcpl_id, tapl_id, H5AC_dxpl_id, eq_id)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
+
+    /* attach the vol object created using the commit call to the 
+       library datatype structure */
+    /* set the committed type object to the VOL pluging pointer in the H5T_t struct */
+    type->vol_obj = dt;
+
+    /* attach VOL information to the ID */
+    if (H5I_register_aux(type_id, vol_plugin) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't attach vol info to ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tcommit_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Topen_ff
+ *
+ * Purpose:	Opens a named datatype using a Datatype Access Property
+ *              List.
+ *
+ * Return:	Success:	Object ID of the named datatype.
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *vol_dt = NULL;       /* datatype token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5T_t   *dt = NULL;
+    H5VL_loc_params_t loc_params;
+    hid_t     ret_value = FAIL;      /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+     if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the datatype through the VOL */
+    if(NULL == (vol_dt = H5VL_datatype_open(obj, loc_params, vol_plugin, name, tapl_id, 
+                                        H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open datatype");
+
+    /* Get an atom for the datatype */
+    if ((ret_value = H5VL_create_datatype(vol_dt, vol_plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize datatype handle");
+
+    /* Get an atom for the datatype with the VOL information as the auxilary struct*/
+    //if((ret_value = H5I_register2(H5I_DATATYPE, dt, vol_plugin, app_ref)) < 0)
+    //HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+done:
+    if (ret_value < 0 && dt)
+        if(H5VL_datatype_close (dt, vol_plugin, H5AC_dxpl_id, eq_id) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Topen_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Tclose_ff
+ *
+ * Purpose:	Frees a datatype and all associated memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tclose_ff(hid_t type_id, hid_t eq_id)
+{
+    H5T_t   *dt;                    /* Pointer to datatype to close */
+    H5VL_t  *vol_plugin = NULL;
+    herr_t   ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(H5T_STATE_IMMUTABLE == dt->shared->state)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(type_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = eq_id;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+
+    /* When the reference count reaches zero the resources are freed */
+    if(H5I_dec_app_ref(type_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tclose_ff() */
 
 #if 0
 

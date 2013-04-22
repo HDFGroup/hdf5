@@ -53,6 +53,9 @@ static hg_id_t H5VL_DSET_READ_ID;
 static hg_id_t H5VL_DSET_WRITE_ID;
 static hg_id_t H5VL_DSET_SET_EXTENT_ID;
 static hg_id_t H5VL_DSET_CLOSE_ID;
+static hg_id_t H5VL_DTYPE_COMMIT_ID;
+static hg_id_t H5VL_DTYPE_OPEN_ID;
+static hg_id_t H5VL_DTYPE_CLOSE_ID;
 
 /* Prototypes */
 static void *H5VL_iod_fapl_copy(const void *_old_fa);
@@ -134,6 +137,7 @@ typedef struct H5VL_iod_fapl_t {
 H5FL_DEFINE(H5VL_iod_file_t);
 H5FL_DEFINE(H5VL_iod_group_t);
 H5FL_DEFINE(H5VL_iod_dset_t);
+H5FL_DEFINE(H5VL_iod_dtype_t);
 
 static na_addr_t PEER;
 uint32_t write_checksum;
@@ -157,10 +161,10 @@ static H5VL_class_t H5VL_iod_g = {
         NULL//H5VL_iod_attr_close               /* close */
     },
     {                                           /* datatype_cls */
-        NULL,//H5VL_iod_datatype_commit,        /* commit */
-        NULL,//H5VL_iod_datatype_open,          /* open */
-        NULL,//H5VL_iod_datatype_get_binary,    /* get_size */
-        NULL//H5VL_iod_datatype_close           /* close */
+        H5VL_iod_datatype_commit,        /* commit */
+        H5VL_iod_datatype_open,          /* open */
+        H5VL_iod_datatype_get_binary,    /* get_size */
+        H5VL_iod_datatype_close           /* close */
     },
     {                                           /* dataset_cls */
         H5VL_iod_dataset_create,                /* create */
@@ -320,6 +324,10 @@ EFF_init(MPI_Comm comm, MPI_Info info)
     H5VL_DSET_SET_EXTENT_ID = MERCURY_REGISTER("dset_set_extent", 
                                                      dset_set_extent_in_t, ret_t);
     H5VL_DSET_CLOSE_ID  =  MERCURY_REGISTER("dset_close", dset_close_in_t, ret_t);
+
+    H5VL_DTYPE_COMMIT_ID = MERCURY_REGISTER("dtype_commit", dtype_commit_in_t, dtype_commit_out_t);
+    H5VL_DTYPE_OPEN_ID   = MERCURY_REGISTER("dtype_open", dtype_open_in_t, dtype_open_out_t);
+    H5VL_DTYPE_CLOSE_ID  =  MERCURY_REGISTER("dtype_close", dtype_close_in_t, ret_t);
 
     /* forward the init call to the IONs */
     if(HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req) < 0)
@@ -553,7 +561,6 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 {
     H5VL_iod_fapl_t *fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
-    int my_rank, my_size;
     H5VL_iod_file_t *file = NULL;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -579,8 +586,6 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(NULL == (fa = (H5VL_iod_fapl_t *)H5P_get_vol_info(plist)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get IOD info struct")
-    MPI_Comm_rank(fa->comm, &my_rank);
-    MPI_Comm_size(fa->comm, &my_size);
 
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
@@ -688,7 +693,6 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
 {
     H5VL_iod_fapl_t *fa;
     H5P_genplist_t *plist;      /* Property list pointer */
-    int my_rank, my_size;
     H5VL_iod_file_t *file = NULL;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -705,8 +709,6 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(NULL == (fa = (H5VL_iod_fapl_t *)H5P_get_vol_info(plist)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get IOD info struct")
-    MPI_Comm_rank(fa->comm, &my_rank);
-    MPI_Comm_size(fa->comm, &my_size);
 
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
@@ -1662,10 +1664,6 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     input.type_id = type_id;
     input.space_id = space_id;
 
-    /* Get the dapl plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dapl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, NULL, "can't find object for ID")
-
     /* get a function shipper request */
     if(do_async) {
         if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
@@ -1770,7 +1768,6 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the dataset */
     H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
     H5VL_iod_dset_open_input_t input;
-    H5P_genplist_t *plist;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name;
@@ -1799,10 +1796,6 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.loc_oh = iod_oh;
     input.name = new_name;
     input.dapl_id = dapl_id;
-
-    /* Get the dapl plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dapl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, NULL, "can't find object for ID")
 
     /* get a function shipper request */
     if(do_async) {
@@ -2486,6 +2479,394 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_datatype_commit
+ *
+ * Purpose:	Commits a datatype inside the container.
+ *
+ * Return:	Success:	datatype
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                         hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
+                         hid_t dxpl_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the datatype */
+    H5VL_iod_dtype_t  *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5T_t *dt = NULL;
+    H5VL_iod_dtype_commit_input_t input;
+    iod_obj_id_t iod_id;
+    iod_handle_t iod_oh;
+    char *new_name;
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* resolve the location where to commit the datatype by fetching the iod id and object handle
+       for the last open group in the path hierarchy. This is where we will start the traversal
+       at the server side */
+    if(H5VL_iod_local_traverse(obj, loc_params, name, &iod_id, &iod_oh, &new_name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
+
+    /* allocate the datatype object that is returned to the user */
+    if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_id = iod_id;
+    input.loc_oh = iod_oh;
+    input.name = new_name;
+    input.tcpl_id = tcpl_id;
+    input.tapl_id = tapl_id;
+    input.lcpl_id = lcpl_id;
+    input.type_id = type_id;
+
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, NULL, "can't allocate a HG request");
+    } /* end if */
+    else
+        hg_req = &_hg_req;
+
+    /* forward the call to the IONs */
+    if(HG_Forward(PEER, H5VL_DTYPE_COMMIT_ID, &input, &dtype->remote_dtype, hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship dataset create");
+
+    /* setup the local datatype struct */
+    /* store the entire path of the datatype locally */
+    if (NULL == (dtype->common.obj_name = (char *)malloc
+                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+    HDstrcpy(dtype->common.obj_name, obj->obj_name);
+    HDstrcat(dtype->common.obj_name, name);
+    dtype->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+
+    /* store a copy of the datatype parameters*/
+    if((dtype->remote_dtype.tcpl_id = H5Pcopy(tcpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dcpl");
+    if((dtype->tapl_id = H5Pcopy(tapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+    if((dtype->remote_dtype.type_id = H5Tcopy(type_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
+
+    /* set common object parameters */
+    dtype->common.obj_type = H5I_DATASET;
+    dtype->common.file = obj->file;
+    dtype->common.file->nopen_objs ++;
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
+
+    /* Set up request */
+    HDmemset(request, 0, sizeof(*request));
+    request->type = HG_DTYPE_COMMIT;
+    request->data = dtype;
+    request->req = hg_req;
+    request->obj = dtype;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(obj->file, request);
+
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        dtype->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(obj->file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
+
+        /* Sanity check */
+        HDassert(request == &_request);
+
+        /* Request has completed already */
+        dtype->common.request = NULL;
+    } /* end else */
+
+    ret_value = (void *)dtype;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_datatype_commit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_datatype_open
+ *
+ * Purpose:	Opens a named datatype.
+ *
+ * Return:	Success:	datatype id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                       hid_t tapl_id, hid_t dxpl_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the datatype */
+    H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
+    H5VL_iod_dtype_open_input_t input;
+    iod_obj_id_t iod_id;
+    iod_handle_t iod_oh;
+    char *new_name;
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* resolve the location where to open the datatype by fetching the iod id and object handle
+       for the last open group in the path hierarchy. This is where we will start the traversal
+       at the server side. */
+    if(H5VL_iod_local_traverse(obj, loc_params, name, &iod_id, &iod_oh, &new_name) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
+
+    /* allocate the datatype object that is returned to the user */
+    if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_id = iod_id;
+    input.loc_oh = iod_oh;
+    input.name = new_name;
+    input.tapl_id = tapl_id;
+
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, NULL, "can't allocate a HG request");
+    } /* end if */
+    else
+        hg_req = &_hg_req;
+
+    /* forward the call to the IONs */
+    if(HG_Forward(PEER, H5VL_DTYPE_OPEN_ID, &input, &dtype->remote_dtype, hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship datatype open");
+
+    /* setup the local datatype struct */
+    /* store the entire path of the datatype locally */
+    if (NULL == (dtype->common.obj_name = (char *)malloc
+                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+    HDstrcpy(dtype->common.obj_name, obj->obj_name);
+    HDstrcat(dtype->common.obj_name, name);
+    dtype->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+
+    if((dtype->tapl_id = H5Pcopy(tapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy tapl");
+
+    /* set common object parameters */
+    dtype->common.obj_type = H5I_DATATYPE;
+    dtype->common.file = obj->file;
+    dtype->common.file->nopen_objs ++;
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
+
+    /* Set up request */
+    HDmemset(request, 0, sizeof(*request));
+    request->type = HG_DTYPE_OPEN;
+    request->data = dtype;
+    request->req = hg_req;
+    request->obj = dtype;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(obj->file, request);
+
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        dtype->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(obj->file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
+
+        /* Sanity check */
+        HDassert(request == &_request);
+
+        /* Request has completed already */
+        dtype->common.request = NULL;
+    } /* end else */
+
+    ret_value = (void *)dtype;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_datatype_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_datatype_get_binary
+ *
+ * Purpose:	gets size required to encode the datatype
+ *
+ * Return:	Success:	datatype id. 
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static ssize_t
+H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, 
+                             hid_t UNUSED dxpl_id, void UNUSED **req)
+{
+    H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+    size_t       nalloc = size;
+    ssize_t      ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(H5Tencode(dtype->remote_dtype.type_id, buf, &nalloc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't determine serialized length of datatype")
+
+    ret_value = (ssize_t) nalloc;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_datatype_get_binary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_datatype_close
+ *
+ * Purpose:	Closes an datatype.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, datatype not closed.
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
+{
+    H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+    int *status;
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
+    herr_t ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL != dtype->common.request && H5VL_IOD_PENDING == dtype->common.request->state) {
+        if(H5VL_iod_request_wait(dtype->common.file, dtype->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
+
+        /* Reset object's pointer to request */
+        /* (Request is owned by the request object and will be freed when the
+         *      application calls test or wait on it.)
+         */
+        dtype->common.request = NULL;
+    }
+
+    if(H5VL_iod_request_wait_some(dtype->common.file, dtype) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG requests");
+
+    status = (int *)malloc(sizeof(int));
+
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+    } /* end if */
+    else
+        hg_req = &_hg_req;
+
+    /* forward the call to the IONs */
+    if(HG_Forward(PEER, H5VL_DTYPE_CLOSE_ID, &dtype->remote_dtype, status, hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship dtype close");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
+
+    /* Set up request */
+    HDmemset(request, 0, sizeof(*request));
+    request->type = HG_DTYPE_CLOSE;
+    request->data = status;
+    request->req = hg_req;
+    request->obj = dtype;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(dtype->common.file, request);
+
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        dtype->common.request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(dtype->common.file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_datatype_close() */
 
 
 /*-------------------------------------------------------------------------

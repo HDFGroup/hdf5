@@ -12,7 +12,7 @@
 #include "hdf5.h"
 
 int main(int argc, char **argv) {
-    const char file_name[]="test_file.h5";
+    const char file_name[]="eff_file.h5";
     hid_t file_id;
     hid_t gid1, gid2;
     hid_t dataspaceId;
@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
     int my_rank, my_size;
     int provided;
     hid_t event_q;
+    hid_t int_id;
     H5_status_t *status = NULL;
     int num_requests = 0;
     hsize_t extent = 20;
@@ -95,6 +96,14 @@ int main(int argc, char **argv) {
     */
     assert(gid1);
 
+    /* Create a datatype and commit it to the file. This is asynchronous. 
+     * Other Local H5T type operations can be issued before completing this call
+     * because they do not depend on the committed state of the datatype.
+     */
+    int_id = H5Tcopy(H5T_NATIVE_INT);
+    H5Tcommit_ff(file_id, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
+                 0, event_q);
+
     /* create a dataspace. This is a local Bookeeping operation that 
        does not touch the file */
     dims [0] = 60;
@@ -108,21 +117,21 @@ int main(int argc, char **argv) {
        at the client (which has already completed because the gcreate was done 
        synchronously), then forwards the call asynchronously to the server, 
        with the path G2/G3/D1 */
-    did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",H5T_NATIVE_INT,dataspaceId,
+    did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did1);
 
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 
        (i.e. no dependency)*/
-    did2 = H5Dcreate_ff(file_id,"G1/G2/G3/D2",H5T_NATIVE_INT,dataspaceId,
+    did2 = H5Dcreate_ff(file_id,"G1/G2/G3/D2",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did2);
 
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 and D2 
        (i.e. no dependency)*/
-    did3 = H5Dcreate_ff(file_id,"G1/G2/G3/D3",H5T_NATIVE_INT,dataspaceId,
+    did3 = H5Dcreate_ff(file_id,"G1/G2/G3/D3",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did3);
 
@@ -131,21 +140,21 @@ int main(int argc, char **argv) {
        is completed.  Internal to the IOD-VOL plugin client we
        generate a checksum for data and ship it with the write bulk
        data function shipper handle to the server. */
-    H5Dwrite_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
+    H5Dwrite_ff(did1, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
                 0, event_q);
 
     /* Raw data write on D2. This is asynchronous, but it is delayed
        internally at the client until the create for D2 is
        completed. Internally we generate a checksum for data2 and ship
        it with the write call to the server.*/
-    H5Dwrite_ff(did2, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
+    H5Dwrite_ff(did2, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
                 0, event_q);
 
     /* Raw data write on D3. This is asynchronous, but it is delayed
        internally at the client until the create for D3 is
        completed. Internally we generate a checksum for data3 and ship
        it with the write call to the server.*/
-    H5Dwrite_ff(did3, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
+    H5Dwrite_ff(did3, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
                 0, event_q);
 
     /* NOTE: all raw data reads/writes execute concurrently at the
@@ -178,7 +187,7 @@ int main(int argc, char **argv) {
 
        The server returns, along with the data array, a checksum for
        the data that should be stored, but for now generated.  */
-    H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
+    H5Dread_ff(did1, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
                0, event_q);
 
     /* Pop head request from the event queue to test it next. This is the 
@@ -207,7 +216,7 @@ int main(int argc, char **argv) {
        fail the close, but just print a Fatal error. */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
-    H5Dread_ff(did1, H5T_NATIVE_INT, dataspaceId, dataspaceId, dxpl_id, r2_data, 
+    H5Dread_ff(did1, int_id, dataspaceId, dataspaceId, dxpl_id, r2_data, 
                0, event_q);
     H5Pclose(dxpl_id);
 
@@ -234,7 +243,7 @@ int main(int argc, char **argv) {
         /* change the dataset dimensions for Dataset D1. This is
            asynchronous, but internally there is a built in
            "wait_some" on operations pending on that dataset */
-        assert(H5Dset_extent_ff(did1, &extent, event_q) == 0);
+        //assert(H5Dset_extent_ff(did1, &extent, event_q) == 0);
     }
 
     /* closing did1 acts as a wait_some on all pending requests that are issued
@@ -251,10 +260,10 @@ int main(int argc, char **argv) {
 
     H5Sclose(dataspaceId);
 
+    assert(H5Tclose_ff(int_id, event_q) == 0);
+
     assert(H5Gclose_ff(gid1, event_q) == 0);
 
-    if(my_rank == 4)
-        sleep(5);
     /* flush all the contents of file to disk. This is asynchronous. */
     assert(H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q) == 0);
 
@@ -271,9 +280,9 @@ int main(int argc, char **argv) {
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     assert(H5Fclose_ff(file_id, event_q) == 0);
-    fprintf(stderr, "%d: done fclose\n", my_rank);
+
     H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Expecting 14. Completions: ", num_requests);
+    fprintf(stderr, "%d requests in event queue. Expecting 15. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
@@ -314,10 +323,16 @@ int main(int argc, char **argv) {
        routine */
     file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, event_q);
     assert(file_id);
+
     /* Open a group G1 on the file. 
        Internally there is a built in wait on the file_id.*/
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
     assert(gid1);
+
+    /* Open a named datatype in the file. 
+     * This is implemented synchronously for now. */
+    int_id = H5Topen_ff(file_id, "int", H5P_DEFAULT, 0, event_q);
+    assert(int_id);
 
     /* Open a dataset D1 on the file in a group hierarchy. 
        Internally there is a built in wait on group G1.*/
@@ -325,6 +340,7 @@ int main(int argc, char **argv) {
     assert(did1);
 
     assert(H5Dclose(did1) == 0);
+    assert(H5Tclose(int_id) == 0);
     assert(H5Gclose(gid1) == 0);
     assert(H5Fclose(file_id) == 0);
 

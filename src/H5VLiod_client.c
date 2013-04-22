@@ -37,6 +37,7 @@
 H5FL_EXTERN(H5VL_iod_file_t);
 H5FL_EXTERN(H5VL_iod_group_t);
 H5FL_EXTERN(H5VL_iod_dset_t);
+H5FL_EXTERN(H5VL_iod_dtype_t);
 
 herr_t
 H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
@@ -271,6 +272,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_GROUP_OPEN:
     case HG_DSET_CREATE:
     case HG_DSET_OPEN:
+    case HG_DTYPE_COMMIT:
+    case HG_DTYPE_OPEN:
         H5VL_iod_request_delete(file, req);
         break;
     case HG_DSET_WRITE:
@@ -416,6 +419,32 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             if(H5Sclose(dset->remote_dset.space_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+            break;
+        }
+    case HG_DTYPE_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "dtype close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            dtype->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free dtype components */
+            free(dtype->common.obj_name);
+            if(dtype->remote_dtype.tcpl_id != H5P_DATATYPE_CREATE_DEFAULT &&
+               H5Pclose(dtype->remote_dtype.tcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(dtype->tapl_id != H5P_DATATYPE_ACCESS_DEFAULT &&
+               H5Pclose(dtype->tapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(H5Tclose(dtype->remote_dtype.type_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
             break;
         }
     default:

@@ -733,7 +733,9 @@ H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin
                      hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, 
                      hid_t dxpl_id, hid_t eq_id)
 {
-    void *ret_value = NULL;              /* Return value */
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -741,11 +743,26 @@ H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin
     if(NULL == vol_plugin->cls->datatype_cls.commit)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `datatype commit' method")
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     /* call the corresponding VOL commit callback */
     if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.commit) 
-        (obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, H5_REQUEST_NULL)))
+        (obj, loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "commit failed")
     vol_plugin->nrefs ++;
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -770,28 +787,36 @@ void *
 H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, 
                    hid_t tapl_id, hid_t dxpl_id, hid_t eq_id)
 {
-    void *ret_value = NULL;              /* Return value */
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->datatype_cls.open)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "no datatype open callback");
-#if 0
-        H5VL_loc_params_t loc_params;
 
-        loc_params.type = H5VL_OBJECT_BY_NAME;
-        loc_params.loc_data.loc_by_name.name = name;
-        loc_params.loc_data.loc_by_name.plist_id = tapl_id;
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
-        /* Open the object class */
-        if((ret_value = H5VL_object_open(id, loc_params, dxpl_id, event_q)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to open object")
-#endif
     /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, tapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_plugin->cls->datatype_cls.open)(obj, loc_params, name, tapl_id, 
+                                                                 dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
     vol_plugin->nrefs ++;
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -816,6 +841,8 @@ ssize_t
 H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, 
                          hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     ssize_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -823,9 +850,25 @@ H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size
     /* check if the type specific corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->datatype_cls.get_binary)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "no datatype get_binary callback");
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     /* call the corresponding VOL open callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->datatype_cls.get_binary)(obj, buf, size, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "get binary failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -848,6 +891,8 @@ done:
 herr_t
 H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -856,14 +901,29 @@ H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
     if(NULL == vol_plugin->cls->datatype_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype close' method")
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     /* call the corresponding VOL close callback */
-    if((ret_value = (vol_plugin->cls->datatype_cls.close)(dt, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->datatype_cls.close)(dt, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     vol_plugin->nrefs --;
     if (0 == vol_plugin->nrefs) {
         vol_plugin->container_name = (const char *)H5MM_xfree(vol_plugin->container_name);
         vol_plugin = (H5VL_t *)H5MM_xfree(vol_plugin);
+    }
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
     }
 
 done:

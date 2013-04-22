@@ -58,6 +58,18 @@ typedef struct H5VL_iod_server_remote_dset_t {
     void *dspace;
 } H5VL_iod_server_remote_dset_t;
 
+/* struct that contains the information about the IOD dtype */
+typedef struct H5VL_iod_server_remote_dtype_t {
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    size_t tcpl_size;
+    void *tcpl;
+    size_t dtype_size;
+    void *dtype;
+} H5VL_iod_server_remote_dtype_t;
+
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
@@ -73,6 +85,9 @@ H5_DLL int H5VL_iod_server_dset_read(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_write(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_set_extent(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dtype_commit(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dtype_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dtype_close(hg_handle_t handle);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

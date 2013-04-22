@@ -30,6 +30,7 @@
 
 #ifdef H5_HAVE_EFF
 
+#define H5_DO_NATIVE 0
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2012
@@ -85,7 +86,15 @@ static herr_t H5VL_iod_server_dset_set_extent_cb(size_t num_necessary_parents, A
 static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-
+static herr_t H5VL_iod_server_dtype_commit_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                              void *op_data);
+static herr_t H5VL_iod_server_dtype_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                            void *op_data);
+static herr_t H5VL_iod_server_dtype_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+                                             void *op_data);
 herr_t
 H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 {
@@ -138,6 +147,13 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                                    dset_set_extent_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("dset_close", H5VL_iod_server_dset_close, 
                                    dset_close_in_t, ret_t);
+
+    MERCURY_HANDLER_REGISTER("dtype_commit", H5VL_iod_server_dtype_commit, 
+                                   dtype_commit_in_t, dtype_commit_out_t);
+    MERCURY_HANDLER_REGISTER("dtype_open", H5VL_iod_server_dtype_open, 
+                                   dtype_open_in_t, dtype_open_out_t);
+    MERCURY_HANDLER_REGISTER("dtype_close", H5VL_iod_server_dtype_close, 
+                                   dtype_close_in_t, ret_t);
 
     /* Loop tp receive requests from clients */
     while(1) {
@@ -795,6 +811,135 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dtype_commit
+ *
+ * Purpose:	Function shipper registered call for Dtype Commit.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dtype_commit(hg_handle_t handle)
+{
+    H5VL_iod_dtype_commit_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dtype_commit_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dtype_commit_input_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    input->hg_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_commit_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dtype_commit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dtype_open
+ *
+ * Purpose:	Function shipper registered call for Dtype Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dtype_open(hg_handle_t handle)
+{
+    H5VL_iod_dtype_open_input_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_dtype_open_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dtype_open_input_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    input->hg_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_open_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dtype_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dtype_close
+ *
+ * Purpose:	Function shipper registered call for Dtype Close.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dtype_close(hg_handle_t handle)
+{
+    H5VL_iod_remote_dtype_t *input = NULL;
+    AXE_task_t task;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (input = (H5VL_iod_remote_dtype_t *)
+                H5MM_malloc(sizeof(H5VL_iod_remote_dtype_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    input->hg_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_close_cb, 
+                                      input, NULL))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dtype_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_file_create_cb
  *
  * Purpose:	Creates a file as a iod HDF5 file.
@@ -881,6 +1026,16 @@ H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     else
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create file");
 
+#if H5_DO_NATIVE
+    {
+        int file_id;
+        file_id = H5Fcreate(input->name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        HDassert(file_id);
+        coh.cookie = file_id;
+        root_handle.cookie = file_id;
+    }
+#endif
+
     output.coh = coh;
     output.root_id = root_id;
     output.root_oh = root_handle;
@@ -946,6 +1101,15 @@ H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+#if H5_DO_NATIVE
+    {
+        int file_id;
+        file_id = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
+        HDassert(file_id);
+        coh.cookie = file_id;
+        root_handle.cookie = file_id;
+    }
+#endif
 
     output.coh = coh;
     output.root_id = ROOT_ID;
@@ -994,6 +1158,10 @@ H5VL_iod_server_file_flush_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     fprintf(stderr, "Start file flush with scope %d\n", scope);
 
+#if H5_DO_NATIVE
+    ret_value = H5Fflush(coh.cookie, scope);
+#endif
+
 done:
     fprintf(stderr, "Done with file flush, sending response to client\n");
     if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
@@ -1031,6 +1199,10 @@ H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start file close\n");
+
+#if H5_DO_NATIVE
+    H5Fclose(coh.cookie);
+#endif
 
     if(iod_obj_close(scratch_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close scratch object handle");
@@ -1186,6 +1358,12 @@ H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t 
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
 
+#if H5_DO_NATIVE
+    cur_oh.cookie = H5Gcreate2(loc_handle.cookie, name, input->lcpl_id, 
+                               input->gcpl_id, input->gapl_id);
+    HDassert(cur_oh.cookie);
+#endif
+
     output.iod_id = cur_id;
     output.iod_oh = cur_oh;
     output.scratch_id = scratch_pad;
@@ -1308,7 +1486,12 @@ H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+
+#if H5_DO_NATIVE
+    cur_oh.cookie = H5Gopen(loc_handle.cookie, name, input->gapl_id);
+    HDassert(cur_oh.cookie);
+#endif
 
     output.iod_id = cur_id;
     output.iod_oh = cur_oh;
@@ -1354,6 +1537,10 @@ H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start group close\n");
+
+#if H5_DO_NATIVE
+    ret_value = H5Gclose(iod_oh.cookie);
+#endif
 
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
@@ -1599,7 +1786,14 @@ H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t U
 
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+
+#if H5_DO_NATIVE
+    cur_oh.cookie = H5Dcreate2(loc_handle.cookie, name, input->type_id, 
+                               input->space_id, input->lcpl_id, 
+                               input->dcpl_id, input->dapl_id);
+    HDassert(cur_oh.cookie);
+#endif
 
     output.iod_id = cur_id;
     output.iod_oh = cur_oh;
@@ -1657,6 +1851,7 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start dataset Open %s\n", name);
+    printf("dataset name %s    location %d\n", name, loc_handle.cookie);
     cur_oh = loc_handle;
 
     /* Wrap the local buffer for serialized header info */
@@ -1743,15 +1938,24 @@ H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dspace lookup failed");
 #endif
 
-    /* fake a dataspace, type, and dcpl */
     {
         hsize_t dims[1];
         //hid_t space_id, type_id;
 
+#if H5_DO_NATIVE
+        printf("dataset name %s    location %d\n", comp, loc_handle.cookie);
+        cur_oh.cookie = H5Dopen(loc_handle.cookie, comp, input->dapl_id);
+        HDassert(cur_oh.cookie);
+        output.space_id = H5Dget_space(cur_oh.cookie);
+        output.type_id = H5Dget_type(cur_oh.cookie);
+        output.dcpl_id = H5Dget_create_plist(cur_oh.cookie);
+#else
+        /* fake a dataspace, type, and dcpl */
         dims [0] = 60;
         output.space_id = H5Screate_simple(1, dims, NULL);
         output.type_id = H5Tcopy(H5T_NATIVE_INT);
         output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+#endif
 
 #if 0
         output.dcpl_size = 0;
@@ -1855,8 +2059,12 @@ H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNU
         hbool_t flag;
         int *buf_ptr = (int *)buf;
 
-        for(i=0;i<60;++i)
-            buf_ptr[i] = i;
+#if H5_DO_NATIVE
+    ret_value = H5Dread(iod_oh.cookie, H5T_NATIVE_INT, H5S_ALL, space_id, dxpl_id, buf);
+#else
+    for(i=0;i<60;++i)
+        buf_ptr[i] = i;
+#endif
         if(H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
@@ -1971,6 +2179,10 @@ H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
     if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, &cs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't write to array object");
 
+#if H5_DO_NATIVE
+    ret_value = H5Dwrite(iod_oh.cookie, H5T_NATIVE_INT, H5S_ALL, space_id, dxpl_id, buf);
+#endif
+
 done:
     fprintf(stderr, "Done with dset write, sending %d response to client\n", ret_value);
     if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
@@ -2013,6 +2225,10 @@ H5VL_iod_server_dset_set_extent_cb(size_t UNUSED num_necessary_parents, AXE_task
     if(iod_array_extend(iod_oh, IOD_TID_UNKNOWN, (iod_size_t)input->dims.size[0], NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't extend dataset");
 
+#if H5_DO_NATIVE
+    ret_value = H5Dset_extent(iod_oh.cookie, input->dims.size);
+#endif
+
 done:
     fprintf(stderr, "Done with dset set_extent, sending response to client\n");
     HG_Handler_start_output(input->hg_handle, &ret_value);
@@ -2049,6 +2265,10 @@ H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UN
 
     fprintf(stderr, "Start dataset Close\n");
 
+#if H5_DO_NATIVE
+    ret_value = H5Dclose(iod_oh.cookie);
+#endif
+
     if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
     if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
@@ -2061,5 +2281,430 @@ done:
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dtype_commit_cb
+ *
+ * Purpose:	Commits a dtype as a iod object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_dtype_commit_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                                  size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                                  void *op_data)
+{
+    H5VL_iod_dtype_commit_input_t *input = (H5VL_iod_dtype_commit_input_t *)op_data;
+    H5VL_iod_remote_dtype_t output;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_handle = input->loc_oh;
+    iod_handle_t cur_oh, scratch_handle;
+    iod_obj_id_t cur_id, scratch_pad;
+    const char *name = input->name;
+    char comp_buf[1024];     /* Temporary buffer for path components */
+    char *comp;          /* Pointer to buffer for path components */
+    H5WB_t *wb = NULL;     /* Wrapped buffer for temporary buffer */
+    hbool_t last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
+    hbool_t close_handle = FALSE; /* Flag to indicate whether to close the current handle */
+    iod_kv_t kv;
+    size_t nchars;           /* component name length   */
+    iod_array_struct_t array;
+    iod_size_t *max_dims;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start datatype Commit %s\n", name);
+    cur_oh = loc_handle;
+
+    /* Wrap the local buffer for serialized header info */
+    if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+    /* Get a pointer to a buffer that's large enough  */
+    if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
+
+    /* Traverse the path */
+    while((name = H5G__component(name, &nchars)) && *name) {
+        const char *s;                  /* Temporary string pointer */
+        iod_size_t kv_size;
+
+	/*
+	 * Copy the component name into a null-terminated buffer so
+	 * we can pass it down to the other symbol table functions.
+	 */
+	HDmemcpy(comp, name, nchars);
+	comp[nchars] = '\0';
+
+	/*
+	 * The special name `.' is a no-op.
+	 */
+	if('.' == comp[0] && !comp[1]) {
+	    name += nchars;
+	    continue;
+	} /* end if */
+
+        /* Check if this is the last component of the name */
+        if(!((s = H5G__component(name + nchars, NULL)) && *s)) {
+            last_comp = TRUE;
+            break;
+        }
+
+        kv_size = sizeof(iod_obj_id_t);
+        /* lookup next object in the current group */
+        /* MSC - if else need to be flipped when we have a real IOD */
+        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, 
+                            &kv_size, NULL, NULL) >= 0) {
+            fprintf(stderr, "creating intermediate group %s\n",comp);
+            /* we don't want to close the handle for the group we start on */
+            if(close_handle)
+                if(iod_obj_close(cur_oh, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
+
+            /* create the current group */
+            if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
+                                  &cur_id, NULL /*event*/) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
+
+            kv.key = HDstrdup(comp);
+            kv.value = &cur_id;
+            kv.value_len = sizeof(iod_obj_id_t);
+
+            /* insert new object in kv store of current object */
+            if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");;
+
+            /* create scratch pad for current group */
+            if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
+                                  &scratch_pad, NULL /*event*/) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+
+            /* open the current group */
+            if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+            /* add the scratch pad to the current group */
+            if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+        } /* end if */
+        else {
+            /* open the current group */
+            if (iod_obj_open_write(coh, cur_id, NULL, &cur_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+        } /* end else */
+        close_handle = TRUE;
+	/* Advance to next component in string */
+	name += nchars;
+    } /* end while */
+
+    fprintf(stderr, "now creating the Blob object for datatype \n");
+
+    /* create the datatype */
+    if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_BLOB, NULL, NULL,
+                       &cur_id, NULL /*event*/) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
+
+    kv.key = HDstrdup(comp);
+    kv.value = &cur_id;
+    kv.value_len = sizeof(iod_obj_id_t);
+    /* insert new datatype in kv store of current group */
+    if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    HDfree(kv.key);
+
+    /* create scratch pad for datatype */
+    if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
+                          &scratch_pad, NULL /*event*/) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+
+    /* open the datatype */
+    if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+    /* add the scratch pad to the datatype */
+    if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+
+    /* open the scratch pad */
+    if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* insert datatype metadata into scratch pad */
+    kv.key = HDstrdup("datatype_tcpl");
+    /* determine the buffer size needed to store the encoded tcpl of the datatype */ 
+    if(H5Pencode(input->tcpl_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype tcpl");
+    if(NULL == (kv.value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate tcpl buffer");
+    /* encode tcpl of the datatype */ 
+    if(H5Pencode(input->tcpl_id, kv.value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype tcpl");
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(scratch_handle, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    HDfree(kv.key);
+    free(kv.value);
+
+    /* insert datatype metadata into scratch pad */
+    kv.key = HDstrdup("datatype_dtype");
+    /* determine the buffer size needed to store the encoded type of the datatype */ 
+    if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
+    if(NULL == (kv.value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+    /* encode datatype of the datatype */ 
+    if(H5Tencode(input->type_id, kv.value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(scratch_handle, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    HDfree(kv.key);
+    free(kv.value);
+
+#if H5_DO_NATIVE
+    if(H5Tcommit2(cur_oh.cookie, comp, input->type_id, 
+                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't commit datatype");
+#endif
+
+    /* Release temporary component buffer */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+
+    output.iod_id = cur_id;
+    output.iod_oh = cur_oh;
+    output.scratch_id = scratch_pad;
+    output.scratch_oh = scratch_handle;
+
+    fprintf(stderr, "Done with dtype commit, sending response to client\n");
+    HG_Handler_start_output(input->hg_handle, &output);
+
+done:
+    if(ret_value < 0)
+        HG_Handler_start_output(input->hg_handle, &ret_value);
+    input = H5MM_xfree(input);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dtype_commit_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dtype_open_cb
+ *
+ * Purpose:	Opens a datatype as a iod object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_dtype_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                                void *op_data)
+{
+    H5VL_iod_dtype_open_input_t *input = (H5VL_iod_dtype_open_input_t *)op_data;
+    H5VL_iod_remote_dtype_t output;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_handle = input->loc_oh;
+    iod_handle_t cur_oh, scratch_handle;
+    iod_obj_id_t cur_id, scratch_pad;
+    char *name = input->name;
+    char comp_buf[1024];     /* Temporary buffer for path components */
+    char *comp;          /* Pointer to buffer for path components */
+    H5WB_t *wb = NULL;     /* Wrapped buffer for temporary buffer */
+    hbool_t last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
+    hbool_t close_handle = FALSE; /* Flag to indicate whether to close the current handle */
+    size_t nchars;           /* component name length   */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start datatype Open %s\n", name);
+    cur_oh = loc_handle;
+
+    /* Wrap the local buffer for serialized header info */
+    if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+    /* Get a pointer to a buffer that's large enough  */
+    if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
+
+    /* Traverse the path */
+    while((name = H5G__component(name, &nchars)) && *name) {
+        const char *s;                  /* Temporary string pointer */
+        iod_size_t kv_size;
+
+	/*
+	 * Copy the component name into a null-terminated buffer so
+	 * we can pass it down to the other symbol table functions.
+	 */
+	HDmemcpy(comp, name, nchars);
+	comp[nchars] = '\0';
+
+	/*
+	 * The special name `.' is a no-op.
+	 */
+	if('.' == comp[0] && !comp[1]) {
+	    name += nchars;
+	    continue;
+	} /* end if */
+
+        /* Check if this is the last component of the name */
+        if(!((s = H5G__component(name + nchars, NULL)) && *s))
+            last_comp = TRUE;
+
+        kv_size = sizeof(iod_obj_id_t);
+        /* lookup next object in the current group */
+        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "object lookup failed");
+
+        /* open the current group */
+        if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+        close_handle = TRUE;
+	/* Advance to next component in string */
+	name += nchars;
+    }
+
+    /* get scratch pad of datatype */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+
+    /* open the scratch pad */
+    if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_handle, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+#if 0
+    /*retrieve all metadata from scratch pad */
+    if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "datatype_tcpl", NULL, 
+                        &output.tcpl_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype tcpl lookup failed");
+    if(NULL == (output.tcpl = H5MM_malloc (output.tcpl_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate tcpl buffer");
+    if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "datatype_tcpl", output.tcpl, 
+                        &output.tcpl_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype tcpl lookup failed");
+
+    if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "datatype_dtype", NULL, 
+                        &output.dtype_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype dtype lookup failed");
+    if(NULL == (output.dtype = H5MM_malloc (output.dtype_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dtype buffer");
+    if(iod_kv_get_value(scratch_handle, IOD_TID_UNKNOWN, "datatype_dtype", output.dtype, 
+                        &output.dtype_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype dtype lookup failed");
+#endif
+
+    {
+        hsize_t dims[1];
+        //hid_t space_id, type_id;
+
+#if H5_DO_NATIVE
+        printf("datatype name %s    location %d\n", comp, loc_handle.cookie);
+        cur_oh.cookie = H5Topen(loc_handle.cookie, comp, input->tapl_id);
+        HDassert(cur_oh.cookie);
+        output.type_id = cur_oh.cookie;//H5Tget_type(cur_oh.cookie);
+        output.tcpl_id = H5Tget_create_plist(cur_oh.cookie);
+#else
+        /* fake a type, and tcpl */
+        dims [0] = 60;
+        output.type_id = H5Tcopy(H5T_NATIVE_INT);
+        output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+#endif
+
+#if 0
+        output.tcpl_size = 0;
+        output.tcpl = NULL;
+
+        /* get Type size to encode */
+        if(H5Tencode(type_id, NULL, &output.dtype_size) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
+        if(NULL == (output.dtype = H5MM_malloc (output.dtype_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate datatype buffer");
+        if(H5Tencode(type_id, output.dtype, &output.dtype_size) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
+#endif
+    }
+
+    /* Release temporary component buffer */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+
+    output.iod_id = cur_id;
+    output.iod_oh = cur_oh;
+    output.scratch_id = scratch_pad;
+    output.scratch_oh = scratch_handle;
+
+    fprintf(stderr, "Done with dtype open, sending response to client\n");
+    HG_Handler_start_output(input->hg_handle, &output);
+
+done:
+    if(ret_value < 0)
+        HG_Handler_start_output(input->hg_handle, &ret_value);
+
+    input = H5MM_xfree(input);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dtype_open_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dtype_close_cb
+ *
+ * Purpose:	Closes iod HDF5 datatype.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_server_dtype_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                              void *op_data)
+{
+    H5VL_iod_remote_dtype_t *input = (H5VL_iod_remote_dtype_t *)op_data;
+    iod_handle_t iod_oh = input->iod_oh;
+    iod_handle_t scratch_oh = input->scratch_oh;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start datatype Close\n");
+
+#if H5_DO_NATIVE
+    ret_value = H5Tclose(iod_oh.cookie);
+#endif
+
+    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
+    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+
+done:
+    fprintf(stderr, "Done with dtype close, sending response to client\n");
+    HG_Handler_start_output(input->hg_handle, &ret_value);
+
+    input = H5MM_xfree(input);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dtype_close_cb() */
 
 #endif /* H5_HAVE_EFF */
