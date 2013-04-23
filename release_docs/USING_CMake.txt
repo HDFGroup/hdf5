@@ -1,5 +1,5 @@
 ************************************************************************
-* Build and Install HDF5 Applications with CMake                           *
+* Build and Install HDF5 Applications with CMake                       *
 ************************************************************************
 
 Notes: This short instruction is written for users who want to quickly build 
@@ -50,17 +50,18 @@ Notes: This short instruction is written for users who want to quickly build
       (See the appendix at the bottom of this file for an example of using
       a non-cmake built HDF5 binary)
 
-   3. On Windows with Visual Studio, if you have installed the static HDF5
-      library, you will need to add the HDF5\lib folder to the library
-      search list. See the "Using Static Libraries with Visual Studio" section.
- 
-   4. Set the environment variable HDF5_DIR to the installed location of the 
+   3. Set the environment variable HDF5_DIR to the installed location of the 
       config files for HDF5. On Windows 
          HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.8.x/cmake/hdf5
-      (Note there are no quote characters used on windows)
+      (Note there are no quote characters used on windows and use forward slashes)
+
+   4. Created separate source and build directories.
+      (CMake commands are executed in the build directory)
+
+   5. Created a CMakeLists.txt file(s) for your source. See Section II below.
                                                                          
 ========================================================================
-          Building HDF5 Applications with CMake
+I. Building HDF5 Applications with CMake
 ========================================================================
 
    1. Run CMake
@@ -164,54 +165,12 @@ Notes: This short instruction is written for users who want to quickly build
       www.cmake.org.
                          
                                                                          
-==========================================================================
-Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
-==========================================================================
-
-   8. Set up path for external libraries and headers
-
-      Invoke Microsoft Visual Studio and go to "Tools" and select "Options", 
-      find "Projects", and then "VC++ Directories".
-      
-      8.1 If you are building on 64-bit Windows, find the "Platform" dropdown
-          and select "x64".
-
-      8.2 Find the box "Show directories for", choose "Include files", add the 
-          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\include)
-          to the included directories.
-
-      8.3 Find the box "Show directories for", choose "Library files", add the
-          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\lib)
-          to the library directories.
-          
-      8.4 If using Fortran libraries, you will also need to setup the path
-          for the Intel Fortran compiler.
-
-                                                                         
 ========================================================================
-   Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
+II. Minimum C Project Files for CMake
 ========================================================================
 
-   9. Set up path for external libraries and headers
-
-      The path settings will need to be in project property sheets per project. 
-      Go to "Project" and select "Properties", find "Configuration Properties", 
-      and then "VC++ Directories".
-          
-      9.1 If you are building on 64-bit Windows, find the "Platform" dropdown
-              and select "x64".
-              
-      9.2 Add the header path to the "Include Directories" setting.
-          
-      9.3 Add the library path to the "Library Directories" setting.
-
-                                                                         
-========================================================================
-          Minimum C Project Files for CMake
-========================================================================
-
-   10. Create a CMakeLists.txt file at the source root.
-..........................................................................
+   8. Create a CMakeLists.txt file at the source root.
+##########################################################
 cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5MyApp C CXX)
 
@@ -222,22 +181,23 @@ SET (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
 
 ADD_EXECUTABLE (hdf_example ${PROJECT_SOURCE_DIR}/hdf_example.c)
 TARGET_LINK_LIBRARIES (hdf_example ${LINK_LIBS})
-..........................................................................
+##########################################################
 
 
-************************************************************************
-                      APPENDIX
+========================================================================
+III.                      APPENDIX
+========================================================================
 
 Below is an example of the ctest script used by The HDF Group. See the
 Appendix in the CMake.txt file for the CTestScript.cmake file used by this
 script.
 
-************************************************************************
-Product specific script, HDF518Example.cmake, that uses the 
-CTestScript.cmake file (see Appendix in the CMake.txt). Usage:
-"ctest -S HDF518Example.cmake,hdf518Examples -C Release -O hdf518EX.log"
-where hdf518Examples is the source folder relative to the location of these scripts
-========================================================================
+############################################################################
+# Product specific script, HDF518Example.cmake, that uses the 
+# CTestScript.cmake file (see Appendix in the CMake.txt). Usage:
+# "ctest -S HDF518Example.cmake,hdf518Examples -C Release -O hdf518EX.log"
+# where hdf518Examples is the source folder relative to the location of these scripts
+############################################################################
 
 cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 
@@ -272,7 +232,7 @@ set(ENV{HDF5_DIR} "/usr/share/cmake/hdf5")
 include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
 
 message("DONE")
-
+#################################################################################
 
 Need further assistance, send email to help@hdfgroup.org
 

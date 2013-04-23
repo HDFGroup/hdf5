@@ -119,7 +119,7 @@ Notes: This short instruction is written for users who want to quickly build
             * <HDF5OPTION>:BOOL=[ON | OFF]
 
         <cacheinit.cmake> is:
-                # This is the CMakeCache file.
+                # This is the CMakeCache file used by HDF Group for daily tests.
                 ########################
                 # EXTERNAL cache entries
                 ########################

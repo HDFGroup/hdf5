@@ -6,8 +6,8 @@
 
 We now recommend that users build, test and install HDF5 using CMake.
 
-Instructions for building and testing HDF5 applications using CMake can be found in
-the USING_CMake.txt file found in this folder.
+Instructions for building and testing HDF5 applications using CMake can 
+be found in the CMake.txt and USING_CMake.txt files found in this folder.
 
 
 ========================================================================
@@ -30,6 +30,65 @@ using the Visual C++ Development Environment.
     
         http://hdfgroup.org/HDF5-FAQ.html
 
+The following two sections are helpful if you do not use CMake to build 
+your applications.
+                                                                        
+========================================================================
+Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
+========================================================================
+
+   2. Set up path for external libraries and headers
+
+      The path settings will need to be in project property sheets per project. 
+      Go to "Project" and select "Properties", find "Configuration Properties", 
+      and then "VC++ Directories".
+          
+      2.1 If you are building on 64-bit Windows, find the "Platform" dropdown
+              and select "x64".
+              
+      2.2 Add the header path to the "Include Directories" setting.
+          
+      2.3 Add the library path to the "Library Directories" setting.
+          
+      2.4 Select Linker->Input and beginning with the
+          "Additional Dependencies" line, enter the library names. The
+          external libraries should be listed first, followed by the HDF5
+          library, and then optionally the HDF5 High Level, Fortran or C++
+          libraries. For example, to compile a C++ application, enter:
+
+          szip.lib zlib.lib hdf5dll.lib hdf5_cppdll.lib
+
+                                                                         
+==========================================================================
+Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
+==========================================================================
+
+   3. Set up path for external libraries and headers
+
+      Invoke Microsoft Visual Studio and go to "Tools" and select "Options", 
+      find "Projects", and then "VC++ Directories".
+      
+      3.1 If you are building on 64-bit Windows, find the "Platform" dropdown
+          and select "x64".
+
+      3.2 Find the box "Show directories for", choose "Include files", add the 
+          header path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\include)
+          to the included directories.
+
+      3.3 Find the box "Show directories for", choose "Library files", add the
+          library path (i.e. c:\Program Files\HDF_Group\HDF5\1.8.x\lib)
+          to the library directories.
+          
+      3.4 If using Fortran libraries, you will also need to setup the path
+          for the Intel Fortran compiler.
+          
+      3.5 Select Project->Properties->Linker->Input and beginning with the
+          "Additional Dependencies" line, enter the library names. The
+          external libraries should be listed first, followed by the HDF5
+          library, and then optionally the HDF5 High Level, Fortran or C++
+          libraries. For example, to compile a C++ application, enter:
+
+          szip.lib zlib.lib hdf5dll.lib hdf5_cppdll.lib
     
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
