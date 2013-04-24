@@ -233,6 +233,10 @@ set(SITE_OS_BITS "os size")
 set(SITE_COMPILER_NAME "compiler name")
 set(SITE_COMPILER_VERSION "compiler version")
 
+# skip submit to cdash
+set(LOCAL_NO_SUBMIT "True")
+# skip update source from repository
+set(LOCAL_SKIP_UPDATE "True")
 
 # needed for source updates, change as required
 set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/1_8")
