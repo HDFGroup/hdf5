@@ -26212,7 +26212,7 @@ fi
 
 done
 
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_self in -lpthread" >&5
 $as_echo_n "checking for pthread_self in -lpthread... " >&6; }
 if ${ac_cv_lib_pthread_pthread_self+:} false; then :
@@ -26336,7 +26336,7 @@ done
 
     fi
 
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       if test -n "$pthread_lib"; then
         saved_LDFLAGS="$LDFLAGS"
         saved_AM_LDFLAGS="$AM_LDFLAGS"
