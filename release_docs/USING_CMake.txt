@@ -187,10 +187,15 @@ FIND_PACKAGE (HDF5 NAMES hdf5)
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
 SET (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
 
-ADD_EXECUTABLE (hdf_example ${PROJECT_SOURCE_DIR}/hdf_example.c)
-TARGET_LINK_LIBRARIES (hdf_example ${LINK_LIBS})
+SET (example hdf_example)
 
-ADD_TEST (NAME test_example COMMAND hdf_example)
+ADD_EXECUTABLE (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
+TARGET_LINK_LIBRARIES (${example} ${LINK_LIBS})
+
+ENABLE_TESTING ()
+INCLUDE (CTest)
+
+ADD_TEST (NAME test_example COMMAND ${example})
 ##########################################################
 
 
