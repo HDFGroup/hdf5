@@ -2,9 +2,9 @@
 * Build and Install HDF5 C/C++ Library with CMake                      *
 ************************************************************************
 
-Notes: This short instruction is written for users who want to quickly build 
-       HDF5 library and tools from the HDF5 source code package using the 
-       CMake tools.
+Notes: This short instruction is written for users who want to quickly 
+       build HDF5 library and tools from the HDF5 source code package 
+       using the CMake tools.
        
        More information about using CMake can be found at the KitWare site, 
        www.cmake.org.
@@ -20,26 +20,26 @@ Notes: This short instruction is written for users who want to quickly build
             tested outside of HDF. The CMake specific files may change
             before the next release.
             
-         2. CMake was originally introduced to support development on Windows, 
-            however it should be usable on any system where CMake is supported. 
-            Please send us any comments on how CMake support can be improved on 
-            any system. Visit the KitWare site for more information about CMake.
+         2. CMake support for HDF5 development should be usable on any 
+            system where CMake is supported. Please send us any comments on 
+            how CMake support can be improved on any system. Visit the 
+            KitWare site for more information about CMake.
             
          3. Build and test results can be submitted to our CDash server at:
-            cdash.hdfgroup.uiuc.edu. 
+                 cdash.hdfgroup.uiuc.edu. 
             Please read the HDF and CDash document at:
-            www.hdfgroup.org/CDash/HowToSubmit. 
+                 www.hdfgroup.org/CDash/HowToSubmit. 
             
          4. See the appendix at the bottom of this file for examples of using
             a ctest script for building and testing. 
             
 
 ========================================================================
-                            Preconditions                                                           
+I. Preconditions                                                           
 ========================================================================                          
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.8.x product requires CMake version 2.8.10.                     
+      web site. The HDF5 1.8.x product requires a minimum CMake version 2.8.10.                     
                                                                          
    2. If you plan to use Zlib or Szip;
       A. Download the packages and install them
@@ -69,9 +69,17 @@ Notes: This short instruction is written for users who want to quickly build
             CTEST_USE_LAUNCHERS:BOOL=ON
             CMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF         
    
-                                                                         
+   4. Windows developers should install NSIS to create an install image with CPack.
+      Visual Studio Express users will not be able to package HDF5 into
+      an install image executable.
+                                                                     
 ========================================================================
-          Building HDF5 C/C++ Libraries with CMake
+II. Building HDF5 C/C++ Libraries with CMake
+   1. Run CMake
+   2. Configure the cache settings
+   3. Build HDF5
+   4. Test HDF5.
+   5. Packaging HDF5 (create install image)
 ========================================================================
 
    1. Run CMake
@@ -101,6 +109,8 @@ Notes: This short instruction is written for users who want to quickly build
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
+            * Visual Studio 11
+            * Visual Studio 11 Win64
             * Visual Studio 10
             * Visual Studio 10 Win64
             * Visual Studio 6
@@ -243,7 +253,7 @@ Notes: This short instruction is written for users who want to quickly build
             recommend choosing either Debug or Release to match the build
             step on Windows.                                                                                      
 
-   5. Packaging HDF5
+   5. Packaging HDF5 (create install image)
    
       To package the build into a simple installer using the NullSoft installer NSIS
       on Windows, or into compressed files (.tar.gz, .sh, .zip), use the CPack tool.
@@ -252,9 +262,7 @@ Notes: This short instruction is written for users who want to quickly build
       
               cpack -C {Debug | Release} CPackConfig.cmake
       
-      NOTE: We have just introduced the packaging capability and it has not been 
-            extensively tested. Please send us comments on how it can be improved.
-            See NSIS note 8 of this document.
+      NOTE: See note 8 of this document for NSIS information.
             Also, if you are using a VS Express version or do not want to enable
             the packaging components, set HDF5_NO_PACKAGES to ON (on the command
             line add -DHDF5_NO_PACKAGES:BOOL=ON)
@@ -280,70 +288,70 @@ Notes: This short instruction is written for users who want to quickly build
 
                                                                          
 ========================================================================
-          All options for HDF5 C/C++ Libraries with CMake
+III. All options for HDF5 C/C++ Libraries with CMake
           Option Name --- Option Description --- Option Default
 ========================================================================
 ---------------- General Build Options ---------------------
-BUILD_SHARED_LIBS "Build Shared Libraries" OFF
+BUILD_SHARED_LIBS  "Build Shared Libraries"    OFF
 BUILD_STATIC_EXECS "Build Static Executabless" OFF
-BUILD_STATIC_PIC "Build Static PIC" OFF
-BUILD_TESTING "Build HDF5 Unit Testing" OFF
+BUILD_STATIC_PIC   "Build Static PIC"          OFF
+BUILD_TESTING      "Build HDF5 Unit Testing"   OFF
 
 ---------------- HDF5 Build Options ---------------------
-HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF
-HDF5_BUILD_EXAMPLES  "Build HDF5 Library Examples" OFF
-HDF5_BUILD_FORTRAN "Build FORTRAN support" OFF
-HDF5_BUILD_HL_LIB  "Build HIGH Level HDF5 Library" OFF
-HDF5_BUILD_TOOLS  "Build HDF5 Tools" OFF
+HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library"         OFF
+HDF5_BUILD_EXAMPLES "Build HDF5 Library Examples"    OFF
+HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
+HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  OFF
+HDF5_BUILD_TOOLS    "Build HDF5 Tools"               OFF
 IF (HDF5_BUILD_FORTRAN) 
     HDF5_ENABLE_F2003 "Enable FORTRAN 2003 Standard" OFF
 
 ---------------- HDF5 Advanced Options ---------------------
-HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings" OFF
-HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file" ON
-HDF5_Enable_Instrument "Instrument The library" HDF5_Enable_Instrument
-HDF5_ENABLE_CODESTACK "Enable the function stack tracing (for developer debugging)." OFF
-HDF5_ENABLE_COVERAGE "Enable code coverage for Libraries and Programs" OFF
-HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON
-HDF5_ENABLE_EMBEDDED_LIBINFO "embed library info into executables" ON
-HDF5_ENABLE_GPFS "Enable GPFS hints for the MPI/POSIX file driver" OFF
-HDF5_ENABLE_HSIZET "Enable datasets larger than memory" ON
-HDF5_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON
-HDF5_ENABLE_PARALLEL "Enable parallel build (requires MPI)" OFF
-HDF5_ENABLE_TRACE "Enable API tracing capability" OFF
-HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF
-HDF5_METADATA_TRACE_FILE "Enable metadata trace file collection" OFF
-HDF5_NO_PACKAGES "Do not include CPack Packaging" OFF
-HDF5_PACKAGE_EXTLIBS "CPACK - include external libraries" OFF
-HDF5_STRICT_FORMAT_CHECKS "Whether to perform strict file format checks" OFF
-HDF5_TEST_VFD "Execute tests with different VFDs" OFF
-HDF5_USE_16_API_DEFAULT "Use the HDF5 1.6.x API by default" OFF
-HDF5_USE_18_API_DEFAULT "Use the HDF5 1.8.x API by default" OFF
-HDF5_USE_FOLDERS "Enable folder grouping of projects in IDEs." OFF
-HDF5_WANT_DATA_ACCURACY "IF data accuracy is guaranteed during data conversions" ON
-HDF5_WANT_DCONV_EXCEPTION "exception handling functions is checked during data conversions" ON
+HDF5_DISABLE_COMPILER_WARNINGS "Disable compiler warnings"                                    OFF
+HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file"           ON
+HDF5_Enable_Instrument         "Instrument The library"                                       OFF
+HDF5_ENABLE_CODESTACK          "Enable the function stack tracing (for developer debugging)." OFF
+HDF5_ENABLE_COVERAGE           "Enable code coverage for Libraries and Programs"              OFF
+HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols"                         ON
+HDF5_ENABLE_EMBEDDED_LIBINFO   "embed library info into executables"                          ON
+HDF5_ENABLE_GPFS               "Enable GPFS hints for the MPI/POSIX file driver"              OFF
+HDF5_ENABLE_HSIZET             "Enable datasets larger than memory"                           ON
+HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux."            ON
+HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
+HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
+HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
+HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
+HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
+HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
+HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
+HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
+HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
+HDF5_USE_18_API_DEFAULT        "Use the HDF5 1.8.x API by default"                            OFF
+HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
+HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
+HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
+HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
 IF (APPLE) 
-    HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path" OFF
+    HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 IF (CMAKE_BUILD_TYPE MATCHES Debug) 
-    HDF5_ENABLE_TRACE "Enable API tracing capability" ON
+    HDF5_ENABLE_TRACE          "Enable API tracing capability"               ON
 IF (HDF5_TEST_VFD) 
-    HDF5_TEST_FHEAP_VFD "Execute fheap test with different VFDs" ON
+    HDF5_TEST_FHEAP_VFD        "Execute fheap test with different VFDs"      ON
 IF (WIN32 AND NOT CYGWIN) 
-    HDF_LEGACY_NAMING "Use Legacy Names for Libraries and Programs" OFF
-HDF5_ENABLE_THREADSAFE "Enable Threadsafety" OFF
+    HDF_LEGACY_NAMING          "Use Legacy Names for Libraries and Programs" OFF
 
 ---------------- External Library Options ---------------------
-HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building" "NO"
-HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF
-HDF5_ENABLE_Z_LIB_SUPPORT "Enable Zlib Filters" OFF
-ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" 0
-SZIP_USE_EXTERNAL "Use External Library Building for SZIP" 0
-HDF5_USE_FILTER_FLETCHER32 "Use the FLETCHER32 Filter" ON
-HDF5_USE_FILTER_NBIT "Use the NBIT Filter" ON
-HDF5_USE_FILTER_SCALEOFFSET "Use the SCALEOFFSET Filter" ON
-HDF5_USE_FILTER_SHUFFLE "Use the SHUFFLE Filter" ON
+HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building"        "NO"
+HDF5_ENABLE_SZIP_SUPPORT    "Use SZip Filter"                        OFF
+HDF5_ENABLE_Z_LIB_SUPPORT   "Enable Zlib Filters"                    OFF
+ZLIB_USE_EXTERNAL           "Use External Library Building for ZLIB" 0
+SZIP_USE_EXTERNAL           "Use External Library Building for SZIP" 0
+HDF5_USE_FILTER_FLETCHER32  "Use the FLETCHER32 Filter"              ON
+HDF5_USE_FILTER_NBIT        "Use the NBIT Filter"                    ON
+HDF5_USE_FILTER_SCALEOFFSET "Use the SCALEOFFSET Filter"             ON
+HDF5_USE_FILTER_SHUFFLE     "Use the SHUFFLE Filter"                 ON
 IF (HDF5_ENABLE_SZIP_SUPPORT) 
-    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF
+    HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
 
 
 ************************************************************************
@@ -624,23 +632,27 @@ if(NOT LOCAL_MEMCHECK_TEST)
   file(WRITE ${CTEST_BINARY_DIRECTORY}/cpack.log "${cpackLog.err}" "${cpackLog}")
 endif(NOT LOCAL_MEMCHECK_TEST)
 #-----------------------------------------------------------------------------
- 
 message("DONE:CTestScript")
+
 ************************************************************************
+Below is an example of the ctest script used by The HDF Group. See the
+Appendix in the CMake.txt file for the CTestScript.cmake file used by this
+script. Adjust values as necessary. Note that the source folder is entered 
+on the command line and the build folder is created as a sub-folder.
 ************************************************************************
-========================================================================
-Product specific script, HDF518Static.cmake, that uses the 
-CTestScript.cmake file (see above). Usage:
-"ctest -S HDF518Static.cmake,hdf518 -C Release -O hdf518static.log"
-where hdf518 is the source folder relative to the location of these scripts
-========================================================================
+############################################################################
+# Product specific script, HDF518Static.cmake, that uses the 
+# CTestScript.cmake file (see above). Usage:
+# "ctest -S HDF518Static.cmake,hdf518 -C Release -O hdf518static.log"
+# where hdf518 is the source folder relative to the location of these scripts
+############################################################################
 
 cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
 
 # CTEST_SCRIPT_ARG is the source folder passed on the command line
+set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 set(CTEST_SOURCE_NAME ${CTEST_SCRIPT_ARG})
 set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/buildstatic)
-set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_SOURCE_NAME}")
 set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 set(CTEST_BUILD_CONFIGURATION "Release")
