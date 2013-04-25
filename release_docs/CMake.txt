@@ -409,7 +409,7 @@ IF (HDF5_ENABLE_SZIP_SUPPORT)
 
 
 ========================================================================
-APPENDIX
+V. APPENDIX
 ========================================================================
 
 Below are examples of the ctest scripts used by The HDF Group.
