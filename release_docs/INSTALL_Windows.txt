@@ -7,4 +7,4 @@
 We now recommend that users build, test and install HDF5 using CMake.
 
 Instructions for building and testing HDF5 using CMake can be found in
-the CMake.txt file found in this folder.
+the INSTALL_CMake.txt file found in this folder.
