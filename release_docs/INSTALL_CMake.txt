@@ -2,42 +2,86 @@
 * Build and Install HDF5 C/C++ Library with CMake                      *
 ************************************************************************
 
-Notes: This short set of instructions is written for users who want to 
-       quickly build the HDF5 Library and tools from the HDF5 source code 
-       package using the CMake tools.
-       
-       More information about using CMake can be found at the KitWare site, 
-       www.cmake.org.
-         
-       CMake uses the command line; however, the visual CMake tool is 
-       recommended for the configuration step. The steps are similar for
-       all the operating systems supported by CMake.
-       
-       NOTES:
-         1. Using CMake for building and using HDF5 is under active development. 
-            While we have attempted to provide error-free files, please 
-            understand that development with CMake has not been extensively 
-            tested outside of HDF. The CMake specific files may change
-            before the next release.
-            
-         2. CMake support for HDF5 development should be usable on any 
-            system where CMake is supported. Please send us any comments on 
-            how CMake support can be improved on any system. Visit the 
-            KitWare site for more information about CMake.
-            
-         3. Build and test results can be submitted to our CDash server at:
-                 cdash.hdfgroup.uiuc.edu. 
-            Please read the HDF and CDash document at:
-                 www.hdfgroup.org/CDash/HowToSubmit. 
-            
-         4. See the appendix at the bottom of this file for examples of using
-            a ctest script for building and testing. 
-            
+                     Table of Contents
+                     
+Section I:   Quick Step Building HDF5 Libraries with CMake 
+Section II:  Preconditions
+Section III: Building HDF5 C/C++ Libraries with CMake
+Section IV:  All Options for HDF5 C/C++ Libraries with CMake
+Section V:   APPENDIX
+
+************************************************************************
 
 
 
 ========================================================================
-I. Preconditions                                                           
+I. Quick Step Building HDF5 Libraries with CMake
+========================================================================
+Notes: This short set of instructions is written for users who want to 
+       quickly build the HDF5 Library and tools from the HDF5 source code 
+       package using the CMake tools.
+       
+   A. Windows Quick Step Building HDF5 Libraries with CMake Using VS2010
+
+      Go through these steps:
+
+      1. Locate the source files in:
+         c:\MyHDFstuff\hdf5
+      
+      2. Create a build folder at:
+         c:\MyHDFstuff\hdf5\build
+      
+      3. Open a command prompt at:
+         c:\MyHDFstuff\hdf5\build
+      
+      4. Configure the C library, tools and tests with this command:
+         cmake -G "Visual Studio 10" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
+      
+      3. Build the C library, tools and tests with this command:
+         cmake --build . --config Release
+      
+      4. Test the C library and tools with this command:
+         ctest . -C Release
+      
+      5. Create an install image with this command:
+         cpack -C Release CPackConfig.cmake
+      
+      6. Install with this command:
+         HDF5-1.8.11-win32.exe
+        
+   B. Linux Quick Step Building HDF5 Libraries with CMake Using GCC
+
+      Go through these steps:
+
+      1. Locate the source files in:
+         ~\MyHDFstuff\hdf5
+      
+      2. Create a build folder at:
+         ~\MyHDFstuff\hdf5\build
+      
+      3. Open a command prompt at:
+         ~\MyHDFstuff\hdf5\build
+      
+      4. Configure the C library, tools and tests with this command:
+         cmake -G "Unix Makefiles" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
+      
+      3. Build the C library, tools and tests with this command:
+         cmake --build . --config Release
+      
+      4. Test the C library and tools with this command:
+         ctest . -C Release
+      
+      5. Create an install image with this command:
+         cpack -C Release CPackConfig.cmake
+      
+      6. Install with this command:
+         HDF5-1.8.11-Linux.sh
+      
+
+
+
+========================================================================
+II. Preconditions                                                           
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
@@ -77,37 +121,33 @@ I. Preconditions
       an install image executable.
 
 
-
-========================================================================
-II. Windows Quick Step Building HDF5 Libraries with CMake Using VS2010
-========================================================================
-
-Go through these steps:
-
-   1. Locate the source files in:
-      c:\MyHDFstuff\hdf5
-      
-   2. Create a build folder at:
-      c:\MyHDFstuff\hdf5\build
-      
-   3. Open a command prompt at:
-      c:\MyHDFstuff\hdf5\build
-      
-   4. Configure the C library, tools and tests with this command:
-      cmake -G "Visual Studio 10" -DBUILD_TESTING:BOOL=ON -DHDF5_BUILD_TOOLS:BOOL=ON ..
-      
-   3. Build the C library, tools and tests with this command:
-      cmake --build . --config Release
-      
-   4. Test the C library and tools with this command:
-      ctest . -C Release
-      
-   5. Create an install image with this command:
-      cpack -C Release CPackConfig.cmake
-      
-   6. Install with this command:
-      HDF5-1.8.11-win32.exe
-      
+Notes: More information about using CMake can be found at the KitWare site, 
+       www.cmake.org.
+         
+       CMake uses the command line; however, the visual CMake tool is 
+       recommended for the configuration step. The steps are similar for
+       all the operating systems supported by CMake.
+       
+       NOTES:
+         1. Using CMake for building and using HDF5 is under active development. 
+            While we have attempted to provide error-free files, please 
+            understand that development with CMake has not been extensively 
+            tested outside of HDF. The CMake specific files may change
+            before the next release.
+            
+         2. CMake support for HDF5 development should be usable on any 
+            system where CMake is supported. Please send us any comments on 
+            how CMake support can be improved on any system. Visit the 
+            KitWare site for more information about CMake.
+            
+         3. Build and test results can be submitted to our CDash server at:
+                 cdash.hdfgroup.uiuc.edu. 
+            Please read the HDF and CDash document at:
+                 www.hdfgroup.org/CDash/HowToSubmit. 
+            
+         4. See the appendix at the bottom of this file for examples of using
+            a ctest script for building and testing. 
+            
 
 
 

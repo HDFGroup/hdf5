@@ -25,13 +25,7 @@ Notes: This short instruction is written for users who want to quickly
             where CMake is supported. Please send us any comments on how 
             CMake support can be improved on any system. 
             
-         3. HDF5 library build and test results can be submitted to our 
-            CDash server at:
-                   cdash.hdfgroup.uiuc.edu. 
-            Please read the HDF and CDash document at:
-                   www.hdfgroup.org/CDash/HowToSubmit. 
-            
-         4. See the appendix at the bottom of this file for an example 
+         3. See the appendix at the bottom of this file for an example 
             of using a ctest script for building and testing. See 
             CMake.txt for more information.
 
@@ -218,9 +212,9 @@ IV. APPENDIX
 ========================================================================
 
 Below is an example of the ctest script used by The HDF Group. See the
-Appendix in the CMake.txt file for the CTestScript.cmake file used by this
-script. Adjust the values as necessary. Note that the source folder is 
-entered on the command line and the build folder is created as a sub-folder. 
+Appendix in the INSTALL_CMake.txt file for the CTestScript.cmake file used
+by this script. Adjust the values as necessary. Note that the source folder
+is entered on the command line and the build folder is created as a sub-folder.
 Windows should adjust the forward slash to double backslashes, except for
 the HDF_DIR environment variable.
 
