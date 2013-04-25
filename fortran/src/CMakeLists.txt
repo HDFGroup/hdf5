@@ -254,7 +254,7 @@ INSTALL (
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
     DESTINATION 
-        ${HDF5_INSTALL_INCLUDE_DIR}/fortran 
+        ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT 
         fortheaders
 )
@@ -264,7 +264,7 @@ IF (WIN32 AND NOT CYGWIN)
       DIRECTORY
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+          ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
@@ -273,7 +273,7 @@ ELSE (WIN32 AND NOT CYGWIN)
       DIRECTORY
           ${CMAKE_Fortran_MODULE_DIRECTORY}/
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+          ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
