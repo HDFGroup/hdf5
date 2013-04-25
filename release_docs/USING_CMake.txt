@@ -3,16 +3,16 @@
 ************************************************************************
 
 Notes: This short instruction is written for users who want to quickly 
-       build HDF5 Applications using the CMake tools. Users can adapt 
-       these instructions  for their own applications, see the "Minimum 
-       Project Files" section.
+       build HDF5 applications using the CMake tools. Users can adapt 
+       these instructions for their own applications. For more information, 
+       see the "Minimum C Project Files for CMake" section.
        
        More information about using CMake can be found at the KitWare 
        site, www.cmake.org.
          
-       CMake uses the command line, however the visual CMake tool is 
+       CMake uses the command line; however, the visual CMake tool is 
        available for the configuration step. The steps are similar for
-       all the operating systems supported by CMake.
+       all of the operating systems supported by CMake.
        
        NOTES:
          1. Using CMake for building and using HDF5 is under active 
@@ -23,8 +23,7 @@ Notes: This short instruction is written for users who want to quickly
             
          2. CMake for HDF5 development should be usable on any system 
             where CMake is supported. Please send us any comments on how 
-            CMake support can be improved on any system. Visit the 
-            KitWare site for more information about CMake.
+            CMake support can be improved on any system. 
             
          3. HDF5 library build and test results can be submitted to our 
             CDash server at:
@@ -35,18 +34,19 @@ Notes: This short instruction is written for users who want to quickly
          4. See the appendix at the bottom of this file for an example 
             of using a ctest script for building and testing. See 
             CMake.txt for more information.
-            
+
+
 
 ========================================================================
-                            Preconditions                                                           
-========================================================================                          
+I. Preconditions                                                           
+========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.8.x product requires a minimum CMake version 
       of 2.8.10.                     
                                                                          
    2. You have installed the HDF5 library built with CMake, by executing 
-      the HDF Install Utility (The *.exe file in the binary package for 
+      the HDF Install Utility (the *.exe file in the binary package for 
       Windows). If you are using a Windows platform, you can obtain a 
       pre-built Windows binary from The HDF Group's website at 
       www.hdfgroup.org.
@@ -54,21 +54,32 @@ Notes: This short instruction is written for users who want to quickly
    3. Set the environment variable HDF5_DIR to the installed location of 
       the config files for HDF5. On Windows: 
             HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.8.x/cmake/hdf5
-      (Note there are no quote characters used on windows and all platforms
+      
+      (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
 
    4. Created separate source and build directories.
       (CMake commands are executed in the build directory)
 
-   5. Created a CMakeLists.txt file(s) for your source. See Section II below.
-                                                                         
+   5. Created a CMakeLists.txt file(s) for your source. See Section III 
+      below.
+
+
+
 ========================================================================
-I. Building HDF5 Applications with CMake
+II. Building HDF5 Applications with CMake
+========================================================================
+
+Go through these steps to build HDF5 applications with CMake.
+
    1. Run CMake
    2. Configure the cache settings
    3. Build HDF5 Applications
    4. Test HDF5 Applications.
-========================================================================
+
+These steps are described in more detail below.
+
+
 
    1. Run CMake
 
@@ -76,14 +87,16 @@ I. Building HDF5 Applications with CMake
       available in your Start menu. For Linux, UNIX, and Mac users the
       executable is named "cmake-gui" and can be found where CMake was 
       installed. 
-      Specify the source and build directories. It is recommended that you 
-      choose a build directory different then the source directory 
-      (for example on Windows, if the source is at c:\MyHDFstuff\hdf5, then
-      use c:\MyHDFstuff\hdf5\build or c:\MyHDFstuff\build\hdf5). 
+      
+      Specify the source and build directories. Make the build and source 
+      directories different. For example on Windows, if the source is at 
+      c:\MyHDFstuff\hdf5, then use c:\MyHDFstuff\hdf5\build or 
+      c:\MyHDFstuff\build\hdf5 for the build directory. 
       
       OPTIONAL:
-        Users can perform the configuration step without using the visual cmake-gui
-        program. Example configuration step executed within the build directory:
+        Users can perform the configuration step without using the visual 
+        cmake-gui program. The following is an example command line 
+        configuration step executed within the build directory:
         
         cmake -G "<generator>"  [-D<options>]  <sourcepath>
         
@@ -139,7 +152,7 @@ I. Building HDF5 Applications with CMake
       or the command line. The command line is normally used on linux, Unix, and Mac.
 
       To build from the command line, navigate to your build directory and
-      execute the following;
+      execute the following:
           
               cmake --build . --config {Debug | Release}     
               
@@ -151,9 +164,9 @@ I. Building HDF5 Applications with CMake
            file in your build directory. Be sure to select either Debug or 
            Release and build the solution.
              
-   4. Test HDF5 Applications.
+   4. Test HDF5 Applications
 
-      To test the build, navigate to your build directory and execute;
+      To test the build, navigate to your build directory and execute:
       
               ctest . -C {Debug | Release}
               
@@ -161,23 +174,23 @@ I. Building HDF5 Applications with CMake
             recommend choosing either Debug or Release to match the build
             step on Windows.                                                                                      
 
-   5. The files that support building with CMake are all the files in the 
+   5. The files that support building with CMake are all of the files in the 
       config/cmake folder, the CMakeLists.txt files in each source folder, and 
       CTestConfig.cmake. CTestConfig.cmake is specific to the internal testing 
-      performed by The HDF Group. It should be altered for the users 
+      performed by The HDF Group. It should be altered for the user's 
       installation and needs. The cacheinit.cmake file settings are used by
-      The HDF Group for daily testing. It should be altered/ignored for the users 
+      The HDF Group for daily testing. It should be altered/ignored for the user's 
       installation and needs. 
 
-   6. More information about using CMake can be found at the KitWare site, 
-      www.cmake.org.
-                         
-                                                                         
+
+
 ========================================================================
-II. Minimum C Project Files for CMake
+III. Minimum C Project Files for CMake
 ========================================================================
 
-   7. Create a CMakeLists.txt file at the source root.
+   6. Create a CMakeLists.txt file at the source root. Include the 
+      following text in the file:
+
 ##########################################################
 cmake_minimum_required (VERSION 2.8.10)
 PROJECT (HDF5MyApp C CXX)
@@ -199,16 +212,23 @@ ADD_TEST (NAME test_example COMMAND ${example})
 ##########################################################
 
 
+
 ========================================================================
-III.                      APPENDIX
+IV. APPENDIX
 ========================================================================
 
 Below is an example of the ctest script used by The HDF Group. See the
 Appendix in the CMake.txt file for the CTestScript.cmake file used by this
-script. Adjust values as necessary. Note that the source folder is entered 
-on the command line and the build folder is created as a sub-folder.
-(Windows should adjust the forward slash to double backslashes, except for
-the HDF_DIR environment variable)
+script. Adjust the values as necessary. Note that the source folder is 
+entered on the command line and the build folder is created as a sub-folder. 
+Windows should adjust the forward slash to double backslashes, except for
+the HDF_DIR environment variable.
+
+
+
+========================================================================
+ctest
+========================================================================
 
 ############################################################################
 # Product specific script, HDF518Example.cmake, that uses the 
@@ -256,5 +276,10 @@ include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
 message("DONE")
 #################################################################################
 
-Need further assistance, send email to help@hdfgroup.org
+
+
+========================================================================
+For further assistance, send email to help@hdfgroup.org
+========================================================================
+
 
