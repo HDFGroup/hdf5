@@ -136,11 +136,11 @@ These five steps are described in detail below.
       
       Specify the source and build directories. 
       
-      ***** It is recommemded that the build and  ****** 
-      ***** source directories are different.     ******
+      ***** Make the build and source directories different. ******
       
       For example on Windows, if the source is at c:\MyHDFstuff\hdf5, 
-      then use c:\MyHDFstuff\hdf5\build or c:\MyHDFstuff\build\hdf5.
+      then use c:\MyHDFstuff\hdf5\build or c:\MyHDFstuff\build\hdf5 as the 
+      build directory.
       
       OPTIONAL:
         Users can perform the configuration step without using the visual 
