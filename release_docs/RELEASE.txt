@@ -411,6 +411,12 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+
+* When building using the Cray compilers on Cray machines, HDF5
+  configure mistakenly thinks the compiler is an intel compiler and
+  sets the -std=c99 flag which breaks configure on Cray.
+  (MSC - 2013/04/26 - HDFFV-8429)
+
 * Thread-safe feature failed in AIX during configure stage. (AKC - 2013/04/16
   HDFFV-8390)
 
