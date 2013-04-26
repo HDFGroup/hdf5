@@ -451,7 +451,6 @@
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_MinGW.txt
 ./release_docs/INSTALL_parallel
-./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
 ./release_docs/USING_HDF5_CMake.txt
