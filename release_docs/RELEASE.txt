@@ -414,7 +414,9 @@ Known Problems
 
 * When building using the Cray compilers on Cray machines, HDF5
   configure mistakenly thinks the compiler is an intel compiler and
-  sets the -std=c99 flag which breaks configure on Cray.
+  sets the -std=c99 flag which breaks configure on Cray. To build HDF5
+  properly on a Cray machine, please consult with the instructions in
+  INSTALL_parallel for building on Hopper and/or Red Storm.
   (MSC - 2013/04/26 - HDFFV-8429)
 
 * Thread-safe feature failed in AIX during configure stage. (AKC - 2013/04/16
