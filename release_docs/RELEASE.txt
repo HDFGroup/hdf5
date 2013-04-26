@@ -117,6 +117,8 @@ Bug Fixes since HDF5-1.8.10
 
     Configuration
     -------------
+    - Fixed Thread-safe configure failure for the AIX platform.
+      (AKC - 2013/04/19 HDFFV-8390)
     - Configure will check the result of header searches before searching for
       the library. 
       Fixes HDFFV-8257 (ADB 2013/03/04)
@@ -352,7 +354,7 @@ Windows 8 x64                              y       y         y         n
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
-AIX 5.3 32- and 64-bit                     y       n         n         n        
+AIX 5.3 32- and 64-bit                     y       n         n         y        
 CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
 CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
 CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
@@ -422,9 +424,6 @@ Known Problems
   properly on a Cray machine, please consult with the instructions in
   INSTALL_parallel for building on Hopper and/or Red Storm.
   (MSC - 2013/04/26 - HDFFV-8429)
-
-* Thread-safe feature failed in AIX during configure stage. (AKC - 2013/04/16
-  HDFFV-8390)
 
 * The h5dump and h5diff utilities occasionally produce different output
   between Linux and Windows systems. This is caused by lower-level library
