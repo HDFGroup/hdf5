@@ -235,6 +235,8 @@ Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7     x64                       y        y/y    n        y    y     y
+Windows 8                               n        y/n    n        y    y     y
+Windows 8     x64                       n        y/n    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
@@ -255,6 +257,8 @@ Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y        
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
+Windows 8                                  y       y         y         n
+Windows 8 x64                              y       y         y         n
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
