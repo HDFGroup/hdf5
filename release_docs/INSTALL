@@ -105,8 +105,7 @@ CONTENTS
 
 2.1. Windows
         Users of Microsoft Windows should see the INSTALL_Windows files for
-        detailed instructions.  INSTALL_Cygwin and INSTALL_MinGW also exist for 
-        those platforms.
+        detailed instructions.  Cygwin users should see INSTALL_Cygwin.
 
 2.2. Red Storm (Cray XT3)
         Users of the Red Storm machine, after reading this file, should read
