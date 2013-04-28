@@ -108,10 +108,10 @@ This allows for >2GB sized files on Linux systems and is only available with
 Linux kernels 2.4 and greater.
 
 
-2.5. Hopper (Cray XE6) (for v1.8 and later)
+2.4. Hopper (Cray XE6) (for v1.8 and later)
 -------------------------
 
-2.5.1 Building HDF5 for Hopper
+2.4.1 Building HDF5 for Hopper
 ------------------------------------------ 
 The following steps are for building HDF5 for the Hopper compute
 nodes.  They would probably work for other Cray XE6 systems but have
@@ -156,7 +156,7 @@ make check
 Once the job runs and all is well, install the binary:
 $ make install
 
-2.5.2 Hopper known issues
+2.4.2 Hopper known issues
 ------------------------------
 Sometimes when building the library with make, you might get this problem:
 
@@ -175,6 +175,7 @@ LD_LIBRARY_PATH="$LD_LIBRARY_PATH`echo | sed -e 's/-L/:/g' -e 's/
 If that happens, you are probable running with make -j <x>. In that
 case, you need to cleanup everything and start again as detailed above
 but use serial make (do not use -j <x>).
+
 
 3. Detail explanation
 ---------------------
