@@ -14,7 +14,6 @@ CONTENTS
 
         2. Quick installation
         2.1. Windows
-        2.2. Red Storm (Cray XT3)
 
         3. HDF5 dependencies
         3.1. Zlib
@@ -106,13 +105,6 @@ CONTENTS
 2.1. Windows
         Users of Microsoft Windows should see the INSTALL_Windows files for
         detailed instructions.  Cygwin users should see INSTALL_Cygwin.
-
-2.2. Red Storm (Cray XT3)
-        Users of the Red Storm machine, after reading this file, should read
-        the Red Storm section in the INSTALL_parallel file for specific
-        instructions for the Red Storm machine.  The same instructions would
-        probably work for other Cray XT3 systems, but they have not been
-        verified.
 
 
 3. HDF5 dependencies
