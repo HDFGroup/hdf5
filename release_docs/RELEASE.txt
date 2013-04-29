@@ -114,6 +114,8 @@ Support for New Platforms, Languages, and Compilers
     - SunOS 5.11 (emu) 32-bit and 64-bit with Sun C/C++ 5.12 compiler and
       Sun Fortran 95 8.6 compiler.
 
+    - Visual Studio 2012 w/ Intel Fortran 13 on Windows 7 and Windows 8
+
 Bug Fixes since HDF5-1.8.10
 ==========================
 
