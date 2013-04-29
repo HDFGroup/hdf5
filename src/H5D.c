@@ -572,19 +572,56 @@ done:
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
-    H5D_t		*dset;                  /* Dataset structure */
+    H5D_t		*dataset;                  /* Dataset structure */
+    H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
+    H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
+    H5O_fill_t          copied_fill;            /* Fill value to tweak */
+    hid_t		new_dcpl_id = FAIL;
+    hid_t		ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("i", "i", dset_id);
+
+    /* Check args */
+    if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if((ret_value = H5D_get_create_plist(dataset)) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dget_create_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_get_create_plist
+ *
+ * Purpose:	Private function for H5Dget_create_plist
+ *
+ * Return:	Success:	ID for a copy of the dataset creation
+ *				property list.  The template should be
+ *				released by calling H5P_close().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		Tuesday, February  3, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5D_get_create_plist(H5D_t *dset)
+{
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
     H5O_fill_t          copied_fill;            /* Fill value to tweak */
     hid_t		new_dcpl_id = FAIL;
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("i", "i", dset_id);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(NULL == (dcpl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
@@ -670,8 +707,8 @@ done:
             if(H5I_dec_app_ref(new_dcpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object")
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dget_create_plist() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_get_create_plist() */
 
 
 /*-------------------------------------------------------------------------

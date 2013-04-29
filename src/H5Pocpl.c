@@ -1177,6 +1177,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5P_filter_in_pline
+ *
+ * Purpose:	Check whether the filter is in the pipeline of the object
+ *              creation property list.  
+ *
+ * Return:	TRUE:		found
+ *		FALSE:		not found
+ *              FAIL: 		error
+ *
+ * Programmer:	Raymond Lu
+ *              26 April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
+{
+    H5O_pline_t         pline;  /* Filter pipeline */
+    H5Z_filter_info_t *filter;  /* Pointer to filter information */
+    htri_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get pipeline info */
+    if(H5P_get(plist, H5O_CRT_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+
+    /* Check if the file is in the pipeline */
+    if((ret_value = H5Z_filter_in_pline(&pline, id)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTCOMPARE, FAIL, "can't find filter")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_get_filter_by_id() */
+
+
+/*-------------------------------------------------------------------------
  * Function: H5Premove_filter
  *
  * Purpose: Deletes a filter from the dataset creation property list;

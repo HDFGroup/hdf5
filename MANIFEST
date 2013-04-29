@@ -1091,6 +1091,7 @@
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c
+./test/unregister.c
 ./test/vfd.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
