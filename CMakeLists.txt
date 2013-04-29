@@ -969,7 +969,6 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       SET (release_files
           ${release_files}
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_MinGW.txt
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL_VMS.txt
       )
     ENDIF (WIN32 AND NOT CYGWIN)
