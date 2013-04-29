@@ -953,8 +953,8 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     SET (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/CMake.txt
-        ${HDF5_SOURCE_DIR}/release_docs/USING_CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
         ${HDF5_SOURCE_DIR}/release_docs/COPYING
         ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
         ${HDF5_SOURCE_DIR}/release_docs/INSTALL
