@@ -34,6 +34,13 @@ typedef enum H5RQ_type_t {
     HG_FILE_OPEN,
     HG_FILE_FLUSH,
     HG_FILE_CLOSE,
+    HG_ATTR_CREATE,
+    HG_ATTR_OPEN,
+    HG_ATTR_READ,
+    HG_ATTR_WRITE,
+    HG_ATTR_EXISTS,
+    HG_ATTR_REMOVE,
+    HG_ATTR_CLOSE,
     HG_GROUP_CREATE,
     HG_GROUP_OPEN,
     HG_GROUP_CLOSE,
@@ -84,6 +91,13 @@ typedef struct H5VL_iod_file_t {
     H5VL_iod_request_t *request_list_head;
     H5VL_iod_request_t *request_list_tail;
 } H5VL_iod_file_t;
+
+/* the client side attribute struct */
+typedef struct H5VL_iod_attr_t {
+    H5VL_iod_object_t common; /* must be first */
+    H5VL_iod_remote_attr_t remote_attr;
+    char *loc_name;
+} H5VL_iod_attr_t;
 
 /* the client side group struct */
 typedef struct H5VL_iod_group_t {

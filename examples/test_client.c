@@ -17,9 +17,10 @@ int main(int argc, char **argv) {
     hid_t gid1, gid2;
     hid_t dataspaceId;
     hid_t did1, did2, did3;
+    hid_t aid1, aid2, aid3;
     hid_t fapl_id, dxpl_id;
     const unsigned int nelem=60;
-    int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL, *data3 = NULL;
+    int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL, *data3 = NULL, *a_data = NULL;
     unsigned int i = 0;
     hsize_t dims[1];
     int my_rank, my_size;
@@ -63,9 +64,11 @@ int main(int argc, char **argv) {
     data2 = malloc (sizeof(int)*nelem);
     data3 = malloc (sizeof(int)*nelem);
     r_data = malloc (sizeof(int)*nelem);
+    a_data = malloc (sizeof(int)*nelem);
     r2_data = malloc (sizeof(int)*nelem);
     for(i=0;i<nelem;++i) {
         r_data[i] = 0;
+        a_data[i] = 0;
         r2_data[i] = 0;
         data[i]=i;
         data2[i]=i;
@@ -109,6 +112,14 @@ int main(int argc, char **argv) {
     dims [0] = 60;
     dataspaceId = H5Screate_simple(1, dims, NULL);
 
+    /* create an attribute on group G1 then delete it afterwards */
+    aid1 = H5Acreate2(gid1, "ATTR1", H5T_NATIVE_INT, dataspaceId, H5P_DEFAULT, H5P_DEFAULT);
+    assert(aid1);
+    H5Aclose(aid1);
+    //assert(H5Aexists_by_name(file_id,"G1","ATTR1", H5P_DEFAULT));
+    assert(H5Adelete_by_name(file_id, "G1", "ATTR1", H5P_DEFAULT) == 0);
+    assert(!H5Aexists(gid1, "ATTR1"));
+
     /* create a Dataset D1 on the file, in group /G1/G2/G3. This is asynchronous. 
        Internally to the IOD-VOL this call traverses the path G1/G2/G3. 
        It realizes that group G1 has been created locally, but has no info about 
@@ -120,6 +131,13 @@ int main(int argc, char **argv) {
     did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did1);
+
+    /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
+    aid2 = H5Acreate_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5T_NATIVE_INT, 
+                             dataspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(aid2);
+
+    H5Awrite(aid2, int_id, data);
 
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 
@@ -260,6 +278,8 @@ int main(int argc, char **argv) {
 
     H5Sclose(dataspaceId);
 
+    assert(H5Aclose(aid2) == 0);
+
     assert(H5Tclose_ff(int_id, event_q) == 0);
 
     assert(H5Gclose_ff(gid1, event_q) == 0);
@@ -339,6 +359,16 @@ int main(int argc, char **argv) {
     did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
 
+    /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
+    aid2 = H5Aopen_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT);
+    assert(aid2);
+    H5Aread(aid2, int_id, a_data);
+    fprintf(stderr, "Printing Attribute data: ");
+    for(i=0;i<nelem;++i)
+        fprintf(stderr, "%d ",a_data[i]);
+    fprintf(stderr, "\n");
+
+    assert(H5Aclose(aid2) == 0);
     assert(H5Dclose(did1) == 0);
     assert(H5Tclose(int_id) == 0);
     assert(H5Gclose(gid1) == 0);
@@ -365,6 +395,7 @@ int main(int argc, char **argv) {
     */
     free(data);
     free(r_data);
+    free(a_data);
     free(data2);
     free(r2_data);
     free(data3);

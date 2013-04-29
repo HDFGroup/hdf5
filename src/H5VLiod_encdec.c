@@ -37,6 +37,20 @@ int hg_proc_ret_t(hg_proc_t proc, void *data)
     return ret;
 }
 
+/* Define hg_proc_htri_t */
+int hg_proc_htri_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+
+    ret = hg_proc_int32_t(proc, data);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+    return ret;
+}
+
 /* Define hg_proc_iod_handle_t */
 int hg_proc_iod_handle_t(hg_proc_t proc, void *data)
 {
@@ -143,6 +157,7 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
         if(H5P_FILE_CREATE_DEFAULT != plist_id || H5P_GROUP_CREATE_DEFAULT != plist_id ||
            H5P_LINK_CREATE_DEFAULT != plist_id || H5P_DATASET_CREATE_DEFAULT != plist_id ||
            H5P_FILE_ACCESS_DEFAULT != plist_id || H5P_GROUP_ACCESS_DEFAULT != plist_id ||
+           H5P_ATTRIBUTE_CREATE_DEFAULT != plist_id ||
            H5P_DATASET_ACCESS_DEFAULT != plist_id || H5P_DATASET_XFER_DEFAULT != plist_id) {
             if(H5Pencode(plist_id, NULL, &plist_size) < 0) {
                 HG_ERROR_DEFAULT("PLIST encode Proc error");

@@ -38,6 +38,18 @@ typedef struct H5VL_iod_remote_file_t {
     hg_handle_t hg_handle;
 } H5VL_iod_remote_file_t;
 
+/* struct that contains the information about the IOD attr */
+typedef struct H5VL_iod_remote_attr_t {
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    hid_t acpl_id;
+    hid_t space_id;
+    hid_t type_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_remote_attr_t;
+
 /* struct that contains the information about the IOD group */
 typedef struct H5VL_iod_remote_group_t {
     iod_handle_t iod_oh;
@@ -91,6 +103,44 @@ typedef struct H5VL_iod_file_flush_input_t {
     H5F_scope_t scope;
     hg_handle_t hg_handle;
 } H5VL_iod_file_flush_input_t;
+
+typedef struct H5VL_iod_attr_create_input_t {
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *path;
+    const char *attr_name;
+    hid_t acpl_id;
+    hid_t type_id;
+    hid_t space_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_create_input_t;
+
+typedef struct H5VL_iod_attr_open_input_t {
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *path;
+    const char *attr_name;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_open_input_t;
+
+typedef struct H5VL_iod_attr_io_input_t {
+    iod_handle_t iod_oh;
+    iod_handle_t scratch_oh;
+    hid_t type_id;
+    hg_bulk_t bulk_handle;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_io_input_t;
+
+typedef struct H5VL_iod_attr_op_input_t {
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *path;
+    const char *attr_name;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_op_input_t;
 
 typedef struct H5VL_iod_group_create_input_t {
     iod_handle_t coh;
@@ -185,6 +235,7 @@ typedef struct H5VL_iod_dtype_open_input_t {
 
 H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_hid_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_htri_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_iod_obj_id_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_iod_handle_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_dims_t(hg_proc_t proc, void *data);
@@ -206,6 +257,25 @@ MERCURY_GEN_PROC(file_flush_in_t, ((int32_t)(scope)) ((iod_handle_t)(coh)))
 MERCURY_GEN_PROC(file_close_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(root_oh))
                  ((iod_obj_id_t)(root_id)) ((iod_handle_t)(scratch_oh)) 
                  ((iod_obj_id_t)(scratch_id)))
+
+MERCURY_GEN_PROC(attr_create_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(path))
+                 ((hg_string_t)(attr_name)) ((hid_t)(acpl_id)) 
+                 ((hid_t)(type_id)) ((hid_t)(space_id)))
+MERCURY_GEN_PROC(attr_create_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id)))
+MERCURY_GEN_PROC(attr_open_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(path)) 
+                 ((hg_string_t)(attr_name)))
+MERCURY_GEN_PROC(attr_open_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id))
+                 ((hid_t)(acpl_id)) ((hid_t)(type_id)) ((hid_t)(space_id)))
+MERCURY_GEN_PROC(attr_op_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
+                 ((iod_obj_id_t)(loc_id)) ((hg_string_t)(path)) ((hg_string_t)(attr_name)))
+MERCURY_GEN_PROC(attr_io_in_t, ((iod_handle_t)(iod_oh)) ((iod_handle_t)(scratch_oh)) 
+                 ((hid_t)(type_id)) ((hg_bulk_t)(bulk_handle)))
+MERCURY_GEN_PROC(attr_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
+                 ((iod_handle_t)(scratch_oh)) ((iod_obj_id_t)(scratch_id)))
 
 MERCURY_GEN_PROC(group_create_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
                  ((iod_obj_id_t)(loc_id)) ((hg_string_t)(name))

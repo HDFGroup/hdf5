@@ -224,7 +224,7 @@ H5A_term_interface(void)
 /* ARGSUSED */
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
-    hid_t acpl_id, hid_t UNUSED aapl_id)
+    hid_t acpl_id, hid_t aapl_id)
 {
     void    *attr = NULL;       /* attr token from VOL plugin */
     void    *obj = NULL;        /* object token of loc_id */
@@ -371,7 +371,8 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* Create the attribute through the VOL */
-    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, aapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, 
+                                        aapl_id, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     /* Get an atom for the attribute */
@@ -1832,7 +1833,8 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* get the attribute info through the VOL */
-    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, loc_params, attr_name, &ret_value) < 0)
+    if(H5VL_attr_get(obj, vol_plugin, H5VL_ATTR_EXISTS, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, 
+                     loc_params, attr_name, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:

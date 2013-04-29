@@ -35,6 +35,7 @@
 #ifdef H5_HAVE_EFF
 
 H5FL_EXTERN(H5VL_iod_file_t);
+H5FL_EXTERN(H5VL_iod_attr_t);
 H5FL_EXTERN(H5VL_iod_group_t);
 H5FL_EXTERN(H5VL_iod_dset_t);
 H5FL_EXTERN(H5VL_iod_dtype_t);
@@ -268,6 +269,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     switch(req->type) {
     case HG_FILE_CREATE:
     case HG_FILE_OPEN:
+    case HG_ATTR_CREATE:
+    case HG_ATTR_OPEN:
     case HG_GROUP_CREATE:
     case HG_GROUP_OPEN:
     case HG_DSET_CREATE:
@@ -320,6 +323,31 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+    case HG_ATTR_WRITE:
+    case HG_ATTR_READ:
+        {
+            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)req->data;
+
+            /* Free memory handle */
+            if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
+                fprintf(stderr, "failed to free bulk handle\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            if(SUCCEED != *((int *)info->status)) {
+                fprintf(stderr, "write failed %d\n", *((int *)info->status));
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            free(info->status);
+            info->status = NULL;
+            info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
+            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_FILE_FLUSH:
         {
             int *status = (int *)req->data;
@@ -354,6 +382,58 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                H5Pclose(file->remote_file.fcpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
             file = H5FL_FREE(H5VL_iod_file_t, file);
+            break;
+        }
+    case HG_ATTR_REMOVE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "attr remove failed at the server");
+
+            free(status);
+            req->data = NULL;
+            obj->request = NULL;
+            H5VL_iod_request_delete(obj, req);
+            break;
+        }
+    case HG_ATTR_EXISTS:
+        {
+            htri_t *ret = (htri_t *)req->data;
+            H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
+
+            if(*ret < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "attr exists failed at the server");
+
+            req->data = NULL;
+            obj->request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_ATTR_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "attr close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            attr->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free attr components */
+            free(attr->common.obj_name);
+            if(attr->remote_attr.acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT &&
+               H5Pclose(attr->remote_attr.acpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(H5Tclose(attr->remote_attr.type_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(H5Sclose(attr->remote_attr.space_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
+            attr = H5FL_FREE(H5VL_iod_attr_t, attr);
             break;
         }
     case HG_GROUP_CLOSE:
@@ -456,13 +536,14 @@ done:
 }
 
 herr_t
-H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_params, const char *name,
+H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, const char *name,
                         iod_obj_id_t *id, iod_handle_t *oh, char **new_name)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
-    H5VL_iod_group_t *cur_grp = NULL;
-    char *cur_name;
+    H5VL_iod_object_t *cur_obj = NULL;
+    const char *path;        /* specified path for the object to traverse to */
+    char *cur_name;          /* full path to object that is currently being looked for */
     H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;              /* Pointer to buffer for path components */
@@ -472,11 +553,6 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
-    HDstrcpy(cur_name, obj->obj_name);
-    cur_size = HDstrlen(obj->obj_name);
 
     if(NULL != obj->request) {
         if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
@@ -489,77 +565,118 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t UNUSED loc_par
         obj->request = NULL;
     }
 
-    if(H5I_FILE == obj->obj_type) {
+    switch(obj->obj_type) {
+    case H5I_FILE:
         cur_oh = obj->file->remote_file.root_oh;
         cur_id = obj->file->remote_file.root_id;
-    }
-    else if (H5I_GROUP == obj->obj_type) {
+        break;
+    case H5I_GROUP:
         cur_oh = ((H5VL_iod_group_t *)obj)->remote_group.iod_oh;
         cur_id = ((H5VL_iod_group_t *)obj)->remote_group.iod_id;
-    }
-    else
+        break;
+    case H5I_DATASET:
+        cur_oh = ((H5VL_iod_dset_t *)obj)->remote_dset.iod_oh;
+        cur_id = ((H5VL_iod_dset_t *)obj)->remote_dset.iod_id;
+        break;
+    case H5I_DATATYPE:
+        cur_oh = ((H5VL_iod_dtype_t *)obj)->remote_dtype.iod_oh;
+        cur_id = ((H5VL_iod_dtype_t *)obj)->remote_dtype.iod_id;
+        break;
+    default:
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
+    }
+
+    if(loc_params.type == H5VL_OBJECT_BY_SELF)
+        path = name;
+    else if (loc_params.type == H5VL_OBJECT_BY_NAME)
+        path = loc_params.loc_data.loc_by_name.name;
+
+    if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(path) + 1)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
+    HDstrcpy(cur_name, obj->obj_name);
+    cur_size = HDstrlen(obj->obj_name);
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
     /* Get a pointer to a buffer that's large enough  */
-    if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(name) + 1))))
+    if(NULL == (comp = (char *)H5WB_actual(wb, (HDstrlen(path) + 1))))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
     /* Traverse the path */
-    while((name = H5G__component(name, &nchars)) && *name) {
+    while((path = H5G__component(path, &nchars)) && *path) {
         const char *s;                  /* Temporary string pointer */
 
 	/*
 	 * Copy the component name into a null-terminated buffer so
 	 * we can pass it down to the other symbol table functions.
 	 */
-	HDmemcpy(comp, name, nchars);
+	HDmemcpy(comp, path, nchars);
 	comp[nchars] = '\0';
 
 	/*
 	 * The special name `.' is a no-op.
 	 */
 	if('.' == comp[0] && !comp[1]) {
-	    name += nchars;
+	    path += nchars;
 	    continue;
 	} /* end if */
 
         /* Check if this is the last component of the name */
-        if(!((s = H5G__component(name + nchars, NULL)) && *s))
+        if(!((s = H5G__component(path + nchars, NULL)) && *s))
             last_comp = TRUE;
 
         HDstrcat(cur_name, comp);
         cur_size += nchars;
         cur_name[cur_size] = '\0';
 
-        if(NULL == (cur_grp = (H5VL_iod_group_t *)H5I_search_name(cur_name, H5I_GROUP)))
-            break;
+        if(NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_GROUP))) {
+            if(last_comp) {
+                if(NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATASET)))
+                   //&& NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATATYPE)))
+                    break;
+            }
+            else
+                break;
+        }
 
         printf("Found %s Locally\n", comp);
 
-        if(NULL != cur_grp->common.request) {
-            if(H5VL_iod_request_wait(obj->file, cur_grp->common.request) < 0)
+        if(NULL != cur_obj->request) {
+            if(H5VL_iod_request_wait(obj->file, cur_obj->request) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
 
             /* Reset object's pointer to request */
             /* (Request is owned by the request object and will be freed when the
              *      application calls test or wait on it.)
              */
-            cur_grp->common.request = NULL;
+            cur_obj->request = NULL;
         }
 
-        cur_id = cur_grp->remote_group.iod_id;
-        cur_oh = cur_grp->remote_group.iod_oh;
+        switch(cur_obj->obj_type) {
+        case H5I_GROUP:
+            cur_oh = ((H5VL_iod_group_t *)cur_obj)->remote_group.iod_oh;
+            cur_id = ((H5VL_iod_group_t *)cur_obj)->remote_group.iod_id;
+            break;
+        case H5I_DATASET:
+            cur_oh = ((H5VL_iod_dset_t *)cur_obj)->remote_dset.iod_oh;
+            cur_id = ((H5VL_iod_dset_t *)cur_obj)->remote_dset.iod_id;
+            break;
+        case H5I_DATATYPE:
+            cur_oh = ((H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_oh;
+            cur_id = ((H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_id;
+            break;
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
+        }
 
 	/* Advance to next component in string */
-	name += nchars;
+	path += nchars;
     }
 
     *id = cur_id;
     *oh = cur_oh;
-    *new_name = strdup(name);
+    *new_name = strdup(path);
 
 done:
     free(cur_name);

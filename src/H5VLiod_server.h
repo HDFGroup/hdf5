@@ -34,6 +34,20 @@ typedef struct H5VL_iod_server_remote_file_t {
     void *fcpl;
 } H5VL_iod_server_remote_file_t;
 
+/* struct that contains the information about the IOD attr */
+typedef struct H5VL_iod_server_remote_attr_t {
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    size_t acpl_size;
+    void *acpl;
+    size_t dtype_size;
+    void *dtype;
+    size_t dspace_size;
+    void *dspace;
+} H5VL_iod_server_remote_attr_t;
+
 /* struct that contains the information about the IOD group */
 typedef struct H5VL_iod_server_remote_group_t {
     iod_handle_t iod_oh;
@@ -76,6 +90,13 @@ H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_flush(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_close(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_read(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_write(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_remove(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_group_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_group_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_group_close(hg_handle_t handle);
