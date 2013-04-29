@@ -529,7 +529,7 @@
 ./perform/sio_timer.h
 ./perform/zip_perf.c
 
-./release_docs/CMake.txt
+./release_docs/INSTALL_CMake.txt
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_9.txt
@@ -539,8 +539,8 @@
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
-./release_docs/USING_CMake.txt
-./release_docs/USING_Windows.txt
+./release_docs/USING_HDF5_CMake.txt
+./release_docs/USING_HDF5_VS.txt
 
 ./src/.indent.pro      _DO_NOT_DISTRIBUTE_
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
