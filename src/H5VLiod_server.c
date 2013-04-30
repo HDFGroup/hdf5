@@ -53,73 +53,73 @@ static herr_t H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle,
                                       char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
                                       iod_obj_id_t *scratch_id, iod_handle_t *scratch_oh);
 
-static herr_t H5VL_iod_server_file_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_file_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_file_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_file_flush_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_attr_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_attr_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_attr_read_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_read_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_attr_write_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_write_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_attr_exists_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_exists_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_attr_remove_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_remove_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_attr_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_attr_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_group_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_group_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                               size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                               void *op_data);
-static herr_t H5VL_iod_server_group_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_group_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_group_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_group_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_dset_create_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_dset_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_dset_read_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_dset_write_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dset_set_extent_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                                  size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                                  void *op_data);
-static herr_t H5VL_iod_server_dset_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dset_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dtype_commit_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dtype_commit_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                               size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                               void *op_data);
-static herr_t H5VL_iod_server_dtype_open_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dtype_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dtype_close_cb(size_t num_necessary_parents, AXE_task_t necessary_parents[], 
+static herr_t H5VL_iod_server_dtype_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
                                              void *op_data);
 herr_t
@@ -127,6 +127,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 {
     na_class_t *network_class = NULL;
     int num_procs;
+    AXE_engine_attr_t engine_attr;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_procs);
@@ -197,6 +198,18 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MERCURY_HANDLER_REGISTER("dtype_close", H5VL_iod_server_dtype_close, 
                                    dtype_close_in_t, ret_t);
 
+    /* Initialize engine attribute */
+    if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
+        return FAIL;
+
+    /* Set number of threads in AXE engine */
+    if(AXEset_num_threads(&engine_attr, 4) != AXE_SUCCEED)
+        return FAIL;
+
+    /* Create AXE engine */
+    if(AXEcreate_engine(&engine, &engine_attr) != AXE_SUCCEED)
+        return FAIL;
+
     /* Loop tp receive requests from clients */
     while(1) {
         fprintf(stderr, "Server In Loop\n");
@@ -206,6 +219,12 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
         if(shutdown)
             break;
     }
+
+    if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
+        return FAIL;
+
+    if(AXEengine_attr_destroy(&engine_attr) != AXE_SUCCEED)
+        return FAIL;
 
     if(HG_SUCCESS != HG_Bulk_finalize())
         return FAIL;
@@ -247,9 +266,6 @@ H5VL_iod_server_eff_init(hg_handle_t handle)
     /* MSC - this needs to be changed to be the number of peers connecting to this server */
     num_peers = num_procs;
 
-    if(AXE_SUCCEED != AXEcreate_engine(4, &engine))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't start AXE engine");
-
 done:
     HG_Handler_start_output(handle, &ret_value);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -281,8 +297,6 @@ H5VL_iod_server_eff_finalize(hg_handle_t handle)
     if(terminate_requests == num_peers) {
         if(iod_finalize(NULL, NULL) < 0 )
             HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, HG_FAIL, "can't finalize IOD");
-        if(AXE_SUCCEED != AXEterminate_engine(engine, TRUE))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, HG_FAIL, "can't shutdown AXE engine");
         shutdown = TRUE;
     }
 
@@ -325,8 +339,11 @@ H5VL_iod_server_file_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_create_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_create_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -368,8 +385,11 @@ H5VL_iod_server_file_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_open_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_open_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -411,8 +431,11 @@ H5VL_iod_server_file_flush(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_flush_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_flush_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -454,8 +477,11 @@ H5VL_iod_server_file_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_file_close_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_close_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -497,8 +523,11 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_attr_create_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_create_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -540,8 +569,11 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_attr_open_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_open_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -583,8 +615,11 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_attr_read_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_read_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -626,8 +661,11 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_attr_write_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_write_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -669,9 +707,11 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
 
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, 
+    input->hg_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_attr_exists_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -713,9 +753,11 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
 
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, 
+    input->hg_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_attr_remove_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -757,8 +799,11 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_attr_close_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_close_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -800,8 +845,11 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_create_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_group_create_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -843,8 +891,11 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_open_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_group_open_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -886,8 +937,11 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_group_close_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_group_close_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -929,8 +983,11 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_create_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_create_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -972,8 +1029,11 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_open_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_open_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1015,8 +1075,11 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_read_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_read_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1058,8 +1121,11 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_write_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_write_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1101,9 +1167,11 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
 
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, 
+    input->hg_handle = handle;
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_dset_set_extent_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1145,8 +1213,11 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dset_close_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_close_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1188,8 +1259,11 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_commit_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_commit_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1231,8 +1305,11 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_open_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_open_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1274,8 +1351,11 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
+
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, &task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_close_cb, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_close_cb, 
                                       input, NULL))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1298,7 +1378,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                void *op_data)
 {
@@ -1411,7 +1491,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -1487,7 +1567,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_flush_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_file_flush_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -1528,7 +1608,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -1577,7 +1657,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_group_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                 size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                 void *op_data)
 {
@@ -1637,7 +1717,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_group_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
@@ -1706,7 +1786,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_group_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                void *op_data)
 {
@@ -1751,7 +1831,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                   size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                   void *op_data)
 {
@@ -1933,7 +2013,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                 size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                 void *op_data)
 {
@@ -2063,7 +2143,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -2163,7 +2243,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -2255,7 +2335,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_set_extent_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                    size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                    void *op_data)
 {
@@ -2298,7 +2378,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
@@ -2343,7 +2423,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dtype_commit_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                 size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                 void *op_data)
 {
@@ -2481,7 +2561,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dtype_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
@@ -2584,7 +2664,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dtype_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
@@ -2629,7 +2709,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_create_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                void *op_data)
 {
@@ -2784,7 +2864,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_open_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -2870,7 +2950,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_read_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
@@ -2956,9 +3036,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_write_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
+                              void *op_data)
 {
     H5VL_iod_attr_io_input_t *input = (H5VL_iod_attr_io_input_t *)op_data;
     iod_handle_t iod_oh = input->iod_oh;
@@ -3046,7 +3127,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_exists_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                void *op_data)
 {
@@ -3105,7 +3187,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_remove_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                void *op_data)
 {
@@ -3161,7 +3244,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_close_cb(size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
+H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
