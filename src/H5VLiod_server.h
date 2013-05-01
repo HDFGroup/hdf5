@@ -23,66 +23,224 @@
 
 #ifdef H5_HAVE_EFF
 
-/* struct that contains the information about the IOD container */
-typedef struct H5VL_iod_server_remote_file_t {
+typedef struct H5VL_iod_file_create_input_t {
+    /* Do NOT change the order of the parameters */
+    const char *name;
+    unsigned flags;
+    hid_t fapl_id;
+    hid_t fcpl_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_file_create_input_t;
+
+typedef struct H5VL_iod_file_open_input_t {
+    /* Do NOT change the order of the parameters */
+    const char *name;
+    unsigned flags;
+    hid_t fapl_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_file_open_input_t;
+
+typedef struct H5VL_iod_file_flush_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    H5F_scope_t scope;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_file_flush_input_t;
+
+typedef struct H5VL_iod_file_close_input_t {
+    /* Do NOT change the order of the parameters */
     iod_handle_t coh;
     iod_handle_t root_oh;
     iod_obj_id_t root_id;
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
-    size_t fcpl_size;
-    void *fcpl;
-} H5VL_iod_server_remote_file_t;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_file_close_input_t;
 
-/* struct that contains the information about the IOD attr */
-typedef struct H5VL_iod_server_remote_attr_t {
+typedef struct H5VL_iod_attr_create_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *path;
+    const char *attr_name;
+    hid_t acpl_id;
+    hid_t type_id;
+    hid_t space_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_create_input_t;
+
+typedef struct H5VL_iod_attr_open_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *path;
+    const char *attr_name;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_open_input_t;
+
+typedef struct H5VL_iod_attr_io_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_handle_t scratch_oh;
+    hid_t type_id;
+    hg_bulk_t bulk_handle;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_io_input_t;
+
+typedef struct H5VL_iod_attr_op_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *path;
+    const char *attr_name;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_op_input_t;
+
+typedef struct H5VL_iod_attr_close_input_t {
+    /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
-    size_t acpl_size;
-    void *acpl;
-    size_t dtype_size;
-    void *dtype;
-    size_t dspace_size;
-    void *dspace;
-} H5VL_iod_server_remote_attr_t;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_attr_close_input_t;
 
-/* struct that contains the information about the IOD group */
-typedef struct H5VL_iod_server_remote_group_t {
+typedef struct H5VL_iod_group_create_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *name;
+    hid_t gapl_id;
+    hid_t gcpl_id;
+    hid_t lcpl_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_group_create_input_t;
+
+typedef struct H5VL_iod_group_open_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *name;
+    hid_t gapl_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_group_open_input_t;
+
+typedef struct H5VL_iod_group_close_input_t {
+    /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
-    size_t gcpl_size;
-    void *gcpl;
-} H5VL_iod_server_remote_group_t;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_group_close_input_t;
 
-/* struct that contains the information about the IOD dset */
-typedef struct H5VL_iod_server_remote_dset_t {
+typedef struct H5VL_iod_dset_create_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *name;
+    hid_t dapl_id;
+    hid_t dcpl_id;
+    hid_t lcpl_id;
+    hid_t type_id;
+    hid_t space_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dset_create_input_t;
+
+typedef struct H5VL_iod_dset_open_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *name;
+    hid_t dapl_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dset_open_input_t;
+
+typedef struct H5VL_iod_dset_io_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_handle_t scratch_oh;
+    hid_t space_id;
+    hid_t dxpl_id;
+    uint32_t checksum;
+    hg_bulk_t bulk_handle;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dset_io_input_t;
+
+typedef struct H5VL_iod_dset_set_extent_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    struct dims_t dims;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dset_set_extent_input_t;
+
+typedef struct H5VL_iod_dset_close_input_t {
+    /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
-    size_t dcpl_size;
-    void *dcpl;
-    size_t dtype_size;
-    void *dtype;
-    size_t dspace_size;
-    void *dspace;
-} H5VL_iod_server_remote_dset_t;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dset_close_input_t;
 
-/* struct that contains the information about the IOD dtype */
-typedef struct H5VL_iod_server_remote_dtype_t {
+typedef struct H5VL_iod_dtype_commit_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *name;
+    hid_t tapl_id;
+    hid_t tcpl_id;
+    hid_t lcpl_id;
+    hid_t type_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dtype_commit_input_t;
+
+typedef struct H5VL_iod_dtype_open_input_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t loc_oh;
+    iod_obj_id_t loc_id;
+    const char *name;
+    hid_t tapl_id;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dtype_open_input_t;
+
+typedef struct H5VL_iod_dtype_close_input_t {
+    /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
     iod_handle_t scratch_oh;
     iod_obj_id_t scratch_id;
-    size_t tcpl_size;
-    void *tcpl;
-    size_t dtype_size;
-    void *dtype;
-} H5VL_iod_server_remote_dtype_t;
+    AXE_task_t axe_id;
+    hg_handle_t hg_handle;
+} H5VL_iod_dtype_close_input_t;
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);

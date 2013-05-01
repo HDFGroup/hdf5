@@ -353,7 +353,6 @@ int main(int argc, char **argv) {
      * This is implemented synchronously for now. */
     int_id = H5Topen_ff(file_id, "int", H5P_DEFAULT, 0, event_q);
     assert(int_id);
-
     /* Open a dataset D1 on the file in a group hierarchy. 
        Internally there is a built in wait on group G1.*/
     did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);

@@ -150,6 +150,8 @@ H5FL_DEFINE(H5VL_iod_dtype_t);
 static na_addr_t PEER;
 uint32_t write_checksum;
 static na_class_t *network_class = NULL;
+static uint64_t axe_id;
+static uint64_t axe_bound;
 
 static H5VL_class_t H5VL_iod_g = {
     IOD,
@@ -290,11 +292,17 @@ EFF_init(MPI_Comm comm, MPI_Info info)
     char mpi_port_name[MPI_MAX_PORT_NAME];
     FILE *config;
     hg_request_t hg_req;
-    int num_procs;
+    int num_procs, my_rank;
     na_addr_t ion_target;
+    uint64_t axe_seed;
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_procs);
+    MPI_Comm_rank(comm, &my_rank);
+
+    axe_seed = (pow(2,64) - 1) / num_procs;
+    axe_id = axe_seed * my_rank;
+    axe_bound = axe_seed * (my_rank + 1);
 
     if ((config = fopen("port.cfg", "r")) != NULL) {
         fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
@@ -582,7 +590,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
-    H5VL_iod_file_create_input_t input;
+    file_create_in_t input;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE;  /* Whether we're performing async. I/O */
     void  *ret_value = NULL;
 
@@ -612,6 +620,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     input.flags = flags;
     input.fcpl_id = fcpl_id;
     input.fapl_id = fapl_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -714,7 +723,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
-    H5VL_iod_file_open_input_t input;
+    file_open_in_t input;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void  *ret_value = NULL;
 
@@ -734,6 +743,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     input.name = name;
     input.flags = flags;
     input.fapl_id = fapl_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -833,7 +843,7 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     int *status;
-    H5VL_iod_file_flush_input_t input;
+    file_flush_in_t input;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
@@ -848,6 +858,7 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     /* set the input structure for the HG encode routine */
     input.coh = file->remote_file.coh;
     input.scope = scope;
+    input.axe_id = axe_id ++;
 
     /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
@@ -1126,6 +1137,7 @@ static herr_t
 H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
 {
     H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
+    file_close_in_t input;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     int *status;
@@ -1151,8 +1163,15 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
     else
         hg_req = &_hg_req;
 
+    input.coh = file->remote_file.coh;
+    input.root_oh = file->remote_file.root_oh;
+    input.root_id = file->remote_file.root_id;
+    input.scratch_oh = file->remote_file.scratch_oh;
+    input.scratch_id = file->remote_file.scratch_id;
+    input.axe_id = axe_id ++;
+
     /* forward the call to the ION */
-    if(HG_Forward(PEER, H5VL_FILE_CLOSE_ID, &file->remote_file, status, hg_req) < 0)
+    if(HG_Forward(PEER, H5VL_FILE_CLOSE_ID, &input, status, hg_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
 
     /* Get async request for operation */
@@ -1215,7 +1234,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
     H5VL_iod_group_t *grp = NULL; /* the group object that is created and passed to the user */
-    H5VL_iod_group_create_input_t input;
+    group_create_in_t input;
     H5P_genplist_t *plist;
     hid_t lcpl_id;
     iod_obj_id_t iod_id;
@@ -1256,6 +1275,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.gcpl_id = gcpl_id;
     input.gapl_id = gapl_id;
     input.lcpl_id = lcpl_id;
+    input.axe_id = axe_id ++;
 
     /* Get the group access plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gapl_id)))
@@ -1368,7 +1388,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    H5VL_iod_group_open_input_t input;
+    group_open_in_t input;
     void           *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1389,6 +1409,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     input.loc_oh = iod_oh;
     input.name = new_name;
     input.gapl_id = gapl_id;
+    input.axe_id = axe_id ++;
 
     /* Get the group access plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gapl_id)))
@@ -1535,6 +1556,7 @@ static herr_t
 H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
+    group_close_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -1568,8 +1590,14 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     else
         hg_req = &_hg_req;
 
+    input.iod_oh = grp->remote_group.iod_oh;
+    input.iod_id = grp->remote_group.iod_id;
+    input.scratch_oh = grp->remote_group.scratch_oh;
+    input.scratch_id = grp->remote_group.scratch_id;
+    input.axe_id = axe_id ++;
+
     /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_GROUP_CLOSE_ID, &grp->remote_group, status, hg_req) < 0)
+    if(HG_Forward(PEER, H5VL_GROUP_CLOSE_ID, &input, status, hg_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship group close");
 
     /* Get async request for operation */
@@ -1632,7 +1660,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the dataset */
     H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
-    H5VL_iod_dset_create_input_t input;
+    dset_create_in_t input;
     H5P_genplist_t *plist;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
@@ -1679,6 +1707,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     input.lcpl_id = lcpl_id;
     input.type_id = type_id;
     input.space_id = space_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -1783,7 +1812,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the dataset */
     H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
-    H5VL_iod_dset_open_input_t input;
+    dset_open_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name; /* resolved path to where we need to start traversal at the server */
@@ -1812,6 +1841,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.loc_oh = iod_oh;
     input.name = new_name;
     input.dapl_id = dapl_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -1908,7 +1938,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                       hid_t file_space_id, hid_t dxpl_id, void *buf, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
-    H5VL_iod_dset_io_input_t input;
+    dset_io_in_t input;
     H5P_genplist_t *plist;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -1984,6 +2014,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.checksum = 0;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
+    input.axe_id = axe_id ++;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
     status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
@@ -2067,7 +2098,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
-    H5VL_iod_dset_io_input_t input;
+    dset_io_in_t input;
     H5P_genplist_t *plist;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -2149,6 +2180,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.checksum = cs;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
+    input.axe_id = axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
@@ -2228,7 +2260,7 @@ herr_t
 H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
-    H5VL_iod_dset_set_extent_input_t input;
+    dset_set_extent_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
@@ -2261,6 +2293,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     input.iod_oh = dset->remote_dset.iod_oh;
     input.dims.rank = H5Sget_simple_extent_ndims(dset->remote_dset.space_id);
     input.dims.size = size;
+    input.axe_id = axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
@@ -2410,6 +2443,7 @@ static herr_t
 H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
+    dset_close_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -2444,8 +2478,14 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     else
         hg_req = &_hg_req;
 
+    input.iod_oh = dset->remote_dset.iod_oh;
+    input.iod_id = dset->remote_dset.iod_id;
+    input.scratch_oh = dset->remote_dset.scratch_oh;
+    input.scratch_id = dset->remote_dset.scratch_id;
+    input.axe_id = axe_id ++;
+
     /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_CLOSE_ID, &dset->remote_dset, status, hg_req) < 0)
+    if(HG_Forward(PEER, H5VL_DSET_CLOSE_ID, &input, status, hg_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship dset close");
 
     /* Get async request for operation */
@@ -2510,7 +2550,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the datatype */
     H5VL_iod_dtype_t  *dtype = NULL; /* the datatype object that is created and passed to the user */
     H5T_t *dt = NULL;
-    H5VL_iod_dtype_commit_input_t input;
+    dtype_commit_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name; /* resolved path to where we need to start traversal at the server */
@@ -2542,6 +2582,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     input.tapl_id = tapl_id;
     input.lcpl_id = lcpl_id;
     input.type_id = type_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -2642,7 +2683,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the datatype */
     H5VL_iod_dtype_t *dtype = NULL; /* the datatype object that is created and passed to the user */
-    H5VL_iod_dtype_open_input_t input;
+    dtype_open_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name; /* resolved path to where we need to start traversal at the server */
@@ -2671,6 +2712,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     input.loc_oh = iod_oh;
     input.name = new_name;
     input.tapl_id = tapl_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -2798,6 +2840,7 @@ static herr_t
 H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
 {
     H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
+    dtype_close_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -2832,8 +2875,14 @@ H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
     else
         hg_req = &_hg_req;
 
+    input.iod_oh = dtype->remote_dtype.iod_oh;
+    input.iod_id = dtype->remote_dtype.iod_id;
+    input.scratch_oh = dtype->remote_dtype.scratch_oh;
+    input.scratch_id = dtype->remote_dtype.scratch_id;
+    input.axe_id = axe_id ++;
+
     /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DTYPE_CLOSE_ID, &dtype->remote_dtype, status, hg_req) < 0)
+    if(HG_Forward(PEER, H5VL_DTYPE_CLOSE_ID, &input, status, hg_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship dtype close");
 
     /* Get async request for operation */
@@ -2896,7 +2945,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the attribute */
     H5VL_iod_attr_t *attr = NULL; /* the attribute object that is created and passed to the user */
-    H5VL_iod_attr_create_input_t input;
+    attr_create_in_t input;
     H5P_genplist_t *plist;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
@@ -2942,6 +2991,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.acpl_id = acpl_id;
     input.type_id = type_id;
     input.space_id = space_id;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -3055,7 +3105,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the attribute */
     H5VL_iod_attr_t *attr = NULL; /* the attribute object that is created and passed to the user */
-    H5VL_iod_attr_open_input_t input;
+    attr_open_in_t input;
     char *new_name;   /* resolved path to where we need to start traversal at the server */
     const char *path; /* path on where the traversal starts relative to the location object specified */
     iod_obj_id_t iod_id;
@@ -3085,6 +3135,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     input.loc_oh = iod_oh;
     input.path = new_name;
     input.attr_name = attr_name;
+    input.axe_id = axe_id ++;
 
     /* get a function shipper request */
     if(do_async) {
@@ -3188,7 +3239,7 @@ static herr_t
 H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, void **req)
 {
     H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)_attr;
-    H5VL_iod_attr_io_input_t input;
+    attr_io_in_t input;
     H5P_genplist_t *plist;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -3226,6 +3277,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.scratch_oh = attr->remote_attr.scratch_oh;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
+    input.axe_id = axe_id ++;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
     status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
@@ -3307,7 +3359,7 @@ static herr_t
 H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl_id, void **req)
 {
     H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)_attr;
-    H5VL_iod_attr_io_input_t input;
+    attr_io_in_t input;
     H5P_genplist_t *plist;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -3351,6 +3403,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.scratch_oh = attr->remote_attr.scratch_oh;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
+    input.axe_id = axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
@@ -3434,7 +3487,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
                           hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the attribute */
-    H5VL_iod_attr_op_input_t input;
+    attr_op_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name;   /* resolved path to where we need to start traversal at the server */
@@ -3461,6 +3514,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.loc_oh = iod_oh;
     input.path = new_name;
     input.attr_name = attr_name;
+    input.axe_id = axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
@@ -3636,7 +3690,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 htri_t *ret = va_arg (arguments, htri_t *);
                 htri_t *value = NULL;
                 char *new_name;
-                H5VL_iod_attr_op_input_t input;
+                attr_op_in_t input;
 
                 /* resolve the location where to lookup the attribute by fetching
                    the iod id and object handle for the last open group in the
@@ -3651,6 +3705,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.loc_oh = iod_oh;
                 input.path = new_name;
                 input.attr_name = attr_name;
+                input.axe_id = axe_id ++;
 
                 value = (htri_t *)malloc(sizeof(htri_t));
 
@@ -3759,6 +3814,7 @@ static herr_t
 H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
 {
     H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)_attr;
+    attr_close_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -3793,8 +3849,14 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
     else
         hg_req = &_hg_req;
 
+    input.iod_oh = attr->remote_attr.iod_oh;
+    input.iod_id = attr->remote_attr.iod_id;
+    input.scratch_oh = attr->remote_attr.scratch_oh;
+    input.scratch_id = attr->remote_attr.scratch_id;
+    input.axe_id = axe_id ++;
+
     /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_CLOSE_ID, &attr->remote_attr, status, hg_req) < 0)
+    if(HG_Forward(PEER, H5VL_ATTR_CLOSE_ID, &input, status, hg_req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship attr close");
 
     /* Get async request for operation */

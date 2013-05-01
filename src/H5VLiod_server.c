@@ -32,6 +32,7 @@
 #ifdef H5_HAVE_EFF
 
 #define H5_DO_NATIVE 0
+
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2013
@@ -143,18 +144,18 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Register function and encoding/decoding functions */
     MERCURY_HANDLER_REGISTER("eff_init", H5VL_iod_server_eff_init, 
-                                   eff_init_in_t, ret_t);
+                             eff_init_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("eff_finalize", H5VL_iod_server_eff_finalize, 
-                                   ret_t, ret_t);
+                             ret_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("file_create", H5VL_iod_server_file_create, 
-                                   file_create_in_t, file_create_out_t);
+                             file_create_in_t, file_create_out_t);
     MERCURY_HANDLER_REGISTER("file_open", H5VL_iod_server_file_open, 
-                                   file_open_in_t, file_open_out_t);
+                             file_open_in_t, file_open_out_t);
     MERCURY_HANDLER_REGISTER("file_flush", H5VL_iod_server_file_flush, 
-                                   file_flush_in_t, ret_t);
+                             file_flush_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("file_close", H5VL_iod_server_file_close, 
-                                   file_close_in_t, ret_t);
+                             file_close_in_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("attr_create", H5VL_iod_server_attr_create, 
                              attr_create_in_t, attr_create_out_t);
@@ -172,31 +173,31 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              attr_close_in_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("group_create", H5VL_iod_server_group_create, 
-                                   group_create_in_t, group_create_out_t);
+                             group_create_in_t, group_create_out_t);
     MERCURY_HANDLER_REGISTER("group_open", H5VL_iod_server_group_open, 
-                                   group_open_in_t, group_open_out_t);
+                             group_open_in_t, group_open_out_t);
     MERCURY_HANDLER_REGISTER("group_close", H5VL_iod_server_group_close, 
-                                   group_close_in_t, ret_t);
+                             group_close_in_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("dset_create", H5VL_iod_server_dset_create, 
-                                   dset_create_in_t, dset_create_out_t);
+                             dset_create_in_t, dset_create_out_t);
     MERCURY_HANDLER_REGISTER("dset_open", H5VL_iod_server_dset_open, 
-                                   dset_open_in_t, dset_open_out_t);
+                             dset_open_in_t, dset_open_out_t);
     MERCURY_HANDLER_REGISTER("dset_read", H5VL_iod_server_dset_read, 
-                                   dset_io_in_t, dset_read_out_t);
+                             dset_io_in_t, dset_read_out_t);
     MERCURY_HANDLER_REGISTER("dset_write", H5VL_iod_server_dset_write, 
-                                   dset_io_in_t, ret_t);
+                             dset_io_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("dset_set_extent", H5VL_iod_server_dset_set_extent, 
-                                   dset_set_extent_in_t, ret_t);
+                             dset_set_extent_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("dset_close", H5VL_iod_server_dset_close, 
-                                   dset_close_in_t, ret_t);
+                             dset_close_in_t, ret_t);
 
     MERCURY_HANDLER_REGISTER("dtype_commit", H5VL_iod_server_dtype_commit, 
-                                   dtype_commit_in_t, dtype_commit_out_t);
+                             dtype_commit_in_t, dtype_commit_out_t);
     MERCURY_HANDLER_REGISTER("dtype_open", H5VL_iod_server_dtype_open, 
-                                   dtype_open_in_t, dtype_open_out_t);
+                             dtype_open_in_t, dtype_open_out_t);
     MERCURY_HANDLER_REGISTER("dtype_close", H5VL_iod_server_dtype_close, 
-                                   dtype_close_in_t, ret_t);
+                             dtype_close_in_t, ret_t);
 
     /* Initialize engine attribute */
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
@@ -324,7 +325,6 @@ int
 H5VL_iod_server_file_create(hg_handle_t handle)
 {
     H5VL_iod_file_create_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -339,12 +339,9 @@ H5VL_iod_server_file_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_create_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_file_create_cb, input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -370,7 +367,6 @@ int
 H5VL_iod_server_file_open(hg_handle_t handle)
 {
     H5VL_iod_file_open_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -385,12 +381,9 @@ H5VL_iod_server_file_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_open_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_file_open_cb, input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -416,7 +409,6 @@ int
 H5VL_iod_server_file_flush(hg_handle_t handle)
 {
     H5VL_iod_file_flush_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -431,12 +423,9 @@ H5VL_iod_server_file_flush(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_flush_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_file_flush_cb, input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -461,14 +450,13 @@ done:
 int
 H5VL_iod_server_file_close(hg_handle_t handle)
 {
-    H5VL_iod_remote_file_t *input = NULL;
-    AXE_task_t task;
+    H5VL_iod_file_close_input_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_remote_file_t *)
-                H5MM_malloc(sizeof(H5VL_iod_remote_file_t))))
+    if(NULL == (input = (H5VL_iod_file_close_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_file_close_input_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -477,12 +465,9 @@ H5VL_iod_server_file_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_file_close_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_file_close_cb, input, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -508,7 +493,6 @@ int
 H5VL_iod_server_attr_create(hg_handle_t handle)
 {
     H5VL_iod_attr_create_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -523,12 +507,9 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_create_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_attr_create_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -554,7 +535,6 @@ int
 H5VL_iod_server_attr_open(hg_handle_t handle)
 {
     H5VL_iod_attr_open_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -569,12 +549,9 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_open_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_attr_open_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -600,7 +577,6 @@ int
 H5VL_iod_server_attr_read(hg_handle_t handle)
 {
     H5VL_iod_attr_io_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -615,12 +591,9 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_read_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_attr_read_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -646,7 +619,6 @@ int
 H5VL_iod_server_attr_write(hg_handle_t handle)
 {
     H5VL_iod_attr_io_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -661,12 +633,9 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_write_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_attr_write_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -692,7 +661,6 @@ int
 H5VL_iod_server_attr_exists(hg_handle_t handle)
 {
     H5VL_iod_attr_op_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -707,11 +675,8 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_attr_exists_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -738,7 +703,6 @@ int
 H5VL_iod_server_attr_remove(hg_handle_t handle)
 {
     H5VL_iod_attr_op_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -753,11 +717,8 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_attr_remove_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -783,14 +744,13 @@ done:
 int
 H5VL_iod_server_attr_close(hg_handle_t handle)
 {
-    H5VL_iod_remote_attr_t *input = NULL;
-    AXE_task_t task;
+    H5VL_iod_attr_close_input_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_remote_attr_t *)
-                H5MM_malloc(sizeof(H5VL_iod_remote_attr_t))))
+    if(NULL == (input = (H5VL_iod_attr_close_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_attr_close_input_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -799,12 +759,9 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_attr_close_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_attr_close_cb, input, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -830,7 +787,6 @@ int
 H5VL_iod_server_group_create(hg_handle_t handle)
 {
     H5VL_iod_group_create_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -845,12 +801,9 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_group_create_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_group_create_cb, input, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -876,7 +829,6 @@ int
 H5VL_iod_server_group_open(hg_handle_t handle)
 {
     H5VL_iod_group_open_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -891,12 +843,9 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_group_open_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_group_open_cb, input, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -921,14 +870,13 @@ done:
 int
 H5VL_iod_server_group_close(hg_handle_t handle)
 {
-    H5VL_iod_remote_group_t *input = NULL;
-    AXE_task_t task;
+    H5VL_iod_group_close_input_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_remote_group_t *)
-                H5MM_malloc(sizeof(H5VL_iod_remote_group_t))))
+    if(NULL == (input = (H5VL_iod_group_close_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_group_close_input_t))))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -937,12 +885,9 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_group_close_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_group_close_cb, input, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -968,7 +913,6 @@ int
 H5VL_iod_server_dset_create(hg_handle_t handle)
 {
     H5VL_iod_dset_create_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -983,12 +927,9 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_create_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dset_create_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1014,7 +955,6 @@ int
 H5VL_iod_server_dset_open(hg_handle_t handle)
 {
     H5VL_iod_dset_open_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1029,12 +969,9 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_open_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dset_open_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1060,7 +997,6 @@ int
 H5VL_iod_server_dset_read(hg_handle_t handle)
 {
     H5VL_iod_dset_io_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1075,12 +1011,9 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_read_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dset_read_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1106,7 +1039,6 @@ int
 H5VL_iod_server_dset_write(hg_handle_t handle)
 {
     H5VL_iod_dset_io_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1121,12 +1053,9 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_write_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dset_write_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1152,7 +1081,6 @@ int
 H5VL_iod_server_dset_set_extent(hg_handle_t handle)
 {
     H5VL_iod_dset_set_extent_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1167,11 +1095,8 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, 
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_dset_set_extent_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
@@ -1197,14 +1122,13 @@ done:
 int
 H5VL_iod_server_dset_close(hg_handle_t handle)
 {
-    H5VL_iod_remote_dset_t *input = NULL;
-    AXE_task_t task;
+    H5VL_iod_dset_close_input_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_remote_dset_t *)
-                H5MM_malloc(sizeof(H5VL_iod_remote_dset_t))))
+    if(NULL == (input = (H5VL_iod_dset_close_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dset_close_input_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1213,12 +1137,9 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dset_close_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dset_close_cb, input, NULL))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1244,7 +1165,6 @@ int
 H5VL_iod_server_dtype_commit(hg_handle_t handle)
 {
     H5VL_iod_dtype_commit_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1259,12 +1179,9 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_commit_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dtype_commit_cb, input, NULL))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1290,7 +1207,6 @@ int
 H5VL_iod_server_dtype_open(hg_handle_t handle)
 {
     H5VL_iod_dtype_open_input_t *input = NULL;
-    AXE_task_t task;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1305,12 +1221,9 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_open_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dtype_open_cb, input, NULL))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1335,14 +1248,13 @@ done:
 int
 H5VL_iod_server_dtype_close(hg_handle_t handle)
 {
-    H5VL_iod_remote_dtype_t *input = NULL;
-    AXE_task_t task;
+    H5VL_iod_dtype_close_input_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_remote_dtype_t *)
-                H5MM_malloc(sizeof(H5VL_iod_remote_dtype_t))))
+    if(NULL == (input = (H5VL_iod_dtype_close_input_t *)
+                H5MM_malloc(sizeof(H5VL_iod_dtype_close_input_t))))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1351,12 +1263,9 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    if(AXEgenerate_task_id(engine, &task) != AXE_SUCCEED)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't generate AXE ID\n");
-
     input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, task, 0, NULL, 0, NULL, H5VL_iod_server_dtype_close_cb, 
-                                      input, NULL))
+    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                      H5VL_iod_server_dtype_close_cb, input, NULL))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -1383,7 +1292,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
                                void *op_data)
 {
     H5VL_iod_file_create_input_t *input = (H5VL_iod_file_create_input_t *)op_data;
-    H5VL_iod_remote_file_t output;
+    file_create_out_t output;
     unsigned int mode;
     iod_handle_t coh;
     iod_handle_t root_handle, scratch_oh;
@@ -1496,7 +1405,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
                              void *op_data)
 {
     H5VL_iod_file_open_input_t *input = (H5VL_iod_file_open_input_t *)op_data;
-    H5VL_iod_remote_file_t output;
+    file_open_out_t output;
     unsigned int mode = input->flags;
     iod_handle_t coh;
     iod_handle_t root_handle, scratch_oh;
@@ -1541,6 +1450,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
     output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
 
     fprintf(stderr, "Done with file open, sending response to client\n");
+
     HG_Handler_start_output(input->hg_handle, &output);
 
 done:
@@ -1612,7 +1522,7 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                              void *op_data)
 {
-    H5VL_iod_remote_file_t *input = (H5VL_iod_remote_file_t *)op_data;
+    H5VL_iod_file_close_input_t *input = (H5VL_iod_file_close_input_t *)op_data;
     iod_handle_t coh = input->coh;
     iod_handle_t root_oh = input->root_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
@@ -1662,7 +1572,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED nu
                                 void *op_data)
 {
     H5VL_iod_group_create_input_t *input = (H5VL_iod_group_create_input_t *)op_data;
-    H5VL_iod_remote_group_t output;
+    group_create_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -1722,7 +1632,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
                               void *op_data)
 {
     H5VL_iod_group_open_input_t *input = (H5VL_iod_group_open_input_t *)op_data;
-    H5VL_iod_remote_group_t output;
+    group_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -1790,7 +1700,7 @@ H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                                void *op_data)
 {
-    H5VL_iod_remote_group_t *input = (H5VL_iod_remote_group_t *)op_data;
+    H5VL_iod_group_close_input_t *input = (H5VL_iod_group_close_input_t *)op_data;
     iod_handle_t iod_oh = input->iod_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
     herr_t ret_value = SUCCEED;
@@ -1836,7 +1746,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
                                   void *op_data)
 {
     H5VL_iod_dset_create_input_t *input = (H5VL_iod_dset_create_input_t *)op_data;
-    H5VL_iod_remote_dset_t output;
+    dset_create_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -2018,7 +1928,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
                                 void *op_data)
 {
     H5VL_iod_dset_open_input_t *input = (H5VL_iod_dset_open_input_t *)op_data;
-    H5VL_iod_remote_dset_t output;
+    dset_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -2122,6 +2032,11 @@ done:
     if(ret_value < 0)
         HG_Handler_start_output(input->hg_handle, &ret_value);
 
+#if !H5_DO_NATIVE
+    H5Tclose(output.type_id);
+    H5Sclose(output.space_id);
+#endif
+
     input = H5MM_xfree(input);
     free(last_comp);
 
@@ -2148,7 +2063,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
                              void *op_data)
 {
     H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)op_data;
-    H5VL_iod_read_status_t output;
+    dset_read_out_t output;
     iod_handle_t iod_oh = input->iod_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
     hg_bulk_t bulk_handle = input->bulk_handle;
@@ -2382,7 +2297,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
-    H5VL_iod_remote_dset_t *input = (H5VL_iod_remote_dset_t *)op_data;
+    H5VL_iod_dset_close_input_t *input = (H5VL_iod_dset_close_input_t *)op_data;
     iod_handle_t iod_oh = input->iod_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
     herr_t ret_value = SUCCEED;
@@ -2428,7 +2343,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED nu
                                 void *op_data)
 {
     H5VL_iod_dtype_commit_input_t *input = (H5VL_iod_dtype_commit_input_t *)op_data;
-    H5VL_iod_remote_dtype_t output;
+    dtype_commit_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -2566,7 +2481,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
                               void *op_data)
 {
     H5VL_iod_dtype_open_input_t *input = (H5VL_iod_dtype_open_input_t *)op_data;
-    H5VL_iod_remote_dtype_t output;
+    dtype_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -2602,21 +2517,16 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype tcpl lookup failed");
 #endif
 
-    {
-        hsize_t dims[1];
-        //hid_t space_id, type_id;
-
 #if H5_DO_NATIVE
-        printf("datatype name %s    location %d\n", name, loc_handle.cookie);
-        cur_oh.cookie = H5Topen(loc_handle.cookie, name, input->tapl_id);
-        HDassert(cur_oh.cookie);
-        output.type_id = cur_oh.cookie;//H5Tget_type(cur_oh.cookie);
-        output.tcpl_id = H5Tget_create_plist(cur_oh.cookie);
+    printf("datatype name %s    location %d\n", name, loc_handle.cookie);
+    cur_oh.cookie = H5Topen(loc_handle.cookie, name, input->tapl_id);
+    HDassert(cur_oh.cookie);
+    output.type_id = cur_oh.cookie;//H5Tget_type(cur_oh.cookie);
+    output.tcpl_id = H5Tget_create_plist(cur_oh.cookie);
 #else
-        /* fake a type, and tcpl */
-        dims [0] = 60;
-        output.type_id = H5Tcopy(H5T_NATIVE_INT);
-        output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+    /* fake a type, and tcpl */
+    output.type_id = H5Tcopy(H5T_NATIVE_INT);
+    output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
 #endif
 
 #if 0
@@ -2631,7 +2541,6 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
         if(H5Tencode(type_id, output.dtype, &output.dtype_size) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 #endif
-    }
 
     output.iod_id = cur_id;
     output.iod_oh = cur_oh;
@@ -2645,6 +2554,9 @@ done:
     if(ret_value < 0)
         HG_Handler_start_output(input->hg_handle, &ret_value);
 
+#if !H5_DO_NATIVE
+    H5Tclose(output.type_id);
+#endif
     input = H5MM_xfree(input);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dtype_open_cb() */
@@ -2668,7 +2580,7 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
-    H5VL_iod_remote_dtype_t *input = (H5VL_iod_remote_dtype_t *)op_data;
+    H5VL_iod_dtype_close_input_t *input = (H5VL_iod_dtype_close_input_t *)op_data;
     iod_handle_t iod_oh = input->iod_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
     herr_t ret_value = SUCCEED;
@@ -2714,7 +2626,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
                                void *op_data)
 {
     H5VL_iod_attr_create_input_t *input = (H5VL_iod_attr_create_input_t *)op_data;
-    H5VL_iod_remote_attr_t output;
+    attr_create_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -2869,7 +2781,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
                              void *op_data)
 {
     H5VL_iod_attr_open_input_t *input = (H5VL_iod_attr_open_input_t *)op_data;
-    H5VL_iod_remote_attr_t output;
+    attr_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_handle_t cur_oh, scratch_oh;
@@ -2927,6 +2839,11 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
 done:
     if(ret_value < 0)
         HG_Handler_start_output(input->hg_handle, &ret_value);
+
+#if !H5_DO_NATIVE
+    H5Sclose(output.space_id);
+    H5Tclose(output.type_id);
+#endif
 
     input = H5MM_xfree(input);
     if(last_comp)
@@ -3249,7 +3166,7 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
                               void *op_data)
 {
-    H5VL_iod_remote_attr_t *input = (H5VL_iod_remote_attr_t *)op_data;
+    H5VL_iod_attr_close_input_t *input = (H5VL_iod_attr_close_input_t *)op_data;
     iod_handle_t iod_oh = input->iod_oh;
     iod_handle_t scratch_oh = input->scratch_oh;
     herr_t ret_value = SUCCEED;

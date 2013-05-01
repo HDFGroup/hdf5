@@ -676,7 +676,10 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, co
 
     *id = cur_id;
     *oh = cur_oh;
-    *new_name = strdup(path);
+    if(*path)
+        *new_name = strdup(path);
+    else
+        *new_name = strdup(".");
 
 done:
     free(cur_name);
@@ -685,5 +688,35 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_local_traverse */
+
+#if 0
+static herr_t
+H5VL_generate_axe_ids(int myrank, int nranks, uint64_t *start_id)
+{
+    uint64_t seed;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    seed = (pow(2,64) - 1) / nranks;
+    *start_id = seed * my_rank;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+static herr_t
+H5VL_iod_get_axe_id(int myrank, int nranks, int index, uint64_t *id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif
 
 #endif /* H5_HAVE_EFF */

@@ -72,6 +72,62 @@ typedef struct H5VL_iod_request_t {
     struct H5VL_iod_request_t *next;
 } H5VL_iod_request_t;
 
+/* struct that contains the information about the IOD container */
+typedef struct H5VL_iod_remote_file_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t coh;
+    iod_handle_t root_oh;
+    iod_obj_id_t root_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    hid_t fcpl_id;
+} H5VL_iod_remote_file_t;
+
+/* struct that contains the information about the IOD attr */
+typedef struct H5VL_iod_remote_attr_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    hid_t acpl_id;
+    hid_t type_id;
+    hid_t space_id;
+} H5VL_iod_remote_attr_t;
+
+/* struct that contains the information about the IOD group */
+typedef struct H5VL_iod_remote_group_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    hid_t gcpl_id;
+} H5VL_iod_remote_group_t;
+
+/* struct that contains the information about the IOD dset */
+typedef struct H5VL_iod_remote_dset_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    hid_t dcpl_id;
+    hid_t type_id;
+    hid_t space_id;
+} H5VL_iod_remote_dset_t;
+
+/* struct that contains the information about the IOD dtype */
+typedef struct H5VL_iod_remote_dtype_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    iod_handle_t scratch_oh;
+    iod_obj_id_t scratch_id;
+    hid_t tcpl_id;
+    hid_t type_id;
+} H5VL_iod_remote_dtype_t;
+
 /* a common strcut between all client side objects */
 typedef struct H5VL_iod_object_t {
     H5I_type_t obj_type;
