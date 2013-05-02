@@ -990,29 +990,31 @@
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gen_bad_ohdr.c           _DO_NOT_DISTRIBUTE_
-./test/gen_bad_compound.c       _DO_NOT_DISTRIBUTE_
-./test/gen_bogus.c              _DO_NOT_DISTRIBUTE_
-./test/gen_cross.c              _DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c            _DO_NOT_DISTRIBUTE_
-./test/gen_file_image.c         _DO_NOT_DISTRIBUTE_
-./test/gen_filespace.c          _DO_NOT_DISTRIBUTE_
-./test/gen_mergemsg.c           _DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c          _DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c           _DO_NOT_DISTRIBUTE_
-./test/gen_new_group.c          _DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c          _DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c          _DO_NOT_DISTRIBUTE_
-./test/gen_noencoder.c          _DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c          _DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c          _DO_NOT_DISTRIBUTE_
-./test/gen_old_group.c          _DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c         _DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c          _DO_NOT_DISTRIBUTE_
-./test/gen_plist.c              _DO_NOT_DISTRIBUTE_
-./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
-./test/gen_specmetaread.c       _DO_NOT_DISTRIBUTE_
-./test/gen_udlinks.c            _DO_NOT_DISTRIBUTE_
+# ====distribute this for now. See HDFFV-8236====
+./test/gen_bad_ohdr.c
+./test/gen_bad_compound.c
+./test/gen_bogus.c
+./test/gen_cross.c
+./test/gen_deflate.c
+./test/gen_file_image.c
+./test/gen_filespace.c
+./test/gen_mergemsg.c
+./test/gen_new_array.c
+./test/gen_new_fill.c
+./test/gen_new_group.c
+./test/gen_new_mtime.c
+./test/gen_new_super.c
+./test/gen_noencoder.c
+./test/gen_nullspace.c
+./test/gen_old_array.c
+./test/gen_old_group.c
+./test/gen_old_layout.c
+./test/gen_old_mtime.c
+./test/gen_plist.c
+./test/gen_sizes_lheap.c
+./test/gen_specmetaread.c
+./test/gen_udlinks.c
+# ====end distribute this for now. See HDFFV-8236====
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -1039,7 +1041,9 @@
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
-./test/space_overflow.c      _DO_NOT_DISTRIBUTE_
+# ====distribute this for now. See HDFFV-8236====
+./test/space_overflow.c
+# ====end distribute this for now. See HDFFV-8236====
 ./test/specmetaread.h5
 ./test/stab.c
 ./test/tarray.c
