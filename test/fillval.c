@@ -37,6 +37,7 @@ const char *FILENAME[] = {
     "fillval_6",
     "fillval_7",
     "fillval_8",
+    "fillval_9",
     NULL
 };
 
@@ -2085,6 +2086,285 @@ error:
     return 1;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	test_partalloc_cases
+ *
+ * Purpose:	Tests fill values read and write for datasets.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Joel Plutchak
+ *              April 15, 2013
+ *
+ * Modifications:
+ * 		This function is called by test_rdwr to write and read
+ *		dataset for different cases of chunked datasets with 
+ *              unallocated chunks.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define ROWS 4
+#define COLS 4
+static int
+test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t fill_time)
+{
+    hid_t	fspace=-1, dset1=-1, rspace = -1;
+    herr_t	ret;
+    hsize_t	ds_size[2] = {4, 4};
+    hsize_t	max_size[2] = {H5S_UNLIMITED,4};
+    hsize_t     chunk_size[2] = {1, 4};
+    int		fillval=(-1);
+    int     w_values[] = {42};            /* New value to be written */
+    int     f_values[4] = {88,88,88,88};  /* pre-seed read buffer with known values */
+    int     r_values[4] = {88,88,88,88};  /* pre-seed read buffer with known values */
+    hsize_t coord[1][2];                  /* coordinate(s) of point to write */
+    hsize_t start[2], count[2];
+
+    fillval = 0;   /* default fill value is zero */
+
+    /* Create dataset with 4x4 integer dataset */
+    if((fspace = H5Screate_simple(2, ds_size, max_size)) < 0)
+        goto error;
+    if((dset1 = H5Dcreate2(file, dname, H5T_NATIVE_INT, fspace, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /*
+     * Select a point in the file dataspace.
+     */
+    coord[0][0]=0; coord[0][1]=0; 
+    if (H5Sselect_elements( fspace, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord))
+        goto error;
+    
+    /*
+     * Write single data point to the dataset.
+     */
+    /*fprintf( stdout, "Writing (%llu,%llu) to file\n", coord[0][0], coord[0][1] );*/
+    if ((ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, fspace, H5P_DEFAULT, w_values))< 0) {
+        H5Eprint( H5E_DEFAULT, stderr );
+        goto error;
+    }
+    
+    /* Read a line/chunk and make sure values are right */
+    rspace = H5Screate_simple(2, chunk_size, NULL);
+
+    /* Read the first row of elements: one known plus three fill */
+    start[0] = 0;
+    start[1] = 0;
+    count[0] = 1;
+    count[1] = 4;
+    /*
+    fprintf( stdout, "Reading (%llu,%llu) --> (%llu,%llu) from file\n",
+        start[0]+1, start[1]+1, count[0]+start[0], count[1]+start[1] );
+    */
+    if ((ret = H5Sselect_hyperslab(fspace, H5S_SELECT_SET, start, NULL, count, NULL)) < 0)
+        goto error;
+    if ((ret = H5Sselect_all(rspace)) < 0)
+	goto error;
+    if(H5Dread(dset1, H5T_NATIVE_INT, rspace, fspace, H5P_DEFAULT, &r_values) < 0)
+        goto error;
+/*
+            HDfprintf(stdout, "%u: Allocated chunk value read:\n", (unsigned)__LINE__);
+            printf("    {%ld,%ld,%ld,%ld} should be {%ld,%ld,%ld,%ld}\n",
+                    (long)r_values[0], (long)r_values[1],
+                    (long)r_values[2], (long)r_values[3],
+                    (long)w_values[0], (long)fillval,
+                    (long)fillval, (long)fillval );
+*/
+    /* Read the third row of elements: all fill */
+    start[0] = 2;
+    start[1] = 0;
+    count[0] = 1;
+    count[1] = 4;
+    /*
+    fprintf( stdout, "Reading (%llu,%llu) --> (%llu,%llu) from file\n",
+        start[0]+1, start[1]+1, count[0]+start[0], count[1]+start[1] );
+    */
+    if ((ret = H5Sselect_hyperslab(fspace, H5S_SELECT_SET, start, NULL, count, NULL)) < 0)
+        goto error;
+    if(H5Dread(dset1, H5T_NATIVE_INT, rspace, fspace, H5P_DEFAULT, &f_values) < 0)
+        goto error;
+
+    if(fill_time != H5D_FILL_TIME_NEVER) {
+        /* check allocated chunk */
+        if ((r_values[0] != w_values[0]) ||
+                (r_values[1] != fillval) ||
+                (r_values[2] != fillval) ||
+                (r_values[3] != fillval)) {
+            H5_FAILED();
+            HDfprintf(stdout, "%u: Allocated chunk value read was not correct.\n", (unsigned)__LINE__);
+            printf("    {%ld,%ld,%ld,%ld} should be {%ld,%ld,%ld,%ld}\n",
+                    (long)r_values[0], (long)r_values[1],
+                    (long)r_values[2], (long)r_values[3],
+                    (long)w_values[0], (long)fillval,
+                    (long)fillval, (long)fillval );
+            goto error;
+        }
+        /* check unallocated chunk */
+        if ((f_values[0] != fillval) ||
+                (f_values[1] != fillval) ||
+                (f_values[2] != fillval) ||
+                (f_values[3] != fillval)) {
+            H5_FAILED();
+            HDfprintf(stdout, "%u: Unallocated chunk value read was not correct.\n", (unsigned)__LINE__);
+            printf("    {%ld,%ld,%ld,%ld} should be {%ld,%ld,%ld,%ld}\n",
+                    (long)f_values[0], (long)f_values[1],
+                    (long)f_values[2], (long)f_values[3],
+                    (long)fillval, (long)fillval,
+                    (long)fillval, (long)fillval );
+            goto error;
+        }
+        /* for the "never fill" case expect to get trash values, so skip */
+    }
+    else if(fill_time == H5D_FILL_TIME_NEVER) {
+    }
+
+    if(H5Sclose(rspace) < 0) goto error;
+    if(H5Dclose(dset1) < 0) goto error;
+    if(H5Sclose(fspace) < 0) goto error;
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+	H5Dclose(dset1);
+	H5Sclose(fspace);
+	H5Sclose(rspace);
+    } H5E_END_TRY;
+
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_partalloc
+ *
+ * Purpose:     Tests fill values for chunked, partially-allocated datasets.
+ *              Regression test for HDFFV-8247.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Joel Plutchak
+ *              April 15, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_partalloc(hid_t fapl, const char *base_name)
+{
+    char        filename[1024];
+    hid_t 	file=-1, dcpl=-1;
+    hsize_t     ch_size[2] = {1, 4};
+    int		nerrors=0;
+
+    TESTING("chunked dataset partially allocated I/O");
+
+    h5_fixname(base_name, fapl, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+
+    if((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if(H5Pset_chunk(dcpl, 2, ch_size) < 0) goto error;
+
+    /* I. Test H5D_ALLOC_TIME_LATE space allocation cases */
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "\nALLOC_TIME_LATE\n" );
+#endif
+
+    /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_ALLOC\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset1", H5D_FILL_TIME_ALLOC);
+	        
+    /* case for H5D_FILL_TIME_NEVER as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_NEVER\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset2", H5D_FILL_TIME_NEVER );
+
+    /* case for H5D_FILL_TIME_IFSET as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_IFSET\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset3", H5D_FILL_TIME_IFSET );
+
+    /* II.  Test H5D_ALLOC_TIME_INCR space allocation cases */
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "\nALLOC_TIME_INCR\n" );
+#endif
+
+    /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_ALLOC\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset4", H5D_FILL_TIME_ALLOC );
+
+    /* case for H5D_FILL_TIME_NEVER as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_NEVER\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset5", H5D_FILL_TIME_NEVER );
+
+    /* case for H5D_FILL_TIME_IFSET as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_IFSET\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset6", H5D_FILL_TIME_IFSET );
+
+    /* III.  Test H5D_ALLOC_TIME_EARLY space allocation cases */
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "\nALLOC_TIME_EARLY\n" );
+#endif
+
+    /* case for H5D_FILL_TIME_ALLOC as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_ALLOC\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset7", H5D_FILL_TIME_ALLOC );
+
+    /* case for H5D_FILL_TIME_NEVER as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_NEVER\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset8", H5D_FILL_TIME_NEVER );
+
+    /* case for H5D_FILL_TIME_IFSET as fill write time and fill value to be default */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0) goto error;
+#ifdef DEBUG
+    fprintf( stdout, "   FILL_TIME_IFSET\n" );
+#endif
+    nerrors += test_partalloc_cases(file, dcpl, "dset9", H5D_FILL_TIME_IFSET );
+
+    if(nerrors)
+	goto error;
+    if(H5Pclose(dcpl) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return nerrors;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -2157,6 +2437,7 @@ main(int argc, char *argv[])
             nerrors += test_create(my_fapl, FILENAME[0], H5D_CHUNKED);
             nerrors += test_rdwr  (my_fapl, FILENAME[2], H5D_CHUNKED);
             nerrors += test_extend(my_fapl, FILENAME[4], H5D_CHUNKED);
+            nerrors += test_partalloc(my_fapl, FILENAME[8]);
         } /* end if */
 
         /* Contiguous storage layout tests */
