@@ -2106,8 +2106,6 @@ error:
  *-------------------------------------------------------------------------
  */
 
-#define ROWS 4
-#define COLS 4
 static int
 test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t fill_time)
 {
@@ -2141,9 +2139,7 @@ test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t 
     /*
      * Write single data point to the dataset.
      */
-    /*fprintf( stdout, "Writing (%llu,%llu) to file\n", coord[0][0], coord[0][1] );*/
     if ((ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, fspace, H5P_DEFAULT, w_values))< 0) {
-        H5Eprint( H5E_DEFAULT, stderr );
         goto error;
     }
     
@@ -2155,33 +2151,18 @@ test_partalloc_cases(hid_t file, hid_t dcpl, const char *dname, H5D_fill_time_t 
     start[1] = 0;
     count[0] = 1;
     count[1] = 4;
-    /*
-    fprintf( stdout, "Reading (%llu,%llu) --> (%llu,%llu) from file\n",
-        start[0]+1, start[1]+1, count[0]+start[0], count[1]+start[1] );
-    */
     if ((ret = H5Sselect_hyperslab(fspace, H5S_SELECT_SET, start, NULL, count, NULL)) < 0)
         goto error;
     if ((ret = H5Sselect_all(rspace)) < 0)
 	goto error;
     if(H5Dread(dset1, H5T_NATIVE_INT, rspace, fspace, H5P_DEFAULT, &r_values) < 0)
         goto error;
-/*
-            HDfprintf(stdout, "%u: Allocated chunk value read:\n", (unsigned)__LINE__);
-            printf("    {%ld,%ld,%ld,%ld} should be {%ld,%ld,%ld,%ld}\n",
-                    (long)r_values[0], (long)r_values[1],
-                    (long)r_values[2], (long)r_values[3],
-                    (long)w_values[0], (long)fillval,
-                    (long)fillval, (long)fillval );
-*/
+
     /* Read the third row of elements: all fill */
     start[0] = 2;
     start[1] = 0;
     count[0] = 1;
     count[1] = 4;
-    /*
-    fprintf( stdout, "Reading (%llu,%llu) --> (%llu,%llu) from file\n",
-        start[0]+1, start[1]+1, count[0]+start[0], count[1]+start[1] );
-    */
     if ((ret = H5Sselect_hyperslab(fspace, H5S_SELECT_SET, start, NULL, count, NULL)) < 0)
         goto error;
     if(H5Dread(dset1, H5T_NATIVE_INT, rspace, fspace, H5P_DEFAULT, &f_values) < 0)
