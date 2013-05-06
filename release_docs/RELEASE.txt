@@ -248,7 +248,7 @@ Supported Platforms
 
     Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
-    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-52)
+    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-54)
                                       Version 4.6.3
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
@@ -256,7 +256,8 @@ Supported Platforms
                                       Version 12.5-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
-                                      Version 12.1
+                                      Version 12.1 (Build 20110811)
+                                      Version 12.1 (Build 20120212)
 
     Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
@@ -344,7 +345,7 @@ Windows 8                               n        y/n    n        y    y     y
 Windows 8     x64                       n        y/n    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n?   n        y    y     n?
 AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
 CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
 CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
