@@ -145,7 +145,6 @@ test_unregister_filters(hid_t my_fapl)
         goto error;
     } /* end if */
 
-
     /* Close the group */
     if(H5Gclose(gid) < 0) goto error;
 
@@ -176,7 +175,6 @@ test_unregister_filters(hid_t my_fapl)
         goto error;
 
     /* Unregister the filter before closing the dataset.  It should fail */
-    /*if(H5Zunregister(H5Z_FILTER_DUMMY) < 0) goto error;*/
     H5E_BEGIN_TRY {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     } H5E_END_TRY;
