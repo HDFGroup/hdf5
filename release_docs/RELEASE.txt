@@ -113,7 +113,7 @@ Support for New Platforms, Languages, and Compilers
 ===================================================
     - SunOS 5.11 (emu) 32-bit and 64-bit with Sun C/C++ 5.12 compiler and
       Sun Fortran 95 8.6 compiler.
-    - Visual Studio 2012 w/ Intel Fortran 13 on Windows 7 and Windows 8
+    - Visual Studio 2012 w/ Intel Fortran 13 on Windows 7
     - g95 released new version recently and is tested in this release.
 
 Bug Fixes since HDF5-1.8.10
@@ -301,10 +301,6 @@ Supported Platforms
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
 
-    Windows 8                     Visual Studio 2012 w/ Intel Fortran 13 (cmake)
-
-    Windows 8 x64                 Visual Studio 2012 w/ Intel Fortran 13 (cmake)
-
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     64-bit                        gfortran GNU Fortran (GCC) 4.6.2
@@ -343,8 +339,6 @@ Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
-Windows 8                               n        y/n    n        y    y     y
-Windows 8 x64                           n        y/n    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
@@ -366,8 +360,6 @@ Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
 Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
-Windows 8                                  y       y         y         n
-Windows 8 x64                              y       y         y         n
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
