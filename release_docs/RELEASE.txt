@@ -343,12 +343,14 @@ Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
 AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 GNU      n        y/n    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
 Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
 
 
@@ -364,12 +366,14 @@ Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
 AIX 5.3 32- and 64-bit                     y       n         n         y        
-CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
-CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
-CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
-CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
+CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.9 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.9 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 PGI         y       y         y         n     
+CentOS 6.4 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 6.4 Linux 2.6.32 x86_64 Intel       y       y         y         n
 Linux 2.6.32-358.2.1.el6.ppc64             y       y         y         n 
 
 Compiler versions for each platform are listed in the preceding
