@@ -101,7 +101,7 @@ New Features
 
       h5odecr_refcount_f, h5oexists_by_name_f, h5oget_comment_f,
       h5oget_comment_by_name_f, h5oincr_refcount_f, h5oopen_by_idx_f, 
-      h5oset_comment_f, h5oset_comment_by_name_f, h5oset_comment_by_name_f
+      h5oset_comment_f, h5oset_comment_by_name_f
 
       F2003: h5oget_info_f, h5oget_info_by_idx_f, h5ovisit_by_name_f
     
