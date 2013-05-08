@@ -57,6 +57,8 @@ New Features
 
     Configuration
     -------------
+    - Libtool version number is changed to 8.0.0 because there are API
+      changes. See below for details. (AKC - 2013/05/07 HDFFV-8435)
     - Mac OS X 10.7 (Lion) and 10.8 (Mountain Lion) uses clang/clang++ as the
       default C and C++ compilers. (AKC - 2013/04/19 HDFFV-8245)
     - CMake minimum is now 2.8.10. (ADB 2013/1/14)
@@ -242,6 +244,9 @@ Bug Fixes since HDF5-1.8.10
 
 Supported Platforms
 ===================
+The following platforms are supported and have been tested for this release.
+They are built with the configure process unless specified otherwise.
+
     AIX 5.3                       xlc 10.1.0.5
     (NASA G-ADA)                  xlC 10.1.0.5
                                   xlf90 12.1.0.6
@@ -307,15 +312,13 @@ Supported Platforms
     (fred)                        Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1 Build 20120928
 
-    Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
-    64-bit                        g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
-    (duck)                        gfortran GNU Fortran (GCC) 4.6.2
+    Mac OS X Lion 10.7.3          Apple clang/clang++ version 3.0 from Xcode 4.6.1
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    (duck)                        Intel icc/icpc/ifort version 13.0
 
-    Mac OS X Mountain Lion 10.8.1 cc Apple clang version 4.0 from Xcode 4.5.1
-    (owl)                         c++ Apple clang version 4.0 from Xcode 4.5.1
-				  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.5.1
-				  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.5.1
-    			          gfortran GNU Fortran (GCC) 4.6.2
+    Mac OS X Mountain Lion 10.8.1 Apple clang/clang++ version 4.2 from Xcode 4.6.1
+    64-bit    			  gfortran GNU Fortran (GCC) 4.6.2
+    (wren)                        Intel icc/icpc/ifort version 13.0.1.119
 
 
 Tested Configuration Features Summary
@@ -342,7 +345,7 @@ Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
-AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
+AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
 CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
