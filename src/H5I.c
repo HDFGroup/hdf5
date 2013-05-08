@@ -2002,55 +2002,21 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
-    if((ret_value = H5I_search(type, func, key)) == NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Isearch() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5I_search
- *
- * Purpose:	Private function for H5Isearch
- *
- * Return:	Success:	The first object in the type for which FUNC
- *				returns non-zero. NULL if FUNC returned zero
- *				for every object in the type.
- *
- *		Failure:	NULL
- *
- * Programmer:	James Laird
- *		Nathaniel Furrer
- *		Friday, April 23, 2004
- *
- *-------------------------------------------------------------------------
- */
-void *
-H5I_search(H5I_type_t _type, H5I_search_func_t _func, void *_key)
-{
-    H5I_search_ud_t udata;      /* Context for iteration */
-    void *ret_value;            /* Return value */
-
-    FUNC_ENTER_NOAPI(NULL)
-
     /* Set up udata struct */
-    udata.app_cb = _func;
-    udata.app_key = _key;
+    udata.app_cb = func;
+    udata.app_key = key;
     udata.ret_obj = NULL;
 
     /* Note that H5I_iterate returns an error code.  We ignore it 
      * here, as we can't do anything with it without revising the API.
      */
-    if(H5I_iterate(_type, H5I_search_cb, &udata, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
+    H5I_iterate(type, H5I_search_cb, &udata, TRUE);
 
     /* Set return value */
     ret_value = udata.ret_obj;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Isearch() */
 
 

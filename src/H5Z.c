@@ -71,6 +71,7 @@ static H5Z_stats_t	*H5Z_stat_table_g = NULL;
 /* Local functions */
 static int H5Z_find_idx(H5Z_filter_t id);
 static int H5Z_get_object_cb(void *obj_ptr, hid_t obj_id, void *key);
+static int H5Z_get_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 
 /*-------------------------------------------------------------------------
@@ -415,8 +416,6 @@ done:
 herr_t
 H5Z_unregister (H5Z_filter_t filter_id)
 {
-    size_t       num_obj_id = 0;
-    size_t       num_file_id = 0;
     size_t       filter_index;        /* Local index variable for filter */
     H5Z_object_t object;
     herr_t       ret_value=SUCCEED;   /* Return value */
@@ -434,39 +433,27 @@ H5Z_unregister (H5Z_filter_t filter_id)
     if (filter_index>=H5Z_table_used_g)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter is not registered")
 
-    /* Count the number of opened datasets and groups among all opened files */
-    if(H5F_get_obj_count(NULL, H5F_OBJ_DATASET | H5F_OBJ_GROUP, FALSE, &num_obj_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object number")
+    /* Initialize the structure object for iteration */
+    object.filter_id = filter_id;
+    object.found = FALSE;
 
-    if(num_obj_id) {
-        /* Initialize it here because it isn't needed when the object is file */
-        object.filter_id = filter_id;
-        object.found = FALSE;
+    /* Iterate through all opened datasets, returns a failure if any of them uses the filter */
+    if(H5I_iterate(H5I_DATASET, H5Z_get_object_cb, &object, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
 
-        /* Iterate through all opened datasets, returns a failure if any of them uses the filter */
-        if(H5I_iterate(H5I_DATASET, H5Z_get_object_cb, &object, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
+    if(object.found)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "can't unregister filter because a dataset is still using it")
 
-        if(object.found)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "can't unregister filter because a dataset is still using it")
+    /* Iterate through all opened groups, returns a failure if any of them uses the filter */
+    if(H5I_iterate(H5I_GROUP, H5Z_get_object_cb, &object, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
 
-        /* Iterate through all opened groups, returns a failure if any of them uses the filter */
-        if(H5I_iterate(H5I_GROUP, H5Z_get_object_cb, &object, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
+    if(object.found)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "can't unregister filter because a group is still using it")
 
-        if(object.found)
-            HGOTO_ERROR(H5E_PLINE, H5E_CANTRELEASE, FAIL, "can't unregister filter because a group is still using it")
-    }
-
-    /* Count the number of opened files */
-    if(H5F_get_obj_count(NULL, H5F_OBJ_FILE, FALSE, &num_file_id) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file number")
-   
     /* Iterate through all opened files and flush them */
-    if(num_file_id) {
-        if(H5I_iterate(H5I_FILE, H5Z_get_object_cb, &object, FALSE) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
-    }
+    if(H5I_iterate(H5I_FILE, H5Z_get_file_cb, NULL, FALSE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_BADITER, FAIL, "iteration failed")
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
@@ -487,8 +474,7 @@ done:
  * Purpose:	The callback function for H5Z_unregister. It iterates 
  *              through all opened objects.  If the object is a dataset
  *              or a group and it uses the filter to be unregistered, the 
- *              function returns TRUE. If the object is a file, the function
- *              flushes it to the disk. 
+ *              function returns TRUE. 
  *
  * Return:      TRUE if the object uses the filter.
  *              FALSE otherwise.
@@ -516,23 +502,6 @@ H5Z_get_object_cb(void *obj_ptr, hid_t obj_id, void *key)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "bad object id");
 
     switch(id_type) {
-        case H5I_FILE:
-        {
-            H5F_t    *f = NULL;         /* File to query */
-
-            if(NULL == (f = (H5F_t *)H5I_object_verify(obj_id, H5I_FILE)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-
-            /* Call the flush routine for mounted file hierarchies. Do a global flush 
-             * if the file is opened for write */
-            if(H5F_ACC_RDWR & H5F_INTENT(f)) {
-                if(H5F_flush_mounts(f, H5AC_dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy")
-            } /* end if */
-
-            /* H5I_iterate expects FALSE to continue to other files */
-            HGOTO_DONE(FALSE) 
-        } 
         case H5I_GROUP:
             if((ocpl_id = H5G_get_create_plist(obj_ptr)) < 0) 
                 HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get group creation property list")
@@ -566,8 +535,42 @@ H5Z_get_object_cb(void *obj_ptr, hid_t obj_id, void *key)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_objects_cb() */
+} /* end H5F_get_object_cb() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_get_file_cb
+ *
+ * Purpose:	The callback function for H5Z_unregister. It iterates 
+ *              through all opened files and flush them. 
+ *
+ * Return:      FALSE if finishes flushing and moves on
+ *              FAIL if there is an error
+ *
+ * Programmer:  Raymond Lu
+ *              6 May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5Z_get_file_cb(void *obj_ptr, hid_t obj_id, void *key)
+{
+    int             ret_value = FALSE;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(obj_ptr);
+
+    /* Call the flush routine for mounted file hierarchies. Do a global flush 
+     * if the file is opened for write */
+    if(H5F_ACC_RDWR & H5F_INTENT((H5F_t *)obj_ptr)) {
+        if(H5F_flush_mounts((H5F_t *)obj_ptr, H5AC_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_file_cb() */
 
 
 /*-------------------------------------------------------------------------
