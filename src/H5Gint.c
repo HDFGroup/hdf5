@@ -1188,15 +1188,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_get_create_plist
  *
- * Purpose:	Returns a copy of the group creation property list.
+ * Purpose:	Private function for H5Gget_create_plist
  *
  * Return:	Success:	ID for a copy of the group creation
- *				property list. 
+ *				property list.  The property list ID should be
+ *				released by calling H5Pclose().
  *
  *		Failure:	FAIL
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Programmer:	Quincey Koziol
+ *		Tuesday, October 25, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -1209,17 +1210,17 @@ H5G_get_create_plist(H5G_t *grp)
     htri_t              pline_exists;
     H5P_genplist_t      *gcpl_plist;
     H5P_genplist_t      *new_plist;
-    hid_t               new_id = FAIL;
-    hid_t               ret_value = FAIL;
+    hid_t		new_gcpl_id = FAIL;
+    hid_t		ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Copy the default group creation property list */
     if(NULL == (gcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_GROUP_CREATE_g)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default group creation property list")
-    if((new_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
+         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default group creation property list")
+    if((new_gcpl_id = H5P_copy_plist(gcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
-    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_id)))
+    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_gcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Retrieve any object creation properties */
@@ -1228,7 +1229,7 @@ H5G_get_create_plist(H5G_t *grp)
 
     /* Check for the group having a group info message */
     if((ginfo_exists = H5O_msg_exists(&(grp->oloc), H5O_GINFO_ID, H5AC_ind_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(ginfo_exists) {
         H5O_ginfo_t ginfo;		/* Group info message            */
 
@@ -1243,7 +1244,7 @@ H5G_get_create_plist(H5G_t *grp)
 
     /* Check for the group having a link info message */
     if((linfo_exists = H5G__obj_get_linfo(&(grp->oloc), &linfo, H5AC_ind_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(linfo_exists) {
         /* Set the link info for the property list */
         if(H5P_set(new_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
@@ -1266,12 +1267,12 @@ H5G_get_create_plist(H5G_t *grp)
     } /* end if */
 
     /* Set the return value */
-    ret_value = new_id;
+    ret_value = new_gcpl_id;
 
 done:
     if(ret_value < 0) {
-        if(new_id > 0)
-            if(H5I_dec_app_ref(new_id) < 0)
+        if(new_gcpl_id > 0)
+            if(H5I_dec_app_ref(new_gcpl_id) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
     } /* end if */
 

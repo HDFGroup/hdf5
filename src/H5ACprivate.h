@@ -199,6 +199,11 @@ typedef H5C_t	H5AC_t;
 #define H5AC_BLOCK_BEFORE_META_WRITE_SIZE       sizeof(unsigned)
 #define H5AC_BLOCK_BEFORE_META_WRITE_DEF        0
 
+/* Definitions for "collective metadata write" property */
+#define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
+#define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(unsigned)
+#define H5AC_COLLECTIVE_META_WRITE_DEF          0
+
 /* Definitions for "library internal" property */
 #define H5AC_LIBRARY_INTERNAL_NAME       "H5AC_library_internal"
 #define H5AC_LIBRARY_INTERNAL_SIZE       sizeof(unsigned)

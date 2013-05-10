@@ -171,8 +171,8 @@ H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id);
-H5_DLL hid_t H5D_get_access_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_create_plist(H5D_t *dset);
+H5_DLL hid_t H5D_get_access_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_space(H5D_t *dset);
 H5_DLL hid_t H5D_get_type(H5D_t *dset);
 

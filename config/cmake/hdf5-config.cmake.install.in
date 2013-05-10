@@ -24,9 +24,17 @@ SET (HDF5_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
 SET (HDF5_PACKAGE_EXTLIBS      @HDF5_PACKAGE_EXTLIBS@)
 
 #-----------------------------------------------------------------------------
+# Dependencies
+#-----------------------------------------------------------------------------
+IF(HDF5_ENABLE_PARALLEL)
+  SET(HDF5_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_PATH@")
+  SET(HDF5_MPI_C_LIBRARIES    "@MPI_C_LIBRARIES@")
+ENDIF(HDF5_ENABLE_PARALLEL)
+
+#-----------------------------------------------------------------------------
 # Directories
 #-----------------------------------------------------------------------------
-SET (HDF5_INCLUDE_DIR "${_IMPORT_PREFIX}/include" )
+SET (HDF5_INCLUDE_DIR "${_IMPORT_PREFIX}/include" "${HDF5_MPI_C_INCLUDE_PATH}" )
 
 IF (HDF5_BUILD_FORTRAN)
   SET (HDF5_INCLUDE_DIR_FORTRAN "${_IMPORT_PREFIX}/include/fortran" )

@@ -2464,15 +2464,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_get_create_plist
  *
- * Purpose:	Returns a copy of the dataset creation property list.
+ * Purpose:	Private function for H5Dget_create_plist
  *
  * Return:	Success:	ID for a copy of the dataset creation
- *				property list. 
+ *				property list.  The template should be
+ *				released by calling H5P_close().
  *
  *		Failure:	FAIL
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Programmer:	Robb Matzke
+ *		Tuesday, February  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2482,19 +2483,19 @@ H5D_get_create_plist(H5D_t *dset)
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
     H5O_fill_t          copied_fill;            /* Fill value to tweak */
-    hid_t               new_id = FAIL;
-    hid_t               ret_value = FAIL;
+    hid_t		new_dcpl_id = FAIL;
+    hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (dcpl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Copy the creation property list */
-    if((new_id = H5P_copy_plist(dcpl_plist, TRUE)) < 0)
+    if((new_dcpl_id = H5P_copy_plist(dcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to copy the creation property list")
-    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_id)))
+    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Retrieve any object creation properties */
@@ -2565,14 +2566,13 @@ H5D_get_create_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property list fill value")
 
     /* Set the return value */
-    ret_value = new_id;
+    ret_value = new_dcpl_id;
 
 done:
-    if(ret_value < 0) {
-        if(new_id > 0)
-            if(H5I_dec_app_ref(new_id) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
-    } /* end if */
+    if(ret_value < 0)
+        if(new_dcpl_id > 0)
+            if(H5I_dec_app_ref(new_dcpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */

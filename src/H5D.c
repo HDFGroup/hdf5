@@ -569,7 +569,7 @@ H5Dget_create_plist(hid_t dset_id)
 {
     H5VL_t     *vol_plugin;
     void       *dset;
-    hid_t		ret_value = FAIL;              /* Return value */
+    hid_t       ret_value = FAIL;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);

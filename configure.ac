@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.149], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.151], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -436,6 +436,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   ## General Fortran flags
   ## Only add FFLAGS to FCFLAGS if it's set.
   if test "x$FFLAGS" != "x" ; then
+    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
     FCFLAGS="${FCFLAGS} ${FFLAGS}"
   fi
 
@@ -1243,9 +1244,10 @@ case "X-$enable_production" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check for system libraries.
+## Check for system libraries. "dl" stands for dynamically loaded library
 ##
 AC_CHECK_LIB([m], [ceil])
+AC_CHECK_LIB([dl], [dlopen])
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   ## ...for Solaris
@@ -1275,6 +1277,7 @@ AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="n
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
+AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
 ## Darwin
@@ -1848,7 +1851,7 @@ case $withval in
     
     AC_CHECK_HEADERS([szlib.h],
                      [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZIP])
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
@@ -1942,7 +1945,7 @@ AC_ARG_WITH([pthread],
 case "$withval" in
   yes)
     AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
     fi
     ;;
@@ -1984,7 +1987,7 @@ case "$withval" in
       AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
     fi
 
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       if test -n "$pthread_lib"; then
         saved_LDFLAGS="$LDFLAGS"
         saved_AM_LDFLAGS="$AM_LDFLAGS"
@@ -4433,6 +4436,64 @@ if test -n "$TESTPARALLEL"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
   fi
 fi
+LT_OUTPUT
+no_create=$saved_no_create
+
+## Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+## Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+## Post processing to patch up some deficiencies in libtool
+case $host_os in
+  linux* | freebsd* )
+    ## If gcc is not used, need to set $wl to use "-Wl,"
+    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
+      : using gcc
+    else
+      echo 'fixing $wl in' $ofile
+ed - $ofile <<EOF 2> /dev/null
+g/^wl=""/s//wl="-Wl,"/
+w
+q
+EOF
+    fi
+    ;;
+esac
+
+## Are we compiling static libraries, shared libraries, or both?  This
+## is only used for the libhdf5.settings file. We can't just look at
+## $enable_static and $enable_shared because if they're yes the ltconfig
+## might have decided that one or the other is simply not possible.
+## Therefore we have to ask the generated `libtool' shell script
+## which 'features' it has enabled.
+if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
+  enable_shared=yes
+else
+  enable_shared=no
+fi
+
+if (./libtool --features | grep '^enable static libraries' > /dev/null); then
+  enable_static=yes
+else
+  enable_static=no
+fi
+
+if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="static, shared"
+elif test "X$enable_static" = "Xyes"; then
+  STATIC_SHARED="static"
+elif test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="shared"
+else
+  STATIC_SHARED="none"
+fi
+
+## ----------------------------------------------------------------------
+## Set a macro if shared library is enabled.
+##
+AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
@@ -4443,6 +4504,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/test_plugin.sh
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile
@@ -4511,59 +4573,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_OUTPUT
-LT_OUTPUT
-no_create=$saved_no_create
-
-## Then the stamp2 file for H5config.h
-touch ./config/stamp2
-
-## Finally the makefiles
-test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-## Post processing to patch up some deficiencies in libtool
-case $host_os in
-  linux* | freebsd* )
-    ## If gcc is not used, need to set $wl to use "-Wl,"
-    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
-      : using gcc
-    else
-      echo 'fixing $wl in' $ofile
-ed - $ofile <<EOF 2> /dev/null
-g/^wl=""/s//wl="-Wl,"/
-w
-q
-EOF
-    fi
-    ;;
-esac
-
-## Are we compiling static libraries, shared libraries, or both?  This
-## is only used for the libhdf5.settings file. We can't just look at
-## $enable_static and $enable_shared because if they're yes the ltconfig
-## might have decided that one or the other is simply not possible.
-## Therefore we have to ask the generated `libtool' shell script
-## which 'features' it has enabled.
-if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
-  enable_shared=yes
-else
-  enable_shared=no
-fi
-
-if (./libtool --features | grep '^enable static libraries' > /dev/null); then
-  enable_static=yes
-else
-  enable_static=no
-fi
-
-if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="static, shared"
-elif test "X$enable_static" = "Xyes"; then
-  STATIC_SHARED="static"
-elif test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="shared"
-else
-  STATIC_SHARED="none"
-fi
 
 chmod 755 tools/misc/h5cc
 

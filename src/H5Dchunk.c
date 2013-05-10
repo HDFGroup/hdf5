@@ -1709,8 +1709,9 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
                     /* If the fill value needs to be written then we will need
                      * to use the cache to write the fill value */
                     if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
-                            (fill->fill_time == H5D_FILL_TIME_IFSET
-                            && fill_status == H5D_FILL_VALUE_USER_DEFINED))
+                            (fill->fill_time == H5D_FILL_TIME_IFSET &&
+                            (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
+                             fill_status == H5D_FILL_VALUE_DEFAULT)))
                         ret_value = TRUE;
                     else
                         ret_value = FALSE;
@@ -1796,7 +1797,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
          * but they aren't set, set the flag to skip missing chunks.
          */
         if(fill->fill_time == H5D_FILL_TIME_NEVER ||
-                (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status != H5D_FILL_VALUE_USER_DEFINED))
+                (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status != H5D_FILL_VALUE_USER_DEFINED &&
+                fill_status != H5D_FILL_VALUE_DEFAULT))
             skip_missing_chunks = TRUE;
     }
 
