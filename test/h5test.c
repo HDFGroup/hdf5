@@ -1124,24 +1124,8 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     ssize_t nread;                      /* Number of bytes read in */
-    char  buf[READ_BUF_SIZE];        /* Buffer for copying data */
-    char  filename[FILENAME_BUF_SIZE] = "";
-#ifdef H5_VMS 
-    HDstrcat(filename, origfilename);
-#else
-    const char * srcdir = HDgetenv("srcdir"); /* The source directory */
-
-    /* Check for using the srcdir from configure time */
-    if(NULL == srcdir)
-        srcdir = config_srcdir;
-
-    if(srcdir && ((HDstrlen(srcdir) +
-                   HDstrlen(origfilename) + 6) < FILENAME_BUF_SIZE)) {
-        HDstrcpy(filename, srcdir);
-        HDstrcat(filename, "/");
-    }
-    HDstrcat(filename, origfilename);
-#endif
+    char  buf[READ_BUF_SIZE];           /* Buffer for copying data */
+    const char *filename = H5_get_srcdir_filename(origfilename);;       /* Get the test file name to copy */
 
     /* Copy old file into temporary file */
     if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) return -1;

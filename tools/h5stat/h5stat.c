@@ -118,7 +118,8 @@ static int        display_object = FALSE;  /* not implemented yet */
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
-    char *obj;
+    size_t obj_count;
+    char **obj;
 };
 
 
@@ -525,7 +526,7 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     if(type_found)
          (iter->dset_type_info[u].count)++;
     else {
-        unsigned curr_ntype = iter->dset_ntypes;
+        unsigned curr_ntype = (unsigned)iter->dset_ntypes;
 
         /* Increment # of datatypes seen for datasets */
         iter->dset_ntypes++;
@@ -643,9 +644,11 @@ obj_stats(const char *path, const H5O_info_t *oi, const char *already_visited,
                 break;
 
             case H5O_TYPE_NAMED_DATATYPE:
-    datatype_stats(iter, oi);
+                datatype_stats(iter, oi);
                 break;
 
+            case H5O_TYPE_UNKNOWN:
+            case H5O_TYPE_NTYPES:
             default:
                 /* Gather statistics about this type of object */
                 iter->uniq_others++;
@@ -683,6 +686,9 @@ lnk_stats(const char UNUSED *path, const H5L_info_t *li, void *_iter)
             iter->uniq_links++;
             break;
 
+        case H5L_TYPE_HARD:
+        case H5L_TYPE_MAX:
+        case H5L_TYPE_ERROR:
         default:
             /* Gather statistics about this type of object */
             iter->uniq_others++;
@@ -691,6 +697,35 @@ lnk_stats(const char UNUSED *path, const H5L_info_t *li, void *_iter)
 
     return 0;
 } /* end lnk_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: hand_free
+ *
+ * Purpose: Free handler structure
+ *
+ * Return: Success: 0
+ *
+ * Failure: Never fails
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+hand_free(struct handler_t *hand)
+{
+    if(hand) {
+        unsigned u;
+
+        for(u = 0; u < hand->obj_count; u++)
+            if(hand->obj[u]) {
+                HDfree(hand->obj[u]);
+                hand->obj[u] = NULL;
+            } /* end if */
+        hand->obj_count = 0;
+        HDfree(hand->obj);
+        HDfree(hand);
+    } /* end if */
+} /* end hand_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -707,50 +742,25 @@ lnk_stats(const char UNUSED *path, const H5L_info_t *li, void *_iter)
  *
  *-------------------------------------------------------------------------
  */
-static struct handler_t *
-parse_command_line(int argc, const char *argv[])
+static int
+parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 {
-    int                opt, i;
+    int                opt;
+    unsigned           u;
     struct handler_t   *hand = NULL;
 
-    /* Allocate space to hold the command line info */
-    if((hand = (struct handler_t *)HDcalloc((size_t)argc, sizeof(struct handler_t)))==NULL) {
-        error_msg("unable to parse command line arguments \n");
-        goto error;
-    }
-
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-        switch ((char)opt) {
+    while((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                if (hand) {
-                    for (i = 0; i < argc; i++)
-                        if(hand[i].obj) {
-                            free(hand[i].obj);
-                            hand[i].obj=NULL;
-                        }
-
-                    free(hand);
-                    hand = NULL;
-                }
                 goto done;
                 break;
 
             case 'V':
                 print_version(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
-                if (hand) {
-                    for (i = 0; i < argc; i++)
-                        if(hand[i].obj) {
-                            free(hand[i].obj);
-                            hand[i].obj=NULL;
-                        }
-
-                    free(hand);
-                    hand = NULL;
-                }
                 goto done;
                 break;
 
@@ -802,45 +812,52 @@ parse_command_line(int argc, const char *argv[])
             case 'O':
                 display_all = FALSE;
                 display_object = TRUE;
-                for(i = 0; i < argc; i++)
-                    if(!hand[i].obj) {
-                        hand[i].obj = HDstrdup(opt_arg);
-                        break;
+
+                /* Allocate space to hold the command line info */
+                if(NULL == (hand = (struct handler_t *)HDcalloc((size_t)1, sizeof(struct handler_t)))) {
+                    error_msg("unable to allocate memory for object struct\n");
+                    goto error;
+                } /* end if */
+
+                /* Allocate space to hold the object strings */
+                hand->obj_count = (size_t)argc;
+                if(NULL == (hand->obj = (char **)HDcalloc((size_t)argc, sizeof(char *)))) {
+                    error_msg("unable to allocate memory for object array\n");
+                    goto error;
+                } /* end if */
+
+                /* Store object names */
+                for(u = 0; u < hand->obj_count; u++)
+                    if(NULL == (hand->obj[u] = HDstrdup(opt_arg))) {
+                        error_msg("unable to allocate memory for object name\n");
+                        goto error;
                     } /* end if */
                 break;
 
             default:
                 usage(h5tools_getprogname());
-                h5tools_setstatus(EXIT_FAILURE);
                 goto error;
         } /* end switch */
     } /* end while */
 
     /* check for file name to be processed */
-    if (argc <= opt_ind) {
+    if(argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
-        h5tools_setstatus(EXIT_FAILURE);
         goto error;
     } /* end if */
 
+    /* Set handler structure */
+    *hand_ret = hand;
+
 done:
-    return hand;
+    return 0;
 
 error:
-    if (hand) {
-        for (i = 0; i < argc; i++)
-            if(hand[i].obj) {
-                free(hand[i].obj);
-                hand[i].obj=NULL;
-            }
-
-        free(hand);
-        hand = NULL;
-    }
+    hand_free(hand);
     h5tools_setstatus(EXIT_FAILURE);
 
-    return hand;
+    return -1;
 }
 
 
@@ -855,28 +872,34 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 iter_free(iter_t *iter)
 {
     /* Clear array of bins for group counts */
-    if(iter->group_bins)
-        free(iter->group_bins);
-    iter->group_bins = NULL;
-    /* Clear array of bins for attribute counts */
-    if(iter->attr_bins)
-        free(iter->attr_bins);
-    iter->attr_bins = NULL;
-    /* Clear dataset datatype information found */
-    if(iter->dset_type_info)
-        free(iter->dset_type_info);
-    iter->dset_type_info = NULL;
-    /* Clear array of bins for dataset dimensions */
-    if(iter->dset_dim_bins)
-        free(iter->dset_dim_bins);
-    iter->dset_dim_bins = NULL;
+    if(iter->group_bins) {
+        HDfree(iter->group_bins);
+        iter->group_bins = NULL;
+    } /* end if */
 
-    return 0;
-}
+    /* Clear array of bins for attribute counts */
+    if(iter->attr_bins) {
+        HDfree(iter->attr_bins);
+        iter->attr_bins = NULL;
+    } /* end if */
+
+    /* Clear dataset datatype information found */
+    if(iter->dset_type_info) {
+        HDfree(iter->dset_type_info);
+        iter->dset_type_info = NULL;
+    } /* end if */
+
+    /* Clear array of bins for dataset dimensions */
+    if(iter->dset_dim_bins) {
+        HDfree(iter->dset_dim_bins);
+        iter->dset_dim_bins = NULL;
+    } /* end if */
+
+} /* end iter_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1278,7 +1301,6 @@ print_storage_summary(const iter_t *iter)
 {
     hsize_t total_meta = 0;
     hsize_t unaccount = 0;
-    float   percent = 0.0;
 
     printf("Summary of file space information:\n");
     total_meta =
@@ -1426,10 +1448,7 @@ main(int argc, const char *argv[])
     iter_t              iter;
     const char         *fname = NULL;
     hid_t               fid = -1;
-    hid_t               fcpl;
     struct handler_t   *hand = NULL;
-    H5F_info_t         finfo;
-    int                 i;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -1440,86 +1459,80 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
     
-    if((hand = parse_command_line(argc, argv))==NULL) {
+    HDmemset(&iter, 0, sizeof(iter));
+
+    if(parse_command_line(argc, argv, &hand) < 0)
         goto done;
-    }
 
     fname = argv[opt_ind];
 
-    printf("Filename: %s\n", fname);
+    /* Check for filename given */
+    if(fname) {
+        hid_t               fcpl;
+        H5F_info_t          finfo;
 
-    HDmemset(&iter, 0, sizeof(iter));
+        printf("Filename: %s\n", fname);
 
-    fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
-    if(fid < 0) {
-        error_msg("unable to open file \"%s\"\n", fname);
-        h5tools_setstatus(EXIT_FAILURE);
-        goto done;
-    } /* end if */
+        fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
+        if(fid < 0) {
+            error_msg("unable to open file \"%s\"\n", fname);
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        } /* end if */
 
-    /* Initialize iter structure */
-    iter.fid = fid;
+        /* Initialize iter structure */
+        iter.fid = fid;
 
-    if(H5Fget_filesize(fid, &iter.filesize) < 0)
-        warn_msg("Unable to retrieve file size\n");
-    HDassert(iter.filesize != 0);
+        if(H5Fget_filesize(fid, &iter.filesize) < 0)
+            warn_msg("Unable to retrieve file size\n");
+        HDassert(iter.filesize != 0);
 
-    /* Get storge info for file-level structures */
-    if(H5Fget_info(fid, &finfo) < 0)
-        warn_msg("Unable to retrieve file info\n");
-    else {
-        iter.super_ext_size = finfo.super_ext_size;
-        iter.SM_hdr_storage_size = finfo.sohm.hdr_size;
-        iter.SM_index_storage_size = finfo.sohm.msgs_info.index_size;
-        iter.SM_heap_storage_size = finfo.sohm.msgs_info.heap_size;
-    } /* end else */
+        /* Get storge info for file-level structures */
+        if(H5Fget_info(fid, &finfo) < 0)
+            warn_msg("Unable to retrieve file info\n");
+        else {
+            iter.super_ext_size = finfo.super_ext_size;
+            iter.SM_hdr_storage_size = finfo.sohm.hdr_size;
+            iter.SM_index_storage_size = finfo.sohm.msgs_info.index_size;
+            iter.SM_heap_storage_size = finfo.sohm.msgs_info.heap_size;
+        } /* end else */
 
-    if((fcpl = H5Fget_create_plist(fid)) < 0)
-        warn_msg("Unable to retrieve file creation property\n");
+        if((fcpl = H5Fget_create_plist(fid)) < 0)
+            warn_msg("Unable to retrieve file creation property\n");
 
-    if(H5Pget_userblock(fcpl, &iter.ublk_size) < 0)
-        warn_msg("Unable to retrieve userblock size\n");
+        if(H5Pget_userblock(fcpl, &iter.ublk_size) < 0)
+            warn_msg("Unable to retrieve userblock size\n");
 
-    /* Walk the objects or all file */
-    if(display_object) {
-        unsigned u;
+        /* Walk the objects or all file */
+        if(display_object) {
+            unsigned u;
 
-        u = 0;
-        while(hand[u].obj) {
-            if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
-                warn_msg("Unable to traverse object \"%s\"\n", hand[u].obj);
+            for(u = 0; u < hand->obj_count; u++) {
+                if(h5trav_visit(fid, hand->obj[u], TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
+                    warn_msg("Unable to traverse object \"%s\"\n", hand->obj[u]);
+                else
+                    print_statistics(hand->obj[u], &iter);
+            } /* end for */
+        } /* end if */
+        else {
+            if(h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
+                warn_msg("Unable to traverse objects/links in file \"%s\"\n", fname);
             else
-                print_statistics(hand[u].obj, &iter);
-            u++;
-        } /* end while */
+                print_statistics("/", &iter);
+        } /* end else */
     } /* end if */
-    else {
-        if (h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
-            warn_msg("Unable to traverse objects/links in file \"%s\"\n", fname);
-  else
-      print_statistics("/", &iter);
-    } /* end else */
 
 done:
-    if(hand) {
-        for (i = 0; i < argc; i++)
-            if(hand[i].obj) {
-                free(hand[i].obj);
-                hand[i].obj=NULL;
-            }
+    hand_free(hand);
 
-        free(hand);
-        hand = NULL;
+    /* Free iter structure */
+    iter_free(&iter);
 
-        /* Free iter structure */
-        iter_free(&iter);
-    
-        if(fid >= 0 && H5Fclose(fid) < 0) {
-            error_msg("unable to close file \"%s\"\n", fname);
-            h5tools_setstatus(EXIT_FAILURE);
-        }
-    }
+    if(fid >= 0 && H5Fclose(fid) < 0) {
+        error_msg("unable to close file \"%s\"\n", fname);
+        h5tools_setstatus(EXIT_FAILURE);
+    } /* end if */
 
     leave(h5tools_getstatus());
-}
+} /* end main() */
 
