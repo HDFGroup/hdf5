@@ -55,11 +55,6 @@ typedef enum H5RQ_type_t {
     HG_DTYPE_CLOSE
 } H5RQ_type_t;
 
-typedef enum H5VL_iod_state_t {
-    H5VL_IOD_PENDING,
-    H5VL_IOD_COMPLETED
-} H5VL_iod_state_t;
-
 /* the client IOD VOL request struct */
 typedef struct H5VL_iod_request_t {
     H5RQ_type_t type;
@@ -68,6 +63,7 @@ typedef struct H5VL_iod_request_t {
     struct H5VL_iod_object_t *obj;
     H5VL_iod_state_t state;
     H5_status_t status;
+    uint64_t axe_id;
     struct H5VL_iod_request_t *prev;
     struct H5VL_iod_request_t *next;
 } H5VL_iod_request_t;
@@ -77,9 +73,10 @@ typedef struct H5VL_iod_remote_file_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t coh;
     iod_handle_t root_oh;
+    uint64_t kv_oid_index;
+    uint64_t array_oid_index;
+    uint64_t blob_oid_index;
     iod_obj_id_t root_id;
-    iod_handle_t scratch_oh;
-    iod_obj_id_t scratch_id;
     hid_t fcpl_id;
 } H5VL_iod_remote_file_t;
 
@@ -88,8 +85,6 @@ typedef struct H5VL_iod_remote_attr_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
-    iod_handle_t scratch_oh;
-    iod_obj_id_t scratch_id;
     hid_t acpl_id;
     hid_t type_id;
     hid_t space_id;
@@ -100,8 +95,6 @@ typedef struct H5VL_iod_remote_group_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
-    iod_handle_t scratch_oh;
-    iod_obj_id_t scratch_id;
     hid_t gcpl_id;
 } H5VL_iod_remote_group_t;
 
@@ -110,8 +103,6 @@ typedef struct H5VL_iod_remote_dset_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
-    iod_handle_t scratch_oh;
-    iod_obj_id_t scratch_id;
     hid_t dcpl_id;
     hid_t type_id;
     hid_t space_id;
@@ -122,8 +113,6 @@ typedef struct H5VL_iod_remote_dtype_t {
     /* Do NOT change the order of the parameters */
     iod_handle_t iod_oh;
     iod_obj_id_t iod_id;
-    iod_handle_t scratch_oh;
-    iod_obj_id_t scratch_id;
     hid_t tcpl_id;
     hid_t type_id;
 } H5VL_iod_remote_dtype_t;
@@ -143,6 +132,8 @@ typedef struct H5VL_iod_file_t {
     char *file_name;
     unsigned flags;
     hid_t fapl_id;
+    int my_rank;
+    int num_procs;
     unsigned nopen_objs;
     H5VL_iod_request_t *request_list_head;
     H5VL_iod_request_t *request_list_tail;
@@ -189,9 +180,11 @@ H5_DLL herr_t H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *r
 H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
 H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object);
 H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
-H5_DLL herr_t H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
-                                      const char *name, iod_obj_id_t *id, iod_handle_t *oh, 
-                                      char **new_name);
-
+H5_DLL herr_t H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
+H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
+                                       const char *name, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
+                                       uint64_t *axe_id, char **new_name);
+H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
+                                  iod_obj_type_t type, uint64_t *id);
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */

@@ -73,20 +73,12 @@ int hg_proc_iod_obj_id_t(hg_proc_t proc, void *data)
     int ret = HG_SUCCESS;
     iod_obj_id_t *struct_data = (iod_obj_id_t *)data;
 
-    ret = hg_proc_uint64_t(proc, &struct_data->oid_hi);
+    ret = hg_proc_uint64_t(proc, &struct_data);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
         return ret;
     }
-
-    ret = hg_proc_uint64_t(proc, &struct_data->oid_lo);
-    if (ret != HG_SUCCESS) {
-        HG_ERROR_DEFAULT("Proc error");
-        ret = HG_FAIL;
-        return ret;
-    }
-
     return ret;
 }
 

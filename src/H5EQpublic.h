@@ -47,7 +47,7 @@ typedef enum {
     H5AO_PENDING,       /* Operation has not yet completed */
     H5AO_SUCCEEDED,     /* Operation has completed, successfully */
     H5AO_FAILED,        /* Operation has completed, but failed */
-    H5AO_CANCELLED      /* Operation has no completed and has been cancelled */
+    H5AO_CANCELLED      /* Operation has not completed and has been cancelled */
 } H5_status_t;
 
 #define H5_REQUEST_NULL NULL
@@ -66,6 +66,7 @@ H5_DLL herr_t H5EQtest(hid_t event_q, int *num_remaining);
 H5_DLL herr_t H5EQclose(hid_t event_q);
 
 /* Asynchronous test & wait operations */
+H5_DLL herr_t H5AOcancel(H5_request_t req, H5_status_t *status);
 H5_DLL herr_t H5AOtest(H5_request_t req, H5_status_t *status);
 H5_DLL herr_t H5AOwait(H5_request_t req, H5_status_t *status);
 

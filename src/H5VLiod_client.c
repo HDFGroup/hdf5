@@ -536,8 +536,218 @@ done:
 }
 
 herr_t
-H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, const char *name,
-                        iod_obj_id_t *id, iod_handle_t *oh, char **new_name)
+H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(req->state == H5VL_IOD_CANCELLED);
+
+    switch(req->type) {
+    case HG_DSET_WRITE:
+    case HG_DSET_READ:
+    case HG_ATTR_WRITE:
+    case HG_ATTR_READ:
+        {
+            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)req->data;
+
+            /* Free memory handle */
+            if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
+                fprintf(stderr, "failed to free bulk handle\n");
+            }
+            free(info->status);
+            info->status = NULL;
+            info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
+            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_FILE_FLUSH:
+        {
+            int *status = (int *)req->data;
+
+            free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_FILE_CREATE:
+    case HG_FILE_OPEN:
+    case HG_FILE_CLOSE:
+        {
+            int *status = (int *)req->data;
+
+            free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free everything */
+            free(file->file_name);
+            free(file->common.obj_name);
+            if(file->fapl_id != H5P_FILE_ACCESS_DEFAULT && H5Pclose(file->fapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(file->remote_file.fcpl_id != 0 && 
+               file->remote_file.fcpl_id != H5P_FILE_CREATE_DEFAULT && 
+               H5Pclose(file->remote_file.fcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            file = H5FL_FREE(H5VL_iod_file_t, file);
+            break;
+        }
+    case HG_ATTR_REMOVE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            obj->request = NULL;
+            H5VL_iod_request_delete(obj, req);
+            break;
+        }
+    case HG_ATTR_EXISTS:
+        {
+            htri_t *ret = (htri_t *)req->data;
+            H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
+
+            req->data = NULL;
+            obj->request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_ATTR_CREATE:
+    case HG_ATTR_OPEN:
+    case HG_ATTR_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            attr->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free attr components */
+            free(attr->common.obj_name);
+            if(attr->remote_attr.acpl_id != 0 &&
+               attr->remote_attr.acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT &&
+               H5Pclose(attr->remote_attr.acpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(attr->remote_attr.type_id != 0 &&
+               H5Tclose(attr->remote_attr.type_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(attr->remote_attr.space_id != 0 &&
+               H5Sclose(attr->remote_attr.space_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
+            attr = H5FL_FREE(H5VL_iod_attr_t, attr);
+            break;
+        }
+    case HG_GROUP_CREATE:
+    case HG_GROUP_OPEN:
+    case HG_GROUP_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_group_t *grp = (H5VL_iod_group_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            grp->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free group components */
+            free(grp->common.obj_name);
+            if(grp->gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5Pclose(grp->gapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(grp->remote_group.gcpl_id != 0 &&
+               grp->remote_group.gcpl_id != H5P_GROUP_CREATE_DEFAULT && 
+               H5Pclose(grp->remote_group.gcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            grp = H5FL_FREE(H5VL_iod_group_t, grp);
+            break;
+        }
+    case HG_DSET_SET_EXTENT:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            dset->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_DSET_CREATE:
+    case HG_DSET_OPEN:
+    case HG_DSET_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            dset->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free dset components */
+            free(dset->common.obj_name);
+            if(dset->remote_dset.dcpl_id != 0 &&
+               dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
+               H5Pclose(dset->remote_dset.dcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT &&
+               H5Pclose(dset->dapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(dset->remote_dset.type_id != 0 &&
+               H5Tclose(dset->remote_dset.type_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(dset->remote_dset.space_id != 0 &&
+               H5Sclose(dset->remote_dset.space_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dspace");
+            dset = H5FL_FREE(H5VL_iod_dset_t, dset);
+            break;
+        }
+    case HG_DTYPE_COMMIT:
+    case HG_DTYPE_OPEN:
+    case HG_DTYPE_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            dtype->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free dtype components */
+            free(dtype->common.obj_name);
+            if(dtype->remote_dtype.tcpl_id != 0 &&
+               dtype->remote_dtype.tcpl_id != H5P_DATATYPE_CREATE_DEFAULT &&
+               H5Pclose(dtype->remote_dtype.tcpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(dtype->tapl_id != H5P_DATATYPE_ACCESS_DEFAULT &&
+               H5Pclose(dtype->tapl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            if(dtype->remote_dtype.type_id != 0 && 
+               H5Tclose(dtype->remote_dtype.type_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
+            break;
+        }
+    default:
+        H5VL_iod_request_delete(file, req);
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t
+H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
+                         const char *name, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
+                         uint64_t *axe_id, char **new_name)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
@@ -553,17 +763,6 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, co
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    if(NULL != obj->request) {
-        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
-
-        /* Reset object's pointer to request */
-        /* (Request is owned by the request object and will be freed when the
-         *      application calls test or wait on it.)
-         */
-        obj->request = NULL;
-    }
 
     switch(obj->obj_type) {
     case H5I_FILE:
@@ -584,6 +783,14 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, co
         break;
     default:
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
+    }
+
+    if(obj->request && obj->request->status == H5AO_PENDING){
+        *axe_id = obj->request->axe_id;
+    }
+    else {
+        *axe_id = 0;
+        HDassert(cur_oh.cookie != IOD_OH_UNDEFINED);
     }
 
     if(loc_params.type == H5VL_OBJECT_BY_SELF)
@@ -636,22 +843,14 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, co
                    //&& NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATATYPE)))
                     break;
             }
-            else
+            else {
                 break;
+            }
         }
 
+#if H5VL_IOD_DEBUG
         printf("Found %s Locally\n", comp);
-
-        if(NULL != cur_obj->request) {
-            if(H5VL_iod_request_wait(obj->file, cur_obj->request) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
-
-            /* Reset object's pointer to request */
-            /* (Request is owned by the request object and will be freed when the
-             *      application calls test or wait on it.)
-             */
-            cur_obj->request = NULL;
-        }
+#endif
 
         switch(cur_obj->obj_type) {
         case H5I_GROUP:
@@ -670,12 +869,22 @@ H5VL_iod_local_traverse(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, co
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
         }
 
+        if(cur_obj->request && cur_obj->request->status == H5AO_PENDING) {
+            *axe_id = cur_obj->request->axe_id;
+        }
+        else {
+            *axe_id = 0;
+            HDassert(cur_oh.cookie != IOD_OH_UNDEFINED);
+        }
+
 	/* Advance to next component in string */
 	path += nchars;
+        HDstrcat(cur_name, "/");
+        cur_size += 1;
     }
 
-    *id = cur_id;
-    *oh = cur_oh;
+    *iod_id = cur_id;
+    *iod_oh = cur_oh;
     if(*path)
         *new_name = strdup(path);
     else
@@ -687,7 +896,43 @@ done:
     if(wb && H5WB_unwrap(wb) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer")
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_local_traverse */
+} /* end H5VL_iod_get_parent_info */
+
+herr_t
+H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
+                    iod_obj_type_t type, uint64_t *id)
+{
+    herr_t ret_value = SUCCEED;
+    uint64_t tmp_id;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* determine first the rank of the object with the first 59
+       bits */
+    tmp_id = myrank + (nranks * cur_index);
+
+    /* toggle the object type bits */
+    switch(type) {
+    case IOD_OBJ_ARRAY:
+        tmp_id |= IOD_OBJ_TYPE_ARRAY;
+        break;
+    case IOD_OBJ_KV:
+        tmp_id |= IOD_OBJ_TYPE_KV;
+        break;
+    case IOD_OBJ_BLOB:
+        tmp_id |= IOD_OBJ_TYPE_BLOB;
+        break;
+    default:
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad object type");
+    }
+
+    /* toggle the owner bit */
+    tmp_id |= IOD_OBJID_APP;
+
+    *id = tmp_id;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 #if 0
 static herr_t
@@ -706,7 +951,7 @@ done:
 }
 
 static herr_t
-H5VL_iod_get_axe_id(int myrank, int nranks, int index, uint64_t *id)
+H5VL_iod_get_axe_id(int myrank, int nranks, int cur_index, uint64_t *id)
 {
     herr_t ret_value = SUCCEED;
 

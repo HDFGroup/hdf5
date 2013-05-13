@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
     const char file_name[]="eff_file.h5";
     hid_t file_id;
-    hid_t gid1, gid2;
+    hid_t gid1, gid2, gid3;
     hid_t dataspaceId;
     hid_t did1, did2, did3;
     hid_t aid1, aid2, aid3;
@@ -82,22 +82,24 @@ int main(int argc, char **argv) {
     /* create the file. This is asynchronous. */
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, event_q);
 
+    {
+        char temp_name[50];
+        H5Fget_name(file_id, temp_name, 50);
+        fprintf(stderr, "File name %s   %s\n", temp_name, file_name);
+    }
+
     /* create a group G1 on the file. We creat it here synchronously just to
        show that we can intermix the original HDF5 API with the new 
        Async API.
        Internally there is a built in wait on the file_id, which has already been
        completed when we called H5AOwait on the file create request earlier*/
     gid1 = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    gid3 = H5Gcreate_ff(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
-    /* this comment block shows how we could create G1 asynchronously and wait
-    *
-    * gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
-    *                     0, &req2);
-    *
-    * assert(H5AOwait(&req2, &status2) == 0);
-    * assert (status2);
-    */
     assert(gid1);
+    assert(gid2);
+    assert(gid3);
 
     /* Create a datatype and commit it to the file. This is asynchronous. 
      * Other Local H5T type operations can be issued before completing this call
@@ -283,6 +285,8 @@ int main(int argc, char **argv) {
     assert(H5Tclose_ff(int_id, event_q) == 0);
 
     assert(H5Gclose_ff(gid1, event_q) == 0);
+    assert(H5Gclose_ff(gid2, event_q) == 0);
+    assert(H5Gclose_ff(gid3, event_q) == 0);
 
     /* flush all the contents of file to disk. This is asynchronous. */
     assert(H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q) == 0);
@@ -302,7 +306,7 @@ int main(int argc, char **argv) {
     assert(H5Fclose_ff(file_id, event_q) == 0);
 
     H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Expecting 15. Completions: ", num_requests);
+    fprintf(stderr, "%d requests in event queue. Expecting 19. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");

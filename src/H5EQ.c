@@ -391,6 +391,40 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5AOcancel
+ *
+ * Purpose:	Cancel an asynchronous operation
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AOcancel(H5_request_t req, H5_status_t *status)
+{
+    H5_priv_request_t *request = (H5_priv_request_t *)req;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(H5VL_request_cancel(&request->req, request->vol_plugin, status) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to cancel request");
+
+    request->req = NULL;
+    request->vol_plugin = NULL;
+    request->next = NULL;
+    request = (H5_priv_request_t *)H5MM_xfree(request);
+    
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5AOcancel() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5AOtest
  *
  * Purpose:	Test for an asynchronous operation's completion

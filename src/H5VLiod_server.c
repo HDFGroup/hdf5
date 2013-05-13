@@ -49,79 +49,78 @@ static hbool_t shutdown = FALSE;
 
 #define EEXISTS 1
 
-static herr_t H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *path,
-                                      hbool_t create_interm_grps, hbool_t break_on_last_comp,
-                                      char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
-                                      iod_obj_id_t *scratch_id, iod_handle_t *scratch_oh);
+static herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
+                                       const char *path, hbool_t create_interm_grps,
+                                       char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
 
-static herr_t H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_attr_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_create_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_attr_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_open_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_attr_read_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_read_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_attr_write_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_write_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_attr_exists_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_exists_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_attr_remove_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_remove_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_attr_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_attr_close_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_group_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_group_create_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                              size_t num_s_parents, AXE_task_t s_parents[], 
                                               void *op_data);
-static herr_t H5VL_iod_server_group_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_group_open_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_group_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_group_close_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_dset_create_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dset_create_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_dset_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dset_open_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                           size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                                 size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                                 size_t num_s_parents, AXE_task_t s_parents[], 
                                                  void *op_data);
-static herr_t H5VL_iod_server_dset_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dset_close_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dtype_commit_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                              size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dtype_commit_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                              size_t num_s_parents, AXE_task_t s_parents[], 
                                               void *op_data);
-static herr_t H5VL_iod_server_dtype_open_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                            size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dtype_open_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dtype_close_cb(AXE_engine_t axe_engine, size_t num_necessary_parents, AXE_task_t necessary_parents[], 
-                                             size_t num_sufficient_parents, AXE_task_t sufficient_parents[], 
+static herr_t H5VL_iod_server_dtype_close_cb(AXE_engine_t axe_engine, size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
 herr_t
 H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
@@ -198,6 +197,9 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              dtype_open_in_t, dtype_open_out_t);
     MERCURY_HANDLER_REGISTER("dtype_close", H5VL_iod_server_dtype_close, 
                              dtype_close_in_t, ret_t);
+
+    MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, 
+                             uint64_t, uint8_t);
 
     /* Initialize engine attribute */
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
@@ -308,6 +310,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_cancel_op
+ *
+ * Purpose:	Function to cancel an AXE operation
+ *
+ * Return:	Success:	HG_SUCCESS
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_cancel_op(hg_handle_t handle)
+{
+    AXE_task_t axe_id;
+    AXE_remove_status_t remove_status;
+    H5_status_t ret_value = H5AO_PENDING;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(HG_FAIL == HG_Handler_get_input(handle, &axe_id))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    /* Try to remove the task. */
+    if(AXEremove(engine, axe_id, &remove_status) != AXE_SUCCEED)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREMOVE, HG_FAIL, "can't remove AXE task; it has children");
+
+    if(remove_status == AXE_CANCELED)
+        HGOTO_DONE(H5VL_IOD_CANCELLED)
+    else if(remove_status == AXE_ALL_DONE)
+        HGOTO_DONE(H5VL_IOD_COMPLETED)
+    else if(remove_status == AXE_NOT_CANCELED) {
+        void *op_data;
+
+        fprintf(stderr, "Task is running. Attempting to cancel Manually\n");
+        if(AXEget_op_data(engine, axe_id, op_data) != AXE_SUCCEED)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get op data");
+        /* Attempt to cancel the task manually */
+    }
+done:
+    HG_Handler_start_output(handle, &ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_cancel_op() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_file_create
  *
  * Purpose:	Function shipper registered call for File Create.
@@ -324,13 +373,16 @@ done:
 int
 H5VL_iod_server_file_create(hg_handle_t handle)
 {
-    H5VL_iod_file_create_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    file_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_file_create_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_file_create_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (file_create_in_t *)H5MM_malloc(sizeof(file_create_in_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -339,9 +391,11 @@ H5VL_iod_server_file_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_file_create_cb, input, NULL))
+                                      H5VL_iod_server_file_create_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -366,13 +420,16 @@ done:
 int
 H5VL_iod_server_file_open(hg_handle_t handle)
 {
-    H5VL_iod_file_open_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    file_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_file_open_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_file_open_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (file_open_in_t *) H5MM_malloc(sizeof(file_open_in_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -381,9 +438,11 @@ H5VL_iod_server_file_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_file_open_cb, input, NULL))
+                                      H5VL_iod_server_file_open_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -408,13 +467,16 @@ done:
 int
 H5VL_iod_server_file_flush(hg_handle_t handle)
 {
-    H5VL_iod_file_flush_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    file_flush_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_file_flush_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_file_flush_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (file_flush_in_t *) H5MM_malloc(sizeof(file_flush_in_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -423,9 +485,11 @@ H5VL_iod_server_file_flush(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_file_flush_cb, input, NULL))
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_barrier_task(engine, input->axe_id,
+                                              H5VL_iod_server_file_flush_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -450,13 +514,17 @@ done:
 int
 H5VL_iod_server_file_close(hg_handle_t handle)
 {
-    H5VL_iod_file_close_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    file_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_file_close_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_file_close_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (file_close_in_t *)
+                H5MM_malloc(sizeof(file_close_in_t))))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -465,9 +533,11 @@ H5VL_iod_server_file_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_file_close_cb, input, NULL))
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if (AXE_SUCCEED != AXEcreate_barrier_task(engine, input->axe_id,
+                                              H5VL_iod_server_file_close_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
 
 done:
@@ -492,13 +562,17 @@ done:
 int
 H5VL_iod_server_attr_create(hg_handle_t handle)
 {
-    H5VL_iod_attr_create_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_create_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_create_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_create_in_t *)
+                H5MM_malloc(sizeof(attr_create_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -507,10 +581,20 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_create_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -534,13 +618,17 @@ done:
 int
 H5VL_iod_server_attr_open(hg_handle_t handle)
 {
-    H5VL_iod_attr_open_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_open_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_open_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_open_in_t *)
+                H5MM_malloc(sizeof(attr_open_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -549,10 +637,20 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_open_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -576,13 +674,17 @@ done:
 int
 H5VL_iod_server_attr_read(hg_handle_t handle)
 {
-    H5VL_iod_attr_io_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_io_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_io_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_io_in_t *)
+                H5MM_malloc(sizeof(attr_io_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -591,10 +693,20 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_read_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_read_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_read_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -618,13 +730,17 @@ done:
 int
 H5VL_iod_server_attr_write(hg_handle_t handle)
 {
-    H5VL_iod_attr_io_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_io_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_io_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_io_in_t *)
+                H5MM_malloc(sizeof(attr_io_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -633,10 +749,20 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_write_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_write_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_write_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -660,13 +786,17 @@ done:
 int
 H5VL_iod_server_attr_exists(hg_handle_t handle)
 {
-    H5VL_iod_attr_op_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_op_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_op_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_op_in_t *)
+                H5MM_malloc(sizeof(attr_op_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -675,10 +805,20 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_exists_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -702,13 +842,17 @@ done:
 int
 H5VL_iod_server_attr_remove(hg_handle_t handle)
 {
-    H5VL_iod_attr_op_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_op_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_op_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_op_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_op_in_t *)
+                H5MM_malloc(sizeof(attr_op_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -717,10 +861,20 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_remove_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_remove_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_remove_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -744,13 +898,17 @@ done:
 int
 H5VL_iod_server_attr_close(hg_handle_t handle)
 {
-    H5VL_iod_attr_close_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    attr_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_attr_close_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_attr_close_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_close_in_t *)
+                H5MM_malloc(sizeof(attr_close_in_t))))
 	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -759,10 +917,20 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_attr_close_cb, input, NULL))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -786,14 +954,17 @@ done:
 int
 H5VL_iod_server_group_create(hg_handle_t handle)
 {
-    H5VL_iod_group_create_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    group_create_in_t *input;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_group_create_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_group_create_input_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (group_create_in_t *)H5MM_malloc(sizeof(group_create_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
@@ -801,10 +972,20 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_group_create_cb, input, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_group_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_group_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -828,14 +1009,17 @@ done:
 int
 H5VL_iod_server_group_open(hg_handle_t handle)
 {
-    H5VL_iod_group_open_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    group_open_in_t *input;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_group_open_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_group_open_input_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (group_open_in_t *)H5MM_malloc(sizeof(group_open_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
@@ -843,10 +1027,20 @@ H5VL_iod_server_group_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_group_open_cb, input, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_group_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_group_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -870,14 +1064,17 @@ done:
 int
 H5VL_iod_server_group_close(hg_handle_t handle)
 {
-    H5VL_iod_group_close_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    group_close_in_t *input;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_group_close_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_group_close_input_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (group_close_in_t *)H5MM_malloc(sizeof(group_close_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
@@ -885,10 +1082,20 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_group_close_cb, input, NULL))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_group_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_group_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -912,13 +1119,17 @@ done:
 int
 H5VL_iod_server_dset_create(hg_handle_t handle)
 {
-    H5VL_iod_dset_create_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dset_create_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dset_create_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dset_create_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_create_in_t *)
+                H5MM_malloc(sizeof(dset_create_in_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -927,10 +1138,20 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dset_create_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -954,13 +1175,17 @@ done:
 int
 H5VL_iod_server_dset_open(hg_handle_t handle)
 {
-    H5VL_iod_dset_open_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dset_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dset_open_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dset_open_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_open_in_t *)
+                H5MM_malloc(sizeof(dset_open_in_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -969,10 +1194,20 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dset_open_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -996,13 +1231,17 @@ done:
 int
 H5VL_iod_server_dset_read(hg_handle_t handle)
 {
-    H5VL_iod_dset_io_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dset_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dset_io_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dset_io_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_io_in_t *)
+                H5MM_malloc(sizeof(dset_io_in_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1011,10 +1250,20 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dset_read_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_read_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_read_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1038,13 +1287,17 @@ done:
 int
 H5VL_iod_server_dset_write(hg_handle_t handle)
 {
-    H5VL_iod_dset_io_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dset_io_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dset_io_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dset_io_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_io_in_t *)
+                H5MM_malloc(sizeof(dset_io_in_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1053,10 +1306,20 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dset_write_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_write_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_write_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1080,13 +1343,17 @@ done:
 int
 H5VL_iod_server_dset_set_extent(hg_handle_t handle)
 {
-    H5VL_iod_dset_set_extent_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dset_set_extent_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dset_set_extent_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dset_set_extent_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_set_extent_in_t *)
+                H5MM_malloc(sizeof(dset_set_extent_in_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1095,10 +1362,20 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dset_set_extent_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1122,13 +1399,17 @@ done:
 int
 H5VL_iod_server_dset_close(hg_handle_t handle)
 {
-    H5VL_iod_dset_close_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dset_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dset_close_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dset_close_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_close_in_t *)
+                H5MM_malloc(sizeof(dset_close_in_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1137,10 +1418,20 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dset_close_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1164,13 +1455,17 @@ done:
 int
 H5VL_iod_server_dtype_commit(hg_handle_t handle)
 {
-    H5VL_iod_dtype_commit_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dtype_commit_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dtype_commit_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dtype_commit_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dtype_commit_in_t *)
+                H5MM_malloc(sizeof(dtype_commit_in_t))))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1179,10 +1474,20 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dtype_commit_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dtype_commit_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dtype_commit_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1206,13 +1511,17 @@ done:
 int
 H5VL_iod_server_dtype_open(hg_handle_t handle)
 {
-    H5VL_iod_dtype_open_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dtype_open_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dtype_open_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dtype_open_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dtype_open_in_t *)
+                H5MM_malloc(sizeof(dtype_open_in_t))))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1221,10 +1530,20 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dtype_open_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dtype_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dtype_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1248,13 +1567,17 @@ done:
 int
 H5VL_iod_server_dtype_close(hg_handle_t handle)
 {
-    H5VL_iod_dtype_close_input_t *input = NULL;
+    op_data_t *op_data = NULL;
+    dtype_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if(NULL == (input = (H5VL_iod_dtype_close_input_t *)
-                H5MM_malloc(sizeof(H5VL_iod_dtype_close_input_t))))
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dtype_close_in_t *)
+                H5MM_malloc(sizeof(dtype_close_in_t))))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
 
     if(HG_FAIL == HG_Handler_get_input(handle, input))
@@ -1263,10 +1586,20 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
-    input->hg_handle = handle;
-    if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
-                                      H5VL_iod_server_dtype_close_cb, input, NULL))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dtype_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dtype_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1287,17 +1620,19 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                               void *op_data)
+H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_file_create_input_t *input = (H5VL_iod_file_create_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    file_create_in_t *input = (file_create_in_t *)op_data->input;
     file_create_out_t output;
     unsigned int mode;
     iod_handle_t coh;
-    iod_handle_t root_handle, scratch_oh;
+    iod_handle_t root_oh, scratch_oh;
     iod_obj_id_t root_id, scratch_pad;
-    iod_ret_t status;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1309,78 +1644,70 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
     if (input->flags&H5F_ACC_CREAT) 
         mode |= IOD_CONT_CREATE;
 
-    status = iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/);
+    /* Create the Container */
+    if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create container");
 
-    if (EEXISTS != status && status == 0) {
-        /* create root group KV store */
-        if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
-                              &root_id, NULL /*event*/) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create root object");
-
-        ROOT_ID = root_id;
-
-        /* create scratch pad for root group */
-        if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
-                              &scratch_pad, NULL /*event*/) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create scratch pad");
-
-        /* open the root group */
-        if (iod_obj_open_write(coh, root_id, NULL /*hints*/, &root_handle, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
-
-        /* add the scratch pad to the root group */
-        if (iod_obj_set_scratch(root_handle, IOD_TID_UNKNOWN, &scratch_pad, NULL /*cs*/, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't set scratch pad for root object");
-
-        /* open the scratch pad */
-        if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    /* create the root group */
+    ret = iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, NULL, NULL, 
+                         &input->root_id, NULL);
+    if(ret >= 0 || ret == EEXISTS) {
+        /* root group has been created, open it */
+        if (iod_obj_open_write(coh, input->root_id, NULL, &root_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
     }
-    else if (EEXISTS == status) {
-        /* spin trying to open the root group */
-        while (1) {
-            if ((status = iod_obj_open_write(coh, root_id, NULL /*hints*/, &root_handle, NULL)) < 0)
-                continue;
-            else
-                break;
-        }
-        /* spin trying to get scratch pad for the root group */
-        while (1) {
-            if((status = iod_obj_get_scratch(root_handle, IOD_TID_UNKNOWN, &scratch_pad, 
-                                             NULL, NULL)) < 0)
-                continue;
-            else
-                break;
-        }
-
-        /* open the scratch pad */
-        if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    else {
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
     }
-    else
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create file");
+
+    /* create the scratch pad for the root group */
+    ret = iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, NULL, NULL, 
+                         &scratch_pad, NULL);
+    if(ret >= 0 || ret == EEXISTS) {
+        /* scratch pad has been created, set it in root group */
+        if (iod_obj_set_scratch(root_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
+    }
+    else {
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
+    }
+
+#if 0
+    /* Store Metadata in scratch pad */
+    if (iod_obj_open_write(coh, input->scratch_id, NULL, &scratch_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+    if(iod_obj_close(scratch_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+#endif
 
 #if H5_DO_NATIVE
     coh.cookie = H5Fcreate(input->name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(coh.cookie);
-    root_handle.cookie = coh.cookie;
-    fprintf(stderr, "Created Native file %s with ID %d\n", input->name, root_handle.cookie);
+    root_oh.cookie = coh.cookie;
+    fprintf(stderr, "Created Native file %s with ID %d\n", input->name, root_oh.cookie);
 #endif
 
     output.coh = coh;
-    output.root_id = root_id;
-    output.root_oh = root_handle;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
+    output.root_oh = root_oh;
+    output.kv_oid_index = 1;
+    output.array_oid_index = 1;
+    output.blob_oid_index = 1;
 
-    fprintf(stderr, "Done with file create, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    fprintf(stderr, "Done with file create, sending response to client \n");
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.coh.cookie = IOD_OH_UNDEFINED;
+        output.root_oh.cookie = IOD_OH_UNDEFINED;
+        output.kv_oid_index = 0;
+        output.array_oid_index = 0;
+        output.blob_oid_index = 0;
+        HG_Handler_start_output(op_data->hg_handle, &ret_value);
+    }
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_create_cb() */
@@ -1400,64 +1727,79 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine, 
+                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             void *_op_data)
 {
-    H5VL_iod_file_open_input_t *input = (H5VL_iod_file_open_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    file_open_in_t *input = (file_open_in_t *)op_data->input;
     file_open_out_t output;
     unsigned int mode = input->flags;
     iod_handle_t coh;
-    iod_handle_t root_handle, scratch_oh;
+    iod_handle_t root_oh, scratch_oh;
     iod_obj_id_t scratch_pad;
-    iod_ret_t status;
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 
-    if((status = iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/)) < 0)
+    if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
     /* open the root group */
-    if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_handle, NULL) < 0)
+    if (iod_obj_open_write(coh, ROOT_ID, NULL /*hints*/, &root_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open root object");
 
+    /* get metadata */
+#if 0
     /* get scratch pad of root group */
-    if(iod_obj_get_scratch(root_handle, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(root_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
-
     /* open the scratch pad */
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    if(iod_obj_close(scratch_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+#endif
 
 #if H5_DO_NATIVE
     {
-        int file_id;
-        file_id = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
-        HDassert(file_id);
-        coh.cookie = file_id;
-        root_handle.cookie = file_id;
+        coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
+        HDassert(coh.cookie);
+        root_oh.cookie = coh.cookie;
+        fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
     }
 #endif
 
     output.coh = coh;
     output.root_id = ROOT_ID;
-    output.root_oh = root_handle;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
+    output.root_oh = root_oh;
     output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
+    output.kv_oid_index = 1;
+    output.array_oid_index = 1;
+    output.blob_oid_index = 1;
 
     fprintf(stderr, "Done with file open, sending response to client\n");
 
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.coh.cookie = IOD_OH_UNDEFINED;
+        output.root_id = IOD_ID_UNDEFINED;
+        output.root_oh.cookie = IOD_OH_UNDEFINED;
+        output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
+        output.kv_oid_index = 0;
+        output.array_oid_index = 0;
+        output.blob_oid_index = 0;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_open_cb() */
@@ -1477,11 +1819,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_flush_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_file_flush_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_file_flush_input_t *input = (H5VL_iod_file_flush_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    file_flush_in_t *input = (file_flush_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
     H5F_scope_t scope = input->scope;
     herr_t ret_value = SUCCEED;
@@ -1496,10 +1840,12 @@ H5VL_iod_server_file_flush_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
 
 done:
     fprintf(stderr, "Done with file flush, sending response to client\n");
-    if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file flush to client");
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_flush_cb() */
 
@@ -1518,14 +1864,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             void *_op_data)
 {
-    H5VL_iod_file_close_input_t *input = (H5VL_iod_file_close_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    file_close_in_t *input = (file_close_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
     iod_handle_t root_oh = input->root_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1536,8 +1883,6 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
     H5Fclose(coh.cookie);
 #endif
 
-    if(iod_obj_close(scratch_oh, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close scratch object handle");
     if(iod_obj_close(root_oh, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't close root object handle");
     if(iod_container_close(coh, NULL, NULL) < 0)
@@ -1545,10 +1890,12 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
 
 done:
     fprintf(stderr, "Done with file close, sending response to client\n");
-    if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_file_close_cb() */
 
@@ -1567,47 +1914,85 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                                void *op_data)
+H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine, 
+                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                void *_op_data)
 {
-    H5VL_iod_group_create_input_t *input = (H5VL_iod_group_create_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    group_create_in_t *input = (group_create_in_t *)op_data->input;
     group_create_out_t output;
-    iod_handle_t coh = input->coh;
-    iod_handle_t loc_handle = input->loc_oh;
+    iod_handle_t coh = input->coh; /* the container handle */
+    iod_handle_t loc_handle = input->loc_oh; /* The handle for current object - could be undefined */
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_obj_id_t grp_id = input->grp_id; /* The ID of the group that needs to be created */
+    const char *name = input->name; /* path relative to loc_id and loc_oh  */
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
-    const char *name = input->name;
+    char *last_comp; /* the name of the group obtained from traversal function */
+    iod_kv_t kv;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start group create %s\n", name);
 
-    /* the traversal will count the created group as an intermediate
-       group and create it in the process */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, name, TRUE, FALSE, NULL,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the group needs
+       to be created. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /* create the group */
+    if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, NULL, NULL, &grp_id, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
+
+    /* insert new group in kv store of parent object */
+    kv.key = HDstrdup(last_comp);
+    kv.value = &grp_id;
+    kv.value_len = sizeof(iod_obj_id_t);
+    if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    HDfree(kv.key);
+
+    /* close parent group and its scratch pad if it is not the
+       location we started the traversal into */
+    if(loc_handle.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* create scratch pad for new group */
+    if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
+                       &scratch_pad, NULL /*event*/) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
+
+    /* set the scratch pad in group */
+    if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
 #if H5_DO_NATIVE
     cur_oh.cookie = H5Gcreate2(loc_handle.cookie, name, input->lcpl_id, 
-                               input->gcpl_id, input->gapl_id);
+                        input->gcpl_id, input->gapl_id);
     HDassert(cur_oh.cookie);
 #endif
 
-    output.iod_id = cur_id;
-    output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
-
     fprintf(stderr, "Done with group create, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+
+    /* return the object handle for the group to the client */
+    output.iod_oh = cur_oh;
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    /* return an UNDEFINED oh to the client if the operation failed */
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    free(last_comp);
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_create_cb() */
@@ -1627,28 +2012,50 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                              void *op_data)
+H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_group_open_input_t *input = (H5VL_iod_group_open_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    group_open_in_t *input = (group_open_in_t *)op_data->input;
     group_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    const char *name = input->name;
+    iod_obj_id_t grp_id; /* The ID of the group that needs to be opened */
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
-    const char *name = input->name;
+    char *last_comp; /* the name of the group obtained from traversal function */
+    iod_size_t kv_size;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start group open %s\n", name);
 
-    if(H5VL_iod_server_get_loc(coh, loc_handle, name, FALSE, FALSE, NULL,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the group needs
+       to be created. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
+    kv_size = sizeof(iod_obj_id_t);
+
+    /* lookup group in the current location */
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &grp_id, &kv_size, NULL, NULL) < 0) {
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
+    } /* end if */
+
+    /* open the group */
+    if (iod_obj_open_write(coh, grp_id, NULL, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
 #if 0 
+    /* When we have a real IOD, open the scratch pad and read the
+       group's metadata */
     if(iod_kv_get_value(scratch_oh, IOD_TID_UNKNOWN, "dataset_gcpl", NULL, 
                         &output.gcpl_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset gcpl lookup failed");
@@ -1664,19 +2071,24 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
     HDassert(cur_oh.cookie);
 #endif
 
-    output.iod_id = cur_id;
+    output.iod_id = grp_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
     output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
     fprintf(stderr, "Done with group open, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_id = IOD_ID_UNDEFINED;
+        output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    free(last_comp);
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_open_cb() */
@@ -1696,33 +2108,39 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                               void *op_data)
+H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_group_close_input_t *input = (H5VL_iod_group_close_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    group_close_in_t *input = (group_close_in_t *)op_data->input;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start group close\n");
 
+    if(iod_oh.cookie != IOD_OH_UNDEFINED) {
 #if H5_DO_NATIVE
-    ret_value = H5Gclose(iod_oh.cookie);
+        ret_value = H5Gclose(iod_oh.cookie);
 #endif
 
-    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
-    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
-
+        if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+    }
+    else {
+        /* need a way to kill object handle for this group */
+        fprintf(stderr, "I do not have the OH of this group to close it\n");
+    }
 done:
     fprintf(stderr, "Done with group close, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret_value);
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_group_close_cb() */
 
@@ -1741,14 +2159,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                                  size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                                  void *op_data)
+H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_dset_create_input_t *input = (H5VL_iod_dset_create_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_create_in_t *input = (dset_create_in_t *)op_data->input;
     dset_create_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_obj_id_t dset_id = input->dset_id; /* The ID of the dataset that needs to be created */
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
     const char *name = input->name;
@@ -1763,9 +2185,11 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
 
     fprintf(stderr, "Start dataset Create %s\n", name);
 
-    /* traverse and break at the last component in the path, i.e. the dataset */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, name, TRUE, TRUE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the dataset needs
+       to be created. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* Set the IOD array creation parameters */
@@ -1779,6 +2203,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get dimentions' sizes");
     array.firstdim_max = max_dims[0];
     array.chunk_dims = NULL;
+
     /* MSC - NEED TO FIX THAT */
 #if 0
     if(layout.type == H5D_CHUNKED) {
@@ -1794,22 +2219,21 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
 
     /* create the dataset */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
-                       &cur_id, NULL /*event*/) < 0)
+                       &dset_id, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
 
     kv.key = HDstrdup(last_comp);
-    kv.value = &cur_id;
+    kv.value = &dset_id;
     kv.value_len = sizeof(iod_obj_id_t);
     /* insert new dataset in kv store of current group */
     if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
     HDfree(kv.key);
 
+    /* close parent group if it is not the location we started the
+       traversal into */
     if(loc_handle.cookie != cur_oh.cookie) {
-        /* close parent group and its scratch pad if it is not the
-           location we started the traversal into */
         iod_obj_close(cur_oh, NULL, NULL);
-        iod_obj_close(scratch_oh, NULL, NULL);
     }
 
     /* create scratch pad for dataset */
@@ -1818,18 +2242,18 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     /* open the dataset */
-    if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, dset_id, NULL /*hints*/, &cur_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* add the scratch pad to the dataset */
     if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
+#if 0
     /* open the scratch pad */
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-#if 0
     /* insert layout metadata into scratch pad */
     kv.key = HDstrdup("dataset_dcpl");
     /* determine the buffer size needed to store the encoded dcpl of the dataset */ 
@@ -1888,22 +2312,25 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
     HDassert(cur_oh.cookie);
 #endif
 
-    output.iod_id = cur_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
 
     free(max_dims);
     free(array.current_dims);
     free(last_comp);
 
     fprintf(stderr, "Done with dset create, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    /* return an UNDEFINED oh to the client if the operation failed */
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_create_cb() */
@@ -1923,16 +2350,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                                void *op_data)
+H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, 
+                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             void *_op_data)
 {
-    H5VL_iod_dset_open_input_t *input = (H5VL_iod_dset_open_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_open_in_t *input = (dset_open_in_t *)op_data->input;
     dset_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
+    iod_obj_id_t dset_id;
     char *name = input->name;
     char *last_comp;
     herr_t ret_value = SUCCEED;
@@ -1941,10 +2372,20 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
 
     fprintf(stderr, "Start dataset Open %s\n", name);
 
-    /* traverse the path and open the dataset object as we do it */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, name, FALSE, FALSE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the dataset needs
+       to be opened. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &dset_id, 
+                        sizeof(iod_obj_id_t) , NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Array ID from parent KV store");
+
+    /* open the dataset */
+    if (iod_obj_open_write(coh, dset_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
 #if 0
     /*retrieve all metadata from scratch pad */
@@ -1981,8 +2422,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
         //hid_t space_id, type_id;
 
 #if H5_DO_NATIVE
-        printf("dataset name %s    location %d\n", last_comp, loc_handle.cookie);
-        cur_oh.cookie = H5Dopen(loc_handle.cookie, last_comp, input->dapl_id);
+        printf("dataset name %s    location %d\n", name, loc_handle.cookie);
+        cur_oh.cookie = H5Dopen(loc_handle.cookie, name, input->dapl_id);
         HDassert(cur_oh.cookie);
         output.space_id = H5Dget_space(cur_oh.cookie);
         output.type_id = H5Dget_type(cur_oh.cookie);
@@ -2020,17 +2461,18 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
 
     }
 
-    output.iod_id = cur_id;
+    output.iod_id = dset_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
 
     fprintf(stderr, "Done with dset open, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_id = IOD_ID_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
 
 #if !H5_DO_NATIVE
     H5Tclose(output.type_id);
@@ -2038,6 +2480,7 @@ done:
 #endif
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     free(last_comp);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2058,14 +2501,17 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine, 
+                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             void *_op_data)
 {
-    H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_io_in_t *input = (dset_io_in_t *)op_data->input;
     dset_read_out_t output;
+    iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id;    
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
@@ -2075,10 +2521,20 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
     size_t size;
     void *buf;
     uint32_t cs = 0;
-    na_addr_t dest = HG_Handler_get_addr(input->hg_handle);
+    na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If the dataset handle and ID are not avaiable, traverse the path to obtain it */
+    if(iod_id == IOD_ID_UNDEFINED) {
+        ;/* traverse routine */
+    }
+    /* open the dataset if we don't have the handle yet */
+    if(iod_oh.cookie == IOD_OH_UNDEFINED) {
+        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
+    }
 
     size = HG_Bulk_handle_get_size(bulk_handle);
     fprintf(stderr, "Start dataset Read of size %d\n", size);
@@ -2132,12 +2588,13 @@ done:
 
     fprintf(stderr, "Done with dset read, sending response to client\n");
 
-    if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &output))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     free(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2158,13 +2615,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_dset_io_input_t *input = (H5VL_iod_dset_io_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_io_in_t *input = (dset_io_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
@@ -2175,12 +2635,22 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
     size_t size;
     void *buf;
     ssize_t ret;
-    na_addr_t source = HG_Handler_get_addr(input->hg_handle);
+    na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start dataset Write with checksum %u\n", cs);
+
+    /* If the dataset handle and ID are not avaiable, traverse the path to obtain it */
+    if(iod_id == IOD_ID_UNDEFINED) {
+        ;/* traverse routine */
+    }
+    /* open the dataset if we don't have the handle yet */
+    if(iod_oh.cookie == IOD_OH_UNDEFINED) {
+        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
+    }
 
     /* Read bulk data here and wait for the data to be here  */
     size = HG_Bulk_handle_get_size(bulk_handle);
@@ -2226,10 +2696,11 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
 
 done:
     fprintf(stderr, "Done with dset write, sending %d response to client\n", ret_value);
-    if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     free(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2250,18 +2721,32 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                                   size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                                   void *op_data)
+H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine, 
+                                   size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                   size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                   void *_op_data)
 {
-    H5VL_iod_dset_set_extent_input_t *input = (H5VL_iod_dset_set_extent_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_set_extent_in_t *input = (dset_set_extent_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     int rank = input->dims.rank;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start dataset Extend on the first dimension to %d\n", input->dims.size[0]);
+
+    /* If the dataset handle and ID are not avaiable, traverse the path to obtain it */
+    if(iod_id == IOD_ID_UNDEFINED) {
+        ;/* traverse routine */
+    }
+    /* open the dataset if we don't have the handle yet */
+    if(iod_oh.cookie == IOD_OH_UNDEFINED) {
+        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
+    }
 
     if(iod_array_extend(iod_oh, IOD_TID_UNKNOWN, (iod_size_t)input->dims.size[0], NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't extend dataset");
@@ -2272,8 +2757,10 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED
 
 done:
     fprintf(stderr, "Done with dset set_extent, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret_value);
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
+
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_set_extent_cb() */
@@ -2293,33 +2780,41 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                              void *op_data)
+H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_dset_close_input_t *input = (H5VL_iod_dset_close_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_close_in_t *input = (dset_close_in_t *)op_data->input;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start dataset Close\n");
 
+    if(iod_oh.cookie != IOD_OH_UNDEFINED) {
 #if H5_DO_NATIVE
-    ret_value = H5Dclose(iod_oh.cookie);
+        ret_value = H5Dclose(iod_oh.cookie);
 #endif
 
-    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
-    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+        if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+    }
+    else {
+        /* need a way to kill object handle for this group */
+        fprintf(stderr, "I do not have the OH of this dataset to close it\n");
+    }
 
 done:
     fprintf(stderr, "Done with dset close, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret_value);
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close_cb() */
 
@@ -2338,14 +2833,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                                size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                                void *op_data)
+H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, 
+                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                void *_op_data)
 {
-    H5VL_iod_dtype_commit_input_t *input = (H5VL_iod_dtype_commit_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dtype_commit_in_t *input = (dtype_commit_in_t *)op_data->input;
     dtype_commit_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_obj_id_t dtype_id = input->dtype_id; /* The ID of the datatype that needs to be created */
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
     const char *name = input->name;
@@ -2361,25 +2860,31 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED nu
 
     fprintf(stderr, "Start datatype Commit %s\n", name);
 
-    /* traverse and break at the last component in the path, i.e. the dataset */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, name, TRUE, TRUE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the datatype needs
+       to be created. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
-
-    fprintf(stderr, "now creating the Blob object for datatype \n");
 
     /* create the datatype */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_BLOB, NULL, NULL,
-                       &cur_id, NULL /*event*/) < 0)
+                       &dtype_id, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
 
     kv.key = HDstrdup(last_comp);
-    kv.value = &cur_id;
+    kv.value = &dtype_id;
     kv.value_len = sizeof(iod_obj_id_t);
-    /* insert new datatype in kv store of current group */
+    /* insert new dataset in kv store of current group */
     if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
     HDfree(kv.key);
+
+    /* close parent group and its scratch pad if it is not the
+       location we started the traversal into */
+    if(loc_handle.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
 
     /* create scratch pad for datatype */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
@@ -2387,16 +2892,12 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED nu
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     /* open the datatype */
-    if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, dtype_id, NULL /*hints*/, &cur_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* add the scratch pad to the datatype */
     if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
-
-    /* open the scratch pad */
-    if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* determine the buffer size needed to store the encoded type of the datatype */ 
     if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
@@ -2442,19 +2943,19 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED nu
             last_comp, cur_oh.cookie, loc_handle.cookie);
 #endif
 
-    output.iod_id = cur_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
 
     fprintf(stderr, "Done with dtype commit, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     free(last_comp);
     free(buf);
 
@@ -2476,17 +2977,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                              void *op_data)
+H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, 
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_dtype_open_input_t *input = (H5VL_iod_dtype_open_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dtype_open_in_t *input = (dtype_open_in_t *)op_data->input;
     dtype_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_obj_id_t dtype_id;
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
     char *name = input->name;
+    char *last_comp; /* the name of the datatype obtained from the last component in the path */
     size_t buf_size;
     void *buf;
     iod_mem_desc_t mem_desc;
@@ -2497,10 +3003,20 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
 
     fprintf(stderr, "Start datatype Open %s\n", name);
 
-    /* traverse the path and open the dataset object as we do it */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, name, FALSE, FALSE, NULL,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the datatype needs
+       to be opened. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &dtype_id, 
+                        sizeof(iod_obj_id_t) , NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Array ID from parent KV store");
+
+    /* open the datatype */
+    if (iod_obj_open_write(coh, dtype_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* MSC - need to read datatype; size should be stored in metadata,
        but since no real IOD, can't do anything now */
@@ -2542,22 +3058,27 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype");
 #endif
 
-    output.iod_id = cur_id;
+    output.iod_id = dtype_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
 
     fprintf(stderr, "Done with dtype open, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_id = IOD_ID_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
 
 #if !H5_DO_NATIVE
     H5Tclose(output.type_id);
 #endif
+
+    free(last_comp);
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dtype_open_cb() */
 
@@ -2576,33 +3097,41 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                              void *op_data)
+H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_dtype_close_input_t *input = (H5VL_iod_dtype_close_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dtype_close_in_t *input = (dtype_close_in_t *)op_data->input;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    fprintf(stderr, "Start datatype Close %d\n", iod_oh.cookie);
+    fprintf(stderr, "Start datatype Close\n");
 
+    if(iod_oh.cookie != IOD_OH_UNDEFINED) {
 #if H5_DO_NATIVE
-    HDassert(H5Tclose(iod_oh.cookie) == SUCCEED);
+        HDassert(H5Tclose(iod_oh.cookie) == SUCCEED);
 #endif
 
-    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
-    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+        if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+    }
+    else {
+        /* need a way to kill object handle for this group */
+        fprintf(stderr, "I do not have the OH of this datatype to close it\n");
+    }
 
 done:
     fprintf(stderr, "Done with dtype close, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret_value);
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dtype_close_cb() */
 
@@ -2621,14 +3150,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                               void *op_data)
+H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_attr_create_input_t *input = (H5VL_iod_attr_create_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_create_in_t *input = (attr_create_in_t *)op_data->input;
     attr_create_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_obj_id_t attr_id = input->attr_id; /* The ID of the attribute that needs to be created */
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
     const char *loc_name = input->path;
@@ -2644,9 +3177,11 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
 
     fprintf(stderr, "Start attribute Create %s on object path %s\n", attr_name, loc_name);
 
-    /* traverse path */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, loc_name, FALSE, FALSE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the attribute needs
+       to be created. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* Set the IOD array creation parameters */
@@ -2662,24 +3197,23 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
     array.chunk_dims = NULL;
     array.dims_seq = NULL;
 
-    /* create the dataset */
+    /* create the attribute */
     if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_ARRAY, NULL, &array,
-                       &cur_id, NULL /*event*/) < 0)
+                       &attr_id, NULL /*event*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
 
     /* insert new attribute in scratch pad of current object */
     kv.key = HDstrdup(attr_name);
-    kv.value = &cur_id;
+    kv.value = &attr_id;
     kv.value_len = 0;
-    if (iod_kv_set(scratch_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+    if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
     HDfree(kv.key);
 
+    /* close parent group if it is not the location we started the
+       traversal into */
     if(loc_handle.cookie != cur_oh.cookie) {
-        /* close parent group and its scratch pad if it is not the
-           location we started the traversal into */
         iod_obj_close(cur_oh, NULL, NULL);
-        iod_obj_close(scratch_oh, NULL, NULL);
     }
 
     /* create scratch pad for attribute */
@@ -2688,18 +3222,18 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
     /* open the attribute */
-    if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+    if (iod_obj_open_write(coh, attr_id, NULL /*hints*/, &cur_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     /* add the scratch pad to the attribute */
     if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
+#if 0
     /* open the scratch pad */
     if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-#if 0
     /* insert datatype metadata into scratch pad */
     kv.key = HDstrdup("attribute_dtype");
     /* determine the buffer size needed to store the encoded type of the attribute */ 
@@ -2740,21 +3274,24 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num
     HDassert(cur_oh.cookie);
 #endif
 
-    output.iod_id = cur_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
 
     free(max_dims);
     free(array.current_dims);
 
     fprintf(stderr, "Done with attr create, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+
+    /* return an UNDEFINED oh to the client if the operation failed */
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
@@ -2776,16 +3313,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, 
+                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             void *_op_data)
 {
-    H5VL_iod_attr_open_input_t *input = (H5VL_iod_attr_open_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_open_in_t *input = (attr_open_in_t *)op_data->input;
     attr_open_out_t output;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
+    iod_obj_id_t attr_id;
     const char *loc_name = input->path;
     const char *attr_name = input->attr_name;
     char *last_comp = NULL;
@@ -2795,26 +3336,46 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
 
     fprintf(stderr, "Start attribute Open %s\n", attr_name);
 
-    /* traverse the path and open the location object as we do it */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, loc_name, FALSE, FALSE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the attribute needs
+       to be opened. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    /*retrieve that attribute ID from the scratch pad and open it */
-    if(iod_kv_get_value(scratch_oh, IOD_TID_UNKNOWN, attr_name, &cur_id, 
-                        sizeof(iod_obj_id_t), NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve attribute ID");
+    /* get and open the scratch pad where the attribute should be */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &scratch_pad, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
+    if (iod_obj_open_write(coh, scratch_pad, NULL /*hints*/, &scratch_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+    /* get attribute ID from scratch pad */
+    if(iod_kv_get_value(scratch_oh, IOD_TID_UNKNOWN, attr_name, &attr_id, 
+                        sizeof(iod_obj_id_t) , NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Array ID from parent KV store");
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+        iod_obj_close(scratch_oh, NULL, NULL);
+    }
 
     /* open the attribute */
-    if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+    if (iod_obj_open_write(coh, attr_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
     {
         hsize_t dims[1];
         //hid_t space_id, type_id;
 
 #if H5_DO_NATIVE
-        cur_oh.cookie = H5Aopen(loc_handle.cookie, attr_name, H5P_DEFAULT);
+        printf("attr name %s  location %d %s\n", attr_name, loc_handle.cookie, loc_name);
+        if(strcmp(loc_name, ".") == 0)
+            cur_oh.cookie = H5Aopen(loc_handle.cookie, attr_name, H5P_DEFAULT);
+        else
+            cur_oh.cookie = H5Aopen_by_name(loc_handle.cookie, loc_name, 
+                                            attr_name, H5P_DEFAULT, H5P_DEFAULT);
         HDassert(cur_oh.cookie);
         output.space_id = H5Aget_space(cur_oh.cookie);
         output.type_id = H5Aget_type(cur_oh.cookie);
@@ -2828,17 +3389,18 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
 #endif
     }
 
-    output.iod_id = cur_id;
+    output.iod_id = attr_id;
     output.iod_oh = cur_oh;
-    output.scratch_id = scratch_pad;
-    output.scratch_oh = scratch_oh;
 
     fprintf(stderr, "Done with attr open, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &output);
+    HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
-    if(ret_value < 0)
-        HG_Handler_start_output(input->hg_handle, &ret_value);
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_id = IOD_ID_UNDEFINED;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
 
 #if !H5_DO_NATIVE
     H5Sclose(output.space_id);
@@ -2846,6 +3408,7 @@ done:
 #endif
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
@@ -2867,13 +3430,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                             size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                             void *op_data)
+H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine, 
+                             size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                             size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                             void *_op_data)
 {
-    H5VL_iod_attr_io_input_t *input = (H5VL_iod_attr_io_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_io_in_t *input = (attr_io_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t type_id = input->type_id;
     hg_bulk_block_t bulk_block_handle;
@@ -2881,10 +3447,20 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
     iod_array_iodesc_t file_desc;
     size_t size;
     void *buf;
-    na_addr_t dest = HG_Handler_get_addr(input->hg_handle);
+    na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If the attribute handle and ID are not avaiable, traverse the path to obtain it */
+    if(iod_id == IOD_ID_UNDEFINED) {
+        ;/* traverse routine */
+    }
+    /* open the attribute if we don't have the handle yet */
+    if(iod_oh.cookie == IOD_OH_UNDEFINED) {
+        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
+    }
 
     size = HG_Bulk_handle_get_size(bulk_handle);
     fprintf(stderr, "Start attribute Read of size %d\n", size);
@@ -2927,12 +3503,13 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine, size_t UNUSED num_n
 done:
     fprintf(stderr, "Done with attr read, sending response to client\n");
 
-    if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     free(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2954,13 +3531,15 @@ done:
  */
 static herr_t
 H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine, 
-                              size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                              void *op_data)
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_attr_io_input_t *input = (H5VL_iod_attr_io_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_io_in_t *input = (attr_io_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t type_id = input->type_id;
     hg_bulk_block_t bulk_block_handle;
@@ -2969,12 +3548,22 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     size_t size;
     void *buf;
     ssize_t ret;
-    na_addr_t source = HG_Handler_get_addr(input->hg_handle);
+    na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start attribute Write\n");
+
+    /* If the attribute handle and ID are not avaiable, traverse the path to obtain it */
+    if(iod_id == IOD_ID_UNDEFINED) {
+        ;/* traverse routine */
+    }
+    /* open the attribute if we don't have the handle yet */
+    if(iod_oh.cookie == IOD_OH_UNDEFINED) {
+        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
+    }
 
     /* Read bulk data here and wait for the data to be here  */
     size = HG_Bulk_handle_get_size(bulk_handle);
@@ -3020,10 +3609,11 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     fprintf(stderr, "Done with attr write, sending %d response to client\n", ret_value);
-    if(HG_SUCCESS != HG_Handler_start_output(input->hg_handle, &ret_value))
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     free(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3045,13 +3635,15 @@ done:
  */
 static herr_t
 H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine, 
-                               size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                               void *op_data)
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_attr_op_input_t *input = (H5VL_iod_attr_op_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_op_in_t *input = (attr_op_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
     const char *loc_name = input->path;
@@ -3064,9 +3656,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     fprintf(stderr, "Start attribute Exists %s\n", attr_name);
 
-    /* traverse the path and open the dataset object as we do it */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, loc_name, FALSE, FALSE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the dataset needs
+       to be opened. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /*MSC - check the attribute in the scratch pad KV store when it is
@@ -3080,9 +3674,10 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     fprintf(stderr, "Done with attr exists, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret);
+    HG_Handler_start_output(op_data->hg_handle, &ret);
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
@@ -3105,13 +3700,15 @@ done:
  */
 static herr_t
 H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine, 
-                               size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                               size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                               void *op_data)
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
 {
-    H5VL_iod_attr_op_input_t *input = (H5VL_iod_attr_op_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_op_in_t *input = (attr_op_in_t *)op_data->input;
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
     const char *loc_name = input->path;
@@ -3123,9 +3720,11 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     fprintf(stderr, "Start attribute Remove %s\n", attr_name);
 
-    /* traverse the path and open the dataset object as we do it */
-    if(H5VL_iod_server_get_loc(coh, loc_handle, loc_name, FALSE, FALSE, &last_comp,
-                               &cur_id, &cur_oh, &scratch_pad, &scratch_oh) < 0)
+    /* the traversal will retrieve the location where the dataset needs
+       to be opened. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /*MSC - Remove the attribute from the scratch pad KV store when it
@@ -3137,9 +3736,10 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
 done:
     fprintf(stderr, "Done with attr remove, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret_value);
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
@@ -3162,45 +3762,50 @@ done:
  */
 static herr_t
 H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine, 
-                              size_t UNUSED num_necessary_parents, AXE_task_t UNUSED necessary_parents[], 
-                              size_t UNUSED num_sufficient_parents, AXE_task_t UNUSED sufficient_parents[], 
-                              void *op_data)
+                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                              void *_op_data)
 {
-    H5VL_iod_attr_close_input_t *input = (H5VL_iod_attr_close_input_t *)op_data;
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_close_in_t *input = (attr_close_in_t *)op_data->input;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_handle_t scratch_oh = input->scratch_oh;
+    iod_obj_id_t iod_id = input->iod_id; 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start attribute Close\n");
 
+    if(iod_oh.cookie != IOD_OH_UNDEFINED) {
 #if H5_DO_NATIVE
-    HDassert(H5Aclose(iod_oh.cookie) == SUCCEED);
+        HDassert(H5Aclose(iod_oh.cookie) == SUCCEED);
 #endif
-
-    if((ret_value = iod_obj_close(scratch_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close scratch object handle");
-    if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+        if((ret_value = iod_obj_close(iod_oh, NULL, NULL)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
+    }
+    else {
+        /* need a way to kill object handle for this group */
+        fprintf(stderr, "I do not have the OH of this dataset to close it\n");
+    }
 
 done:
     fprintf(stderr, "Done with attr close, sending response to client\n");
-    HG_Handler_start_output(input->hg_handle, &ret_value);
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = H5MM_xfree(input);
+    op_data = H5MM_xfree(op_data);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_attr_close_cb() */
 
 static herr_t 
-H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *path,
-                        hbool_t create_interm_grps, hbool_t break_on_last_comp,
-                        char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
-                        iod_obj_id_t *scratch_id, iod_handle_t *scratch_oh)
+H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
+                         const char *path, hbool_t create_interm_grps,
+                         char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh)
 {
     char comp_buf[1024];     /* Temporary buffer for path components */
-    char *comp;          /* Pointer to buffer for path components */
-    H5WB_t *wb = NULL;     /* Wrapped buffer for temporary buffer */
+    char *comp;              /* Pointer to buffer for path components */
+    H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     size_t nchars;	     /* component name length	*/
     iod_handle_t cur_oh, prev_oh;
     iod_obj_id_t cur_id;
@@ -3209,6 +3814,12 @@ H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *p
     FUNC_ENTER_NOAPI_NOINIT
 
     cur_oh = loc_handle;
+
+    if(cur_oh.cookie == IOD_OH_UNDEFINED) {
+        /* open the current group */
+        if (iod_obj_open_write(coh, loc_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    }
 
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
@@ -3222,10 +3833,7 @@ H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *p
         const char *s;                  /* Temporary string pointer */
         iod_size_t kv_size;
 
-	/*
-	 * Copy the component path into a null-terminated buffer so
-	 * we can pass it down to the other symbol table functions.
-	 */
+        /* Copy the component path into a null-terminated buffer. */
 	HDmemcpy(comp, path, nchars);
 	comp[nchars] = '\0';
 
@@ -3241,8 +3849,7 @@ H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *p
         if(!((s = H5G__component(path + nchars, NULL)) && *s)) {
             if(last_comp)
                 *last_comp = HDstrdup(comp);
-            if(break_on_last_comp)
-                break;
+            break;
         }
 
         kv_size = sizeof(iod_obj_id_t);
@@ -3250,47 +3857,8 @@ H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *p
         prev_oh = cur_oh;
 
         /* lookup next object in the current group */
-        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, 
-                            &kv_size, NULL, NULL) < 0) {
-            if(create_interm_grps) {
-                iod_kv_t kv;
-
-                fprintf(stderr, "creating intermediate group %s\n",comp);
-
-                /* create the current group */
-                if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
-                                   &cur_id, NULL /*event*/) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create current object handle");
-
-                /* insert new object in kv store of current object */
-                kv.key = HDstrdup(comp);
-                kv.value = &cur_id;
-                kv.value_len = sizeof(iod_obj_id_t);
-                if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");;
-                HDfree(kv.key);
-
-                /* create scratch pad for current group */
-                if (iod_obj_create(coh, IOD_TID_UNKNOWN, NULL/*hints*/, IOD_OBJ_KV, NULL, NULL,
-                                   scratch_id, NULL /*event*/) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
-
-                /* Close previous handle unless it is the original one */
-                if(loc_handle.cookie != prev_oh.cookie && 
-                   iod_obj_close(prev_oh, NULL, NULL) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close current object handle");
-
-                /* open the current group */
-                if (iod_obj_open_write(coh, cur_id, NULL /*hints*/, &cur_oh, NULL) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
-
-                /* add the scratch pad to the current group */
-                if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, scratch_id, NULL, NULL) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
-            }
-            else {
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "group does not exist");
-            }
+        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, comp, &cur_id, &kv_size, NULL, NULL) < 0) {
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
         } /* end if */
         else {
             /* Close previous handle unless it is the original one */
@@ -3307,17 +3875,9 @@ H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *p
 	path += nchars;
     } /* end while */
 
-    /* get scratch pad of current location */
-    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, scratch_id, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for root object");
-
-    /* open the scratch pad */
-    if (iod_obj_open_write(coh, *scratch_id, NULL /*hints*/, scratch_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
-
     /* Release temporary component buffer */
     if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't release wrapped buffer");
 
     *iod_id = cur_id;
     *iod_oh = cur_oh;
@@ -3325,4 +3885,5 @@ H5VL_iod_server_get_loc(iod_handle_t coh, iod_handle_t loc_handle, const char *p
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
 #endif /* H5_HAVE_EFF */
