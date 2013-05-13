@@ -269,16 +269,65 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     switch(req->type) {
     case HG_FILE_CREATE:
     case HG_FILE_OPEN:
-    case HG_ATTR_CREATE:
-    case HG_ATTR_OPEN:
-    case HG_GROUP_CREATE:
-    case HG_GROUP_OPEN:
-    case HG_DSET_CREATE:
-    case HG_DSET_OPEN:
-    case HG_DTYPE_COMMIT:
-    case HG_DTYPE_OPEN:
+        if(IOD_OH_UNDEFINED == req->obj->file->remote_file.coh.cookie) {
+            fprintf(stderr, "failed to create/open file\n");
+            req->status = H5AO_FAILED;
+            req->state = H5VL_IOD_COMPLETED;
+        }
         H5VL_iod_request_delete(file, req);
         break;
+    case HG_ATTR_CREATE:
+    case HG_ATTR_OPEN:
+        {
+            H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
+
+            if(IOD_OH_UNDEFINED == attr->remote_attr.iod_oh.cookie) {
+                fprintf(stderr, "failed to create/open Attribute\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_GROUP_CREATE:
+    case HG_GROUP_OPEN:
+        {
+            H5VL_iod_group_t *group = (H5VL_iod_group_t *)req->obj;
+
+            if(IOD_OH_UNDEFINED == group->remote_group.iod_oh.cookie) {
+                fprintf(stderr, "failed to create/open Group\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_DSET_CREATE:
+    case HG_DSET_OPEN:
+        {
+            H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
+
+            if(IOD_OH_UNDEFINED == dset->remote_dset.iod_oh.cookie) {
+                fprintf(stderr, "failed to create/open Dataset\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_DTYPE_COMMIT:
+    case HG_DTYPE_OPEN:
+        {
+            H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
+
+            if(IOD_OH_UNDEFINED == dtype->remote_dtype.iod_oh.cookie) {
+                fprintf(stderr, "failed to create/open Attribute\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_DSET_WRITE:
     case HG_DSET_READ:
         {
