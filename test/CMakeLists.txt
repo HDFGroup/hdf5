@@ -354,6 +354,8 @@ ADD_TEST (
         testmeta.h5
         tstint1.h5
         tstint2.h5
+        unregister_filter_1.h5
+        unregister_filter_2.h5
 )
 
 SET (H5_TESTS
@@ -406,6 +408,7 @@ SET (H5_TESTS
     testmeta
     #links_env
     file_image
+    unregister
 )
 
 FOREACH (test ${H5_TESTS})
@@ -664,6 +667,7 @@ IF (HDF5_TEST_VFD)
       tcheck_version
       testmeta
       links_env
+      unregister
 )
   
   IF (DIRECT_VFD)
