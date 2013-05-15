@@ -86,10 +86,7 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - SunOS 5.11 (emu) 32-bit and 64-bit with Sun C/C++ 5.12 compiler and
-      Sun Fortran 95 8.6 compiler.
-
-    - Visual Studio 2012 w/ Intel Fortran 13 on Windows 7 and Windows 8
+    - None
 
 Bug Fixes since HDF5-1.8.11
 ===========================
@@ -136,25 +133,28 @@ Bug Fixes since HDF5-1.8.11
 
 Supported Platforms
 ===================
+The following platforms are supported and have been tested for this release.
+They are built with the configure process unless specified otherwise.
+
     AIX 5.3                       xlc 10.1.0.5
     (NASA G-ADA)                  xlC 10.1.0.5
                                   xlf90 12.1.0.6
 
     Linux 2.6.18-308.13.1.el5PAE  GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP i686 i686 i386         compilers for 32-bit applications;
-    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-52)
+    (jam)                             Version 4.1.2 20080704 (Red Hat 4.1.2-54)
                                       Version 4.6.3
                                   PGI C, Fortran, C++ Compilers for 32-bit
                                   applications;
                                       Version 11.9-0
+                                      Version 12.5-0
                                   Intel(R) C, C++, Fortran Compiler for 32-bit
                                   applications;
-                                      Version 12.1
-                                  MPICH mpich2-1.4.1p1 compiled with
-                                      gcc 4.1.2 and gfortran 4.1.2
+                                      Version 12.1 (Build 20110811)
+                                      Version 12.1 (Build 20120212)
 
     Linux 2.6.18-308.16.1.el5     GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers for 32-bit applications;
+    #1 SMP x86_64 GNU/Linux       compilers for 64-bit applications;
     (koala)                           Version 4.1.2 20080704 (Red Hat 4.1.2-52)
                                       Version 4.6.3
                                   PGI C, Fortran, C++ for 64-bit target on 
@@ -165,21 +165,19 @@ Supported Platforms
                                   applications running on Intel(R) 64; 
                                       Version 12.1 (Build 20110811)
                                       Version 12.1 (Build 20120212)
-                                  MPICH mpich2-1.4.1p1 compiled with
-                                      gcc 4.1.2 and gfortran 4.1.2
+
+    Linux 2.6.32-358.2.1.el6      GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux       compilers:
+    (platypus)                       Version 4.4.7 20120313
+                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                  compilers:
+                                     Version 12.1 20120212
 
     Linux 2.6.32-358.2.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
     (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-3)
                                   IBM XL C/C++ V11.1
                                   IBM XL Fortran V13.1
-    Linux 2.6.32-220.23.1.1chaos  Intel C, C++, Fortran Compilers
-    ch5.x86_64 GNU/Linux              Version 12.1.5.339
-    (LLNL Aztec)
-
-    IBM Blue Gene/P               XL C for Blue Gene/P, bgxlc V9.0
-    (LLNL uDawn)                  XL C++ for Blue Gene/P, bgxlC V9.0
-                                  XL Fortran for Blue Gene/P, bgxlf90 V11.1
 
     SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
@@ -197,25 +195,19 @@ Supported Platforms
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
 
-    Windows 8                     Visual Studio 2012 w/ Intel Fortran 13 (cmake)
-
-    Windows 8 x64                 Visual Studio 2012 w/ Intel Fortran 13 (cmake)
-
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     64-bit                        gfortran GNU Fortran (GCC) 4.6.2
     (fred)                        Intel C (icc), Fortran (ifort), C++ (icpc)
                                       12.1 Build 20120928
 
-    Mac OS X Lion 10.7.3          gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.2.1
-    32- and 64-bit                g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.2.1
-    (duck)                        gfortran GNU Fortran (GCC) 4.6.2
+    Mac OS X Lion 10.7.3          Apple clang/clang++ version 3.0 from Xcode 4.6.1
+    64-bit                        gfortran GNU Fortran (GCC) 4.6.2
+    (duck)                        Intel icc/icpc/ifort version 13.0
 
-    Mac OS X Mountain Lion 10.8.1 cc Apple clang version 4.0 from Xcode 4.5.1
-    (owl)                         c++ Apple clang version 4.0 from Xcode 4.5.1
-				  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 4.5.1
-				  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 4.5.1
-    			          gfortran GNU Fortran (GCC) 4.6.2
+    Mac OS X Mountain Lion 10.8.1 Apple clang/clang++ version 4.2 from Xcode 4.6.1
+    64-bit    			  gfortran GNU Fortran (GCC) 4.6.2
+    (wren)                        Intel icc/icpc/ifort version 13.0.1.119
 
 
 Tested Configuration Features Summary
@@ -236,20 +228,21 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
-Windows 7     x64                       y        y/y    n        y    y     y
-Windows 8                               n        y/n    n        y    y     y
-Windows 8     x64                       n        y/n    n        y    y     y
+Windows 7 x64                           y        y/y    n        y    y     y
+Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
-Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
-Mac OS X Mountain Lion 10.8.1 64-bit    n        y/n    n        y    y     n
-AIX 5.3 32- and 64-bit                  y        y/n    y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
-CentOS 5.5 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
+AIX 5.3 32- and 64-bit                  n        y/n    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 GNU    y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 Intel  n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18-308 i686 PGI    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 GNU      y        y/y    y        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 Intel    n        y/y    n        y    y     y
+CentOS 5.9 Linux 2.6.18 x86_64 PGI      n        y/y    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 GNU      n        y/n    n        y    y     y
+CentOS 6.4 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
 Linux 2.6.32-358.2.1.el6.ppc64          n        y/n    n        y    y     y
 
 
@@ -259,19 +252,20 @@ Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y        
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
-Windows 8                                  y       y         y         n
-Windows 8 x64                              y       y         y         n
+Windows 7 Cygwin                           n       n         n         y
+Windows 7 x64 Cygwin                       n       n         n         y
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
-Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
-AIX 5.3 32- and 64-bit                     n       n         n         y        
-CentOS 5.5 Linux 2.6.18-308 i686 GNU       y       y         y         y        
-CentOS 5.5 Linux 2.6.18-308 i686 Intel     y       y         y         n        
-CentOS 5.5 Linux 2.6.18-308 i686 PGI       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 GNU         y       y         y         y        
-CentOS 5.5 Linux 2.6.18 x86_64 Intel       y       y         y         n        
-CentOS 5.5 Linux 2.6.18 x86_64 PGI         y       y         y         n        
+AIX 5.3 32- and 64-bit                     y       n         n         y        
+CentOS 5.9 Linux 2.6.18-308 i686 GNU       y       y         y         y        
+CentOS 5.9 Linux 2.6.18-308 i686 Intel     y       y         y         n        
+CentOS 5.9 Linux 2.6.18-308 i686 PGI       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 GNU         y       y         y         y        
+CentOS 5.9 Linux 2.6.18 x86_64 Intel       y       y         y         n        
+CentOS 5.9 Linux 2.6.18 x86_64 PGI         y       y         y         n     
+CentOS 6.4 Linux 2.6.32 x86_64 GNU         y       y         y         n
+CentOS 6.4 Linux 2.6.32 x86_64 Intel       y       y         y         n
 Linux 2.6.32-358.2.1.el6.ppc64             y       y         y         n 
 
 Compiler versions for each platform are listed in the preceding
@@ -282,6 +276,14 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
+    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich2-1.4.1p1 compiled with
+    #1 SMP i686 i686 i386             gcc 4.1.2 and gfortran 4.1.2
+    (jam)                         g95 (GCC 4.0.3 (g95 0.94!)
+
+    Linux 2.6.18-308.16.1.el5     MPICH mpich2-1.4.1p1 compiled with
+    #1 SMP x86_64 GNU/Linux           gcc 4.1.2 and gfortran 4.1.2
+    (koala)                       g95 (GCC 4.0.3 (g95 0.94!)
+                                  
     FreeBSD 8.2-STABLE i386       gcc 4.2.1 [FreeBSD] 20070719
     (loyalty)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
@@ -292,19 +294,9 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Debian6.0.7 2.6.32-5-686 #1 SMP i686 GNU/Linux
-                                  gcc (Debian 4.4.5-8) 4.4.5
-                                  GNU Fortran (Debian 4.4.5-8) 4.4.5
-                                  (cmake and autotools)
-
     Debian6.0.7 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
                                   gcc (Debian 4.4.5-8) 4.4.5
                                   GNU Fortran (Debian 4.4.5-8) 4.4.5
-                                  (cmake and autotools)
-
-    Fedora18 3.7.9-205.fc18.i6866 #1 SMP i686 i686 i386 GNU/Linux
-                                  gcc (GCC) 4.7.2 20121109 (Red Hat 4.7.2-8)
-                                  GNU Fortran (GCC) 4.7.2 20120507 (Red Hat 4.7.2-8)
                                   (cmake and autotools)
 
     Fedora18 3.7.9-205.fc18.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
@@ -312,19 +304,9 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (GCC) 4.7.2 20120507 (Red Hat 4.7.2-8)
                                   (cmake and autotools)
 
-    SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
-                                  gcc (SUSE Linux) 4.7.2
-                                  GNU Fortran (SUSE Linux) 4.7.2
-                                  (cmake and autotools)
-
     SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (SUSE Linux) 4.7.2
                                   GNU Fortran (SUSE Linux) 4.7.2 
-                                  (cmake and autotools)
-
-    Ubuntu 12.10 3.5.0-25-generic #39-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
-                                  GNU Fortran (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
                                   (cmake and autotools)
 
     Ubuntu 12.10 3.5.0-25-generic #39-Ubuntu SMP x86_64 GNU/Linux
@@ -340,12 +322,19 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* When building using the Cray compilers on Cray machines, HDF5
+  configure mistakenly thinks the compiler is an intel compiler and
+  sets the -std=c99 flag which breaks configure on Cray. To build HDF5
+  properly on a Cray machine, please consult with the instructions in
+  INSTALL_parallel for building on Hopper.
+  (MSC - 2013/04/26 - HDFFV-8429)
+
 * The h5dump and h5diff utilities occasionally produce different output
   between Linux and Windows systems. This is caused by lower-level library
   routines that fail to write fill values to the user's buffer when reading
   unallocated chunks from datasets that have a fill value set to
   H5D_FILL_VALUE_DEFAULT. Due to platform differences the return of
-  spurious data values have only been encountered on Windows 32-bit systems.
+  spurious data values has only been encountered on Windows 32-bit systems.
   (Issue HDFFV-8247; JP - 2013/03/27)
 
 * The 5.9 C++ compiler on Sun failed to compile a C++ test ttypes.cpp.  It 
@@ -356,8 +345,8 @@ Known Problems
   HDF5 C library uses it in H5private.h.  The test ttypes.cpp includes 
   H5private.h (H5Tpkg.h<-H5Fprivate.h<-H5Vprivate.h<-H5private.h).  Sun's 5.9
   C++ compiler doesn't support __func__, thus fails to compile the C++ test.
-  But 5.11 C++ compiler does.  To check whether your Sun C++ compiler knows
-  this identifier, try to compile the following simple C++ program:
+  But Sun's 5.11 C++ compiler does.  To check whether your Sun C++ compiler 
+  knows this identifier, try to compile the following simple C++ program:
       #include<stdio.h>
 
       int main(void)
