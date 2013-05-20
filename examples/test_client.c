@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
     H5_status_t *status = NULL;
     int num_requests = 0;
     hsize_t extent = 20;
+    hbool_t exists;
     H5_request_t req1;
     H5_status_t status1;
 
@@ -118,7 +119,13 @@ int main(int argc, char **argv) {
     aid1 = H5Acreate2(gid1, "ATTR1", H5T_NATIVE_INT, dataspaceId, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid1);
     H5Aclose(aid1);
-    //assert(H5Aexists_by_name(file_id,"G1","ATTR1", H5P_DEFAULT));
+
+    exists = H5Aexists_by_name(file_id,"G1","ATTR1", H5P_DEFAULT);
+    if(exists)
+        printf("Attribute ATTR1 exists!\n");
+    else
+        printf("Attribute ATTR1 does NOT exist. This must be the test without a native backend\n");
+
     assert(H5Adelete_by_name(file_id, "G1", "ATTR1", H5P_DEFAULT) == 0);
     assert(!H5Aexists(gid1, "ATTR1"));
 
@@ -260,10 +267,8 @@ int main(int argc, char **argv) {
         assert(plist_id);
         H5Pclose(plist_id);
 
-        /* change the dataset dimensions for Dataset D1. This is
-           asynchronous, but internally there is a built in
-           "wait_some" on operations pending on that dataset */
-        //assert(H5Dset_extent_ff(did1, &extent, event_q) == 0);
+        /* change the dataset dimensions for Dataset D1. */
+        assert(H5Dset_extent_ff(did1, &extent, event_q) == 0);
     }
 
     /* closing did1 acts as a wait_some on all pending requests that are issued
@@ -279,14 +284,29 @@ int main(int argc, char **argv) {
     assert(H5Dclose_ff(did3, event_q) == 0);
 
     H5Sclose(dataspaceId);
-
     assert(H5Aclose(aid2) == 0);
-
     assert(H5Tclose_ff(int_id, event_q) == 0);
-
     assert(H5Gclose_ff(gid1, event_q) == 0);
     assert(H5Gclose_ff(gid2, event_q) == 0);
     assert(H5Gclose_ff(gid3, event_q) == 0);
+
+    /* Test Links */
+    gid1 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    gid2 = H5Gcreate_ff(file_id, "G4/G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+
+    H5Lcreate_hard(file_id, "G1/G2/G3/D1", gid1, "G5/newD1", H5P_DEFAULT, H5P_DEFAULT);
+    did1 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, 0, event_q);
+
+    H5Lcreate_soft("/G1/G2/G3/D4", gid1, "G5/newD2", H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Lmove(file_id, "/G1/G2/G3/D3", file_id, "/G4/G5/D3moved", H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Ldelete(file_id, "/G1/G2/G3/D2", H5P_DEFAULT);
+
+    assert(H5Dclose_ff(did1, event_q) == 0);
+    assert(H5Gclose_ff(gid1, event_q) == 0);
+    assert(H5Gclose_ff(gid2, event_q) == 0);
+
 
     /* flush all the contents of file to disk. This is asynchronous. */
     assert(H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q) == 0);

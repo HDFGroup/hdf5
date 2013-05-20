@@ -576,13 +576,29 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
             break;
         }
+    case HG_LINK_CREATE:
+    case HG_LINK_MOVE:
+    case HG_LINK_REMOVE:
+    case HG_LINK_EXISTS:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Link operation failed at the server");
+
+            free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     default:
         H5VL_iod_request_delete(file, req);
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5VL_iod_request_complete */
 
 herr_t
 H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
@@ -785,13 +801,54 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
             break;
         }
+    case HG_LINK_CREATE:
+    case HG_LINK_MOVE:
+    case HG_LINK_REMOVE:
+    case HG_LINK_EXISTS:
+        {
+            int *status = (int *)req->data;
+
+            free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     default:
         H5VL_iod_request_delete(file, req);
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5VL_iod_request_cancel */
+
+herr_t
+H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parents)
+{
+    H5VL_iod_file_t *file = obj->file;
+    H5VL_iod_request_t *cur_req = file->request_list_head;
+    size_t size = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Loop to complete some requests */
+    while(cur_req) {
+        /* If the request is pending on the object we want, add its axe_id */
+        if(cur_req->obj == obj) {
+            if(cur_req->status == H5AO_PENDING){
+                if(NULL != parents) {
+                    parents[size] = cur_req->axe_id;
+                }
+                size ++;
+            }
+        }
+        cur_req = cur_req->next;
+    }
+
+    *count = size;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_get_axe_parents */
 
 herr_t
 H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
@@ -847,11 +904,17 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
     else if (loc_params.type == H5VL_OBJECT_BY_NAME)
         path = loc_params.loc_data.loc_by_name.name;
 
-    if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(path) + 1)))
+    if (NULL == (cur_name = (char *)malloc(HDstrlen(obj->obj_name) + HDstrlen(path) + 2)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
+
     HDstrcpy(cur_name, obj->obj_name);
     cur_size = HDstrlen(obj->obj_name);
 
+    if(obj->obj_type != H5I_FILE) {
+        HDstrcat(cur_name, "/");
+        cur_size += 1;
+    }
+        
     /* Wrap the local buffer for serialized header info */
     if(NULL == (wb = H5WB_wrap(comp_buf, sizeof(comp_buf))))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")

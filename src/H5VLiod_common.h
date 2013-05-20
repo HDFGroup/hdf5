@@ -36,6 +36,11 @@ typedef enum H5VL_iod_state_t {
     H5VL_IOD_CANCELLED
 } H5VL_iod_state_t;
 
+typedef struct axe_ids_t {
+    size_t count;
+    uint64_t *ids;
+} axe_ids_t;
+
 typedef struct H5VL_iod_read_status_t {
     int ret;
     uint32_t cs;
@@ -49,9 +54,11 @@ typedef struct dims_t {
 H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_hid_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_htri_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_hbool_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_iod_obj_id_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_iod_handle_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_dims_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_axe_ids_t(hg_proc_t proc, void *data);
 
 
 MERCURY_GEN_PROC(eff_init_in_t, ((uint32_t)(proc_num)))
@@ -91,7 +98,7 @@ MERCURY_GEN_PROC(attr_io_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh))
                  ((iod_obj_id_t)(iod_id)) ((uint64_t)(parent_axe_id))
                  ((hid_t)(type_id)) ((hg_bulk_t)(bulk_handle)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(attr_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
-                 ((uint64_t)(parent_axe_id)) ((uint64_t)(axe_id)))
+                 ((axe_ids_t)(parent_axe_ids)) ((uint64_t)(axe_id)))
 
 MERCURY_GEN_PROC(group_create_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
                  ((iod_obj_id_t)(loc_id)) ((iod_obj_id_t)(grp_id))
@@ -118,7 +125,7 @@ MERCURY_GEN_PROC(dset_open_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
 MERCURY_GEN_PROC(dset_open_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
                  ((hid_t)(dcpl_id)) ((hid_t)(type_id)) ((hid_t)(space_id)))
 MERCURY_GEN_PROC(dset_set_extent_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh)) 
-                 ((iod_obj_id_t)(iod_id)) ((uint64_t)(parent_axe_id)) 
+                 ((iod_obj_id_t)(iod_id)) ((axe_ids_t)(parent_axe_ids)) 
                  ((dims_t)(dims)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(dset_io_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh)) 
                  ((iod_obj_id_t)(iod_id)) ((uint64_t)(parent_axe_id))
@@ -126,7 +133,7 @@ MERCURY_GEN_PROC(dset_io_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh))
                  ((hg_bulk_t)(bulk_handle)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint32_t)(cs)))
 MERCURY_GEN_PROC(dset_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
-                 ((uint64_t)(parent_axe_id)) ((uint64_t)(axe_id)))
+                 ((axe_ids_t)(parent_axe_ids)) ((uint64_t)(axe_id)))
 
 MERCURY_GEN_PROC(dtype_commit_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
                  ((iod_obj_id_t)(loc_id)) ((iod_obj_id_t)(dtype_id)) 
@@ -141,6 +148,22 @@ MERCURY_GEN_PROC(dtype_open_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_
                  ((hid_t)(tcpl_id)) ((hid_t)(type_id)))
 MERCURY_GEN_PROC(dtype_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
                  ((uint64_t)(parent_axe_id)) ((uint64_t)(axe_id)))
+
+MERCURY_GEN_PROC(link_create_in_t, ((int8_t)(create_type)) ((iod_handle_t)(coh)) 
+                 ((iod_handle_t)(loc_oh)) ((iod_obj_id_t)(loc_id))
+                 ((uint64_t)(parent_axe_id)) ((hg_string_t)(loc_name))
+                 ((iod_handle_t)(target_loc_oh)) ((iod_obj_id_t)(target_loc_id))
+                 ((uint64_t)(target_parent_axe_id)) ((hg_string_t)(target_name))
+                 ((hid_t)(lapl_id)) ((hid_t)(lcpl_id)) ((uint64_t)(axe_id)))
+MERCURY_GEN_PROC(link_move_in_t, ((hbool_t)(copy_flag)) ((iod_handle_t)(coh)) 
+                 ((iod_handle_t)(src_loc_oh)) ((iod_obj_id_t)(src_loc_id))
+                 ((uint64_t)(src_parent_axe_id)) ((hg_string_t)(src_loc_name))
+                 ((iod_handle_t)(dst_loc_oh)) ((iod_obj_id_t)(dst_loc_id))
+                 ((uint64_t)(dst_parent_axe_id)) ((hg_string_t)(dst_loc_name))
+                 ((hid_t)(lapl_id)) ((hid_t)(lcpl_id)) ((uint64_t)(axe_id)))
+MERCURY_GEN_PROC(link_op_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh)) 
+                 ((iod_obj_id_t)(loc_id)) ((uint64_t)(parent_axe_id)) 
+                 ((hg_string_t)(path)) ((uint64_t)(axe_id)))
 
 #if 0
 H5_DLL int hg_proc_eff_init_in_t(hg_proc_t proc, void *data);

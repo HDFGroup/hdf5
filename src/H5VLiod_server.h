@@ -54,6 +54,11 @@ H5_DLL int H5VL_iod_server_dtype_commit(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dtype_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dtype_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_cancel_op(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_create(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_move(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */
