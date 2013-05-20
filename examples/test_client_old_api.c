@@ -164,7 +164,6 @@ int main(int argc, char **argv) {
     assert(H5Gclose(gid2) == 0);
     assert(H5Gclose(gid3) == 0);
 
-
     /* Test Links */
     gid1 = H5Gcreate2(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     gid2 = H5Gcreate2(file_id, "G4/G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
