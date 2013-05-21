@@ -335,7 +335,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             /* Free memory handle */
             if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
-                fprintf(stderr, "failed to free bulk handle\n");
+                fprintf(stderr, "failed to free dataset bulk handle\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -379,7 +379,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             /* Free memory handle */
             if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
-                fprintf(stderr, "failed to free bulk handle\n");
+                fprintf(stderr, "failed to free attribute bulk handle\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }

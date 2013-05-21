@@ -1963,6 +1963,9 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     dset->remote_dset.iod_oh.cookie = IOD_OH_UNDEFINED;
     dset->remote_dset.iod_id = IOD_ID_UNDEFINED;
+    dset->remote_dset.dcpl_id = -1;
+    dset->remote_dset.type_id = -1;
+    dset->remote_dset.space_id = -1;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -2531,6 +2534,15 @@ H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t dxpl_id,
     herr_t       ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(-1 == dset->remote_dset.dcpl_id ||
+       -1 == dset->remote_dset.type_id ||
+       -1 == dset->remote_dset.space_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
 
     switch (get_type) {
         case H5VL_DATASET_GET_DCPL:
@@ -3346,6 +3358,9 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
 
     attr->remote_attr.iod_oh.cookie = IOD_OH_UNDEFINED;
     attr->remote_attr.iod_id = IOD_ID_UNDEFINED;
+    attr->remote_attr.acpl_id = -1;
+    attr->remote_attr.type_id = -1;
+    attr->remote_attr.space_id = -1;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -3479,6 +3494,13 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if(-1 == attr->remote_attr.space_id) {
+        /* Synchronously wait on the request attached to the attribute */
+        if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
+            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        attr->common.request = NULL;
+    }
+
     /* set the parent axe id */
     if(attr->common.request)
         input.parent_axe_id = attr->common.request->axe_id;
@@ -3601,6 +3623,13 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if(-1 == attr->remote_attr.space_id) {
+        /* Synchronously wait on the request attached to the attribute */
+        if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
+            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        attr->common.request = NULL;
+    }
 
     /* set the parent axe id */
     if(attr->common.request)
@@ -3840,9 +3869,10 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
                 H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
 
-                if(NULL != attr->common.request && H5VL_IOD_PENDING == attr->common.request->state) {
+                if(-1 == attr->remote_attr.space_id) {
+                    /* Synchronously wait on the request attached to the attribute */
                     if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
                     attr->common.request = NULL;
                 }
 
@@ -3856,9 +3886,10 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
                 H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
 
-                if(NULL != attr->common.request && H5VL_IOD_PENDING == attr->common.request->state) {
+                if(-1 == attr->remote_attr.type_id) {
+                    /* Synchronously wait on the request attached to the attribute */
                     if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
                     attr->common.request = NULL;
                 }
 
@@ -3872,9 +3903,10 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
                 H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)obj;
 
-                if(NULL != attr->common.request && H5VL_IOD_PENDING == attr->common.request->state) {
+                if(-1 == attr->remote_attr.acpl_id) {
+                    /* Synchronously wait on the request attached to the attribute */
                     if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wait on HG request");
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
                     attr->common.request = NULL;
                 }
 

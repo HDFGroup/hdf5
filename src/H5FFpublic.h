@@ -81,6 +81,23 @@ H5_DLL hid_t H5Topen_ff(hid_t loc_id, const char *name, hid_t tapl_id,
                         uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Tclose_ff(hid_t type_id, hid_t eq_id);
 
+H5_DLL hid_t H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+                          hid_t acpl_id, hid_t aapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL hid_t H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+                                  hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+                                  hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL hid_t H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id, 
+                        uint64_t trans, hid_t eq_id);
+H5_DLL hid_t H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+                                hid_t aapl_id, hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, 
+                          uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Adelete_ff(hid_t loc_id, const char *name, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+                                   hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Aclose_ff(hid_t attr_id, hid_t eq_id);
+
 #endif /* H5_HAVE_EFF */
 
 #ifdef __cplusplus

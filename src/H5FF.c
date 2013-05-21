@@ -26,6 +26,8 @@
 /* Module Setup */
 /****************/
 
+#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
@@ -37,6 +39,8 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Apkg.h"             /* Attribute access			*/
+#include "H5Dpkg.h"             /* Dataset access			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FFprivate.h"        /* FastForward wrappers                 */
@@ -82,9 +86,23 @@
 static herr_t
 H5FF__init_interface(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    herr_t ret_value = SUCCEED;
 
-    FUNC_LEAVE_NOAPI(H5F_init())
+    FUNC_ENTER_STATIC
+
+    if(H5F_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init file interface")
+
+    if(H5G__init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init group interface")
+
+    if(H5D_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init dataset interface")
+
+    if(H5A_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init attribute interface")
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FF__init_interface() */
 
 
@@ -1045,196 +1063,489 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tclose_ff() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Acreate_ff
+ PURPOSE
+    Creates an attribute on an object
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+hid_t
+H5Acreate_ff(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+             hid_t acpl_id, hid_t aapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *attr = NULL;       /* attr token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5P_genplist_t      *plist;            /* Property list pointer */
+    H5VL_loc_params_t   loc_params;
+    hid_t		ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == acpl_id)
+        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the attribute through the VOL */
+    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, aapl_id, 
+                                        H5AC_dxpl_id, eq_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+    /* Get an atom for the attribute */
+    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+done:
+    if (ret_value < 0 && attr)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, eq_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Acreate_by_name_ff
+ PURPOSE
+    Creates an attribute on an object
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+hid_t
+H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+    hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *attr = NULL;       /* attr token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5P_genplist_t      *plist;            /* Property list pointer */
+    H5VL_loc_params_t    loc_params;
+    hid_t		 ret_value;        /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id,
+             acpl_id, aapl_id, lapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == acpl_id)
+        acpl_id = H5P_ATTRIBUTE_CREATE_DEFAULT;
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(acpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_ATTR_TYPE_ID, &type_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for datatype id")
+    if(H5P_set(plist, H5VL_ATTR_SPACE_ID, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for space id")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = obj_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the attribute through the VOL */
+    if(NULL == (attr = H5VL_attr_create(obj, loc_params, vol_plugin, attr_name, acpl_id, 
+                                        aapl_id, H5AC_dxpl_id, eq_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+    /* Get an atom for the attribute */
+    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+done:
+    if (ret_value < 0 && attr)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, eq_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_by_name_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aopen_ff
+ PURPOSE
+    Opens an attribute for an object by looking up the attribute name
+ RETURNS
+    ID of attribute on success, negative on failure
+--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id, 
+           uint64_t trans, hid_t eq_id)
+{
+    void    *attr = NULL;       /* attr token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params; 
+    hid_t		ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "i*si", loc_id, attr_name, aapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the attribute through the VOL */
+    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, H5AC_dxpl_id, eq_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+
+    /* Get an atom for the attribute */
+    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+done:
+    if (ret_value < 0 && attr)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, eq_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aopen_by_name_ff
+ PURPOSE
+    Opens an attribute for an object by looking up the attribute name
+ RETURNS
+    ID of attribute on success, negative on failure
+--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t aapl_id, hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *attr = NULL;       /* attr token from VOL plugin */
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t   loc_params;
+    hid_t		ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("i", "i*s*sii", loc_id, obj_name, attr_name, aapl_id, lapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = obj_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Create the attribute through the VOL */
+    if(NULL == (attr = H5VL_attr_open(obj, loc_params, vol_plugin, attr_name, aapl_id, H5AC_dxpl_id, eq_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open attribute")
+
+    /* Get an atom for the attribute */
+    if((ret_value = H5I_register2(H5I_ATTR, attr, vol_plugin, TRUE)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+done:
+    if (ret_value < 0 && attr)
+        if(H5VL_attr_close (attr, vol_plugin, H5AC_dxpl_id, eq_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen_by_name_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Awrite_ff
+ PURPOSE
+    Write out data to an attribute
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+herr_t
+H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, uint64_t trans, hid_t eq_id)
+{
+    H5VL_t     *vol_plugin;
+    void       *attr;
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
+
+    /* check arguments */
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (attr = (void *)H5I_object(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
+
+    /* write the data through the VOL */
+    if((ret_value = H5VL_attr_write(attr, vol_plugin, dtype_id, buf, H5AC_dxpl_id, eq_id)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Awrite_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aread_ff
+ PURPOSE
+    Read in data from an attribute
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+herr_t
+H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, uint64_t trans, hid_t eq_id)
+{
+    H5VL_t     *vol_plugin;
+    void       *attr;
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
+
+    /* check arguments */
+    if(NULL == buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null attribute buffer")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (attr = (void *)H5I_object(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid attribute identifier")
+
+    /* Read the data through the VOL */
+    if((ret_value = H5VL_attr_read(attr, vol_plugin, dtype_id, buf, H5AC_dxpl_id, eq_id)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aread_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Adelete_ff
+ PURPOSE
+    Deletes an attribute from a location
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+herr_t
+H5Adelete_ff(hid_t loc_id, const char *name, uint64_t trans, hid_t eq_id)
+{
+    H5VL_t     *vol_plugin;
+    void       *obj;
+    H5VL_loc_params_t loc_params;
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*s", loc_id, name);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Open the attribute through the VOL */
+    if(H5VL_attr_remove(obj, loc_params, vol_plugin, name, H5AC_dxpl_id, eq_id) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Adelete_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Adelete_by_name_ff
+ PURPOSE
+    Deletes an attribute from a location
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function removes the named attribute from an object.
+--------------------------------------------------------------------------*/
+herr_t
+H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    H5VL_t     *vol_plugin;
+    void       *obj;
+    H5VL_loc_params_t loc_params;
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = obj_name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Open the attribute through the VOL */
+    if(H5VL_attr_remove(obj, loc_params, vol_plugin, attr_name, H5AC_dxpl_id, eq_id) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Adelete_by_name_ff() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aclose_ff
+ PURPOSE
+    Close an attribute ID
+ RETURNS
+    Non-negative on success/Negative on failure
+
+ DESCRIPTION
+        This function releases an attribute from use.  Further use of the
+    attribute ID will result in undefined behavior.
+--------------------------------------------------------------------------*/
+herr_t
+H5Aclose_ff(hid_t attr_id, hid_t eq_id)
+{
+    H5VL_t *vol_plugin = NULL;
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", attr_id);
+
+    /* check arguments */
+    if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = eq_id;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+
+    /* Decrement references to that atom (and close it) */
+    if(H5I_dec_app_ref(attr_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aclose_ff() */
+
+/* MSC - This can't be done asynchronously */
 #if 0
-
-/*-------------------------------------------------------------------------
- * Function:	H5AOtest
- *
- * Purpose:	Test for an asynchronous operation's completion
- *
- * Return:	Success:	SUCCEED
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AOtest(H5_request_t *req, H5_status_t *status)
-{
-    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-
-    *status = request->status;
-
-    if(H5VL_IOD_COMPLETED == request->state) {
-        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
-                request->req = H5MM_xfree(request->req);
-        request = H5MM_xfree(request);
-        req = NULL;
-    }
-
-/* I believe that the VOL interface needs to be expanded with a 'test' callback,
-    since the H5_request_t is pointing at a H5VL_iod_request_t [currently]
-    and I can't get down to the VOL plugin from here.
-
-    [And the 'test' client callback needs to release the request structure that
-        the plugin allocated, if the operation has completed]
-*/
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5AOtest() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5AOwait
- *
- * Purpose:	Wait for an asynchronous operation to complete
- *
- * Return:	Success:	SUCCEED
- *		Failure:	FAIL
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AOwait(H5_request_t *req, H5_status_t *status)
-{
-    H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-
-    if(H5VL_IOD_PENDING == request->state) {
-        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
-    }
-    *status = request->status;
-
-    request->req = H5MM_xfree(request->req);
-    request = H5MM_xfree(request);
-    req = NULL;
-
-/* I believe that the VOL interface needs to be expanded with a 'wait' callback,
-    since the H5_request_t is pointing at a H5VL_iod_request_t [currently]
-    and I can't get down to the VOL plugin from here.
-
-    [And the 'wait' client callback needs to release the request structure that
-        the plugin allocated]
-*/
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5AOwait() */
-
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FF_set_async_flag
- *
- * Purpose:	Helper routine to set up asynchronous I/O properties
- *
- * Return:	Success:	0
- *		Failure:	<0
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FF_set_async_flag(H5P_genplist_t *plist, const H5_request_t *req)
-{
-    hbool_t     do_async;               /* Whether we're going to do async. I/O */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(plist);
-    HDassert(req);
-
-    /* Check if we are performing asynchronous I/O */
-    do_async = req ? TRUE : FALSE;
-
-    /* Set the async. I/O operation flag */
-    if(H5P_set(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set async flag")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FF_set_async_flag() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FF_get_async_req
- *
- * Purpose:	Helper routine to get asynchronous I/O request
- *
- * Return:	Success:	0
- *		Failure:	<0
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FF_get_async_req(H5P_genplist_t *plist, H5_request_t *req)
-{
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity check */
-    HDassert(plist);
-    HDassert(req);
-
-    /* Retrieve the async. I/O operation request */
-    if(H5P_get(plist, H5P_ASYNC_REQ_NAME, req) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get async request")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FF_get_async_req() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FF_reset_async_flag
- *
- * Purpose:	Helper routine to reset asynchronous I/O properties
- *
- * Return:	Success:	0
- *		Failure:	<0
- *
- * Programmer:	Quincey Koziol
- *		Wednesday, March 20, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FF_reset_async_flag(H5P_genplist_t *plist)
-{
-    hbool_t     do_async = H5P_ASYNC_FLAG_DEF;  /* Default async I/O flag */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Reset the async. I/O operation flag */
-    if(H5P_set(plist, H5P_ASYNC_FLAG_NAME, &do_async) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set async flag")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FF_reset_async_flag() */
-
+htri_t H5Aexists_ff(hid_t obj_id, const char *attr_name, uint64_t trans, hid_t eq_id)
+htri_t H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+                            hid_t lapl_id, uint64_t trans, hid_t eq_id)
 #endif
 
 #endif /* H5_HAVE_EFF */

@@ -20,7 +20,8 @@ int main(int argc, char **argv) {
     hid_t aid1, aid2, aid3;
     hid_t fapl_id, dxpl_id;
     const unsigned int nelem=60;
-    int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL, *data3 = NULL, *a_data = NULL;
+    int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL, *data3 = NULL;
+    int *a_data = NULL, *ra_data = NULL;
     unsigned int i = 0;
     hsize_t dims[1];
     int my_rank, my_size;
@@ -64,16 +65,18 @@ int main(int argc, char **argv) {
     data = malloc (sizeof(int)*nelem);
     data2 = malloc (sizeof(int)*nelem);
     data3 = malloc (sizeof(int)*nelem);
-    r_data = malloc (sizeof(int)*nelem);
     a_data = malloc (sizeof(int)*nelem);
+    ra_data = malloc (sizeof(int)*nelem);
+    r_data = malloc (sizeof(int)*nelem);
     r2_data = malloc (sizeof(int)*nelem);
     for(i=0;i<nelem;++i) {
         r_data[i] = 0;
-        a_data[i] = 0;
+        ra_data[i] = 0;
         r2_data[i] = 0;
         data[i]=i;
         data2[i]=i;
         data3[i]=i;
+        a_data[i]=i;
     }
 
     /* create an event Queue for managing asynchronous requests */
@@ -94,7 +97,7 @@ int main(int argc, char **argv) {
        Async API.
        Internally there is a built in wait on the file_id, which has already been
        completed when we called H5AOwait on the file create request earlier*/
-    gid1 = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     gid3 = H5Gcreate_ff(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
@@ -115,18 +118,25 @@ int main(int argc, char **argv) {
     dims [0] = 60;
     dataspaceId = H5Screate_simple(1, dims, NULL);
 
-    /* create an attribute on group G1 then delete it afterwards */
-    aid1 = H5Acreate2(gid1, "ATTR1", H5T_NATIVE_INT, dataspaceId, H5P_DEFAULT, H5P_DEFAULT);
+    /* create an attribute on group G1 */
+    aid1 = H5Acreate_ff(gid1, "ATTR1", H5T_NATIVE_INT, dataspaceId, 
+                        H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid1);
-    H5Aclose(aid1);
 
+    /* close the attribute */
+    H5Aclose_ff(aid1, event_q);
+
+    /* Check if the attribute on group G1 exists */
     exists = H5Aexists_by_name(file_id,"G1","ATTR1", H5P_DEFAULT);
     if(exists)
         printf("Attribute ATTR1 exists!\n");
     else
         printf("Attribute ATTR1 does NOT exist. This must be the test without a native backend\n");
 
-    assert(H5Adelete_by_name(file_id, "G1", "ATTR1", H5P_DEFAULT) == 0);
+    /* Delete the attribute just created */
+    assert(H5Adelete_by_name_ff(file_id, "G1", "ATTR1", H5P_DEFAULT, 0, event_q) == 0);
+
+    /* check if it exists now */
     assert(!H5Aexists(gid1, "ATTR1"));
 
     /* create a Dataset D1 on the file, in group /G1/G2/G3. This is asynchronous. 
@@ -142,11 +152,11 @@ int main(int argc, char **argv) {
     assert(did1);
 
     /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
-    aid2 = H5Acreate_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5T_NATIVE_INT, 
-                             dataspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    aid2 = H5Acreate_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", H5T_NATIVE_INT, 
+                                dataspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
 
-    H5Awrite(aid2, int_id, data);
+    H5Awrite_ff(aid2, int_id, a_data, 0, event_q);
 
     /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
        asynchronously and concurrently with the H5Dcreate for D1 
@@ -284,7 +294,7 @@ int main(int argc, char **argv) {
     assert(H5Dclose_ff(did3, event_q) == 0);
 
     H5Sclose(dataspaceId);
-    assert(H5Aclose(aid2) == 0);
+    assert(H5Aclose_ff(aid2, event_q) == 0);
     assert(H5Tclose_ff(int_id, event_q) == 0);
     assert(H5Gclose_ff(gid1, event_q) == 0);
     assert(H5Gclose_ff(gid2, event_q) == 0);
@@ -295,12 +305,10 @@ int main(int argc, char **argv) {
     gid2 = H5Gcreate_ff(file_id, "G4/G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
     H5Lcreate_hard(file_id, "G1/G2/G3/D1", gid1, "G5/newD1", H5P_DEFAULT, H5P_DEFAULT);
+
     did1 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, 0, event_q);
-
     H5Lcreate_soft("/G1/G2/G3/D4", gid1, "G5/newD2", H5P_DEFAULT, H5P_DEFAULT);
-
     H5Lmove(file_id, "/G1/G2/G3/D3", file_id, "/G4/G5/D3moved", H5P_DEFAULT, H5P_DEFAULT);
-
     H5Ldelete(file_id, "/G1/G2/G3/D2", H5P_DEFAULT);
 
     assert(H5Dclose_ff(did1, event_q) == 0);
@@ -383,13 +391,9 @@ int main(int argc, char **argv) {
     assert(did1);
 
     /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
-    aid2 = H5Aopen_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT);
+    aid2 = H5Aopen_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
-    H5Aread(aid2, int_id, a_data);
-    fprintf(stderr, "Printing Attribute data: ");
-    for(i=0;i<nelem;++i)
-        fprintf(stderr, "%d ",a_data[i]);
-    fprintf(stderr, "\n");
+    H5Aread_ff(aid2, int_id, ra_data, 0, event_q);
 
     assert(H5Aclose(aid2) == 0);
     assert(H5Dclose(did1) == 0);
@@ -403,6 +407,11 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
     free(status);
+
+    fprintf(stderr, "Printing Attribute data (after EQ wait): ");
+    for(i=0;i<nelem;++i)
+        fprintf(stderr, "%d ",ra_data[i]);
+    fprintf(stderr, "\n");
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
@@ -418,6 +427,7 @@ int main(int argc, char **argv) {
     */
     free(data);
     free(r_data);
+    free(ra_data);
     free(a_data);
     free(data2);
     free(r2_data);

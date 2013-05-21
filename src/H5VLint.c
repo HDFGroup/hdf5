@@ -493,7 +493,7 @@ H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, co
 
     /* call the corresponding VOL create callback */
     if(NULL == (ret_value = (vol_plugin->cls->attr_cls.create) (obj, loc_params, name, acpl_id, 
-                                                                aapl_id, dxpl_id, H5_REQUEST_NULL)))
+                                                                aapl_id, dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "create failed")
     vol_plugin->nrefs ++;
 
@@ -546,7 +546,8 @@ H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, cons
     }
 
     /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->attr_cls.open) (obj, loc_params, name, aapl_id, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_plugin->cls->attr_cls.open) (obj, loc_params, name, aapl_id, 
+                                                              dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "attribute open failed")
 
     vol_plugin->nrefs ++;
@@ -597,7 +598,8 @@ herr_t H5VL_attr_read(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, void *b
         request->vol_plugin = vol_plugin;
     }
 
-    if((ret_value = (vol_plugin->cls->attr_cls.read)(attr, mem_type_id, buf, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.read)(attr, mem_type_id, buf, 
+                                                     dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "read failed")
 
     if(request && *req) {
@@ -646,7 +648,8 @@ herr_t H5VL_attr_write(void *attr, H5VL_t *vol_plugin, hid_t mem_type_id, const 
         request->vol_plugin = vol_plugin;
     }
 
-    if((ret_value = (vol_plugin->cls->attr_cls.write)(attr, mem_type_id, buf, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.write)(attr, mem_type_id, buf, 
+                                                      dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "write failed")
 
     if(request && *req) {
@@ -698,7 +701,7 @@ H5VL_attr_get(void *obj, H5VL_t *vol_plugin, H5VL_attr_get_t get_type,
     }
 
     va_start (arguments, event_q);
-    if((ret_value = (vol_plugin->cls->attr_cls.get)(obj, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.get)(obj, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
 
@@ -749,7 +752,7 @@ H5VL_attr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
         request->vol_plugin = vol_plugin;
     }
 
-    if((ret_value = (vol_plugin->cls->attr_cls.remove)(obj, loc_params, attr_name, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.remove)(obj, loc_params, attr_name, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTDELETE, FAIL, "remove failed")
 
     if(request && *req) {
@@ -800,7 +803,7 @@ H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t eq_id)
         request->vol_plugin = vol_plugin;
     }
 
-    if((ret_value = (vol_plugin->cls->attr_cls.close)(attr, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->attr_cls.close)(attr, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
 
     vol_plugin->nrefs --;

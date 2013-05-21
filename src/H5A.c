@@ -1773,6 +1773,7 @@ done:
 herr_t
 H5Aclose(hid_t attr_id)
 {
+    H5VL_t *vol_plugin = NULL;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1781,6 +1782,13 @@ H5Aclose(hid_t attr_id)
     /* check arguments */
     if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(attr_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+    /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+    vol_plugin->close_eq_id = H5_EVENT_QUEUE_NULL;
+    vol_plugin->close_dxpl_id = H5AC_dxpl_id;
 
     /* Decrement references to that atom (and close it) */
     if(H5I_dec_app_ref(attr_id) < 0)
@@ -1923,7 +1931,8 @@ H5A_close_attr(void *attr, H5VL_t *vol_plugin)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Close the attr through the VOL*/
-    if((ret_value = H5VL_attr_close(attr, vol_plugin, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+        if((ret_value = H5VL_attr_close(attr, vol_plugin, vol_plugin->close_dxpl_id,
+                                        vol_plugin->close_eq_id)) < 0)
 	HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to close attribute")
 
 done:
