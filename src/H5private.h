@@ -844,6 +844,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDgetgroups
     #define HDgetgroups(Z,G)  getgroups(Z,G)
 #endif /* HDgetgroups */
+#ifndef HDgethostname
+    #define HDgethostname(N,L)    gethostname(N,L)
+#endif /* HDgetlogin */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */

@@ -2681,7 +2681,7 @@ done:
  PURPOSE
     Internal routine to query the existance of a property in a property list.
  USAGE
-    herr_t H5P_exist_plist(plist, name)
+    htri_t H5P_exist_plist(plist, name)
         const H5P_genplist_t *plist;  IN: Property list to check
         const char *name;       IN: Name of property to check for
  RETURNS

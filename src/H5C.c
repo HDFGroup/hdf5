@@ -479,10 +479,10 @@ H5C_apply_candidate_list(H5F_t * f,
     sprintf(&(tbl_buf[0]), "candidate list = ");
     for ( i = 0; i < num_candidates; i++ )
     {
-        sprintf(&(tbl_buf[strlen(tbl_buf)]), " 0x%llx", 
+        sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " 0x%llx", 
                 (long long)(*(candidates_list_ptr + i)));
     }
-    sprintf(&(tbl_buf[strlen(tbl_buf)]), "\n");
+    sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
     HDfprintf(stdout, "%s", tbl_buf);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
@@ -539,8 +539,8 @@ H5C_apply_candidate_list(H5F_t * f,
         tbl_buf[i] = '\0';
     sprintf(&(tbl_buf[0]), "candidate assignment table = ");
     for(i = 0; i <= mpi_size; i++)
-        sprintf(&(tbl_buf[strlen(tbl_buf)]), " %d", candidate_assignment_table[i]);
-    sprintf(&(tbl_buf[strlen(tbl_buf)]), "\n");
+        sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %d", candidate_assignment_table[i]);
+    sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
     HDfprintf(stdout, "%s", tbl_buf);
 
     HDfprintf(stdout, "%s:%d: flush entries [%d, %d].\n", 
@@ -814,7 +814,7 @@ H5C_apply_candidate_list(H5F_t * f,
               entries_cleared, entries_flushed);
     HDfprintf(stdout, "%s:%d: done.\n", FUNC, mpi_rank);
 
-    fsync(stdout);
+    HDfsync(stdout);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     /* ====================================================================== *

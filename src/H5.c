@@ -144,7 +144,7 @@ H5_init_library(void)
 	MPI_Initialized(&mpi_initialized);
 	if (mpi_initialized){
 	    mpe_code = MPE_Init_log();
-	    assert(mpe_code >=0);
+	    HDassert(mpe_code >=0);
 	    H5_MPEinit_g = TRUE;
 	}
     }
@@ -309,7 +309,7 @@ H5_term_library(void)
 	MPI_Initialized(&mpi_initialized);
 	if(mpi_initialized) {
 	    mpe_code = MPE_Finish_log("h5log");
-	    assert(mpe_code >=0);
+	    HDassert(mpe_code >=0);
 	} /* end if */
 	H5_MPEinit_g = FALSE;	/* turn it off no matter what */
     } /* end if */

@@ -1206,7 +1206,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    assert(fm->f_ndims>0);
+    HDassert(fm->f_ndims>0);
 
     /* Get number of elements selected in file */
     sel_points = fm->nelmts;
@@ -1383,7 +1383,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    assert(fm->f_ndims>0);
+    HDassert(fm->f_ndims>0);
 
     /* Check for all I/O going to a single chunk */
     if(H5SL_count(fm->sel_chunks)==1) {
@@ -1394,7 +1394,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 
         /* Get pointer to chunk's information */
         chunk_info = (H5D_chunk_info_t *)H5SL_item(curr_node);
-        assert(chunk_info);
+        HDassert(chunk_info);
 
         /* Just point at the memory dataspace & selection */
         /* (Casting away const OK -QAK) */
@@ -1413,7 +1413,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
         /* Calculate the adjustment for memory selection from file selection */
-        assert(fm->m_ndims==fm->f_ndims);
+        HDassert(fm->m_ndims==fm->f_ndims);
         for(u=0; u<fm->f_ndims; u++) {
             H5_CHECK_OVERFLOW(file_sel_start[u],hsize_t,hssize_t);
             H5_CHECK_OVERFLOW(mem_sel_start[u],hsize_t,hssize_t);
@@ -1427,7 +1427,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 
             /* Get pointer to chunk's information */
             chunk_info = (H5D_chunk_info_t *)H5SL_item(curr_node);
-            assert(chunk_info);
+            HDassert(chunk_info);
 
             /* Copy the information */
 

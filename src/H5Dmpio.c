@@ -648,42 +648,49 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     } /* end else */
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
+{
+    H5P_genplist_t    *plist;           /* Property list pointer */
     htri_t            check_prop;
     int               new_value;
 
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(io_info->dxpl_id)))
+        HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
     /*** Test collective chunk user-input optimization APIs. ***/
-    check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME);
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME);
     if(check_prop > 0) {
         if(H5D_ONE_LINK_CHUNK_IO == io_option) {
             new_value = 0;
-            if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &new_value) < 0)
+            if(H5P_set(plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &new_value) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
-    check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME);
     if(check_prop > 0) {
         if(H5D_MULTI_CHUNK_IO == io_option) {
             new_value = 0;
-            if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, &new_value) < 0)
+            if(H5P_set(plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, &new_value) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
-    check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME);
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME);
     if(check_prop > 0) {
         if(H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option) {
             new_value = 0;
-            if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, &new_value) < 0)
+            if(H5P_set(plist, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, &new_value) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
-    check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME);
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME);
     if(check_prop > 0) {
         if(temp_not_link_io) {
             new_value = 0;
-            if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, &new_value) < 0)
+            if(H5P_set(plist, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, &new_value) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
+}
 #endif
 
     /* step 2:  Go ahead to do IO.*/
@@ -1713,19 +1720,26 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     HDmemcpy(chunk_addr, tempbuf, sizeof(haddr_t) * total_chunks);
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME);
+{
+    H5P_genplist_t    *plist;           /* Property list pointer */
+
+    /* Get the dataset transfer property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(io_info->dxpl_id)))
+        HGOTO_ERROR(H5E_IO, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
+
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME);
     if(check_prop > 0) {
         for(ic = 0; ic < total_chunks; ic++) {
             if(assign_io_mode[ic] == H5D_CHUNK_IO_MODE_COL) {
                 new_value = 0;
-                if(H5Pset(io_info->dxpl_id,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,&new_value) < 0)
+                if(H5P_set(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, &new_value) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value")
                 break;
             } /* end if */
         } /* end for */
     } /* end if */
 
-    check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME);
+    check_prop = H5P_exist_plist(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME);
     if(check_prop > 0) {
         int temp_count = 0;
 
@@ -1737,10 +1751,11 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
         } /* end for */
         if(temp_count == 0) {
             new_value = 0;
-            if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, &new_value) < 0)
+            if(H5P_set(plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, &new_value) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "unable to set property value")
         } /* end if */
     } /* end if */
+}
 #endif
 
 done:

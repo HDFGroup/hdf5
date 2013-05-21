@@ -236,12 +236,12 @@ H5T_set_precision(const H5T_t *dt, size_t prec)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(dt);
-    assert(prec>0);
-    assert(H5T_OPAQUE!=dt->shared->type);
-    assert(H5T_COMPOUND!=dt->shared->type);
-    assert(H5T_STRING!=dt->shared->type);
-    assert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
+    HDassert(dt);
+    HDassert(prec>0);
+    HDassert(H5T_OPAQUE!=dt->shared->type);
+    HDassert(H5T_COMPOUND!=dt->shared->type);
+    HDassert(H5T_STRING!=dt->shared->type);
+    HDassert(!(H5T_ENUM==dt->shared->type && 0==dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
 	if (H5T_set_precision(dt->shared->parent, prec)<0)

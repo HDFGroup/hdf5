@@ -105,7 +105,7 @@ H5D__init_pub_interface(void)
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *
@@ -191,7 +191,7 @@ done:
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *
@@ -409,9 +409,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Dget_space
  *
- * Purpose:	Returns a copy of the file data space for a dataset.
+ * Purpose:	Returns a copy of the file dataspace for a dataset.
  *
- * Return:	Success:	ID for a copy of the data space.  The data
+ * Return:	Success:	ID for a copy of the dataspace.  The data
  *				space should be released by calling
  *				H5Sclose().
  *
@@ -436,13 +436,13 @@ H5Dget_space(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    /* Read the data space message and return a data space object */
+    /* Read the dataspace message and return a dataspace object */
     if(NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get data space")
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
     /* Create an atom */
     if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space")
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
     if(ret_value < 0) {
@@ -459,7 +459,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Dget_space_status
  *
- * Purpose:	Returns the status of data space allocation.
+ * Purpose:	Returns the status of dataspace allocation.
  *
  * Return:
  *		Success:	Non-negative
@@ -483,7 +483,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
     if(NULL==(dset=(H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    /* Read data space address and return */
+    /* Read dataspace address and return */
     if(H5D__get_space_status(dset, allocation, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
@@ -573,10 +573,6 @@ hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
     H5D_t		*dataset;                  /* Dataset structure */
-    H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
-    H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
-    H5O_fill_t          copied_fill;            /* Fill value to tweak */
-    hid_t		new_dcpl_id = FAIL;
     hid_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1030,6 +1026,9 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         hsize_t *size)
 {
     H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0};
+    H5D_t *dset;                /* Dataset for operation */
+    H5S_t *fspace = NULL;       /* Dataset's dataspace */
+    H5S_t *mspace = NULL;       /* Memory dataspace */
     char bogus;                 /* bogus value to pass to H5Diterate() */
     H5S_t *space;               /* Dataspace for iteration */
     H5P_genclass_t  *pclass;    /* Property class */
@@ -1043,21 +1042,25 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     if(H5I_DATASET != H5I_get_type(dataset_id) ||
             H5I_DATATYPE != H5I_get_type(type_id) || size == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(NULL == (dset = (H5D_t *)H5I_object(dataset_id)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
     if(!(H5S_has_extent(space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
-    /* Save the dataset ID */
-    vlen_bufsize.dataset_id = dataset_id;
+    /* Save the dataset */
+    vlen_bufsize.dset = dset;
 
-    /* Get a copy of the dataspace ID */
-    if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
+    /* Get a copy of the dataset's dataspace */
+    if(NULL == (fspace = H5S_copy(dset->shared->space, FALSE, TRUE)))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to get dataspace")
+    vlen_bufsize.fspace = fspace;
 
     /* Create a scalar for the memory dataspace */
-    if((vlen_bufsize.mspace_id = H5Screate(H5S_SCALAR)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't create dataspace")
+    if(NULL == (mspace = H5S_create(H5S_SCALAR)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    vlen_bufsize.mspace = mspace;
 
     /* Grab the temporary buffers required */
     if(NULL == (vlen_bufsize.fl_tbuf = H5FL_BLK_MALLOC(vlen_fl_buf, (size_t)1)))
@@ -1092,9 +1095,9 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         *size = vlen_bufsize.size;
 
 done:
-    if(vlen_bufsize.fspace_id > 0 && H5I_dec_ref(vlen_bufsize.fspace_id) < 0)
+    if(fspace && H5S_close(fspace) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-    if(vlen_bufsize.mspace_id > 0 && H5I_dec_ref(vlen_bufsize.mspace_id) < 0)
+    if(mspace && H5S_close(mspace) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
     if(vlen_bufsize.fl_tbuf != NULL)
         vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);

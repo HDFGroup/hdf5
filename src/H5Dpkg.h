@@ -479,9 +479,9 @@ typedef struct H5D_fill_buf_info_t {
 
 /* Internal data structure for computing variable-length dataset's total size */
 typedef struct {
-    hid_t dataset_id;   /* ID of the dataset we are working on */
-    hid_t fspace_id;    /* ID of the file dataset's dataspace we are working on */
-    hid_t mspace_id;    /* ID of the memory dataset's dataspace we are working on */
+    H5D_t *dset;        /* Dataset for operation */
+    H5S_t *fspace;      /* Dataset's dataspace for operation */
+    H5S_t *mspace;      /* Memory dataspace for operation */
     void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
     void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
     hid_t xfer_pid;     /* ID of the dataset xfer property list */
@@ -546,6 +546,11 @@ H5_DLL herr_t H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
+
+/* Internal I/O routines */
+H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
+    const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
+    void *buf/*out*/);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info,

@@ -246,7 +246,7 @@ precision (detected_t *d)
            _v = (_v << 8) + _i;						      \
        for(_i = 0, _x = (unsigned char *)&_v; _i < (signed)sizeof(TYPE); _i++) { \
           _j = (*_x++) - 1;						      \
-          assert(_j < (signed)sizeof(TYPE));				      \
+          HDassert(_j < (signed)sizeof(TYPE));				      \
           INFO.perm[_i] = _j;						      \
        } /* end for */							      \
    } else { /*Not able to detect order if type size is 1 byte. Use native int \
@@ -255,7 +255,7 @@ precision (detected_t *d)
            _int_v = (_int_v << 8) + _i;					      \
        for(_i = 0, _x = (unsigned char *)&_int_v; _i < (signed)sizeof(int); _i++) { \
           _j = (*_x++)-1;						      \
-          assert(_j < (signed)sizeof(int));				      \
+          HDassert(_j < (signed)sizeof(int));				      \
           INFO.perm[_i] = _j;						      \
        } /* end for */							      \
    } /* end else */                                                           \
@@ -296,23 +296,23 @@ precision (detected_t *d)
    int _i, _j, _last = (-1);						      \
    char *_mesg;								      \
 									      \
-   memset(&INFO, 0, sizeof(INFO));					      \
+   HDmemset(&INFO, 0, sizeof(INFO));					      \
    INFO.varname = #VAR;							      \
    INFO.size = sizeof(TYPE);						      \
 									      \
    /* Completely initialize temporary variables, in case the bits used in */  \
    /* the type take less space than the number of bits used to store the type */  \
-   memset(&_v3, 0, sizeof(TYPE));                                             \
-   memset(&_v2, 0, sizeof(TYPE));                                             \
-   memset(&_v1, 0, sizeof(TYPE));                                             \
+   HDmemset(&_v3, 0, sizeof(TYPE));                                             \
+   HDmemset(&_v2, 0, sizeof(TYPE));                                             \
+   HDmemset(&_v1, 0, sizeof(TYPE));                                             \
 									      \
    /* Byte Order */							      \
    for(_i = 0, _v1 = 0.0, _v2 = 1.0; _i < (int)sizeof(TYPE); _i++) {	      \
       _v3 = _v1;							      \
       _v1 += _v2;							      \
       _v2 /= 256.0;							      \
-      memcpy(_buf1, (const void *)&_v1, sizeof(TYPE));			      \
-      memcpy(_buf3, (const void *)&_v3, sizeof(TYPE));			      \
+      HDmemcpy(_buf1, (const void *)&_v1, sizeof(TYPE));			      \
+      HDmemcpy(_buf3, (const void *)&_v3, sizeof(TYPE));			      \
       _j = byte_cmp(sizeof(TYPE), &_buf3, &_buf1);			      \
       if(_j >= 0) {							      \
           INFO.perm[_i] = _j;						      \
@@ -321,7 +321,7 @@ precision (detected_t *d)
    }									      \
    fix_order(sizeof(TYPE), _last, INFO.perm, (const char**)&_mesg);	      \
                                                                               \
-   if(!strcmp(_mesg, "VAX"))                                                  \
+   if(!HDstrcmp(_mesg, "VAX"))                                                  \
       INFO.is_vax = TRUE;                                                     \
 									      \
    /* Implicit mantissa bit */						      \
@@ -351,8 +351,8 @@ precision (detected_t *d)
    INFO.bias = find_bias (INFO.epos, INFO.esize, INFO.perm, &_v1);	      \
    precision (&(INFO));							      \
    ALIGNMENT(TYPE, INFO);						      \
-   if(!strcmp(INFO.varname, "FLOAT") || !strcmp(INFO.varname, "DOUBLE") ||    \
-      !strcmp(INFO.varname, "LDOUBLE")) {                                     \
+   if(!HDstrcmp(INFO.varname, "FLOAT") || !HDstrcmp(INFO.varname, "DOUBLE") ||    \
+      !HDstrcmp(INFO.varname, "LDOUBLE")) {                                     \
       COMP_ALIGNMENT(TYPE,INFO.comp_align);                                   \
    }                                                                          \
 }
@@ -399,7 +399,7 @@ precision (detected_t *d)
     void		(*_handler)(int) = HDsignal(SIGBUS, sigbus_handler);  \
     void		(*_handler2)(int) = HDsignal(SIGSEGV, sigsegv_handler);\
 									      \
-    _buf = (char*)malloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);	      \
+    _buf = (char*)HDmalloc(sizeof(TYPE) + align_g[NELMTS(align_g) - 1]);	      \
     if(H5SETJMP(jbuf_g)) _ano++;					      \
     if(_ano < NELMTS(align_g)) {					      \
 	*((TYPE*)(_buf+align_g[_ano])) = _val; /*possible SIGBUS or SEGSEGV*/ \
@@ -409,12 +409,12 @@ precision (detected_t *d)
 	/*              pointer values when pointing to non-word aligned */   \
 	/*              locations with pointers that are supposed to be */    \
 	/*              word aligned. -QAK */                                 \
-	memset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
+	HDmemset(_buf, 0xff, sizeof(TYPE)+align_g[NELMTS(align_g)-1]);	      \
         /*How to handle VAX types?*/                                          \
 	if(INFO.perm[0]) /* Big-Endian */				      \
-	    memcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(size_t)(INFO.precision/8)); \
+	    HDmemcpy(_buf+align_g[_ano]+(INFO.size-((INFO.offset+INFO.precision)/8)),((char *)&_val)+(INFO.size-((INFO.offset+INFO.precision)/8)),(size_t)(INFO.precision/8)); \
 	else /* Little-Endian */					      \
-	    memcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
+	    HDmemcpy(_buf+align_g[_ano]+(INFO.offset/8),((char *)&_val)+(INFO.offset/8),(size_t)(INFO.precision/8)); \
 	_val2 = *((TYPE*)(_buf+align_g[_ano]));				      \
 	if(_val!=_val2)							      \
 	    H5LONGJMP(jbuf_g, 1);		        		      \
@@ -424,7 +424,7 @@ precision (detected_t *d)
 	(INFO.align)=0;							      \
 	fprintf(stderr, "unable to calculate alignment for %s\n", #TYPE);     \
     }									      \
-    free(_buf);								      \
+    HDfree(_buf);								      \
     HDsignal(SIGBUS, _handler); /*restore original handler*/		      \
     HDsignal(SIGSEGV, _handler2); /*restore original handler*/		      \
 }
@@ -669,7 +669,7 @@ H5TN_init_interface(void)\n\
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;\n",
 	       d[i].offset,			/*offset		*/
 	       d[i].precision);			/*precision		*/
-    /*assert((d[i].perm[0]>0)==(byte_order>0));*/   /* Double-check that byte-order doesn't change */
+    /*HDassert((d[i].perm[0]>0)==(byte_order>0));*/   /* Double-check that byte-order doesn't change */
 
 	if (0 == d[i].msize) {
 	    /* The part unique to fixed point types */
@@ -705,10 +705,10 @@ H5TN_init_interface(void)\n\
 	       d[i].varname, (unsigned long)(d[i].align));
 
         /* Variables for alignment of compound datatype */
-        if(!strcmp(d[i].varname, "SCHAR")  || !strcmp(d[i].varname, "SHORT") ||
-            !strcmp(d[i].varname, "INT")   || !strcmp(d[i].varname, "LONG")  ||
-            !strcmp(d[i].varname, "LLONG") || !strcmp(d[i].varname, "FLOAT") ||
-            !strcmp(d[i].varname, "DOUBLE") || !strcmp(d[i].varname, "LDOUBLE")) {
+        if(!HDstrcmp(d[i].varname, "SCHAR")  || !HDstrcmp(d[i].varname, "SHORT") ||
+            !HDstrcmp(d[i].varname, "INT")   || !HDstrcmp(d[i].varname, "LONG")  ||
+            !HDstrcmp(d[i].varname, "LLONG") || !HDstrcmp(d[i].varname, "FLOAT") ||
+            !HDstrcmp(d[i].varname, "DOUBLE") || !HDstrcmp(d[i].varname, "LDOUBLE")) {
             printf("    H5T_NATIVE_%s_COMP_ALIGN_g = %lu;\n",
                     d[i].varname, (unsigned long)(d[i].comp_align));
         }
@@ -823,7 +823,7 @@ iprint(detected_t *d)
 	printf("    * ");
 	for (i=MIN(pass*4+3,d->size-1); i>=pass*4; --i) {
 	    printf ("%4d", d->perm[i]);
-	    if (i>pass*4) fputs ("     ", stdout);
+	    if (i>pass*4) HDfputs ("     ", stdout);
 	}
 
 	/*
@@ -835,23 +835,23 @@ iprint(detected_t *d)
 	     i>=pass*4; --i) {
 	    for (j=7; j>=0; --j) {
 		if (k==d->sign && d->msize) {
-		    putchar('S');
+		    HDputchar('S');
 		} else if (k>=d->epos && k<d->epos+d->esize) {
-		    putchar('E');
+		    HDputchar('E');
 		} else if (k>=d->mpos && k<d->mpos+d->msize) {
-		    putchar('M');
+		    HDputchar('M');
 		} else if (d->msize) {
-		    putchar('?');   /*unknown floating point bit */
+		    HDputchar('?');   /*unknown floating point bit */
 		} else if (d->sign) {
-		    putchar('I');
+		    HDputchar('I');
 		} else {
-		    putchar('U');
+		    HDputchar('U');
 		}
 		--k;
 	    }
-	    if (i>pass*4) putchar(' ');
+	    if (i>pass*4) HDputchar(' ');
 	}
-	putchar('\n');
+	HDputchar('\n');
     }
 
     /*
@@ -934,13 +934,13 @@ bit_cmp(int nbytes, int *perm, volatile void *_a, volatile void *_b)
     unsigned char	aa, bb;
 
     for (i = 0; i < nbytes; i++) {
-	assert(perm[i] < nbytes);
+	HDassert(perm[i] < nbytes);
 	if ((aa = a[perm[i]]) != (bb = b[perm[i]])) {
 	    for (j = 0; j < 8; j++, aa >>= 1, bb >>= 1) {
 		if ((aa & 1) != (bb & 1)) return i * 8 + j;
 	    }
-	    assert("INTERNAL ERROR" && 0);
-	    abort();
+	    HDassert("INTERNAL ERROR" && 0);
+	    HDabort();
 	}
     }
     return -1;
@@ -998,7 +998,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
              *          It could have some other endianess and fall into this
              *          case - JKM & QAK)
 	     */
-	    assert(0 == n % 2);
+	    HDassert(0 == n % 2);
 	    if (mesg) *mesg = "VAX";
 	    for (i = 0; i < n; i += 2) {
 		perm[i] = (n - 2) - i;
@@ -1008,7 +1008,7 @@ fix_order(int n, int last, int *perm, const char **mesg)
     } else {
 	fprintf(stderr,
 	     "Failed to detect byte order of %d-byte floating point.\n", n);
-	exit(1);
+	HDexit(1);
     }
 }
 
@@ -1062,7 +1062,7 @@ imp_bit(int n, int *perm, volatile void *_a, volatile void *_b)
      * A and B.	 This is the least significant bit of the exponent.
      */
     changed = bit_cmp(n, perm, a, b);
-    assert(changed >= 0);
+    HDassert(changed >= 0);
 
     /*
      * The bit to the right (less significant) of the changed bit should
@@ -1139,8 +1139,8 @@ static void
 print_header(void)
 {
 
-    time_t		now = time(NULL);
-    struct tm		*tm = localtime(&now);
+    time_t		now = HDtime(NULL);
+    struct tm		*tm = HDlocaltime(&now);
     char		real_name[30];
     char		host_name[256];
     int			i;
@@ -1199,13 +1199,13 @@ bit.\n";
     {
 	size_t n;
 	char *comma;
-	if ((pwd = getpwuid(getuid()))) {
-	    if ((comma = strchr(pwd->pw_gecos, ','))) {
+	if ((pwd = HDgetpwuid(HDgetuid()))) {
+	    if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
 		n = MIN(sizeof(real_name)-1, (unsigned)(comma-pwd->pw_gecos));
-		strncpy(real_name, pwd->pw_gecos, n);
+		HDstrncpy(real_name, pwd->pw_gecos, n);
 		real_name[n] = '\0';
 	    } else {
-		strncpy(real_name, pwd->pw_gecos, sizeof(real_name));
+		HDstrncpy(real_name, pwd->pw_gecos, sizeof(real_name));
 		real_name[sizeof(real_name) - 1] = '\0';
 	    }
 	} else {
@@ -1220,7 +1220,7 @@ bit.\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-    if (gethostname(host_name, sizeof(host_name)) < 0) {
+    if (HDgethostname(host_name, sizeof(host_name)) < 0) {
 	host_name[0] = '\0';
     }
 #else
@@ -1231,7 +1231,7 @@ bit.\n";
      * The file header: warning, copyright notice, build information.
      */
     printf("/* Generated automatically by H5detect -- do not edit */\n\n\n");
-    puts(FileHeader);		/*the copyright notice--see top of this file */
+    HDputs(FileHeader);		/*the copyright notice--see top of this file */
 
     printf(" *\n * Created:\t\t%s %2d, %4d\n",
 	   month_name[tm->tm_mon], tm->tm_mday, 1900 + tm->tm_year);
@@ -1239,15 +1239,15 @@ bit.\n";
 	printf(" *\t\t\t");
 	if (real_name[0]) printf("%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
-	if (pwd) fputs(pwd->pw_name, stdout);
+	if (pwd) HDfputs(pwd->pw_name, stdout);
 #endif
 	if (host_name[0]) printf("@%s", host_name);
 	if (real_name[0]) printf(">");
-	putchar('\n');
+	HDputchar('\n');
     }
     printf(" *\n * Purpose:\t\t");
     for (s = purpose; *s; s++) {
-	putchar(*s);
+	HDputchar(*s);
 	if ('\n' == *s && s[1]) printf(" *\t\t\t");
     }
 
@@ -1256,7 +1256,7 @@ bit.\n";
     printf(" *\tIt was generated by code in `H5detect.c'.\n");
 
     printf(" *\n *");
-    for (i = 0; i < 73; i++) putchar('-');
+    for (i = 0; i < 73; i++) HDputchar('-');
     printf("\n */\n\n");
 
 }
@@ -1645,7 +1645,7 @@ main(void)
     nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
     if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0)<0) {
 	fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n",
-		strerror(errno));
+		HDstrerror(errno));
     }
 #endif
 #endif

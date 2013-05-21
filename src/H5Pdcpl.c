@@ -1669,13 +1669,6 @@ done:
  * Programmer:	Kent Yang
  *              Tuesday, April 1, 2003
  *
- * Modifications:
- *
- *          Nat Furrer and James Laird
- *          June 30, 2004
- *          Now ensures that SZIP encoding is enabled
- *          SZIP defaults to k13 compression
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1685,22 +1678,22 @@ H5Pset_szip(hid_t plist_id, unsigned options_mask, unsigned pixels_per_block)
     H5P_genplist_t *plist;      /* Property list pointer */
     unsigned cd_values[2];      /* Filter parameters */
     unsigned int config_flags;
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iIuIu", plist_id, options_mask, pixels_per_block);
 
-    if(H5Zget_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
+    if(H5Z_get_filter_info(H5Z_FILTER_SZIP, &config_flags) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get filter info")
 
-    if(! (config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED))
+    if(!(config_flags & H5Z_FILTER_CONFIG_ENCODE_ENABLED))
         HGOTO_ERROR(H5E_PLINE, H5E_NOENCODER, FAIL, "Filter present but encoding is disabled.")
 
     /* Check arguments */
-    if ((pixels_per_block%2)==1)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even")
-    if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK)
-        HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is too large")
+    if((pixels_per_block % 2) == 1)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is not even")
+    if(pixels_per_block > H5_SZIP_MAX_PIXELS_PER_BLOCK)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "pixels_per_block is too large")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
