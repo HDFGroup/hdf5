@@ -812,6 +812,11 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     if(NULL == (file = H5FL_CALLOC(H5VL_iod_file_t)))
 	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD file struct");
 
+    file->remote_file.coh.cookie = IOD_OH_UNDEFINED;
+    file->remote_file.root_oh.cookie = IOD_OH_UNDEFINED;
+    file->remote_file.root_id = IOD_ID_UNDEFINED;
+    file->remote_file.fcpl_id = -1;
+
     /* set input paramters in struct to give to the function shipper */
     input.name = name;
     input.flags = flags;
@@ -1337,14 +1342,16 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* Retrieve the parent AXE id by traversing the path where the
        group should be created. */
     if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the group object that is returned to the user */
     if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
     grp->remote_group.iod_oh.cookie = IOD_OH_UNDEFINED;
     grp->remote_group.iod_id = IOD_ID_UNDEFINED;
+    grp->remote_group.gcpl_id = -1;
 
     /* Generate an IOD ID for the group to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -1492,7 +1499,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     /* Retrieve the parent AXE id by traversing the path where the
        group should be opened. */
     if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the group object that is returned to the user */
@@ -1796,7 +1803,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     /* Retrieve the parent AXE id by traversing the path where the
        dataset should be created. */
     if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the dataset object that is returned to the user */
@@ -1954,7 +1961,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     /* Retrieve the parent AXE id by traversing the path where the
        dataset should be opened. */
     if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the dataset object that is returned to the user */
@@ -2001,7 +2008,8 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     HDstrcpy(dset->common.obj_name, obj->obj_name);
     HDstrcat(dset->common.obj_name, name);
     dset->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
-
+    printf("Dataset Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
+           dset->common.obj_name, input.loc_id, input.axe_id, input.parent_axe_id);
     if((dset->dapl_id = H5Pcopy(dapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
@@ -2657,8 +2665,8 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     {
         size_t i;
 
-        printf("Dataset Close, axe id %llu, %d parents: ", 
-               input.axe_id, num_parents);
+        printf("Dataset Close %s, axe id %llu, %d parents: ", 
+               dset->common.obj_name, input.axe_id, num_parents);
         for(i=0 ; i<num_parents ; i++)
             printf("%llu ", axe_parents[i]);
         printf("\n");
@@ -2750,7 +2758,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     /* Retrieve the parent AXE id by traversing the path where the
        dtype should be created. */
     if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the datatype object that is returned to the user */
@@ -2903,7 +2911,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     /* Retrieve the parent AXE id by traversing the path where the
        dtype should be opened. */
     if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the datatype object that is returned to the user */
@@ -2912,6 +2920,8 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
 
     dtype->remote_dtype.iod_oh.cookie = IOD_OH_UNDEFINED;
     dtype->remote_dtype.iod_id = IOD_ID_UNDEFINED;
+    dtype->remote_dtype.tcpl_id = -1;
+    dtype->remote_dtype.type_id = -1;
 
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
@@ -3182,7 +3192,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     /* Retrieve the parent AXE id by traversing the path where the
        attribute should be created. */
     if(H5VL_iod_get_parent_info(obj, loc_params, ".", &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the attribute object that is returned to the user */
@@ -3349,7 +3359,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     /* Retrieve the parent AXE id by traversing the path where the
        attribute should be opened. */
     if(H5VL_iod_get_parent_info(obj, loc_params, ".", &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name) < 0)
+                                &parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
 
     /* allocate the attribute object that is returned to the user */
@@ -3763,7 +3773,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     /* Retrieve the parent AXE id by traversing the path where the
        attribute should be removed. */
     if(H5VL_iod_get_parent_info(obj, loc_params, ".", &iod_id, &iod_oh, 
-                                &input.parent_axe_id, &new_name) < 0)
+                                &input.parent_axe_id, &new_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
     /* set the input structure for the HG encode routine */
@@ -3953,14 +3963,13 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
                 char *attr_name = va_arg (arguments, char *);
                 htri_t *ret = va_arg (arguments, htri_t *);
-                htri_t *value = NULL;
                 char *new_name;
                 attr_op_in_t input;
 
                 /* Retrieve the parent AXE id by traversing the path where the
                    attribute should be checked. */
                 if(H5VL_iod_get_parent_info(obj, loc_params, ".", &iod_id, &iod_oh, 
-                                            &input.parent_axe_id, &new_name) < 0)
+                                            &input.parent_axe_id, &new_name, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
                 /* set the input structure for the HG encode routine */
@@ -3971,8 +3980,6 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.attr_name = attr_name;
                 input.axe_id = axe_id ++;
 
-                value = (htri_t *)malloc(sizeof(htri_t));
-
                 /* get a function shipper request */
                 if(do_async) {
                     if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
@@ -3982,7 +3989,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                     hg_req = &_hg_req;
 
                 /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_ATTR_EXISTS_ID, &input, value, hg_req) < 0)
+                if(HG_Forward(PEER, H5VL_ATTR_EXISTS_ID, &input, ret, hg_req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
 
                 /* Get async request for operation */
@@ -3997,7 +4004,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 /* Set up request */
                 HDmemset(request, 0, sizeof(*request));
                 request->type = HG_ATTR_EXISTS;
-                request->data = value;
+                request->data = ret;
                 request->req = hg_req;
                 request->obj = obj;
                 request->axe_id = input.axe_id;
@@ -4021,10 +4028,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                     HDassert(request == &_request);
                 } /* end else */
 
-                *ret = *value;
-
                 free(new_name);
-                free(value);
                 break;
             }
         /* H5Aget_info */
@@ -4197,6 +4201,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                      hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object */
+    H5VL_iod_object_t *cur_obj = NULL;
     link_create_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
@@ -4233,7 +4238,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 /* Retrieve the parent info by traversing the path where the
                    link should be created from. */
                 if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
-                                            &input.parent_axe_id, &loc_name) < 0)
+                                            &input.parent_axe_id, &loc_name, &cur_obj) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
                 /* object is H5L_SAME_LOC */
@@ -4244,7 +4249,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                    link should be created. */
                 if(H5VL_iod_get_parent_info(target_obj, target_params, ".", 
                                             &input.target_loc_id, &input.target_loc_oh, 
-                                            &input.target_parent_axe_id, &new_name) < 0)
+                                            &input.target_parent_axe_id, &new_name, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
                 /* set the input structure for the HG encode routine */
@@ -4292,14 +4297,14 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 /* Retrieve the parent info by traversing the path where the
                    link should be created from. */
                 if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
-                                            &input.parent_axe_id, &loc_name) < 0)
+                                            &input.parent_axe_id, &loc_name, &cur_obj) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
                 /* Retrieve the parent info by traversing the path where the
                    target link should be created. */
                 if(H5VL_iod_get_parent_info(target_obj, target_params, ".", 
                                             &input.target_loc_id, &input.target_loc_oh, 
-                                            &input.target_parent_axe_id, &new_name) < 0)
+                                            &input.target_parent_axe_id, &new_name, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
                 /* set the input structure for the HG encode routine */
@@ -4366,7 +4371,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
     request->type = HG_LINK_CREATE;
     request->data = status;
     request->req = hg_req;
-    request->obj = obj;
+    request->obj = cur_obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4380,7 +4385,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
         *req = request;
 
         /* Track request */
-        obj->request = request;
+        cur_obj->request = request;
     } /* end if */
     else {
         /* Synchronously wait on the request */
@@ -4423,6 +4428,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 {
     H5VL_iod_object_t *src_obj = (H5VL_iod_object_t *)_src_obj;
     H5VL_iod_object_t *dst_obj = (H5VL_iod_object_t *)_dst_obj;
+    H5VL_iod_object_t *cur_obj;
     link_move_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
@@ -4438,13 +4444,13 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     /* Retrieve the parent information by traversing the path where the
        link should be moved from. */
     if(H5VL_iod_get_parent_info(src_obj, loc_params1, ".", &input.src_loc_id, &input.src_loc_oh, 
-                                &input.src_parent_axe_id, &src_name) < 0)
+                                &input.src_parent_axe_id, &src_name, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
     /* Retrieve the parent information by traversing the path where the
        link should be moved to. */
     if(H5VL_iod_get_parent_info(dst_obj, loc_params2, ".", &input.dst_loc_id, &input.dst_loc_oh, 
-                                &input.dst_parent_axe_id, &dst_name) < 0)
+                                &input.dst_parent_axe_id, &dst_name, &cur_obj) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
     /* if the object, to be moved is open locally, then update its
@@ -4512,7 +4518,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     request->type = HG_LINK_MOVE;
     request->data = status;
     request->req = hg_req;
-    request->obj = dst_obj;
+    request->obj = cur_obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4526,7 +4532,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
         *req = request;
 
         /* Track request */
-        dst_obj->request = request;
+        cur_obj->request = request;
     } /* end if */
     else {
         /* Synchronously wait on the request */
@@ -4607,21 +4613,18 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
         case H5VL_LINK_EXISTS:
             {
                 link_op_in_t input;
-                htri_t *value = NULL;
                 htri_t *ret    = va_arg (arguments, htri_t *);
 
                 /* Retrieve the parent info by traversing the path where the
                    link should be checked. */
                 if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
-                                            &input.parent_axe_id, &new_name) < 0)
+                                            &input.parent_axe_id, &new_name, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
                 input.axe_id = axe_id ++;
                 input.path = new_name;
-
-                value = (htri_t *)malloc(sizeof(htri_t));
 
                 /* get a function shipper request */
                 if(do_async) {
@@ -4637,7 +4640,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 #endif
 
                 /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_LINK_EXISTS_ID, &input, value, hg_req) < 0)
+                if(HG_Forward(PEER, H5VL_LINK_EXISTS_ID, &input, ret, hg_req) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
 
                 /* Get async request for operation */
@@ -4652,7 +4655,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 /* Set up request */
                 HDmemset(request, 0, sizeof(*request));
                 request->type = HG_LINK_EXISTS;
-                request->data = value;
+                request->data = ret;
                 request->req = hg_req;
                 request->obj = obj;
                 request->axe_id = input.axe_id;
@@ -4676,10 +4679,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     HDassert(request == &_request);
                 } /* end else */
 
-                *ret = *value;
-
                 free(new_name);
-                free(value);
                 break;
             }
         /* H5Lget_info/H5Lget_info_by_idx */
@@ -4730,6 +4730,7 @@ herr_t
 H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    H5VL_iod_object_t *cur_obj;
     link_op_in_t input;
     int *status;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
@@ -4745,7 +4746,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     /* Retrieve the parent info by traversing the path where the
        link should be removed. */
     if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
-                                &input.parent_axe_id, &new_name) < 0)
+                                &input.parent_axe_id, &new_name, &cur_obj) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
 
     /* set the input structure for the HG encode routine */
@@ -4785,7 +4786,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     request->type = HG_LINK_REMOVE;
     request->data = status;
     request->req = hg_req;
-    request->obj = obj;
+    request->obj = cur_obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4799,7 +4800,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
         *req = request;
 
         /* Track request */
-        obj->request = request;
+        cur_obj->request = request;
     } /* end if */
     else {
         /* Synchronously wait on the request */

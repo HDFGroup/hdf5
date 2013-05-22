@@ -569,11 +569,13 @@ H5EQ_insert(H5EQ_t *eq, H5_priv_request_t *req)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "event queue not intialized");
  
     req->next = NULL;
+    req->prev = NULL;
 
     if(NULL == eq->head && NULL == eq->tail) {
         eq->head = eq->tail = req;
     }
     else {
+        eq->head->prev = req;
         req->next = eq->head;
         eq->head = req;
     }
@@ -600,7 +602,7 @@ done:
 herr_t
 H5EQ_wait(H5EQ_t *eq, H5VL_t *vol_plugin, int *num_requests/*OUT*/, H5_status_t **_status/*OUT*/)
 {
-    H5_priv_request_t *cur = NULL, *head = NULL, *next = NULL;
+    H5_priv_request_t *cur = NULL, *tail = NULL, *prev = NULL;
     int i = 0;
     H5_status_t *status = NULL;
     herr_t ret_value = SUCCEED;          /* Return value */
@@ -617,21 +619,23 @@ H5EQ_wait(H5EQ_t *eq, H5VL_t *vol_plugin, int *num_requests/*OUT*/, H5_status_t 
 
     cur = eq->head;
 
-    while(eq->head) {
-        /* Pop the first item and manage the queue accordingly */
-        head = eq->head;
-        next = head->next;
-        eq->head = next;
-        if(NULL == eq->head)
-            eq->tail = eq->head;
+    while(eq->tail) {
+        /* Pop the last item and manage the queue accordingly */
+        tail = eq->tail;
+        prev = tail->prev;
+        eq->tail = prev;
+
+        if(NULL == eq->tail)
+            eq->head = eq->tail;
 
         /* wait on and free the request */
-        if(head->req && H5VL_request_wait(&head->req, vol_plugin, &status[i++]) < 0)
+        if(tail->req && H5VL_request_wait(&tail->req, vol_plugin, &status[i++]) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to test request");
-        head->req = NULL;
-        head->vol_plugin = NULL;
-        head->next = NULL;
-        head = (H5_priv_request_t *)H5MM_xfree(head);
+        tail->req = NULL;
+        tail->vol_plugin = NULL;
+        tail->next = NULL;
+        tail->prev = NULL;
+        tail = (H5_priv_request_t *)H5MM_xfree(tail);
 
         eq->size --;
     }

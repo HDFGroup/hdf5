@@ -2004,17 +2004,34 @@ herr_t
 H5VL_link_create(H5VL_link_create_type_t create_type, void *obj, H5VL_loc_params_t loc_params, 
                  H5VL_t *vol_plugin, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t               ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL create callback exists */
     if(NULL == vol_plugin->cls->link_cls.create)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link create' method")
     /* call the corresponding VOL create callback */
     if((ret_value = (vol_plugin->cls->link_cls.create)
-        (create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL)) < 0)
+        (create_type, obj, loc_params, lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link create failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2038,17 +2055,34 @@ H5VL_link_move(void *src_obj, H5VL_loc_params_t loc_params1, void *dst_obj,
                H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin, hbool_t copy_flag, 
                hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t               ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL move callback exists */
     if(NULL == vol_plugin->cls->link_cls.move)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link move' method")
     /* call the corresponding VOL move callback */
     if((ret_value = (vol_plugin->cls->link_cls.move)
-        (src_obj, loc_params1, dst_obj, loc_params2, copy_flag, lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL)) < 0)
+        (src_obj, loc_params1, dst_obj, loc_params2, copy_flag, lcpl_id, lapl_id, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link move failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2073,15 +2107,32 @@ H5VL_link_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,
                   hbool_t recursive, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, 
                   H5L_iterate_t op, void *op_data, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->link_cls.iterate)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link iterate' method")
     if((ret_value = (vol_plugin->cls->link_cls.iterate)(obj, loc_params, recursive, idx_type,
-                                                        order, idx, op, op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
+                                                        order, idx, op, op_data, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)    
@@ -2104,19 +2155,36 @@ done:
  */
 herr_t
 H5VL_link_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_link_get_t get_type, 
-              hid_t dxpl_id, hid_t event_q, ...)
+              hid_t dxpl_id, hid_t eq_id, ...)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->link_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link get' method")
-    va_start (arguments, event_q);
-    if((ret_value = (vol_plugin->cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, eq_id);
+    if((ret_value = (vol_plugin->cls->link_cls.get)(obj, loc_params, get_type, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2139,16 +2207,33 @@ herr_t
 H5VL_link_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
                  hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t             ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL remove callback exists */
     if(NULL == vol_plugin->cls->link_cls.remove)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `link remove' method")
     /* call the corresponding VOL remove callback */
-    if((ret_value = (vol_plugin->cls->link_cls.remove)(obj, loc_params, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->link_cls.remove)(obj, loc_params, dxpl_id, req)) < 0)
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "link remove failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2173,17 +2258,35 @@ void *
 H5VL_object_open(void *obj, H5VL_loc_params_t params, H5VL_t *vol_plugin, H5I_type_t *opened_type,
                  hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL;    /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     void *ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     /* check if the corresponding VOL open callback exists */
     if(NULL == vol_plugin->cls->object_cls.open)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "vol plugin has no `object open' method")
     /* call the corresponding VOL open callback */
-    if(NULL == (ret_value = (vol_plugin->cls->object_cls.open)(obj, params, opened_type, dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (ret_value = (vol_plugin->cls->object_cls.open)(obj, params, opened_type, 
+                                                               dxpl_id, req)))
 	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "open failed")
     vol_plugin->nrefs++;
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2208,19 +2311,38 @@ H5VL_object_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugi
                  void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
                  hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin1;
+    }
+
     /* check if both objects are associated with the same VOL plugin */
     if(vol_plugin1->cls != vol_plugin2->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be copied")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, 
+                    "Objects are accessed through different VOL plugins and can't be copied")
 
     if(NULL == vol_plugin1->cls->object_cls.copy)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object copy' method")
     if((ret_value = (vol_plugin1->cls->object_cls.copy)
-        (src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, ocpypl_id, lcpl_id, dxpl_id, H5_REQUEST_NULL)) < 0)
+        (src_obj, loc_params1, src_name, dst_obj, loc_params2, dst_name, 
+         ocpypl_id, lcpl_id, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "copy failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2244,16 +2366,33 @@ herr_t H5VL_object_visit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_pl
                          H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op, 
                          void *op_data, hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
+
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
 
     if(NULL == vol_plugin->cls->object_cls.visit)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object visit' method")
 
     if((ret_value = (vol_plugin->cls->object_cls.visit)(obj, loc_params, idx_type, order, op, 
-                                                        op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
+                                                        op_data, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "object visitation failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)    
@@ -2277,7 +2416,7 @@ done:
  */
 herr_t
 H5VL_object_lookup(hid_t id, H5VL_loc_type_t lookup_type, void **location, 
-                   hid_t dxpl_id, hid_t event_q, ...)
+                   hid_t dxpl_id, hid_t eq_id, ...)
 {
     va_list           arguments;             /* argument list passed from the API call */
     H5VL_class_t      *vol_plugin;            /* VOL structure attached to id */
@@ -2291,8 +2430,8 @@ H5VL_object_lookup(hid_t id, H5VL_loc_type_t lookup_type, void **location,
     if(NULL == vol_plugin->object_cls.lookup)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object lookup' method")
 
-    va_start (arguments, event_q);
-    if((ret_value = (vol_plugin->object_cls.lookup)(id, lookup_type, location, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, eq_id);
+    if((ret_value = (vol_plugin->object_cls.lookup)(id, lookup_type, location, dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "lookup of object location failed")
     va_end (arguments);
 done:
@@ -2327,7 +2466,7 @@ H5VL_object_free_loc(hid_t id, void *location, hid_t dxpl_id, hid_t eq_id)
     if(NULL == vol_plugin->object_cls.free_loc)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object free_loc' method")
 
-    if((ret_value = (vol_plugin->object_cls.free_loc)(location, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->object_cls.free_loc)(location, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "freeing location token of object location failed")
 
 done:
@@ -2352,20 +2491,39 @@ done:
  */
 herr_t
 H5VL_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_get_t get_type, 
-                hid_t dxpl_id, hid_t event_q, ...)
+                hid_t dxpl_id, hid_t eq_id, ...)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->object_cls.get)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object get' method")
 
-    va_start (arguments, event_q);
-    if((ret_value = (vol_plugin->cls->object_cls.get)(obj, loc_params, get_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, eq_id);
+    if((ret_value = (vol_plugin->cls->object_cls.get)(obj, loc_params, get_type, 
+                                                      dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
     va_end (arguments);
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_get() */
@@ -2386,20 +2544,38 @@ done:
  */
 herr_t
 H5VL_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, H5VL_object_misc_t misc_type, 
-                 hid_t dxpl_id, hid_t event_q, ...)
+                 hid_t dxpl_id, hid_t eq_id, ...)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     va_list           arguments;             /* argument list passed from the API call */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->object_cls.misc)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object misc' method")
 
-    va_start (arguments, event_q);
-    if((ret_value = (vol_plugin->cls->object_cls.misc)(obj, loc_params, misc_type, dxpl_id, H5_REQUEST_NULL, arguments)) < 0)
+    va_start (arguments, eq_id);
+    if((ret_value = (vol_plugin->cls->object_cls.misc)(obj, loc_params, misc_type, 
+                                                       dxpl_id, req, arguments)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "misc failed")
     va_end (arguments);
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2424,14 +2600,31 @@ herr_t
 H5VL_object_close(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
                   hid_t dxpl_id, hid_t eq_id)
 {
+    H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+    void               **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(eq_id != H5_EVENT_QUEUE_NULL) {
+        /* create the private request */
+        if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        request->req = NULL;
+        req = &request->req;
+        request->next = NULL;
+        request->vol_plugin = vol_plugin;
+    }
+
     if(NULL == vol_plugin->cls->object_cls.close)
 	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `object close' method")
-    if((ret_value = (vol_plugin->cls->object_cls.close)(obj, loc_params, dxpl_id, H5_REQUEST_NULL)) < 0)
+    if((ret_value = (vol_plugin->cls->object_cls.close)(obj, loc_params, dxpl_id, req)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "close failed")
+
+    if(request && *req) {
+        if(H5EQinsert(eq_id, request) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "failed to insert request in event queue");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

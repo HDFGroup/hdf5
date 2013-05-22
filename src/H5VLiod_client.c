@@ -157,8 +157,9 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
                         if(tmp_status) {
                             cur_req->status = H5AO_SUCCEEDED;
                             cur_req->state = H5VL_IOD_COMPLETED;
-                            if(H5VL_iod_request_complete(file, cur_req) < 0)
+                            if(H5VL_iod_request_complete(file, cur_req) < 0) {
                                 fprintf(stderr, "Operation Failed!\n");
+                            }
                         }
                     }
                 }
@@ -168,11 +169,13 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
         }
         /* request complete, remove it from list & break */
         else {
-            if(H5VL_iod_request_complete(file, request) < 0)
+            if(H5VL_iod_request_complete(file, request) < 0) {
                 fprintf(stderr, "Operation Failed!\n");
+            }
             break;
         }
     }
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_wait */
 
@@ -274,6 +277,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             req->status = H5AO_FAILED;
             req->state = H5VL_IOD_COMPLETED;
         }
+
         H5VL_iod_request_delete(file, req);
         break;
     case HG_ATTR_CREATE:
@@ -286,6 +290,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
+
             H5VL_iod_request_delete(file, req);
             break;
         }
@@ -299,6 +304,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
+
             H5VL_iod_request_delete(file, req);
             break;
         }
@@ -312,6 +318,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
+
             H5VL_iod_request_delete(file, req);
             break;
         }
@@ -325,6 +332,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
+
             H5VL_iod_request_delete(file, req);
             break;
         }
@@ -728,8 +736,9 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
             if(grp->remote_group.gcpl_id != 0 &&
                grp->remote_group.gcpl_id != H5P_GROUP_CREATE_DEFAULT && 
-               H5Pclose(grp->remote_group.gcpl_id) < 0)
+               H5Pclose(grp->remote_group.gcpl_id) < 0) {
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            }
             grp = H5FL_FREE(H5VL_iod_group_t, grp);
             break;
         }
@@ -760,8 +769,9 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             free(dset->common.obj_name);
             if(dset->remote_dset.dcpl_id != 0 &&
                dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
-               H5Pclose(dset->remote_dset.dcpl_id) < 0)
+               H5Pclose(dset->remote_dset.dcpl_id) < 0) {
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+            }
             if(dset->dapl_id != H5P_DATASET_ACCESS_DEFAULT &&
                H5Pclose(dset->dapl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
@@ -853,51 +863,23 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parent
 herr_t
 H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                          const char *name, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
-                         uint64_t *axe_id, char **new_name)
+                         uint64_t *axe_id, char **new_name, H5VL_iod_object_t **last_obj)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
-    H5VL_iod_object_t *cur_obj = NULL;
+    size_t cur_size; /* current size of the path traversed so far */
+    char *cur_name;  /* full path to object that is currently being looked for */
+    H5VL_iod_object_t *cur_obj = obj;   /* current object in the traversal loop */
+    H5VL_iod_object_t *next_obj = NULL; /* the next object to traverse */
     const char *path;        /* specified path for the object to traverse to */
-    char *cur_name;          /* full path to object that is currently being looked for */
     H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;              /* Pointer to buffer for path components */
     size_t nchars;	     /* component name length	*/
-    size_t cur_size;
     hbool_t last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    switch(obj->obj_type) {
-    case H5I_FILE:
-        cur_oh = obj->file->remote_file.root_oh;
-        cur_id = obj->file->remote_file.root_id;
-        break;
-    case H5I_GROUP:
-        cur_oh = ((H5VL_iod_group_t *)obj)->remote_group.iod_oh;
-        cur_id = ((H5VL_iod_group_t *)obj)->remote_group.iod_id;
-        break;
-    case H5I_DATASET:
-        cur_oh = ((H5VL_iod_dset_t *)obj)->remote_dset.iod_oh;
-        cur_id = ((H5VL_iod_dset_t *)obj)->remote_dset.iod_id;
-        break;
-    case H5I_DATATYPE:
-        cur_oh = ((H5VL_iod_dtype_t *)obj)->remote_dtype.iod_oh;
-        cur_id = ((H5VL_iod_dtype_t *)obj)->remote_dtype.iod_id;
-        break;
-    default:
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
-    }
-
-    if(obj->request && obj->request->status == H5AO_PENDING){
-        *axe_id = obj->request->axe_id;
-    }
-    else {
-        *axe_id = 0;
-        HDassert(cur_oh.cookie != IOD_OH_UNDEFINED);
-    }
 
     if(loc_params.type == H5VL_OBJECT_BY_SELF)
         path = name;
@@ -949,9 +931,9 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
         cur_size += nchars;
         cur_name[cur_size] = '\0';
 
-        if(NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_GROUP))) {
+        if(NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_GROUP))) {
             if(last_comp) {
-                if(NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATASET)))
+                if(NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATASET)))
                    //&& NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATATYPE)))
                     break;
             }
@@ -964,7 +946,18 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
         printf("Found %s Locally\n", comp);
 #endif
 
-        switch(cur_obj->obj_type) {
+	/* Advance to next component in string */
+	path += nchars;
+        HDstrcat(cur_name, "/");
+        cur_size += 1;
+        cur_obj = next_obj;
+    }
+
+    switch(cur_obj->obj_type) {
+        case H5I_FILE:
+            cur_oh = cur_obj->file->remote_file.root_oh;
+            cur_id = cur_obj->file->remote_file.root_id;
+            break;
         case H5I_GROUP:
             cur_oh = ((H5VL_iod_group_t *)cur_obj)->remote_group.iod_oh;
             cur_id = ((H5VL_iod_group_t *)cur_obj)->remote_group.iod_id;
@@ -979,28 +972,26 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
             break;
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");
-        }
+    }
 
-        if(cur_obj->request && cur_obj->request->status == H5AO_PENDING) {
-            *axe_id = cur_obj->request->axe_id;
-        }
-        else {
-            *axe_id = 0;
-            HDassert(cur_oh.cookie != IOD_OH_UNDEFINED);
-        }
-
-	/* Advance to next component in string */
-	path += nchars;
-        HDstrcat(cur_name, "/");
-        cur_size += 1;
+    if(cur_obj->request && cur_obj->request->status == H5AO_PENDING) {
+        *axe_id = cur_obj->request->axe_id;
+    }
+    else {
+        *axe_id = 0;
+        HDassert(cur_oh.cookie != IOD_OH_UNDEFINED);
     }
 
     *iod_id = cur_id;
     *iod_oh = cur_oh;
+
     if(*path)
         *new_name = strdup(path);
     else
         *new_name = strdup(".");
+
+    if(last_obj)
+        *last_obj = cur_obj;
 
 done:
     free(cur_name);

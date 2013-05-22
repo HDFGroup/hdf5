@@ -2795,6 +2795,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         output.space_id = H5Screate_simple(1, dims, NULL);
         output.type_id = H5Tcopy(H5T_NATIVE_INT);
         output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+        cur_oh.cookie = 1;
 #endif
 
 #if 0
@@ -2822,8 +2823,9 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 
     }
 
+    dset_id = 1;
     output.iod_id = dset_id;
-    output.iod_oh = cur_oh;
+    output.iod_oh.cookie = cur_oh.cookie;
 
     fprintf(stderr, "Done with dset open, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &output);

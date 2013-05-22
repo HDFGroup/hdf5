@@ -96,7 +96,27 @@ H5_DLL herr_t H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, uint64_t tran
 H5_DLL herr_t H5Adelete_ff(hid_t loc_id, const char *name, uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
                                    hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
+                                   hid_t lapl_id, htri_t *ret, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, 
+                           uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Aclose_ff(hid_t attr_id, hid_t eq_id);
+
+H5_DLL herr_t H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
+                         const char *dst_name, hid_t lcpl_id, hid_t lapl_id, 
+                         uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Lcopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+                         const char *dst_name, hid_t lcpl_id, hid_t lapl_id, 
+                         uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Lcreate_soft_ff(const char *link_target, hid_t link_loc_id, const char *link_name, 
+                                hid_t lcpl_id, hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, 
+                                const char *new_name, hid_t lcpl_id, hid_t lapl_id, 
+                                uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, 
+                           uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
+                    uint64_t trans, hid_t eq_id);
 
 #endif /* H5_HAVE_EFF */
 

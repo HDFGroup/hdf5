@@ -127,7 +127,12 @@ int main(int argc, char **argv) {
     H5Aclose_ff(aid1, event_q);
 
     /* Check if the attribute on group G1 exists */
-    exists = H5Aexists_by_name(file_id,"G1","ATTR1", H5P_DEFAULT);
+    assert(H5Aexists_by_name_ff(file_id,"G1","ATTR1", H5P_DEFAULT, &exists, 0, event_q) == 0);
+    if(H5EQpop(event_q, &req1) < 0)
+        exit(1);
+    assert(H5AOwait(req1, &status1) == 0);
+    assert (status1);
+
     if(exists)
         printf("Attribute ATTR1 exists!\n");
     else
@@ -137,7 +142,7 @@ int main(int argc, char **argv) {
     assert(H5Adelete_by_name_ff(file_id, "G1", "ATTR1", H5P_DEFAULT, 0, event_q) == 0);
 
     /* check if it exists now */
-    assert(!H5Aexists(gid1, "ATTR1"));
+    assert(0 == H5Aexists_ff(gid1, "ATTR1", &exists, 0, event_q));
 
     /* create a Dataset D1 on the file, in group /G1/G2/G3. This is asynchronous. 
        Internally to the IOD-VOL this call traverses the path G1/G2/G3. 
@@ -292,8 +297,6 @@ int main(int argc, char **argv) {
     /* closing did3 acts as a wait_some on all pending requests that are issued
        on did3 (the H5Dwrite above). This is asynchronous. */
     assert(H5Dclose_ff(did3, event_q) == 0);
-
-    H5Sclose(dataspaceId);
     assert(H5Aclose_ff(aid2, event_q) == 0);
     assert(H5Tclose_ff(int_id, event_q) == 0);
     assert(H5Gclose_ff(gid1, event_q) == 0);
@@ -304,17 +307,16 @@ int main(int argc, char **argv) {
     gid1 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     gid2 = H5Gcreate_ff(file_id, "G4/G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
-    H5Lcreate_hard(file_id, "G1/G2/G3/D1", gid1, "G5/newD1", H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_hard_ff(file_id, "G1/G2/G3/D1", gid1, "G5/newD1", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
     did1 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, 0, event_q);
-    H5Lcreate_soft("/G1/G2/G3/D4", gid1, "G5/newD2", H5P_DEFAULT, H5P_DEFAULT);
-    H5Lmove(file_id, "/G1/G2/G3/D3", file_id, "/G4/G5/D3moved", H5P_DEFAULT, H5P_DEFAULT);
-    H5Ldelete(file_id, "/G1/G2/G3/D2", H5P_DEFAULT);
+    H5Lcreate_soft_ff("/G1/G2/G3/D4", gid1, "G5/newD2", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    H5Lmove_ff(file_id, "/G1/G2/G3/D3", file_id, "/G4/G5/D3moved", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, 0, event_q);
 
     assert(H5Dclose_ff(did1, event_q) == 0);
     assert(H5Gclose_ff(gid1, event_q) == 0);
     assert(H5Gclose_ff(gid2, event_q) == 0);
-
 
     /* flush all the contents of file to disk. This is asynchronous. */
     assert(H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q) == 0);
@@ -327,7 +329,6 @@ int main(int argc, char **argv) {
     }
     else
         assert(H5AO_SUCCEEDED == status1);
-
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
@@ -346,6 +347,11 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
     free(status);
+
+    if(exists)
+        printf("Attribute ATTR1 exists after being removed! Something is wrong!\n");
+    else
+        printf("Attribute ATTR1 does NOT exist. Good, it was removed!\n");
 
     /* Print the data that has been read, after we have issued a wait 
        (in the H5Dclose).
@@ -415,7 +421,7 @@ int main(int argc, char **argv) {
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
-
+    H5Sclose(dataspaceId);
 
     /*
     assert(H5AOwait(&req1, &status1) == 0);
