@@ -342,7 +342,7 @@ H5HP_create(H5HP_type_t heap_type)
     FUNC_ENTER_NOAPI(NULL)
 
     /* Check args */
-    assert(heap_type==H5HP_MIN_HEAP || heap_type==H5HP_MAX_HEAP);
+    HDassert(heap_type==H5HP_MIN_HEAP || heap_type==H5HP_MAX_HEAP);
 
     /* Allocate ref-counted string structure */
     if((new_heap=H5FL_MALLOC(H5HP_t))==NULL)
@@ -416,15 +416,15 @@ H5HP_count(const H5HP_t *heap)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(heap);
+    HDassert(heap);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Return the number of objects in the heap */
     H5_CHECK_OVERFLOW(heap->nobjs,size_t,ssize_t);
@@ -463,16 +463,16 @@ H5HP_insert(H5HP_t *heap, int val, void *obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(heap);
-    assert(obj);
+    HDassert(heap);
+    HDassert(obj);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Increment number of objects in heap */
     heap->nobjs++;
@@ -507,11 +507,11 @@ done:
 
     /* Check internal consistency */
     /* (Post-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_insert() */
@@ -542,16 +542,16 @@ H5HP_top(const H5HP_t *heap, int *val)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(heap);
-    assert(val);
+    HDassert(heap);
+    HDassert(val);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Get value of the top object in the heap */
     *val=heap->heap[1].val;
@@ -589,24 +589,24 @@ H5HP_remove(H5HP_t *heap, int *val, void **obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(heap);
-    assert(val);
-    assert(obj);
+    HDassert(heap);
+    HDassert(val);
+    HDassert(obj);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Check if there are any objects on the heap to remove */
     if(heap->nobjs==0)
         HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "heap is empty");
 
     /* Get the information for the top object on the heap */
-    assert(heap->heap[1].obj->heap_loc==1);
+    HDassert(heap->heap[1].obj->heap_loc==1);
     *val=heap->heap[1].val;
     *obj=heap->heap[1].obj;
 
@@ -634,11 +634,11 @@ done:
 
     /* Check internal consistency */
     /* (Post-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_remove() */
@@ -675,20 +675,20 @@ H5HP_change(H5HP_t *heap, int val, void *_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(heap);
-    assert(obj);
+    HDassert(heap);
+    HDassert(obj);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Get the location of the object in the heap */
     obj_loc=obj->heap_loc;
-    assert(obj_loc>0 && obj_loc<=heap->nobjs);
+    HDassert(obj_loc>0 && obj_loc<=heap->nobjs);
 
     /* Change the heap object's priority */
     old_val=heap->heap[obj_loc].val;
@@ -720,11 +720,11 @@ done:
 
     /* Check internal consistency */
     /* (Post-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_change() */
@@ -760,20 +760,20 @@ H5HP_incr(H5HP_t *heap, unsigned amt, void *_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(heap);
-    assert(obj);
+    HDassert(heap);
+    HDassert(obj);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Get the location of the object in the heap */
     obj_loc = obj->heap_loc;
-    assert(obj_loc > 0 && obj_loc <= heap->nobjs);
+    HDassert(obj_loc > 0 && obj_loc <= heap->nobjs);
 
     /* Change the heap object's priority */
     heap->heap[obj_loc].val += (int)amt;
@@ -792,11 +792,11 @@ done:
 
     /* Check internal consistency */
     /* (Post-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_incr() */
@@ -832,20 +832,20 @@ H5HP_decr(H5HP_t *heap, unsigned amt, void *_obj)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(heap);
-    assert(obj);
+    HDassert(heap);
+    HDassert(obj);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     /* Get the location of the object in the heap */
     obj_loc=obj->heap_loc;
-    assert(obj_loc>0 && obj_loc<=heap->nobjs);
+    HDassert(obj_loc>0 && obj_loc<=heap->nobjs);
 
     /* Change the heap object's priority */
     heap->heap[obj_loc].val-=amt;
@@ -864,11 +864,11 @@ done:
 
     /* Check internal consistency */
     /* (Post-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
+    HDassert(heap->nobjs<heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
         (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->heap[0].obj==NULL);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_decr() */

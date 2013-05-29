@@ -118,9 +118,9 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh,
 
     /* Number of slots */
     UINT16DECODE(p, mesg->nalloc);
-    assert(mesg->nalloc>0);
+    HDassert(mesg->nalloc>0);
     UINT16DECODE(p, mesg->nused);
-    assert(mesg->nused <= mesg->nalloc);
+    HDassert(mesg->nused <= mesg->nalloc);
 
     /* Heap address */
     H5F_addr_decode(f, &p, &(mesg->heap_addr));

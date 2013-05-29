@@ -17,33 +17,51 @@ require 5.003;
 
 # Purpose: insures that API functions aren't called internally.
 # Usage:   checkapi H5*.c
-my $comment = 0;
-while (<>) {
+my $filename = "";
+my $lastname = "";
 
-  # Remove comments within the line.
-  s/\/\*.*?\*\///g;
+if(<>) {
+    while (<>) {
+        if($ARGV =~ /\//) {
+            ($filename) = ($ARGV =~ /^.*\/([A-Za-z0-9_]*)\.c$/);
+        } else {
+            ($filename) = ($ARGV =~ /([A-Za-z0-9_]*)\.c$/);
+        }
 
-  # Process comment begin and end tokens on this line.
-  $comment-- if /\*\//;		# count comment ends
-  next if $comment;		# skip line if in comment
-  $comment++ if /\/\*/;		# count comment starts
-  s/(.*)\/\*.*/$1/;		# remove comments that begin on this line
+        if($filename =~ /H5FDmulti|H5FDstdio/) {
+            if($filename ne $lastname) {
+                print "$ARGV is exempt from checking\n";
+                $lastname = $filename;
+            }
+        } else {
+           # Get rid of comments by removing the inside part.
+           s|/\*.*?\*/||g;
+           if ($in_comment) {
+              if (/\*\//) {
+                 s|.*?\*/||;
+                 $in_comment = 0;
+              } else {
+                 $_="\n";
+              }
+           } elsif (m|/\*|) {
+              s|/\*.*||;
+              $in_comment = 1;
+           }
 
-  # Remove character strings
-  s/\\.//g;			# remove escaped characters
-  s/\".*?\"//g;			# remove string constants
+          # Remove character strings
+          s/\\.//g;			# remove escaped characters
+          s/\".*?\"//g;			# remove string constants
 
-  # Disregard the following hits
-  next if /^H5/;
-  next if /^\#/;
-  next if /FUNC_ENTER(_NOINIT)*/;
+          # Disregard the following hits
+          next if /^H5/;
+          next if /^\#/;
+          next if /FUNC_ENTER(_NOINIT)*/;
 
-  next unless /(H5[A-Z]{1,2}[a-z]\w*)/;
-  print "$ARGV:$.: $1\n";
-} continue {
-  if (eof) {
-    print "$ARGV:$.: bad comment nesting\n" if $comment;
-    $comment = 0;
-    close ARGV;		# reset line number
-  }
+          next unless /(H5[A-Z]{1,2}[a-z]\w*)/;
+          print "$ARGV:$.: $1\n";
+        }
+    } continue {
+       close ARGV if eof;       # reset line number
+    }
 }
+

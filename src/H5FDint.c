@@ -298,7 +298,7 @@ H5FD_get_eof(const H5FD_t *file)
     /* Dispatch to driver */
     if(file->cls->get_eof) {
 	if(HADDR_UNDEF == (ret_value = (file->cls->get_eof)(file)))
-	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eof request failed")
+	    HGOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "driver get_eof request failed")
     } /* end if */
     else
 	ret_value = file->maxaddr;
