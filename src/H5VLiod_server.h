@@ -39,6 +39,7 @@ H5_DLL int H5VL_iod_server_attr_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_read(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_write(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_rename(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_remove(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_group_create(hg_handle_t handle);
@@ -59,6 +60,12 @@ H5_DLL int H5VL_iod_server_link_move(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_exists(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_copy(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

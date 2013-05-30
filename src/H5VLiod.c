@@ -49,6 +49,7 @@ static hg_id_t H5VL_ATTR_OPEN_ID;
 static hg_id_t H5VL_ATTR_READ_ID;
 static hg_id_t H5VL_ATTR_WRITE_ID;
 static hg_id_t H5VL_ATTR_EXISTS_ID;
+static hg_id_t H5VL_ATTR_RENAME_ID;
 static hg_id_t H5VL_ATTR_REMOVE_ID;
 static hg_id_t H5VL_ATTR_CLOSE_ID;
 static hg_id_t H5VL_GROUP_CREATE_ID;
@@ -68,6 +69,12 @@ static hg_id_t H5VL_LINK_MOVE_ID;
 static hg_id_t H5VL_LINK_ITERATE_ID;
 static hg_id_t H5VL_LINK_EXISTS_ID;
 static hg_id_t H5VL_LINK_REMOVE_ID;
+static hg_id_t H5VL_OBJECT_OPEN_ID;
+static hg_id_t H5VL_OBJECT_COPY_ID;
+static hg_id_t H5VL_OBJECT_EXISTS_ID;
+static hg_id_t H5VL_OBJECT_VISIT_ID;
+static hg_id_t H5VL_OBJECT_SET_COMMENT_ID;
+static hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
 
 /* Prototypes */
@@ -135,8 +142,6 @@ static herr_t H5VL_iod_object_visit(void *obj, H5VL_loc_params_t loc_params, H5_
                                     H5_iter_order_t order, H5O_iterate_t op, void *op_data, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_object_get(void *obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_object_misc(void *obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_object_optional(void *obj, H5VL_loc_params_t loc_params, H5VL_object_optional_t optional_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_object_close(void *obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, void **req);
 
 static herr_t H5VL_iod_cancel(void **req, H5_status_t *status);
 static herr_t H5VL_iod_test(void **req, H5_status_t *status);
@@ -216,13 +221,13 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_link_remove                    /* remove */
     },
     {                                           /* object_cls */
-        NULL,//H5VL_iod_object_open,            /* open */
-        NULL,//H5VL_iod_object_copy,            /* copy */
-        NULL,//H5VL_iod_object_visit,           /* visit */
-        NULL,//H5VL_iod_object_get,             /* get */
-        NULL,//H5VL_iod_object_misc,            /* misc */
-        NULL,//H5VL_iod_object_optional,        /* optional */
-        NULL//H5VL_iod_object_close             /* close */
+        H5VL_iod_object_open,                   /* open */
+        H5VL_iod_object_copy,                   /* copy */
+        H5VL_iod_object_visit,                  /* visit */
+        H5VL_iod_object_get,                    /* get */
+        H5VL_iod_object_misc,                   /* misc */
+        NULL,                                   /* optional */
+        NULL                                    /* close */
     },
     {
         H5VL_iod_cancel,
@@ -295,7 +300,7 @@ H5VL_iod_init(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-EFF_init(MPI_Comm comm, MPI_Info info)
+EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 {
     char mpi_port_name[MPI_MAX_PORT_NAME];
     FILE *config;
@@ -308,7 +313,7 @@ EFF_init(MPI_Comm comm, MPI_Info info)
     MPI_Comm_size(comm, &num_procs);
     MPI_Comm_rank(comm, &my_rank);
 
-    axe_seed = (pow(2,64) - 1) / num_procs;
+    axe_seed = (pow(2.0,64.0) - 1) / num_procs;
     axe_id = axe_seed * my_rank + 1;
     axe_bound = axe_seed * (my_rank + 1);
 
@@ -342,6 +347,7 @@ EFF_init(MPI_Comm comm, MPI_Info info)
     H5VL_ATTR_READ_ID   = MERCURY_REGISTER("attr_read", attr_io_in_t, ret_t);
     H5VL_ATTR_WRITE_ID  = MERCURY_REGISTER("attr_write", attr_io_in_t, ret_t);
     H5VL_ATTR_EXISTS_ID = MERCURY_REGISTER("attr_exists", attr_op_in_t, htri_t);
+    H5VL_ATTR_RENAME_ID = MERCURY_REGISTER("attr_rename", attr_rename_in_t, ret_t);
     H5VL_ATTR_REMOVE_ID = MERCURY_REGISTER("attr_remove", attr_op_in_t, ret_t);
     H5VL_ATTR_CLOSE_ID  = MERCURY_REGISTER("attr_close", attr_close_in_t, ret_t);
 
@@ -367,7 +373,15 @@ EFF_init(MPI_Comm comm, MPI_Info info)
     H5VL_LINK_ITERATE_ID = MERCURY_REGISTER("link_iterate", link_op_in_t, ret_t);
     H5VL_LINK_REMOVE_ID  = MERCURY_REGISTER("link_remove", link_op_in_t, ret_t);
 
-    H5VL_CANCEL_OP_ID    = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
+    H5VL_OBJECT_OPEN_ID   = MERCURY_REGISTER("object_open", object_op_in_t, object_open_out_t);
+    H5VL_OBJECT_COPY_ID   = MERCURY_REGISTER("object_copy", object_copy_in_t, ret_t);
+    H5VL_OBJECT_EXISTS_ID = MERCURY_REGISTER("object_exists", object_op_in_t, htri_t);
+    H5VL_OBJECT_VISIT_ID  = MERCURY_REGISTER("object_visit", object_op_in_t, ret_t);
+    H5VL_OBJECT_SET_COMMENT_ID = MERCURY_REGISTER("set_comment", object_set_comment_in_t, ret_t);
+    H5VL_OBJECT_GET_COMMENT_ID = MERCURY_REGISTER("get_comment", object_get_comment_in_t, 
+                                                  object_get_comment_out_t);
+
+    H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
     /* forward the init call to the IONs */
     if(HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req) < 0)
@@ -679,7 +693,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     MPI_Comm_size(fa->comm, &file->num_procs);
 
     /* Generate an IOD ID for the root group to be created */
-    H5VL_iod_gen_obj_id(file->my_rank, file->num_procs, 0, IOD_OBJ_KV, &input.root_id);
+    H5VL_iod_gen_obj_id(file->my_rank, file->num_procs, (uint64_t)0, IOD_OBJ_KV, &input.root_id);
     file->remote_file.root_id = input.root_id;
 
     /* set the input structure for the HG encode routine */
@@ -738,7 +752,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     request->type = HG_FILE_CREATE;
     request->data = file;
     request->req = hg_req;
-    request->obj = file;
+    request->obj = (H5VL_iod_object_t *)file;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -871,7 +885,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     request->type = HG_FILE_OPEN;
     request->data = file;
     request->req = hg_req;
-    request->obj = file;
+    request->obj = (H5VL_iod_object_t *)file;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -969,7 +983,7 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     request->type = HG_FILE_FLUSH;
     request->data = status;
     request->req = hg_req;
-    request->obj = file;
+    request->obj = (H5VL_iod_object_t *)file;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -1267,7 +1281,7 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
     request->type = HG_FILE_CLOSE;
     request->data = status;
     request->req = hg_req;
-    request->obj = file;
+    request->obj = (H5VL_iod_object_t *)file;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -1426,7 +1440,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     request->type = HG_GROUP_CREATE;
     request->data = grp;
     request->req = hg_req;
-    request->obj = grp;
+    request->obj = (H5VL_iod_object_t *)grp;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -1569,7 +1583,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     request->type = HG_GROUP_OPEN;
     request->data = grp;
     request->req = hg_req;
-    request->obj = grp;
+    request->obj = (H5VL_iod_object_t *)grp;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -1724,7 +1738,7 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     request->type = HG_GROUP_CLOSE;
     request->data = status;
     request->req = hg_req;
-    request->obj = grp;
+    request->obj = (H5VL_iod_object_t *)grp;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -1889,7 +1903,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     request->type = HG_DSET_CREATE;
     request->data = dset;
     request->req = hg_req;
-    request->obj = dset;
+    request->obj = (H5VL_iod_object_t *)dset;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -2031,7 +2045,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     request->type = HG_DSET_OPEN;
     request->data = dset;
     request->req = hg_req;
-    request->obj = dset;
+    request->obj = (H5VL_iod_object_t *)dset;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -2103,6 +2117,16 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If there is information needed about the dataset that is not present locally, wait */
+    if(-1 == dset->remote_dset.dcpl_id ||
+       -1 == dset->remote_dset.type_id ||
+       -1 == dset->remote_dset.space_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
 
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
@@ -2201,7 +2225,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     request->type = HG_DSET_READ;
     request->data = info;
     request->req = hg_req;
-    request->obj = dset;
+    request->obj = (H5VL_iod_object_t *)dset;
     request->status = 0;
     request->state = 0;
     request->axe_id = input.axe_id;
@@ -2267,6 +2291,16 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If there is information needed about the dataset that is not present locally, wait */
+    if(-1 == dset->remote_dset.dcpl_id ||
+       -1 == dset->remote_dset.type_id ||
+       -1 == dset->remote_dset.space_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
 
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
@@ -2370,7 +2404,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     request->type = HG_DSET_WRITE;
     request->data = info;
     request->req = hg_req;
-    request->obj = dset;
+    request->obj = (H5VL_iod_object_t *)dset;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -2430,14 +2464,22 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* If there is information needed about the dataset that is not present locally, wait */
+    if(-1 == dset->remote_dset.space_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
+
     /* retrieve the parent axe ids array */
-    if(H5VL_iod_get_axe_parents(dset, &num_parents, NULL) < 0)
+    if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)dset, &num_parents, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get num AXE parents");
 
     if(num_parents) {
         if(NULL == (axe_parents = (uint64_t *)H5MM_malloc(sizeof(uint64_t) * num_parents)))
             HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate num parents array");
-        if(H5VL_iod_get_axe_parents(dset, &num_parents, axe_parents) < 0)
+        if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)dset, &num_parents, axe_parents) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get AXE parents");
     }
 
@@ -2490,7 +2532,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     request->type = HG_DSET_SET_EXTENT;
     request->data = status;
     request->req = hg_req;
-    request->obj = dset;
+    request->obj = (H5VL_iod_object_t *)dset;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -2515,7 +2557,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     } /* end else */
 
 done:
-    axe_parents = H5MM_xfree(axe_parents);
+    axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_set_extent() */
 
@@ -2635,13 +2677,22 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if(-1 == dset->remote_dset.dcpl_id ||
+       -1 == dset->remote_dset.type_id ||
+       -1 == dset->remote_dset.space_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        dset->common.request = NULL;
+    }
+
     /* determine the parent axe IDs array for this operation*/
-    if(H5VL_iod_get_axe_parents(dset, &num_parents, NULL) < 0)
+    if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)dset, &num_parents, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get num AXE parents");
     if(num_parents) {
         if(NULL == (axe_parents = (uint64_t *)H5MM_malloc(sizeof(uint64_t) * num_parents)))
             HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate num parents array");
-        if(H5VL_iod_get_axe_parents(dset, &num_parents, axe_parents) < 0)
+        if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)dset, &num_parents, axe_parents) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get AXE parents");
     }
 
@@ -2690,7 +2741,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     request->type = HG_DSET_CLOSE;
     request->data = status;
     request->req = hg_req;
-    request->obj = dset;
+    request->obj = (H5VL_iod_object_t *)dset;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -2715,7 +2766,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     } /* end else */
 
 done:
-    axe_parents = H5MM_xfree(axe_parents);
+    axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_close() */
 
@@ -2841,7 +2892,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     request->type = HG_DTYPE_COMMIT;
     request->data = dtype;
     request->req = hg_req;
-    request->obj = dtype;
+    request->obj = (H5VL_iod_object_t *)dtype;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -2979,7 +3030,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     request->type = HG_DTYPE_OPEN;
     request->data = dtype;
     request->req = hg_req;
-    request->obj = dtype;
+    request->obj = (H5VL_iod_object_t *)dtype;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -3114,7 +3165,7 @@ H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
     request->type = HG_DTYPE_CLOSE;
     request->data = status;
     request->req = hg_req;
-    request->obj = dtype;
+    request->obj = (H5VL_iod_object_t *)dtype;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -3286,7 +3337,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     request->type = HG_ATTR_CREATE;
     request->data = attr;
     request->req = hg_req;
-    request->obj = attr;
+    request->obj = (H5VL_iod_object_t *)attr;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -3436,7 +3487,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     request->type = HG_ATTR_OPEN;
     request->data = attr;
     request->req = hg_req;
-    request->obj = attr;
+    request->obj = (H5VL_iod_object_t *)attr;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -3505,6 +3556,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     FUNC_ENTER_NOAPI_NOINIT
 
     if(-1 == attr->remote_attr.space_id) {
+        HDassert(attr->common.request);
         /* Synchronously wait on the request attached to the attribute */
         if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
             HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
@@ -3572,7 +3624,7 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     request->type = HG_ATTR_READ;
     request->data = info;
     request->req = hg_req;
-    request->obj = attr;
+    request->obj = (H5VL_iod_object_t *)attr;
     request->status = 0;
     request->state = 0;
     request->axe_id = input.axe_id;
@@ -3711,7 +3763,7 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     request->type = HG_ATTR_WRITE;
     request->data = info;
     request->req = hg_req;
-    request->obj = attr;
+    request->obj = (H5VL_iod_object_t *)attr;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -3796,7 +3848,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
 
     /* forward the call to the IONs */
     if(HG_Forward(PEER, H5VL_ATTR_REMOVE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute remove");
 
     /* Get async request for operation */
     if(do_async) {
@@ -3811,7 +3863,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     request->type = HG_ATTR_REMOVE;
     request->data = status;
     request->req = hg_req;
-    request->obj = obj;
+    request->obj = (H5VL_iod_object_t *)obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -3990,7 +4042,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
 
                 /* forward the call to the IONs */
                 if(HG_Forward(PEER, H5VL_ATTR_EXISTS_ID, &input, ret, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute exists");
 
                 /* Get async request for operation */
                 if(do_async) {
@@ -4006,7 +4058,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 request->type = HG_ATTR_EXISTS;
                 request->data = ret;
                 request->req = hg_req;
-                request->obj = obj;
+                request->obj = (H5VL_iod_object_t *)obj;
                 request->axe_id = input.axe_id;
                 request->next = request->prev = NULL;
                 /* add request to container's linked list */
@@ -4098,14 +4150,23 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    if(-1 == attr->remote_attr.acpl_id ||
+       -1 == attr->remote_attr.type_id ||
+       -1 == attr->remote_attr.space_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
+            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        attr->common.request = NULL;
+    }
+
     /* get all the parents required to complete before this operation can start */
-    if(H5VL_iod_get_axe_parents(attr, &num_parents, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get num AXE parents");
+    if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)attr, &num_parents, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get num AXE parents");
     if(num_parents) {
         if(NULL == (axe_parents = (uint64_t *)H5MM_malloc(sizeof(uint64_t) * num_parents)))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate num parents array");
-        if(H5VL_iod_get_axe_parents(attr, &num_parents, axe_parents) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get AXE parents");
+            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate num parents array");
+        if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)attr, &num_parents, axe_parents) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get AXE parents");
     }
 
     status = (int *)malloc(sizeof(int));
@@ -4153,7 +4214,7 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
     request->type = HG_ATTR_CLOSE;
     request->data = status;
     request->req = hg_req;
-    request->obj = attr;
+    request->obj = (H5VL_iod_object_t *)attr;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4178,7 +4239,7 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
     } /* end else */
 
 done:
-    axe_parents = H5MM_xfree(axe_parents);
+    axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_close() */
 
@@ -4289,7 +4350,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 /* determine target object whether it is absolute or
                    relative to the location object */
                 if('/' == *target_name)
-                    target_obj = obj->file;
+                    target_obj = (H5VL_iod_object_t *)obj->file;
                 else
                     target_obj = obj;
 
@@ -4355,7 +4416,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
     /* forward the call to the IONs */
     if(HG_Forward(PEER, H5VL_LINK_CREATE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link create");
 
     /* Get async request for operation */
     if(do_async) {
@@ -4371,7 +4432,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
     request->type = HG_LINK_CREATE;
     request->data = status;
     request->req = hg_req;
-    request->obj = cur_obj;
+    request->obj = (H5VL_iod_object_t *)cur_obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4502,7 +4563,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 
     /* forward the call to the IONs */
     if(HG_Forward(PEER, H5VL_LINK_MOVE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link move");
 
     /* Get async request for operation */
     if(do_async) {
@@ -4518,7 +4579,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     request->type = HG_LINK_MOVE;
     request->data = status;
     request->req = hg_req;
-    request->obj = cur_obj;
+    request->obj = (H5VL_iod_object_t *)cur_obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4641,7 +4702,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 /* forward the call to the IONs */
                 if(HG_Forward(PEER, H5VL_LINK_EXISTS_ID, &input, ret, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link exists");
 
                 /* Get async request for operation */
                 if(do_async) {
@@ -4657,7 +4718,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 request->type = HG_LINK_EXISTS;
                 request->data = ret;
                 request->req = hg_req;
-                request->obj = obj;
+                request->obj = (H5VL_iod_object_t *)obj;
                 request->axe_id = input.axe_id;
                 request->next = request->prev = NULL;
                 /* add request to container's linked list */
@@ -4668,8 +4729,6 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     /* Sanity check */
                     HDassert(request != &_request);
                     *req = request;
-                    /* Track request */
-                    obj->request = request;
                 } /* end if */
                 else {
                     /* Synchronously wait on the request */
@@ -4771,7 +4830,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
 
     /* forward the call to the IONs */
     if(HG_Forward(PEER, H5VL_LINK_REMOVE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link remove");
 
     /* Get async request for operation */
     if(do_async) {
@@ -4786,7 +4845,7 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     request->type = HG_LINK_REMOVE;
     request->data = status;
     request->req = hg_req;
-    request->obj = cur_obj;
+    request->obj = (H5VL_iod_object_t *)cur_obj;
     request->axe_id = input.axe_id;
     request->next = request->prev = NULL;
     /* add request to container's linked list */
@@ -4814,6 +4873,804 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_remove() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_open
+ *
+ * Purpose:	Opens a object inside IOD file.
+ *
+ * Return:	Success:	object id. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params, 
+                     H5I_type_t *opened_type, hid_t dxpl_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to open the group */
+    hg_request_t hg_req; /* Local function shipper request, for sync. operations */
+    H5VL_iod_request_t request; /* Local request, for sync. operations */
+    H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
+    object_op_in_t input;
+    char *new_name;
+    void *ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Retrieve the parent AXE id by traversing the path where the
+       object should be opened. */
+    if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
+                                &input.parent_axe_id, &new_name, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.axe_id = axe_id ++;
+    input.loc_name = new_name;
+
+    /* forward the call to the IONs */
+    if(HG_Forward(PEER, H5VL_OBJECT_OPEN_ID, &input, &remote_obj, &hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship link remove");
+
+    /* Set up request */
+    HDmemset(&request, 0, sizeof(request));
+    request.type = HG_OBJECT_OPEN;
+    request.data = &remote_obj;
+    request.req = &hg_req;
+    request.obj = obj;
+    request.axe_id = input.axe_id;
+    request.next = request.prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(obj->file, &request);
+
+    /* Synchronously wait on the request */
+    if(H5VL_iod_request_wait(obj->file, &request) < 0)
+        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, NULL, "can't wait on HG request");
+
+    *opened_type = remote_obj.obj_type;
+
+    switch(remote_obj.obj_type) {
+        case H5I_DATASET:
+            {
+                H5VL_iod_dset_t *dset = NULL; /* the dataset object that is created and passed to the user */
+
+                /* allocate the dataset object that is returned to the user */
+                if(NULL == (dset = H5FL_CALLOC(H5VL_iod_dset_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+                dset->remote_dset.iod_oh.cookie = remote_obj.iod_oh.cookie;
+                dset->remote_dset.iod_id = remote_obj.iod_id;
+                dset->remote_dset.dcpl_id = remote_obj.cpl_id;
+                dset->remote_dset.type_id = remote_obj.type_id;
+                dset->remote_dset.space_id = remote_obj.space_id;
+
+                if(dset->remote_dset.dcpl_id == H5P_DEFAULT){
+                    dset->remote_dset.dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
+                }
+
+                HDassert(dset->remote_dset.dcpl_id);
+                HDassert(dset->remote_dset.type_id);
+                HDassert(dset->remote_dset.space_id);
+
+                /* setup the local dataset struct */
+                /* store the entire path of the dataset locally */
+                if (NULL == (dset->common.obj_name = (char *)malloc
+                             (HDstrlen(obj->obj_name) + 
+                              HDstrlen(loc_params.loc_data.loc_by_name.name) + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDstrcpy(dset->common.obj_name, obj->obj_name);
+                HDstrcat(dset->common.obj_name, loc_params.loc_data.loc_by_name.name);
+                dset->common.obj_name[HDstrlen(obj->obj_name) + 
+                                      HDstrlen(loc_params.loc_data.loc_by_name.name) + 1] = '\0';
+                if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
+                /* set common object parameters */
+                dset->common.obj_type = H5I_DATASET;
+                dset->common.file = obj->file;
+                dset->common.file->nopen_objs ++;
+
+                ret_value = (void *)dset;
+                break;
+            }
+        case H5I_DATATYPE:
+            {
+                H5VL_iod_dtype_t *dtype = NULL; /* the dataset object that is created and passed to the user */
+
+                /* allocate the dataset object that is returned to the user */
+                if(NULL == (dtype = H5FL_CALLOC(H5VL_iod_dtype_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+                dtype->remote_dtype.iod_oh.cookie = remote_obj.iod_oh.cookie;
+                dtype->remote_dtype.iod_id = remote_obj.iod_id;
+                dtype->remote_dtype.tcpl_id = remote_obj.cpl_id;
+                dtype->remote_dtype.type_id = remote_obj.type_id;
+
+                if(dtype->remote_dtype.tcpl_id == H5P_DEFAULT){
+                    dtype->remote_dtype.tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
+                }
+
+                HDassert(dtype->remote_dtype.tcpl_id);
+                HDassert(dtype->remote_dtype.type_id);
+
+                /* setup the local dataset struct */
+                /* store the entire path of the dataset locally */
+                if (NULL == (dtype->common.obj_name = (char *)malloc
+                             (HDstrlen(obj->obj_name) + 
+                              HDstrlen(loc_params.loc_data.loc_by_name.name) + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDstrcpy(dtype->common.obj_name, obj->obj_name);
+                HDstrcat(dtype->common.obj_name, loc_params.loc_data.loc_by_name.name);
+                dtype->common.obj_name[HDstrlen(obj->obj_name) + 
+                                      HDstrlen(loc_params.loc_data.loc_by_name.name) + 1] = '\0';
+                if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
+
+                /* set common object parameters */
+                dtype->common.obj_type = H5I_DATATYPE;
+                dtype->common.file = obj->file;
+                dtype->common.file->nopen_objs ++;
+
+                ret_value = (void *)dtype;
+                break;
+            }
+        case H5I_GROUP:
+            {
+                H5VL_iod_group_t  *grp = NULL; /* the group object that is created and passed to the user */
+
+                /* allocate the dataset object that is returned to the user */
+                if(NULL == (grp = H5FL_CALLOC(H5VL_iod_group_t)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+                grp->remote_group.iod_oh.cookie = remote_obj.iod_oh.cookie;
+                grp->remote_group.iod_id = remote_obj.iod_id;
+                grp->remote_group.gcpl_id = remote_obj.cpl_id;
+
+                if(grp->remote_group.gcpl_id == H5P_DEFAULT){
+                    grp->remote_group.gcpl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT);
+                }
+
+                HDassert(grp->remote_group.gcpl_id);
+
+                /* setup the local dataset struct */
+                /* store the entire path of the dataset locally */
+                if (NULL == (grp->common.obj_name = (char *)malloc
+                             (HDstrlen(obj->obj_name) + 
+                              HDstrlen(loc_params.loc_data.loc_by_name.name) + 1)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                HDstrcpy(grp->common.obj_name, obj->obj_name);
+                HDstrcat(grp->common.obj_name, loc_params.loc_data.loc_by_name.name);
+                grp->common.obj_name[HDstrlen(obj->obj_name) + 
+                                      HDstrlen(loc_params.loc_data.loc_by_name.name) + 1] = '\0';
+                if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
+
+                /* set common object parameters */
+                grp->common.obj_type = H5I_GROUP;
+                grp->common.file = obj->file;
+                grp->common.file->nopen_objs ++;
+
+                ret_value = (void *)grp;
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, NULL, "not a valid file object (dataset, group, or datatype)")
+        break;
+    }
+
+done:
+    free(new_name);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_open */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_copy
+ *
+ * Purpose:	Copys a object through the IOD plugin.
+ *
+ * Return:	Success:	postive. 
+ *		Failure:	NULL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *src_name, 
+                     void *_dst_obj, H5VL_loc_params_t loc_params2, const char *dst_name, 
+                     hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req)
+{
+    H5VL_iod_object_t *src_obj = (H5VL_iod_object_t *)_src_obj;
+    H5VL_iod_object_t *dst_obj = (H5VL_iod_object_t *)_dst_obj;
+    H5VL_iod_object_t *cur_obj;
+    object_copy_in_t input;
+    int *status;
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
+    char *new_src_name = NULL, *new_dst_name = NULL;
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Retrieve the parent information by traversing the path where the
+       link should be moved from. */
+    if(H5VL_iod_get_parent_info(src_obj, loc_params1, src_name, 
+                                &input.src_loc_id, &input.src_loc_oh, 
+                                &input.src_parent_axe_id, &new_src_name, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
+
+    /* Retrieve the parent information by traversing the path where the
+       link should be moved to. */
+    if(H5VL_iod_get_parent_info(dst_obj, loc_params2, dst_name, 
+                                &input.dst_loc_id, &input.dst_loc_oh, 
+                                &input.dst_parent_axe_id, &new_dst_name, &cur_obj) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
+
+    /* set the input structure for the HG encode routine */
+    input.coh = src_obj->file->remote_file.coh;
+    input.axe_id = axe_id ++;
+    input.lcpl_id = lcpl_id;
+    input.ocpypl_id = ocpypl_id;
+    input.src_loc_name = new_src_name;
+    input.dst_loc_name = new_dst_name;
+
+#if H5VL_IOD_DEBUG
+    printf("Object Copy axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
+           input.axe_id, new_src_name, input.src_loc_id, input.src_parent_axe_id,
+           new_dst_name, input.dst_loc_id, input.dst_parent_axe_id);
+#endif
+
+    status = (herr_t *)malloc(sizeof(herr_t));
+
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+    } /* end if */
+    else
+        hg_req = &_hg_req;
+
+    /* forward the call to the IONs */
+    if(HG_Forward(PEER, H5VL_OBJECT_COPY_ID, &input, status, hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object copy");
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc
+                    (sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
+
+    /* Set up request */
+    HDmemset(request, 0, sizeof(*request));
+    request->type = HG_OBJECT_COPY;
+    request->data = status;
+    request->req = hg_req;
+    request->obj = (H5VL_iod_object_t *)cur_obj;
+    request->axe_id = input.axe_id;
+    request->next = request->prev = NULL;
+    /* add request to container's linked list */
+    H5VL_iod_request_add(dst_obj->file, request);
+
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        cur_obj->request = request;
+    } /* end if */
+    else {
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(dst_obj->file, request) < 0)
+            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
+
+done:
+    free(new_src_name);
+    free(new_dst_name);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_visit
+ *
+ * Purpose:	Iterates through all objects linked to an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5VL_iod_object_visit(void *_obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
+                                    H5_iter_order_t order, H5O_iterate_t op, void *op_data, 
+                                    hid_t dxpl_id, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    hid_t temp_id;
+    herr_t ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_visit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_misc
+ *
+ * Purpose:	Perform a plugin specific operation for an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_t misc_type, 
+                     hid_t dxpl_id, void **req, va_list arguments)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (misc_type) {
+        /* H5Arename/rename_by_name */
+        case H5VL_ATTR_RENAME:
+            {
+                const char    *old_name  = va_arg (arguments, const char *);
+                const char    *new_name  = va_arg (arguments, const char *);
+                char *loc_name;
+                attr_rename_in_t input;
+
+                /* Retrieve the parent AXE id by traversing the path where the
+                   attribute is located. */
+                if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
+                                           &input.parent_axe_id, &loc_name, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.path = loc_name;
+                input.old_attr_name = old_name;
+                input.new_attr_name = new_name;
+                input.axe_id = axe_id ++;
+
+#if H5VL_IOD_DEBUG
+                printf("Attribute Rename %s to %s LOC ID %llu, axe id %llu, parent %llu\n", 
+                       old_name, new_name, input.loc_id, input.axe_id, input.parent_axe_id);
+#endif
+
+                status = (herr_t *)malloc(sizeof(herr_t));
+
+                /* get a function shipper request */
+                if(do_async) {
+                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+                } /* end if */
+                else
+                    hg_req = &_hg_req;
+
+                /* forward the call to the IONs */
+                if(HG_Forward(PEER, H5VL_ATTR_RENAME_ID, &input, status, hg_req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute rename");
+
+                /* Get async request for operation */
+                if(do_async) {
+                    if(NULL == (request = (H5VL_iod_request_t *)
+                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
+                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+                } /* end if */
+                else
+                    request = &_request;
+
+                /* Set up request */
+                HDmemset(request, 0, sizeof(*request));
+                request->type = HG_ATTR_RENAME;
+                request->data = status;
+                request->req = hg_req;
+                request->obj = (H5VL_iod_object_t *)obj;
+                request->axe_id = input.axe_id;
+                request->next = request->prev = NULL;
+                /* add request to container's linked list */
+                H5VL_iod_request_add(obj->file, request);
+
+                /* Store/wait on request */
+                if(do_async) {
+                    /* Sanity check */
+                    HDassert(request != &_request);
+                    *req = request;
+                    /* Track request */
+                    obj->request = request;
+                } /* end if */
+                else {
+                    /* Synchronously wait on the request */
+                    if(H5VL_iod_request_wait(obj->file, request) < 0)
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    /* Sanity check */
+                    HDassert(request == &_request);
+                } /* end else */
+
+                free(loc_name);
+                break;
+            }
+        /* H5Oset_comment */
+        case H5VL_OBJECT_SET_COMMENT:
+            {
+                const char    *comment  = va_arg (arguments, char *);
+                object_set_comment_in_t input;
+                char *loc_name = NULL;
+
+                /* Retrieve the parent AXE id by traversing the path where the
+                   object is located. */
+                if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
+                                           &input.parent_axe_id, &loc_name, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.path = loc_name;
+                input.comment = comment;
+                input.axe_id = axe_id ++;
+
+                status = (herr_t *)malloc(sizeof(herr_t));
+
+                /* get a function shipper request */
+                if(do_async) {
+                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+                } /* end if */
+                else
+                    hg_req = &_hg_req;
+
+                /* forward the call to the IONs */
+                if(HG_Forward(PEER, H5VL_OBJECT_SET_COMMENT_ID, &input, status, hg_req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship set comment");
+
+                /* Get async request for operation */
+                if(do_async) {
+                    if(NULL == (request = (H5VL_iod_request_t *)
+                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
+                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+                } /* end if */
+                else
+                    request = &_request;
+
+                /* Set up request */
+                HDmemset(request, 0, sizeof(*request));
+                request->type = HG_OBJECT_SET_COMMENT;
+                request->data = status;
+                request->req = hg_req;
+                request->obj = (H5VL_iod_object_t *)obj;
+                request->axe_id = input.axe_id;
+                request->next = request->prev = NULL;
+                /* add request to container's linked list */
+                H5VL_iod_request_add(obj->file, request);
+
+                /* Store/wait on request */
+                if(do_async) {
+                    /* Sanity check */
+                    HDassert(request != &_request);
+                    *req = request;
+                } /* end if */
+                else {
+                    /* Synchronously wait on the request */
+                    if(H5VL_iod_request_wait(obj->file, request) < 0)
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    /* Sanity check */
+                    HDassert(request == &_request);
+                } /* end else */
+
+                /* store the comment locally if the object is open */
+                if(loc_params.type == H5VL_OBJECT_BY_SELF)
+                    obj->comment = HDstrdup(comment);
+
+                free(loc_name);
+                break;
+            }
+        /* H5Oincr_refcount / H5Odecr_refcount */
+        case H5VL_OBJECT_CHANGE_REF_COUNT:
+            {
+                int update_ref  = va_arg (arguments, int);
+            }
+        case H5VL_REF_CREATE:
+            {
+                void        *ref      = va_arg (arguments, void *);
+                const char  *name     = va_arg (arguments, char *);
+                H5R_type_t  ref_type  = va_arg (arguments, H5R_type_t);
+                hid_t       space_id  = va_arg (arguments, hid_t);
+                size_t ref_size = 0;
+
+                if(ref_type == H5R_DATASET_REGION)
+                    ref_size = sizeof(hdset_reg_ref_t);
+                else if (ref_type == H5R_OBJECT)
+                    ref_size = sizeof(hobj_ref_t);
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't recognize this operation type")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_misc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_object_get
+ *
+ * Purpose:	Gets certain data about a file
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              November, 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t get_type, 
+                    hid_t dxpl_id, void **req, va_list arguments)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
+    int *status;
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
+    char *new_name = NULL;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Oexists_by_name */
+        case H5VL_OBJECT_EXISTS:
+            {
+                htri_t	  *ret = va_arg (arguments, htri_t *);
+                object_op_in_t input;
+
+                /* Retrieve the parent info by traversing the path where the
+                   object should be checked. */
+                if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
+                                            &input.parent_axe_id, &new_name, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.axe_id = axe_id ++;
+                input.loc_name = new_name;
+
+                /* get a function shipper request */
+                if(do_async) {
+                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+                } /* end if */
+                else
+                    hg_req = &_hg_req;
+
+#if H5VL_IOD_DEBUG
+                printf("Object Exists axe %llu: %s ID %llu axe %llu\n", 
+                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+#endif
+
+                /* forward the call to the IONs */
+                if(HG_Forward(PEER, H5VL_OBJECT_EXISTS_ID, &input, ret, hg_req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object exists");
+
+                /* Get async request for operation */
+                if(do_async) {
+                    if(NULL == (request = (H5VL_iod_request_t *)
+                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
+                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+                } /* end if */
+                else
+                    request = &_request;
+
+                /* Set up request */
+                HDmemset(request, 0, sizeof(*request));
+                request->type = HG_OBJECT_EXISTS;
+                request->data = ret;
+                request->req = hg_req;
+                request->obj = (H5VL_iod_object_t *)obj;
+                request->axe_id = input.axe_id;
+                request->next = request->prev = NULL;
+                /* add request to container's linked list */
+                H5VL_iod_request_add(obj->file, request);
+
+                /* Store/wait on request */
+                if(do_async) {
+                    /* Sanity check */
+                    HDassert(request != &_request);
+                    *req = request;
+                } /* end if */
+                else {
+                    /* Synchronously wait on the request */
+                    if(H5VL_iod_request_wait(obj->file, request) < 0)
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    /* Sanity check */
+                    HDassert(request == &_request);
+                } /* end else */
+
+                free(new_name);
+                break;
+            }
+        /* H5Oget_comment / H5Oget_comment_by_name */
+        case H5VL_OBJECT_GET_COMMENT:
+            {
+                char *comment =  va_arg (arguments, char *);
+                size_t size  =  va_arg (arguments, size_t);
+                ssize_t *ret =  va_arg (arguments, ssize_t *);
+                object_get_comment_in_t input;
+                object_get_comment_out_t *result = NULL;
+                size_t len;
+
+                /* If the comment is present locally, get it and return */
+                if(loc_params.type == H5VL_OBJECT_BY_SELF && obj->comment) {
+                    len = HDstrlen(obj->comment);
+
+                    if(comment) {
+                        HDstrncpy(comment, obj->comment, MIN(len + 1,size));
+                        if(len >= size)
+                            comment[size-1]='\0';
+                    } /* end if */
+
+                    /* Set the return value for the API call */
+                    *ret = (ssize_t)len;
+                    break;
+                }
+
+                /* Otherwise Go to the server */
+
+                /* Retrieve the parent info by traversing the path where the
+                   object should be checked. */
+                if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
+                                            &input.parent_axe_id, &new_name, NULL) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to resolve current working group");
+
+                /* set the input structure for the HG encode routine */
+                input.coh = obj->file->remote_file.coh;
+                input.axe_id = axe_id ++;
+                input.path = new_name;
+                if(comment)
+                    input.length = size;
+                else
+                    input.length = 0;
+
+                if(NULL == (result = (object_get_comment_out_t *)malloc
+                            (sizeof(object_get_comment_out_t)))) {
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate get comment return struct");
+                }
+
+                result->name.size = input.length;
+                result->name.value_size = ret;
+                result->name.value = comment;
+
+                /* get a function shipper request */
+                if(do_async) {
+                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+                } /* end if */
+                else
+                    hg_req = &_hg_req;
+
+#if H5VL_IOD_DEBUG
+                printf("Object Get Comment axe %llu: %s ID %llu axe %llu\n", 
+                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+#endif
+
+                /* forward the call to the IONs */
+                if(HG_Forward(PEER, H5VL_OBJECT_GET_COMMENT_ID, &input, result, hg_req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object exists");
+
+                /* Get async request for operation */
+                if(do_async) {
+                    if(NULL == (request = (H5VL_iod_request_t *)
+                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
+                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+                } /* end if */
+                else
+                    request = &_request;
+
+                /* Set up request */
+                HDmemset(request, 0, sizeof(*request));
+                request->type = HG_OBJECT_GET_COMMENT;
+                request->data = result;
+                request->req = hg_req;
+                request->obj = (H5VL_iod_object_t *)obj;
+                request->axe_id = input.axe_id;
+                request->next = request->prev = NULL;
+                /* add request to container's linked list */
+                H5VL_iod_request_add(obj->file, request);
+
+                /* Store/wait on request */
+                if(do_async) {
+                    /* Sanity check */
+                    HDassert(request != &_request);
+                    *req = request;
+                } /* end if */
+                else {
+                    /* Synchronously wait on the request */
+                    if(H5VL_iod_request_wait(obj->file, request) < 0)
+                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                    /* Sanity check */
+                    HDassert(request == &_request);
+                } /* end else */
+
+                free(new_name);
+                break;
+            }
+        /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
+        case H5VL_OBJECT_GET_INFO:
+            {
+                H5O_info_t  *obj_info = va_arg (arguments, H5O_info_t *);
+                size_t info_size = 0;
+            }
+        /* H5Rget_region */
+        case H5VL_REF_GET_REGION:
+            {
+                hid_t       *ret     =  va_arg (arguments, hid_t *);
+                H5R_type_t  ref_type =  va_arg (arguments, H5R_type_t);
+                void        *ref     =  va_arg (arguments, void *);
+                H5S_t       *space = NULL;    /* Dataspace object */
+            }
+        /* H5Rget_obj_type2 */
+        case H5VL_REF_GET_TYPE:
+            {
+                H5O_type_t  *obj_type  =  va_arg (arguments, H5O_type_t *);
+                H5R_type_t  ref_type   =  va_arg (arguments, H5R_type_t);
+                const void  *ref       =  va_arg (arguments, const void *);
+            }
+        /* H5Rget_name */
+        case H5VL_REF_GET_NAME:
+            {
+                ssize_t     *ret       = va_arg (arguments, ssize_t *);
+                char        *name      = va_arg (arguments, char *);
+                size_t      size       = va_arg (arguments, size_t);
+                H5R_type_t  ref_type   = va_arg (arguments, H5R_type_t);
+                void        *ref       = va_arg (arguments, void *);
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from object")
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_object_get() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_cancel
@@ -4836,7 +5693,6 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
     int         ret;
     H5VL_iod_state_t state;
     hg_request_t hg_req;       /* Local function shipper request, for sync. operations */
-    H5VL_iod_request_t cancel_req; /* Local request, for sync. operations */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4847,7 +5703,7 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
         *status = request->status;
         request->req = H5MM_xfree(request->req);
-        request = H5MM_xfree(request);
+        request = (H5VL_iod_request_t *)H5MM_xfree(request);
     }
 
     /* forward the cancel call to the IONs */
@@ -4872,7 +5728,7 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
 
                 *status = request->status;
                 request->req = H5MM_xfree(request->req);
-                request = H5MM_xfree(request);
+                request = (H5VL_iod_request_t *)H5MM_xfree(request);
             }
 
             /* if the status returned is cancelled, then cancel it
@@ -4885,7 +5741,7 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
 
                 *status = request->status;
                 request->req = H5MM_xfree(request->req);
-                request = H5MM_xfree(request);
+                request = (H5VL_iod_request_t *)H5MM_xfree(request);
             }
         }
         else
@@ -4916,9 +5772,8 @@ H5VL_iod_test(void **req, H5_status_t *status)
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
     hg_status_t hg_status;
     int         ret;
-    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     ret = HG_Wait(*((hg_request_t *)request->req), 0, &hg_status);
     if(HG_FAIL == ret) {
@@ -4935,14 +5790,13 @@ H5VL_iod_test(void **req, H5_status_t *status)
                 fprintf(stderr, "Operation Failed!\n");
             *status = request->status;
             request->req = H5MM_xfree(request->req);
-            request = H5MM_xfree(request);
+            request = (H5VL_iod_request_t *)H5MM_xfree(request);
         }
         else
             *status = request->status;
     }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_test() */
 
 
@@ -4963,18 +5817,18 @@ static herr_t
 H5VL_iod_wait(void **req, H5_status_t *status)
 {
     H5VL_iod_request_t *request = *((H5VL_iod_request_t **)req);
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if(H5VL_IOD_PENDING == request->state) {
         if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
     }
 
     *status = request->status;
     request->req = H5MM_xfree(request->req);
-    request = H5MM_xfree(request);
+    request = (H5VL_iod_request_t *)H5MM_xfree(request);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

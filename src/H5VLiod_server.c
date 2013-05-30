@@ -54,118 +54,140 @@ static herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id,
                                        hbool_t create_interm_grps, char **last_comp, 
                                        iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
 
-static herr_t H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine,  
+static void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_attr_create_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_attr_open_cb(AXE_engine_t axe_engine,  
+static void H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+static void H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_attr_create_cb(AXE_engine_t axe_engine,  
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_attr_read_cb(AXE_engine_t axe_engine,  
+static void H5VL_iod_server_attr_open_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+static void H5VL_iod_server_attr_read_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+static void H5VL_iod_server_attr_write_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_attr_exists_cb(AXE_engine_t axe_engine,  
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_attr_write_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_attr_exists_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_attr_remove_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_attr_close_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_group_create_cb(AXE_engine_t axe_engine,  
-                                              size_t num_n_parents, AXE_task_t n_parents[], 
-                                              size_t num_s_parents, AXE_task_t s_parents[], 
-                                              void *op_data);
-static herr_t H5VL_iod_server_group_open_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_group_close_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_dset_create_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_dset_open_cb(AXE_engine_t axe_engine,  
+static void H5VL_iod_server_attr_rename_cb(AXE_engine_t axe_engine,  
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,  
+static void H5VL_iod_server_attr_remove_cb(AXE_engine_t axe_engine,  
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine,  
+static void H5VL_iod_server_attr_close_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_group_create_cb(AXE_engine_t axe_engine,  
                                             size_t num_n_parents, AXE_task_t n_parents[], 
                                             size_t num_s_parents, AXE_task_t s_parents[], 
                                             void *op_data);
-static herr_t H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine,  
-                                                 size_t num_n_parents, AXE_task_t n_parents[], 
-                                                 size_t num_s_parents, AXE_task_t s_parents[], 
-                                                 void *op_data);
-static herr_t H5VL_iod_server_dset_close_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_dtype_commit_cb(AXE_engine_t axe_engine,  
-                                              size_t num_n_parents, AXE_task_t n_parents[], 
-                                              size_t num_s_parents, AXE_task_t s_parents[], 
-                                              void *op_data);
-static herr_t H5VL_iod_server_dtype_open_cb(AXE_engine_t axe_engine,  
-                                            size_t num_n_parents, AXE_task_t n_parents[], 
-                                            size_t num_s_parents, AXE_task_t s_parents[], 
-                                            void *op_data);
-static herr_t H5VL_iod_server_dtype_close_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_link_create_cb(AXE_engine_t axe_engine,  
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
-static herr_t H5VL_iod_server_link_move_cb(AXE_engine_t axe_engine, 
+static void H5VL_iod_server_group_open_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_group_close_cb(AXE_engine_t axe_engine,  
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
-static herr_t H5VL_iod_server_link_exists_cb(AXE_engine_t axe_engine, 
+static void H5VL_iod_server_dset_create_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_dset_open_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+static void H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+static void H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine,  
+                                               size_t num_n_parents, AXE_task_t n_parents[], 
+                                               size_t num_s_parents, AXE_task_t s_parents[], 
+                                               void *op_data);
+static void H5VL_iod_server_dset_close_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_dtype_commit_cb(AXE_engine_t axe_engine,  
+                                            size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
+                                            void *op_data);
+static void H5VL_iod_server_dtype_open_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+static void H5VL_iod_server_dtype_close_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_link_create_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_link_move_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_link_exists_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_link_remove_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+
+static void H5VL_iod_server_object_open_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_object_copy_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+static void H5VL_iod_server_object_exists_cb(AXE_engine_t axe_engine, 
                                              size_t num_n_parents, AXE_task_t n_parents[], 
                                              size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
-static herr_t H5VL_iod_server_link_iterate_cb(AXE_engine_t axe_engine, 
-                                              size_t num_n_parents, AXE_task_t n_parents[], 
-                                              size_t num_s_parents, AXE_task_t s_parents[], 
-                                              void *op_data);
-static herr_t H5VL_iod_server_link_remove_cb(AXE_engine_t axe_engine, 
-                                             size_t num_n_parents, AXE_task_t n_parents[], 
-                                             size_t num_s_parents, AXE_task_t s_parents[], 
-                                             void *op_data);
+static void H5VL_iod_server_object_set_comment_cb(AXE_engine_t axe_engine, 
+                                                  size_t num_n_parents, AXE_task_t n_parents[], 
+                                                  size_t num_s_parents, AXE_task_t s_parents[], 
+                                                  void *op_data);
+static void H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine, 
+                                                  size_t num_n_parents, AXE_task_t n_parents[], 
+                                                  size_t num_s_parents, AXE_task_t s_parents[], 
+                                                  void *_op_data);
+
 herr_t
 H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 {
@@ -210,6 +232,8 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              attr_io_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("attr_exists", H5VL_iod_server_attr_exists, 
                              attr_op_in_t, htri_t);
+    MERCURY_HANDLER_REGISTER("attr_rename", H5VL_iod_server_attr_rename, 
+                             attr_rename_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("attr_remove", H5VL_iod_server_attr_remove, 
                              attr_op_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("attr_close", H5VL_iod_server_attr_close, 
@@ -253,8 +277,20 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MERCURY_HANDLER_REGISTER("link_remove", H5VL_iod_server_link_remove, 
                              link_op_in_t, ret_t);
 
-    MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, 
-                             uint64_t, uint8_t);
+    MERCURY_HANDLER_REGISTER("object_open", H5VL_iod_server_object_open, 
+                             object_op_in_t, object_open_out_t);
+    MERCURY_HANDLER_REGISTER("object_copy", H5VL_iod_server_object_copy, 
+                             object_copy_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("object_exists", H5VL_iod_server_object_exists, 
+                             object_op_in_t, htri_t);
+    MERCURY_HANDLER_REGISTER("object_visit", H5VL_iod_server_object_visit, 
+                             object_op_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("set_comment", H5VL_iod_server_object_set_comment, 
+                             object_set_comment_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("get_comment", H5VL_iod_server_object_get_comment, 
+                             object_get_comment_in_t, object_get_comment_out_t);
+
+    MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, uint64_t, uint8_t);
 
     /* Initialize engine attribute */
     if(AXEengine_attr_init(&engine_attr) != AXE_SUCCEED)
@@ -401,7 +437,7 @@ H5VL_iod_server_cancel_op(hg_handle_t handle)
         void *op_data;
 
         fprintf(stderr, "Task is running. Attempting to cancel Manually\n");
-        if(AXEget_op_data(engine, axe_id, op_data) != AXE_SUCCEED)
+        if(AXEget_op_data(engine, axe_id, &op_data) != AXE_SUCCEED)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get op data");
         /* Attempt to cancel the task manually */
     }
@@ -448,7 +484,6 @@ H5VL_iod_server_file_create(hg_handle_t handle)
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
-
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_file_create_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
@@ -878,6 +913,62 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_attr_exists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_attr_rename
+ *
+ * Purpose:	Function shipper registered call for Attr Rename.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_attr_rename(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    attr_rename_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (attr_rename_in_t *)
+                H5MM_malloc(sizeof(attr_rename_in_t))))
+	HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_attr_rename_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_attr_rename_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_attr_rename() */
 
 
 /*-------------------------------------------------------------------------
@@ -1962,6 +2053,327 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_open
+ *
+ * Purpose:	Function shipper registered call for Object Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_open(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_op_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_op_in_t *)
+                H5MM_malloc(sizeof(object_op_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_object_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_copy
+ *
+ * Purpose:	Function shipper registered call for Object Copy.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_copy(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_copy_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_copy_in_t *)
+                H5MM_malloc(sizeof(object_copy_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->src_parent_axe_id && input->dst_parent_axe_id) {
+        AXE_task_t tasks[2] = {input->src_parent_axe_id, input->dst_parent_axe_id};
+
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          2, tasks, 0, NULL, 
+                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else if(input->src_parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->src_parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else if(input->dst_parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->dst_parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_object_copy_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_visit
+ *
+ * Purpose:	Function shipper registered call for Object Visit.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_visit(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_visit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_exists
+ *
+ * Purpose:	Function shipper registered call for Link Existance.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_exists(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_op_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_op_in_t *)
+                H5MM_malloc(sizeof(object_op_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_object_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_exists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_set_comment
+ *
+ * Purpose:	Function shipper registered call for Set Comment.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_set_comment(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_set_comment_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_set_comment_in_t *)
+                H5MM_malloc(sizeof(object_set_comment_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_set_comment_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_object_set_comment_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_set_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_get_comment
+ *
+ * Purpose:	Function shipper registered call for Get Comment.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_get_comment(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_get_comment_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_get_comment_in_t *)
+                H5MM_malloc(sizeof(object_get_comment_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_get_comment_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_object_get_comment_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_get_comment() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_file_create_cb
  *
  * Purpose:	Creates a file as a iod HDF5 file.
@@ -1974,7 +2386,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2061,10 +2473,10 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &ret_value);
     }
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (file_create_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_create_cb() */
 
 
@@ -2081,7 +2493,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine, 
                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2094,7 +2506,6 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh;
     iod_handle_t root_oh, scratch_oh;
     iod_obj_id_t scratch_pad;
-    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2153,10 +2564,10 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (file_open_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_open_cb() */
 
 
@@ -2173,7 +2584,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_file_flush_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2198,10 +2609,10 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file flush to client");
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (file_flush_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_flush_cb() */
 
 
@@ -2218,7 +2629,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2248,10 +2659,10 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (file_close_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_file_close_cb() */
 
 
@@ -2268,7 +2679,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine, 
                                 size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                 size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2346,10 +2757,10 @@ done:
     }
 
     free(last_comp);
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (group_create_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_group_create_cb() */
 
 
@@ -2366,7 +2777,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2448,10 +2859,10 @@ done:
     }
 
     free(last_comp);
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (group_open_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_group_open_cb() */
 
 
@@ -2468,7 +2879,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_group_close_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2499,10 +2910,10 @@ done:
     fprintf(stderr, "Done with group close, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (group_close_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_group_close_cb() */
 
 
@@ -2519,7 +2930,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2690,10 +3101,10 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dset_create_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_create_cb() */
 
 
@@ -2710,7 +3121,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine, 
                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2788,7 +3199,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         HDassert(cur_oh.cookie);
         output.space_id = H5Dget_space(cur_oh.cookie);
         output.type_id = H5Dget_type(cur_oh.cookie);
-        output.dcpl_id = H5Dget_create_plist(cur_oh.cookie);
+        output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
 #else
         /* fake a dataspace, type, and dcpl */
         dims [0] = 60;
@@ -2837,16 +3248,14 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-#if !H5_DO_NATIVE
     H5Tclose(output.type_id);
     H5Sclose(output.space_id);
-#endif
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dset_open_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     free(last_comp);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_open_cb() */
 
 
@@ -2863,7 +3272,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine, 
                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -2925,7 +3334,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     for(i=0;i<60;++i)
         buf_ptr[i] = i;
 #endif
-        if(H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
+        if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
             fprintf(stderr, "Injecting a bad data value to generate a bad checksum \n");
@@ -2956,11 +3365,11 @@ done:
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dset_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_read_cb() */
 
 
@@ -2977,7 +3386,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3062,11 +3471,11 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dset_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_write_cb() */
 
 
@@ -3083,7 +3492,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine, 
                                    size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                    size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3122,10 +3531,10 @@ done:
     fprintf(stderr, "Done with dset set_extent, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dset_set_extent_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_set_extent_cb() */
 
 
@@ -3142,7 +3551,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3175,10 +3584,10 @@ done:
     fprintf(stderr, "Done with dset close, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dset_close_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_close_cb() */
 
 
@@ -3195,7 +3604,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine, 
                                 size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                 size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3317,12 +3726,12 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dtype_commit_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     free(last_comp);
     free(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dtype_commit_cb() */
 
 
@@ -3339,7 +3748,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3354,7 +3763,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dtype_id;
     iod_handle_t cur_oh, scratch_oh;
     iod_obj_id_t cur_id, scratch_pad;
-    char *name = input->name;
+    const char *name = input->name;
     char *last_comp; /* the name of the datatype obtained from the last component in the path */
     size_t buf_size;
     void *buf;
@@ -3401,7 +3810,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     cur_oh.cookie = H5Topen(loc_handle.cookie, name, input->tapl_id);
     HDassert(cur_oh.cookie);
     output.type_id = cur_oh.cookie;//H5Tget_type(cur_oh.cookie);
-    output.tcpl_id = H5Tget_create_plist(cur_oh.cookie);
+    output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
 #else
     /* fake a type, and tcpl */
     output.type_id = H5Tcopy(H5T_NATIVE_INT);
@@ -3439,10 +3848,10 @@ done:
 #endif
 
     free(last_comp);
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dtype_open_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dtype_open_cb() */
 
 
@@ -3459,7 +3868,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3492,10 +3901,10 @@ done:
     fprintf(stderr, "Done with dtype close, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (dtype_close_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dtype_close_cb() */
 
 
@@ -3512,7 +3921,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3653,12 +4062,12 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_create_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_create_cb() */
 
 
@@ -3675,7 +4084,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine, 
                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3765,17 +4174,15 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-#if !H5_DO_NATIVE
     H5Sclose(output.space_id);
     H5Tclose(output.type_id);
-#endif
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_open_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_open_cb() */
 
 
@@ -3792,7 +4199,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine, 
                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3871,11 +4278,11 @@ done:
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_read_cb() */
 
 
@@ -3892,7 +4299,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -3975,11 +4382,11 @@ done:
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_write_cb() */
 
 
@@ -3996,7 +4403,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4019,8 +4426,8 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     fprintf(stderr, "Start attribute Exists %s\n", attr_name);
 
-    /* the traversal will retrieve the location where the dataset needs
-       to be opened. The traversal will fail if an intermediate group
+    /* the traversal will retrieve the location where the attribute needs
+       to be checked. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
@@ -4039,13 +4446,77 @@ done:
     fprintf(stderr, "Done with attr exists, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_exists_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_attr_rename_cb
+ *
+ * Purpose:	Renames iod HDF5 attribute.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              April, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_rename_in_t *input = (attr_rename_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_handle = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_handle_t cur_oh, scratch_oh;
+    iod_obj_id_t cur_id, scratch_pad;
+    const char *loc_name = input->path;
+    const char *old_name = input->old_attr_name;
+    const char *new_name = input->new_attr_name;
+    char *last_comp = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start attribute Rename %s to %s\n", old_name, new_name);
+
+    /* the traversal will retrieve the location where the attribute
+       needs to be renamed. The traversal will fail if an intermediate
+       group does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /*MSC - Rename the attribute from the scratch pad KV store when it
+      is there */
+
+#if H5_DO_NATIVE
+    ret_value = H5Arename(loc_handle.cookie, old_name, new_name);
+#endif
+
+done:
+    fprintf(stderr, "Done with attr rename, sending response to client\n");
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
+
+    input = (attr_rename_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    if(last_comp)
+        free(last_comp);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_attr_rename_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -4061,7 +4532,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4083,9 +4554,9 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     fprintf(stderr, "Start attribute Remove %s\n", attr_name);
 
-    /* the traversal will retrieve the location where the dataset needs
-       to be opened. The traversal will fail if an intermediate group
-       does not exist. */
+    /* the traversal will retrieve the location where the attribute
+       needs to be removed. The traversal will fail if an intermediate
+       group does not exist. */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, loc_name, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
@@ -4101,12 +4572,12 @@ done:
     fprintf(stderr, "Done with attr remove, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_remove_cb() */
 
 
@@ -4123,7 +4594,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine, 
                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4155,10 +4626,10 @@ done:
     fprintf(stderr, "Done with attr close, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (attr_close_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_close_cb() */
 
 
@@ -4175,7 +4646,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4203,7 +4674,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
        to be created from. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, FALSE, 
-                                NULL, &cur_id, &cur_oh) < 0)
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup group in the current location */
@@ -4293,10 +4764,10 @@ done:
 
     if(last_comp)
         free(last_comp);
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (link_create_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_create_cb() */
 
 
@@ -4313,7 +4784,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine, 
                              size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                              size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4406,10 +4877,10 @@ done:
 
     if(last_comp)
         free(last_comp);
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (link_move_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_move_cb() */
 
 
@@ -4426,7 +4897,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4483,12 +4954,12 @@ done:
     fprintf(stderr, "Done with link exists, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (link_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
     if(last_comp)
         free(last_comp);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_exists_cb() */
 
 
@@ -4505,7 +4976,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static void
 H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine, 
                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
@@ -4560,16 +5031,506 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
-    fprintf(stderr, "Done with link move, sending response to client\n");
+    fprintf(stderr, "Done with link remove, sending response to client\n");
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     if(last_comp)
         free(last_comp);
-    input = H5MM_xfree(input);
-    op_data = H5MM_xfree(op_data);
+    input = (link_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_remove_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_open_cb
+ *
+ * Purpose:	Opens an existing object in the container
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_op_in_t *input = (object_op_in_t *)op_data->input;
+    object_open_out_t output;
+    iod_handle_t coh = input->coh; /* the container handle */
+    iod_handle_t obj_oh; /* The handle for object */
+    iod_obj_id_t obj_id; /* The ID of the object */
+    iod_handle_t cur_oh;
+    iod_obj_id_t cur_id;
+    char *last_comp = NULL;
+    iod_kv_t kv;
+    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start Object Open\n");
+
+    /* the traversal will retrieve the location where the object needs
+       to be opened to be created from. The traversal will fail if an
+       intermediate group does not exist. */
+    if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, FALSE, 
+                                last_comp, &cur_id, &cur_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /* lookup object in the current location */
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(input->loc_oh.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* open the object */
+    if (iod_obj_open_write(coh, obj_id, NULL, &obj_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+#if 0
+    /* When we have a real IOD, open the scratch pad and read the
+       object's metadata */
+#endif
+
+#if H5_DO_NATIVE
+    obj_oh.cookie = H5Oopen(input->loc_oh.cookie, input->loc_name, H5P_DEFAULT);
+    output.obj_type = H5Iget_type(obj_oh.cookie);
+    switch(output.obj_type){
+    case H5I_GROUP:
+        output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
+        output.type_id = 0;
+        output.space_id = 0;
+        break;
+    case H5I_DATASET:
+        output.cpl_id = H5P_DATASET_CREATE_DEFAULT;
+        output.type_id = H5Dget_type(obj_oh.cookie);
+        output.space_id = H5Dget_space(obj_oh.cookie);
+        break;
+    case H5I_DATATYPE:
+        output.cpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+        output.type_id = obj_oh.cookie;
+        output.space_id = 0;
+        break;
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object (dataset, group, or datatype)")
+    }
+#else
+    /* Fake something */
+    output.obj_type = H5I_GROUP;
+    output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
+    output.type_id = 0;
+    output.space_id = 0;
+#endif
+
+    output.iod_id = obj_id;
+    output.iod_oh = obj_oh;
+
+    fprintf(stderr, "Done with object open, sending response to client\n");
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+done:
+    if(ret_value < 0) {
+        output.iod_oh.cookie = IOD_OH_UNDEFINED;
+        output.iod_id = IOD_ID_UNDEFINED;
+        output.cpl_id = H5P_GROUP_CREATE_DEFAULT;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    switch(output.obj_type){
+    case H5I_GROUP:
+        break;
+    case H5I_DATASET:
+#if H5_DO_NATIVE
+        H5Tclose(output.type_id);
+        H5Sclose(output.space_id);
+#endif
+        break;
+    case H5I_DATATYPE:
+        break;
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "not a valid object (dataset, group, or datatype)")
+    }
+
+    if(last_comp)
+        free(last_comp);
+    input = (object_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_object_open_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_copy_cb
+ *
+ * Purpose:	Moves/Copies a link in the container.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine, 
+                               size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                               size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                               void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_copy_in_t *input = (object_copy_in_t *)op_data->input;
+    iod_handle_t coh = input->coh; /* the container handle */
+    iod_handle_t src_oh; /* The handle for src object group */
+    iod_obj_id_t src_id; /* The ID of the src object */
+    iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
+    iod_obj_id_t dst_id; /* The ID of the dst object where link is created*/
+    iod_obj_id_t obj_id; /* The ID of the object to be moved/copied */
+    char *last_comp = NULL, *new_name;
+    iod_kv_t kv;
+    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start object copy\n");
+
+    /* the traversal will retrieve the location where the object
+       exists. The traversal will fail if an intermediate group does
+       not exist. */
+    if(H5VL_iod_server_traverse(coh, input->src_loc_id, input->src_loc_oh, input->src_loc_name, 
+                                FALSE, &last_comp, &src_id, &src_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /* the traversal will retrieve the location where the objects
+       needs to be copied to. The traversal will fail if an
+       intermediate group does not exist. */
+    if(H5VL_iod_server_traverse(coh, input->dst_loc_id, input->dst_loc_oh, input->dst_loc_name, 
+                                FALSE, &new_name, &dst_id, &dst_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /* lookup object ID in the current src location */
+    if(iod_kv_get_value(src_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+
+    /* create new object as a copy of the source object */
+    /* MSC - wait to see if IOD will have an object copy */
+
+    /* Insert object in the destination path */
+    kv.key = HDstrdup(new_name);
+    kv.value = &obj_id;
+    kv.value_len = kv_size;
+    if (iod_kv_set(dst_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    HDfree(kv.key);
+
+    /* close source group if it is not the location we started the
+       traversal into */
+    if(input->src_loc_oh.cookie != src_oh.cookie) {
+        iod_obj_close(src_oh, NULL, NULL);
+    }
+
+    /* close dst group if it is not the location we started the
+       traversal into */
+    if(input->dst_loc_oh.cookie != dst_oh.cookie) {
+        iod_obj_close(dst_oh, NULL, NULL);
+    }
+
+#if H5_DO_NATIVE
+    if(H5Ocopy(input->src_loc_oh.cookie, input->src_loc_name, 
+               input->dst_loc_oh.cookie, input->dst_loc_name,
+               H5P_DEFAULT, H5P_DEFAULT) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't copy object");
+#endif
+
+done:
+    fprintf(stderr, "Done with object Copy, sending response to client\n");
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
+
+    if(last_comp)
+        free(last_comp);
+    if(new_name)
+        free(new_name);
+    input = (object_copy_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_object_copy_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_exists_cb
+ *
+ * Purpose:	Checks if an object exists.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine, 
+                                 size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                 size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                 void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_op_in_t *input = (object_op_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_handle_t cur_oh;
+    iod_obj_id_t cur_id;
+    const char *loc_name = input->loc_name;
+    char *last_comp = NULL;
+    htri_t ret = -1;
+    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start Object Exists\n");
+
+    /* the traversal will retrieve the location where the object needs
+       to be checked */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0) {
+        ret = FALSE;
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* check the last component */
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+                        &cur_id, &kv_size, NULL, NULL) < 0) {
+        ret = FALSE;
+    } /* end if */
+    else {
+        iod_handle_t obj_oh;
+        /* try to open the object */
+        if (iod_obj_open_write(coh, cur_id, NULL, &obj_oh, NULL) < 0) {
+            ret = FALSE;
+            HGOTO_DONE(SUCCEED);
+        }
+        else {
+            /* close the object */
+            iod_obj_close(obj_oh, NULL, NULL);
+            ret = TRUE;
+        }
+    }
+
+#if H5_DO_NATIVE
+    ret = H5Oexists_by_name(loc_oh.cookie, loc_name, H5P_DEFAULT);
+#else
+    ret = FALSE;
+#endif
+
+done:
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_oh.cookie != IOD_OH_UNDEFINED && input->loc_oh.cookie != loc_oh.cookie) {
+        iod_obj_close(loc_oh, NULL, NULL);
+    }
+
+    fprintf(stderr, "Done with Object exists, sending response to client\n");
+    HG_Handler_start_output(op_data->hg_handle, &ret);
+
+    input = (object_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+    if(last_comp)
+        free(last_comp);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_object_exists_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_set_comment_cb
+ *
+ * Purpose:	Set comment for an object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine, 
+                                      size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                      size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                      void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_set_comment_in_t *input = (object_set_comment_in_t *)op_data->input;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_handle_t cur_oh;
+    iod_obj_id_t cur_id, obj_id;
+    const char *loc_name = input->path;
+    const char *comment = input->comment;
+    char *last_comp = NULL;
+    iod_kv_params_t kvs;
+    iod_kv_t kv;
+    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start Object set comment: %s on %s\n", comment, loc_name);
+
+    /* the traversal will retrieve the location where the link needs
+       to be removed. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, 
+                                FALSE, &last_comp, &cur_id, &cur_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /* lookup object ID in the current location */
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+
+    /* Open object */
+    /* retrieve scratch pad */
+    /* open scratch pad */
+    /* update scratch pad with comment */
+    /* close scratch pad and object */
+
+#if H5_DO_NATIVE
+    if(H5Oset_comment(loc_oh.cookie, comment) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Unable to set object comment");
+#endif
+
+done:
+    fprintf(stderr, "Done with set comment, sending response to client\n");
+    HG_Handler_start_output(op_data->hg_handle, &ret_value);
+
+    if(last_comp)
+        free(last_comp);
+    input = (object_set_comment_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_object_set_comment_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_get_comment_cb
+ *
+ * Purpose:	Get comment for an object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine, 
+                                      size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                      size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                      void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_get_comment_in_t *input = (object_get_comment_in_t *)op_data->input;
+    object_get_comment_out_t output;
+    name_t comment;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    size_t length = input->length;
+    iod_handle_t cur_oh;
+    iod_obj_id_t cur_id, obj_id;
+    const char *loc_name = input->path;
+    char *last_comp = NULL;
+    iod_kv_params_t kvs;
+    iod_kv_t kv;
+    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    ssize_t size = 0;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    fprintf(stderr, "Start Object get comment on %s\n", loc_name);
+
+    /* the traversal will retrieve the location where the link needs
+       to be removed. The traversal will fail if an intermediate group
+       does not exist. */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, 
+                                FALSE, &last_comp, &cur_id, &cur_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    /* lookup object ID in the current location */
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+
+    /* Open object */
+    /* retrieve scratch pad */
+    /* open scratch pad */
+    /* get comment */
+    /* close scratch pad and object */
+
+    comment.value_size = (ssize_t *)malloc(sizeof(ssize_t));
+    comment.value = NULL;
+    comment.size = length;
+
+#if H5_DO_NATIVE
+    if(0 != length) {
+        size = H5Oget_comment(loc_oh.cookie, NULL, length);
+        comment.value = malloc(size);
+    }
+    if((size = H5Oget_comment(loc_oh.cookie, comment.value, length)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Unable to get object comment");
+#else
+    if(length) {
+        comment.value = strdup("fake comment");
+        size = strlen(comment.value) + 1;
+    }
+    else
+        size = 22;
+#endif
+
+    *comment.value_size = size;
+
+done:
+    output.ret = ret_value;
+    output.name = comment;
+
+    fprintf(stderr, "Done with get comment, sending response to client\n");
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+    if(comment.value)
+        free(comment.value);
+    free(comment.value_size);
+    if(last_comp)
+        free(last_comp);
+    input = (object_get_comment_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_object_get_comment_cb() */
 
 static herr_t 
 H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
@@ -4585,6 +5546,8 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    assert(FALSE == create_interm_grps);
 
     cur_oh = loc_handle;
 

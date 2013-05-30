@@ -1153,8 +1153,6 @@ H5Acreate_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t		 ret_value;        /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id,
-             acpl_id, aapl_id, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1227,7 +1225,6 @@ H5Aopen_ff(hid_t loc_id, const char *attr_name, hid_t aapl_id,
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "i*si", loc_id, attr_name, aapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1281,7 +1278,6 @@ H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("i", "i*s*sii", loc_id, obj_name, attr_name, aapl_id, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1341,7 +1337,6 @@ H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, uint64_t trans, hid_
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
     if(NULL == buf)
@@ -1379,7 +1374,6 @@ H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, uint64_t trans, hid_t eq_id
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
     if(NULL == buf)
@@ -1401,6 +1395,124 @@ done:
 } /* H5Aread_ff() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5Arename_ff
+ *
+ * Purpose:     Rename an attribute
+ *
+ * Return:	Success:             Non-negative
+ *		Failure:             Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name, 
+             uint64_t trans, hid_t eq_id)
+{
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(!old_name || !new_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_name, new_name)) {
+        H5VL_t     *vol_plugin;
+        void       *obj;
+        H5VL_loc_params_t loc_params;
+
+        loc_params.type = H5VL_OBJECT_BY_SELF;
+        loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* get the file object */
+        if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+        /* rename the attribute info through the VOL */
+        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, H5AC_dxpl_id, 
+                            eq_id, old_name, new_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+    }
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Arename_by_name_ff
+ *
+ * Purpose:     Rename an attribute
+ *
+ * Return:	Success:             Non-negative
+ *		Failure:             Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+                     const char *new_attr_name, hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!old_attr_name || !*old_attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no old attribute name")
+    if(!new_attr_name || !*new_attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_attr_name, new_attr_name)) {
+        H5VL_t     *vol_plugin;
+        void       *obj;
+        H5VL_loc_params_t loc_params;
+
+        loc_params.type = H5VL_OBJECT_BY_NAME;
+        loc_params.loc_data.loc_by_name.name = obj_name;
+        loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+        loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* get the file object */
+        if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+        /* rename the attribute info through the VOL */
+        if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_ATTR_RENAME, H5AC_dxpl_id, 
+                            eq_id, old_attr_name, new_attr_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename_by_name_ff() */
+
+
 /*--------------------------------------------------------------------------
  NAME
     H5Adelete_ff
@@ -1418,7 +1530,6 @@ H5Adelete_ff(hid_t loc_id, const char *name, uint64_t trans, hid_t eq_id)
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*s", loc_id, name);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1465,7 +1576,6 @@ H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1574,7 +1684,6 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     herr_t	ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1630,7 +1739,6 @@ H5Aclose_ff(hid_t attr_id, hid_t eq_id)
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", attr_id);
 
     /* check arguments */
     if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
@@ -2117,5 +2225,569 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lexists_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oopen_ff
+ *
+ * Purpose:	Opens an object within an HDF5 file.
+ *
+ *              This function opens an object in the same way that H5Gopen2,
+ *              H5Topen2, and H5Dopen2 do. However, H5Oopen doesn't require
+ *              the type of object to be known beforehand. This can be
+ *              useful in user-defined links, for instance, when only a
+ *              path is known.
+ *
+ *              The opened object should be closed again with H5Oclose
+ *              or H5Gclose, H5Tclose, or H5Dclose.
+ *
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5I_type_t  opened_type;
+    void       *opened_obj = NULL;
+    H5VL_loc_params_t loc_params;
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Open the object through the VOL */
+    if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
+                                              H5AC_dxpl_id, eq_id)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+
+    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oopen_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Olink_ff
+ *
+ * Purpose:	Creates a hard link from NEW_NAME to the object specified
+ *		by OBJ_ID using properties defined in the Link Creation
+ *              Property List LCPL.
+ *
+ *		This function should be used to link objects that have just
+ *              been created.
+ *
+ *		NEW_NAME is interpreted relative to
+ *		NEW_LOC_ID, which is either a file ID or a
+ *		group ID.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
+           hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj1 = NULL;        /* object token of loc_id */
+    void    *obj2 = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin1 = NULL;  /* VOL plugin information */
+    H5VL_t  *vol_plugin2 = NULL;  /* VOL plugin information */
+    H5VL_loc_params_t loc_params1;
+    H5VL_loc_params_t loc_params2;
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t         ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if(new_loc_id == H5L_SAME_LOC)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot use H5L_SAME_LOC when only one location is specified")
+    if(!new_name || !*new_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+/* Avoid compiler warning on 32-bit machines */
+#if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
+    if(HDstrlen(new_name) > H5L_MAX_LINK_NAME_LEN)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "name too long")
+#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
+    if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
+
+    /* Check the group access property list */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+
+    loc_params1.type = H5VL_OBJECT_BY_SELF;
+    loc_params1.obj_type = H5I_get_type(obj_id);
+
+    loc_params2.type = H5VL_OBJECT_BY_NAME;
+    loc_params2.obj_type = H5I_get_type(new_loc_id);
+    loc_params2.loc_data.loc_by_name.name = new_name;
+    loc_params2.loc_data.loc_by_name.plist_id = lapl_id;
+
+    if(H5L_SAME_LOC != obj_id) {
+        /* get the file object */
+        if(NULL == (obj1 = (void *)H5VL_get_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    if(H5L_SAME_LOC != new_loc_id) {
+        /* get the file object */
+        if(NULL == (obj2 = (void *)H5VL_get_object(new_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(new_loc_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    }
+    /* Make sure that the VOL plugins are the same */
+    if(H5L_SAME_LOC != new_loc_id && H5L_SAME_LOC != obj_id) {
+        if (vol_plugin1->cls != vol_plugin2->cls)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Objects are accessed through different VOL plugins and can't be linked")
+    }
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_LINK_TARGET, &obj1) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
+    if(H5P_set(plist, H5VL_LINK_TARGET_LOC_PARAMS, &loc_params1) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for target id")
+
+    /* Create the link through the VOL */
+    if((ret_value = H5VL_link_create(H5VL_LINK_CREATE_HARD, obj2, loc_params2, 
+                                     (vol_plugin1!=NULL ? vol_plugin1 : vol_plugin2),
+                                     lcpl_id, lapl_id, H5AC_dxpl_id, eq_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Olink_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oexists_by_name_ff
+ *
+ * Purpose:	Determine if a linked-to object exists
+ *
+ * Return:	Success:	TRUE/FALSE
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
+                     uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t  ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* change the ref count through the VOL */
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_EXISTS, 
+                       H5AC_dxpl_id, eq_id, ret) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oexists_by_name_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oset_comment_ff
+ *
+ * Purpose:     Gives the specified object a comment.  The COMMENT string
+ *		should be a null terminated string.  An object can have only
+ *		one comment at a time.  Passing NULL for the COMMENT argument
+ *		will remove the comment property from the object.
+ *
+ * Note:	Deprecated in favor of using attributes on objects
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oset_comment_ff(hid_t obj_id, const char *comment, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(obj_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* set comment on object through the VOL */
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, 
+                        H5AC_dxpl_id, eq_id, comment) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oset_comment_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oset_comment_by_name_ff
+ *
+ * Purpose:     Gives the specified object a comment.  The COMMENT string
+ *		should be a null terminated string.  An object can have only
+ *		one comment at a time.  Passing NULL for the COMMENT argument
+ *		will remove the comment property from the object.
+ *
+ * Note:	Deprecated in favor of using attributes on objects
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
+                          hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* set comment on object through the VOL */
+    if(H5VL_object_misc(obj, loc_params, vol_plugin, H5VL_OBJECT_SET_COMMENT, 
+                        H5AC_dxpl_id, eq_id, comment) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oset_comment_by_name_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_comment_ff
+ *
+ * Purpose:	Retrieve comment for an object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
+                  uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, 
+                       H5AC_dxpl_id, eq_id, comment, bufsize, ret) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object comment")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_comment_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_comment_by_name_ff
+ *
+ * Purpose:	Retrieve comment for an object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t bufsize,
+                          ssize_t *ret, hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_COMMENT, 
+                       H5AC_dxpl_id, eq_id, comment, bufsize, ret) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get object info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_comment_by_name_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Ocopy_ff
+ *
+ * Purpose:     Copy an object (group or dataset) to destination location
+ *              within a file or cross files. PLIST_ID is a property list
+ *              which is used to pass user options and properties to the
+ *              copy. The name, dst_name, must not already be taken by some
+ *              other object in the destination group.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+           const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, 
+           uint64_t trans, hid_t eq_id)
+{
+    void    *obj1 = NULL;        /* object token of src_id */
+    H5VL_t  *vol_plugin1;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params1;
+    void    *obj2 = NULL;        /* object token of dst_id */
+    H5VL_t  *vol_plugin2;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params2;
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get correct property lists */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
+
+    /* Get object copy property list */
+    if(H5P_DEFAULT == ocpypl_id)
+        ocpypl_id = H5P_OBJECT_COPY_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(ocpypl_id, H5P_OBJECT_COPY))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not object copy property list")
+
+    /* get the object */
+    if(NULL == (obj1 = (void *)H5I_object(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin1 = (H5VL_t *)H5I_get_aux(src_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src ID does not contain VOL information")
+    loc_params1.type = H5VL_OBJECT_BY_SELF;
+    loc_params1.obj_type = H5I_get_type(src_loc_id);
+
+    /* get the object */
+    if(NULL == (obj2 = (void *)H5I_object(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin2 = (H5VL_t *)H5I_get_aux(dst_loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst ID does not contain VOL information")
+    loc_params2.type = H5VL_OBJECT_BY_SELF;
+    loc_params2.obj_type = H5I_get_type(dst_loc_id);
+
+    /* Open the object through the VOL */
+    if((ret_value = H5VL_object_copy(obj1, loc_params1, vol_plugin1, src_name, 
+                                     obj2, loc_params2, vol_plugin2, dst_name, 
+                                     ocpypl_id, lcpl_id, H5AC_dxpl_id, eq_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ocopy_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oclose_ff
+ *
+ * Purpose:	Close an open file object.
+ *
+ *              This is the companion to H5Oopen. It is used to close any
+ *              open object in an HDF5 file (but not IDs are that not file
+ *              objects, such as property lists and dataspaces). It has
+ *              the same effect as calling H5Gclose, H5Dclose, or H5Tclose.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oclose_ff(hid_t object_id, hid_t eq_id)
+{
+    H5VL_t      *vol_plugin = NULL;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the type of the object and close it in the correct way */
+    switch(H5I_get_type(object_id)) {
+        case H5I_GROUP:
+        case H5I_DATATYPE:
+        case H5I_DATASET:
+            /* check ID */
+            if(H5I_object(object_id) == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object");
+            /* get the plugin pointer */
+            if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(object_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information");
+            /* set the event queue and dxpl IDs to be passed on to the VOL layer */
+            vol_plugin->close_eq_id = eq_id;
+            vol_plugin->close_dxpl_id = H5AC_dxpl_id;
+
+            if(H5I_dec_app_ref(object_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object");
+            break;
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_EQ:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
+        break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oclose_ff() */
 
 #endif /* H5_HAVE_EFF */

@@ -39,6 +39,7 @@ typedef enum H5RQ_type_t {
     HG_ATTR_READ,
     HG_ATTR_WRITE,
     HG_ATTR_EXISTS,
+    HG_ATTR_RENAME,
     HG_ATTR_REMOVE,
     HG_ATTR_CLOSE,
     HG_GROUP_CREATE,
@@ -57,7 +58,13 @@ typedef enum H5RQ_type_t {
     HG_LINK_MOVE,
     HG_LINK_ITERATE,
     HG_LINK_EXISTS,
-    HG_LINK_REMOVE
+    HG_LINK_REMOVE,
+    HG_OBJECT_OPEN,
+    HG_OBJECT_COPY,
+    HG_OBJECT_VISIT,
+    HG_OBJECT_EXISTS,
+    HG_OBJECT_SET_COMMENT,
+    HG_OBJECT_GET_COMMENT
 } H5RQ_type_t;
 
 /* the client IOD VOL request struct */
@@ -122,10 +129,22 @@ typedef struct H5VL_iod_remote_dtype_t {
     hid_t type_id;
 } H5VL_iod_remote_dtype_t;
 
+/* struct that contains the information about a generic IOD object */
+typedef struct H5VL_iod_remote_object_t {
+    /* Do NOT change the order of the parameters */
+    H5I_type_t obj_type;
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    hid_t cpl_id;
+    hid_t type_id;
+    hid_t space_id;
+} H5VL_iod_remote_object_t;
+
 /* a common strcut between all client side objects */
 typedef struct H5VL_iod_object_t {
     H5I_type_t obj_type;
     char *obj_name;
+    char *comment;
     H5VL_iod_request_t *request;
     struct H5VL_iod_file_t *file;
 } H5VL_iod_object_t;

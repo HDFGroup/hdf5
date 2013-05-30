@@ -93,6 +93,11 @@ H5_DLL hid_t H5Aopen_by_name_ff(hid_t loc_id, const char *obj_name, const char *
 H5_DLL herr_t H5Awrite_ff(hid_t attr_id, hid_t dtype_id, const void *buf, 
                           uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Aread_ff(hid_t attr_id, hid_t dtype_id, void *buf, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Arename_ff(hid_t loc_id, const char *old_name, const char *new_name, 
+                           uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Arename_by_name_ff(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+                                   const char *new_attr_name, hid_t lapl_id, 
+                                   uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Adelete_ff(hid_t loc_id, const char *name, uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
                                    hid_t lapl_id, uint64_t trans, hid_t eq_id);
@@ -116,7 +121,25 @@ H5_DLL herr_t H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t ne
 H5_DLL herr_t H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, 
                            uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
-                    uint64_t trans, hid_t eq_id);
+                           uint64_t trans, hid_t eq_id);
+
+H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
+                         hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, 
+                                   hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oset_comment_ff(hid_t obj_id, const char *comment, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
+                                        hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oget_comment_ff(hid_t loc_id, char *comment, size_t bufsize, ssize_t *ret,
+                                uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *comment, size_t bufsize,
+                                        ssize_t *ret, hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
+                         const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, 
+                         uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t eq_id);
+
 
 #endif /* H5_HAVE_EFF */
 

@@ -98,6 +98,7 @@ int main(int argc, char **argv) {
        Internally there is a built in wait on the file_id, which has already been
        completed when we called H5AOwait on the file create request earlier*/
     gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    H5Oset_comment_ff(gid1, "Testing Object Comment", 0, event_q);
     gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     gid3 = H5Gcreate_ff(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
@@ -157,9 +158,11 @@ int main(int argc, char **argv) {
     assert(did1);
 
     /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
-    aid2 = H5Acreate_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", H5T_NATIVE_INT, 
+    aid2 = H5Acreate_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2_tmp", H5T_NATIVE_INT, 
                                 dataspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
+
+    H5Arename_ff(did1, "ATTR2_tmp", "ATTR2", 0, event_q);
 
     H5Awrite_ff(aid2, int_id, a_data, 0, event_q);
 
@@ -382,27 +385,74 @@ int main(int argc, char **argv) {
     file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, event_q);
     assert(file_id);
 
+    assert(H5Ocopy_ff(file_id, "/G1/G2/G3/D1", file_id, "D1_copy", 
+                      H5P_DEFAULT, H5P_DEFAULT, 0, event_q) == 0);
+
+    H5Oexists_by_name_ff(file_id, "G1/G2/G3", &exists, H5P_DEFAULT, 0, event_q);
+    if(exists)
+        printf("Group G3 exists!\n");
+    else
+        printf("Group G3 does NOT exist. This must be the test without a native backend\n");
+
+    gid1 = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
+    assert(gid1);
+    int_id = H5Oopen_ff(file_id, "int", H5P_DEFAULT, 0, event_q);
+    assert(int_id);
+    did1 = H5Oopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
+    assert(did1);
+    aid2 = H5Aopen_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", 
+                              H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+    assert(aid2);
+
+    assert(H5Aclose_ff(aid2, event_q) == 0);
+    assert(H5Oclose_ff(did1, event_q) == 0);
+    assert(H5Oclose_ff(int_id, event_q) == 0);
+    assert(H5Oclose_ff(gid1, event_q) == 0);
+
     /* Open a group G1 on the file. 
        Internally there is a built in wait on the file_id.*/
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
     assert(gid1);
 
+    {
+        ssize_t ret_size;
+        char *comment = NULL;
+
+        H5Oget_comment_ff(gid1, NULL, 0, &ret_size, 0, event_q);
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+        fprintf(stderr, "size of comment is %d\n", ret_size);
+
+        comment = malloc((size_t)ret_size);
+
+        H5Oget_comment_ff(gid1, comment, (size_t)ret_size + 1, &ret_size, 0, event_q);
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+        fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
+        free(comment);
+    }
+
     /* Open a named datatype in the file. 
      * This is implemented synchronously for now. */
     int_id = H5Topen_ff(file_id, "int", H5P_DEFAULT, 0, event_q);
     assert(int_id);
+
     /* Open a dataset D1 on the file in a group hierarchy. 
        Internally there is a built in wait on group G1.*/
     did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
+    assert(H5Dclose(did1) == 0);
 
     /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
     aid2 = H5Aopen_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
     H5Aread_ff(aid2, int_id, ra_data, 0, event_q);
-
     assert(H5Aclose(aid2) == 0);
-    assert(H5Dclose(did1) == 0);
+
     assert(H5Tclose(int_id) == 0);
     assert(H5Gclose(gid1) == 0);
     assert(H5Fclose(file_id) == 0);

@@ -80,6 +80,7 @@ int main(int argc, char **argv) {
     assert(file_id);
 
     gid1 = H5Gcreate2(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Oset_comment(gid1, "Testing Object Comment");
     gid2 = H5Gcreate2(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     gid3 = H5Gcreate2(file_id, "G1/G2/G3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(gid1);
@@ -109,9 +110,10 @@ int main(int argc, char **argv) {
     assert(did1);
 
     /* create an attribute on dataset D1 */
-    aid2 = H5Acreate_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5T_NATIVE_INT, 
+    aid2 = H5Acreate_by_name(file_id, "G1/G2/G3/D1", "ATTR2_tmp", H5T_NATIVE_INT, 
                              dataspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid2);
+    H5Arename(did1, "ATTR2_tmp", "ATTR2");
     H5Awrite(aid2, int_id, data);
 
     did2 = H5Dcreate(file_id,"G1/G2/G3/D2",int_id,dataspaceId,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
@@ -209,24 +211,61 @@ int main(int argc, char **argv) {
 
     file_id = H5Fopen(file_name, H5F_ACC_RDONLY, fapl_id);
     assert(file_id);
+
+    assert(H5Ocopy(file_id, "/G1/G2/G3/D1", file_id, "D1_copy", H5P_DEFAULT, H5P_DEFAULT) == 0);
+
+    exists = H5Oexists_by_name(file_id, "G1/G2/G3", H5P_DEFAULT);
+    if(exists)
+        printf("Group G3 exists!\n");
+    else
+        printf("Group G3 does NOT exist. This must be the test without a native backend\n");
+
+    gid1 = H5Oopen(file_id, "G1", H5P_DEFAULT);
+    assert(gid1);
+    int_id = H5Oopen(file_id, "int", H5P_DEFAULT);
+    assert(int_id);
+    did1 = H5Oopen(file_id,"G1/G2/G3/D1", H5P_DEFAULT);
+    assert(did1);
+    aid2 = H5Aopen_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT);
+    assert(aid2);
+
+    assert(H5Aclose(aid2) == 0);
+    assert(H5Oclose(did1) == 0);
+    assert(H5Oclose(int_id) == 0);
+    assert(H5Oclose(gid1) == 0);
+
     gid1 = H5Gopen2(file_id, "G1", H5P_DEFAULT);
     assert(gid1);
+    {
+        ssize_t ret_size;
+        char *comment = NULL;
+
+        ret_size = H5Oget_comment(gid1, NULL, 0);
+        fprintf(stderr, "size of comment is %d\n", ret_size);
+
+        comment = malloc((size_t)ret_size);
+
+        ret_size = H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
+        fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
+        free(comment);
+    }
     int_id = H5Topen2(file_id, "int", H5P_DEFAULT);
     assert(int_id);
     did1 = H5Dopen2(file_id,"G1/G2/G3/D1", H5P_DEFAULT);
     assert(did1);
-    //aid2 = H5Aopen(did1, "ATTR2", H5P_DEFAULT);
-    aid2 = H5Aopen_by_name(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT);
-    assert(aid2);
+
+    aid2 = H5Aopen(did1, "ATTR2", H5P_DEFAULT);
     H5Aread(aid2, int_id, a_data);
     fprintf(stderr, "Printing Attribute data: ");
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",a_data[i]);
     fprintf(stderr, "\n");
+
     assert(H5Aclose(aid2) == 0);
     assert(H5Dclose(did1) == 0);
     assert(H5Tclose(int_id) == 0);
     assert(H5Gclose(gid1) == 0);
+
     assert(H5Fclose(file_id) == 0);
     H5Pclose(fapl_id);
 
