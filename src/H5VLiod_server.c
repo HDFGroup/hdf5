@@ -308,7 +308,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     while(1) {
         fprintf(stderr, "Server In Loop\n");
         /* Receive new function calls */
-        if(HG_SUCCESS != HG_Handler_process(HG_HANDLER_MAX_IDLE_TIME))
+        if(HG_SUCCESS != HG_Handler_process(HG_HANDLER_MAX_IDLE_TIME, HG_STATUS_IGNORE))
             return FAIL;
         if(shutdown)
             break;
@@ -3288,6 +3288,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
     hg_bulk_block_t bulk_block_handle;
+    hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
@@ -3348,10 +3349,10 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_write(bulk_handle, dest, bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_block_handle, HG_BULK_MAX_IDLE_TIME))
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:
@@ -3402,6 +3403,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hid_t dxpl_id = input->dxpl_id;
     uint32_t cs = input->checksum;
     hg_bulk_block_t bulk_block_handle;
+    hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
@@ -3432,10 +3434,10 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_read(bulk_handle, source, bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
     /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_block_handle, HG_BULK_MAX_IDLE_TIME))
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     /* free the bds block handle */
@@ -4213,6 +4215,7 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t type_id = input->type_id;
     hg_bulk_block_t bulk_block_handle;
+    hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
@@ -4264,10 +4267,10 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_write(bulk_handle, dest, bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_block_handle, HG_BULK_MAX_IDLE_TIME))
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:
@@ -4313,6 +4316,7 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t type_id = input->type_id;
     hg_bulk_block_t bulk_block_handle;
+    hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
     size_t size;
@@ -4343,10 +4347,10 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
 
     /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_read(bulk_handle, source, bulk_block_handle))
+    if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
     /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_block_handle, HG_BULK_MAX_IDLE_TIME))
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     /* free the bds block handle */

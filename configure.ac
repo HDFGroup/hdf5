@@ -2842,7 +2842,7 @@ AC_ARG_ENABLE([eff],
 
 case "X-$enableval" in
   X-yes)
-    AC_CHECK_HEADERS([AXE.h iod_api.h iod_types.h function_shipper.h function_shipper_handler.h network_abstraction.h],
+    AC_CHECK_HEADERS([AXE.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h],
                      [AC_MSG_CHECKING([for EFF support])
                      AC_TRY_COMPILE([#include <AXE.h> #include <iod_api.h> #include <iod_types.h> 
 		                     #include <mercury.h> #include <mercury_handler.h> 

@@ -153,12 +153,6 @@
 /* Define if the compiler understands the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
-/* Define to 1 if you have the <function_shipper.h> header file. */
-#undef HAVE_FUNCTION_SHIPPER_H
-
-/* Define to 1 if you have the <function_shipper_handler.h> header file. */
-#undef HAVE_FUNCTION_SHIPPER_HANDLER_H
-
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 #undef HAVE_GETCONSOLESCREENBUFFERINFO
 
@@ -297,9 +291,6 @@
 
 /* Define to 1 if you have the <na.h> header file. */
 #undef HAVE_NA_H
-
-/* Define to 1 if you have the <network_abstraction.h> header file. */
-#undef HAVE_NETWORK_ABSTRACTION_H
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL

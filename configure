@@ -28627,7 +28627,7 @@ fi
 
 case "X-$enableval" in
   X-yes)
-    for ac_header in AXE.h iod_api.h iod_types.h function_shipper.h function_shipper_handler.h network_abstraction.h
+    for ac_header in AXE.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
