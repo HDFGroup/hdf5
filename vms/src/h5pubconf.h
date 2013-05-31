@@ -99,6 +99,9 @@
 /* Define if the direct I/O virtual file driver should be compiled */
 /* #undef H5_HAVE_DIRECT */
 
+/* Define to 1 if you have the <dirent.h> header file. */
+#define H5_HAVE_DIRENT_H 1
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define H5_HAVE_DLFCN_H 1
 
@@ -196,6 +199,9 @@
 /* Define to 1 if you have the <io.h> header file. */
 /* #undef H5_HAVE_IO_H */
 
+/* Define to 1 if you have the `dl' library (-ldl). */
+#define H5_HAVE_LIBDL 1
+
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 /* #undef H5_HAVE_LIBDMALLOC */
 
@@ -273,6 +279,9 @@
 
 /* Define to 1 if you have the `rand_r' function. */
 /* #define H5_HAVE_RAND_R 1 */
+
+/* Define to 1 if you have the `setjmp' function. */
+#define H5_HAVE_SETJMP 1
 
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define H5_HAVE_SETJMP_H 1

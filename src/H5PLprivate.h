@@ -25,6 +25,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"          /* Generic Functions                    */
 
+#ifndef H5_VMS
 
 /**************************/
 /* Library Private Macros */
@@ -48,6 +49,7 @@
 /* Internal API routines */
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, int type_id);
 H5_DLL htri_t H5PL_no_plugin(void);
+#endif /*H5_VMS*/
 
 #endif /* _H5PLprivate_H */
 

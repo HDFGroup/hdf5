@@ -169,6 +169,12 @@ $ link fheap, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
+       Creating file_image test
+$ ccc  file_image
+$ link file_image, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
        Creating fillval test
 $ ccc  fillval
 $ link fillval, -
@@ -313,6 +319,12 @@ $ type sys$input
        Creating unlink test
 $ ccc  unlink
 $ link unlink, -
+       libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
+       Creating unregister test
+$ ccc  unregister
+$ link unregister, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input

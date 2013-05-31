@@ -22,6 +22,8 @@
 /* Include HDF5 header */
 #include "hdf5.h"
 
+#ifndef H5_VMS
+
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -79,6 +81,7 @@ H5PLUGIN_DLL const void *H5PLget_plugin_info(void);
 #ifdef __cplusplus
 }
 #endif
+#endif /*H5_VMS*/
 
 #endif /* _H5PLextern_H */
 

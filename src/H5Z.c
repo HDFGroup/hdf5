@@ -1325,6 +1325,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
              */
 	    if((fclass_idx = H5Z_find_idx(pline->filter[idx].id)) < 0) {
                 hbool_t issue_error = FALSE;
+#ifndef H5_VMS
 
                 /* Check for "no plugins" indicated" */
 	        if(H5PL_no_plugin())
@@ -1345,7 +1346,9 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
                     else
                         issue_error = TRUE;
                 } /* end else */
-
+#else /*H5_VMS*/
+                issue_error = TRUE;
+#endif /*H5_VMS*/
                 /* Check for error */
                 if(issue_error) {
                     /* Print out the filter name to give more info.  But the name is optional for 
