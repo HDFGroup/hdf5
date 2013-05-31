@@ -34,14 +34,19 @@
 #define UC_CTYPE		short		    /* use case C data type */
 
 /* type declarations */
+typedef enum part_t {
+    UC_READWRITE	=0,	/* both writer and reader */
+    UC_WRITER,			/* writer only */
+    UC_READER			/* reader only */
+} part_t;
 typedef struct options_t {
-    int num_dsets;              /* number of datasets                   */
-    int use_swmr;               /* use swmr open or not 		*/
+    int use_swmr;               /* use swmr open (1) or not 		*/
     int compress;		/* 0: no compress			*/
     int h5_use_chunks;     	/* 0/1: Not use/use chunked dataset     */
     int chunksize;		/* chunks are chunksize^2 planes	*/
     int nplanes;		/* number of planes, default chunksize  */
     char *filename;		/* use case data filename		*/
+    part_t launch;		/* launch writer, reader or both	*/
 } options_t;
 
 /* global variables declarations */

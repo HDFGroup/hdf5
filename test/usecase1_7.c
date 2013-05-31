@@ -67,7 +67,7 @@
 options_t UC_opts;	/* Use Case Options */
 const char *progname_g="usecase1_7";	/* program name */
 
-/* create the use case file for testing.
+/* Create the skeleton use case file for testing.
  * It has one 3d dataset using chunked storage.
  * The dataset is (unlimited, chunksize, chunksize).
  * Dataset type is 2 bytes integer.
@@ -105,8 +105,8 @@ int create_uc_file(void)
     if(H5Pset_chunk(dcpl, 3, chunk_dims) < 0)
         return -1;
 
-    /* create dataset of use case name */
-    if((dsid = H5Dcreate2(fid, UC_opts.filename, UC_DATATYPE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    /* create dataset of progname */
+    if((dsid = H5Dcreate2(fid, progname_g, UC_DATATYPE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
 	return -1;
 
     /* Close everythign */
@@ -151,8 +151,8 @@ int write_uc_file(void)
         return -1;
     }
 
-    /* Open the dataset of the same name */
-    if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) < 0){
+    /* Open the dataset of the program name */
+    if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){
 	fprintf(stderr, "H5Dopen2 failed\n");
 	return -1;
     }
@@ -287,6 +287,7 @@ int read_uc_file(void)
     int		j, k;
     int		nreadererr=0;
     int		nerrs;
+    int		nonewplane;
 
     name = UC_opts.filename;
 
@@ -296,8 +297,8 @@ int read_uc_file(void)
         return -1;
     }
 
-    /* Open the dataset of the same name */
-    if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) < 0){
+    /* Open the dataset of the program name */
+    if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){
 	fprintf(stderr, "H5Dopen2 failed\n");
 	return -1;
     }
@@ -345,8 +346,31 @@ int read_uc_file(void)
     count[0]=1;
     count[1]=count[2]=cz;
     /* quit when all nplanes, default cz, have been read */
+    nonewplane=0;
     while (nplane_old < UC_opts.nplanes ){
-	printf("enter while with nplane_old=%d, dims[0]=%d\n", nplane_old, (int)dims[0]);
+	/* print progress message according to if new planes are availalbe */
+	if (nplane_old < dims[0]) {
+	    if (nonewplane){
+		/* end the previous message */
+		printf("\n");
+		nonewplane=0;
+	    }
+	    printf("reading planes %d to %d\n", nplane_old, (int)dims[0]);
+	}else{
+	    if (nonewplane){
+		printf(".");
+		if (nonewplane>=30){
+		    fprintf(stderr, "waited too long for new plane, quit.\n");
+		    return -1;
+		}
+	    }else{
+		/* print mesg only the first time; dots still no new plane */
+		printf("no new planes to read ");
+	    }
+	    nonewplane++;
+	    /* pause for a second */
+	    sleep(1);
+	}
 	for (nplane=nplane_old; nplane < dims[0]; nplane++){
 	    /* read planes between last old nplanes and current extent */
 	    /* Get the dataset's dataspace */
@@ -404,7 +428,7 @@ int read_uc_file(void)
 	    fprintf(stderr, "H5Fopen failed\n");
 	    return -1;
 	}
-	if((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) < 0){
+	if((dsid = H5Dopen2(fid, progname_g, H5P_DEFAULT)) < 0){
 	    fprintf(stderr, "H5Dopen2 failed\n");
 	    return -1;
 	}
@@ -432,7 +456,8 @@ int read_uc_file(void)
 int
 main(int argc, char *argv[])
 {
-    pid_t childpid, mypid, tmppid;
+    pid_t childpid=0;
+    pid_t mypid, tmppid;
     int	child_status;
     int child_wait_option=0;
     int ret_value = 0;
@@ -443,8 +468,6 @@ main(int argc, char *argv[])
     HDmemset(&UC_opts, 0, sizeof(options_t));
     UC_opts.h5_use_chunks = 1;	/* use chunked datasets */
     UC_opts.chunksize = Chunksize_DFT;
-    UC_opts.num_dsets = 1;
-    UC_opts.compress = 0;	/* no compression */
     UC_opts.use_swmr = 1;	/* use swmr open */
 
     /* parse options */
@@ -452,61 +475,75 @@ main(int argc, char *argv[])
 	Hgoto_error(1);
     }
 
-    /* data file name is <progname>.h5 */
-    if ((UC_opts.filename=(char*)HDmalloc(HDstrlen(progname_g)+4))==NULL) {
-	fprintf(stderr, "malloc: failed\n");
-	Hgoto_error(1);
-    };
-    HDstrcpy(UC_opts.filename, progname_g);
-    HDstrcat(UC_opts.filename, ".h5");
+    /* ==============================================================*/
+    /* UC_READWRITE: create datafile, launch both reader and writer. */
+    /* UC_WRITER:    create datafile, skip reader, launch writer.    */
+    /* UC_READER:    skip create, launch reader, exit.               */
+    /* ==============================================================*/
+    /* ============*/
+    /* Create file */
+    /* ============*/
+    if (UC_opts.launch != UC_READER){
+	printf("Creating skeleton data file for test...\n");
+	if (create_uc_file() < 0){
+	    fprintf(stderr, "***encounter error\n");
+	    Hgoto_error(1);
+	}else
+	    printf("File created.\n");
+    }
 
-    /* generate files */
-    printf("Creating data file for test...\n");
-    if (create_uc_file() < 0){
-	fprintf(stderr, "***encounter error\n");
-	Hgoto_error(1);
-    }else
-	printf("File created.\n");
-
-    /* fork process */
-    if((childpid = fork()) < 0) {
-	perror("fork");
-	Hgoto_error(1);
+    if (UC_opts.launch==UC_READWRITE){
+	/* fork process */
+	if((childpid = fork()) < 0) {
+	    perror("fork");
+	    Hgoto_error(1);
+	};
     };
     mypid = getpid();
 
-    /* child process becomes the reader */
-    if(0 == childpid) {
-	printf("%d: become reader process\n", mypid);
-	if (read_uc_file() < 0){
-	    fprintf(stderr, "read_uc_file encountered error\n");
-	    Hgoto_error(1);
+    /* ============= */
+    /* launch reader */
+    /* ============= */
+    if (UC_opts.launch != UC_WRITER){
+	/* child process launch the reader */
+	if(0 == childpid) {
+	    printf("%d: launch reader process\n", mypid);
+	    if (read_uc_file() < 0){
+		fprintf(stderr, "read_uc_file encountered error\n");
+		exit(1);
+	    }
+	    exit(0);
 	}
-	exit(0);
     }
 
-    /* this process continues as the writer */
-    printf("%d: child pid is %d\n", mypid, childpid);
+    /* ============= */
+    /* launch writer */
+    /* ============= */
+    /* this process continues to launch the writer */
     printf("%d: continue as the writer process\n", mypid);
     if (write_uc_file() < 0){
 	fprintf(stderr, "write_uc_file encountered error\n");
 	Hgoto_error(1);
     }
 
-    /* Collect exit code of child process */
-    if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0){
-	perror("waitpid");
-	Hgoto_error(1);
-    }
-    if (WIFEXITED(child_status)){
-	if ((child_ret_value=WEXITSTATUS(child_status)) != 0){
-	    printf("%d: child process exited with non-zero code (%d)\n",
-		mypid, child_ret_value);
+    /* ================================================ */
+    /* If readwrite, collect exit code of child process */
+    /* ================================================ */
+    if (UC_opts.launch == UC_READWRITE){
+	if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0){
+	    perror("waitpid");
+	    Hgoto_error(1);
+	}
+	if (WIFEXITED(child_status)){
+	    if ((child_ret_value=WEXITSTATUS(child_status)) != 0){
+		printf("%d: child process exited with non-zero code (%d)\n",
+		    mypid, child_ret_value);
+		Hgoto_error(2);
+	    }
+	} else {
+	    printf("%d: child process terminated abnormally\n", mypid);
 	    Hgoto_error(2);
 	}
-    } else {
-	printf("%d: child process terminated abnormally\n", mypid);
-	Hgoto_error(2);
     }
     
 done:
