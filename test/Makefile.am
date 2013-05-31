@@ -50,7 +50,8 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            freespace mf farray earray btree2 fheap file_image
 
 bin_PROGRAMS=swmr_generator swmr_reader swmr_writer swmr_remove_reader \
-    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer
+    swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
+    usecase1_7 
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
@@ -158,7 +159,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy                                     \
-    swmr_data.h5                                                     \
+    swmr_data.h5 usecase1_7.h5                                       \
     flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
     flushrefresh_VERIFICATION_DONE
@@ -168,6 +169,9 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
     trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
     tvlstr.c tvltypes.c
+
+# Sources for Use Cases
+usecase1_7_SOURCES=usecase1_7.c usecase_common.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh \
