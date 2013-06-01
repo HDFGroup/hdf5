@@ -61,11 +61,11 @@
  * Modified:
  */
 
-#include "usecase.h"
+#include "use.h"
 
 /* Global Variable definitions */
 options_t UC_opts;	/* Use Case Options */
-const char *progname_g="usecase1_7";	/* program name */
+const char *progname_g="use_append_chunk";	/* program name */
 
 /* Create the skeleton use case file for testing.
  * It has one 3d dataset using chunked storage.
@@ -332,6 +332,8 @@ int read_uc_file(void)
     if (dims[1] != memdims[1] || dims[2] != memdims[2]){
 	fprintf(stderr, "dataset dimension is not as expected. Got dims=(%ld,%ld,%ld)\n",
 	    (long)dims[0], (long)dims[1], (long)dims[2]);
+	fprintf(stderr, "But memdims=(%ld,%ld,%ld)\n",
+	    (long)memdims[0], (long)memdims[1], (long)memdims[2]);
 	return -1;
     }
     

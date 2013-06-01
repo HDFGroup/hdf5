@@ -1121,9 +1121,9 @@
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c
-./test/usecase1_7.c
-./test/usecase_common.c
-./test/usecase.h
+./test/use_append_chunk.c
+./test/use_common.c
+./test/use.h
 ./test/vfd.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5

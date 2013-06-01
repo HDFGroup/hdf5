@@ -12,7 +12,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "usecase.h"
+#include "use.h"
 
 void
 usage(const char *prog)
