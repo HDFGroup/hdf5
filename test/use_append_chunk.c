@@ -122,9 +122,10 @@ int create_uc_file(void)
 }
 
 
-/* Write planes to the dataset in the use case file.
- * Fill each plan with plan numbers and then write it to the nth plane.
- * Increase the plane number and repeat till end of dataset.
+/* Append planes, each of (1,chunksize,chunksize) to the dataset.
+ * Fill each plan with the plane number and then write it at the nth plane.
+ * Increase the plane number and repeat till the end of dataset, when it
+ * reaches chunksize long. End product is a chunksize^3 cube.
  *
  * Return: 0 succeed; -1 fail.
  */
@@ -260,13 +261,13 @@ int write_uc_file(void)
 }
 
 
-/* Read planes from the dataset in the use case file.
+/* Read planes from the dataset.
  * It expects the dataset is being changed (growing).
  * It checks the unlimited dimension (1st one). When it increases,
- * it will try read the new plane and verify the data correctness.
+ * it will read in the new planes, one by one, and verify the data correctness.
  * (The nth plan should contain all "n".)
- * When the unlimited dimension grows to the chunksize (it becomes
- * a cube), that is the end of data. It will then return.
+ * When the unlimited dimension grows to the chunksize (it becomes a cube),
+ * that is the expected end of data, the reader exits.
  *
  * Return: 0 succeed; -1 fail.
  */
