@@ -41,10 +41,10 @@ How to run the program:
     Simplest way is
     $ use_append_chunk
 
-    It creates a skeleton dataset (0,254,254) of shorts. Then fork off a
-    process, which becomes the reader process to read planes from the dataset,
-    while the original process continues as the writer process to append
-    planes onto the dataset.
+    It creates a skeleton dataset (0,256,256) of shorts. Then fork off
+    a process, which becomes the reader process to read planes from the
+    dataset, while the original process continues as the writer process
+    to append planes onto the dataset.
 
     Other possible options:
 
@@ -58,8 +58,8 @@ How to run the program:
     $ use_append_chunk -f /gpfs/tmp/append_data.h5
 
     The data file is /gpfs/tmp/append_data.h5. This allows two independent
-    processes in separated compute nodes to access the datafile on the shared
-    /gpfs file system.
+    processes in separated compute nodes to access the datafile on the
+    shared /gpfs file system.
 
 
     3. -l option: launch only the reader or writer process.
@@ -69,8 +69,10 @@ How to run the program:
     In node X, launch the writer process, which creates the data file
     and appends to it.
     In node Y, launch the read process to read the data file.
+
     Note that you need to time the read process to start AFTER the write
-    process has created the skeleton data file. Otherwise, the reader will encounter errors such as data file not found.
+    process has created the skeleton data file. Otherwise, the reader
+    will encounter errors such as data file not found.
 
 
     4. -s option: use SWMR file access mode or not. Default is yes.
@@ -82,7 +84,8 @@ How to run the program:
     access.
 
 Test Shell Script:
-    The Use Case program is installed in the test/ directory and is compiled
-    as part of the make process. A test script (test_usecases.sh) is installed
-    in the same directory to test the use case programs. The test script is
-    rather basic and is more for demonstrating how to use the program.
+    The Use Case program is installed in the test/ directory and is
+    compiled as part of the make process. A test script (test_usecases.sh)
+    is installed in the same directory to test the use case programs. The
+    test script is rather basic and is more for demonstrating how to
+    use the program.
