@@ -70,6 +70,7 @@ build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/test_plugin.sh.in \
+	$(srcdir)/test_usecases.sh.in \
 	$(srcdir)/testcheck_version.sh.in $(srcdir)/testerror.sh.in \
 	$(srcdir)/testflushrefresh.sh.in $(srcdir)/testlibinfo.sh.in \
 	$(srcdir)/testlinks_env.sh.in $(top_srcdir)/bin/depcomp \
@@ -99,7 +100,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testcheck_version.sh testerror.sh \
 	testflushrefresh.sh H5srcdir_str.h testlibinfo.sh \
-	testlinks_env.sh test_plugin.sh
+	testlinks_env.sh test_plugin.sh test_usecases.sh
 CONFIG_CLEAN_VPATH_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -949,7 +950,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 # Test script for error_test and err_compat
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh \
 	testlinks_env.sh $(srcdir)/testswmr.sh testflushrefresh.sh \
-	$(am__append_1)
+	test_usecases.sh $(am__append_1)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
 	links_env$(EXEEXT) $(am__append_2)
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -1081,6 +1082,8 @@ testlibinfo.sh: $(top_builddir)/config.status $(srcdir)/testlibinfo.sh.in
 testlinks_env.sh: $(top_builddir)/config.status $(srcdir)/testlinks_env.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 test_plugin.sh: $(top_builddir)/config.status $(srcdir)/test_plugin.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+test_usecases.sh: $(top_builddir)/config.status $(srcdir)/test_usecases.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)

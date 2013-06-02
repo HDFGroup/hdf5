@@ -1088,6 +1088,7 @@
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
 ./test/test_plugin.sh.in
+./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh
 ./test/tfile.c
