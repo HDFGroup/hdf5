@@ -30992,8 +30992,8 @@ fi
 ## Enable strict file format checks
 ##
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking Whether to perform strict file format checks" >&5
-$as_echo_n "checking Whether to perform strict file format checks... " >&6; };
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to perform strict file format checks" >&5
+$as_echo_n "checking whether to perform strict file format checks... " >&6; };
 # Check whether --enable-strict-format-checks was given.
 if test "${enable_strict_format_checks+set}" = set; then :
   enableval=$enable_strict_format_checks; STRICT_CHECKS=$enableval
@@ -31029,8 +31029,8 @@ esac
 ## ----------------------------------------------------------------------
 ## Enable embedded library information
 ##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking Whether to have library information embedded in the executables" >&5
-$as_echo_n "checking Whether to have library information embedded in the executables... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to have library information embedded in the executables" >&5
+$as_echo_n "checking whether to have library information embedded in the executables... " >&6; }
 # Check whether --enable-embedded-libinfo was given.
 if test "${enable_embedded_libinfo+set}" = set; then :
   enableval=$enable_embedded_libinfo; enable_embedded_libinfo=$enableval
