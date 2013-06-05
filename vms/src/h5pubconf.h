@@ -236,7 +236,7 @@
 /* #undef H5_HAVE_LIBSZ */
 
 /* Define to 1 if you have the `z' library (-lz). */
-/* #undef H5_HAVE_LIBZ */
+#define H5_HAVE_LIBZ 1
 
 /* Define to 1 if you have the `longjmp' function. */
 #define H5_HAVE_LONGJMP 1
