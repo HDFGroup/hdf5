@@ -64,7 +64,9 @@ SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
+TEST_P_DIR=./testfiles
 TESTDIR=./testfiles/pbits
+test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
