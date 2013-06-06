@@ -60,7 +60,7 @@ $ ffiles= "H5_ff_F90.f90, H5_ff.f90, H5Aff.f90, H5Dff.f90, H5Eff.f90,"+-
           "H5Fff.f90, H5Gff.f90, H5Iff.f90, H5Pff.f90, H5Rff.f90, H5Sff.f90,"+-
           "H5Tff.f90, H5Zff.f90, H5_DBLE_InterfaceExclude.f90, H5_DBLE_InterfaceInclude.f90,"+-
           "HDF5.f90"
-$ ffiles_F90="H5Aff_F90.f90, H5Dff_F90.f90, H5Eff_F90.f90, H5Lff_F90.f90,"+-
+$ ffiles_F90="H5Aff_F90.f90, H5Dff_F90.f90, H5Eff_F90.f90, H5Fff_F90.f90, H5Lff_F90.f90,"+-
              "H5Off_F90.f90, H5Pff_F90.f90, H5Rff_F90.f90, H5Tff_F90.f90"
 $ fobj="H5f90global, "+-
        "H5fortran_types, H5_ff_F90, H5_ff, H5Aff, H5Dff, H5Eff,"+-
