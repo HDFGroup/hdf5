@@ -29,7 +29,7 @@ $ type sys$input
        Creating and running H5test_kind to generate H5fortran_detect.f90
 $!
 $ fff  H5test_kind_sizeof.f90
-$ link "H5test_kind_sizeof
+$ link H5test_kind_sizeof
 $ define/user_mode sys$output H5fortran_detect.f90
 $ run  H5test_kind_sizeof
 $!
