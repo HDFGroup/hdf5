@@ -276,6 +276,8 @@ $SRC_H5DUMP_TESTFILES/tno-subset.ddl
 $SRC_H5DUMP_TESTFILES/tnullspace.ddl
 $SRC_H5DUMP_TESTFILES/trawdatafile.ddl
 $SRC_H5DUMP_TESTFILES/trawdatafile.exp
+$SRC_H5DUMP_TESTFILES/trawssetfile.ddl
+$SRC_H5DUMP_TESTFILES/trawssetfile.exp
 $SRC_H5DUMP_TESTFILES/zerodim.ddl
 $SRC_H5DUMP_TESTFILES/tordergr1.ddl
 $SRC_H5DUMP_TESTFILES/tordergr2.ddl
@@ -875,6 +877,7 @@ TOOLTEST tnoattrdata.ddl --enable-error-stack -A -o tattr.h5
 TOOLTEST2 trawdatafile.exp --enable-error-stack -y -o trawdatafile.txt packedbits.h5
 TOOLTEST2 tnoddlfile.exp --enable-error-stack -O -y -o tnoddlfile.txt packedbits.h5
 TOOLTEST2A twithddlfile.exp twithddl.exp --enable-error-stack --ddl=twithddl.txt -y -o twithddlfile.txt packedbits.h5
+TOOLTEST2 trawssetfile.exp --enable-error-stack -d "/dset1[1,1;;;]" -y -o trawssetfile.txt tdset.h5
 
 # test for maximum display datasets
 TOOLTEST twidedisplay.ddl --enable-error-stack -w0 packedbits.h5

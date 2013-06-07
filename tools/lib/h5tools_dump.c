@@ -314,13 +314,13 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                     if (region_space >= 0) {
                         if (h5tools_is_zero(memref, H5Tget_size(type))) {
                             ctx->need_prefix = TRUE;
-                            h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+                            h5tools_simple_prefix(rawoutstream, info, ctx, curr_pos, 0);
 
                             /* Render the region element begin */
                             h5tools_str_reset(&buffer);
                             h5tools_str_append(&buffer, "NULL");
 
-                            dimension_break = h5tools_render_element(stream, info,
+                            dimension_break = h5tools_render_element(rawoutstream, info,
                                        ctx, &buffer, &curr_pos, ncols, i, elmt_counter);
                         }
                         else {
@@ -328,25 +328,25 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                                 HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Rget_name failed");
 
                             ctx->need_prefix = TRUE;
-                            h5tools_simple_prefix(stream, info, ctx, curr_pos+i, 0);
+                            h5tools_simple_prefix(rawoutstream, info, ctx, curr_pos+i, 0);
 
                             /* Render the region element begin */
                             h5tools_str_reset(&buffer);
                             h5tools_str_append(&buffer, info->dset_format, ref_name);
 
-                            dimension_break = h5tools_render_element(stream, info,
+                            dimension_break = h5tools_render_element(rawoutstream, info,
                                        ctx, &buffer, &curr_pos, ncols, i, elmt_counter);
 
                             region_type = H5Sget_select_type(region_space);
                             if(region_type == H5S_SEL_POINTS)
                                 /* Print point information */
                                 dimension_break = h5tools_dump_region_data_points(
-                                                       region_space, region_id, stream, info, ctx,
+                                                       region_space, region_id, rawoutstream, info, ctx,
                                                        &buffer, &curr_pos, ncols, i, elmt_counter);
                             else if(region_type == H5S_SEL_HYPERSLABS)
                                 /* Print block information */
                                 dimension_break = h5tools_dump_region_data_blocks(
-                                                       region_space, region_id, stream, info, ctx,
+                                                       region_space, region_id, rawoutstream, info, ctx,
                                                        &buffer, &curr_pos, ncols, i, elmt_counter);
                             else
                                 HERROR(H5E_tools_g, H5E_tools_min_id_g, "invalid region type");
@@ -1790,7 +1790,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         if(!sset)
             status = h5tools_dump_simple_dset(rawdatastream, info, ctx, dset, p_type);
         else
-            status = h5tools_dump_simple_subset(stream, info, ctx, dset, p_type, sset);
+            status = h5tools_dump_simple_subset(rawdatastream, info, ctx, dset, p_type, sset);
     }
     else
         /* space is H5S_NULL */
