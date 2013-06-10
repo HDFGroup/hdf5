@@ -132,7 +132,7 @@ MACRO (TARGET_C_PROPERTIES wintarget addcompileflags addlinkflags)
               LINK_FLAGS "${addlinkflags}"
       ) 
     ELSE (BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (${forttarget}
+      SET_TARGET_PROPERTIES (${wintarget}
           PROPERTIES
               COMPILE_FLAGS "${addcompileflags}"
               LINK_FLAGS "${addlinkflags}"
@@ -151,7 +151,7 @@ MACRO (TARGET_MSVC_PROPERTIES wintarget addcompileflags addlinkflags)
               LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
       ) 
     ELSE (BUILD_SHARED_LIBS)
-      SET_TARGET_PROPERTIES (${forttarget}
+      SET_TARGET_PROPERTIES (${wintarget}
           PROPERTIES
               COMPILE_FLAGS "${addcompileflags}"
               LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
