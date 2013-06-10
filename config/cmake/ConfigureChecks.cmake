@@ -190,7 +190,7 @@ ENDIF (WINDOWS)
 # something not quite correct with the actual test implementation. This affects
 # the 'dt_arith' test and most likely lots of other code
 # ----------------------------------------------------------------------------
-#SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
+SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
 
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
