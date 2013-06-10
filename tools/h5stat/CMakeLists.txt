@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5stat ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat.c)
 TARGET_NAMING (h5stat ${LIB_TYPE})
+TARGET_C_PROPERTIES (h5stat " " " ")
 TARGET_LINK_LIBRARIES (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_TARGET_PROPERTIES (h5stat PROPERTIES FOLDER tools)
 
@@ -29,6 +30,7 @@ IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5stat_gentest ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/h5stat_gentest.c)
     TARGET_NAMING (h5stat_gentest ${LIB_TYPE})
+    TARGET_C_PROPERTIES (h5stat_gentest " " " ")
     TARGET_LINK_LIBRARIES (h5stat_gentest ${HDF5_LIB_TARGET})
     SET_TARGET_PROPERTIES (h5stat_gentest PROPERTIES FOLDER generator/tools)
     

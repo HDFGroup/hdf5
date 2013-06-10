@@ -2398,6 +2398,7 @@
 
 ./CMakeLists.txt
 ./CTestConfig.cmake
+./UserMacros.cmake
 ./c++/CMakeLists.txt
 ./c++/examples/CMakeLists.txt
 ./c++/src/CMakeLists.txt

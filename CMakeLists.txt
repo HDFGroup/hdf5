@@ -351,6 +351,8 @@ ENDIF (WIN32)
 
 IF (MSVC)
   SET (CMAKE_MFC_FLAG 0)
+  SET (WIN_COMPILE_FLAGS "/MD")
+  SET (WIN_LINK_FLAGS "")
 ENDIF (MSVC)
 
 SET (MAKE_SYSTEM)
@@ -520,6 +522,11 @@ IF (HDF5_USE_18_API_DEFAULT)
   SET (H5_USE_18_API_DEFAULT 1)
   SET (DEFAULT_API_VERSION "v18")
 ENDIF (HDF5_USE_18_API_DEFAULT)
+
+#-----------------------------------------------------------------------------
+# Include user macros
+#-----------------------------------------------------------------------------
+INCLUDE (UserMacros.cmake)
 
 #-----------------------------------------------------------------------------
 # Options for HDF5 Filters
