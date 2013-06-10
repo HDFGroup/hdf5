@@ -1006,7 +1006,7 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
         if(NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_GROUP))) {
             if(last_comp) {
                 if(NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATASET)))
-                   //&& NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATATYPE)))
+                    //&& NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATATYPE)))
                     break;
             }
             else {

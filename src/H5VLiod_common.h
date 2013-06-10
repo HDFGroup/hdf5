@@ -139,6 +139,7 @@ MERCURY_GEN_PROC(dset_set_extent_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod
                  ((dims_t)(dims)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(dset_io_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh)) 
                  ((iod_obj_id_t)(iod_id)) ((uint64_t)(parent_axe_id))
+                 ((hid_t)(dset_type_id)) ((hid_t)(mem_type_id))
                  ((hid_t)(space_id)) ((hid_t)(dxpl_id)) ((uint32_t)(checksum))
                  ((hg_bulk_t)(bulk_handle)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint32_t)(cs)))

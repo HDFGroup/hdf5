@@ -14,9 +14,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apublic.h"		/* Attributes				*/
+#include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -49,10 +51,19 @@ static hbool_t shutdown = FALSE;
 
 #define EEXISTS 1
 
+H5FL_BLK_EXTERN(type_conv);
+
 static herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, 
                                        iod_handle_t loc_handle, const char *path, 
                                        hbool_t create_interm_grps, char **last_comp, 
                                        iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
+
+#if 0
+static herr_t H5VL_iod_typeinfo_init(hid_t dset_type_id, const H5D_dxpl_cache_t *dxpl_cache,
+                                     hid_t dxpl_id, hid_t mem_type_id, hbool_t do_write,
+                                     H5D_type_info_t *type_info);
+static herr_t H5VL_iod_typeinfo_term(const H5D_type_info_t *type_info);
+#endif
 
 static void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 
@@ -3287,13 +3298,16 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_t bulk_handle = input->bulk_handle;
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
+    hid_t src_id = input->dset_type_id;
+    hid_t dst_id = input->mem_type_id;
     hg_bulk_block_t bulk_block_handle;
     hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
-    size_t size;
+    size_t size, buf_size, src_size, dst_size;
     void *buf;
     uint32_t cs = 0;
+    size_t nelmts;
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
@@ -3311,7 +3325,23 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
     size = HG_Bulk_handle_get_size(bulk_handle);
     fprintf(stderr, "Start dataset Read of size %d\n", size);
-    if(NULL == (buf = malloc(size)))
+
+    nelmts = (size_t)H5Sget_simple_extent_npoints(space_id);
+    src_size = H5Tget_size(src_id);
+    dst_size = H5Tget_size(dst_id);
+
+    /* adjust buffer size for datatype conversion */
+    if(src_size > dst_size) {
+        buf_size = src_size * nelmts;
+        fprintf(stderr, "Adjusted Buffer size because of datatype conversion from %d to %d: ", 
+                size, buf_size);        
+    }
+    else {
+        buf_size = dst_size * nelmts;
+        assert(buf_size == size);
+    }
+
+    if(NULL == (buf = malloc(buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
     mem_desc.nfrag = 1;
@@ -3326,11 +3356,11 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     
     {
         int i;
-        hbool_t flag;
+        hbool_t flag = FALSE;
         int *buf_ptr = (int *)buf;
 
 #if H5_DO_NATIVE
-    ret_value = H5Dread(iod_oh.cookie, H5T_NATIVE_INT, H5S_ALL, space_id, dxpl_id, buf);
+    ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
 #else
     for(i=0;i<60;++i)
         buf_ptr[i] = i;
@@ -3344,6 +3374,9 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
         cs = H5_checksum_fletcher32(buf, size);
         fprintf(stderr, "Checksum Generated for data at server: %u\n", cs);
     }
+
+    if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
     /* Create a new block handle to write the data */
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
@@ -3402,13 +3435,15 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
     uint32_t cs = input->checksum;
+    hid_t src_id = input->mem_type_id;
+    hid_t dst_id = input->dset_type_id;
     hg_bulk_block_t bulk_block_handle;
     hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
-    size_t size;
+    size_t size, buf_size, src_size, dst_size;
     void *buf;
-    ssize_t ret;
+    size_t nelmts;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
@@ -3428,7 +3463,23 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Read bulk data here and wait for the data to be here  */
     size = HG_Bulk_handle_get_size(bulk_handle);
-    if(NULL == (buf = malloc(size)))
+
+    nelmts = (size_t)H5Sget_simple_extent_npoints(space_id);
+    src_size = H5Tget_size(src_id);
+    dst_size = H5Tget_size(dst_id);
+
+    /* adjust buffer size for datatype conversion */
+    if(src_size < dst_size) {
+        buf_size = dst_size * nelmts;
+        fprintf(stderr, "Adjusted Buffer size because of datatype conversion from %d to %d: ", 
+                size, buf_size);        
+    }
+    else {
+        buf_size = src_size * nelmts;
+        assert(buf_size == size);
+    }
+
+    if(NULL == (buf = malloc(buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
@@ -3443,6 +3494,24 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     /* free the bds block handle */
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+
+#if 0
+    /* Fill the DXPL cache values for later use */
+    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
+    /* Set up datatype info for operation */
+    if(H5VL_iod_typeinfo_init(input->dset_type_id, dxpl_cache, dxpl_id, 
+                              input->mem_type_id, TRUE, &type_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+    type_info_init = TRUE;
+
+    if(!type_info->is_xform_noop || !type_info->is_conv_noop) {
+        /* type conversion is needed */
+    }
+#endif
+
+    if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
     { 
         int i;
@@ -3472,6 +3541,11 @@ done:
     fprintf(stderr, "Done with dset write, sending %d response to client\n", ret_value);
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+#if 0
+    /* Shut down datatype info for operation */
+    if(type_info_init && H5VL_iod_typeinfo_term(&type_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+#endif
 
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
@@ -5625,5 +5699,194 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_typeinfo_init
+ *
+ * Purpose:	Routine for determining correct datatype information for
+ *              each I/O action.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_typeinfo_init(hid_t dset_type_id, const H5D_dxpl_cache_t *dxpl_cache,
+                       hid_t dxpl_id, hid_t mem_type_id, hbool_t do_write,
+                       H5D_type_info_t *type_info)
+{
+    const H5T_t	*src_type;              /* Source datatype */
+    const H5T_t	*dst_type;              /* Destination datatype */
+    herr_t ret_value = SUCCEED;	        /* Return value	*/
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check args */
+    HDassert(type_info);
+
+    /* Initialize type info safely */
+    HDmemset(type_info, 0, sizeof(*type_info));
+
+    /* Get the memory & dataset datatypes */
+    if(NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(NULL == (type_info->dset_type = (const H5T_t *)H5I_object_verify(dset_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    if(do_write) {
+        src_type = type_info->mem_type;
+        dst_type = type_info->dset_type;
+        type_info->src_type_id = mem_type_id;
+        type_info->dst_type_id = dset_type_id;
+    } /* end if */
+    else {
+        src_type = type_info->dset_type;
+        dst_type = type_info->mem_type;
+        type_info->src_type_id = dset_type_id;
+        type_info->dst_type_id = mem_type_id;
+    } /* end else */
+
+    /*
+     * Locate the type conversion function and data space conversion
+     * functions, and set up the element numbering information. If a data
+     * type conversion is necessary then register datatype atoms. Data type
+     * conversion is necessary if the user has set the `need_bkg' to a high
+     * enough value in xfer_parms since turning off datatype conversion also
+     * turns off background preservation.
+     */
+    if(NULL == (type_info->tpath = H5T_path_find(src_type, dst_type, NULL, NULL, dxpl_id, FALSE)))
+	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
+
+    /* Precompute some useful information */
+    type_info->src_type_size = H5T_get_size(src_type);
+    type_info->dst_type_size = H5T_get_size(dst_type);
+    type_info->max_type_size = MAX(type_info->src_type_size, type_info->dst_type_size);
+    type_info->is_conv_noop = H5T_path_noop(type_info->tpath);
+    type_info->is_xform_noop = H5Z_xform_noop(dxpl_cache->data_xform_prop);
+    if(type_info->is_xform_noop && type_info->is_conv_noop) {
+        type_info->cmpd_subset = NULL;
+        type_info->need_bkg = H5T_BKG_NO;
+    } /* end if */
+    else {
+        size_t	target_size;		/* Desired buffer size	*/
+
+        /* Check if the datatypes are compound subsets of one another */
+        type_info->cmpd_subset = H5T_path_compound_subset(type_info->tpath);
+
+        /* Check if we need a background buffer */
+        if(do_write && H5T_detect_class(type_info->dset_type, H5T_VLEN, FALSE))
+            type_info->need_bkg = H5T_BKG_YES;
+        else {
+            H5T_bkg_t path_bkg;     /* Type conversion's background info */
+
+            if((path_bkg = H5T_path_bkg(type_info->tpath))) {
+                /* Retrieve the bkgr buffer property */
+                type_info->need_bkg = dxpl_cache->bkgr_buf_type;
+                type_info->need_bkg = MAX(path_bkg, type_info->need_bkg);
+            } /* end if */
+            else
+                type_info->need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
+        } /* end else */
+
+
+        /* Set up datatype conversion/background buffers */
+
+        /* Get buffer size from DXPL */
+        target_size = dxpl_cache->max_temp_buf;
+
+        /* If the buffer is too small to hold even one element, try to make it bigger */
+        if(target_size < type_info->max_type_size) {
+            hbool_t default_buffer_info;    /* Whether the buffer information are the defaults */
+
+            /* Detect if we have all default settings for buffers */
+            default_buffer_info = (hbool_t)((H5D_TEMP_BUF_SIZE == dxpl_cache->max_temp_buf)
+                    && (NULL == dxpl_cache->tconv_buf) && (NULL == dxpl_cache->bkgr_buf));
+
+            /* Check if we are using the default buffer info */
+            if(default_buffer_info)
+                /* OK to get bigger for library default settings */
+                target_size = type_info->max_type_size;
+            else
+                /* Don't get bigger than the application has requested */
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
+        } /* end if */
+
+        /* Compute the number of elements that will fit into buffer */
+        type_info->request_nelmts = target_size / type_info->max_type_size;
+
+        /* Sanity check elements in temporary buffer */
+        if(type_info->request_nelmts == 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
+
+        /*
+         * Get a temporary buffer for type conversion unless the app has already
+         * supplied one through the xfer properties. Instead of allocating a
+         * buffer which is the exact size, we allocate the target size.  The
+         * malloc() is usually less resource-intensive if we allocate/free the
+         * same size over and over.
+         */
+        if(NULL == (type_info->tconv_buf = (uint8_t *)dxpl_cache->tconv_buf)) {
+            /* Allocate temporary buffer */
+            if(NULL == (type_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+            type_info->tconv_buf_allocated = TRUE;
+        } /* end if */
+        if(type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)dxpl_cache->bkgr_buf)) {
+            size_t	bkg_size;		/* Desired background buffer size	*/
+
+            /* Compute the background buffer size */
+            /* (don't try to use buffers smaller than the default size) */
+            bkg_size = type_info->request_nelmts * type_info->dst_type_size;
+            if(bkg_size < dxpl_cache->max_temp_buf)
+                bkg_size = dxpl_cache->max_temp_buf;
+
+            /* Allocate background buffer */
+            /* (Need calloc()-like call since memory needs to be initialized) */
+            if(NULL == (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for background conversion")
+            type_info->bkg_buf_allocated = TRUE;
+        } /* end if */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_typeinfo_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_typeinfo_term
+ *
+ * Purpose:	Common logic for terminating a type info object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Thursday, March  6, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_typeinfo_term(const H5D_type_info_t *type_info)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check for releasing datatype conversion & background buffers */
+    if(type_info->tconv_buf_allocated) {
+        HDassert(type_info->tconv_buf);
+        (void)H5FL_BLK_FREE(type_conv, type_info->tconv_buf);
+    } /* end if */
+    if(type_info->bkg_buf_allocated) {
+        HDassert(type_info->bkg_buf);
+        (void)H5FL_BLK_FREE(type_conv, type_info->bkg_buf);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL_iod_typeinfo_term() */
+#endif
 
 #endif /* H5_HAVE_EFF */

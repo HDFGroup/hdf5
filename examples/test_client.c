@@ -20,7 +20,9 @@ int main(int argc, char **argv) {
     hid_t aid1, aid2, aid3;
     hid_t fapl_id, dxpl_id;
     const unsigned int nelem=60;
-    int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL, *data3 = NULL;
+    int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL;
+    int16_t *data3 = NULL;
+    int16_t *r3_data = NULL;
     int *a_data = NULL, *ra_data = NULL;
     unsigned int i = 0;
     hsize_t dims[1];
@@ -58,32 +60,41 @@ int main(int argc, char **argv) {
     fapl_id = H5Pcreate (H5P_FILE_ACCESS);
     H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
 
-    /* allocate and initialize 3 arrays for dataset writes, and 2 arrays 
-       for dataset reads. 
+    /* allocate and initialize arrays for dataset & attribute writes and reads. 
        The write arrays are intialized to contain 60 integers (0-59). 
        The read arrays are intialized to contain 60 integers all 0s. */
     data = malloc (sizeof(int)*nelem);
     data2 = malloc (sizeof(int)*nelem);
-    data3 = malloc (sizeof(int)*nelem);
+    data3 = malloc (sizeof(int16_t)*nelem);
     a_data = malloc (sizeof(int)*nelem);
     ra_data = malloc (sizeof(int)*nelem);
     r_data = malloc (sizeof(int)*nelem);
     r2_data = malloc (sizeof(int)*nelem);
+    r3_data = malloc (sizeof(int16_t)*nelem);
     for(i=0;i<nelem;++i) {
         r_data[i] = 0;
         ra_data[i] = 0;
         r2_data[i] = 0;
+        r3_data[i] = 0;
         data[i]=i;
         data2[i]=i;
         data3[i]=i;
         a_data[i]=i;
     }
 
-    /* create an event Queue for managing asynchronous requests */
+    /* create an event Queue for managing asynchronous requests.
+
+       Event Queues will releive the use from managing and completing
+       individual requests for every operation. Instead of passing a
+       request for every operation, the event queue is passed and
+       internally the HDF5 library creates a request and adds it to
+       the event queue.
+
+       Multiple Event queue can be created used by the application. */
     event_q = H5EQcreate(fapl_id);
     assert(event_q);
 
-    /* create the file. This is asynchronous. */
+    /* create the file. This is asynchronous, but the file_id can be used. */
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, event_q);
 
     {
@@ -92,11 +103,12 @@ int main(int argc, char **argv) {
         fprintf(stderr, "File name %s   %s\n", temp_name, file_name);
     }
 
-    /* create a group G1 on the file. We creat it here synchronously just to
-       show that we can intermix the original HDF5 API with the new 
-       Async API.
-       Internally there is a built in wait on the file_id, which has already been
-       completed when we called H5AOwait on the file create request earlier*/
+    /* create 3 groups in the file. All calls are completely
+       asychronous. Even though they depend one each other here and
+       they also depend on the file, they will be shipped immdeiately
+       and asynchronously to the server and return to the user. At the
+       server, dependencies are noted in the AXE and functions execute
+       in the order they are supposed to execute. */
     gid1 = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     H5Oset_comment_ff(gid1, "Testing Object Comment", 0, event_q);
     gid2 = H5Gcreate_ff(file_id, "G1/G2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
@@ -106,11 +118,14 @@ int main(int argc, char **argv) {
     assert(gid2);
     assert(gid3);
 
-    /* Create a datatype and commit it to the file. This is asynchronous. 
+    /* create a 32 bit integer LE datatype. This is a local operation
+       that does not touch the file */
+    int_id = H5Tcopy(H5T_STD_I32LE);
+
+    /* Commit the datatype to the file. This is asynchronous & immediate. 
      * Other Local H5T type operations can be issued before completing this call
      * because they do not depend on the committed state of the datatype.
      */
-    int_id = H5Tcopy(H5T_NATIVE_INT);
     H5Tcommit_ff(file_id, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 
                  0, event_q);
 
@@ -119,18 +134,31 @@ int main(int argc, char **argv) {
     dims [0] = 60;
     dataspaceId = H5Screate_simple(1, dims, NULL);
 
-    /* create an attribute on group G1 */
+    /* create an attribute on group G1. This is asynchronous and
+       returns immediately, however at the server it won't start until
+       the group G1 creation op is completed */
     aid1 = H5Acreate_ff(gid1, "ATTR1", H5T_NATIVE_INT, dataspaceId, 
                         H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid1);
 
-    /* close the attribute */
+    /* close the attribute right after the create. This is
+       asynchronous. The attribute id can not be used anymore, however
+       the creation operation will occur first at the server before
+       the close */
     H5Aclose_ff(aid1, event_q);
 
-    /* Check if the attribute on group G1 exists */
+    /* Check if the attribute on group G1 exists. This is
+       asynchronous, so the exists status is correct to examine after
+       the completion of the operation */
     assert(H5Aexists_by_name_ff(file_id,"G1","ATTR1", H5P_DEFAULT, &exists, 0, event_q) == 0);
+
+    /* Pop the request for the last operation from the event
+       queue. The Event queue does not manage it anymore and it is the
+       application's responsibilty to wait/test and ensure
+       completion */
     if(H5EQpop(event_q, &req1) < 0)
         exit(1);
+    /* wait synchronously on the operation */
     assert(H5AOwait(req1, &status1) == 0);
     assert (status1);
 
@@ -139,67 +167,65 @@ int main(int argc, char **argv) {
     else
         printf("Attribute ATTR1 does NOT exist. This must be the test without a native backend\n");
 
-    /* Delete the attribute just created */
+    /* Delete the attribute just created, this is asynchronous */
     assert(H5Adelete_by_name_ff(file_id, "G1", "ATTR1", H5P_DEFAULT, 0, event_q) == 0);
 
-    /* check if it exists now */
+    /* check if it exists now. This is asynchronous. Can't check the
+       exists status until the operation completes. */
     assert(0 == H5Aexists_ff(gid1, "ATTR1", &exists, 0, event_q));
 
-    /* create a Dataset D1 on the file, in group /G1/G2/G3. This is asynchronous. 
-       Internally to the IOD-VOL this call traverses the path G1/G2/G3. 
-       It realizes that group G1 has been created locally, but has no info about 
-       G2 and G3.
-       This enforces a wait for the previous H5Gcreate on G1 to complete 
-       at the client (which has already completed because the gcreate was done 
-       synchronously), then forwards the call asynchronously to the server, 
-       with the path G2/G3/D1 */
+    /* create a Dataset D1 on the file, in group /G1/G2/G3. This is
+       asynchronous.  Internally to the IOD-VOL this call traverses
+       the path G1/G2/G3.  it forwards the call asynchronously to the
+       server, with a dependency on Group G3 creation operation */
     did1 = H5Dcreate_ff(file_id,"G1/G2/G3/D1",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did1);
 
-    /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
+    /* create an attribute on dataset D1. This is asynchronous, but
+       executes at the server after D1 is created */
     aid2 = H5Acreate_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2_tmp", H5T_NATIVE_INT, 
                                 dataspaceId, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
 
+    /* rename the attribute. This is asynchronous with a dependency on
+       the create at the server*/
     H5Arename_ff(did1, "ATTR2_tmp", "ATTR2", 0, event_q);
 
+    /* write data to the attribute. This is asynchronous but will wait
+       for the creation and rename calls at the server to complete */
     H5Awrite_ff(aid2, int_id, a_data, 0, event_q);
 
-    /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
-       asynchronously and concurrently with the H5Dcreate for D1 
-       (i.e. no dependency)*/
+    /* similar to the previous H5Dcreate. */
     did2 = H5Dcreate_ff(file_id,"G1/G2/G3/D2",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did2);
 
-    /* similar to the previous H5Dcreate. As soon as G1 is created, this can execute 
-       asynchronously and concurrently with the H5Dcreate for D1 and D2 
-       (i.e. no dependency)*/
+    /* similar to the previous H5Dcreate. */
     did3 = H5Dcreate_ff(file_id,"G1/G2/G3/D3",int_id,dataspaceId,
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did3);
 
     /* Raw data write on D1. This is asynchronous, but it is delayed
-       internally at the IOD-VOL plugin client until the create for D1
+       internally at the server until the create for D1
        is completed.  Internal to the IOD-VOL plugin client we
        generate a checksum for data and ship it with the write bulk
        data function shipper handle to the server. */
     H5Dwrite_ff(did1, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
                 0, event_q);
 
-    /* Raw data write on D2. This is asynchronous, but it is delayed
-       internally at the client until the create for D2 is
-       completed. Internally we generate a checksum for data2 and ship
-       it with the write call to the server.*/
+    /* Raw data write on D2. same as previous. */
     H5Dwrite_ff(did2, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
                 0, event_q);
 
-    /* Raw data write on D3. This is asynchronous, but it is delayed
-       internally at the client until the create for D3 is
-       completed. Internally we generate a checksum for data3 and ship
-       it with the write call to the server.*/
-    H5Dwrite_ff(did3, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
+    /* Raw data write on D3. Same as previous; however we specify that
+       the data in the buffer is in BE byte order and of smaller
+       extent than the datatype of the dataset. Type conversion will
+       happen at the server when we detect that the dataset type is of
+       LE order and the datatype here is in BE order and the
+       difference in size. The buffer is resized at the server also to
+       encompass the increase. */
+    H5Dwrite_ff(did3, H5T_STD_I16LE, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
                 0, event_q);
 
     /* NOTE: all raw data reads/writes execute concurrently at the
@@ -221,10 +247,7 @@ int main(int argc, char **argv) {
     assert(H5AOwait(req1, &status1) == 0);
     assert (status1);
 
-
-    /* Raw data read on D1. This is asynchronous, but it is delayed
-       internally at the client until the create for D1 is completed,
-       which it is since we waited on it in the previous H5Dwrite(D1).
+    /* Raw data read on D1. This is asynchronous.
 
        At the server side, since the IOD library is "skeletal" and no
        data exists, I am creating an array with the same size and
@@ -289,16 +312,11 @@ int main(int argc, char **argv) {
         assert(H5Dset_extent_ff(did1, &extent, event_q) == 0);
     }
 
-    /* closing did1 acts as a wait_some on all pending requests that are issued
-       on did1 (the H5Dwrite and 2 H5Dreads above). This is asynchronous. */
+    /* closing did1 acts as a barrier task at the server for all
+       operations dependeing on the dataset. This is asynchronous. */
     assert(H5Dclose_ff(did1, event_q) == 0);
 
-    /* closing did2 acts as a wait_some on all pending requests that are issued
-       on did2 (the H5Dwrite above). This is asynchronous. */
     assert(H5Dclose_ff(did2, event_q) == 0);
-
-    /* closing did3 acts as a wait_some on all pending requests that are issued
-       on did3 (the H5Dwrite above). This is asynchronous. */
     assert(H5Dclose_ff(did3, event_q) == 0);
     assert(H5Aclose_ff(aid2, event_q) == 0);
     assert(H5Tclose_ff(int_id, event_q) == 0);
@@ -307,12 +325,20 @@ int main(int argc, char **argv) {
     assert(H5Gclose_ff(gid3, event_q) == 0);
 
     /* Test Links */
+
+    /* create two new groups /G4 and /G4/G5 */
     gid1 = H5Gcreate_ff(file_id, "G4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     gid2 = H5Gcreate_ff(file_id, "G4/G5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
+    /* create a hard link to D1 (created previosuly) so that it can be
+       accessed from G5/newD1. This is asynchronous; however all
+       operation that depend on G5 now will have this operation as a
+       parent at the AXE on the server. */
     H5Lcreate_hard_ff(file_id, "G1/G2/G3/D1", gid1, "G5/newD1", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
 
+    /* Try and open the dataset. This is asynchronous. */
     did1 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, 0, event_q);
+
     H5Lcreate_soft_ff("/G1/G2/G3/D4", gid1, "G5/newD2", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     H5Lmove_ff(file_id, "/G1/G2/G3/D3", file_id, "/G4/G5/D3moved", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, 0, event_q);
@@ -321,7 +347,8 @@ int main(int argc, char **argv) {
     assert(H5Gclose_ff(gid1, event_q) == 0);
     assert(H5Gclose_ff(gid2, event_q) == 0);
 
-    /* flush all the contents of file to disk. This is asynchronous. */
+    /* flush all the contents of file to disk. This is a barrier task
+       at the server. This is asynchronous. */
     assert(H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q) == 0);
 
     /* If the read request did no complete earlier when we tested it, Wait on it now.
@@ -337,13 +364,15 @@ int main(int argc, char **argv) {
        on the container. */
     assert(H5Fclose_ff(file_id, event_q) == 0);
 
+    /* wait on all requests and print completion status */
     H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Expecting 19. Completions: ", num_requests);
+    fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
     free(status);
 
+    /* wait again.. event queue should be empty now */
     H5EQwait(event_q, &num_requests, &status);
     fprintf(stderr, "%d requests in event queue. Expecting 0. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
@@ -351,6 +380,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\n");
     free(status);
 
+    /* Now we can check operations that were issued previously */
     if(exists)
         printf("Attribute ATTR1 exists after being removed! Something is wrong!\n");
     else
@@ -385,21 +415,26 @@ int main(int argc, char **argv) {
     file_id = H5Fopen_ff(file_name, H5F_ACC_RDONLY, fapl_id, event_q);
     assert(file_id);
 
+    /* test object copy. This is asynchronous */
     assert(H5Ocopy_ff(file_id, "/G1/G2/G3/D1", file_id, "D1_copy", 
                       H5P_DEFAULT, H5P_DEFAULT, 0, event_q) == 0);
 
+    /* check if an object exists. This is asynchronous, so checking
+       the value should be done after the wait */
     H5Oexists_by_name_ff(file_id, "G1/G2/G3", &exists, H5P_DEFAULT, 0, event_q);
-    if(exists)
-        printf("Group G3 exists!\n");
-    else
-        printf("Group G3 does NOT exist. This must be the test without a native backend\n");
 
+    /* Open objects using the general H5O routines. This has an
+       asynchronous interface, but right now we implement it
+       synchronously, because we don't the object type to be able to
+       generate the ID. */
     gid1 = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
     assert(gid1);
     int_id = H5Oopen_ff(file_id, "int", H5P_DEFAULT, 0, event_q);
     assert(int_id);
     did1 = H5Oopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
+
+    /* open attribute by name. This is asynchronous. */
     aid2 = H5Aopen_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", 
                               H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
@@ -409,11 +444,11 @@ int main(int argc, char **argv) {
     assert(H5Oclose_ff(int_id, event_q) == 0);
     assert(H5Oclose_ff(gid1, event_q) == 0);
 
-    /* Open a group G1 on the file. 
-       Internally there is a built in wait on the file_id.*/
+    /* Open a group G1 on the file. This is asynchronous */
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
     assert(gid1);
 
+    /* get operations on the group */
     {
         ssize_t ret_size;
         char *comment = NULL;
@@ -442,14 +477,36 @@ int main(int argc, char **argv) {
     assert(int_id);
 
     /* Open a dataset D1 on the file in a group hierarchy. 
-       Internally there is a built in wait on group G1.*/
+       This is asynchronous */
     did1 = H5Dopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
     assert(did1);
+
+    /* Raw data read on D1. This is asynchronous.  Note that the type
+       is different than the dataset type. The dataset was created in
+       int LE order with data written to it earlier in the same type
+       (0 - 60).
+
+       Reading this now will read those values, and convert them to BE
+       16 bit integers at the server and send them to the
+       client. Printing this data will result in 0 - 60 in 16 bit BE byte
+       order. */
+    H5Dread_ff(did1, H5T_STD_I32BE, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
+               0, event_q);
+    if(H5EQpop(event_q, &req1) < 0)
+        exit(1);
+    assert(H5AOwait(req1, &status1) == 0);
+    assert (status1);
+    fprintf(stderr, "Printing Dataset value read in 16 bit BE order. This should be interesting: ");
+    for(i=0;i<nelem;++i)
+        fprintf(stderr, "%d ",r_data[i]);
+    fprintf(stderr, "\n");
     assert(H5Dclose(did1) == 0);
 
-    /* create an attribute on dataset D1. This is asynchronous, but waits internall for D1 to be created */
+    /* open attribute on dataset D1. This is asynchronous */
     aid2 = H5Aopen_by_name_ff(file_id, "G1/G2/G3/D1", "ATTR2", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(aid2);
+
+    /* read data from attribute. this is asynchronous */
     H5Aread_ff(aid2, int_id, ra_data, 0, event_q);
     assert(H5Aclose(aid2) == 0);
 
@@ -457,8 +514,9 @@ int main(int argc, char **argv) {
     assert(H5Gclose(gid1) == 0);
     assert(H5Fclose(file_id) == 0);
 
+    /* wait on all requests in event queue */
     H5EQwait(event_q, &num_requests, &status);
-    fprintf(stderr, "%d requests in event queue. Expecting 3. Completions: ", num_requests);
+    fprintf(stderr, "%d requests in event queue. Completions: ", num_requests);
     for(i=0 ; i<num_requests; i++)
         fprintf(stderr, "%d ",status[i]);
     fprintf(stderr, "\n");
@@ -468,6 +526,11 @@ int main(int argc, char **argv) {
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",ra_data[i]);
     fprintf(stderr, "\n");
+
+    if(exists)
+        printf("Group G3 exists!\n");
+    else
+        printf("Group G3 does NOT exist. This must be the test without a native backend\n");
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
@@ -487,6 +550,7 @@ int main(int argc, char **argv) {
     free(a_data);
     free(data2);
     free(r2_data);
+    free(r3_data);
     free(data3);
 
     /* This finalizes the EFF stack. ships a terminate and IOD finalize to the server 

@@ -2149,10 +2149,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
-    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-     * doesn't support this feature.
-     */
     if(!buf)
         buf = &fake_char;
 
@@ -2164,7 +2160,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     }
 
     /* calculate the size of the buffer needed - MSC we are assuming everything is contiguous now */
-    size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
+    size = H5Sget_simple_extent_npoints(mem_space_id) * H5Tget_size(mem_type_id);
 
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
@@ -2182,6 +2178,8 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.checksum = 0;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
+    input.dset_type_id = dset->remote_dset.type_id;
+    input.mem_type_id = mem_type_id;
     input.axe_id = axe_id ++;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
@@ -2263,7 +2261,7 @@ done:
  *		Failure:	-1, dataset not writed.
  *
  * Programmer:  Mohamad Chaarawi
- *              October, 2013
+ *              October, 2012
  *
  *-------------------------------------------------------------------------
  */
@@ -2323,10 +2321,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf && (NULL == file_space || H5S_GET_SELECT_NPOINTS(file_space) != 0))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer");
 
-    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
-     * This is for some MPI package like ChaMPIon on NCSA's tungsten which
-     * doesn't support this feature.
-     */
     if(!buf)
         buf = &fake_char;
 
@@ -2362,6 +2356,8 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.checksum = cs;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
+    input.dset_type_id = dset->remote_dset.type_id;
+    input.mem_type_id = mem_type_id;
     input.axe_id = axe_id ++;
 
     status = (int *)malloc(sizeof(int));
