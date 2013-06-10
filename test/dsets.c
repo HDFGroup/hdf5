@@ -9438,7 +9438,11 @@ test_fixed_array(hid_t fapl)
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
-		if(alloc_time == H5D_ALLOC_TIME_EARLY && !compress) {
+		if(alloc_time == H5D_ALLOC_TIME_EARLY
+#ifdef H5_HAVE_FILTER_DEFLATE
+			&& !compress
+#endif /* H5_HAVE_FILTER_DEFLATE */
+		    ) {
 		    if(idx_type != H5D_CHUNK_IDX_NONE)
 			FAIL_PUTS_ERROR("should be using Non Index as index");
 		} else if (idx_type != H5D_CHUNK_IDX_FARRAY)
@@ -9476,7 +9480,11 @@ test_fixed_array(hid_t fapl)
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
-		if(alloc_time == H5D_ALLOC_TIME_EARLY && !compress) {
+		if(alloc_time == H5D_ALLOC_TIME_EARLY
+#ifdef H5_HAVE_FILTER_DEFLATE
+			&& !compress
+#endif /* H5_HAVE_FILTER_DEFLATE */
+		    ) {
 		    if(idx_type != H5D_CHUNK_IDX_NONE)
 			FAIL_PUTS_ERROR("should be using Non Index as index");
 		} else if(idx_type != H5D_CHUNK_IDX_FARRAY)
@@ -9512,7 +9520,11 @@ test_fixed_array(hid_t fapl)
 
 	    /* Chunk index type depends on whether we are using the latest version of the format */
 	    if(low == H5F_LIBVER_LATEST) {
-		if(alloc_time == H5D_ALLOC_TIME_EARLY && !compress) {
+		if(alloc_time == H5D_ALLOC_TIME_EARLY
+#ifdef H5_HAVE_FILTER_DEFLATE
+			&& !compress
+#endif /* H5_HAVE_FILTER_DEFLATE */
+		    ) {
 		    if(idx_type != H5D_CHUNK_IDX_NONE)
 			FAIL_PUTS_ERROR("should be using Non Index as index");
 		} else if(idx_type != H5D_CHUNK_IDX_FARRAY)
