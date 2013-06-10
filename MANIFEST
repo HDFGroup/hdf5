@@ -951,6 +951,7 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/Makefile.in
+./test/SWMR_UseCase_UG.txt
 ./test/accum.c
 ./test/app_ref.c
 ./test/bad_compound.h5
