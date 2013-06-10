@@ -58,7 +58,7 @@
 /* Define if the __attribute__(()) extension is present */
 #undef HAVE_ATTRIBUTE
 
-/* Define to 1 if you have the <AXE.h> header file. */
+/* Define to 1 if you have the <axe.h> header file. */
 #undef HAVE_AXE_H
 
 /* Define to 1 if you have the `BSDgettimeofday' function. */

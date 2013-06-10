@@ -24,7 +24,7 @@
 
 #ifdef H5_HAVE_EFF
 
-#include "AXE.h"
+#include "axe.h"
 #include "iod_api.h"
 #include "iod_types.h"
 #include "mercury.h"

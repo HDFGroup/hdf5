@@ -1682,7 +1682,7 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
-## Is the axe present? It has a header file `AXE.h' and a library
+## Is the axe present? It has a header file `axe.h' and a library
 ## `-laxe' and their locations might be specified with the `--with-axe'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
@@ -1695,7 +1695,7 @@ AC_ARG_WITH([axe],
 case $withval in
   yes)
     HAVE_AXE="yes"
-    AC_CHECK_HEADERS([AXE.h])
+    AC_CHECK_HEADERS([axe.h])
     AC_CHECK_LIB([axe], [AXEcreate_engine],[MYAXE_LIBS='-laxe'], [unset HAVE_AXE])
     AC_SUBST([MYAXE_LIBS])
     if test -z "$HAVE_AXE" -a -n "$HDF5_CONFIG_ABORT"; then
@@ -1741,7 +1741,7 @@ case $withval in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$axe_inc"
     fi
 
-    AC_CHECK_HEADERS([AXE.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([axe.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
 
     if test -n "$axe_lib"; then
       LDFLAGS="$LDFLAGS -L$axe_lib"
@@ -2842,9 +2842,9 @@ AC_ARG_ENABLE([eff],
 
 case "X-$enableval" in
   X-yes)
-    AC_CHECK_HEADERS([AXE.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h],
+    AC_CHECK_HEADERS([axe.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h],
                      [AC_MSG_CHECKING([for EFF support])
-                     AC_TRY_COMPILE([#include <AXE.h> #include <iod_api.h> #include <iod_types.h> 
+                     AC_TRY_COMPILE([#include <axe.h> #include <iod_api.h> #include <iod_types.h> 
 		                     #include <mercury.h> #include <mercury_handler.h> 
                                      #include <na.h>],
 				    [AXEend_try(); iod_finalize(NULL, NULL); HG_Bulk_finalize(); 

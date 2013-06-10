@@ -25482,7 +25482,7 @@ fi
 esac
 
 ## ----------------------------------------------------------------------
-## Is the axe present? It has a header file `AXE.h' and a library
+## Is the axe present? It has a header file `axe.h' and a library
 ## `-laxe' and their locations might be specified with the `--with-axe'
 ## command-line switch. The value is an include path and/or a library path.
 ## If the library path is specified then it must be preceded by a comma.
@@ -25499,10 +25499,10 @@ fi
 case $withval in
   yes)
     HAVE_AXE="yes"
-    for ac_header in AXE.h
+    for ac_header in axe.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "AXE.h" "ac_cv_header_AXE_h" "$ac_includes_default"
-if test "x$ac_cv_header_AXE_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "axe.h" "ac_cv_header_axe_h" "$ac_includes_default"
+if test "x$ac_cv_header_axe_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_AXE_H 1
 _ACEOF
@@ -25607,10 +25607,10 @@ $as_echo "suppressed" >&6; }
       AM_CPPFLAGS="$AM_CPPFLAGS -I$axe_inc"
     fi
 
-    for ac_header in AXE.h
+    for ac_header in axe.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "AXE.h" "ac_cv_header_AXE_h" "$ac_includes_default"
-if test "x$ac_cv_header_AXE_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "axe.h" "ac_cv_header_axe_h" "$ac_includes_default"
+if test "x$ac_cv_header_axe_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_AXE_H 1
 _ACEOF
@@ -28627,7 +28627,7 @@ fi
 
 case "X-$enableval" in
   X-yes)
-    for ac_header in AXE.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h
+    for ac_header in axe.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -28639,7 +28639,7 @@ _ACEOF
 $as_echo_n "checking for EFF support... " >&6; }
                      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-#include <AXE.h> #include <iod_api.h> #include <iod_types.h>
+#include <axe.h> #include <iod_api.h> #include <iod_types.h>
 		                     #include <mercury.h> #include <mercury_handler.h>
                                      #include <na.h>
 #ifdef FC_DUMMY_MAIN
