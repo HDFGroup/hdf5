@@ -2396,6 +2396,9 @@
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
 
+# CMake-specific User Files
+./config/cmake/UserMacros/Windows_MT.cmake
+
 ./CMakeLists.txt
 ./CTestConfig.cmake
 ./UserMacros.cmake
