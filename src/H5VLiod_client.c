@@ -358,15 +358,19 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     req->status = H5AO_FAILED;
                     req->state = H5VL_IOD_COMPLETED;
                 }
-                if(info->checksum && info->checksum != read_status->cs) {
-                    //free(info->status);
-                    //info->status = NULL;
-                    //info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
-                    //HDfree(req->obj_name);
-                    //info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
-                    /* MSC not returning an error because we injected this failure */
-                    fprintf(stderr, "Errrrr!  Data integrity failure (expecting %u got %u).\n",
-                            info->checksum, read_status->cs);
+                else {
+                    uint32_t internal_cs;
+
+                    /* calculate a checksum for the data recieved */
+                    internal_cs = H5_checksum_fletcher32(info->buf_ptr, info->buf_size);
+
+                    /* verify data integrity */
+                    if(internal_cs != read_status->cs) {
+                        fprintf(stderr, "Errrrr!  Data integrity failure (expecting %u got %u).\n",
+                                read_status->cs, internal_cs);
+                        req->status = H5AO_FAILED;
+                        req->state = H5VL_IOD_COMPLETED;
+                    }
                 }
             }
 

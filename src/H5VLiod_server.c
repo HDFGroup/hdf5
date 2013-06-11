@@ -3360,23 +3360,22 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
         int *buf_ptr = (int *)buf;
 
 #if H5_DO_NATIVE
-    ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
+        ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
 #else
-    for(i=0;i<60;++i)
-        buf_ptr[i] = i;
+        for(i=0;i<60;++i)
+            buf_ptr[i] = i;
 #endif
+        if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+
+        cs = H5_checksum_fletcher32(buf, size);
         if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
             fprintf(stderr, "Injecting a bad data value to generate a bad checksum \n");
             buf_ptr[0] = 10;
         }
-        cs = H5_checksum_fletcher32(buf, size);
-        fprintf(stderr, "Checksum Generated for data at server: %u\n", cs);
     }
-
-    if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
     /* Create a new block handle to write the data */
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
@@ -3435,6 +3434,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     hid_t space_id = input->space_id;
     hid_t dxpl_id = input->dxpl_id;
     uint32_t cs = input->checksum;
+    uint32_t data_cs = 0;
     hid_t src_id = input->mem_type_id;
     hid_t dst_id = input->dset_type_id;
     hg_bulk_block_t bulk_block_handle;
@@ -3495,20 +3495,17 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
-#if 0
-    /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-    /* Set up datatype info for operation */
-    if(H5VL_iod_typeinfo_init(input->dset_type_id, dxpl_cache, dxpl_id, 
-                              input->mem_type_id, TRUE, &type_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
-    type_info_init = TRUE;
-
-    if(!type_info->is_xform_noop || !type_info->is_conv_noop) {
-        /* type conversion is needed */
+    /* If client specified a checksum, verify it */
+    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_checksum(dxpl_id, &data_cs) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
+    if(data_cs != 0) {
+        cs = H5_checksum_fletcher32(buf, size);
+        if(cs != data_cs) {
+            fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %u, got %u\n",
+                    data_cs, cs);
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
+        }
     }
-#endif
 
     if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")

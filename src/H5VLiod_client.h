@@ -195,7 +195,8 @@ typedef struct H5VL_iod_dtype_t {
 typedef struct H5VL_iod_io_info_t {
     void *status;
     hg_bulk_t *bulk_handle;
-    uint32_t checksum;
+    void *buf_ptr;
+    size_t buf_size;
 } H5VL_iod_io_info_t;
 
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);

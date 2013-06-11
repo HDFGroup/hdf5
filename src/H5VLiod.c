@@ -595,6 +595,49 @@ done:
 } /* end H5VL_iod_fapl_free() */
 
 herr_t
+H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t cs)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5D_XFER_CHECKSUM_NAME, &cs) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set checksum value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_dxpl_checksum() */
+
+herr_t
+H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *cs/*out*/)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the transfer mode */
+    if(cs)
+        if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, cs) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_dxpl_checksum() */
+
+herr_t
 H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -2262,7 +2305,8 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bulk_handle = bulk_handle;
-    info->checksum = write_checksum;
+    info->buf_ptr = buf;
+    info->buf_size = buf_size;
 
     /* Get async request for operation */
     if(do_async) {
@@ -2340,7 +2384,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     size_t nelmts;    /* num elements in mem dataspace */
     H5VL_iod_io_info_t *info;
     uint64_t parent_axe_id;
-    uint32_t cs;
+    uint32_t internal_cs;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
@@ -2400,12 +2444,33 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     /* get the number of elements selcted in dataspace */
     nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
+    /* calculate the raw data size */
+    buf_size = nelmts * type_size;
+
+    /* calculate a checksum for the data */
+    internal_cs = H5_checksum_fletcher32(buf, buf_size);
+
+    /* Verify the checksum value if the dxpl contains a user defined checksum */
+    if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
+        uint32_t user_cs;
+
+        /* Get the dcpl plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+
+        if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
+
+        if(user_cs != internal_cs) {
+            fprintf(stderr, "Errrr.. In memory Data corruption. expecting %u, got %u\n",
+                    user_cs, internal_cs);
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
+        }
+    }
+
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
-
-    /* calculate the raw data size */
-    buf_size = nelmts * type_size;
 
     /* If the memory selection is contiguous, create simple HG Bulk Handle */
     if(H5S_select_is_contiguous(mem_space)) {
@@ -2451,18 +2516,12 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         }
     }
 
-    /* calculate a checksum for the data */
-    cs = H5_checksum_fletcher32(buf, buf_size);
-    /* MSC- store it in a global variable for now so that the read can see it (for demo purposes */
-    write_checksum = cs;
-    printf("Checksum Generated for data at client: %u\n", cs);
-
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
     input.iod_oh = dset->remote_dset.iod_oh;
     input.iod_id = dset->remote_dset.iod_id;
     input.bulk_handle = *bulk_handle;
-    input.checksum = cs;
+    input.checksum = internal_cs;
     input.dxpl_id = dxpl_id;
     input.space_id = file_space_id;
     input.dset_type_id = dset->remote_dset.type_id;
@@ -2494,7 +2553,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bulk_handle = bulk_handle;
-    info->checksum = cs;
 
     /* Get async request for operation */
     if(do_async) {
