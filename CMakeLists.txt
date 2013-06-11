@@ -456,6 +456,62 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
 ENDIF (HDF5_DISABLE_COMPILER_WARNINGS)
 
 #-----------------------------------------------------------------------------
+# Option to allow the user to enable all warnings
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_ALL_WARNINGS "Enable all warnings" OFF)
+IF (HDF5_ENABLE_ALL_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wformat=2 -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+ENDIF (HDF5_ENABLE_ALL_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPZERO_WARNINGS "Enable group one warnings" OFF)
+IF (HDF5_ENABLE_GROUPZERO_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wundef")
+ENDIF (HDF5_ENABLE_GROUPZERO_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPONE_WARNINGS "Enable group one warnings" OFF)
+IF (HDF5_ENABLE_GROUPONE_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return")
+ENDIF (HDF5_ENABLE_GROUPONE_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPTWO_WARNINGS "Enable group two warnings" OFF)
+IF (HDF5_ENABLE_GROUPTWO_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wformat=2")
+ENDIF (HDF5_ENABLE_GROUPTWO_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPTHREE_WARNINGS "Enable group three warnings" OFF)
+IF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros")
+ENDIF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPFOUR_WARNINGS "Enable group four warnings" OFF)
+IF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5")
+ENDIF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPFIVE_WARNINGS "Enable group five warnings" OFF)
+IF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wjump-misses-init -Wunsuffixed-float-constants -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+ENDIF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
+
+#-----------------------------------------------------------------------------
 # This is in here to help some of the GCC based IDES like Eclipse
 # and code blocks parse the compiler errors and warnings better.
 #-----------------------------------------------------------------------------
