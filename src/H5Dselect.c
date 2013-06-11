@@ -311,4 +311,3 @@ H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__select_write() */
-

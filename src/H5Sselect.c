@@ -2053,3 +2053,93 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_fill() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_get_offsets
+ *
+ * Purpose:	Returns an offset/length pair array for a corresponding 
+ *              dataspace selecton.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5S_get_offsets(const H5S_t *space, size_t elmt_size, size_t nelmts, 
+                hsize_t **_off, size_t **_len, size_t *_num_entries)
+{
+    H5S_sel_iter_t iter;    /* Memory selection iteration info */
+    hbool_t iter_init = 0;  /* Memory selection iteration info has been initialized */
+    size_t curr_seq;        /* Current memory sequence to operate on */
+    size_t nseq;            /* Number of sequences generated in the file */
+    hsize_t *off = NULL;
+    size_t *len = NULL;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (off = (hsize_t *)calloc(H5D_IO_VECTOR_SIZE, sizeof(hsize_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    if(NULL == (len = (size_t *)calloc(H5D_IO_VECTOR_SIZE, sizeof(size_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+
+    /* Check for only one element in selection */
+    if(nelmts == 1) {
+        if(H5S_SELECT_OFFSET(space, off) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve memory selection offset");
+
+        /* Set up necessary information for I/O operation */
+        nseq = 1;
+        *off *= elmt_size;
+        *len = elmt_size;
+    } /* end if */
+    else {
+        size_t nelem;           /* Number of elements used in sequences */
+        size_t n = 2;
+
+        /* Initialize iterator */
+        if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+        iter_init = 1;	/* Memory selection iteration info has been initialized */
+
+        /* Initialize sequence counts */
+        curr_seq = 0;
+        nseq = 0;
+
+        /* Loop, until all bytes are processed */
+        while(nelmts > 0) {
+            /* Get sequences for selection */
+            if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, H5D_IO_VECTOR_SIZE, nelmts, &nseq, 
+                                       &nelem, &off[curr_seq], &len[curr_seq]) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
+
+            /* check if more sequences are needed and extend the arrays if yes */
+            nelmts -= nelem;
+            curr_seq += nseq;
+
+            if(nelmts) {
+                HDassert(nseq == H5D_IO_VECTOR_SIZE);
+                if(NULL == (off = (hsize_t *)realloc(off, n * sizeof(hsize_t) * H5D_IO_VECTOR_SIZE)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+                if(NULL == (len = (size_t *)realloc(len, n * sizeof(size_t) * H5D_IO_VECTOR_SIZE)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+            }
+            n ++;
+        } /* end while */
+    } /* end else */
+
+    *_off = off;
+    *_len = len;
+    *_num_entries = curr_seq;
+
+done:
+    /* Release memory selection iterator */
+    if(iter_init)
+        if(H5S_SELECT_ITER_RELEASE(&iter) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_get_offsets() */

@@ -490,7 +490,8 @@ int main(int argc, char **argv) {
        16 bit integers at the server and send them to the
        client. Printing this data will result in 0 - 60 in 16 bit BE byte
        order. */
-    H5Dread_ff(did1, H5T_STD_I32BE, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
+    memset(r_data, 0, nelem*sizeof(int));
+    H5Dread_ff(did1, H5T_STD_I16BE, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
                0, event_q);
     if(H5EQpop(event_q, &req1) < 0)
         exit(1);
@@ -500,6 +501,42 @@ int main(int argc, char **argv) {
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",r_data[i]);
     fprintf(stderr, "\n");
+
+    /* Raw data read on D1. This is asynchronous.  The read is done into a 
+       noncontiguous memory dataspace selection */
+    {
+        hid_t mem_space;
+        hsize_t start = 0;
+        hsize_t stride = 2;
+        hsize_t count = 60;
+        hsize_t block = 1;
+        int *buf = NULL;
+
+        buf = calloc (120, sizeof(int));
+
+        /* create a dataspace. This is a local Bookeeping operation that 
+           does not touch the file */
+        dims [0] = 120;
+        mem_space = H5Screate_simple(1, dims, NULL);
+        H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, &start,&stride,&count,&block);
+
+        H5Dread_ff(did1, H5T_STD_I32LE, mem_space, dataspaceId, H5P_DEFAULT, buf, 
+                   0, event_q);
+
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+
+        fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
+        for(i=0;i<120;++i)
+            fprintf(stderr, "%d ", buf[i]);
+        fprintf(stderr, "\n");
+
+        H5Sclose(mem_space);
+        free(buf);
+    }
+
     assert(H5Dclose(did1) == 0);
 
     /* open attribute on dataset D1. This is asynchronous */

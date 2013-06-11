@@ -2110,9 +2110,10 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
     char fake_char;
-    size_t size;
+    size_t buf_size;  /* size of the contiguous buffer */
+    size_t type_size; /* size of mem type */
+    size_t nelmts;    /* num elements in mem dataspace */
     H5VL_iod_io_info_t *info;
-    uint64_t parent_axe_id;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
@@ -2159,16 +2160,69 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.parent_axe_id = 0;
     }
 
-    /* calculate the size of the buffer needed - MSC we are assuming everything is contiguous now */
-    size = H5Sget_simple_extent_npoints(mem_space_id) * H5Tget_size(mem_type_id);
+    /* get the memory type size */
+    {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+
+        type_size = H5T_GET_SIZE(dt);
+    }
+
+    /* get the number of elements selcted in dataspace */
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
+
+    /* calculate the raw data size */
+    buf_size = nelmts * type_size;
 
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* Register memory with bulk_handle */
-    if(HG_SUCCESS != HG_Bulk_handle_create(buf, size, HG_BULK_READWRITE, bulk_handle))
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+    /* If the memory selection is contiguous, create simple HG Bulk Handle */
+    if(H5S_select_is_contiguous(mem_space)) {
+        /* Register memory with bulk_handle */
+        if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, HG_BULK_READWRITE, bulk_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+    }
+
+    /* if the memory selection is non-contiguous, create a segmented selection */
+    else {
+        hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
+        size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
+        size_t count = 0; /* number of offset/length entries in selection */
+        size_t i;
+        hg_bulk_segment_t *bulk_segments = NULL;
+
+        /* generate the offsets/lengths pair arrays from the memory dataspace selection */
+        if(H5S_get_offsets(mem_space, type_size, nelmts, &off, &len, &count) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
+
+        /* Register memory with segmented HG handle */
+        bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
+        for (i = 0; i < count ; i++) {
+            hsize_t start_offset = (hsize_t)buf;
+
+            bulk_segments[i].address = (void *)(start_offset + off[i]);
+            bulk_segments[i].size = len[i];
+        }
+
+        /* create Bulk handle */
+        if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
+                                                         HG_BULK_READWRITE, bulk_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+        /* cleanup */
+        if(count) {
+            free(bulk_segments);
+            bulk_segments = NULL;
+            free(len);
+            len = NULL;
+            free(off);
+            off = NULL;
+        }
+    }
 
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
@@ -2281,7 +2335,9 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t *file_space = NULL;
     char fake_char;
     int *status = NULL;
-    size_t size;
+    size_t buf_size;  /* size of the contiguous buffer */
+    size_t type_size; /* size of mem type */
+    size_t nelmts;    /* num elements in mem dataspace */
     H5VL_iod_io_info_t *info;
     uint64_t parent_axe_id;
     uint32_t cs;
@@ -2331,22 +2387,75 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.parent_axe_id = 0;
     }
 
-    /* calculate the size of the buffer needed - MSC we are assuming everything is contiguous now */
-    size = H5Sget_simple_extent_npoints(mem_space_id) *  H5Tget_size(mem_type_id);
+    /* get the memory type size */
+    {
+        H5T_t *dt = NULL;
 
-    /* calculate a checksum for the data */
-    cs = H5_checksum_fletcher32(buf, size);
-    /* MSC- store it in a global variable for now so that the read can see it (for demo purposes */
-    write_checksum = cs;
-    printf("Checksum Generated for data at client: %u\n", cs);
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+
+        type_size = H5T_GET_SIZE(dt);
+    }
+
+    /* get the number of elements selcted in dataspace */
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a bulk data transfer handle");
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* Register memory */
-    if(HG_SUCCESS != HG_Bulk_handle_create(buf, size, HG_BULK_READ_ONLY, bulk_handle))
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't create Bulk Data Handle");
+    /* calculate the raw data size */
+    buf_size = nelmts * type_size;
+
+    /* If the memory selection is contiguous, create simple HG Bulk Handle */
+    if(H5S_select_is_contiguous(mem_space)) {
+        /* Register memory with bulk_handle */
+        if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, HG_BULK_READ_ONLY, bulk_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+    }
+
+    /* if the memory selection is non-contiguous, create a segmented selection */
+    else {
+        hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
+        size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
+        size_t count = 0; /* number of offset/length entries in selection */
+        size_t i;
+        hg_bulk_segment_t *bulk_segments = NULL;
+
+        /* generate the offsets/lengths pair arrays from the memory dataspace selection */
+        if(H5S_get_offsets(mem_space, type_size, nelmts, &off, &len, &count) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
+
+        /* Register memory with segmented HG handle */
+        bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
+        for (i = 0; i < count ; i++) {
+            hsize_t start_offset = (hsize_t)buf;
+
+            bulk_segments[i].address = (void *)(start_offset + off[i]);
+            bulk_segments[i].size = len[i];
+        }
+
+        /* create Bulk handle */
+        if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
+                                                         HG_BULK_READWRITE, bulk_handle))
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+        /* cleanup */
+        if(count) {
+            free(bulk_segments);
+            bulk_segments = NULL;
+            free(len);
+            len = NULL;
+            free(off);
+            off = NULL;
+        }
+    }
+
+    /* calculate a checksum for the data */
+    cs = H5_checksum_fletcher32(buf, buf_size);
+    /* MSC- store it in a global variable for now so that the read can see it (for demo purposes */
+    write_checksum = cs;
+    printf("Checksum Generated for data at client: %u\n", cs);
 
     /* Fill input structure */
     input.coh = dset->common.file->remote_file.coh;
