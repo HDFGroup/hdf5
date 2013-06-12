@@ -1124,6 +1124,7 @@
 ./test/tvltypes.c
 ./test/unlink.c
 ./test/use_append_chunk.c
+./test/use_append_mchunks.c
 ./test/use_common.c
 ./test/use.h
 ./test/vfd.c

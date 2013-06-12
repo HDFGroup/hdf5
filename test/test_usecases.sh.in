@@ -31,7 +31,7 @@ EXIT_FAILURE=1
 RESULT_PASSED=" PASSED"
 RESULT_FAILED="*FAILED*"
 RESULT_SKIP="-SKIP-"
-USECASES_PROGRAMS=use_append_chunk
+USECASES_PROGRAMS="use_append_chunk use_append_mchunks"
 TESTNAME="Use Case"
 
 # Define variables
@@ -106,6 +106,10 @@ for p in $USECASES_PROGRAMS; do
     TOOLTEST $p -f $tmpfile; rm -f $tmpfile
     TOOLTEST $p -l w
     TOOLTEST $p -l r
+    # cleanup temp datafile
+    if test -z "$HDF5_NOCLEANUP"; then
+	rm -f $p.h5
+    fi
 done
 
 
