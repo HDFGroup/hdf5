@@ -460,7 +460,14 @@ ENDIF (HDF5_DISABLE_COMPILER_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_ALL_WARNINGS "Enable all warnings" OFF)
 IF (HDF5_ENABLE_ALL_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wformat=2 -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wformat=2 -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+  ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_ALL_WARNINGS)
 
 #-----------------------------------------------------------------------------
@@ -468,7 +475,14 @@ ENDIF (HDF5_ENABLE_ALL_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_GROUPZERO_WARNINGS "Enable group one warnings" OFF)
 IF (HDF5_ENABLE_GROUPZERO_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wundef")
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wundef")
+  ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_GROUPZERO_WARNINGS)
 
 #-----------------------------------------------------------------------------
@@ -476,7 +490,14 @@ ENDIF (HDF5_ENABLE_GROUPZERO_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_GROUPONE_WARNINGS "Enable group one warnings" OFF)
 IF (HDF5_ENABLE_GROUPONE_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return")
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return")
+  ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_GROUPONE_WARNINGS)
 
 #-----------------------------------------------------------------------------
@@ -484,7 +505,14 @@ ENDIF (HDF5_ENABLE_GROUPONE_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_GROUPTWO_WARNINGS "Enable group two warnings" OFF)
 IF (HDF5_ENABLE_GROUPTWO_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wformat=2")
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wformat=2")
+  ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_GROUPTWO_WARNINGS)
 
 #-----------------------------------------------------------------------------
@@ -492,7 +520,14 @@ ENDIF (HDF5_ENABLE_GROUPTWO_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_GROUPTHREE_WARNINGS "Enable group three warnings" OFF)
 IF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros")
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros")
+  ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
 
 #-----------------------------------------------------------------------------
@@ -500,7 +535,14 @@ ENDIF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_GROUPFOUR_WARNINGS "Enable group four warnings" OFF)
 IF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5")
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wlogical-op -Wlarger-than=2048 -Wvla -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat -Wstrict-overflow=5")
+  ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
 
 #-----------------------------------------------------------------------------
@@ -508,7 +550,9 @@ ENDIF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
 #-----------------------------------------------------------------------------
 OPTION (HDF5_ENABLE_GROUPFIVE_WARNINGS "Enable group five warnings" OFF)
 IF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wjump-misses-init -Wunsuffixed-float-constants -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+  IF (NOT MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wjump-misses-init -Wunsuffixed-float-constants -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+  ENDIF (NOT MSVC)
 ENDIF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
 
 #-----------------------------------------------------------------------------
