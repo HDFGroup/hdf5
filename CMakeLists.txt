@@ -499,6 +499,40 @@ IF (H5_HAVE_PARALLEL)
 ENDIF (H5_HAVE_PARALLEL)
 
 SET (DEFAULT_API_VERSION "v110")
+
+#-----------------------------------------------------------------------------
+# Option to Enable EFF
+#-----------------------------------------------------------------------------
+IF (HDF5_ENABLE_PARALLEL)
+  OPTION (HDF5_ENABLE_EFF "Enable Exascale Fast-Forward functionalities." OFF)
+  IF (HDF5_ENABLE_EFF)
+    # AXE Asynchronous Engine
+    FIND_PACKAGE(AXE)
+    IF (AXE_FOUND)
+      INCLUDE_DIRECTORIES (${AXE_INCLUDE_DIR})
+      SET (LINK_LIBS ${LINK_LIBS} ${AXE_LIBRARIES})
+    ENDIF (AXE_FOUND)
+    # MERCURY Function Shipper
+    FIND_PACKAGE(MERCURY NO_MODULE)
+    IF (MERCURY_FOUND)
+      INCLUDE_DIRECTORIES (${MERCURY_INCLUDE_DIR})
+      SET (LINK_LIBS ${LINK_LIBS} mercury)
+    ENDIF (MERCURY_FOUND)
+    # I/O Dispatcher
+    FIND_PACKAGE(IOD)
+    IF (IOD_FOUND)
+      INCLUDE_DIRECTORIES (${IOD_INCLUDE_DIR})
+      SET (LINK_LIBS ${LINK_LIBS} ${IOD_LIBRARIES})
+    ENDIF (IOD_FOUND)
+    # Use threadsafe
+    SET (HDF5_ENABLE_THREADSAFE ON)
+    SET (H5_HAVE_THREADSAFE 1)
+    IF (AXE_FOUND AND MERCURY_FOUND AND IOD_FOUND)
+      SET (H5_HAVE_EFF 1)
+    ENDIF (AXE_FOUND AND MERCURY_FOUND AND IOD_FOUND)
+  ENDIF (HDF5_ENABLE_EFF)
+ENDIF (HDF5_ENABLE_PARALLEL)
+
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
 #-----------------------------------------------------------------------------

@@ -608,11 +608,36 @@ SET (H5VL_SRCS
     ${HDF5_SRC_DIR}/H5VLint.c
     ${HDF5_SRC_DIR}/H5VLnative.c
 )
+
 SET (H5VL_HDRS
     ${HDF5_SRC_DIR}/H5VLpublic.h
     ${HDF5_SRC_DIR}/H5VLpkg.h
     ${HDF5_SRC_DIR}/H5VLnative.h
 )
+
+IF (HDF5_ENABLE_EFF)
+    SET (H5FF_SRCS
+        ${HDF5_SRC_DIR}/H5FF.c
+        ${HDF5_SRC_DIR}/H5EQ.c
+    )
+    SET (H5FF_HDRS
+        ${HDF5_SRC_DIR}/H5FFpublic.h
+        ${HDF5_SRC_DIR}/H5EQpublic.h
+    )
+    IDE_GENERATED_PROPERTIES ("H5FF" "${H5FF_HDRS}" "${H5FF_SRCS}" )
+    SET (H5VL_SRCS
+        ${H5VL_SRCS}
+        ${HDF5_SRC_DIR}/H5VLiod.c
+        ${HDF5_SRC_DIR}/H5VLiod_client.c
+        ${HDF5_SRC_DIR}/H5VLiod_server.c
+        ${HDF5_SRC_DIR}/H5VLiod_encdec.c
+    )
+    SET (H5VL_HDRS
+        ${H5VL_HDRS}
+        ${HDF5_SRC_DIR}/H5VLiod.h
+    )
+ENDIF (HDF5_ENABLE_EFF)
+
 IDE_GENERATED_PROPERTIES ("H5VL" "${H5VL_HDRS}" "${H5VL_SRCS}" )
 
 SET (H5WB_SRCS
@@ -688,6 +713,12 @@ SET (common_SRCS
     ${H5WB_SRCS}
     ${H5Z_SRCS}
 )
+IF (HDF5_ENABLE_EFF)
+  SET (common_SRCS
+    ${common_SRCS}
+    ${H5FF_SRCS}
+  )
+ENDIF (HDF5_ENABLE_EFF)
 
 SET (H5_PUBLIC_HEADERS
     ${H5_HDRS}
@@ -721,6 +752,12 @@ SET (H5_PUBLIC_HEADERS
     ${H5VL_HDRS}
     ${H5Z_HDRS}
 )
+IF (HDF5_ENABLE_EFF)
+  SET (H5_PUBLIC_HEADERS
+    ${H5_PUBLIC_HEADERS}
+    ${H5FF_HDRS}
+  )
+ENDIF (HDF5_ENABLE_EFF)
 
 
 SET (H5_PRIVATE_HEADERS
@@ -768,6 +805,12 @@ SET (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Zprivate.h
     ${HDF5_SRC_DIR}/H5win32defs.h
 )
+IF (HDF5_ENABLE_EFF)
+  SET (H5_PRIVATE_HEADERS
+    ${H5_PRIVATE_HEADERS}
+    ${HDF5_SRC_DIR}/H5FFprivate.h
+  )
+ENDIF (HDF5_ENABLE_EFF)
 
 INCLUDE_DIRECTORIES (${HDF5_SOURCE_DIR})
 INCLUDE_DIRECTORIES (${CMAKE_BINARY_DIR})
