@@ -159,7 +159,6 @@ int write_uc_file(void)
     }
 
     /* allocate space for data buffer chunksize X chunksize of UC_CTYPE */
-    /*cz = UC_opts.chunksize;*/
     memdims[0]=1;
     memdims[1] = memdims[2] = cz;
     if ((buffer=(UC_CTYPE*)HDmalloc(cz*cz*sizeof(UC_CTYPE)))==NULL) {
@@ -200,7 +199,6 @@ int write_uc_file(void)
     count[1]=count[2]=cz;
     for (i=0; i<UC_opts.nplanes; i++){
 	/* fill buffer with value i+1 */
-	/* HDmemset(buffer, i+1, cz*cz*sizeof(UC_CTYPE));*/
 	bufptr = buffer;
 	for (j=0; j<cz; j++)
 	    for (k=0; k<cz; k++)
