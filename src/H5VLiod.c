@@ -160,7 +160,6 @@ H5FL_DEFINE(H5VL_iod_dset_t);
 H5FL_DEFINE(H5VL_iod_dtype_t);
 
 static na_addr_t PEER;
-uint32_t write_checksum;
 static na_class_t *network_class = NULL;
 
 static uint64_t axe_id;
@@ -3868,8 +3867,8 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
 
     /* calculate a checksum for the data */
     cs = H5_checksum_fletcher32(buf, size);
+
     /* MSC- store it in a global variable for now so that the read can see it (for demo purposes */
-    write_checksum = cs;
     printf("Checksum Generated for attribute data at client: %u\n", cs);
 
     /* allocate a bulk data transfer handle */

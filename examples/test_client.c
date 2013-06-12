@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
     int num_requests = 0;
     hsize_t extent = 20;
     hbool_t exists;
+    uint32_t cs;
     H5_request_t req1;
     H5_status_t status1;
 
@@ -206,17 +207,28 @@ int main(int argc, char **argv) {
                         H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
     assert(did3);
 
+    /* Attach a checksum to the dxpl which is verified all the way
+       down at the server */
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
+    cs = H5_checksum_fletcher32(data, sizeof(int) * nelem);
+    H5Pset_dxpl_checksum(dxpl_id, cs);
+
     /* Raw data write on D1. This is asynchronous, but it is delayed
        internally at the server until the create for D1
        is completed.  Internal to the IOD-VOL plugin client we
        generate a checksum for data and ship it with the write bulk
        data function shipper handle to the server. */
-    H5Dwrite_ff(did1, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data, 
+    H5Dwrite_ff(did1, int_id, dataspaceId, dataspaceId, dxpl_id, data, 
                 0, event_q);
 
+    cs = H5_checksum_fletcher32(data2, sizeof(int) * nelem);
+    H5Pset_dxpl_checksum(dxpl_id, cs);
+
     /* Raw data write on D2. same as previous. */
-    H5Dwrite_ff(did2, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, data2, 
+    H5Dwrite_ff(did2, int_id, dataspaceId, dataspaceId, dxpl_id, data2, 
                 0, event_q);
+
+    H5Pclose(dxpl_id);
 
     /* Raw data write on D3. Same as previous; however we specify that
        the data in the buffer is in BE byte order and of smaller
