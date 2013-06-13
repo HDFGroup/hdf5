@@ -510,7 +510,7 @@ IF (NOT MSVC)
     SET (H5_CFLAGS3 "${H5_CFLAGS4} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
 
     # Append more extra warning flags that only gcc 4.5+ know about
-    H5_CFLAGS4 "${H5_CFLAGS4} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
+    SET (H5_CFLAGS4 "${H5_CFLAGS4} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
 
     # Append more extra warning flags that only gcc 4.6+ know about
     SET (H5_CFLAGS4 "${H5_CFLAGS5} -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines")
@@ -560,7 +560,6 @@ IF (HDF5_ENABLE_GROUPONE_WARNINGS)
     STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
   ELSE (MSVC)
-    #config/gnu-flags General setting
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS1}")
   ENDIF (MSVC)
 ENDIF (HDF5_ENABLE_GROUPONE_WARNINGS)
