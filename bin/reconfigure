@@ -34,6 +34,7 @@ AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
 ACLOCAL_VERSION="aclocal (GNU automake) 1.12.3"
 LIBTOOL_VERSION="(GNU libtool) 2.4.2"
 M4_VERSION="m4 (GNU M4) 1.4.16"
+PKGCONFIG_VERSION="0.27"
 
 #
 # When upgrading automake's version, don't forget to also update its
@@ -59,6 +60,9 @@ if test -z ${LIBTOOL}; then
 fi
 if test -z ${M4}; then
   M4=/mnt/hdf/packages/m4/m4-1.4.16/bin/m4
+fi
+if test -z ${PKGCONFIG}; then
+  PKGCONFIG=/mnt/hdf/packages/pkg-config/pkg-config-0.27/bin/pkg-config
 fi
 
 # Check version numbers of all autotools against the "correct" versions
@@ -92,16 +96,22 @@ if test -z "${M4_VERS}"; then
    echo "${M4} version is not ${M4_VERSION}"
    exit 1
 fi
+PKG_VERS=`${PKGCONFIG} --version 2>&1 | grep "${PKGCONFIG_VERSION}"`
+if test -z "${PKG_VERS}"; then
+   echo "${PKGCONFIG} version is not ${PKGCONFIG_VERSION}"
+   exit 1
+fi
 
 # Make sure that the tools are in the path.
 AUTOCONF_DIR=`dirname ${AUTOCONF}`
 LIBTOOL_DIR=`dirname ${LIBTOOL}`
 M4_DIR=`dirname ${M4}`
-PATH=${AUTOCONF_DIR}:${M4_DIR}:$PATH
+PKGCONFIG_DIR=`dirname ${PKGCONFIG}`
+PATH=${AUTOCONF_DIR}:${M4_DIR}:${PKGCONFIG_DIR}:$PATH
 
 # Run autoconf/automake commands in order
-  echo ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal
-  ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal || exit 1
+  echo ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal -I ${PKGCONFIG_DIR}/../share/aclocal
+  ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal -I ${PKGCONFIG_DIR}/../share/aclocal || exit 1
 
   echo ${AUTOHEADER}
   ${AUTOHEADER} || exit 1
