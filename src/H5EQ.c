@@ -202,6 +202,7 @@ H5EQcreate(hid_t fapl_id)
     hid_t ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("i", "i", fapl_id);
 
     /* Check the file access property list */
     if(H5P_DEFAULT == fapl_id)

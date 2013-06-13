@@ -34,6 +34,11 @@ if((msg = H5E_create_msg(cls, H5E_MAJOR, "File accessibilty"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FILE_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_VOL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MAJOR, "Virtual Object Layer"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_VOL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_SOHM_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Shared Object Header Messages"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
@@ -48,11 +53,6 @@ assert(H5E_VFL_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Virtual File Layer"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_VFL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
-assert(H5E_VOL_g==(-1));
-if((msg = H5E_create_msg(cls, H5E_MAJOR, "Virtual Object Layer"))==NULL)
-    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
-if((H5E_VOL_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 assert(H5E_INTERNAL_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MAJOR, "Internal error (too specific to document in detail)"))==NULL)

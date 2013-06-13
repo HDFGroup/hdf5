@@ -214,9 +214,6 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
-/* Define to 1 if you have the `mercury' library (-lmercury). */
-#undef HAVE_LIBMERCURY
-
 /* Define to 1 if you have the `mpe' library (-lmpe). */
 #undef HAVE_LIBMPE
 
@@ -262,18 +259,6 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have the <mercury_bulk.h> header file. */
-#undef HAVE_MERCURY_BULK_H
-
-/* Define to 1 if you have the <mercury.h> header file. */
-#undef HAVE_MERCURY_H
-
-/* Define to 1 if you have the <mercury_handler.h> header file. */
-#undef HAVE_MERCURY_HANDLER_H
-
-/* Define to 1 if you have the <mercury_proc.h> header file. */
-#undef HAVE_MERCURY_PROC_H
-
 /* Define if we have MPE support */
 #undef HAVE_MPE
 
@@ -288,9 +273,6 @@
 
 /* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
 #undef HAVE_MPI_MULTI_LANG_Info
-
-/* Define to 1 if you have the <na.h> header file. */
-#undef HAVE_NA_H
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL

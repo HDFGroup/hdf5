@@ -130,6 +130,7 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("i", "*sIuiii", filename, flags, fcpl_id, fapl_id, eq_id);
 
     /* Check/fix arguments */
     if(!filename || !*filename)
@@ -195,6 +196,7 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, hid_t eq_id)
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "*sIuii", filename, flags, fapl_id, eq_id);
 
     /* Check/fix arguments. */
     if(!filename || !*filename)
@@ -245,6 +247,7 @@ H5Fflush_ff(hid_t object_id, H5F_scope_t scope, hid_t eq_id)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iFsi", object_id, scope, eq_id);
 
     obj_type = H5I_get_type(object_id);
     if(H5I_FILE != obj_type && H5I_GROUP != obj_type && H5I_DATATYPE != obj_type &&
@@ -297,6 +300,7 @@ H5Fclose_ff(hid_t file_id, hid_t eq_id)
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", file_id, eq_id);
 
     /* Check/fix arguments. */
     if(H5I_FILE != H5I_get_type(file_id))
@@ -491,6 +495,7 @@ H5Gclose_ff(hid_t group_id, hid_t eq_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", group_id, eq_id);
 
     /* Check args */
     if(NULL == H5I_object_verify(group_id,H5I_GROUP))
@@ -799,6 +804,7 @@ H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t eq_id)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*hi", dset_id, size, eq_id);
 
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
@@ -840,6 +846,7 @@ H5Dclose_ff(hid_t dset_id, hid_t eq_id)
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", dset_id, eq_id);
 
     /* Check/fix arguments. */
     if(H5I_DATASET != H5I_get_type(dset_id))
@@ -1041,6 +1048,7 @@ H5Tclose_ff(hid_t type_id, hid_t eq_id)
     herr_t   ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", type_id, eq_id);
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -1739,6 +1747,7 @@ H5Aclose_ff(hid_t attr_id, hid_t eq_id)
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", attr_id, eq_id);
 
     /* check arguments */
     if(NULL == H5I_object_verify(attr_id, H5I_ATTR))
@@ -2747,6 +2756,7 @@ H5Oclose_ff(hid_t object_id, hid_t eq_id)
     herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", object_id, eq_id);
 
     /* Get the type of the object and close it in the correct way */
     switch(H5I_get_type(object_id)) {

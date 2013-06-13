@@ -304,7 +304,7 @@ H5VLis_registered(hid_t id)
     htri_t ret_value = FALSE;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("t", "Ll", id);
+    H5TRACE1("t", "i", id);
 
     /* Check arguments */
     if(NULL != H5I_object_verify(id, H5I_VOL))
@@ -335,7 +335,7 @@ H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size)
     ssize_t    ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "*x", id, name, size);
+    H5TRACE3("Zs", "ixz", id, name, size);
 
     if((ret_value = H5VL_get_plugin_name(id, name, size)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "Can't get plugin name")
@@ -635,7 +635,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5VLattr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
                  const char *attr_name, hid_t dxpl_id, void UNUSED **req)
 {
@@ -763,7 +763,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t 
+ssize_t
 H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t dxpl_id, void UNUSED **req)
 {
     ssize_t ret_value = FAIL;
@@ -889,7 +889,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5VLdataset_read(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
                   hid_t file_space_id, hid_t plist_id, void *buf, void UNUSED **req)
 {
@@ -922,7 +922,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5VLdataset_write(void *dset, H5VL_t *vol_plugin, hid_t mem_type_id, hid_t mem_space_id, 
                    hid_t file_space_id, hid_t plist_id, const void *buf, void UNUSED **req)
 {
@@ -955,7 +955,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5VLdataset_set_extent(void *dset, H5VL_t *vol_plugin, const hsize_t size[], hid_t dxpl_id, void UNUSED **req)
 {
     herr_t ret_value = SUCCEED;
@@ -1945,7 +1945,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t 
+herr_t
 H5VLobject_copy(void *src_obj, H5VL_loc_params_t loc_params1, H5VL_t *vol_plugin1, const char *src_name, 
                 void *dst_obj, H5VL_loc_params_t loc_params2, H5VL_t *vol_plugin2, const char *dst_name, 
                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void UNUSED **req)
