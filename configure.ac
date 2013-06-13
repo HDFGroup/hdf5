@@ -1758,87 +1758,6 @@ case $withval in
 esac
 
 ## ----------------------------------------------------------------------
-## Is the mercury library present? 
-##
-AC_ARG_WITH([mercury],
-            [AS_HELP_STRING([--with-mercury=DIR],
-                            [Use mercury [default=no]])],,
-            [withval=no])
-
-case $withval in
-  yes)
-    HAVE_MERCURY="yes"
-    AC_CHECK_HEADERS([mercury.h])
-    AC_CHECK_HEADERS([mercury_handler.h])
-    AC_CHECK_HEADERS([mercury_proc.h])
-    AC_CHECK_HEADERS([mercury_bulk.h])
-    AC_CHECK_HEADERS([na.h])
-    AC_CHECK_LIB([mercury], [HG_Init], [MYMERCURY_LIBS='-lmercury'], [unset HAVE_MERCURY])
-    AC_SUBST([MYMERCURY_LIBS])
-    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find mercury library])
-    fi
-    ;;
-  no)
-    HAVE_MERCURY="no"
-    AC_MSG_CHECKING([for mercury library])
-    AC_MSG_RESULT([suppressed])
-    ;;
-  *)
-    HAVE_MERCURY="yes"
-    case "$withval" in
-      *,*)
-        mercury_inc="`echo $withval |cut -f1 -d,`"
-        mercury_lib="`echo $withval |cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          mercury_inc="$withval/include"
-          mercury_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    ## Trying to include -I/usr/include and -L/usr/lib is redundant and
-    ## can mess some compilers up.
-    if test "X$mercury_inc" = "X/usr/include"; then
-      mercury_inc=""
-    fi
-    if test "X$mercury_lib" = "X/usr/lib"; then
-      mercury_lib=""
-    fi
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    saved_AM_LDFLAGS="$AM_LDFLAGS"
-
-    if test -n "$mercury_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$mercury_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
-    fi
-
-    AC_CHECK_HEADERS([mercury.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-    AC_CHECK_HEADERS([mercury_handler.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-    AC_CHECK_HEADERS([mercury_proc.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-    AC_CHECK_HEADERS([mercury_bulk.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-    AC_CHECK_HEADERS([na.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
-
-    if test -n "$mercury_lib"; then
-      LDFLAGS="$LDFLAGS -L$mercury_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$mercury_lib"
-    fi
-
-    AC_CHECK_LIB([mercury], [HG_Init],, 
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_MERCURY])
-
-    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find mercury library])
-    fi
-    ;;
-esac
-
-## ----------------------------------------------------------------------
 ## Is the iod present? It has a header file `IOD.h' and a library
 ## `-liod' and their locations might be specified with the `--with-iod'
 ## command-line switch. The value is an include path and/or a library path.
@@ -2842,13 +2761,18 @@ AC_ARG_ENABLE([eff],
 
 case "X-$enableval" in
   X-yes)
-    AC_CHECK_HEADERS([axe.h iod_api.h iod_types.h mercury.h mercury_handler.h na.h],
+    # Check mercury
+    PKG_CHECK_MODULES(MERCURY, mercury)
+    AM_CFLAGS="$AM_CFLAGS $MERCURY_CFLAGS"
+    AM_LDFLAGS="$AM_LDFLAGS $MERCURY_LIBS"
+    
+    AC_CHECK_HEADERS([axe.h iod_api.h iod_types.h],
                      [AC_MSG_CHECKING([for EFF support])
-                     AC_TRY_COMPILE([#include <axe.h> #include <iod_api.h> #include <iod_types.h> 
-		                     #include <mercury.h> #include <mercury_handler.h> 
-                                     #include <na.h>],
-				    [AXEend_try(); iod_finalize(NULL, NULL); HG_Bulk_finalize(); 
-				     HG_Handler_finalize();],
+                     AC_TRY_COMPILE([#include <axe.h>
+                                     #include <iod_api.h>
+                                     #include <iod_types.h>
+                                     #include <stdlib.h>],
+				    [AXEend_try(); iod_finalize(NULL, NULL);],
                                     [AC_DEFINE([HAVE_EFF], [1],
                                                [Define if we have EFF VOL plugins support])
                                        AC_MSG_RESULT([yes])
