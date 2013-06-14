@@ -83,7 +83,8 @@ bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
 	swmr_writer$(EXEEXT) swmr_remove_reader$(EXEEXT) \
 	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
 	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
-	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT)
+	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
+	atomic_writer$(EXEEXT) atomic_reader$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
 	links_env$(EXEEXT) flushrefresh$(EXEEXT) $(am__EXEEXT_2)
@@ -194,6 +195,14 @@ app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
 app_ref_LDADD = $(LDADD)
 app_ref_DEPENDENCIES = libh5test.la $(LIBHDF5)
+atomic_reader_SOURCES = atomic_reader.c
+atomic_reader_OBJECTS = atomic_reader.$(OBJEXT)
+atomic_reader_LDADD = $(LDADD)
+atomic_reader_DEPENDENCIES = libh5test.la $(LIBHDF5)
+atomic_writer_SOURCES = atomic_writer.c
+atomic_writer_OBJECTS = atomic_writer.$(OBJEXT)
+atomic_writer_LDADD = $(LDADD)
+atomic_writer_DEPENDENCIES = libh5test.la $(LIBHDF5)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
 big_LDADD = $(LDADD)
@@ -583,12 +592,12 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	$(libdynlib3_la_SOURCES) $(libh5test_la_SOURCES) accum.c \
-	app_ref.c big.c bittests.c btree2.c cache.c cache_api.c \
-	cache_tagging.c cmpd_dset.c cross_read.c dangle.c dsets.c \
-	dt_arith.c dtransform.c dtypes.c earray.c efc.c \
-	enc_dec_plist.c enc_dec_plist_with_endianess.c enum.c \
-	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
-	file_image.c fillval.c filter_fail.c flush1.c flush2.c \
+	app_ref.c atomic_reader.c atomic_writer.c big.c bittests.c \
+	btree2.c cache.c cache_api.c cache_tagging.c cmpd_dset.c \
+	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
+	earray.c efc.c enc_dec_plist.c enc_dec_plist_with_endianess.c \
+	enum.c err_compat.c error_test.c extend.c external.c farray.c \
+	fheap.c file_image.c fillval.c filter_fail.c flush1.c flush2.c \
 	flushrefresh.c freespace.c gen_bad_ohdr.c gen_bogus.c \
 	gen_cross.c gen_deflate.c gen_file_image.c gen_filespace.c \
 	gen_filters.c gen_idx.c gen_new_array.c gen_new_fill.c \
@@ -606,17 +615,18 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	$(am__libdynlib2_la_SOURCES_DIST) \
 	$(am__libdynlib3_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
-	accum.c app_ref.c big.c bittests.c btree2.c cache.c \
-	cache_api.c cache_tagging.c cmpd_dset.c cross_read.c dangle.c \
-	dsets.c dt_arith.c dtransform.c dtypes.c earray.c efc.c \
-	enc_dec_plist.c enc_dec_plist_with_endianess.c enum.c \
-	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
-	file_image.c fillval.c filter_fail.c flush1.c flush2.c \
-	flushrefresh.c freespace.c gen_bad_ohdr.c gen_bogus.c \
-	gen_cross.c gen_deflate.c gen_file_image.c gen_filespace.c \
-	gen_filters.c gen_idx.c gen_new_array.c gen_new_fill.c \
-	gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
+	accum.c app_ref.c atomic_reader.c atomic_writer.c big.c \
+	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
+	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
+	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
+	enc_dec_plist_with_endianess.c enum.c err_compat.c \
+	error_test.c extend.c external.c farray.c fheap.c file_image.c \
+	fillval.c filter_fail.c flush1.c flush2.c flushrefresh.c \
+	freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
+	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
+	gen_idx.c gen_new_array.c gen_new_fill.c gen_new_group.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
@@ -951,7 +961,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	flushrefresh.h5 flushrefresh_VERIFICATION_START \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
-	flushrefresh_VERIFICATION_DONE
+	flushrefresh_VERIFICATION_DONE atomic_data
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
@@ -1216,6 +1226,12 @@ accum$(EXEEXT): $(accum_OBJECTS) $(accum_DEPENDENCIES) $(EXTRA_accum_DEPENDENCIE
 app_ref$(EXEEXT): $(app_ref_OBJECTS) $(app_ref_DEPENDENCIES) $(EXTRA_app_ref_DEPENDENCIES) 
 	@rm -f app_ref$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(app_ref_OBJECTS) $(app_ref_LDADD) $(LIBS)
+atomic_reader$(EXEEXT): $(atomic_reader_OBJECTS) $(atomic_reader_DEPENDENCIES) $(EXTRA_atomic_reader_DEPENDENCIES) 
+	@rm -f atomic_reader$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(atomic_reader_OBJECTS) $(atomic_reader_LDADD) $(LIBS)
+atomic_writer$(EXEEXT): $(atomic_writer_OBJECTS) $(atomic_writer_DEPENDENCIES) $(EXTRA_atomic_writer_DEPENDENCIES) 
+	@rm -f atomic_writer$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(atomic_writer_OBJECTS) $(atomic_writer_LDADD) $(LIBS)
 big$(EXEEXT): $(big_OBJECTS) $(big_DEPENDENCIES) $(EXTRA_big_DEPENDENCIES) 
 	@rm -f big$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(big_OBJECTS) $(big_LDADD) $(LIBS)
@@ -1480,6 +1496,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/app_ref.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atomic_reader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atomic_writer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/big.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bittests.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btree2.Po@am__quote@
