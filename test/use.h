@@ -32,6 +32,7 @@
 /* these two definitions must match each other */
 #define UC_DATATYPE		H5T_NATIVE_SHORT    /* use case HDF5 data type */
 #define UC_CTYPE		short		    /* use case C data type */
+#define UC_RANK			3		    /* use case dataset rank */
 
 /* type declarations */
 typedef enum part_t {
@@ -40,13 +41,16 @@ typedef enum part_t {
     UC_READER			/* reader only */
 } part_t;
 typedef struct options_t {
-    int use_swmr;               /* use swmr open (1) or not 		*/
-    int compress;		/* 0: no compress			*/
-    int h5_use_chunks;     	/* 0/1: Not use/use chunked dataset     */
     int chunksize;		/* chunks are chunksize^2 planes	*/
-    int nplanes;		/* number of planes, default chunksize  */
+    int chunkplanes;		/* number of planes per chunk, default 1*/
+    hsize_t chunkdims[UC_RANK]; /* chunk dims is (chunkplan, chunksize, chunksize) */
+    hsize_t dims[UC_RANK];      /* dataset initial dims */
+    hsize_t max_dims[UC_RANK];  /* dataset max dims */
+    int nplanes;		/* number of planes to write, default proportional to chunksize */
     char *filename;		/* use case data filename		*/
     part_t launch;		/* launch writer, reader or both	*/
+    int use_swmr;               /* use swmr open (1) or not 		*/
+    int iterations;		/* iterations, default 1		*/
 } options_t;
 
 /* global variables declarations */
@@ -55,6 +59,8 @@ extern const char *progname_g;	/* Program name */
 
 /* prototype declarations */
 int parse_option(int argc, char * const argv[]);
+int setup_parameters(int argc, char * const argv[]);
+void show_parameters(void);
 void usage(const char *prog);
 int create_uc_file(void);
 int write_uc_file(void);

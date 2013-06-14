@@ -101,11 +101,13 @@ TOOLTEST() {
 # main body
 for p in $USECASES_PROGRAMS; do
     TOOLTEST $p
-    TOOLTEST $p -z 512
+    TOOLTEST $p -z 256
     tmpfile=/tmp/datatfile.$$
     TOOLTEST $p -f $tmpfile; rm -f $tmpfile
     TOOLTEST $p -l w
     TOOLTEST $p -l r
+    # use case 1.9, testing with multi-planes chunks
+    TOOLTEST $p -z 256 -y 5	# 5 planes chunks
     # cleanup temp datafile
     if test -z "$HDF5_NOCLEANUP"; then
 	rm -f $p.h5
