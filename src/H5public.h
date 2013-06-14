@@ -301,6 +301,15 @@ typedef struct H5_ih_info_t {
     hsize_t     heap_size;
 } H5_ih_info_t;
 
+/* Internal Checksum state */
+typedef struct H5_checksum_seed_t {
+    uint32_t a;
+    uint32_t b;
+    uint32_t c;
+    int32_t state;
+    size_t total_length;
+} H5_checksum_seed_t;
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);

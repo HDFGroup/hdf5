@@ -683,6 +683,48 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_inject_bad_checksum() */
 
+herr_t
+H5Pset_dxpl_append_only(hid_t dxpl_id, hbool_t flag)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5D_XFER_APPEND_ONLY_NAME, &flag) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_dxpl_append_only() */
+
+herr_t
+H5Pget_dxpl_append_only(hid_t dxpl_id, hbool_t *flag/*out*/)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the transfer mode */
+    if(flag)
+        if(H5P_get(plist, H5D_XFER_APPEND_ONLY_NAME, flag) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_dxpl_append_only() */
 
 
 /*-------------------------------------------------------------------------
@@ -2304,12 +2346,15 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* setup info struct for I/O request. 
        This is to manage the I/O operation once the wait is called. */
-    if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
+    if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_calloc(sizeof(H5VL_iod_io_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bulk_handle = bulk_handle;
     info->buf_ptr = buf;
-    info->buf_size = buf_size;
+    info->nelmts = nelmts;
+    info->type_size = type_size;
+    if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace")
 
     /* Get async request for operation */
     if(do_async) {
@@ -2451,7 +2496,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     buf_size = nelmts * type_size;
 
     /* calculate a checksum for the data */
-    internal_cs = H5_checksum_fletcher32(buf, buf_size);
+    internal_cs = H5S_checksum(buf, type_size, nelmts, mem_space);
 
     /* Verify the checksum value if the dxpl contains a user defined checksum */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
@@ -2552,7 +2597,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* setup info struct for I/O request 
        This is to manage the I/O operation once the wait is called. */
-    if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_malloc(sizeof(H5VL_iod_io_info_t))))
+    if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_calloc(sizeof(H5VL_iod_io_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
     info->status = status;
     info->bulk_handle = bulk_handle;

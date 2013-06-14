@@ -26,6 +26,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspaces		  		*/
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 #include "H5VLiod_common.h"
@@ -346,7 +347,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->state = H5VL_IOD_COMPLETED;
             }
             if(HG_DSET_WRITE == req->type && SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "write failed %d\n", *((int *)info->status));
+                fprintf(stderr, "Errrr! Dataset Write Failure Reported from Server\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -354,7 +355,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 H5VL_iod_read_status_t *read_status = (H5VL_iod_read_status_t *)info->status;
 
                 if(SUCCEED != read_status->ret) {
-                    fprintf(stderr, "read failed\n");
+                    fprintf(stderr, "Errrr! Dataset Read Failure Reported from Server\n");
                     req->status = H5AO_FAILED;
                     req->state = H5VL_IOD_COMPLETED;
                 }
@@ -362,15 +363,18 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     uint32_t internal_cs;
 
                     /* calculate a checksum for the data recieved */
-                    internal_cs = H5_checksum_fletcher32(info->buf_ptr, info->buf_size);
+                    internal_cs = H5S_checksum(info->buf_ptr, info->type_size, 
+                                               info->nelmts, info->space);
 
                     /* verify data integrity */
                     if(internal_cs != read_status->cs) {
-                        fprintf(stderr, "Errrrr!  Data integrity failure (expecting %u got %u).\n",
+                        fprintf(stderr, "Errrrr!  Dataset Read integrity failure (expecting %u got %u).\n",
                                 read_status->cs, internal_cs);
                         req->status = H5AO_FAILED;
                         req->state = H5VL_IOD_COMPLETED;
                     }
+                    if(info->space && H5S_close(info->space) < 0)
+                        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
                 }
             }
 
@@ -394,7 +398,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->state = H5VL_IOD_COMPLETED;
             }
             if(SUCCEED != *((int *)info->status)) {
-                fprintf(stderr, "write failed %d\n", *((int *)info->status));
+                fprintf(stderr, "Attribute I/O Failure Reported from Server\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }

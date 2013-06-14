@@ -2361,6 +2361,7 @@ H5_DLL int H5Z_term_interface(void);
 H5_DLL uint32_t H5_checksum_fletcher32(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_crc(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_lookup3(const void *data, size_t len, uint32_t initval);
+H5_DLL uint32_t H5_checksum_lookup4(const void *data, size_t len, H5_checksum_seed_t *cs);
 H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_hash_string(const char *str);
 

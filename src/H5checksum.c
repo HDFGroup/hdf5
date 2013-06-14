@@ -430,6 +430,175 @@ done:
     FUNC_LEAVE_NOAPI(c)
 } /* end H5_checksum_lookup3() */
 
+uint32_t
+H5_checksum_lookup4(const void *key, size_t length, H5_checksum_seed_t *cs)
+{
+    const uint8_t *k = (const uint8_t *)key;
+    uint32_t position = 0;
+    uint32_t a, b, c;           /* internal state */
+    int pos = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(key);
+    HDassert(length > 0);
+
+    /* Set up the internal state */
+    if(cs) {
+        if(!cs->a && !cs->b && !cs->c) {
+            a = b = c = 0xdeadbeef + ((uint32_t)cs->total_length);
+            /* Compute new State */
+            cs->state = 12 - (length % 12);
+        }
+        else {
+            a = cs->a;
+            b = cs->b;
+            c = cs->c;
+
+            /* determine position to start up on */
+            if(cs->state) {
+                position = 12 - cs->state + 1;
+            }
+
+            /* Compute new State */
+            cs->state = cs->state - (length % 12);
+            if(cs->state < 0) {
+                H5_lookup3_mix(a, b, c);
+                cs->state = 12 + cs->state;
+            }
+
+            /* Move towards mod 12 */
+            switch(position)                   /* all the case statements fall through */
+            {
+                case 0 : 
+                    break;
+                case 1 : 
+                    a+=k[pos++];
+                    length --;
+                    if(0 == length)
+                        break;
+                case 2 : 
+                    a+=((uint32_t)k[pos++])<<8;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 3 : 
+                    a+=((uint32_t)k[pos++])<<16;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 4 : 
+                    a+=((uint32_t)k[pos++])<<24;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 5 : 
+                    b+=k[pos++];
+                    length --;
+                    if(0 == length)
+                        break;
+                case 6 : 
+                    b+=((uint32_t)k[pos++])<<8;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 7 : 
+                    b+=((uint32_t)k[pos++])<<16;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 8 : 
+                    b+=((uint32_t)k[pos++])<<24;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 9 : 
+                    c+=k[pos++];
+                    length --;
+                    if(0 == length)
+                        break;
+                case 10: 
+                    c+=((uint32_t)k[pos++])<<8;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 11: 
+                    c+=((uint32_t)k[pos++])<<16;
+                    length --;
+                    if(0 == length)
+                        break;
+                case 12: 
+                    c+=((uint32_t)k[pos++])<<24;
+                    length --;
+                    H5_lookup3_mix(a, b, c);
+                    break;
+            }
+        }
+        /* capture internal state if we are done at this stage */
+        if(0 == length) {
+            cs->a = a;
+            cs->b = b;
+            cs->c = c;
+            H5_lookup3_final(a, b, c);
+            goto done;
+        }
+    }
+    else
+        a = b = c = 0xdeadbeef + ((uint32_t)length);
+
+    /*--------------- all but the last block: affect some 32 bits of (a,b,c) */
+    while (length > 12)
+    {
+      a += k[0+pos];
+      a += ((uint32_t)k[1+pos])<<8;
+      a += ((uint32_t)k[2+pos])<<16;
+      a += ((uint32_t)k[3+pos])<<24;
+      b += k[4+pos];
+      b += ((uint32_t)k[5+pos])<<8;
+      b += ((uint32_t)k[6+pos])<<16;
+      b += ((uint32_t)k[7+pos])<<24;
+      c += k[8+pos];
+      c += ((uint32_t)k[9+pos])<<8;
+      c += ((uint32_t)k[10+pos])<<16;
+      c += ((uint32_t)k[11+pos])<<24;
+      H5_lookup3_mix(a, b, c);
+      length -= 12;
+      k += 12;
+    }
+
+    /*-------------------------------- last block: affect all 32 bits of (c) */
+    switch(length)                   /* all the case statements fall through */
+    {
+        case 12: c+=((uint32_t)k[11+pos])<<24;
+        case 11: c+=((uint32_t)k[10+pos])<<16;
+        case 10: c+=((uint32_t)k[9+pos])<<8;
+        case 9 : c+=k[8+pos];
+        case 8 : b+=((uint32_t)k[7+pos])<<24;
+        case 7 : b+=((uint32_t)k[6+pos])<<16;
+        case 6 : b+=((uint32_t)k[5+pos])<<8;
+        case 5 : b+=k[4+pos];
+        case 4 : a+=((uint32_t)k[3+pos])<<24;
+        case 3 : a+=((uint32_t)k[2+pos])<<16;
+        case 2 : a+=((uint32_t)k[1+pos])<<8;
+        case 1 : a+=k[pos];
+                 break;
+        case 0 : goto done;
+    }
+
+    /* capture internal state */
+    if(cs) {
+        cs->a = a;
+        cs->b = b;
+        cs->c = c;
+    }
+
+    H5_lookup3_final(a, b, c);
+
+done:
+    FUNC_LEAVE_NOAPI(c)
+} /* end H5_checksum_lookup3() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5_checksum_metadata

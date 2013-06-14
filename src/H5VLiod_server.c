@@ -3368,11 +3368,14 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
         if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
-        cs = H5_checksum_fletcher32(buf, size);
+        /* calculate a checksum for the data to be sent */
+        cs = H5_checksum_lookup3(buf, size, 0);
+
+        /* MSC - check if client requested to corrupt data */
         if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
-            fprintf(stderr, "Injecting a bad data value to generate a bad checksum \n");
+            fprintf(stderr, "Injecting a bad data value to cause corruption \n");
             buf_ptr[0] = 10;
         }
     }
@@ -3391,7 +3394,7 @@ done:
     output.ret = ret_value;
     output.cs = cs;
 
-    fprintf(stderr, "Done with dset read, sending response to client\n");
+    fprintf(stderr, "Done with dset read, checksum %u, sending response to client\n", cs);
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
@@ -3444,6 +3447,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     size_t size, buf_size, src_size, dst_size;
     void *buf;
     size_t nelmts;
+    hbool_t flag = FALSE;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
     herr_t ret_value = SUCCEED;
 
@@ -3495,11 +3499,18 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
+    /* MSC - check if client requested to corrupt data */
+    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
+    if(flag) {
+        ((int *)buf)[0] = 10;
+    }
+
     /* If client specified a checksum, verify it */
     if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_checksum(dxpl_id, &data_cs) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
     if(data_cs != 0) {
-        cs = H5_checksum_fletcher32(buf, size);
+        cs = H5_checksum_lookup3(buf, size, 0);
         if(cs != data_cs) {
             fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %u, got %u\n",
                     data_cs, cs);

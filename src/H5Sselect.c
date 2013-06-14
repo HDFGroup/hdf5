@@ -2143,3 +2143,78 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_get_offsets() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_checksum
+ *
+ * Purpose:	Computes a checksum for a buffer with a dataspace 
+ *              selection using the HDF5 fletcher checksume routines.
+ *
+ * Return:	Returns a 32-bit value.  Every bit of the key affects every bit of
+ *              the return value.  Two keys differing by one or two bits will have
+ *              totally different hash values.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+uint32_t
+H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *space)
+{
+    hsize_t _off[H5D_IO_VECTOR_SIZE];      /* Array to store sequence offsets in memory */
+    hsize_t *off = NULL;    /* Pointer to sequence offsets in memory */
+    size_t _len[H5D_IO_VECTOR_SIZE];       /* Array to store sequence lengths in memory */
+    size_t *len = NULL;     /* Pointer to sequence lengths in memory */
+    H5S_sel_iter_t iter;    /* Memory selection iteration info */
+    hbool_t iter_init = 0;  /* Memory selection iteration info has been initialized */
+    size_t nseq;            /* Number of sequences generated */
+    uint32_t ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    len = _len;
+    off = _off;
+
+    /* Check for only one element in selection */
+    if(nelmts == 1) {
+        size_t buf_size = elmt_size * nelmts;
+
+        if(H5S_SELECT_OFFSET(space, off) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "can't retrieve memory selection offset");
+
+        ret_value = H5_checksum_lookup3(buf, buf_size, ret_value);
+    } /* end if */
+    else {
+        size_t nelem;           /* Number of elements used in sequences */
+        size_t i;
+
+        /* Initialize iterator */
+        if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, 0, "unable to initialize selection iterator")
+        iter_init = 1;
+
+        nseq = 0;
+
+        /* Loop, until all bytes are processed */
+        while(nelmts > 0) {
+            /* Get sequences for selection */
+            if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, H5D_IO_VECTOR_SIZE, nelmts, &nseq, 
+                                       &nelem, off, len) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
+
+            for(i=0 ; i<nseq ; i++) {
+                ret_value = H5_checksum_lookup3(&((char *)buf)[0]+off[i], len[i], ret_value);
+            }
+            nelmts -= nelem;
+        } /* end while */
+    } /* end else */
+
+done:
+    /* Release memory selection iterator */
+    if(iter_init)
+        if(H5S_SELECT_ITER_RELEASE(&iter) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, 0, "unable to release selection iterator")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_checksum */
