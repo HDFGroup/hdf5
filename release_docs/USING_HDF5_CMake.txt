@@ -197,6 +197,7 @@ SET (LINK_LIBS ${LINK_LIBS} ${HDF5_LIBRARIES})
 SET (example hdf_example)
 
 ADD_EXECUTABLE (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
+TARGET_C_PROPERTIES (${example} " " " ")
 TARGET_LINK_LIBRARIES (${example} ${LINK_LIBS})
 
 ENABLE_TESTING ()

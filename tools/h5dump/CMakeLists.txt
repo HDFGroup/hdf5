@@ -15,6 +15,7 @@ ADD_EXECUTABLE (h5dump
     ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dump_xml.c
 )
 TARGET_NAMING (h5dump ${LIB_TYPE})
+TARGET_C_PROPERTIES (h5dump " " " ")
 TARGET_LINK_LIBRARIES (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_TARGET_PROPERTIES (h5dump PROPERTIES FOLDER tools)
 
@@ -33,6 +34,7 @@ IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5dumpgentest ${HDF5_TOOLS_H5DUMP_SOURCE_DIR}/h5dumpgentest.c)
     TARGET_NAMING (h5dumpgentest ${LIB_TYPE})
+    TARGET_C_PROPERTIES (h5dumpgentest " " " ")
     TARGET_LINK_LIBRARIES (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     SET_TARGET_PROPERTIES (h5dumpgentest PROPERTIES FOLDER generator/tools)
     
@@ -147,6 +149,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tno-subset.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tnullspace.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/trawdatafile.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/trawssetfile.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tordergr2.ddl
@@ -198,6 +201,7 @@ IF (BUILD_TESTING)
       tall-6.exp
       tnoddlfile.exp
       trawdatafile.exp
+      trawssetfile.exp
       tstr2bin2.exp
       tstr2bin6.exp
       twithddl.exp
@@ -1250,6 +1254,9 @@ IF (BUILD_TESTING)
           trawdatafile.out
           trawdatafile.out.err
           trawdatafile.txt
+          trawssetfile.out
+          trawssetfile.out.err
+          trawssetfile.txt
           tno-subset.out
           tno-subset.out.err
           tnullspace.out
@@ -1365,7 +1372,8 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tnoattrdata 0 --enable-error-stack -A -o tattr.h5)
   ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
   ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack -O -y -o)
-
+  ADD_H5_TEST_EXPORT (trawssetfile tdset.h5 0 --enable-error-stack -d "/dset1[1,1;;;]" -y -o)
+  
   ADD_H5_TEST_EXPORT_DDL (twithddlfile packedbits.h5 0 twithddl --enable-error-stack --ddl=twithddl.txt -y -o)
   
   # test for maximum display datasets
