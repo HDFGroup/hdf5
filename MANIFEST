@@ -954,6 +954,8 @@
 ./test/SWMR_UseCase_UG.txt
 ./test/accum.c
 ./test/app_ref.c
+./test/atomic_reader.c
+./test/atomic_writer.c
 ./test/bad_compound.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
