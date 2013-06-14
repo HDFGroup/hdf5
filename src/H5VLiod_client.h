@@ -199,6 +199,7 @@ typedef struct H5VL_iod_io_info_t {
     size_t nelmts;
     size_t type_size;
     struct H5S_t *space;
+    uint32_t *cs_ptr;
 } H5VL_iod_io_info_t;
 
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);

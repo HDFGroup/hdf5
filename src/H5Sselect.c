@@ -2184,11 +2184,13 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
         if(H5S_SELECT_OFFSET(space, off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "can't retrieve memory selection offset");
 
-        ret_value = H5_checksum_lookup3(buf, buf_size, ret_value);
+        ret_value = H5_checksum_lookup4(buf, buf_size, NULL);
     } /* end if */
     else {
         size_t nelem;           /* Number of elements used in sequences */
         size_t i;
+        const uint8_t *p = (const uint8_t *)buf;
+        H5_checksum_seed_t cs;
 
         /* Initialize iterator */
         if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
@@ -2196,6 +2198,9 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
         iter_init = 1;
 
         nseq = 0;
+
+        cs.a = cs.b = cs.c = cs.state = 0;
+        cs.total_length = elmt_size * nelmts;
 
         /* Loop, until all bytes are processed */
         while(nelmts > 0) {
@@ -2205,7 +2210,7 @@ H5S_checksum(const void *buf, size_t elmt_size, size_t nelmts, const H5S_t *spac
                 HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
 
             for(i=0 ; i<nseq ; i++) {
-                ret_value = H5_checksum_lookup3(&((char *)buf)[0]+off[i], len[i], ret_value);
+                ret_value = H5_checksum_lookup4(p+off[i], len[i], &cs);
             }
             nelmts -= nelem;
         } /* end while */

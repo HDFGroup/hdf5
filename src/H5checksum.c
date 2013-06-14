@@ -469,7 +469,7 @@ H5_checksum_lookup4(const void *key, size_t length, H5_checksum_seed_t *cs)
             }
 
             /* Move towards mod 12 */
-            switch(position)                   /* all the case statements fall through */
+            switch(position)
             {
                 case 0 : 
                     break;
@@ -531,6 +531,8 @@ H5_checksum_lookup4(const void *key, size_t length, H5_checksum_seed_t *cs)
                 case 12: 
                     c+=((uint32_t)k[pos++])<<24;
                     length --;
+                    if(0 == length)
+                        break;
                     H5_lookup3_mix(a, b, c);
                     break;
             }

@@ -3369,7 +3369,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
         /* calculate a checksum for the data to be sent */
-        cs = H5_checksum_lookup3(buf, size, 0);
+        cs = H5_checksum_lookup4(buf, size, NULL);
 
         /* MSC - check if client requested to corrupt data */
         if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
@@ -3510,7 +3510,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_checksum(dxpl_id, &data_cs) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
     if(data_cs != 0) {
-        cs = H5_checksum_lookup3(buf, size, 0);
+        cs = H5_checksum_lookup4(buf, size, NULL);
         if(cs != data_cs) {
             fprintf(stderr, "Errrr.. Network transfer Data corruption. expecting %u, got %u\n",
                     data_cs, cs);

@@ -639,6 +639,49 @@ done:
 } /* end H5Pget_dxpl_checksum() */
 
 herr_t
+H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *cs)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(dxpl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    /* Check arguments */
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Set the transfer mode */
+    if(H5P_set(plist, H5D_XFER_CHECKSUM_PTR_NAME, &cs) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set checksum_ptr value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_dxpl_checksum_ptr() */
+
+herr_t
+H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **cs/*out*/)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+
+    /* Get the transfer mode */
+    if(cs)
+        if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, *cs) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum_ptr value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_dxpl_checksum_ptr() */
+
+herr_t
 H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
@@ -690,6 +733,7 @@ H5Pset_dxpl_append_only(hid_t dxpl_id, hbool_t flag)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", dxpl_id, flag);
 
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -713,6 +757,7 @@ H5Pget_dxpl_append_only(hid_t dxpl_id, hbool_t *flag/*out*/)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", dxpl_id, flag);
 
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
@@ -2353,8 +2398,15 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     info->buf_ptr = buf;
     info->nelmts = nelmts;
     info->type_size = type_size;
+    /* store a copy of the dataspace selection to be able to calculate the checksum later */
     if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
+    /* Get the dxpl plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+    /* store the pointer to the buffer where the checksum needs to be placed */
+    if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
 
     /* Get async request for operation */
     if(do_async) {

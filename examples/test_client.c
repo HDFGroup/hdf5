@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     hsize_t extent = 20;
     hbool_t exists;
     herr_t ret;
-    uint32_t cs;
+    uint32_t cs,read1_cs, read2_cs;
     H5_request_t req1;
     H5_status_t status1;
 
@@ -223,7 +223,7 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = H5_checksum_lookup3(data, sizeof(int) * nelem, 0);
+    cs = H5_checksum_lookup4(data, sizeof(int) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
 
     /* Raw data write on D1. This is asynchronous, but it is delayed
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
     /* Raw data write on D2. same as previous, but here we indicate
        through the property list that we want to inject a
        corruption. */
-    cs = H5_checksum_lookup3(data2, sizeof(int) * nelem, 0);
+    cs = H5_checksum_lookup4(data2, sizeof(int) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
     H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
     ret = H5Dwrite_ff(did2, int_id, dataspaceId, dataspaceId, dxpl_id, data2, 
@@ -273,6 +273,7 @@ int main(int argc, char **argv) {
     assert(H5AOwait(req1, &status1) == 0);
     assert (status1);
 
+    dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     /* Raw data read on D1. This is asynchronous.
 
        At the server side, since the IOD library is "skeletal" and no
@@ -281,9 +282,14 @@ int main(int argc, char **argv) {
 
        The server returns, along with the data array, a checksum for
        the data that should be stored, but for now generated.  */
-    ret = H5Dread_ff(did1, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, r_data, 
+
+    /* Give a location to the DXPL to store the checksum once the read has completed */
+    H5Pset_dxpl_checksum_ptr(dxpl_id, &read1_cs);
+    /* Issue the read Data */
+    ret = H5Dread_ff(did1, int_id, dataspaceId, dataspaceId, dxpl_id, r_data, 
                      0, event_q);
     assert(ret == 0);
+    H5Pclose(dxpl_id);
 
     /* Pop head request from the event queue to test it next. This is the 
        request that belongs to the previous H5Dread_ff call. */
@@ -311,6 +317,9 @@ int main(int argc, char **argv) {
        fail the close, but just print a Fatal error. */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
     H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
+
+    /* Give a location to the DXPL to store the checksum once the read has completed */
+    H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
     ret = H5Dread_ff(did1, int_id, dataspaceId, dataspaceId, dxpl_id, r2_data, 
                      0, event_q);
     assert(ret == 0);
@@ -448,6 +457,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",r_data[i]);
     fprintf(stderr, "\n");
 
+    fprintf(stderr, "Checksum Receieved = %u  Checksum Computed = %u (Should be Equal)\n", read1_cs, cs);
+    assert(read1_cs == cs);
+
     /* Print the data that has been read with an injected fault,
        This should print the array similar to the previous one, but with the 
        first value modified to be 10 (the injected error) */
@@ -456,6 +468,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d ",r2_data[i]);
     fprintf(stderr, "\n");
 
+    fprintf(stderr, "Checksum Receieved = %u  Checksum Computed = %u (Should NOT be Equal)\n", read2_cs, cs);
+    assert(read2_cs != cs);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Open The Container\n");
@@ -602,30 +616,6 @@ int main(int argc, char **argv) {
         assert(H5AOwait(req1, &status1) == 0);
         assert (status1);
 
-#if 1
-        {
-            int i;
-            uint32_t temp = 0, temp1 = 0, temp2 = 0;
-            int buf1[60], buf2[120];
-            H5_checksum_seed_t cs;
-
-            cs.a = cs.b = cs.c = cs.state = 0;
-            cs.total_length = 60*4;
-
-            for(i=0 ; i<60 ; i++) {
-                buf1[i] = i;
-                buf2[i*2] = i;
-            }
-
-            for(i=0 ; i<16 ; i++) {
-                temp1 = H5_checksum_lookup4(&((char *)buf1)[i*15], 15, &cs);
-                printf("Current state = %u\n", cs.state);
-            }
-            temp = H5_checksum_lookup4(&((char *)buf1)[0], 240, NULL);
-            printf("Example cs = %u %u\n", temp, temp1);
-        }
-#endif
-
         fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
         for(i=0;i<120;++i)
             fprintf(stderr, "%d ", buf[i]);
@@ -706,3 +696,36 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+#if 0
+        printf("\n*****************************************************************************************************************\n");
+        printf("DEBUG Checksum \n");
+        printf("*****************************************************************************************************************\n");
+        {
+            int i;
+            uint32_t temp = 0, temp1 = 0, temp2 = 0;
+            int buf1[60], buf2[120];
+            H5_checksum_seed_t cs;
+
+            cs.a = cs.b = cs.c = cs.state = 0;
+            cs.total_length = 60*4;
+
+            for(i=0 ; i<60 ; i++) {
+                buf1[i] = i;
+                buf2[i*2] = i;
+            }
+            /*
+            for(i=0 ; i<60 ; i++) {
+                printf("Current state = %u value = %d\n", cs.state, buf2[i*2]);
+                temp1 = H5_checksum_lookup4(&buf2[i*2], 4, &cs);
+            }
+            temp = H5_checksum_lookup4(&((char *)buf1)[0], 240, NULL);
+            printf("Example cs = %u %u\n", temp, temp1);
+            */
+            for(i=0 ; i<16 ; i++) {
+                temp1 = H5_checksum_lookup4(&((char *)buf1)[i*15], 15, &cs);
+                printf("Current state = %u\n", cs.state);
+            }
+            temp = H5_checksum_lookup4(&((char *)buf1)[0], 240, NULL);
+            printf("Example cs = %u %u\n", temp, temp1);
+        }
+#endif
