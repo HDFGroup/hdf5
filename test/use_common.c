@@ -341,7 +341,12 @@ int write_uc_file(void)
             return -1;
 	}
 	/* flush file to make the just written plane available. */
-	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0){
+#if 0
+	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+#else
+	if(H5Dflush(dsid) < 0)
+#endif
+	{
 	    fprintf(stderr, "Failed to H5Fflush file\n");
 	    return -1;
 	}
@@ -528,6 +533,7 @@ int read_uc_file(void)
 	nplane_old=dims[0];
 
 	/* check if dataset has grown since last time */
+#if 0
 	/* close dsid and file, then reopen them */
 	if (H5Dclose(dsid) < 0){
 	    fprintf(stderr, "H5Dclose failed\n");
@@ -545,6 +551,9 @@ int read_uc_file(void)
 	    fprintf(stderr, "H5Dopen2 failed\n");
 	    return -1;
 	}
+#else
+	H5Drefresh(dsid);
+#endif
 	f_sid = H5Dget_space(dsid);    /* Get filespace handle first. */
 	if (H5Sget_simple_extent_dims(f_sid, dims, NULL) < 0){
 	    fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
