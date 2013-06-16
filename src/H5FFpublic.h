@@ -72,7 +72,7 @@ H5_DLL herr_t H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 H5_DLL herr_t H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
                          hid_t file_space_id, hid_t dxpl_id, void *buf/*out*/,
                          uint64_t trans, hid_t eq_id);
-H5_DLL herr_t H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t eq_id);
+H5_DLL herr_t H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Dclose_ff(hid_t dset_id, hid_t eq_id);
 
 H5_DLL herr_t H5Tcommit_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
@@ -143,20 +143,20 @@ H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t eq_id);
 herr_t H5DOappend(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
                   hid_t memtype, const void *buffer);
 herr_t H5DOappend_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
-                     hid_t memtype, const void *buffer, uint64_t transaction_number, 
-                     H5_request_t *request_ptr);
+                     hid_t memtype, const void *buffer, uint64_t trans, 
+                     hid_t eq_id);
 herr_t H5DOsequence(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
                     size_t sequence, hid_t memtype, void *buffer);
 herr_t H5DOsequence_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
                        size_t sequence, hid_t memtype, void *buffer, 
-                       uint64_t transaction_number, H5_request_t *request_ptr);
+                       uint64_t trans, hid_t eq_id);
 herr_t H5DOset(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],
                hid_t memtype, const void *buffer);
 herr_t H5DOset_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
-                  const void *buffer, uint64_t transaction_number, H5_request_t *request_ptr);
+                  const void *buffer, uint64_t trans, hid_t eq_id);
 herr_t H5DOget(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, void *buffer);
 herr_t H5DOget_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
-                  void *buffer, uint64_t transaction_number, H5_request_t *request_ptr);
+                  void *buffer, uint64_t trans, hid_t eq_id);
 
 #endif /* H5_HAVE_EFF */
 

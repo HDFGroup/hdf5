@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
         H5Pclose(plist_id);
 
         /* change the dataset dimensions for Dataset D1. */
-        ret = H5Dset_extent_ff(did1, &extent, event_q);
+        ret = H5Dset_extent_ff(did1, &extent, 0, event_q);
         assert(ret == 0);
     }
 

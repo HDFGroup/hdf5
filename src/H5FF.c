@@ -797,7 +797,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], hid_t eq_id)
+H5Dset_extent_ff(hid_t dset_id, const hsize_t size[], uint64_t trans, hid_t eq_id)
 {
     H5VL_t *vol_plugin;
     void   *dset;
@@ -2814,7 +2814,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     hid_t    space_id = FAIL; /* old File space */
     hid_t    new_space_id = FAIL; /* new file space (after extension) */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
-    hssize_t nelmts; /* number of elements in selection */
+    hsize_t nelmts; /* number of elements in selection */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -2874,8 +2874,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     if(FAIL == H5Sselect_hyperslab(new_space_id, H5S_SELECT_SET, start, stride, count, block))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
 
-    if((nelmts = H5Sget_select_npoints(new_space_id)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get number of elements in selection");
+    nelmts = H5Sget_select_npoints(new_space_id);
 
     /* create a memory space */
     mem_space_id = H5Screate_simple(1, &nelmts, NULL);
@@ -2912,7 +2911,7 @@ H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
     int      ndims, i; /* number of dimensions in dataspace */
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
-    hssize_t nelmts; /* number of elements in selection */
+    hsize_t nelmts; /* number of elements in selection */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -2957,8 +2956,8 @@ H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
     if(FAIL == H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
 
-    if((nelmts = H5Sget_select_npoints(space_id)) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get number of elements in selection");
+
+    nelmts = H5Sget_select_npoints(space_id);
 
     /* create a memory space */
     mem_space_id = H5Screate_simple(1, &nelmts, NULL);
@@ -3073,17 +3072,275 @@ done:
     FUNC_LEAVE_API(ret_value)
 }/* end H5DOget */
 
-/*
-herr_t H5DOappend_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
-                     hid_t memtype, const void *buffer, uint64_t transaction_number, 
-                     H5_request_t *request_ptr);
-herr_t H5DOsequence_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
-                       size_t sequence, hid_t memtype, void *buffer, 
-                       uint64_t transaction_number, H5_request_t *request_ptr);
-herr_t H5DOset_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
-                  const void *buffer, uint64_t transaction_number, H5_request_t *request_ptr);
-herr_t H5DOget_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
-                  void *buffer, uint64_t transaction_number, H5_request_t *request_ptr);
-*/
+
+herr_t H5DOappend_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
+                     hid_t memtype, const void *buf, uint64_t trans, hid_t eq_id)
+{
+    hsize_t  size[H5S_MAX_RANK];
+    hsize_t  start[H5S_MAX_RANK];
+    hsize_t  count[H5S_MAX_RANK];
+    hsize_t  stride[H5S_MAX_RANK];
+    hsize_t  block[H5S_MAX_RANK];
+    hsize_t  old_size=0; /* the size of the dimension to be extended */
+    int      ndims, i; /* number of dimensions in dataspace */
+    hid_t    space_id = FAIL; /* old File space */
+    hid_t    new_space_id = FAIL; /* new file space (after extension) */
+    hid_t    mem_space_id = FAIL; /* memory space for data buffer */
+    hsize_t nelmts; /* number of elements in selection */
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(!dset_id)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* get the dataspace of the dataset */
+    if(FAIL == (space_id = H5Dget_space(dset_id)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
+
+    /* get the rank of this dataspace */
+    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+
+    if((int)axis >= ndims)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Invalid axis");
+
+    /* get the dimensions sizes of the dataspace */
+    if(H5Sget_simple_extent_dims(space_id, size, NULL) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion sizes");
+
+    /* adjust the dimension size of the requested dimension, 
+       but first record the old dimension size */
+    old_size = size[axis];
+    size[axis] += extension;
+    if(extension < old_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "extend size is smaller than current size of axis");
+
+    /* set the extent of the dataset to the new dimension */
+    if(H5Dset_extent_ff(dset_id, size, trans, eq_id) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extent of dataset");
+
+    /* get the new dataspace of the dataset */
+    if(FAIL == (new_space_id = H5Dget_space(dset_id)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
+
+    /* select a hyperslab corresponding to the append operation */
+    for(i=0 ; i<ndims ; i++) {
+        start[i] = 0;
+        stride[i] = 1;
+        count[i] = size[i];
+        block[i] = 1;
+        if(i == (int)axis) {
+            count[i] = extension;
+            start[i] = old_size;
+        }
+    }
+    if(FAIL == H5Sselect_hyperslab(new_space_id, H5S_SELECT_SET, start, stride, count, block))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
+
+    nelmts = H5Sget_select_npoints(new_space_id);
+
+    /* create a memory space */
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
+
+    /* Write the data */
+    if(H5Dwrite_ff(dset_id, memtype, mem_space_id, new_space_id, dxpl_id, buf, trans, eq_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+done:
+
+    /* close old dataspace */
+    if(space_id && H5Sclose(space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    /* close new dataspace */
+    if(new_space_id && H5Sclose(new_space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    /* close memory dataspace */
+    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    FUNC_LEAVE_API(ret_value)
+}/* end H5DOappend_ff */
+
+herr_t 
+H5DOsequence_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off, 
+                size_t sequence, hid_t memtype, void *buf, uint64_t trans, hid_t eq_id)
+{
+    hsize_t  size[H5S_MAX_RANK];
+    hsize_t  start[H5S_MAX_RANK];
+    hsize_t  count[H5S_MAX_RANK];
+    hsize_t  stride[H5S_MAX_RANK];
+    hsize_t  block[H5S_MAX_RANK];
+    int      ndims, i; /* number of dimensions in dataspace */
+    hid_t    space_id = FAIL; /* old File space */
+    hid_t    mem_space_id = FAIL; /* memory space for data buffer */
+    hsize_t nelmts; /* number of elements in selection */
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(!dset_id)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* get the dataspace of the dataset */
+    if(FAIL == (space_id = H5Dget_space(dset_id)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
+
+    /* get the rank of this dataspace */
+    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+
+    if((int)axis >= ndims)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Invalid axis");
+
+    /* get the dimensions sizes of the dataspace */
+    if(H5Sget_simple_extent_dims(space_id, size, NULL) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion sizes");
+
+    /* select a hyperslab corresponding to the append operation */
+    for(i=0 ; i<ndims ; i++) {
+        start[i] = 0;
+        stride[i] = 1;
+        count[i] = size[i];
+        block[i] = 1;
+        if(i == (int)axis) {
+            count[i] = sequence;
+            start[i] = start_off;
+        }
+    }
+    if(FAIL == H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, stride, count, block))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
+
+    nelmts = H5Sget_select_npoints(space_id);
+
+    /* create a memory space */
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
+
+    /* Read the data */
+    if(H5Dread_ff(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf, trans, eq_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+done:
+
+    /* close old dataspace */
+    if(space_id && H5Sclose(space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    /* close memory dataspace */
+    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    FUNC_LEAVE_API(ret_value)
+}/* end H5DOsequence_ff */
+
+herr_t H5DOset_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
+                  hid_t memtype, const void *buf, uint64_t trans, hid_t eq_id)
+{
+    hid_t    space_id = FAIL; /* old File space */
+    hid_t    mem_space_id = FAIL; /* memory space for data buffer */
+    hsize_t  nelmts = 1;
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(!dset_id)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* get the dataspace of the dataset */
+    if(FAIL == (space_id = H5Dget_space(dset_id)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
+
+    if(FAIL == H5Sselect_elements(space_id, H5S_SELECT_SET, (size_t)nelmts, coord))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
+
+    /* create a memory space */
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
+
+    /* Write the data */
+    if(H5Dwrite_ff(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf, trans, eq_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+done:
+
+    /* close old dataspace */
+    if(space_id && H5Sclose(space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    /* close memory dataspace */
+    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    FUNC_LEAVE_API(ret_value)
+}/* end H5DOset_ff */
+
+herr_t H5DOget_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
+                  hid_t memtype, void *buf, uint64_t trans, hid_t eq_id)
+{
+    hid_t    space_id = FAIL; /* old File space */
+    hid_t    mem_space_id = FAIL; /* memory space for data buffer */
+    hsize_t  nelmts = 1;
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(!dset_id)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms");
+
+    /* get the dataspace of the dataset */
+    if(FAIL == (space_id = H5Dget_space(dset_id)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
+
+    if(FAIL == H5Sselect_elements(space_id, H5S_SELECT_SET, (size_t)nelmts, coord))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
+
+    /* create a memory space */
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
+
+    /* Write the data */
+    if(H5Dread_ff(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf, trans, eq_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+done:
+
+    /* close old dataspace */
+    if(space_id && H5Sclose(space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    /* close memory dataspace */
+    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
+
+    FUNC_LEAVE_API(ret_value)
+}/* end H5DOget_ff */
 
 #endif /* H5_HAVE_EFF */
