@@ -180,7 +180,7 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
                 /* Get the actual datatype object if the VOL object is set */
                 if(NULL == (dt = (H5T_t *)H5T_get_named_type((const H5T_t *)obj)))
                     dt = (H5T_t *) obj;
-    
+
                 if(NULL == (loc->oloc = H5T_oloc(dt)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
                 if(NULL == (loc->path = H5T_nameof(dt)))

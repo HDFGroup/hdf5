@@ -2815,8 +2815,6 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     hid_t    new_space_id = FAIL; /* new file space (after extension) */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
     hssize_t nelmts; /* number of elements in selection */
-    size_t   type_size; /* element size */
-    hsize_t  buf_size; /* total buffer size to be written */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -2878,13 +2876,9 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
 
     if((nelmts = H5Sget_select_npoints(new_space_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get number of elements in selection");
-    if((type_size = H5Tget_size(memtype)) == 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get type size");
-
-    buf_size = nelmts * type_size;
 
     /* create a memory space */
-    mem_space_id = H5Screate_simple(1, &buf_size, NULL);
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
 
     /* Write the data */
     if(H5Dwrite(dset_id, memtype, mem_space_id, new_space_id, dxpl_id, buf) < 0)
@@ -2919,8 +2913,6 @@ H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
     hssize_t nelmts; /* number of elements in selection */
-    size_t   type_size; /* element size */
-    hsize_t  buf_size; /* total buffer size to be written */
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -2967,13 +2959,9 @@ H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
 
     if((nelmts = H5Sget_select_npoints(space_id)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get number of elements in selection");
-    if((type_size = H5Tget_size(memtype)) == 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get type size");
-
-    buf_size = nelmts * type_size;
 
     /* create a memory space */
-    mem_space_id = H5Screate_simple(1, &buf_size, NULL);
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
 
     /* Read the data */
     if(H5Dread(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf) < 0)
@@ -2996,7 +2984,7 @@ herr_t H5DOset(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
 {
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
-    hsize_t  type_size; /* element size */
+    hsize_t  nelmts = 1;
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3016,14 +3004,11 @@ herr_t H5DOset(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
     if(FAIL == (space_id = H5Dget_space(dset_id)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
 
-    if(FAIL == H5Sselect_elements(space_id, H5S_SELECT_SET, 1, coord))
+    if(FAIL == H5Sselect_elements(space_id, H5S_SELECT_SET, (size_t)nelmts, coord))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
 
-    if((type_size = (hsize_t)H5Tget_size(memtype)) == 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get type size");
-
     /* create a memory space */
-    mem_space_id = H5Screate_simple(1, &type_size, NULL);
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
 
     /* Write the data */
     if(H5Dwrite(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf) < 0)
@@ -3046,7 +3031,7 @@ herr_t H5DOget(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
 {
     hid_t    space_id = FAIL; /* old File space */
     hid_t    mem_space_id = FAIL; /* memory space for data buffer */
-    hsize_t  type_size; /* element size */
+    hsize_t  nelmts = 1;
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -3066,14 +3051,11 @@ herr_t H5DOget(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
     if(FAIL == (space_id = H5Dget_space(dset_id)))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace");
 
-    if(FAIL == H5Sselect_elements(space_id, H5S_SELECT_SET, 1, coord))
+    if(FAIL == H5Sselect_elements(space_id, H5S_SELECT_SET, (size_t)nelmts, coord))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTSET, FAIL, "unable to set selection in dataspace");
 
-    if((type_size = (hsize_t)H5Tget_size(memtype)) == 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get type size");
-
     /* create a memory space */
-    mem_space_id = H5Screate_simple(1, &type_size, NULL);
+    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
 
     /* Write the data */
     if(H5Dread(dset_id, memtype, mem_space_id, space_id, dxpl_id, buf) < 0)
