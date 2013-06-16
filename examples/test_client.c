@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
     if(exists)
         printf("Attribute ATTR1 exists!\n");
     else
-        printf("Attribute ATTR1 does NOT exist. This must be the test without a native backend\n");
+        printf("Attribute ATTR1 does NOT exist. This must be the test without a storage backend\n");
 
     /* Delete the attribute just created, this is asynchronous */
     ret = H5Adelete_by_name_ff(file_id, "G1", "ATTR1", H5P_DEFAULT, 0, event_q);
@@ -660,7 +660,7 @@ int main(int argc, char **argv) {
     if(exists)
         printf("Group G3 exists!\n");
     else
-        printf("Group G3 does NOT exist. This must be the test without a native backend\n");
+        printf("Group G3 does NOT exist. This must be the test without a storage backend\n");
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
@@ -695,37 +695,3 @@ int main(int argc, char **argv) {
     MPI_Finalize();
     return 0;
 }
-
-#if 0
-        printf("\n*****************************************************************************************************************\n");
-        printf("DEBUG Checksum \n");
-        printf("*****************************************************************************************************************\n");
-        {
-            int i;
-            uint32_t temp = 0, temp1 = 0, temp2 = 0;
-            int buf1[60], buf2[120];
-            H5_checksum_seed_t cs;
-
-            cs.a = cs.b = cs.c = cs.state = 0;
-            cs.total_length = 60*4;
-
-            for(i=0 ; i<60 ; i++) {
-                buf1[i] = i;
-                buf2[i*2] = i;
-            }
-            /*
-            for(i=0 ; i<60 ; i++) {
-                printf("Current state = %u value = %d\n", cs.state, buf2[i*2]);
-                temp1 = H5checksum(&buf2[i*2], 4, &cs);
-            }
-            temp = H5checksum(&((char *)buf1)[0], 240, NULL);
-            printf("Example cs = %u %u\n", temp, temp1);
-            */
-            for(i=0 ; i<16 ; i++) {
-                temp1 = H5checksum(&((char *)buf1)[i*15], 15, &cs);
-                printf("Current state = %u\n", cs.state);
-            }
-            temp = H5checksum(&((char *)buf1)[0], 240, NULL);
-            printf("Example cs = %u %u\n", temp, temp1);
-        }
-#endif
