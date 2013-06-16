@@ -43,12 +43,19 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5Tprivate.h"		/* Datatypes 				*/
+#include "H5VLiod.h"		/* IOD plugin    		  	*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
 
 /****************/
 /* Local Macros */
 /****************/
+
+/* hint that access to dataset will be in an append only fashion */
+#define H5D_CRT_APPEND_ONLY_SIZE	       sizeof(hbool_t)
+#define H5D_CRT_APPEND_ONLY_DEF    	       FALSE
+#define H5D_CRT_APPEND_ONLY_ENC                H5P__encode_hbool_t
+#define H5D_CRT_APPEND_ONLY_DEC                H5P__decode_hbool_t
 
 /* Define default layout information */
 #define H5D_DEF_STORAGE_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
@@ -170,6 +177,7 @@ H5FL_BLK_EXTERN(type_conv);
 /***************************/
 
 /* Property value defaults */
+static const hbool_t H5D_def_append_only_g = H5D_CRT_APPEND_ONLY_DEF;
 static const H5O_layout_t H5D_def_layout_g = H5D_CRT_LAYOUT_DEF;        /* Default storage layout */
 static const H5O_fill_t H5D_def_fill_g = H5D_CRT_FILL_VALUE_DEF;        /* Default fill value */
 static const unsigned H5D_def_alloc_time_state_g = H5D_CRT_ALLOC_TIME_STATE_DEF;  /* Default allocation time state */
@@ -209,6 +217,12 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
+
+    if(H5P_register_real(pclass, H5D_CRT_APPEND_ONLY_NAME, H5D_CRT_APPEND_ONLY_SIZE, 
+                         &H5D_def_append_only_g,
+                         NULL, NULL, NULL, H5D_CRT_APPEND_ONLY_ENC, H5D_CRT_APPEND_ONLY_DEC, 
+                         NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the storage layout property */
     if(H5P_register_real(pclass, H5D_CRT_LAYOUT_NAME, H5D_CRT_LAYOUT_SIZE, &H5D_def_layout_g, 

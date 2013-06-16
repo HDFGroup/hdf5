@@ -79,7 +79,6 @@ static uint32_t H5_crc_table[256];
 /* Flag: has the table been computed? */
 static hbool_t H5_crc_table_computed = FALSE;
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5_checksum_fletcher32

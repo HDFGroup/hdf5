@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     hsize_t extent = 20;
     hbool_t exists;
     herr_t ret;
-    uint32_t cs,read1_cs, read2_cs;
+    uint32_t cs = 0,read1_cs = 0, read2_cs = 0;
     H5_request_t req1;
     H5_status_t status1;
 
@@ -223,7 +223,7 @@ int main(int argc, char **argv) {
     /* Attach a checksum to the dxpl which is verified all the way
        down at the server */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    cs = H5_checksum_lookup4(data, sizeof(int) * nelem, NULL);
+    cs = H5checksum(data, sizeof(int) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
 
     /* Raw data write on D1. This is asynchronous, but it is delayed
@@ -238,9 +238,9 @@ int main(int argc, char **argv) {
     /* Raw data write on D2. same as previous, but here we indicate
        through the property list that we want to inject a
        corruption. */
-    cs = H5_checksum_lookup4(data2, sizeof(int) * nelem, NULL);
+    cs = H5checksum(data2, sizeof(int) * nelem, NULL);
     H5Pset_dxpl_checksum(dxpl_id, cs);
-    H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
+    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
     ret = H5Dwrite_ff(did2, int_id, dataspaceId, dataspaceId, dxpl_id, data2, 
                       0, event_q);
     assert(ret == 0);
@@ -316,7 +316,7 @@ int main(int argc, char **argv) {
        the H5Dclose(D1) later, but for the demo purposes we are not actually going to 
        fail the close, but just print a Fatal error. */
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
+    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
 
     /* Give a location to the DXPL to store the checksum once the read has completed */
     H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
@@ -506,11 +506,11 @@ int main(int argc, char **argv) {
        asynchronous interface, but right now we implement it
        synchronously, because we don't the object type to be able to
        generate the ID. */
-    gid1 = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, 0, event_q);
+    gid1 = H5Oopen(file_id, "G1", H5P_DEFAULT);
     assert(gid1);
-    int_id = H5Oopen_ff(file_id, "int", H5P_DEFAULT, 0, event_q);
+    int_id = H5Oopen(file_id, "int", H5P_DEFAULT);
     assert(int_id);
-    did1 = H5Oopen_ff(file_id,"G1/G2/G3/D1", H5P_DEFAULT, 0, event_q);
+    did1 = H5Oopen(file_id,"G1/G2/G3/D1", H5P_DEFAULT);
     assert(did1);
 
     /* open attribute by name. This is asynchronous. */
@@ -716,16 +716,16 @@ int main(int argc, char **argv) {
             /*
             for(i=0 ; i<60 ; i++) {
                 printf("Current state = %u value = %d\n", cs.state, buf2[i*2]);
-                temp1 = H5_checksum_lookup4(&buf2[i*2], 4, &cs);
+                temp1 = H5checksum(&buf2[i*2], 4, &cs);
             }
-            temp = H5_checksum_lookup4(&((char *)buf1)[0], 240, NULL);
+            temp = H5checksum(&((char *)buf1)[0], 240, NULL);
             printf("Example cs = %u %u\n", temp, temp1);
             */
             for(i=0 ; i<16 ; i++) {
-                temp1 = H5_checksum_lookup4(&((char *)buf1)[i*15], 15, &cs);
+                temp1 = H5checksum(&((char *)buf1)[i*15], 15, &cs);
                 printf("Current state = %u\n", cs.state);
             }
-            temp = H5_checksum_lookup4(&((char *)buf1)[0], 240, NULL);
+            temp = H5checksum(&((char *)buf1)[0], 240, NULL);
             printf("Example cs = %u %u\n", temp, temp1);
         }
 #endif

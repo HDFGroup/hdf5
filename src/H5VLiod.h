@@ -49,10 +49,10 @@ extern "C" {
 
 #ifdef H5_HAVE_EFF
 
-#define H5D_XFER_INJECT_BAD_CHECKSUM_NAME "inject_bad_checksum"
+#define H5D_XFER_INJECT_CORRUPTION_NAME "inject_corruption"
 #define H5D_XFER_CHECKSUM_NAME "checksum"
 #define H5D_XFER_CHECKSUM_PTR_NAME "checksum_ptr"
-#define H5D_XFER_APPEND_ONLY_NAME "append_only"
+#define H5D_CRT_APPEND_ONLY_NAME "append_only"
 
 
 H5_DLL H5VL_class_t *H5VL_iod_init(void);
@@ -65,10 +65,10 @@ H5_DLL herr_t H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t value);
 H5_DLL herr_t H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *value);
 H5_DLL herr_t H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *value);
 H5_DLL herr_t H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **value);
-H5_DLL herr_t H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag);
-H5_DLL herr_t H5Pget_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t *flag);
-H5_DLL herr_t H5Pset_dxpl_append_only(hid_t dxpl_id, hbool_t flag);
-H5_DLL herr_t H5Pget_dxpl_append_only(hid_t dxpl_id, hbool_t *flag);
+H5_DLL herr_t H5Pset_dxpl_inject_corruption(hid_t dxpl_id, hbool_t flag);
+H5_DLL herr_t H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag);
+H5_DLL herr_t H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag);
+H5_DLL herr_t H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag);
 
 #endif /* H5_HAVE_EFF */
 

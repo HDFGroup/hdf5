@@ -49,10 +49,10 @@
 
 #ifdef H5_HAVE_EFF
 
-#define H5D_XFER_INJECT_BAD_CHECKSUM_SIZE		sizeof(hbool_t)
-#define H5D_XFER_INJECT_BAD_CHECKSUM_DEF    		FALSE
-#define H5D_XFER_INJECT_BAD_CHECKSUM_ENC                H5P__encode_hbool_t
-#define H5D_XFER_INJECT_BAD_CHECKSUM_DEC                H5P__decode_hbool_t
+#define H5D_XFER_INJECT_CORRUPTION_SIZE		sizeof(hbool_t)
+#define H5D_XFER_INJECT_CORRUPTION_DEF    		FALSE
+#define H5D_XFER_INJECT_CORRUPTION_ENC                H5P__encode_hbool_t
+#define H5D_XFER_INJECT_CORRUPTION_DEC                H5P__decode_hbool_t
 
 #define H5D_XFER_CHECKSUM_SIZE		sizeof(unsigned)
 #define H5D_XFER_CHECKSUM_DEF  		0
@@ -61,11 +61,6 @@
 
 #define H5D_XFER_CHECKSUM_PTR_SIZE      sizeof(uint32_t *)
 #define H5D_XFER_CHECKSUM_PTR_DEF       NULL
-
-#define H5D_XFER_APPEND_ONLY_SIZE		sizeof(hbool_t)
-#define H5D_XFER_APPEND_ONLY_DEF    		FALSE
-#define H5D_XFER_APPEND_ONLY_ENC                H5P__encode_hbool_t
-#define H5D_XFER_APPEND_ONLY_DEC                H5P__decode_hbool_t
 
 #endif /* H5_HAVE_EFF */
 
@@ -260,10 +255,9 @@ const H5P_libclass_t H5P_CLS_DXFR[1] = {{
 /***************************/
 
 #ifdef H5_HAVE_EFF
-static const hbool_t H5D_def_inject_bad_checksum_g = H5D_XFER_INJECT_BAD_CHECKSUM_DEF;
+static const hbool_t H5D_def_inject_corruption_g = H5D_XFER_INJECT_CORRUPTION_DEF;
 static const uint32_t H5D_def_checksum_g = H5D_XFER_CHECKSUM_DEF;
 static const uint32_t *H5D_def_checksum_ptr_g = H5D_XFER_CHECKSUM_PTR_DEF;
-static const hbool_t H5D_def_append_only_g = H5D_XFER_APPEND_ONLY_DEF;
 #endif /* H5_HAVE_EFF */
 
 /* Property value defaults */
@@ -320,9 +314,9 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
 #ifdef H5_HAVE_EFF
 
-    if(H5P_register_real(pclass, H5D_XFER_INJECT_BAD_CHECKSUM_NAME, H5D_XFER_INJECT_BAD_CHECKSUM_SIZE, 
-                         &H5D_def_inject_bad_checksum_g,
-                         NULL, NULL, NULL, H5D_XFER_INJECT_BAD_CHECKSUM_ENC, H5D_XFER_INJECT_BAD_CHECKSUM_DEC, 
+    if(H5P_register_real(pclass, H5D_XFER_INJECT_CORRUPTION_NAME, H5D_XFER_INJECT_CORRUPTION_SIZE, 
+                         &H5D_def_inject_corruption_g,
+                         NULL, NULL, NULL, H5D_XFER_INJECT_CORRUPTION_ENC, H5D_XFER_INJECT_CORRUPTION_DEC, 
                          NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -335,12 +329,6 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5D_XFER_CHECKSUM_PTR_NAME, H5D_XFER_CHECKSUM_PTR_SIZE, 
                          &H5D_def_checksum_ptr_g,
                          NULL, NULL, NULL, NULL, NULL, 
-                         NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    if(H5P_register_real(pclass, H5D_XFER_APPEND_ONLY_NAME, H5D_XFER_APPEND_ONLY_SIZE, 
-                         &H5D_def_append_only_g,
-                         NULL, NULL, NULL, H5D_XFER_APPEND_ONLY_ENC, H5D_XFER_APPEND_ONLY_DEC, 
                          NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

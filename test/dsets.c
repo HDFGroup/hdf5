@@ -50,6 +50,8 @@ const char *FILENAME[] = {
     "chunk_expand",
     "copy_dcpl_newfile",
     "layout_extend",
+    "append",
+    "setget",
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -8181,6 +8183,425 @@ error:
 
 
 /*-------------------------------------------------------------------------
+* Function: test_append_sequence_1d
+*
+* Purpose: Test support for appending/sequencing elements to 1-D datasets.
+*
+* Return:      Success: 0
+*              Failure: -1
+*
+* Programmer:  Quincey Koziol
+*              Saturday, June 15, 2013
+*
+*-------------------------------------------------------------------------
+*/
+static herr_t
+test_append_sequence_1d(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
+    hsize_t	curr_size;
+    unsigned    u;              /* Local index variable */
+    unsigned    write_elem[10], read_elem[10];  /* Element written/read */
+    herr_t      ret;            /* Return from append/sequence operation */
+
+    TESTING("appending to 1-D dataset");
+
+    h5_fixname(FILENAME[13], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set chunk size */
+    chunk_dim = 12;
+    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Create 1-D dataspace */
+    dim = 0;
+    max_dim = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(1, &dim, &max_dim)) < 0) FAIL_STACK_ERROR
+
+    /* Create 1-D chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Close DCPL and dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+
+    /* Initialize data elements */
+    for(u = 0; u < 10; u++)
+        write_elem[u] = u * 2;
+
+    /* Append 10 elements to dataset, along bad axis */
+    H5E_BEGIN_TRY {
+        ret = H5DOappend(dsid, H5P_DEFAULT, 1, 10, H5T_NATIVE_UINT, write_elem);
+    } H5E_END_TRY;
+    if(ret >= 0) FAIL_PUTS_ERROR("bad append should have failed");
+
+    /* Append 10 elements to dataset, along proper axis */
+    if(H5DOappend(dsid, H5P_DEFAULT, 0, 10, H5T_NATIVE_UINT, write_elem) < 0) FAIL_STACK_ERROR
+
+    /* Get the dataset's dataspace now */
+    if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
+    if(H5Sget_simple_extent_dims(sid, &curr_size, NULL) < 0) FAIL_STACK_ERROR
+
+    /* Verify dataset is correct size */
+    if(curr_size != 10) FAIL_PUTS_ERROR("invalid dataspace dimensions after append");
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+
+    /* Append 10 more elements to dataset */
+    if(H5DOappend(dsid, H5P_DEFAULT, 0, 10, H5T_NATIVE_UINT, write_elem) < 0) FAIL_STACK_ERROR
+
+    /* Get the dataset's dataspace now */
+    if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
+    if(H5Sget_simple_extent_dims(sid, &curr_size, NULL) < 0) FAIL_STACK_ERROR
+
+    /* Verify dataset is correct size */
+    if(curr_size != 20) FAIL_PUTS_ERROR("invalid dataspace dimensions after append");
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+
+    /* Read elements back, with sequence operation */
+    HDmemset(read_elem, 0, sizeof(read_elem));
+
+    /* Sequence 10 elements from dataset, along bad axis */
+    H5E_BEGIN_TRY {
+        ret = H5DOsequence(dsid, H5P_DEFAULT, 1, 0, 10, H5T_NATIVE_UINT, read_elem);
+    } H5E_END_TRY;
+    if(ret >= 0) FAIL_PUTS_ERROR("bad sequence should have failed");
+
+    /* Sequence first 10 elements from dataset, along proper axis */
+    if(H5DOsequence(dsid, H5P_DEFAULT, 0, 0, 10, H5T_NATIVE_UINT, read_elem) < 0) FAIL_STACK_ERROR
+
+    /* Verify data read */
+    for(u = 0; u < 10; u++)
+        if(read_elem[u] != write_elem[u]) FAIL_PUTS_ERROR("bad data from sequence read");
+
+    /* Sequence next 10 elements from dataset */
+    if(H5DOsequence(dsid, H5P_DEFAULT, 0, 10, 10, H5T_NATIVE_UINT, read_elem) < 0) FAIL_STACK_ERROR
+
+    /* Verify data read */
+    for(u = 0; u < 10; u++)
+        if(read_elem[u] != write_elem[u]) FAIL_PUTS_ERROR("bad data from sequence read");
+
+    /* Close everything */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_append_sequence_1d() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_append_sequence_2d
+ *
+ * Purpose: Test support for appending/sequencing elements to 2-D datasets.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, June 15, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_append_sequence_2d(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim[2], max_dim[2], chunk_dim[2]; /* Dataset and chunk dimensions */
+    hsize_t	curr_size[2];
+    unsigned    u, v;           /* Local index variable */
+    unsigned    write_elem[200], read_elem[200];  /* Element written/read */
+    herr_t      ret;            /* Return from append/sequence operation */
+
+    TESTING("appending to 2-D dataset");
+
+    h5_fixname(FILENAME[13], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set chunk size */
+    chunk_dim[0] = chunk_dim[1] = 12;
+    if(H5Pset_chunk(dcpl, 2, chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Create 2-D dataspace */
+    dim[0] = dim[1] = 10;
+    max_dim[0] = max_dim[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dim, max_dim)) < 0) FAIL_STACK_ERROR
+
+    /* Create 2-D chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Close DCPL and dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+
+    /* Initialize data elements */
+    for(u = 0; u < 100; u++)
+        write_elem[u] = u * 2;
+
+    /* Append 10 rows to dataset, along bad axis */
+    H5E_BEGIN_TRY {
+        ret = H5DOappend(dsid, H5P_DEFAULT, 2, 10, H5T_NATIVE_UINT, write_elem);
+    } H5E_END_TRY;
+    if(ret >= 0) FAIL_PUTS_ERROR("bad append should have failed");
+
+    /* Append 10 rows to dataset, along first axis */
+    if(H5DOappend(dsid, H5P_DEFAULT, 0, 10, H5T_NATIVE_UINT, write_elem) < 0) FAIL_STACK_ERROR
+
+    /* Get the dataset's dataspace now */
+    if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
+    if(H5Sget_simple_extent_dims(sid, curr_size, NULL) < 0) FAIL_STACK_ERROR
+
+    /* Verify dataset is correct size */
+    if(curr_size[0] != 20) FAIL_PUTS_ERROR("invalid dataspace dimensions after append");
+    if(curr_size[1] != 10) FAIL_PUTS_ERROR("invalid dataspace dimensions after append");
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+
+    /* Append 10 more rows to dataset, along other axis */
+    if(H5DOappend(dsid, H5P_DEFAULT, 1, 10, H5T_NATIVE_UINT, write_elem) < 0) FAIL_STACK_ERROR
+
+    /* Get the dataset's dataspace now */
+    if((sid = H5Dget_space(dsid)) < 0) FAIL_STACK_ERROR
+    if(H5Sget_simple_extent_dims(sid, curr_size, NULL) < 0) FAIL_STACK_ERROR
+
+    /* Verify dataset is correct size */
+    if(curr_size[0] != 20) FAIL_PUTS_ERROR("invalid dataspace dimensions after append");
+    if(curr_size[1] != 20) FAIL_PUTS_ERROR("invalid dataspace dimensions after append");
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+
+    /* Sequence 10 rows from dataset, along bad axis */
+    H5E_BEGIN_TRY {
+        ret = H5DOsequence(dsid, H5P_DEFAULT, 2, 0, 10, H5T_NATIVE_UINT, read_elem);
+    } H5E_END_TRY;
+    if(ret >= 0) FAIL_PUTS_ERROR("bad sequence should have failed");
+
+
+    /* Read elements back, with sequence operations along one axis */
+
+    /* Sequence first 10 rows from dataset, along proper axis */
+    HDmemset(read_elem, 0, sizeof(read_elem));
+    if(H5DOsequence(dsid, H5P_DEFAULT, 0, 0, 10, H5T_NATIVE_UINT, read_elem) < 0) FAIL_STACK_ERROR
+
+    /* Verify data read */
+    for(u = 0; u < 10; u++)
+        for(v = 0; v < 20; v++)
+            if(v < 10) {
+                if(read_elem[u * 20 + v] != 0) FAIL_PUTS_ERROR("bad data from sequence read");
+            } /* end if */
+            else {
+                if(read_elem[u * 20 + v] != write_elem[u * 10 + (v - 10)]) FAIL_PUTS_ERROR("bad data from sequence read");
+            } /* end else */
+
+    /* Sequence next 10 rows from dataset */
+    HDmemset(read_elem, 0, sizeof(read_elem));
+    if(H5DOsequence(dsid, H5P_DEFAULT, 0, 10, 10, H5T_NATIVE_UINT, read_elem) < 0) FAIL_STACK_ERROR
+
+    /* Verify data read */
+    for(u = 0; u < 200; u++)
+        if(read_elem[u] != write_elem[u]) FAIL_PUTS_ERROR("bad data from sequence read");
+
+
+    /* Read elements back, with sequence operations along other axis */
+
+    /* Sequence first 10 rows from dataset, along proper axis */
+    HDmemset(read_elem, 0, sizeof(read_elem));
+    if(H5DOsequence(dsid, H5P_DEFAULT, 1, 0, 10, H5T_NATIVE_UINT, read_elem) < 0) FAIL_STACK_ERROR
+
+    /* Verify data read */
+    for(u = 0; u < 20; u++) {
+        for(v = 0; v < 10; v++) {
+            if(u < 10) {
+                if(read_elem[u * 10 + v] != 0) FAIL_PUTS_ERROR("bad data from sequence read");
+            } /* end if */
+            else {
+                if(read_elem[u * 10 + v] != write_elem[(u - 10) * 20 + v]) FAIL_PUTS_ERROR("bad data from sequence read");
+            } /* end else */
+        } /* end for */
+    } /* end for */
+
+    /* Sequence next 10 rows from dataset */
+    HDmemset(read_elem, 0, sizeof(read_elem));
+    if(H5DOsequence(dsid, H5P_DEFAULT, 1, 10, 10, H5T_NATIVE_UINT, read_elem) < 0) FAIL_STACK_ERROR
+
+    /* Verify data read */
+    for(u = 0; u < 20; u++) {
+        for(v = 0; v < 10; v++) {
+            if(u < 10) {
+                if(read_elem[u * 10 + v] != write_elem[u * 10 + v]) FAIL_PUTS_ERROR("bad data from sequence read");
+            } /* end if */
+            else {
+                if(read_elem[u * 10 + v] != write_elem[(u - 10) * 20 + v + 10]) FAIL_PUTS_ERROR("bad data from sequence read");
+            } /* end else */
+        } /* end for */
+    } /* end for */
+
+
+    /* Close everything */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_append_sequence_2d() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_set_get
+ *
+ * Purpose: Test support for setting/getting elements in a dataset.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, June 15, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_set_get(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hsize_t     dim[3];         /* Dataset dimensions */
+    hsize_t     loc[3];         /* Element location */
+    unsigned    write_elem, read_elem;  /* Element written/read */
+    herr_t      ret;            /* Return from append/sequence operation */
+
+    TESTING("set/get operations");
+
+    h5_fixname(FILENAME[14], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create 3-D dataspace */
+    dim[0] = dim[1] = dim[2] == 10;
+    if((sid = H5Screate_simple(3, dim, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Create 3-D contiguous dataset */
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Close dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+    /* Set a value at an invalid coordinate for the dataset */
+    write_elem = 19;
+    loc[0] = loc[1] = loc[2] = 19;
+    H5E_BEGIN_TRY {
+        ret = H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &write_elem);
+    } H5E_END_TRY;
+    if(ret >= 0) FAIL_PUTS_ERROR("bad set should have failed");
+
+    /* Set a few elements in the dataset */
+    write_elem = 222;
+    loc[0] = loc[1] = loc[2] = 2;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &write_elem) < 0) FAIL_STACK_ERROR
+    write_elem = 333;
+    loc[0] = loc[1] = loc[2] = 3;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &write_elem) < 0) FAIL_STACK_ERROR
+    write_elem = 777;
+    loc[0] = loc[1] = loc[2] = 7;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &write_elem) < 0) FAIL_STACK_ERROR
+
+
+    /* Get an element from dataset, at an invalid coordinate */
+    loc[0] = loc[1] = loc[2] = 19;
+    H5E_BEGIN_TRY {
+        ret = H5DOget(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &read_elem);
+    } H5E_END_TRY;
+    if(ret >= 0) FAIL_PUTS_ERROR("bad get should have failed");
+
+
+    /* Read elements back, checking unwritten element too */
+    read_elem = 1;
+    loc[0] = loc[1] = loc[2] = 2;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &read_elem) < 0) FAIL_STACK_ERROR
+    if(read_elem != 222) FAIL_PUTS_ERROR("bad data from get");
+    read_elem = 1;
+    loc[0] = loc[1] = loc[2] = 4;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &read_elem) < 0) FAIL_STACK_ERROR
+    if(read_elem != 0) FAIL_PUTS_ERROR("bad data from get");
+    read_elem = 1;
+    loc[0] = loc[1] = loc[2] = 3;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &read_elem) < 0) FAIL_STACK_ERROR
+    if(read_elem != 333) FAIL_PUTS_ERROR("bad data from get");
+    read_elem = 1;
+    loc[0] = loc[1] = loc[2] = 7;
+    if(H5DOset(dsid, H5P_DEFAULT, loc, H5T_NATIVE_UINT, &read_elem) < 0) FAIL_STACK_ERROR
+    if(read_elem != 777) FAIL_PUTS_ERROR("bad data from get");
+
+
+    /* Close everything */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_set_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_scatter
  *
  * Purpose:     Tests H5Dscatter with a variety of different selections
@@ -9329,6 +9750,10 @@ main(void)
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
+
+	nerrors += (test_append_sequence_1d(my_fapl) < 0        ? 1 : 0);
+	nerrors += (test_append_sequence_2d(my_fapl) < 0        ? 1 : 0);
+	nerrors += (test_set_get(my_fapl) < 0        ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;

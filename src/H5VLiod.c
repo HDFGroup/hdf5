@@ -682,7 +682,7 @@ done:
 } /* end H5Pget_dxpl_checksum_ptr() */
 
 herr_t
-H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag)
+H5Pset_dxpl_inject_corruption(hid_t dxpl_id, hbool_t flag)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -698,15 +698,15 @@ H5Pset_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t flag)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
-    if(H5P_set(plist, H5D_XFER_INJECT_BAD_CHECKSUM_NAME, &flag) < 0)
+    if(H5P_set(plist, H5D_XFER_INJECT_CORRUPTION_NAME, &flag) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_dxpl_inject_bad_checksum() */
+} /* end H5Pset_dxpl_inject_corruption() */
 
 herr_t
-H5Pget_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t *flag/*out*/)
+H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag/*out*/)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -719,57 +719,57 @@ H5Pget_dxpl_inject_bad_checksum(hid_t dxpl_id, hbool_t *flag/*out*/)
 
     /* Get the transfer mode */
     if(flag)
-        if(H5P_get(plist, H5D_XFER_INJECT_BAD_CHECKSUM_NAME, flag) < 0)
+        if(H5P_get(plist, H5D_XFER_INJECT_CORRUPTION_NAME, flag) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_dxpl_inject_bad_checksum() */
+} /* end H5Pget_dxpl_inject_corruption() */
 
 herr_t
-H5Pset_dxpl_append_only(hid_t dxpl_id, hbool_t flag)
+H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", dxpl_id, flag);
+    H5TRACE2("e", "ib", dcpl_id, flag);
 
-    if(dxpl_id == H5P_DEFAULT)
+    if(dcpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+    if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
 
     /* Set the transfer mode */
-    if(H5P_set(plist, H5D_XFER_APPEND_ONLY_NAME, &flag) < 0)
+    if(H5P_set(plist, H5D_CRT_APPEND_ONLY_NAME, &flag) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_dxpl_append_only() */
+} /* end H5Pset_dcpl_append_only() */
 
 herr_t
-H5Pget_dxpl_append_only(hid_t dxpl_id, hbool_t *flag/*out*/)
+H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag/*out*/)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ix", dxpl_id, flag);
+    H5TRACE2("e", "ix", dcpl_id, flag);
 
-    if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
+    if(NULL == (plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dcpl")
 
     /* Get the transfer mode */
     if(flag)
-        if(H5P_get(plist, H5D_XFER_APPEND_ONLY_NAME, flag) < 0)
+        if(H5P_get(plist, H5D_CRT_APPEND_ONLY_NAME, flag) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_dxpl_append_only() */
+} /* end H5Pget_dcpl_append_only() */
 
 
 /*-------------------------------------------------------------------------

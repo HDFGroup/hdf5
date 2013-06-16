@@ -123,7 +123,6 @@ H5_DLL herr_t H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id,
 H5_DLL herr_t H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
                            uint64_t trans, hid_t eq_id);
 
-H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
                          hid_t lapl_id, uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, 
@@ -140,6 +139,24 @@ H5_DLL herr_t H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_i
                          uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t eq_id);
 
+/* New Routines for Dynamic Data Structures Use Case (ACG) */
+herr_t H5DOappend(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
+                  hid_t memtype, const void *buffer);
+herr_t H5DOappend_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
+                     hid_t memtype, const void *buffer, uint64_t transaction_number, 
+                     H5_request_t *request_ptr);
+herr_t H5DOsequence(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
+                    size_t sequence, hid_t memtype, void *buffer);
+herr_t H5DOsequence_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
+                       size_t sequence, hid_t memtype, void *buffer, 
+                       uint64_t transaction_number, H5_request_t *request_ptr);
+herr_t H5DOset(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],
+               hid_t memtype, const void *buffer);
+herr_t H5DOset_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
+                  const void *buffer, uint64_t transaction_number, H5_request_t *request_ptr);
+herr_t H5DOget(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, void *buffer);
+herr_t H5DOget_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
+                  void *buffer, uint64_t transaction_number, H5_request_t *request_ptr);
 
 #endif /* H5_HAVE_EFF */
 

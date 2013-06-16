@@ -808,3 +808,30 @@ H5close(void)
     FUNC_LEAVE_API_NOFS(SUCCEED)
 } /* end H5close() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5checksum
+ *
+ * Purpose:	Generate a checksum for the data in Key.
+ *              If the checksum is for a contiguous buffer, pass cs as NULL.
+ *              if the checksum is for non contiguous buffer, intialize cs 
+ *              a,b,c,state to 0 and set the total_length to the size of the 
+ *              data. Then call H5checksum on every contiguous piece of the buffer
+ *              with cs as the seed value from the previous H5checksum call.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+uint32_t H5checksum(const void *key, size_t length, H5_checksum_seed_t *cs) 
+{
+    uint32_t ret_value;
+
+    FUNC_ENTER_API(0)
+
+    ret_value = H5_checksum_lookup4(key, length, cs);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* end H5checksum */

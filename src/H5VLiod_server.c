@@ -317,7 +317,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Loop tp receive requests from clients */
     while(1) {
-        fprintf(stderr, "Server In Loop\n");
+        /*fprintf(stderr, "Server In Loop\n");*/
         /* Receive new function calls */
         if(HG_SUCCESS != HG_Handler_process(HG_HANDLER_MAX_IDLE_TIME, HG_STATUS_IGNORE))
             return FAIL;
@@ -3372,7 +3372,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
         cs = H5_checksum_lookup4(buf, size, NULL);
 
         /* MSC - check if client requested to corrupt data */
-        if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
+        if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
         if(flag) {
             fprintf(stderr, "Injecting a bad data value to cause corruption \n");
@@ -3500,7 +3500,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
     /* MSC - check if client requested to corrupt data */
-    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_bad_checksum(dxpl_id, &flag) < 0)
+    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
     if(flag) {
         ((int *)buf)[0] = 10;

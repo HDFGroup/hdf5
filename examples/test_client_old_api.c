@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
     H5Dread(did1, int_id, dataspaceId, dataspaceId, H5P_DEFAULT, r_data);
 
     dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-    H5Pset_dxpl_inject_bad_checksum(dxpl_id, 1);
+    H5Pset_dxpl_inject_corruption(dxpl_id, 1);
     H5Dread(did1, int_id, dataspaceId, dataspaceId, dxpl_id, r2_data);
     H5Pclose(dxpl_id);
 
