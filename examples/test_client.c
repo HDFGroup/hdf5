@@ -1,5 +1,5 @@
 /* 
- * test_client.c: Client side of Milestone 3.3 Asynchronous I/O and initial
+ * test_client.c: Client side of Milestone 4.2 Asynchronous I/O and initial
  * IOD VOL plugin demonstration.  This is, in effect, the application program that 
  * would run on one or more compute nodes and make calls to the HDF5 API.
  */
@@ -21,6 +21,7 @@ int main(int argc, char **argv) {
     hid_t fapl_id, dxpl_id;
     const unsigned int nelem=60;
     int *data = NULL, *r_data = NULL, *r2_data = NULL, *data2 = NULL;
+    int *buf = NULL;
     int16_t *data3 = NULL;
     int16_t *r3_data = NULL;
     int *a_data = NULL, *ra_data = NULL;
@@ -348,7 +349,7 @@ int main(int argc, char **argv) {
         H5Pclose(plist_id);
 
         /* change the dataset dimensions for Dataset D1. */
-        ret = H5Dset_extent_ff(did1, &extent, 0, event_q);
+        ret = H5Dset_extent_ff(did3, &extent, 0, event_q);
         assert(ret == 0);
     }
 
@@ -597,7 +598,6 @@ int main(int argc, char **argv) {
         hsize_t stride = 2;
         hsize_t count = 60;
         hsize_t block = 1;
-        int *buf = NULL;
 
         buf = calloc (120, sizeof(int));
 
@@ -610,19 +610,7 @@ int main(int argc, char **argv) {
         ret = H5Dread_ff(did1, H5T_STD_I32LE, mem_space, dataspaceId, H5P_DEFAULT, buf, 
                          0, event_q);
         assert(ret == 0);
-
-        if(H5EQpop(event_q, &req1) < 0)
-            exit(1);
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
-
-        fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
-        for(i=0;i<120;++i)
-            fprintf(stderr, "%d ", buf[i]);
-        fprintf(stderr, "\n");
-
         H5Sclose(mem_space);
-        free(buf);
     }
 
     assert(H5Dclose(did1) == 0);
@@ -652,10 +640,17 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\n");
     free(status);
 
+    fprintf(stderr, "Printing all Dataset values. We should have a 0 after each element: ");
+    for(i=0;i<120;++i)
+        fprintf(stderr, "%d ", buf[i]);
+    fprintf(stderr, "\n");
+
+    /*
     fprintf(stderr, "Printing Attribute data (after EQ wait): ");
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",ra_data[i]);
     fprintf(stderr, "\n");
+    */
 
     if(exists)
         printf("Group G3 exists!\n");
@@ -682,6 +677,7 @@ int main(int argc, char **argv) {
     free(r2_data);
     free(r3_data);
     free(data3);
+    free(buf);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Finalize EFF stack\n");

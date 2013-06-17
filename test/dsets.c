@@ -9762,14 +9762,14 @@ main(void)
 	nerrors += (test_append_sequence_1d(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_append_sequence_2d(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_set_get(my_fapl) < 0        ? 1 : 0);
-        exit(0);
+
         if(H5Fclose(file) < 0)
             goto error;
     } /* end for */
 
     /* Close 2nd FAPL */
     if(H5Pclose(fapl2) < 0) TEST_ERROR
-
+#if 0
     /* Tests that do not use files */
     nerrors += (test_scatter() < 0                          ? 1 : 0);
     nerrors += (test_gather() < 0                           ? 1 : 0);
@@ -9778,7 +9778,7 @@ main(void)
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
-
+#endif
     if(nerrors)
         goto error;
     printf("All dataset tests passed.\n");

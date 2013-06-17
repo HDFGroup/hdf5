@@ -3480,6 +3480,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     }
     else {
         buf_size = src_size * nelmts;
+        fprintf(stderr, "%d %d\n", buf_size, size);
         assert(buf_size == size);
     }
 

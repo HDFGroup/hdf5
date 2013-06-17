@@ -10118,7 +10118,7 @@ test_attr_bug5(hid_t fcpl, hid_t fapl)
     /* Open the datatype attribute twice */
     aidt1 = H5Aopen(tid1, BUG3_ATTR_NAME, H5P_DEFAULT);
     CHECK(aidt1, FAIL, "H5Aopen");
-    aidt2 = H5Aopen(tid1, BUG3_ATTR_NAME, H5P_DEFAULT);
+    aidt2 = H5Aopen(tid2, BUG3_ATTR_NAME, H5P_DEFAULT);
     CHECK(aidt2, FAIL, "H5Aopen");
 
     /* Close all attributes */

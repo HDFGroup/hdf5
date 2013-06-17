@@ -2800,7 +2800,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oclose_ff() */
 
-herr_t 
+herr_t
 H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
            hid_t memtype, const void *buf)
 {
@@ -2818,10 +2818,11 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "iiIuzi*x", dset_id, dxpl_id, axis, extension, memtype, buf);
 
     /* check arguments */
-    if(!dset_id)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+    if(H5I_DATASET != H5I_get_type(dset_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");        
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
@@ -2885,21 +2886,21 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close new dataspace */
-    if(new_space_id && H5Sclose(new_space_id) < 0)
+    if(new_space_id != FAIL && H5Sclose(new_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
 }/* end H5DOappend */
 
-herr_t 
+herr_t
 H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off, 
              size_t sequence, hid_t memtype, void *buf)
 {
@@ -2915,6 +2916,8 @@ H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "iiIuhzi*x", dset_id, dxpl_id, axis, start_off, sequence, memtype,
+             buf);
 
     /* check arguments */
     if(!dset_id)
@@ -2968,11 +2971,11 @@ H5DOsequence(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
@@ -3015,11 +3018,11 @@ herr_t H5DOset(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
@@ -3062,11 +3065,11 @@ herr_t H5DOget(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
@@ -3157,21 +3160,21 @@ herr_t H5DOappend_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extensi
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close new dataspace */
-    if(new_space_id && H5Sclose(new_space_id) < 0)
+    if(new_space_id != FAIL && H5Sclose(new_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
 }/* end H5DOappend_ff */
 
-herr_t 
+herr_t
 H5DOsequence_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off, 
                 size_t sequence, hid_t memtype, void *buf, uint64_t trans, hid_t eq_id)
 {
@@ -3239,11 +3242,11 @@ H5DOsequence_ff(hid_t dset_id, hid_t dxpl_id, unsigned axis, hsize_t start_off,
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
@@ -3286,11 +3289,11 @@ herr_t H5DOset_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)
@@ -3333,11 +3336,11 @@ herr_t H5DOget_ff(hid_t dset_id, hid_t dxpl_id, const hsize_t coord[],
 done:
 
     /* close old dataspace */
-    if(space_id && H5Sclose(space_id) < 0)
+    if(space_id != FAIL && H5Sclose(space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     /* close memory dataspace */
-    if(mem_space_id && H5Sclose(mem_space_id) < 0)
+    if(mem_space_id != FAIL && H5Sclose(mem_space_id) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "unable to close dataspace")
 
     FUNC_LEAVE_API(ret_value)

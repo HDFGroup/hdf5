@@ -645,6 +645,7 @@ H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *cs)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", dxpl_id, cs);
 
     if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
@@ -668,6 +669,7 @@ H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **cs/*out*/)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", dxpl_id, cs);
 
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
@@ -2819,6 +2821,24 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
         HDassert(request == &_request);
     } /* end else */
 
+    /* modify the local dataspace of the dataset */
+    {
+        int     rank;                       /* Dataspace # of dimensions */
+        H5S_t   *space;                     /* Dataset's dataspace */
+        hsize_t curr_dims[H5O_LAYOUT_NDIMS];/* Current dimension sizes */
+
+	if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+                                                             H5I_DATASPACE)))
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+
+        /* Check if we are shrinking or expanding any of the dimensions */
+        if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions");
+
+        /* Modify the size of the data space */
+        if(H5S_set_extent(space, size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space");
+    }
 done:
     axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2883,7 +2903,8 @@ H5VL_iod_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t dxpl_id,
                 hid_t	*ret_id = va_arg (arguments, hid_t *);
 
                 if((*ret_id = H5Scopy(dset->remote_dset.space_id)) < 0)
-                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset")
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset");
+                break;
             }
         case H5VL_DATASET_GET_SPACE_STATUS:
             {
