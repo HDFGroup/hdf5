@@ -1084,6 +1084,7 @@ H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *n
     if(NULL == (type = H5T_open(&type_loc, dxpl_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named datatype")
 
+    type->vol_obj = NULL;
     ret_value = (void *)type;
 done:
     if(NULL == type)
