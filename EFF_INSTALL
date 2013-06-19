@@ -1,8 +1,8 @@
 System pre-requisites: 
 	An MPI3 implementation that supports MPI_THREAD_MULTIPLE
             [i.e. MPICH3 or later - we built with MPICH 3.0.2]
-	Pthreads
-
+	Pthread
+	BOOST
 
 build opa:
 	It is located in the tarball in the 'openpa' subdirectory, OR get it
@@ -25,9 +25,7 @@ build AXE:
 
 
 build Skeletal IOD:
-	It is located in the tarball in the 'iod' subdirectory, OR get the
-        tarball from the FastForward Wiki here:
-        https://wiki.hpdd.intel.com/download/attachments/12125118/iod-skeleton.tgz?api=v2
+	It is located in the tarball in the 'iod' subdirectory.
 
 	Copy the 'iodrc' file from the top level iod directory to /etc/iodrc or
         the top-level build directory for HDF5 (e.g. hdf5_ff, if you are
@@ -40,11 +38,13 @@ build Skeletal IOD:
         IOD (i.e. /path/to/your/copy/of/fastforward/iod).
 
 
-build iofsl function shipper
-	The code is located in tarball in the 'iofsl-shipper-*' directory.
+build Mercury (Function Shipper)
+	The code is located in tarball in the 'mercury' directory.
 
-	refer to the function shipper build recipe in the iofsl shipper directory:
-	iofsl_shipper-0.5.0/README
+	refer to the mercury build recipe in:
+	mercury/README
+
+	Note that static building and the BOOST library are both prerequisites for mercury to work in the HDF5_ff branch.
 
 
 build HDF5 IOD VOL plugin:
@@ -52,7 +52,7 @@ build HDF5 IOD VOL plugin:
         get it from here:
             svn checkout http://svn.hdfgroup.uiuc.edu/hdf5/features/hdf5_ff
 
-	./configure --with-iod=/path/to/iod/install/directory --with-axe=/path/to/axe/install/directory --with-shipper=/path/to/iofsl-shipper/install/directory --enable-parallel --enable-debug --enable-threadsafe --enable-unsupported --with-pthread
+	./configure --with-iod=/path/to/iod/install/directory --with-axe=/path/to/axe/install/directory PKG_CONFIG_PATH=/path/to/mercury/install/directory/lib/pkgconfig/ --enable-parallel --enable-debug --enable-trace --enable-threadsafe --enable-unsupported --with-pthread=/usr --enable-eff
 	make
         make check
 	make install
@@ -60,14 +60,22 @@ build HDF5 IOD VOL plugin:
 build the example programs:
 
 	The examples are located in hdf5_ff/examples/.
-	The client is the test_client.c and the server is test_server.c. 
+	The client programs are test_client.c, test_client_acg.c 
+	The server is test_server.c. 
 
 	cd into hdf5_ff/examples/
 	make
+
 	The client and server need to be launched from the same directory for now.
 	Launch the server first:
  	mpiexec -n 1 ./test_server
-	then launch the client
- 	mpiexec -n <x> ./test_client
+	then launch one of the clients
+ 	mpiexec -n <x> ./test_client or ./test_client_acg
+
+	The new ACG routines are also tested in the HDF5 main test suite using the native HDF5 file format.
+	Those will get executed when you  run make check.
+	To manually run those tests, cd into the test directory where you built the branch and run:
+	./dsets
+	This will run a lot of dataset tests including the append/sequence/set/get operations that we added.
 
 END
