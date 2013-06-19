@@ -1147,17 +1147,19 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
           ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
           ${HDF5_SOURCE_DIR}/release_docs/INSTALL
       )
-      IF (WIN32 AND NOT CYGWIN)
-        SET (release_files
-            ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
-        )
-      ELSE (WIN32 AND NOT CYGWIN)
-        SET (release_files
-            ${release_files}
-            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
-        )
-      ENDIF (WIN32 AND NOT CYGWIN)
+      IF (WIN32)
+        IF (NOT CYGWIN)
+          SET (release_files
+              ${release_files}
+              ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+          )
+        ELSE (NOT CYGWIN)
+          SET (release_files
+              ${release_files}
+              ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
+          )
+        ENDIF (NOT CYGWIN)
+      ENDIF (WIN32)
       IF (HDF5_ENABLE_PARALLEL)
         SET (release_files
             ${release_files}
