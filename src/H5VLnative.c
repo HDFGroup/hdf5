@@ -66,6 +66,9 @@ static void *H5VL_native_attr_create(void *obj, H5VL_loc_params_t loc_params, co
 static void *H5VL_native_attr_open(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t aapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
+static herr_t H5VL_native_attr_iterate(void *obj, H5VL_loc_params_t loc_params,
+                                       H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
+                                       H5A_operator2_t op, void *op_data, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_attr_remove(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id, void **req);
 static herr_t H5VL_native_attr_close(void *attr, hid_t dxpl_id, void **req);
@@ -74,6 +77,7 @@ static herr_t H5VL_native_attr_close(void *attr, hid_t dxpl_id, void **req);
 static void *H5VL_native_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_native_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static ssize_t H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static herr_t H5VL_native_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_native_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
@@ -139,6 +143,7 @@ static H5VL_class_t H5VL_native_g = {
         H5VL_native_attr_open,                  /* open */
         H5VL_native_attr_read,                  /* read */
         H5VL_native_attr_write,                 /* write */
+        H5VL_native_attr_iterate,               /* iterate */
         H5VL_native_attr_get,                   /* get */
         H5VL_native_attr_remove,                /* remove */
         H5VL_native_attr_close                  /* close */
@@ -146,7 +151,8 @@ static H5VL_class_t H5VL_native_g = {
     {                                           /* datatype_cls */
         H5VL_native_datatype_commit,            /* commit */
         H5VL_native_datatype_open,              /* open */
-        H5VL_native_datatype_get_binary,        /* get_size */
+        H5VL_native_datatype_get_binary,        /* get_binary */
+        H5VL_native_datatype_get,               /* get */
         H5VL_native_datatype_close              /* close */
     },
     {                                           /* dataset_cls */
@@ -332,7 +338,7 @@ done:
 /*---------------------------------------------------------------------------
  * Function:	H5VL_native_register
  *
- * Purpose:	utility routine to register and ID with the native VOL plugin 
+ * Purpose:	utility routine to register an ID with the native VOL plugin 
  *              as an auxilary object
  *
  * Returns:     Non-negative on success or negative on failure
@@ -624,6 +630,116 @@ H5VL_native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t UNUSED
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_attr_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_attr_iterate
+ *
+ * Purpose:	Iterates through attrs in an object
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t H5VL_native_attr_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
+                                       H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, 
+                                       void *op_data, hid_t UNUSED dxpl_id, void UNUSED **req)
+{
+    H5G_loc_t	loc;	        /* Object location */
+    H5G_loc_t   obj_loc;        /* Location used to open group */
+    H5G_name_t  obj_path;       /* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;       /* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    hid_t       obj_loc_id = (-1);      /* ID for object located */
+    H5A_attr_iter_op_t attr_op; /* Attribute operator */
+    hsize_t	start_idx;      /* Index of attribute to start iterating at */
+    hsize_t	last_attr;      /* Index of last attribute examined */
+    void        *temp_obj = NULL;
+    H5I_type_t  obj_type;
+    herr_t      ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* check arguments */
+    if(H5G_loc_real(obj, loc_params.obj_type, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+    /* Build attribute operator info */
+    attr_op.op_type = H5A_ATTR_OP_APP2;
+    attr_op.u.app_op2 = op;
+
+    /* Call attribute iteration routine */
+    last_attr = start_idx = (idx ? *idx : 0);
+
+    /* Iterate over the links */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        /* Get an atom for the object */
+        if((obj_loc_id = H5VL_native_register(loc_params.obj_type, obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object");
+    }
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &obj_loc/*out*/, 
+                        loc_params.loc_data.loc_by_name.plist_id, H5AC_ind_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found");
+        loc_found = TRUE;
+
+        /* Open the object */
+        if((obj_loc_id = H5O_open_by_loc(&obj_loc, loc_params.loc_data.loc_by_name.plist_id, 
+                                         H5AC_ind_dxpl_id, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+
+        /* get the native object from the ID created by the object header and create 
+           a "VOL object" ID */
+        obj_type = H5I_get_type(obj_loc_id);
+        if(NULL == (temp_obj = H5I_remove(obj_loc_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+        /* Get an atom for the object */
+        if((obj_loc_id = H5VL_native_register(obj_type, temp_obj, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype");
+    }
+    else {
+        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
+    }
+
+    /* Do the real iteration */
+    if((ret_value = H5O_attr_iterate(obj_loc_id, H5AC_ind_dxpl_id, idx_type, order, 
+                                     start_idx, &last_attr, &attr_op, op_data)) < 0)
+        HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
+
+    /* Set the last attribute information */
+    if(idx)
+        *idx = last_attr;
+
+done:
+    /* Release resources */
+    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
+        if(obj_loc_id >= 0 && NULL == H5I_remove(obj_loc_id))
+            HDONE_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object");
+    }
+    else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+        if(obj_loc_id >= 0) {
+            if(H5I_dec_app_ref(obj_loc_id) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
+        } /* end if */
+        else if(loc_found && H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location");
+    }
+    else {
+        HDONE_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown link iterate params");
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_attr_iterate() */
 
 
 /*-------------------------------------------------------------------------
@@ -1124,6 +1240,54 @@ H5VL_native_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_native_datatype_get_binary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_native_datatype_get
+ *
+ * Purpose:	Gets certain information about a datatype
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_native_datatype_get(void *obj, H5VL_datatype_get_t get_type, 
+                         hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
+{
+    H5T_t       *dt = (H5T_t *)obj;
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Tget_create_plist */
+        case H5VL_DATATYPE_GET_TCPL:
+            {
+                H5P_genplist_t  *new_plist;     /* New datatype creation property list */
+                hid_t	tcpl_id = va_arg (arguments, hid_t);
+
+                /* Get property list object for new TCPL */
+                if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(tcpl_id)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list");
+
+                /* Retrieve any object creation properties */
+                if(H5O_get_create_plist(&dt->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info");
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from datatype")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_native_datatype_get() */
 
 
 /*-------------------------------------------------------------------------
