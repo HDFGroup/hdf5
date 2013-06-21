@@ -57,6 +57,7 @@ static const H5VL_class_t H5VL_log_g = {
         NULL, //H5VL_log_attr_open,                  /* open */
         NULL, //H5VL_log_attr_read,                  /* read */
         NULL, //H5VL_log_attr_write,                 /* write */
+        NULL, //H5VL_log_attr_iterate,
         NULL, //H5VL_log_attr_get,                   /* get */
         NULL, //H5VL_log_attr_remove,                /* remove */
         NULL  //H5VL_log_attr_close                  /* close */
@@ -65,6 +66,7 @@ static const H5VL_class_t H5VL_log_g = {
         H5VL_log_datatype_commit,            /* commit */
         H5VL_log_datatype_open,              /* open */
         H5VL_log_datatype_get_binary,          /* get_size */
+        NULL,//H5VL_log_datatype_get
         H5VL_log_datatype_close              /* close */
     },
     {                                           /* dataset_cls */
