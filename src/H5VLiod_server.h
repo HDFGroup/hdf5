@@ -23,10 +23,19 @@
 
 #ifdef H5_HAVE_EFF
 
+/* the AXE op data strucutre stored with every operation */
 typedef struct op_data_t {
     void *input;
     hg_handle_t hg_handle;
 } op_data_t;
+
+/* the IOD scratch pad type */
+typedef struct scratch_pad_t {
+    iod_obj_id_t mdkv_id;      /* IOD ID of the KV store holding the metadata about an object */
+    iod_obj_id_t attr_id;      /* IOD ID of the KV store holding the attribute ID attached to object */
+    iod_obj_id_t filler1_id;   /* filler value - not used */
+    iod_obj_id_t filler2_id;   /* filler value - not used */
+} scratch_pad_t;
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
