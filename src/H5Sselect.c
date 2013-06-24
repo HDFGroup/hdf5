@@ -2053,7 +2053,46 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_fill() */
 
-
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Sget_offsets
+ *
+ * Purpose:	Public API for H5S_get_offsets. Extracts the offsets/len of 
+ *              a give dataspace.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vishwanath Venkatesan
+ *              June 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Sget_offsets(hid_t space_id, size_t elmt_size,
+	       hsize_t **offsets, size_t **len, size_t *num_entries){
+
+  const H5S_t *space = NULL;
+  hssize_t ret_value;
+  size_t nelmts;    /* num elements in the dataspace */
+
+  FUNC_ENTER_API(FAIL)
+
+  if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+
+  /* Check for valid selection */
+  if(H5S_SELECT_VALID(space) != TRUE)
+    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
+  
+  nelmts = H5S_GET_SELECT_NPOINTS(space);
+  ret_value = H5S_get_offsets(space, elmt_size, nelmts, offsets, len, num_entries);
+
+ done:
+  FUNC_LEAVE_API(ret_value);
+}  /* H5Sget_offsets() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5S_get_offsets
  *
