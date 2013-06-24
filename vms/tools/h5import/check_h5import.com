@@ -59,13 +59,14 @@ $ type sys$input
 $ CALL TOOLTEST  "txtin16.txt -c txtin8.conf  -o" txtin8.h5
 $ !
 $ type sys$input 
+                Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
+$ CALL TOOLTEST  "txtuin16.txt -c txtuin16.conf  -o" txtuin16.h5
+$ !
+$ type sys$input 
                Testing ASCII UI32 - rank 3 - Output BE 
 $ CALL TOOLTEST  "txtuin32.txt -c txtuin32.conf -o" txtuin32.h5
 $ !
-$ type sys$input 
-               Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
-$ CALL TOOLTEST  "txtuin32.txt -c txtuin16.conf -o" txtuin16.h5
-$ !
+
 $ type sys$input 
                Testing ASCII F32 - rank 3 - Output LE 
 $ CALL TOOLTEST  "txtfp32.txt -c txtfp32.conf -o" txtfp32.h5
@@ -79,12 +80,12 @@ $ type sys$input
 $ CALL TOOLTEST  "binfp64.bin -c binfp64.conf -o" binfp64.h5
 $ !
 $ type sys$input 
-               Testing BINARY I16 - rank 3 - Output order LE + CHUNKED + extended 
-$ CALL TOOLTEST  "binin16.bin -c binin16.conf -o" binin16.h5
-$ !
-$ type sys$input 
                Testing BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed 
 $ CALL TOOLTEST  "binin8.bin -c binin8.conf -o" binin8.h5
+$ !
+$ type sys$input 
+               Testing BINARY I16 - rank 3 - Output order LE + CHUNKED + extended 
+$ CALL TOOLTEST  "binin16.bin -c binin16.conf -o" binin16.h5
 $ !
 $ type sys$input 
                Testing BINARY I32 - rank 3 - Output BE + CHUNKED 
@@ -101,6 +102,10 @@ $ !
 $ type sys$input 
                Testing STR
 $ CALL TOOLTEST "txtstr.txt -c txtstr.conf -o" txtstr.h5
+$ !
+$ type sys$input 
+               Testing BINARY I8 CR LF EOF
+$ CALL TOOLTEST "binin8w.txt -c binin8w.conf -o" binin8w.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE

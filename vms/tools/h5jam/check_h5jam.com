@@ -48,7 +48,26 @@ $ CALL H5JAMTEST "-u u511.txt -i" tall.h5 ta3.h5
 $ CALL H5JAMTEST "-u u512.txt -i" tall.h5 ta4.h5
 $ CALL H5JAMTEST "-u u513.txt -i" tall.h5 ta5.h5
 $
+$ CALL H5JAMTEST "-u u10.txt -i" twithub.h5 tax2.h5
+$ CALL H5JAMTEST "-u u511.txt -i" twithub.h5 tax3.h5
+$ CALL H5JAMTEST "-u u512.txt -i" twithub.h5 tax4.h5
+$ CALL H5JAMTEST "-u u513.txt -i" twithub.h5 tax5.h5
+$
+$ CALL H5JAMTEST "-u u10.txt -i" twithub513.h5 tax6.h5
+$ CALL H5JAMTEST "-u u511.txt -i" twithub513.h5 tax7.h5
+$ CALL H5JAMTEST "-u u512.txt -i" twithub513.h5 tax8.h5
+$ CALL H5JAMTEST "-u u513.txt -i" twithub513.h5 tax9.h5
 $ 
+$ CALL H5JAMTEST "-u u10.txt -i --clobber" twithub.h5 taz2.h5
+$ CALL H5JAMTEST "-u u511.txt -i --clobber" twithub.h5 taz3.h5
+$ CALL H5JAMTEST "-u u512.txt -i --clobber" twithub.h5 taz4.h5
+$ CALL H5JAMTEST "-u u513.txt -i --clobber" twithub.h5 taz5.h5
+$
+$ CALL H5JAMTEST "-u u10.txt -i --clobber" twithub513.h5 taz6.h5
+$ CALL H5JAMTEST "-u u511.txt -i --clobber" twithub513.h5 taz7.h5
+$ CALL H5JAMTEST "-u u512.txt -i --clobber" twithub513.h5 taz8.h5
+$ CALL H5JAMTEST "-u u513.txt -i --clobber" twithub513.h5 taz9.h5
+$
 $H5JAMTEST: SUBROUTINE
 $
 $ len_org  = F$LENGTH(P2)

@@ -22,7 +22,7 @@ $!
 $ type sys$input
 	Creating  HDF5 Tools library
 $!
-$ cobj="h5tools, h5tools_str, h5tools_utils, h5diff, h5diff_array, "+-
+$ cobj="h5tools, h5tools_dump, h5tools_str, h5tools_utils, h5diff, h5diff_array, "+-
         "h5diff_attr, h5diff_dset, h5diff_util, h5trav,"+- 
         "h5tools_filters, h5tools_ref, h5tools_type"
 $!

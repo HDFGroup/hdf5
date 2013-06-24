@@ -143,6 +143,80 @@ $ CALL TOOLTEST "-l dset_chunk:"""COMPA"""" h5repack_layout.h5
 $ CALL TOOLTEST "-l dset_chunk:"""CONTI"""" h5repack_layout.h5
 $ CALL TOOLTEST "-l dset_chunk:"""CHUNK"""=18x13" h5repack_layout.h5
 $!
+$! test convert small size dataset ( < 1k) to compact layout without -m
+$ CALL TOOLTEST "-l contig_small:"""COMPA"""" h5repack_layout2.h5
+$ CALL TOOLTEST "-l chunked_small_fixed:"""COMPA"""" h5repack_layout2.h5
+$!
+$! ################################################################
+$! Test file contains chunked datasets (need multiple dsets) with
+$! unlimited max dims.
+$! ###############################################################
+$!
+$! chunk to chunk - specify chunk dim bigger than any current dim
+$ CALL TOOLTEST "-l chunk_unlimit1:"""CHUNK"""=100x300" h5repack_layout3.h5
+$!
+$! chunk to contiguous
+$ CALL TOOLTEST "-l chunk_unlimit1:"""CONTI"""" h5repack_layout3.h5
+$! 
+$! chunk to compact - convert big dataset (should be > 64k) for this purpose,
+$! should remain as original layout (chunk)
+$ CALL TOOLTEST "-l chunk_unlimit1:"""COMPA"""" h5repack_layout3.h5 
+$!
+$! #########################################################################
+$! Test -f for some specific cases. Chunked dataset with unlimited max dims.
+$! #########################################################################
+$!
+$! chunk dim is bigger than dataset dim. ( dset size < 64k )
+$ CALL TOOLTEST "-f chunk_unlimit1:"""NONE"""" h5repack_layout3.h5
+$!
+$! chunk dim is bigger than dataset dim. ( dset size > 64k )
+$ CALL TOOLTEST "-f chunk_unlimit2:"""NONE"""" h5repack_layout3.h5
+$!
+$! chunk dims are smaller than dataset dims. ( dset size < 64k )
+$ CALL TOOLTEST "-f chunk_unlimit3:"""NONE"""" h5repack_layout3.h5
+$!
+$! file input - should not fail
+$ CALL TOOLTEST "-f NONE" h5repack_layout3.h5
+$!
+$! ##########################################################################
+$! Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset
+$! (dset size < 64K) and with unlimited max dims on a condition as follow. 
+$! ##########################################################################
+$! 
+$! chunk dim is bigger than dataset dim. should succeed
+$ CALL TOOLTEST "-l chunk_unlimit2:"""CONTI"""" h5repack_layout3.h5
+$! 
+$! chunk dim is smaller than dataset dim. should succeed.
+$ CALL TOOLTEST "-l chunk_unlimit3:"""CONTI"""" h5repack_layout3.h5
+$! 
+$! Native option. Do not use FILE1, as the named dtype will be converted to native, 
+$! and h5diff will report a difference.
+$ CALL TOOLTEST "-n" h5repack_fill.h5
+$ CALL TOOLTEST "-n" h5repack_attr.h5
+$!
+$! Check repacking file with old version of layout message (should get upgraded
+$! to new version and be readable, etc.)
+$ CALL TOOLTEST h5repack_layouto.h5
+$!
+$! test for datum size > H5TOOLS_MALLOCSIZE
+$ CALL TOOLTEST "-f GZIP=1" h5repack_objs.h5
+$!
+$! Check repacking file with committed datatypes in odd configurations
+$ CALL TOOLTEST h5repack_named_dtypes.h5
+$! 
+$! test various references (bug 1814 and 1726)
+$ CALL TOOLTEST h5repack_refs.h5
+$!
+$! test attribute with various references (bug1797 / HDFFV-5932)
+$! the references in attribute of compund or vlen datatype
+$ CALL TOOLTEST h5repack_attr_refs.h5
+$!
+$! Add test for memory leak in attirbute. This test is verified by CTEST.
+$!  1. leak from vlen string
+$!  2. leak from compound type without reference member
+$!  (HDFFV-7840, )
+$! Note: this test is experimental for sharing test file among tools
+$ CALL TOOLTEST h5diff_attr1.h5
 $!
 $!
 $TOOLTEST: SUBROUTINE
@@ -190,5 +264,3 @@ $ endif
 $  del *.h5repackout;*
 $  del  *_out.h5;*
 $ENDSUBROUTINE
-
-

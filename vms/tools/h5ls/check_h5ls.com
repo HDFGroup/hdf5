@@ -102,6 +102,9 @@ $ CALL TOOLTEST tsoftlinks-nodangle-1.ls "-w80 --follow-symlinks --no-dangling-l
 $! when used file with no dangling links - expected exit code 0
 $ CALL TOOLTEST thlinks-nodangle-1.ls "-w80 --follow-symlinks --no-dangling-links thlink.h5"
 
+$! Test for wildcards in filename
+$ CALL TOOLTEST tmultifile.ls "-w80 thlink.h5 tslink.h5"
+
 $! tests for hard links
 $ CALL TOOLTEST thlink-1.ls "-w80 thlink.h5"
 
@@ -142,6 +145,9 @@ $! Modified:  2004-07-06 19:36:17 CST
 $! UNIX shell script does replacement on the fly in the actual output
 $! file; I do not know what can I do on VMS EIP 07/27/06
 $ CALL TOOLTEST tattr2.ls "-w80 -v -"""S""" tattr2.h5"
+
+$! test for variable length data types in verbose mode
+$ CALL TOOLTEST tvldtypes2le.ls "-v tvldtypes1.h5"
 
 $! tests for error handling.
 $! test for non-existing file

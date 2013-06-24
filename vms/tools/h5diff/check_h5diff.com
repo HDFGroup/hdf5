@@ -154,6 +154,9 @@ $!
 $!# 5.8 (region reference)
 $ CALL TOOLTEST h5diff_58.txt "-v h5diff_dset1.h5 h5diff_dset2.h5 refreg"
 $!
+$!# 5.9 (test for both dset and attr with same type but with different size"
+$ CALL TOOLTEST h5diff_59.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b"
+$!
 $!# ##############################################################################
 $!# # Error messages
 $!# ##############################################################################
@@ -357,6 +360,12 @@ $!# entire file
 $!# All the comparables should display differences.
 $ CALL TOOLTEST h5diff_222.txt "-c non_comparables1.h5 non_comparables2.h5"
 $!
+#!# non-comparable test for common objects (same name) with different object types
+$ CALL TOOLTEST h5diff_223.txt "-c non_comparables1.h5 non_comparables2.h5 /diffobjtypes"
+$!
+#!# swap files
+$ CALL TOOLTEST h5diff_224.txt "-c non_comparables2.h5 non_comparables1.h5 /diffobjtypes"
+$!
 $!# ##############################################################################
 $!# # Links compare without --follow-symlinks nor --no-dangling-links
 $!# ##############################################################################
@@ -461,6 +470,26 @@ $ CALL TOOLTEST h5diff_458.txt  "--follow-symlinks -v --no-dangling-links  h5dif
 $!# dangling link found for ext links (obj to obj). Both dangle links
 $ CALL TOOLTEST h5diff_459.txt  "--follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist1 /ext_link_noexist2"
 $!
+#!# dangling link --follow-symlinks (obj vs obj)
+$ CALL TOOLTEST h5diff_465.txt  "--follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1"
+#!# soft dangling vs. soft dangling
+$ CALL TOOLTEST h5diff_466.txt  "--follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1"
+#!# soft link  vs. soft dangling
+$ CALL TOOLTEST h5diff_467.txt  "--follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link2"
+#!# ext dangling vs. ext dangling
+$ CALL TOOLTEST h5diff_468.txt  "--follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4"
+#!# ext link vs. ext dangling
+$ CALL TOOLTEST h5diff_469.txt  "--follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2"
+$!
+#!# dangling links without follow symlink
+#!# test - soft dangle links (same and different paths),
+#!#      - external dangle links (same and different paths)
+$ CALL TOOLTEST h5diff_471.txt  "-v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5"
+$ CALL TOOLTEST h5diff_472.txt  "-v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1"
+$ CALL TOOLTEST h5diff_473.txt  "-v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link4"
+$ CALL TOOLTEST h5diff_474.txt  "-v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4"
+$ CALL TOOLTEST h5diff_475.txt  "-v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link1"
+
 $!# ##############################################################################
 $!# # test for group diff recursivly
 $!# ##############################################################################
@@ -486,7 +515,8 @@ $ CALL TOOLTEST h5diff_507.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5
 $ CALL TOOLTEST h5diff_508.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /elink_grp1"
 
 $!# soft-link vs ext-link 
-$ CALL TOOLTEST h5diff_509.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1TOOLTEST h5diff_510.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1"
+$ CALL TOOLTEST h5diff_509.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1"
+$ CALL TOOLTEST h5diff_510.txt "-v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1"
 
 $!# circled ext links
 $ CALL TOOLTEST h5diff_511.txt "-v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp10 /grp11"
@@ -522,12 +552,18 @@ $ CALL TOOLTEST h5diff_481.txt "-v h5diff_exclude1-1.h5 h5diff_exclude1-2.h5"
 $!#
 $!# Different structure, different names. 
 $!#
-$!# Exclude all the different objects. Expect return - sameTOOLTEST h5diff_482.txt -v --exclude-path "/group1" --exclude-path "/dset1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5
+$!# Exclude all the different objects. Expect return - same
+TOOLTEST h5diff_482.txt "-v --exclude-path "/group1" --exclude-path "/dset1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5"
 $!# Exclude only some different objects. Expect return - diff
 $ CALL TOOLTEST h5diff_483.txt "-v --exclude-path "/group1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5"
 
 $!# Exclude from group compare
 $ CALL TOOLTEST h5diff_484.txt "-v --exclude-path "/dset3" h5diff_exclude1-1.h5 h5diff_exclude1-2.h5 /group1"
+
+$!# Only one file contains unique objs. Common objs are same.
+$ CALL TOOLTEST h5diff_485.txt "-v --exclude-path "/group1" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5"
+$ CALL TOOLTEST h5diff_486.txt "-v --exclude-path "/group1" h5diff_exclude3-2.h5 h5diff_exclude3-1.h5"
+$ CALL TOOLTEST h5diff_487.txt "-v --exclude-path "/group1/dset" h5diff_exclude3-1.h5 h5diff_exclude3-2.h5"
 
 $!# ##############################################################################
 $!# # diff various multiple vlen and fixed strings in a compound type dataset
