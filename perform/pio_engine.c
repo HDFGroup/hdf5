@@ -245,24 +245,24 @@ do_pio(parameters param)
     /* Validate transfer buffer size & block size*/
     if(blk_size<=0) {
     HDfprintf(stderr,
-        "Transfer block size (%lld) must be > 0\n", (long long)blk_size);
+        "Transfer block size (%Hd) must be > 0\n", (long long)blk_size);
     GOTOERROR(FAIL);
     }
     if(buf_size<=0) {
     HDfprintf(stderr,
-        "Transfer buffer size (%lld) must be > 0\n", (long long)buf_size);
+        "Transfer buffer size (%Hd) must be > 0\n", (long long)buf_size);
     GOTOERROR(FAIL);
     }
     if ((buf_size % blk_size) != 0){
     HDfprintf(stderr,
-        "Transfer buffer size (%lld) must be a multiple of the "
-        "interleaved I/O block size (%lld)\n",
+        "Transfer buffer size (%Hd) must be a multiple of the "
+        "interleaved I/O block size (%Hd)\n",
         (long long)buf_size, (long long)blk_size);
     GOTOERROR(FAIL);
     }
     if((snbytes%pio_mpi_nprocs_g)!=0) {
     HDfprintf(stderr,
-        "Dataset size (%lld) must be a multiple of the "
+        "Dataset size (%Hd) must be a multiple of the "
         "number of processes (%d)\n",
         (long long)snbytes, pio_mpi_nprocs_g);
     GOTOERROR(FAIL);
@@ -271,8 +271,8 @@ do_pio(parameters param)
     if (!param.dim2d){
         if(((snbytes/pio_mpi_nprocs_g)%buf_size)!=0) {
         HDfprintf(stderr,
-            "Dataset size/process (%lld) must be a multiple of the "
-            "trasfer buffer size (%lld)\n",
+            "Dataset size/process (%Hd) must be a multiple of the "
+            "trasfer buffer size (%Hd)\n",
             (long long)(snbytes/pio_mpi_nprocs_g), (long long)buf_size);
         GOTOERROR(FAIL);
         }
@@ -280,8 +280,8 @@ do_pio(parameters param)
     else {
         if((snbytes%buf_size)!=0) {
         HDfprintf(stderr,
-            "Dataset side size (%lld) must be a multiple of the "
-            "trasfer buffer size (%lld)\n",
+            "Dataset side size (%Hd) must be a multiple of the "
+            "trasfer buffer size (%Hd)\n",
             (long long)snbytes, (long long)buf_size);
         GOTOERROR(FAIL);
         }
@@ -289,7 +289,7 @@ do_pio(parameters param)
 
     /* Allocate transfer buffer */
     if ((buffer = malloc(bsize)) == NULL){
-    HDfprintf(stderr, "malloc for transfer buffer size (%lld) failed\n",
+    HDfprintf(stderr, "malloc for transfer buffer size (%Hd) failed\n",
         (long long)(bsize));
     GOTOERROR(FAIL);
     }
@@ -651,12 +651,12 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         HDprint_rank(output);
         if (!parms->dim2d) {
         HDfprintf(output, "Debug(do_write): "
-            "buf_size=%lld, bytes_begin=%lld, bytes_count=%lld\n",
+            "buf_size=%Hd, bytes_begin=%Hd, bytes_count=%Hd\n",
             (long long)buf_size, (long long)bytes_begin[0],
             (long long)bytes_count);
         } else {
         HDfprintf(output, "Debug(do_write): "
-            "linear buf_size=%lld, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
+            "linear buf_size=%Hd, bytes_begin=(%Hd,%Hd), bytes_count=%Hd\n",
             (long long)buf_size*blk_size, (long long)bytes_begin[0],
             (long long)bytes_begin[1], (long long)bytes_count);
         }
@@ -1625,12 +1625,12 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
         HDprint_rank(output);
         if (!parms->dim2d) {
         HDfprintf(output, "Debug(do_write): "
-            "buf_size=%lld, bytes_begin=%lld, bytes_count=%lld\n",
+            "buf_size=%Hd, bytes_begin=%Hd, bytes_count=%Hd\n",
             (long long)buf_size, (long long)bytes_begin[0],
             (long long)bytes_count);
         } else {
         HDfprintf(output, "Debug(do_write): "
-            "linear buf_size=%lld, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
+            "linear buf_size=%Hd, bytes_begin=(%Hd,%Hd), bytes_count=%Hd\n",
             (long long)buf_size*blk_size, (long long)bytes_begin[0],
             (long long)bytes_begin[1], (long long)bytes_count);
         }
@@ -2336,8 +2336,8 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
             if (++nerror < 20){
                 /* report at most 20 errors */
                 HDprint_rank(output);
-                HDfprintf(output, "read data error, expected (%lld), "
-                    "got (%lld)\n",
+                HDfprintf(output, "read data error, expected (%Hd), "
+                    "got (%Hd)\n",
                     (long long)pio_mpi_rank_g+1,
                     (long long)*(ucharptr-1));
             } /* end if */
