@@ -1639,20 +1639,14 @@ IF (BUILD_TESTING)
   ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
 
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5DUMP-tbin2-bin-clear-objects COMMAND ${CMAKE_COMMAND} -E remove out2.bin)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin2-bin-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o out2.bin tbinary.h5)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin2 PROPERTIES DEPENDS H5DUMP-tbin2-bin-clear-objects)
+    ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o tbin2.bin tbinary.h5)
   ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
   # the NATIVE test can be validated with h5import/h5diff
   ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5DUMP-tbin4-bin-clear-objects COMMAND ${CMAKE_COMMAND} -E remove out4.bin)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin4-bin-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o out4.bin tbinary.h5)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin4 PROPERTIES DEPENDS H5DUMP-tbin4-bin-clear-objects)
+    ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o tbin4.bin tbinary.h5)
   ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
   # test for dataset region references 
