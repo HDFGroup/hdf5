@@ -457,7 +457,7 @@ ENDIF (HDF5_DISABLE_COMPILER_WARNINGS)
 
 #-----------------------------------------------------------------------------
 # CDash is configured to only allow 3000 warnings, so
-# break into groups
+# break into groups (from the config/gnu-flags file)
 #-----------------------------------------------------------------------------
 IF (NOT MSVC)
     # Append warning flags
@@ -603,16 +603,6 @@ IF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS4}")
   ENDIF (NOT MSVC)
 ENDIF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
-
-#-----------------------------------------------------------------------------
-# Option to allow the user to enable warnings by groups
-#-----------------------------------------------------------------------------
-OPTION (HDF5_ENABLE_GROUPFIVE_WARNINGS "Enable group five warnings" OFF)
-IF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
-  IF (NOT MSVC)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS5}")
-  ENDIF (NOT MSVC)
-ENDIF (HDF5_ENABLE_GROUPFIVE_WARNINGS)
 
 #-----------------------------------------------------------------------------
 # This is in here to help some of the GCC based IDES like Eclipse
