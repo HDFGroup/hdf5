@@ -1360,8 +1360,6 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     string_dataformat.do_escape = display_escape;
     outputformat = &string_dataformat;
 
-    //attr_name = attr + j + 1;
-	// need to replace escape characters
 	attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
 
 
