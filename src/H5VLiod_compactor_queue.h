@@ -2,21 +2,23 @@
 #define _H5VLiod_COMPACTOR_QUEUE_H
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "H5VLiod_common.h"
+
+#ifdef H5_HAVE_EFF
+
+#include "H5VLiod_server.h"
  
 #define READ 100
 #define WRITE 150
 #define SUCCESS 0
 #define ERROR 1
+
+
  
 typedef struct {
-  int input_structure; /* This needs to be replaced by the pointer 
-			to the actual pointer*/
+  op_data_t *input_structure; 
   int type_request;
   int request_id;
-  /*may be we can add a structure for holding the contiguous buffer*/
 }compactor_entry;
 
 struct cqueue
@@ -36,13 +38,12 @@ struct cqlist
  
 typedef struct cqlist compactor; 
 
-
-int H5VL_add_requests_to_compactor(compactor*, compactor_entry request);
-/*Deletes the request after retrieval*/
-int H5VL_remove_request_from_compactor(compactor*, compactor_entry *); 
-int H5VL_get_request_at_front (compactor *, compactor_entry *);
-void H5VL_display_compactor_requests(compactor*);
-void H5VL_remove_element(compactor* s, node* d);
-int H5VL_get_number_of_requests (compactor *s); 
+H5_DLL int H5VL_iod_add_requests_to_compactor(compactor*, compactor_entry request);
+H5_DLL int H5VL_iod_remove_request_from_compactor(compactor*, compactor_entry *); 
+H5_DLL int H5VL_iod_get_request_at_front (compactor *, compactor_entry *);
+H5_DLL int H5VL_iod_display_compactor_requests(compactor*);
+H5_DLL int H5VL_iod_remove_element_from_queue(compactor* s, node* d);
+H5_DLL int H5VL_iod_get_number_of_requests (compactor *s); 
  
-#endif
+#endif /*H5_HAVE_EFF*/
+#endif /*H5VLiod_compactor_queue_H*/

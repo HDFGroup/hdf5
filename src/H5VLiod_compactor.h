@@ -18,18 +18,17 @@
 #define _H5VLiod_COMPACTOR_H
 
 
-/* TODO:  This gets replaced with H5VLiod_common.h on merging with FF code (VV) */
-#include <stdio.h>
-#include <stdlib.h>
-#include "hdf5.h"
+#include "H5VLiod_common.h"
+
+#ifdef H5_HAVE_EFF
+
 #include "H5VLiod_compactor_queue.h"
 
 typedef struct {
   hsize_t offset;
   size_t len;
-  char *mem_buf_pos;
+  char *mem_buffer;
 }block_container_t;
-
 
 typedef struct {
   block_container_t *blocks;
@@ -42,23 +41,21 @@ typedef struct {
 
 /* ----------------------------------------- */
 
-/* Extracts the dimensions of the dataset 
-   using the dataspace id */
-int H5VL_create_requests_list (hid_t dataset_id, hid_t dataspace_id, 
-			       compactor *queue, char *mem_buf, size_t mem_buf_len,
-			       request_list_t **list, int *requests);
-int H5VL_sort_request_list (request_list_t **list, int num_entires, int *sorted);
-int H5VL_extract_dims_info (hid_t dataspace, int *dims, hsize_t *dims_out);
-int H5VL_reconstruct_memory_buffer (hid_t dataspace, 
-				    hid_t dataset, 
-				    request_list_t *list);
-int H5VL_check_overlap (hid_t dataspace1 , hid_t dataspace2 );
-hid_t H5VL_merge_selections (hid_t dataspace1, hid_t dataset1, hid_t dataspace2, hid_t dataset2);
+H5_DLL int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
+					 request_list_t **list, int *numentries,
+					 int request_type);
+H5_DLL int H5VL_iod_sort_request_list (request_list_t **list, int num_entires, int *sorted);
+H5_DLL int H5VL_iod_extract_dims_info (hid_t dataspace, int *dims, hsize_t **dims_out);
+H5_DLL int H5VL_iod_compact_requests  (request_list_t *list, request_list_t *revised,
+				       int **selected_requests, int *num_selected);
+H5_DLL int H5VL_iod_select_overlap (hid_t dataspace1 , hid_t dataspace2 );
+H5_DLL hid_t H5VL_iod_merge_selections (hid_t dataspace1, hid_t dataset1, 
+					hid_t dataspace2, hid_t dataset2);
 
 
 
 
 /*----------------------------------------------------------------------------  */
 
-
-#endif /* _H5VLiod_COMPACTOR_H */
+#endif /* H5_HAVE_EFF*/
+#endif /* _H5VL_iod_COMPACTOR_H */
