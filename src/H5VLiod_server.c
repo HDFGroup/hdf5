@@ -308,7 +308,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     /* Set number of threads in AXE engine */
-    if(AXEset_num_threads(&engine_attr, 1) != AXE_SUCCEED)
+    if(AXEset_num_threads(&engine_attr, 4) != AXE_SUCCEED)
         return FAIL;
 
     /* Create AXE engine */
@@ -3589,6 +3589,9 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Dataset Write with AXE ID %llu\n",input->axe_id);
+#endif
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
         if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
@@ -3607,8 +3610,8 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(src_size < dst_size) {
         buf_size = dst_size * nelmts;
 #if H5VL_IOD_DEBUG 
-        fprintf(stderr, "Adjusted Buffer size because of datatype conversion from %d to %d: ", 
-                size, buf_size);        
+        fprintf(stderr, "Adjusted Buffer size because of datatype conversion from %d to %d\n", 
+                size, buf_size);
 #endif
     }
     else {
@@ -3654,20 +3657,21 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
 
+#if H5VL_IOD_DEBUG 
     { 
         int i;
         int *buf_ptr = (int *)buf;
 
-        fprintf(stderr, "Received a buffer of size %d with values: ", size);
+        fprintf(stderr, "DWRITE Received a buffer of size %d with values: ", size);
         for(i=0;i<60;++i)
             fprintf(stderr, "%d ", buf_ptr[i]);
         fprintf(stderr, "\n");
     }
+#endif
 
     mem_desc.nfrag = 1;
     mem_desc.frag->addr = buf;
     mem_desc.frag->len = (iod_size_t)buf_size;
-    mem_desc.nfrag = 1;
 
     /* MSC TODO - populate file location hyperslab */
 
@@ -4508,7 +4512,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     /* get attribute ID */
     if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, &attr_id, 
                         sizeof(iod_obj_id_t) , NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Array ID from parent KV store");
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
     /* close parent group if it is not the location we started the
        traversal into */
@@ -4522,7 +4526,11 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, attr_id, NULL /*hints*/, &cur_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
-    /* open the metadata scratch pad */
+    /* get scratch pad of the attribute */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* open the metadata scratch pad of the attribute */
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
@@ -4616,18 +4624,16 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     size_t size;
     void *buf;
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle);
+    hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* If the attribute handle and ID are not avaiable, traverse the path to obtain it */
-    if(iod_id == IOD_ID_UNDEFINED) {
-        ;/* traverse routine */
-    }
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
         if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");        
+        opened_locally = TRUE;
     }
 
     size = HG_Bulk_handle_get_size(bulk_handle);
@@ -4635,11 +4641,13 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
+    /* create memory descriptor for reading */
     mem_desc.nfrag = 1;
-    //mem_desc.frag[0].addr = buf;
-    //mem_desc.frag[0].len = (iod_size_t)size;
+    mem_desc.frag->addr = buf;
+    mem_desc.frag->len = (iod_size_t)size;
 
-    /* MSC TODO - populate file location hyperslab */
+    /* retrieve the dataspace of the attribute and create file descriptor for reading */
+    /* MSC TODO - populate file descriptor hyperslab */
 
     /* read from array object */
     if(iod_array_read(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
@@ -4669,7 +4677,9 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr read, sending response to client\n");
+#endif
 
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
@@ -4679,6 +4689,12 @@ done:
     input = (attr_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
+
+    /* close the attribute if we opened it in this routine */
+    if(opened_locally) {
+        if(iod_obj_close(iod_oh, NULL, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+    }
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_read_cb() */
@@ -4718,16 +4734,11 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     void *buf;
     ssize_t ret;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
+    hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    fprintf(stderr, "Start attribute Write\n");
-
-    /* If the attribute handle and ID are not avaiable, traverse the path to obtain it */
-    if(iod_id == IOD_ID_UNDEFINED) {
-        ;/* traverse routine */
-    }
     /* open the attribute if we don't have the handle yet */
     if(iod_oh.cookie == IOD_OH_UNDEFINED) {
         if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
@@ -4752,21 +4763,24 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
 
+#if H5VL_IOD_DEBUG 
     { 
         int i;
         int *buf_ptr = (int *)buf;
 
-        fprintf(stderr, "Received a buffer of size %d with values: ", size);
+        fprintf(stderr, "AWRITE Received a buffer of size %d with values: ", size);
         for(i=0;i<60;++i)
             fprintf(stderr, "%d ", buf_ptr[i]);
         fprintf(stderr, "\n");
     }
+#endif
 
     mem_desc.nfrag = 1;
-    //mem_desc.frag[0].addr = buf;
-    //mem_desc.frag[0].len = (iod_size_t)size;
+    mem_desc.frag->addr = buf;
+    mem_desc.frag->len = (iod_size_t)size;
 
-    /* MSC TODO - populate file location hyperslab */
+    /* retrieve the dataspace of the attribute and create file descriptor for reading */
+    /* MSC TODO - populate file descriptor hyperslab */
 
     /* write from array object */
     if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
@@ -4777,7 +4791,10 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+#if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with attr write, sending %d response to client\n", ret_value);
+#endif
+
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
 
@@ -4785,6 +4802,11 @@ done:
     op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
 
+    /* close the dataset if we opened it in this routine */
+    if(opened_locally) {
+        if(iod_obj_close(iod_oh, NULL, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+    }
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_attr_write_cb() */
 
@@ -4813,17 +4835,20 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_handle_t cur_oh, attr_kv_oh;
+    iod_obj_id_t cur_id, attr_id;
     const char *loc_name = input->path;
     const char *attr_name = input->attr_name;
     char *last_comp = NULL;
+    scratch_pad_t sp;
     htri_t ret = -1;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start attribute Exists %s\n", attr_name);
+#endif
 
     /* the traversal will retrieve the location where the attribute needs
        to be checked. The traversal will fail if an intermediate group
@@ -4832,8 +4857,36 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    /*MSC - check the attribute in the scratch pad KV store when it is
-      there */
+    /* get scratch pad of the parent */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* if attribute KV does not exist, return false*/
+    if(IOD_ID_UNDEFINED == sp.attr_id) {
+        ret = FALSE;
+        HGOTO_DONE(SUCCEED);
+    }
+
+    /* open the attribute KV in scratch pad */
+    if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* get attribute ID */
+    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, &attr_id, 
+                        sizeof(iod_obj_id_t) , NULL, NULL) < 0) {
+        ret = FALSE;
+    }
+    else {
+        ret = TRUE;
+    }
+
+    iod_obj_close(attr_kv_oh, NULL, NULL);
 
 #if H5_DO_NATIVE
     ret = H5Aexists(loc_handle.cookie, attr_name);
@@ -4842,7 +4895,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr exists, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
     input = (attr_op_in_t *)H5MM_xfree(input);
@@ -4877,17 +4934,22 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_handle_t cur_oh, attr_kv_oh;
+    iod_obj_id_t cur_id, attr_id;
     const char *loc_name = input->path;
     const char *old_name = input->old_attr_name;
     const char *new_name = input->new_attr_name;
     char *last_comp = NULL;
+    iod_kv_params_t kvs;
+    iod_kv_t kv;
+    scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start attribute Rename %s to %s\n", old_name, new_name);
+#endif
 
     /* the traversal will retrieve the location where the attribute
        needs to be renamed. The traversal will fail if an intermediate
@@ -4896,15 +4958,57 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    /*MSC - Rename the attribute from the scratch pad KV store when it
-      is there */
+    /* get scratch pad of the parent */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* if attribute KV does not exist, return error*/
+    if(IOD_ID_UNDEFINED == sp.attr_id)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
+
+    /* open the attribute KV in scratch pad */
+    if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* get attribute ID */
+    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, old_name, &attr_id, 
+                        sizeof(iod_obj_id_t) , NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Attribute does not exist");
+
+    /* remove attribute with old name */
+    kv.key = old_name;
+    kv.value = &attr_id;
+    kv.value_len = sizeof(iod_obj_id_t);
+    kvs.kv = &kv;
+    if(iod_kv_unlink_keys(attr_kv_oh,IOD_TID_UNKNOWN, NULL, 1, &kvs, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
+
+    /* insert attribute with new name */
+    kv.key = strdup(new_name);
+    kv.value = &attr_id;
+    kv.value_len = sizeof(iod_obj_id_t);
+    if (iod_kv_set(attr_kv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    HDfree(kv.key);
+
+    iod_obj_close(attr_kv_oh, NULL, NULL);
 
 #if H5_DO_NATIVE
     ret_value = H5Arename(loc_handle.cookie, old_name, new_name);
 #endif
 
 done:
+
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr rename, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = (attr_rename_in_t *)H5MM_xfree(input);
@@ -4939,16 +5043,21 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_handle = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_handle_t cur_oh, attr_kv_oh;
+    iod_obj_id_t cur_id, attr_id;
     const char *loc_name = input->path;
     const char *attr_name = input->attr_name;
     char *last_comp = NULL;
+    iod_kv_params_t kvs;
+    iod_kv_t kv;
+    scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start attribute Remove %s\n", attr_name);
+#endif
 
     /* the traversal will retrieve the location where the attribute
        needs to be removed. The traversal will fail if an intermediate
@@ -4957,15 +5066,49 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    /*MSC - Remove the attribute from the scratch pad KV store when it
-      is there */
+    /* get scratch pad of the parent */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* if attribute KV does not exist, return error*/
+    if(IOD_ID_UNDEFINED == sp.attr_id)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
+
+    /* open the attribute KV in scratch pad */
+    if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* get attribute ID */
+    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, &attr_id, 
+                        sizeof(iod_obj_id_t) , NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Attribute does not exist");
+
+    /* remove attribute */
+    kv.key = attr_name;
+    kv.value = &attr_id;
+    kv.value_len = sizeof(iod_obj_id_t);
+    kvs.kv = &kv;
+    if(iod_kv_unlink_keys(attr_kv_oh,IOD_TID_UNKNOWN, NULL, 1, &kvs, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
+
+    if(iod_obj_unlink(coh, attr_id, IOD_TID_UNKNOWN, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
 
 #if H5_DO_NATIVE
     ret_value = H5Adelete(loc_handle.cookie, attr_name);
 #endif
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr remove, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = (attr_op_in_t *)H5MM_xfree(input);
@@ -5003,7 +5146,9 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start attribute Close\n");
+#endif
 
     if(iod_oh.cookie != IOD_OH_UNDEFINED) {
 #if H5_DO_NATIVE
@@ -5018,7 +5163,10 @@ H5VL_iod_server_attr_close_cb(AXE_engine_t UNUSED axe_engine,
     }
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with attr close, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     input = (attr_close_in_t *)H5MM_xfree(input);
@@ -5053,27 +5201,29 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_handle_t src_oh; /* The handle for creation src object */
     iod_obj_id_t src_id; /* The ID of the creation src object */
-    iod_handle_t cur_oh;
+    iod_handle_t cur_oh, target_oh;
     iod_obj_id_t cur_id;
     iod_obj_id_t target_id; /* The ID of the target object where link is created*/
-    char *last_comp = NULL;
+    char *src_last_comp = NULL, *dst_last_comp = NULL;
     iod_kv_t kv;
     iod_size_t kv_size = sizeof(iod_obj_id_t);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link create\n");
+#endif
 
     /* the traversal will retrieve the location where the link needs
        to be created from. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
+                                &src_last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup group in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &src_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, src_last_comp, &src_id, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
 
     /* close parent group if it is not the location we started the
@@ -5091,12 +5241,13 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
            to. The traversal must not fail. */
         if(H5VL_iod_server_traverse(coh, input->target_loc_id, input->target_loc_oh, 
                                     input->target_name, FALSE, 
-                                    &last_comp, &cur_id, &cur_oh) < 0)
+                                    &dst_last_comp, &cur_id, &cur_oh) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't traverse path");
 
         /* lookup target object in the current location - the lookup
            must succeed since this is a hard link. */
-        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &target_id, &kv_size, NULL, NULL) < 0)
+        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, dst_last_comp, &target_id, &kv_size, 
+                            NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
     }
     else if(H5VL_LINK_CREATE_SOFT == create_type) {
@@ -5104,15 +5255,17 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
            to. The traversal must not fail. */
         if(H5VL_iod_server_traverse(coh, input->target_loc_id, input->target_loc_oh, 
                                     input->target_name, FALSE, 
-                                    &last_comp, &cur_id, &cur_oh) < 0)
+                                    &dst_last_comp, &cur_id, &cur_oh) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't traverse path");
 
         /* lookup target object in the current location. The lookup
            might fail since this is a soft link */
-        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, dst_last_comp, 
                             &target_id, &kv_size, NULL, NULL) < 0) {
             /* the lookup failed so just insert the target_id as
                undefined in the src object */
+            /* MSC - Figure out what to do when reaccessing this
+               object after it was created */
             target_id = IOD_ID_UNDEFINED;
         }
     }
@@ -5126,7 +5279,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     /* insert new link (target group's ID) in kv store of the source object */
-    kv.key = HDstrdup(last_comp);
+    kv.key = HDstrdup(src_last_comp);
     kv.value = &target_id;
     kv.value_len = kv_size;
     if (iod_kv_set(src_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
@@ -5137,6 +5290,15 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     if(src_oh.cookie != input->loc_oh.cookie) {
         iod_obj_close(src_oh, NULL, NULL);
     }
+
+    /* open the target object */
+    if (iod_obj_open_write(coh, target_id, NULL, &target_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+
+    /* MSC - update metadata link information for this object */
+
+    /* close the target object */
+    iod_obj_close(target_oh, NULL, NULL);
 
 #if H5_DO_NATIVE
     if(H5VL_LINK_CREATE_HARD == create_type) {
@@ -5154,10 +5316,14 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link create, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
-    last_comp = (char *)H5MM_xfree(last_comp);
+    src_last_comp = (char *)H5MM_xfree(src_last_comp);
+    dst_last_comp = (char *)H5MM_xfree(dst_last_comp);
     input = (link_create_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
@@ -5200,7 +5366,9 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link move\n");
+#endif
 
     /* the traversal will retrieve the location where the link needs
        to be moved/copied from. The traversal will fail if an intermediate group
@@ -5233,7 +5401,7 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 
         kvs.kv = &kv;
         if(iod_kv_unlink_keys(src_oh,IOD_TID_UNKNOWN, NULL, 1, &kvs, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");;
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     }
 
     HDfree(kv.key);
@@ -5266,7 +5434,10 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link move, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     last_comp = (char *)H5MM_xfree(last_comp);
@@ -5311,7 +5482,9 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link Exists\n");
+#endif
 
     /* the traversal will retrieve the location where the link needs
        to be checked */
@@ -5344,7 +5517,10 @@ done:
         iod_obj_close(loc_oh, NULL, NULL);
     }
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link exists, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
     input = (link_op_in_t *)H5MM_xfree(input);
@@ -5390,7 +5566,9 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link Remove\n");
+#endif
 
     /* the traversal will retrieve the location where the link needs
        to be removed. The traversal will fail if an intermediate group
@@ -5412,6 +5590,9 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     HDfree(kv.key);
 
+    /* MSC - check the metadata information for the object and remove
+       it from the container if this is the last link to it */
+
     /* close location object */
     if(input->loc_oh.cookie != cur_oh.cookie) {
         iod_obj_close(cur_oh, NULL, NULL);
@@ -5423,7 +5604,11 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with link remove, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     last_comp = (char *)H5MM_xfree(last_comp);
@@ -5459,16 +5644,19 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh; /* the container handle */
     iod_handle_t obj_oh; /* The handle for object */
     iod_obj_id_t obj_id; /* The ID of the object */
-    iod_handle_t cur_oh;
+    iod_handle_t cur_oh, mdkv_oh;
     iod_obj_id_t cur_id;
     char *last_comp = NULL;
     iod_kv_t kv;
+    scratch_pad_t sp;
     iod_size_t kv_size = sizeof(iod_obj_id_t);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start Object Open\n");
+#endif
 
     /* the traversal will retrieve the location where the object needs
        to be opened to be created from. The traversal will fail if an
@@ -5491,10 +5679,20 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, obj_id, NULL, &obj_oh, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 
-#if 0
-    /* When we have a real IOD, open the scratch pad and read the
-       object's metadata */
-#endif
+    /* get scratch pad of the dataset */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* open the metadata scratch pad */
+    if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* MSC - Read object's metadata */
+
+    /* close the metadata scratch pad */
+    if(iod_obj_close(mdkv_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
 
 #if H5_DO_NATIVE
     obj_oh.cookie = H5Oopen(input->loc_oh.cookie, input->loc_name, H5P_DEFAULT);
@@ -5529,7 +5727,10 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     output.iod_id = obj_id;
     output.iod_oh = obj_oh;
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with object open, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &output);
 
 done:
@@ -5597,7 +5798,9 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Start object copy\n");
+#endif
 
     /* the traversal will retrieve the location where the object
        exists. The traversal will fail if an intermediate group does
@@ -5648,7 +5851,10 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with object Copy, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     last_comp = (char *)H5MM_xfree(last_comp);
@@ -5695,8 +5901,6 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    fprintf(stderr, "Start Object Exists\n");
-
     /* the traversal will retrieve the location where the object needs
        to be checked */
     if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
@@ -5738,7 +5942,10 @@ done:
         iod_obj_close(loc_oh, NULL, NULL);
     }
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with Object exists, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret);
 
     input = (object_op_in_t *)H5MM_xfree(input);
@@ -5773,19 +5980,18 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
-    iod_handle_t cur_oh;
+    iod_handle_t cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, obj_id;
     const char *loc_name = input->path;
     const char *comment = input->comment;
     char *last_comp = NULL;
     iod_kv_params_t kvs;
     iod_kv_t kv;
+    scratch_pad_t sp;
     iod_size_t kv_size = sizeof(iod_obj_id_t);
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    fprintf(stderr, "Start Object set comment: %s on %s\n", comment, loc_name);
 
     /* the traversal will retrieve the location where the link needs
        to be removed. The traversal will fail if an intermediate group
@@ -5798,11 +6004,31 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
 
-    /* Open object */
-    /* retrieve scratch pad */
-    /* open scratch pad */
-    /* update scratch pad with comment */
-    /* close scratch pad and object */
+    /* close parent group and its scratch pad if it is not the
+       location we started the traversal into */
+    if(loc_oh.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* open the object */
+    if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open object");
+
+    /* get scratch pad of the object */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* open the metadata scratch pad */
+    if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* MSC - update scratch pad with comment */
+
+    /* close metadata KV and object */
+    if(iod_obj_close(mdkv_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    if(iod_obj_close(cur_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
 #if H5_DO_NATIVE
     if(H5Oset_comment(loc_oh.cookie, comment) < 0)
@@ -5810,7 +6036,10 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with set comment, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &ret_value);
 
     last_comp = (char *)H5MM_xfree(last_comp);
@@ -5848,19 +6077,18 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     size_t length = input->length;
-    iod_handle_t cur_oh;
+    iod_handle_t cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, obj_id;
     const char *loc_name = input->path;
     char *last_comp = NULL;
     iod_kv_params_t kvs;
     iod_kv_t kv;
     iod_size_t kv_size = sizeof(iod_obj_id_t);
+    scratch_pad_t sp;
     ssize_t size = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
-
-    fprintf(stderr, "Start Object get comment on %s\n", loc_name);
 
     /* the traversal will retrieve the location where the link needs
        to be removed. The traversal will fail if an intermediate group
@@ -5873,11 +6101,31 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
 
-    /* Open object */
-    /* retrieve scratch pad */
-    /* open scratch pad */
-    /* get comment */
-    /* close scratch pad and object */
+    /* close parent group and its scratch pad if it is not the
+       location we started the traversal into */
+    if(loc_oh.cookie != cur_oh.cookie) {
+        iod_obj_close(cur_oh, NULL, NULL);
+    }
+
+    /* open the object */
+    if (iod_obj_open_write(coh, obj_id, NULL /*hints*/, &cur_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open object");
+
+    /* get scratch pad of the object */
+    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+    /* open the metadata scratch pad */
+    if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+    /* MSC - Get comment from MD KV store*/
+
+    /* close metadata KV and object */
+    if(iod_obj_close(mdkv_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    if(iod_obj_close(cur_oh, NULL, NULL))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     comment.value_size = (ssize_t *)malloc(sizeof(ssize_t));
     comment.value = NULL;
@@ -5905,7 +6153,10 @@ done:
     output.ret = ret_value;
     output.name = comment;
 
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with get comment, sending response to client\n");
+#endif
+
     HG_Handler_start_output(op_data->hg_handle, &output);
 
     if(comment.value)

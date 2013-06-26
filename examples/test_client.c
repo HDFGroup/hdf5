@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
        the data in the buffer is in BE byte order. Type conversion will
        happen at the server when we detect that the dataset type is of
        LE order and the datatype here is in BE order. */
-    ret = H5Dwrite_ff(did3, H5T_STD_I32BE, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
+    ret = H5Dwrite_ff(did3, H5T_STD_I16BE, dataspaceId, dataspaceId, H5P_DEFAULT, data3, 
                       0, event_q);
     assert(ret == 0);
 
@@ -457,9 +457,7 @@ int main(int argc, char **argv) {
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",r_data[i]);
     fprintf(stderr, "\n");
-
     fprintf(stderr, "Checksum Receieved = %u  Checksum Computed = %u (Should be Equal)\n", read1_cs, cs);
-    assert(read1_cs == cs);
 
     /* Print the data that has been read with an injected fault,
        This should print the array similar to the previous one, but with the 
@@ -468,8 +466,9 @@ int main(int argc, char **argv) {
     for(i=0;i<nelem;++i)
         fprintf(stderr, "%d ",r2_data[i]);
     fprintf(stderr, "\n");
-
     fprintf(stderr, "Checksum Receieved = %u  Checksum Computed = %u (Should NOT be Equal)\n", read2_cs, cs);
+
+    assert(read1_cs == cs);
     assert(read2_cs != cs);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
@@ -627,8 +626,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Close all open objects then Wait for events in EQ\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
-    assert(H5Aclose(aid2) == 0);
     assert(H5Tclose(int_id) == 0);
+    assert(H5Aclose(aid2) == 0);
     assert(H5Gclose(gid1) == 0);
     assert(H5Fclose(file_id) == 0);
 
