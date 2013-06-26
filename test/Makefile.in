@@ -84,7 +84,8 @@ bin_PROGRAMS = swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) \
 	swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
 	swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) \
 	use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) \
-	atomic_writer$(EXEEXT) atomic_reader$(EXEEXT)
+	atomic_writer$(EXEEXT) atomic_reader$(EXEEXT) \
+	accum_swmr_reader$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) tcheck_version$(EXEEXT) testmeta$(EXEEXT) \
 	links_env$(EXEEXT) flushrefresh$(EXEEXT) $(am__EXEEXT_2)
@@ -191,6 +192,10 @@ accum_SOURCES = accum.c
 accum_OBJECTS = accum.$(OBJEXT)
 accum_LDADD = $(LDADD)
 accum_DEPENDENCIES = libh5test.la $(LIBHDF5)
+accum_swmr_reader_SOURCES = accum_swmr_reader.c
+accum_swmr_reader_OBJECTS = accum_swmr_reader.$(OBJEXT)
+accum_swmr_reader_LDADD = $(LDADD)
+accum_swmr_reader_DEPENDENCIES = libh5test.la $(LIBHDF5)
 app_ref_SOURCES = app_ref.c
 app_ref_OBJECTS = app_ref.$(OBJEXT)
 app_ref_LDADD = $(LDADD)
@@ -592,17 +597,18 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 	$(libdynlib3_la_SOURCES) $(libh5test_la_SOURCES) accum.c \
-	app_ref.c atomic_reader.c atomic_writer.c big.c bittests.c \
-	btree2.c cache.c cache_api.c cache_tagging.c cmpd_dset.c \
-	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
-	earray.c efc.c enc_dec_plist.c enc_dec_plist_with_endianess.c \
-	enum.c err_compat.c error_test.c extend.c external.c farray.c \
-	fheap.c file_image.c fillval.c filter_fail.c flush1.c flush2.c \
-	flushrefresh.c freespace.c gen_bad_ohdr.c gen_bogus.c \
-	gen_cross.c gen_deflate.c gen_file_image.c gen_filespace.c \
-	gen_filters.c gen_idx.c gen_new_array.c gen_new_fill.c \
-	gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
+	accum_swmr_reader.c app_ref.c atomic_reader.c atomic_writer.c \
+	big.c bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
+	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
+	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
+	enc_dec_plist_with_endianess.c enum.c err_compat.c \
+	error_test.c extend.c external.c farray.c fheap.c file_image.c \
+	fillval.c filter_fail.c flush1.c flush2.c flushrefresh.c \
+	freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
+	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
+	gen_idx.c gen_new_array.c gen_new_fill.c gen_new_group.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
@@ -615,18 +621,18 @@ SOURCES = $(libdynlib1_la_SOURCES) $(libdynlib2_la_SOURCES) \
 DIST_SOURCES = $(am__libdynlib1_la_SOURCES_DIST) \
 	$(am__libdynlib2_la_SOURCES_DIST) \
 	$(am__libdynlib3_la_SOURCES_DIST) $(libh5test_la_SOURCES) \
-	accum.c app_ref.c atomic_reader.c atomic_writer.c big.c \
-	bittests.c btree2.c cache.c cache_api.c cache_tagging.c \
-	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
-	enc_dec_plist_with_endianess.c enum.c err_compat.c \
-	error_test.c extend.c external.c farray.c fheap.c file_image.c \
-	fillval.c filter_fail.c flush1.c flush2.c flushrefresh.c \
-	freespace.c gen_bad_ohdr.c gen_bogus.c gen_cross.c \
-	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
-	gen_idx.c gen_new_array.c gen_new_fill.c gen_new_group.c \
-	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
-	gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
+	accum.c accum_swmr_reader.c app_ref.c atomic_reader.c \
+	atomic_writer.c big.c bittests.c btree2.c cache.c cache_api.c \
+	cache_tagging.c cmpd_dset.c cross_read.c dangle.c dsets.c \
+	dt_arith.c dtransform.c dtypes.c earray.c efc.c \
+	enc_dec_plist.c enc_dec_plist_with_endianess.c enum.c \
+	err_compat.c error_test.c extend.c external.c farray.c fheap.c \
+	file_image.c fillval.c filter_fail.c flush1.c flush2.c \
+	flushrefresh.c freespace.c gen_bad_ohdr.c gen_bogus.c \
+	gen_cross.c gen_deflate.c gen_file_image.c gen_filespace.c \
+	gen_filters.c gen_idx.c gen_new_array.c gen_new_fill.c \
+	gen_new_group.c gen_new_mtime.c gen_new_super.c \
+	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
 	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hyperslab.c \
 	istore.c lheap.c links.c links_env.c mf.c mount.c mtime.c \
 	ntypes.c objcopy.c ohdr.c plugin.c pool.c reserved.c \
@@ -961,7 +967,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog accum.h5 cmpd_dset.h5 \
 	flushrefresh.h5 flushrefresh_VERIFICATION_START \
 	flushrefresh_VERIFICATION_CHECKPOINT1 \
 	flushrefresh_VERIFICATION_CHECKPOINT2 \
-	flushrefresh_VERIFICATION_DONE atomic_data
+	flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 \
+	ohdr_swmr.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
@@ -1223,6 +1230,9 @@ clean-noinstPROGRAMS:
 accum$(EXEEXT): $(accum_OBJECTS) $(accum_DEPENDENCIES) $(EXTRA_accum_DEPENDENCIES) 
 	@rm -f accum$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(accum_OBJECTS) $(accum_LDADD) $(LIBS)
+accum_swmr_reader$(EXEEXT): $(accum_swmr_reader_OBJECTS) $(accum_swmr_reader_DEPENDENCIES) $(EXTRA_accum_swmr_reader_DEPENDENCIES) 
+	@rm -f accum_swmr_reader$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(accum_swmr_reader_OBJECTS) $(accum_swmr_reader_LDADD) $(LIBS)
 app_ref$(EXEEXT): $(app_ref_OBJECTS) $(app_ref_DEPENDENCIES) $(EXTRA_app_ref_DEPENDENCIES) 
 	@rm -f app_ref$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(app_ref_OBJECTS) $(app_ref_LDADD) $(LIBS)
@@ -1495,6 +1505,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/accum_swmr_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/app_ref.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atomic_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atomic_writer.Po@am__quote@

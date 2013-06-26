@@ -953,6 +953,7 @@
 ./test/Makefile.in
 ./test/SWMR_UseCase_UG.txt
 ./test/accum.c
+./test/accum_swmr_reader.c
 ./test/app_ref.c
 ./test/atomic_reader.c
 ./test/atomic_writer.c

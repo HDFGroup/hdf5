@@ -25,6 +25,11 @@
 /* Filename */
 #define FILENAME "accum.h5"
 
+/* The file name is the same as the define in accum_swmr_reader.c */
+#define SWMR_FILENAME "accum_swmr_big.h5"
+/* The reader forked by test_swmr_write_big() */
+#define SWMR_READER "accum_swmr_reader"
+
 /* "big" I/O test values */
 #define BIG_BUF_SIZE (6 * 1024 * 1024)
 
@@ -50,6 +55,7 @@ unsigned test_read_after(void);
 unsigned test_free(void);
 unsigned test_big(void);
 unsigned test_random_write(void);
+unsigned test_swmr_write_big(void);
 
 /* Helper Function Prototypes */
 void accum_printf(void);
@@ -118,6 +124,9 @@ main(void)
     /* End of test code, close and delete file */
     if(H5Fclose(fid) < 0) TEST_ERROR
     HDremove(FILENAME);
+
+    /* This test uses a different file */
+    nerrors += test_swmr_write_big();
 
     if(nerrors)
         goto error;
@@ -1771,6 +1780,165 @@ error:
     HDfprintf(stderr, "Random # seed was: %u\n", seed);
     return 1;
 } /* end test_random_write() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_swmr_write_big
+ * 
+ * Purpose:    	A SWMR test: verifies that writing "large" metadata to a file
+ *		opened with SWMR_WRITE will flush the existing metadata in the 
+ *		accumulator to disk first before writing the "large" metadata
+ *	 	to disk.  
+ *		This test will fork and exec a reader "accum_swmr_reader" which
+ *		opens the same file with SWMR_READ and verifies that the correct
+ *		metadata is read from disk.
+ * 
+ * Return:      Success: 0
+ *              Failure: 1
+ * 
+ * Programmer:  Vailin Choi; April 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned 
+test_swmr_write_big(void)
+{
+    hid_t fid = -1;			/* File ID */
+    hid_t fapl = -1;			/* File access property list */
+    H5F_t *rf = NULL;			/* File pointer */
+    uint8_t *wbuf2, *rbuf;       	/* Buffers for reading & writing */
+    uint8_t wbuf[1024];			/* Buffer for reading & writing */
+    unsigned u;                         /* Local index variable */
+    pid_t pid;				/* Process ID */
+    int status;				/* Status returned from child process */
+
+    TESTING("SWMR write of large metadata");
+
+    /* File access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set to use latest library format */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a test file with latest format (ensure version 2 object header for SWMR) */
+    if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the file with SWMR_WRITE */
+    if((fid = H5Fopen(SWMR_FILENAME, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get H5F_t * to internal file structure */
+    if(NULL == (rf = (H5F_t *)H5I_object(fid))) FAIL_STACK_ERROR
+
+    /* We'll be writing lots of garbage data, so extend the
+        file a ways. 10MB should do. */
+    if(H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024*1024*10)) < 0) FAIL_STACK_ERROR
+
+    /* Reset metadata accumulator for the file */
+    if(H5F_accum_reset(rf, H5P_DATASET_XFER_DEFAULT, TRUE) < 0) 
+	FAIL_STACK_ERROR;
+
+    /* Allocate space for the write & read buffers */
+    if((wbuf2 = (uint8_t *)HDmalloc(BIG_BUF_SIZE)) == NULL)
+	FAIL_STACK_ERROR;
+    if((rbuf = (uint8_t *)HDmalloc(BIG_BUF_SIZE)) == NULL)
+	FAIL_STACK_ERROR;
+
+    /* Initialize wbuf with "0, 1, 2...1024"*/
+    for(u = 0; u < 1024; u++)
+        wbuf[u] = (uint8_t)u;
+
+    /* Write [1024, 1024] bytes with wbuf */
+    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, wbuf) < 0)
+	FAIL_STACK_ERROR;
+    /* Read the data */
+    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+	FAIL_STACK_ERROR;
+    /* Verify the data read is correct */
+    if(HDmemcmp(wbuf, rbuf, 1024) != 0) TEST_ERROR;
+    /* Flush the data to disk */
+    if(H5F_accum_reset(rf, H5P_DATASET_XFER_DEFAULT, TRUE) < 0) 
+	FAIL_STACK_ERROR;
+
+    /* Initialize wbuf with all 1s */
+    for(u = 0; u < 1024; u++)
+        wbuf[u] = (uint8_t)1;
+
+    /* Initialize wbuf2 */
+    for(u = 0; u < BIG_BUF_SIZE; u++)
+        wbuf2[u] = (uint8_t)(u + 1);
+
+    /* Write [1024,1024] with wbuf--all 1s */
+    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, wbuf) < 0)
+	FAIL_STACK_ERROR;
+    /* Read the data */
+    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+	FAIL_STACK_ERROR;
+    /* Verify the data read is correct */
+    if(HDmemcmp(wbuf, rbuf, 1024) != 0) TEST_ERROR;
+    /* The data stays in the accumulator */
+
+    /* Write a large piece of metadata [2048, BIG_BUF_SIZE] with wbuf2 */
+    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, wbuf2) < 0)
+	FAIL_STACK_ERROR;
+    /* Read the data */
+    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+	FAIL_STACK_ERROR;
+    /* Verify the data read is correct */
+    if(HDmemcmp(wbuf2, rbuf, BIG_BUF_SIZE) != 0) TEST_ERROR;
+
+    /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
+    if((pid = HDfork()) < 0) {
+        HDperror("fork");
+        FAIL_STACK_ERROR;
+    } else if(0 == pid) { /* Child process */
+	/* Run the reader */
+	status = HDexecve(SWMR_READER, NULL, NULL);
+        FAIL_STACK_ERROR;
+    }
+
+    /* Parent process -- wait for the child process to complete */
+    while(pid != HDwaitpid(pid, &status, 0))
+        /*void*/;
+
+    /* Check if child process terminates normally and its return value */
+    if(WIFEXITED(status) && !WEXITSTATUS(status)) {
+	/* Flush the accumulator */
+	if(H5F_accum_reset(rf, H5P_DATASET_XFER_DEFAULT, TRUE) < 0) 
+	    FAIL_STACK_ERROR;
+	/* Close the property list */
+	if(H5Pclose(fapl) < 0) 
+	    FAIL_STACK_ERROR;
+
+	/* Close and remove the file */
+	if(H5Fclose(fid) < 0) 
+	    FAIL_STACK_ERROR;
+	HDremove(SWMR_FILENAME);
+
+	/* Release memory */
+	if(wbuf2) HDfree(wbuf2);
+	if(rbuf) HDfree(rbuf);
+	PASSED();
+	return 0;
+    }
+
+error:
+    /* Closing and remove the file */
+    H5Pclose(fapl);
+    H5Fclose(fid);
+    HDremove(SWMR_FILENAME);
+    /* Release memory */
+    if(wbuf2) HDfree(wbuf2);
+    if(rbuf) HDfree(rbuf);
+
+    return 1;
+} /* end test_swmr_write_big() */
 
 
 /*-------------------------------------------------------------------------

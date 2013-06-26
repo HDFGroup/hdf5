@@ -93,6 +93,8 @@ static herr_t H5O_chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno);
 static herr_t H5O_add_cont_msg(H5O_cont_msgs_t *cont_msg_info,
     const H5O_cont_t *cont);
 
+static herr_t H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata);
+
 
 /*********************/
 /* Package Variables */
@@ -139,6 +141,149 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /* Local Variables */
 /*******************/
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_decode_prefix
+ *
+ * Purpose:	To decode the object header prefix.
+ *		The coding is extracted fromt H5O_load() to this routine.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; June 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
+{
+    H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;       /* User data for callback */
+    const uint8_t *p = buf;   	/* Pointer into buffer to decode */
+    size_t prefix_size;    	/* Size of object header prefix */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(oh);
+    HDassert(buf);
+    HDassert(udata);
+
+    /* Check for presence of magic number */
+    /* (indicates version 2 or later) */
+    if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+        /* Magic number */
+        p += H5_SIZEOF_MAGIC;
+
+        /* Version */
+        oh->version = *p++;
+        if(H5O_VERSION_2 != oh->version)
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
+
+        /* Flags */
+        oh->flags = *p++;
+        if(oh->flags & ~H5O_HDR_ALL_FLAGS)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown object header status flag(s)")
+
+        /* Number of links to object (unless overridden by refcount message) */
+        oh->nlink = 1;
+
+        /* Time fields */
+        if(oh->flags & H5O_HDR_STORE_TIMES) {
+            uint32_t tmp;       /* Temporary value */
+
+            UINT32DECODE(p, tmp);
+            oh->atime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->mtime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->ctime = (time_t)tmp;
+            UINT32DECODE(p, tmp);
+            oh->btime = (time_t)tmp;
+        } /* end if */
+        else
+            oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
+        /* Attribute fields */
+        if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
+            UINT16DECODE(p, oh->max_compact);
+            UINT16DECODE(p, oh->min_dense);
+            if(oh->max_compact < oh->min_dense)
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header attribute phase change values")
+        } /* end if */
+        else {
+            oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
+            oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
+        } /* end else */
+
+        /* First chunk size */
+        switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
+            case 0:     /* 1 byte size */
+                oh->chunk0_size = *p++;
+                break;
+
+            case 1:     /* 2 byte size */
+                UINT16DECODE(p, oh->chunk0_size);
+                break;
+
+            case 2:     /* 4 byte size */
+                UINT32DECODE(p, oh->chunk0_size);
+                break;
+
+            case 3:     /* 8 byte size */
+                UINT64DECODE(p, oh->chunk0_size);
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad size for chunk 0")
+        } /* end switch */
+        if(oh->chunk0_size > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
+    } /* end if */
+    else {
+        /* Version */
+        oh->version = *p++;
+        if(H5O_VERSION_1 != oh->version)
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
+
+        /* Flags */
+        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
+
+        /* Reserved */
+        p++;
+
+        /* Number of messages */
+        UINT16DECODE(p, udata->v1_pfx_nmesgs);
+
+        /* Link count */
+        UINT32DECODE(p, oh->nlink);
+
+        /* Reset unused time fields */
+        oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
+        /* Reset unused attribute fields */
+        oh->max_compact = 0;
+        oh->min_dense = 0;
+
+        /* First chunk size */
+        UINT32DECODE(p, oh->chunk0_size);
+        if((udata->v1_pfx_nmesgs > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
+                (udata->v1_pfx_nmesgs == 0 && oh->chunk0_size > 0))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
+
+        /* Reserved, in version 1 (for 8-byte alignment padding) */
+        p += 4;
+    } /* end else */
+
+    /* Determine object header prefix length */
+    prefix_size = (size_t)(p - buf);
+    HDassert((size_t)prefix_size == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5O_decode_prefix() */
 
 
 /*-------------------------------------------------------------------------
@@ -154,6 +299,13 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
  *		matzke@llnl.gov
  *		Aug  5 1997
  *
+ * Modifications:
+ *	Vailin Choi; June 2013
+ * 	This is a fix for SWMR:
+ *	When reading a block that is > spec_read_size, read the whole block in
+ *	again and possibly decode the header.
+ *	Move the coding for decoding the object header prefix to another routine
+ *	H5O_decode_prefix(). 
  *-------------------------------------------------------------------------
  */
 static H5O_t *
@@ -166,7 +318,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     const uint8_t *p;           /* Pointer into buffer to decode */
     uint8_t     *buf;           /* Buffer to decode */
     size_t	spec_read_size; /* Size of buffer to speculatively read in */
-    size_t	prefix_size;    /* Size of object header prefix */
     size_t	buf_size;       /* Size of prefix+chunk #0 buffer */
     haddr_t     eoa;		/* Relative end of file address	*/
     H5O_t	*ret_value;     /* Return value */
@@ -210,115 +361,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     else
         oh->proxy_addr = HADDR_UNDEF;
 
-    /* Check for presence of magic number */
-    /* (indicates version 2 or later) */
-    if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
-        /* Magic number */
-        p += H5_SIZEOF_MAGIC;
-
-        /* Version */
-        oh->version = *p++;
-        if(H5O_VERSION_2 != oh->version)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
-
-        /* Flags */
-        oh->flags = *p++;
-        if(oh->flags & ~H5O_HDR_ALL_FLAGS)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown object header status flag(s)")
-
-        /* Number of links to object (unless overridden by refcount message) */
-        oh->nlink = 1;
-
-        /* Time fields */
-        if(oh->flags & H5O_HDR_STORE_TIMES) {
-            uint32_t tmp;       /* Temporary value */
-
-            UINT32DECODE(p, tmp);
-            oh->atime = (time_t)tmp;
-            UINT32DECODE(p, tmp);
-            oh->mtime = (time_t)tmp;
-            UINT32DECODE(p, tmp);
-            oh->ctime = (time_t)tmp;
-            UINT32DECODE(p, tmp);
-            oh->btime = (time_t)tmp;
-        } /* end if */
-        else
-            oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
-
-        /* Attribute fields */
-        if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
-            UINT16DECODE(p, oh->max_compact);
-            UINT16DECODE(p, oh->min_dense);
-            if(oh->max_compact < oh->min_dense)
-                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad object header attribute phase change values")
-        } /* end if */
-        else {
-            oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
-            oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
-        } /* end else */
-
-        /* First chunk size */
-        switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
-            case 0:     /* 1 byte size */
-                oh->chunk0_size = *p++;
-                break;
-
-            case 1:     /* 2 byte size */
-                UINT16DECODE(p, oh->chunk0_size);
-                break;
-
-            case 2:     /* 4 byte size */
-                UINT32DECODE(p, oh->chunk0_size);
-                break;
-
-            case 3:     /* 8 byte size */
-                UINT64DECODE(p, oh->chunk0_size);
-                break;
-
-            default:
-                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad size for chunk 0")
-        } /* end switch */
-        if(oh->chunk0_size > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad object header chunk size")
-    } /* end if */
-    else {
-        /* Version */
-        oh->version = *p++;
-        if(H5O_VERSION_1 != oh->version)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
-
-        /* Flags */
-        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
-
-        /* Reserved */
-        p++;
-
-        /* Number of messages */
-        UINT16DECODE(p, udata->v1_pfx_nmesgs);
-
-        /* Link count */
-        UINT32DECODE(p, oh->nlink);
-
-        /* Reset unused time fields */
-        oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
-
-        /* Reset unused attribute fields */
-        oh->max_compact = 0;
-        oh->min_dense = 0;
-
-        /* First chunk size */
-        UINT32DECODE(p, oh->chunk0_size);
-        if((udata->v1_pfx_nmesgs > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
-                (udata->v1_pfx_nmesgs == 0 && oh->chunk0_size > 0))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad object header chunk size")
-
-        /* Reserved, in version 1 (for 8-byte alignment padding) */
-        p += 4;
-    } /* end else */
-
-    /* Determine object header prefix length */
-    prefix_size = (size_t)(p - (const uint8_t *)read_buf);
-    HDassert((size_t)prefix_size == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+    if(H5O_decode_prefix(f, oh, read_buf, udata) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't decode object header prefix")
 
     /* Compute the size of the buffer used */
     buf_size = oh->chunk0_size + (size_t)H5O_SIZEOF_HDR(oh);
@@ -333,14 +377,26 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
         if(NULL == (buf = (uint8_t *)H5WB_actual(wb, buf_size)))
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "can't get actual buffer")
 
-        /* Copy existing raw data into new buffer */
-        HDmemcpy(buf, read_buf, spec_read_size);
+	/* SWMR access */
+        if(H5F_INTENT(f) & H5F_ACC_SWMR_READ || H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+            /* Read the chunk that is bigger than the speculative read size */
+            if(H5F_block_read(f, H5FD_MEM_OHDR, addr, buf_size, dxpl_id, buf) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header")
+            /* See if the data read now is the same as what is read initially */
+            if(HDmemcmp(buf, read_buf, spec_read_size)) {
+		HDmemset(oh, 0, sizeof(oh));
+                if(H5O_decode_prefix(f, oh, buf, udata) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't decode object header prefix")
+            }
+        } else {
+            /* Copy existing raw data into new buffer */
+            HDmemcpy(buf, read_buf, spec_read_size);
 
-        /* Read rest of the raw data */
-        if(H5F_block_read(f, H5FD_MEM_OHDR, (addr + spec_read_size), (buf_size - spec_read_size), dxpl_id, (buf + spec_read_size)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
-    } /* end if */
-    else
+            /* Read rest of the raw data */
+            if(H5F_block_read(f, H5FD_MEM_OHDR, (addr + spec_read_size), (buf_size - spec_read_size), dxpl_id, (buf + spec_read_size)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
+	}
+    } else
         buf = read_buf;
 
     /* Parse the first chunk */
