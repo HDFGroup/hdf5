@@ -221,11 +221,6 @@ leave(int ret)
  * Purpose:     Print the usage message about dumper
  *
  * Return:      void
- *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications:
- * Pedro Vicente, October 5, 2007. Add -q and -z flags
  *-------------------------------------------------------------------------
  */
 static void
@@ -240,6 +235,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -B,   --superblock   Print the content of the super block\n");
     PRINTVALSTREAM(rawoutstream, "     -H,   --header       Print the header only; no data is displayed\n");
     PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
+    PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
     PRINTVALSTREAM(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
     PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
     PRINTVALSTREAM(rawoutstream, "     -e,   --escape       Escape non printing characters\n");

@@ -6,6 +6,7 @@ usage: h5dump [OPTIONS] files
      -B,   --superblock   Print the content of the super block
      -H,   --header       Print the header only; no data is displayed
      -A,   --onlyattr     Print the header and value of attributes
+                          Optional value 0 suppresses printing attributes.
      -i,   --object-ids   Print the object ids
      -r,   --string       Print 1-byte integer datasets as ASCII
      -e,   --escape       Escape non printing characters
