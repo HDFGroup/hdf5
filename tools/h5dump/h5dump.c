@@ -71,7 +71,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:Aq:z:m:RECM:O*";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -175,7 +175,7 @@ static struct long_options l_opts[] = {
     { "xml-n", require_arg, 'X' },
     { "xml", no_arg, 'x' },
     { "xm", no_arg, 'x' },
-    { "onlyattr", no_arg, 'A' },
+    { "onlyattr", optional_arg, 'A' },
     { "escape", no_arg, 'e' },
     { "noindex", no_arg, 'y' },
     { "binary", optional_arg, 'b' },
@@ -1093,9 +1093,14 @@ parse_start:
             last_was_dset = FALSE;
             break;
         case 'A':
-            display_data = FALSE;
-            display_attr_data = TRUE;
-            last_was_dset = FALSE;
+            if ( opt_arg != NULL) {
+                if(0 == HDatoi(opt_arg)) include_attrs = FALSE;
+            }
+            else {
+                display_data = FALSE;
+                display_attr_data = TRUE;
+                last_was_dset = FALSE;
+            }
             break;
         case 'i':
             display_oid = TRUE;

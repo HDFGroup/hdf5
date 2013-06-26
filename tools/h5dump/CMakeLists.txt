@@ -52,6 +52,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A0.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2B.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-4s.ddl
@@ -305,6 +306,7 @@ IF (BUILD_TESTING)
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-1.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tall-2A0.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2B.err
       ${PROJECT_SOURCE_DIR}/errfiles/tarray1_big.err
       ${PROJECT_SOURCE_DIR}/errfiles/tattrregR.err
@@ -1072,6 +1074,8 @@ IF (BUILD_TESTING)
           tall-2.out.err
           tall-2A.out
           tall-2A.out.err
+          tall-2A0.out
+          tall-2A0.out.err
           tall-2B.out
           tall-2B.out.err
           tall-3.out
@@ -1505,6 +1509,9 @@ IF (BUILD_TESTING)
 
   # test '-A' to suppress data but print attr's
   ADD_H5ERR_MASK_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
+
+  # test '-A' to suppress attr's but print data
+  ADD_H5ERR_MASK_TEST (tall-2A0 0 --enable-error-stack -A 0 tall.h5)
 
   # test '-r' to print attributes in ASCII instead of decimal
   ADD_H5ERR_MASK_TEST (tall-2B 0 --enable-error-stack -A -r tall.h5)

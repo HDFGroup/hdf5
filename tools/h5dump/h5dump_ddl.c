@@ -556,19 +556,20 @@ attr_iteration(hid_t gid, unsigned attr_crt_order_flags)
 {
     /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
        in the group for attributes, then, sort by creation order, otherwise by name */
-
-    if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
-        if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-            error_msg("error getting attribute information\n");
-            h5tools_setstatus(EXIT_FAILURE);
+    if(include_attrs) {
+        if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+            if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg("error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            } /* end if */
         } /* end if */
-    } /* end if */
-    else {
-        if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-            error_msg("error getting attribute information\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        } /* end if */
-    } /* end else */
+        else {
+            if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg("error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            } /* end if */
+        } /* end else */
+    }
 }
 
 /*-------------------------------------------------------------------------

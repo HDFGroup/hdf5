@@ -1553,6 +1553,7 @@
 ./tools/testfiles/tudlink-2.ddl
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
+./tools/testfiles/tall-2A0.ddl
 ./tools/testfiles/tall-2B.ddl
 ./tools/testfiles/tattrcontents1.ddl
 ./tools/testfiles/tattrcontents2.ddl
@@ -1612,6 +1613,7 @@
 ./tools/h5dump/errfiles/filter_fail.err
 ./tools/h5dump/errfiles/tall-1.err
 ./tools/h5dump/errfiles/tall-2A.err
+./tools/h5dump/errfiles/tall-2A0.err
 ./tools/h5dump/errfiles/tall-2B.err
 ./tools/h5dump/errfiles/tarray1_big.err
 ./tools/h5dump/errfiles/tattr-3.err
