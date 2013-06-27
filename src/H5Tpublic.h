@@ -611,6 +611,7 @@ H5_DLL hid_t H5Tarray_create1(hid_t base_id, int ndims,
             const hsize_t dim[/* ndims */],
             const int perm[/* ndims */]);
 H5_DLL int H5Tget_array_dims1(hid_t type_id, hsize_t dims[], int perm[]);
+H5_DLL herr_t H5Tget_vol_named_type(hid_t type_id, void **dt_obj);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
