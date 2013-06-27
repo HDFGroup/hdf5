@@ -14,9 +14,10 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 
-## Update HDF5 compiler tools after the HDF5 software has been installed
-## in a new location.
-## For help page, use "h5redeploy -help"
+## Update HDF5 compiler tools after the HDF5 software has been installed  ##
+## in a new location.							  ##
+## For help page, use "h5redeploy -help"				  ##
+##									  ##
 
 # Constants definitions
 EXIT_SUCCESS=0
@@ -29,14 +30,20 @@ usage() {
   # A wonderfully informative "usage" message.
   echo "usage: $prog_name [OPTIONS]"
   echo "  OPTIONS:"
-  echo "    -help|help   This help message"
-  echo "    -echo        Show all the shell commands executed"
-  echo "    -force       No prompt, just do it"
-  echo "    -prefix=DIR  New directory to find HDF5 lib/ and include/"
-  echo "                   subdirectories [default: current directory]"
-  echo "    -tool=TOOL   Tool to update. TOOL must be in the current"
-  echo "                   directory and writable. [default: $h5tools]"
-  echo "    -show        Show the commands without executing them"
+  echo "    -help|help        This help message"
+  echo "    -echo             Show all the shell commands executed"
+  echo "    -force            No prompt, just do it"
+  echo "    -prefix=DIR       New directory to find HDF5 lib/ and include/"
+  echo "                        subdirectories [default: current directory]"
+  echo "    -exec-prefix=DIR  New directory to find HDF5 lib/"
+  echo "                        subdirectory [default: <prefix>]"
+  echo "    -libdir=DIR       New directory for the HDF5 lib directory"
+  echo "                        [default: <exec-prefix>/lib]"
+  echo "    -includedir=DIR   New directory for the HDF5 header files"
+  echo "                        [default: <prefix>/include]"
+  echo "    -tool=TOOL        Tool to update. TOOL must be in the current"
+  echo "                        directory and writable. [default: $h5tools]"
+  echo "    -show             Show the commands without executing them"
   echo " "
   exit $EXIT_FAILURE
 }
@@ -70,17 +77,38 @@ ERROR()
 
 # Main
 #
+############################################################################
+## Installation directories:						  ##
+## prefix	architecture-independent files.				  ##
+## exec_prefix	architecture-dependent files, default is <prefix>.	  ##
+## libdir	libraries, default is <exec_prefix>/lib.		  ##
+## includedir	header files, default is <prefix/include>.		  ##
+## Not used here:							  ##
+## bindir	executables, <exec_prefix/bin>.				  ##
+############################################################################
 # Initialization
 h5tools="h5cc h5pcc h5fc h5pfc h5c++"	# possible hdf5 tools
 foundtools=		# tools found and will be modified
 fmode=			# force mode, default is off
-prefix=`(cd ..;pwd)`
+prefix=
+exec_prefix=
+libdir=
+includedir=
 
 # Parse options
 for arg in $@ ; do
   case "$arg" in
     -prefix=*)
-      prefix="`expr "$arg" : '-prefix=\(.*\)'`"
+      prefix="`echo $arg | cut -f2 -d=`"
+      ;;
+    -exec-prefix=*)
+      exec_prefix="`echo $arg | cut -f2 -d=`"
+      ;;
+    -libdir=*)
+      libdir="`echo $arg | cut -f2 -d=`"
+      ;;
+    -includedir=*)
+      includedir="`echo $arg | cut -f2 -d=`"
       ;;
     -echo)
       set -x
@@ -89,7 +117,7 @@ for arg in $@ ; do
       SHOW="echo"
       ;;
     -tool=*)
-      h5tools="`expr "$arg" : '-tool=\(.*\)'`"
+      h5tools="`echo $arg | cut -f2 -d=`"
       ;;
     -help|help)
       usage
@@ -105,10 +133,18 @@ for arg in $@ ; do
   esac
 done
 
-# Sanity checks
-if [ ! -d $prefix ]; then
-    ERROR "prefix($prefix) is not an existing directory"
-    exit $EXIT_FAILURE
+# Set to default value, one above where i am, if not given by user
+if [ -z "$prefix" ]; then
+    prefix=`(cd ..;pwd)`
+fi
+if [ -z "$exec_prefix" ]; then
+    exec_prefix='${prefix}'		# use single quotes to prevent expansion of $
+fi
+if [ -z "$libdir" ]; then
+    libdir='${exec_prefix}'/lib	# use single quotes to prevent expansion of $
+fi
+if [ -z "$includedir" ]; then
+    includedir='${prefix}'/include # use single quotes to prevent expansion of $
 fi
 
 for x in $h5tools; do
@@ -144,10 +180,19 @@ fi
 CMDFILE=/tmp/h5redeploy.$$
 touch $CMDFILE
 chmod 0600 $CMDFILE
-echo "/^prefix/c"                 >> $CMDFILE
-echo prefix=\""$prefix"\"         >> $CMDFILE
-echo .                            >> $CMDFILE
-(echo w; echo q)                  >> $CMDFILE
+echo "/^prefix=/c"                    >> $CMDFILE
+echo prefix=\""$prefix"\"             >> $CMDFILE
+echo .                                >> $CMDFILE
+echo "/^exec_prefix=/c"               >> $CMDFILE
+echo exec_prefix=\""$exec_prefix"\"   >> $CMDFILE
+echo .                                >> $CMDFILE
+echo "/^libdir=/c"                    >> $CMDFILE
+echo libdir=\""$libdir"\"             >> $CMDFILE
+echo .                                >> $CMDFILE
+echo "/^includedir=/c"                >> $CMDFILE
+echo includedir=\""$includedir"\"     >> $CMDFILE
+echo .                                >> $CMDFILE
+(echo w; echo q)                      >> $CMDFILE
 
 
 # Update them
@@ -171,10 +216,3 @@ done
 # Cleanup
 rm -f $CMDFILE
 exit $EXIT_SUCCESS
-
-# Some possible future features to add
-# CCBASE - Name of the alternative C compiler
-# CLINKERBASE - Name of the alternative linker
-# LDFLAGS   - Path to different libraries your application will link with
-#     (this path should include the path to the zlib library)
-# LIBS      - Libraries your application will link with

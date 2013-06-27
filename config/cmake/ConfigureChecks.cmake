@@ -184,14 +184,14 @@ IF (WINDOWS)
   ENDIF (MINGW)
   SET (H5_HAVE_LIBWS2_32 1)
   SET (H5_HAVE_LIBWSOCK32 1)
-ENDIF (WINDOWS)
 
-#-----------------------------------------------------------------------------
-# These tests need to be manually SET for windows since there is currently
-# something not quite correct with the actual test implementation. This affects
-# the 'dt_arith' test and most likely lots of other code
-# ----------------------------------------------------------------------------
-SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
+  #-----------------------------------------------------------------------------
+  # These tests need to be manually SET for windows since there is currently
+  # something not quite correct with the actual test implementation. This affects
+  # the 'dt_arith' test and most likely lots of other code
+  # ----------------------------------------------------------------------------
+  SET (H5_FP_TO_ULLONG_RIGHT_MAXIMUM "" CACHE INTERNAL "")
+ENDIF (WINDOWS)
 
 # ----------------------------------------------------------------------
 # END of WINDOWS Hard code Values
@@ -206,6 +206,7 @@ ENDIF (CYGWIN)
 #-----------------------------------------------------------------------------
 IF (NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("m" ceil     H5_HAVE_LIBM)
+  CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     H5_HAVE_LIBDL)
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  H5_HAVE_LIBWS2_32)
   CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname H5_HAVE_LIBWSOCK32)
 ENDIF (NOT WINDOWS)
@@ -368,6 +369,7 @@ CHECK_INCLUDE_FILE_CONCAT ("sys/types.h"     H5_HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        H5_HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT ("setjmp.h"        H5_HAVE_SETJMP_H)
 CHECK_INCLUDE_FILE_CONCAT ("features.h"      H5_HAVE_FEATURES_H)
+CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        H5_HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdint.h"        H5_HAVE_STDINT_H)
 
 # IF the c compiler found stdint, check the C++ as well. On some systems this
@@ -1028,7 +1030,9 @@ H5MiscConversionTest (H5_SIZEOF_LONG_DOUBLE H5_LDOUBLE_TO_INTEGER_ACCURATE "chec
 # integers except 'unsigned long long'.  Other HP-UX systems are unknown
 # yet. (1/8/05 - SLU)
 #
-H5ConversionTests (H5_LDOUBLE_TO_INTEGER_WORKS "Checking IF converting from long double to integers works")
+IF (NOT MSVC)
+  H5ConversionTests (H5_LDOUBLE_TO_INTEGER_WORKS "Checking IF converting from long double to integers works")
+ENDIF (NOT MSVC)
 # -----------------------------------------------------------------------
 # Set flag to indicate that the machine can handle conversion from
 # integers to long double.  (This flag should be set "yes" for all
@@ -1102,7 +1106,9 @@ ENDIF (H5_LLONG_TO_FP_CAST_WORKS MATCHES ^H5_LLONG_TO_FP_CAST_WORKS$)
 # where the last 2 bytes of mantissa are lost when compiler tries to do
 # the conversion, and Cygwin where compiler doesn't do rounding correctly.)
 #
-H5ConversionTests (H5_ULLONG_TO_LDOUBLE_PRECISION "Checking IF converting unsigned long long to long double with precision")
+IF (NOT MSVC)
+  H5ConversionTests (H5_ULLONG_TO_LDOUBLE_PRECISION "Checking IF converting unsigned long long to long double with precision")
+ENDIF (NOT MSVC)
 # ----------------------------------------------------------------------
 # Set the flag to indicate that the machine can handle overflow converting
 # all floating-point to all integer types.

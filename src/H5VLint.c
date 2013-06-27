@@ -663,6 +663,39 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_attr_iterate
+ *
+ * Purpose:	Iterate over attrs in an object
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5VL_attr_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+                  H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
+                  H5A_operator2_t op, void *op_data, hid_t dxpl_id, hid_t UNUSED event_q)
+{
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->attr_cls.iterate)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `attr iterate' method")
+    if((ret_value = (vol_plugin->cls->attr_cls.iterate)(obj, loc_params, idx_type, order, n, op, 
+                                                        op_data, dxpl_id, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_BADITER, FAIL, "iteration failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_attr_iterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_attr_get
  *
  * Purpose:	Get specific information about the attribute through the VOL
@@ -982,6 +1015,42 @@ H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_datatype_get_binary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_datatype_get
+ *
+ * Purpose:	Get specific information about the datatype through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_datatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, 
+                  hid_t dxpl_id, hid_t event_q, ...)
+{
+    va_list           arguments;             /* argument list passed from the API call */
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == vol_plugin->cls->datatype_cls.get)
+	HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "vol plugin has no `datatype get' method")
+    va_start (arguments, event_q);
+    if((ret_value = (vol_plugin->cls->datatype_cls.get)(obj, get_type, dxpl_id, 
+                                                        H5_REQUEST_NULL, arguments)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "get failed")
+    va_end (arguments);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_datatype_get() */
 
 
 /*-------------------------------------------------------------------------

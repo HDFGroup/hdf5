@@ -94,6 +94,7 @@ static herr_t H5VL_iod_attribute_close(void *attr, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static ssize_t H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
@@ -178,6 +179,7 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_attribute_open,                /* open */
         H5VL_iod_attribute_read,                /* read */
         H5VL_iod_attribute_write,               /* write */
+        NULL,//H5VL_iod_attr_iterate,               /* iterate */
         H5VL_iod_attribute_get,                 /* get */
         H5VL_iod_attribute_remove,              /* remove */
         H5VL_iod_attribute_close                /* close */
@@ -186,6 +188,7 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_datatype_commit,               /* commit */
         H5VL_iod_datatype_open,                 /* open */
         H5VL_iod_datatype_get_binary,           /* get_size */
+        H5VL_iod_datatype_get,                  /* get */
         H5VL_iod_datatype_close                 /* close */
     },
     {                                           /* dataset_cls */
@@ -3426,6 +3429,43 @@ H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_datatype_get_binary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_datatype_get
+ *
+ * Purpose:	Gets certain information about a datatype
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_datatype_get(void UNUSED *obj, H5VL_datatype_get_t get_type, 
+                      hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Tget_create_plist */
+        case H5VL_DATATYPE_GET_TCPL:
+            {
+                /* Nothing to return here */
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from datatype")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_datatype_get() */
 
 
 /*-------------------------------------------------------------------------

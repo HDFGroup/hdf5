@@ -379,7 +379,7 @@ H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache)
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    assert(cache);
+    HDassert(cache);
 
     /* Check for the default DXPL */
     if(dxpl_id==H5P_DATASET_XFER_DEFAULT)
@@ -2052,6 +2052,7 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
     H5T_t *dt;                          /* Datatype for operation */
+    H5S_t *fspace;                      /* File dataspace for operation */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2061,19 +2062,24 @@ H5D__vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, c
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object(type_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Make certain there is enough fixed-length buffer available */
     if(NULL == (vlen_bufsize->fl_tbuf = H5FL_BLK_REALLOC(vlen_fl_buf, vlen_bufsize->fl_tbuf, H5T_get_size(dt))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf")
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't resize tbuf")
 
     /* Select point to read in */
-    if(H5Sselect_elements(vlen_bufsize->fspace_id, H5S_SELECT_SET, (size_t)1, point) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point")
+    if(NULL == (fspace = (H5S_t *)H5I_object_verify(vlen_bufsize->fspace_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+    if(H5S_select_elements(fspace, H5S_SELECT_SET, (size_t)1, point) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if(H5Dread(vlen_bufsize->dataset_id, type_id, vlen_bufsize->mspace_id, vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, vlen_bufsize->fl_tbuf) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
+    if(H5VL_dataset_read(vlen_bufsize->dset, vlen_bufsize->vol_plugin, 
+                         type_id, vlen_bufsize->mspace_id, 
+                         vlen_bufsize->fspace_id, vlen_bufsize->xfer_pid, 
+                         vlen_bufsize->fl_tbuf, H5_EVENT_QUEUE_NULL) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2464,15 +2470,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_get_create_plist
  *
- * Purpose:	Returns a copy of the dataset creation property list.
+ * Purpose:	Private function for H5Dget_create_plist
  *
  * Return:	Success:	ID for a copy of the dataset creation
- *				property list. 
+ *				property list.  The template should be
+ *				released by calling H5P_close().
  *
  *		Failure:	FAIL
  *
- * Programmer:	Mohamad Chaarawi
- *		March, 2012
+ * Programmer:	Robb Matzke
+ *		Tuesday, February  3, 1998
  *
  *-------------------------------------------------------------------------
  */
@@ -2482,19 +2489,19 @@ H5D_get_create_plist(H5D_t *dset)
     H5P_genplist_t      *dcpl_plist;            /* Dataset's DCPL */
     H5P_genplist_t      *new_plist;             /* Copy of dataset's DCPL */
     H5O_fill_t          copied_fill;            /* Fill value to tweak */
-    hid_t               new_id = FAIL;
-    hid_t               ret_value = FAIL;
+    hid_t		new_dcpl_id = FAIL;
+    hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (dcpl_plist = (H5P_genplist_t *)H5I_object(dset->shared->dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Copy the creation property list */
-    if((new_id = H5P_copy_plist(dcpl_plist, TRUE)) < 0)
+    if((new_dcpl_id = H5P_copy_plist(dcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to copy the creation property list")
-    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_id)))
+    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Retrieve any object creation properties */
@@ -2565,14 +2572,13 @@ H5D_get_create_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property list fill value")
 
     /* Set the return value */
-    ret_value = new_id;
+    ret_value = new_dcpl_id;
 
 done:
-    if(ret_value < 0) {
-        if(new_id > 0)
-            if(H5I_dec_app_ref(new_id) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't free")
-    } /* end if */
+    if(ret_value < 0)
+        if(new_dcpl_id > 0)
+            if(H5I_dec_app_ref(new_dcpl_id) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to close temporary object")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_create_plist() */

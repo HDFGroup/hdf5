@@ -112,8 +112,8 @@ H5S_select_copy (H5S_t *dst, const H5S_t *src, hbool_t share_selection)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
-    assert(dst);
-    assert(src);
+    HDassert(dst);
+    HDassert(src);
 
     /* Copy regular fields */
     dst->select=src->select;
@@ -152,7 +152,7 @@ H5S_select_release(H5S_t *ds)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(ds);
+    HDassert(ds);
 
     /* Call the selection type's release function */
     ret_value=(*ds->select.type->release)(ds);
@@ -224,7 +224,7 @@ H5S_select_serial_size(const H5S_t *space)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(space);
+    HDassert(space);
 
     /* Call the selection type's serial_size function */
     ret_value=(*space->select.type->serial_size)(space);
@@ -262,8 +262,8 @@ H5S_select_serialize(const H5S_t *space, uint8_t *buf)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(space);
-    assert(buf);
+    HDassert(space);
+    HDassert(buf);
 
     /* Call the selection type's serialize function */
     ret_value=(*space->select.type->serialize)(space,buf);
@@ -413,7 +413,7 @@ H5S_select_valid(const H5S_t *space)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(space);
+    HDassert(space);
 
     ret_value = (*space->select.type->is_valid)(space);
 
@@ -452,7 +452,7 @@ H5S_select_deserialize (H5S_t *space, const uint8_t *buf)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(space);
+    HDassert(space);
 
     tbuf=buf;
     UINT32DECODE(tbuf, sel_type);
@@ -571,9 +571,9 @@ H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(space);
-    assert(start);
-    assert(end);
+    HDassert(space);
+    HDassert(start);
+    HDassert(end);
 
     ret_value = (*space->select.type->bounds)(space,start,end);
 
@@ -650,7 +650,7 @@ H5S_select_is_contiguous(const H5S_t *space)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(space);
+    HDassert(space);
 
     ret_value = (*space->select.type->is_contiguous)(space);
 
@@ -687,7 +687,7 @@ H5S_select_is_single(const H5S_t *space)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(space);
+    HDassert(space);
 
     ret_value = (*space->select.type->is_single)(space);
 
@@ -724,7 +724,7 @@ H5S_select_is_regular(const H5S_t *space)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(space);
+    HDassert(space);
 
     ret_value = (*space->select.type->is_regular)(space);
 
@@ -929,8 +929,8 @@ H5S_select_iter_coords (const H5S_sel_iter_t *sel_iter, hsize_t *coords)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(sel_iter);
-    assert(coords);
+    HDassert(sel_iter);
+    HDassert(coords);
 
     /* Call iter_coords routine for selection type */
     ret_value = (*sel_iter->type->iter_coords)(sel_iter,coords);
@@ -971,9 +971,9 @@ H5S_select_iter_block (const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
     FUNC_ENTER_NOAPI_NOINIT_NOINIT_NOERR
 
     /* Check args */
-    assert(iter);
-    assert(start);
-    assert(end);
+    HDassert(iter);
+    HDassert(start);
+    HDassert(end);
 
     /* Call iter_block routine for selection type */
     ret_value = (*iter->type->iter_block)(iter,start,end);
@@ -1011,7 +1011,7 @@ H5S_select_iter_nelmts (const H5S_sel_iter_t *sel_iter)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(sel_iter);
+    HDassert(sel_iter);
 
     /* Call iter_nelmts routine for selection type */
     ret_value = (*sel_iter->type->iter_nelmts)(sel_iter);
@@ -1050,7 +1050,7 @@ H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter)
     FUNC_ENTER_NOAPI_NOINIT_NOINIT_NOERR
 
     /* Check args */
-    assert(iter);
+    HDassert(iter);
 
     /* Call iter_has_next_block routine for selection type */
     ret_value = (*iter->type->iter_has_next_block)(iter);
@@ -1090,8 +1090,8 @@ H5S_select_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(iter);
-    assert(nelem>0);
+    HDassert(iter);
+    HDassert(nelem>0);
 
     /* Call iter_next routine for selection type */
     ret_value = (*iter->type->iter_next)(iter,nelem);
@@ -1135,7 +1135,7 @@ H5S_select_iter_next_block(H5S_sel_iter_t *iter)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(iter);
+    HDassert(iter);
 
     /* Call iter_next_block routine for selection type */
     ret_value = (*iter->type->iter_next_block)(iter);
@@ -1173,7 +1173,7 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(sel_iter);
+    HDassert(sel_iter);
 
     /* Call selection type-specific release routine */
     ret_value = (*sel_iter->type->iter_release)(sel_iter);
@@ -1387,7 +1387,7 @@ H5S_get_select_type(const H5S_t *space)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Check args */
-    assert(space);
+    HDassert(space);
 
     /* Set return value */
     ret_value=H5S_GET_SELECT_TYPE(space);

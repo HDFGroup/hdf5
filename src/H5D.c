@@ -115,7 +115,7 @@ done:
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *
@@ -221,7 +221,7 @@ done:
  *		properties (DCPL_ID).
  *
  *		All arguments are copied into the dataset, so the caller is
- *		allowed to derive new types, data spaces, and creation
+ *		allowed to derive new types, dataspaces, and creation
  *		parameters from the old ones and reuse them in calls to
  *		create other datasets.
  *
@@ -436,9 +436,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Dget_space
  *
- * Purpose:	Returns a copy of the file data space for a dataset.
+ * Purpose:	Returns a copy of the file dataspace for a dataset.
  *
- * Return:	Success:	ID for a copy of the data space.  The data
+ * Return:	Success:	ID for a copy of the dataspace.  The data
  *				space should be released by calling
  *				H5Sclose().
  *
@@ -467,8 +467,10 @@ H5Dget_space(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* get the dataspace through the VOL */
-    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, &ret_value) < 0)
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE, H5AC_dxpl_id, 
+			H5_EVENT_QUEUE_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get data space")
+
 done:
     FUNC_LEAVE_API(ret_value)
 }
@@ -477,7 +479,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Dget_space_status
  *
- * Purpose:	Returns the status of data space allocation.
+ * Purpose:	Returns the status of dataspace allocation.
  *
  * Return:
  *		Success:	Non-negative
@@ -506,7 +508,8 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
 
     /* Read data space address through the VOL and return */
-    if((ret_value=H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE_STATUS, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, allocation)) < 0)
+    if((ret_value=H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE_STATUS, 
+				   H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, allocation)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get space status")
 
 done:
@@ -577,7 +580,7 @@ H5Dget_create_plist(hid_t dset_id)
 {
     H5VL_t     *vol_plugin;
     void       *dset;
-    hid_t		ret_value = FAIL;              /* Return value */
+    hid_t       ret_value = FAIL;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", dset_id);
@@ -903,7 +906,10 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         hsize_t *size)
 {
-    H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0};
+    H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0, 0, 0};
+    H5VL_t *vol_plugin;         /* VOL plugin this object belongs to */
+    void  *dset;                /* Dataset for operation */
+    H5S_t *mspace = NULL;       /* Memory dataspace */
     char bogus;                 /* bogus value to pass to H5Diterate() */
     H5S_t *space;               /* Dataspace for iteration */
     H5P_genclass_t  *pclass;    /* Property class */
@@ -917,35 +923,35 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
     if(H5I_DATASET != H5I_get_type(dataset_id) ||
        (H5I_DATATYPE != H5I_get_type(type_id)) || size == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dataset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+    /* get the dataset object */
+    if(NULL == (dset = (void *)H5I_object(dataset_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
     if(!(H5S_has_extent(space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
-    /* Save the dataset ID */
-    vlen_bufsize.dataset_id = dataset_id;
+    /* Save the dataset & VOL plugin */
+    vlen_bufsize.dset = dset;
+    vlen_bufsize.vol_plugin = vol_plugin;
 
-    if((vlen_bufsize.fspace_id = H5Dget_space(dataset_id)) < 0)
+    vlen_bufsize.fspace_id = FAIL;
+    vlen_bufsize.mspace_id = FAIL;
+
+    /* Get a copy of the dataspace ID */
+    if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE, H5AC_dxpl_id, 
+		        H5_EVENT_QUEUE_NULL, &vlen_bufsize.fspace_id) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
-#if 0
-    {
-        H5VL_t     *vol_plugin;
-        void       *dset;
-        /* get the plugin pointer */
-        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dataset_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
-        /* get the dataset object */
-        if(NULL == (dset = (void *)H5I_object(dataset_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
-        /* Get a copy of the dataspace ID */
-        if(H5VL_dataset_get(dset, vol_plugin, H5VL_DATASET_GET_SPACE, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, &(vlen_bufsize.fspace_id)) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy dataspace")
-    }
-#endif
 
     /* Create a scalar for the memory dataspace */
-    if((vlen_bufsize.mspace_id = H5Screate(H5S_SCALAR)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't create dataspace")
+    if(NULL == (mspace = H5S_create(H5S_SCALAR)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create dataspace")
+    /* Atomize */
+    if((vlen_bufsize.mspace_id = H5I_register (H5I_DATASPACE, mspace, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
     /* Grab the temporary buffers required */
     if(NULL == (vlen_bufsize.fl_tbuf = H5FL_BLK_MALLOC(vlen_fl_buf, (size_t)1)))
@@ -980,10 +986,15 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id,
         *size = vlen_bufsize.size;
 
 done:
-    if(vlen_bufsize.fspace_id > 0 && H5I_dec_ref(vlen_bufsize.fspace_id) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-    if(vlen_bufsize.mspace_id > 0 && H5I_dec_ref(vlen_bufsize.mspace_id) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+    if(ret_value < 0) {
+        if(mspace && H5S_close(mspace) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+    } /* end if */
+
+    if(vlen_bufsize.fspace_id && H5I_dec_app_ref(vlen_bufsize.fspace_id) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
+    if(vlen_bufsize.mspace_id && H5I_dec_app_ref(vlen_bufsize.mspace_id) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDEC, FAIL, "problem freeing id")
     if(vlen_bufsize.fl_tbuf != NULL)
         vlen_bufsize.fl_tbuf = H5FL_BLK_FREE(vlen_fl_buf, vlen_bufsize.fl_tbuf);
     if(vlen_bufsize.vl_tbuf != NULL)

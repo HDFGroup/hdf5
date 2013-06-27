@@ -78,8 +78,8 @@ H5FO_create(const H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    assert(f);
-    assert(f->shared);
+    HDassert(f);
+    HDassert(f->shared);
 
     /* Create container used to store open object info */
     if((f->shared->open_objs = H5SL_create(H5SL_TYPE_HADDR, NULL)) == NULL)
@@ -166,11 +166,11 @@ H5FO_insert(const H5F_t *f, haddr_t addr, void *obj, hbool_t delete_flag)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    assert(f);
-    assert(f->shared);
-    assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
-    assert(obj);
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->open_objs);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(obj);
 
     /* Allocate new opened object information structure */
     if((open_obj=H5FL_MALLOC(H5FO_open_obj_t))==NULL)
@@ -269,10 +269,10 @@ H5FO_mark(const H5F_t *f, haddr_t addr, hbool_t deleted)
     FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
-    assert(f);
-    assert(f->shared);
-    assert(f->shared->open_objs);
-    assert(H5F_addr_defined(addr));
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->open_objs);
+    HDassert(H5F_addr_defined(addr));
 
     /* Get the object node from the container */
     if(NULL != (open_obj = (H5FO_open_obj_t *)H5SL_search(f->shared->open_objs, &addr)))
@@ -352,9 +352,9 @@ H5FO_dest(const H5F_t *f)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    assert(f);
-    assert(f->shared);
-    assert(f->shared->open_objs);
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->open_objs);
 
     /* Check if the object info set is empty */
     if(H5SL_count(f->shared->open_objs)!=0)

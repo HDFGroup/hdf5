@@ -23,6 +23,9 @@ DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
 CMP='cmp -s'
 DIFF='diff -c'
 
+# Skip plugin module to test missing filter
+ENVCMD="env HDF5_PLUGIN_PRELOAD=::"
+
 nerrors=0
 verbose=yes
 
@@ -61,7 +64,9 @@ TEST() {
       echo "#############################"
       echo "Expected output for $TEST_ERR" 
       echo "#############################"
-      $RUNSERIAL $TEST_ERR_BIN 
+
+      # Skip the plugin for testing missing filter.
+      $ENVCMD $RUNSERIAL $TEST_ERR_BIN 
    ) >$actual 2>$actual_err
    # Extract file name, line number, version and thread IDs because they may be different
    sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
@@ -109,7 +114,7 @@ else
 TEST err_compat
 fi
 
-# test for error_test
+# test for error_test.  Skip the plugin for testing missing filter.
 TEST error_test
 
 if test $nerrors -eq 0 ; then

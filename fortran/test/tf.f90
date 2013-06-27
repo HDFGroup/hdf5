@@ -115,7 +115,7 @@ END SUBROUTINE verify
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: verify
+!DEC$attributes dllexport :: verify_Fortran_INTEGER_4
 !DEC$endif
 SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
   USE HDF5
@@ -128,9 +128,6 @@ SUBROUTINE verify_Fortran_INTEGER_4(string,value,correct_value,total_error)
   ENDIF
   RETURN
 END SUBROUTINE verify_Fortran_INTEGER_4
-
-
-
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -151,7 +148,7 @@ END SUBROUTINE verifyLogical
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: verifyString
 !DEC$endif
-SUBROUTINE verifystring(string, value,correct_value,total_error)
+SUBROUTINE verifyString(string, value,correct_value,total_error)
   CHARACTER*(*) :: string
   CHARACTER*(*) :: value, correct_value
   INTEGER :: total_error
@@ -160,7 +157,7 @@ SUBROUTINE verifystring(string, value,correct_value,total_error)
      WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string
   ENDIF
   RETURN
-END SUBROUTINE verifystring
+END SUBROUTINE verifyString
 
 
 !----------------------------------------------------------------------

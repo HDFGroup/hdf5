@@ -504,6 +504,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VLattr_iterate
+ *
+ * Purpose:	Iterate over attrs in a group
+ *
+ * Return:	Success:        non negative
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5VLattr_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+                        H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
+                        H5A_operator2_t op, void *op_data, hid_t dxpl_id, void UNUSED **req)
+{
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+    if((ret_value = H5VL_attr_iterate(obj, loc_params, vol_plugin, idx_type, order, n,
+                                      op, op_data, dxpl_id, H5_EVENT_QUEUE_NULL)) < 0)
+	HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "Attr iteration failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)    
+} /* end H5VLattr_iterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VLattr_get
  *
  * Purpose:	Get specific information about the attribute through the VOL
@@ -778,6 +810,51 @@ H5VLdatatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLdatatype_get_binary() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VLdatatype_get
+ *
+ * Purpose:	Get specific information about the datatype through the VOL
+ *
+ * Return:	Success:        non negative
+ *
+ *		Failure:	negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLdatatype_get(void *obj, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, 
+                 hid_t dxpl_id, void UNUSED **req, va_list arguments)
+{
+    herr_t            ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == obj || NULL == vol_plugin || NULL == vol_plugin->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object/VOL class pointer")
+
+    switch (get_type) {
+        /* H5Tget_create_plist */
+        case H5VL_DATATYPE_GET_TCPL:
+            {
+                hid_t *new_tcpl_id = va_arg (arguments, hid_t *);
+
+                if((ret_value = H5VL_datatype_get(obj, vol_plugin, get_type, dxpl_id, 
+                                                  H5_EVENT_QUEUE_NULL, new_tcpl_id)) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to get datatype information")
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from datatype")
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLdatatype_get() */
 
 
 /*-------------------------------------------------------------------------

@@ -202,7 +202,7 @@ H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);
 H5_DLL hbool_t H5G_mounted(H5G_t *grp);
 H5_DLL herr_t H5G_unmount(H5G_t *grp);
-H5_DLL hid_t H5G_get_create_plist(H5G_t *grp);
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -244,6 +244,7 @@ H5_DLL herr_t H5G_obj_remove_by_idx(const struct H5O_loc_t *grp_oloc, H5RS_str_t
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_lookup_by_idx(const struct H5O_loc_t *grp_oloc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, struct H5O_link_t *lnk, hid_t dxpl_id);
+H5_DLL hid_t H5G_get_create_plist(H5G_t *grp);
 
 /*
  * These functions operate on symbol table nodes.
