@@ -639,6 +639,13 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5VLiod.c
         ${HDF5_SRC_DIR}/H5VLiod_client.c
         ${HDF5_SRC_DIR}/H5VLiod_server.c
+        ${HDF5_SRC_DIR}/H5VLiod_file.c
+        ${HDF5_SRC_DIR}/H5VLiod_group.c
+        ${HDF5_SRC_DIR}/H5VLiod_dset.c
+        ${HDF5_SRC_DIR}/H5VLiod_dtype.c
+        ${HDF5_SRC_DIR}/H5VLiod_attr.c
+        ${HDF5_SRC_DIR}/H5VLiod_link.c
+        ${HDF5_SRC_DIR}/H5VLiod_obj.c
         ${HDF5_SRC_DIR}/H5VLiod_encdec.c
     )
     SET (H5VL_HDRS

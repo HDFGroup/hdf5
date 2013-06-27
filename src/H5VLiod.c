@@ -315,16 +315,22 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     MPI_Comm_size(comm, &num_procs);
     MPI_Comm_rank(comm, &my_rank);
 
+    /* generate global variables to create and track axe_ids for every
+       operation. Each process owns a portion of the ID space and uses
+       that space incrementally. */
     axe_seed = (pow(2.0,64.0) - 1) / num_procs;
     axe_id = axe_seed * my_rank + 1;
     axe_bound = axe_seed * (my_rank + 1);
 
+    /* This is a temporary solution for connecting to the server using
+       mercury */
     if ((config = fopen("port.cfg", "r")) != NULL) {
         fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
         printf("Using MPI port name: %s.\n", mpi_port_name);
         fclose(config);
     }
 
+    /* initialize Mercury stuff */
     network_class = NA_MPI_Init(NULL, 0);
     if (HG_SUCCESS != HG_Init(network_class))
         return FAIL;
@@ -385,54 +391,11 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
-    /* forward the init call to the IONs */
+    /* forward the init call to the ION and wait for its completion */
     if(HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req) < 0)
         return FAIL;
-
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
 
-#if 0
-    {
-        int i;
-        uint64_t id;
-
-        for(i=0; i<10; i++) {
-            H5VL_iod_gen_obj_id(my_rank, num_procs, i, IOD_OBJ_KV, &id);
-            fprintf(stderr,"%d ID %d = %llu\n", my_rank, i, id);
-            while (id) {
-                if (id & 1)
-                    fprintf(stderr,"1");
-                else
-                    fprintf(stderr,"0");
-
-                id >>= 1;
-            }
-            fprintf(stderr,"\n");
-            H5VL_iod_gen_obj_id(my_rank, num_procs, i, IOD_OBJ_BLOB, &id);
-            fprintf(stderr,"%d ID %d = %llu\n", my_rank, i, id);
-            while (id) {
-                if (id & 1)
-                    fprintf(stderr,"1");
-                else
-                    fprintf(stderr,"0");
-
-                id >>= 1;
-            }
-            fprintf(stderr,"\n");
-            H5VL_iod_gen_obj_id(my_rank, num_procs, i, IOD_OBJ_ARRAY, &id);
-            fprintf(stderr,"%d ID %d = %llu\n", my_rank, i, id);
-            while (id) {
-                if (id & 1)
-                    fprintf(stderr,"1");
-                else
-                    fprintf(stderr,"0");
-
-                id >>= 1;
-            }
-            fprintf(stderr,"\n");
-        }
-    }
-#endif
     return ret_value;
 } /* end EFF_init() */
 
@@ -455,10 +418,9 @@ EFF_finalize(void)
     hg_request_t hg_req;
     herr_t ret_value = SUCCEED;
 
-    /* forward the finalize call to the IONs */
+    /* forward the finalize call to the ION and wait for it to complete */
     if(HG_Forward(PEER, H5VL_EFF_FINALIZE_ID, &ret_value, &ret_value, &hg_req) < 0)
         return FAIL;
-
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
 
     /* Free addr id */
@@ -544,7 +506,7 @@ H5VL_iod_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the general information */
-    //HDmemcpy(new_fa, old_fa, sizeof(H5VL_iod_fapl_t));
+    /* HDmemcpy(new_fa, old_fa, sizeof(H5VL_iod_fapl_t)); */
 
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
@@ -596,6 +558,21 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_fapl_free() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dxpl_checksum
+ *
+ * Purpose:     Modify the dataset transfer property list to set a
+ *              checksum value for the data to be transfered. 
+ *              This is used with write operations.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t cs)
 {
@@ -620,6 +597,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_checksum() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dxpl_checksum
+ *
+ * Purpose:     Retrieve the checksum value that was set using 
+ *              H5Pset_dxpl_checksum.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *cs/*out*/)
 {
@@ -641,6 +632,21 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_checksum() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dxpl_checksum_ptr
+ *
+ * Purpose:     Set a pointer to tell the library where to insert the
+ *              checksum that is received from a remote location. 
+ *              This is used with read operations.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *cs)
 {
@@ -665,6 +671,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_checksum_ptr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dxpl_checksum_ptr
+ *
+ * Purpose:     Retrieve the checksum pointer value that was set using 
+ *              H5Pset_dxpl_checksum_ptr.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **cs/*out*/)
 {
@@ -686,6 +706,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_checksum_ptr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dxpl_inject_corruption
+ *
+ * Purpose:     Temporary routine to set a boolean flag that tells the 
+ *              library to inject corruption in the stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dxpl_inject_corruption(hid_t dxpl_id, hbool_t flag)
 {
@@ -710,6 +744,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_inject_corruption() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dxpl_inject_corruption
+ *
+ * Purpose:     Temporary routine to retrieve the boolean flag that tells the 
+ *              library to inject corruption in the stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag/*out*/)
 {
@@ -731,6 +779,21 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_inject_corruption() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dcpl_append_only
+ *
+ * Purpose:     Set a boolean flag on the dataset creation property list 
+ *              to indicate to the VOL plugin that access to this dataset 
+ *              will always be in an append/sequence only manner.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag)
 {
@@ -755,6 +818,21 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dcpl_append_only() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dcpl_append_only
+ *
+ * Purpose:     Retrieve a boolean flag on the dataset creation property list 
+ *              that indicates whether access to this dataset 
+ *              will always be in an append/sequence only manner.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag/*out*/)
 {

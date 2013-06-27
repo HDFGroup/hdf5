@@ -934,6 +934,7 @@ H5Tget_vol_named_type(hid_t type_id, void **dt_obj)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i**x", type_id, dt_obj);
 
     /* Check arguments */
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
