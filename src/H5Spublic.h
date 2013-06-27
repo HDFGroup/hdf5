@@ -113,7 +113,7 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t _stride[],
 				   const hsize_t count[],
 				   const hsize_t _block[]);
- #define NEW_HYPERSLAB_API 
+#define NEW_HYPERSLAB_API 
 /* Note that these haven't been working for a while and were never
  *      publicly released - QAK */
 #ifdef NEW_HYPERSLAB_API
@@ -125,10 +125,13 @@ H5_DLL hid_t H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op,
 H5_DLL herr_t H5Sselect_select(hid_t space1_id, H5S_seloper_t op,
                                   hid_t space2_id);
 H5_DLL hid_t H5Scombine_select(hid_t space1_id, H5S_seloper_t op,
-                                  hid_t space2_id);
+			       hid_t space2_id);
+H5_DLL herr_t H5Sget_offsets(hid_t space_id, size_t elmt_size,
+			     hsize_t **offsets, size_t **len, size_t *num_entries);
+  
 #endif /* NEW_HYPERSLAB_API */
 H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
-    size_t num_elem, const hsize_t *coord);
+				 size_t num_elem, const hsize_t *coord);
 H5_DLL H5S_class_t H5Sget_simple_extent_type(hid_t space_id);
 H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
 H5_DLL herr_t H5Sextent_copy(hid_t dst_id,hid_t src_id);

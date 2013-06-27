@@ -27,35 +27,53 @@
 typedef struct {
   hsize_t offset;
   size_t len;
-  hsize_t mem_offset;
-  size_t mem_len;
 }block_container_t;
 
 typedef struct {
-  block_container_t *blocks;
-  size_t numblocks;
-  size_t elementsize;
-  hid_t dataset_id;
-  hid_t selection_id;
-  char *mem_buffer;
-  size_t mem_length;
+  hid_t dataset;
+  int num_requests;
+  int *requests;
+}dataset_container_t;
+
+typedef struct {
+  int request_id;              /* The ID of the current request */
+  int merged;                  /* Was this request was used to create a merged request 
+				  0 - Not Merged --> call call-back normally 
+			          1 - Used for merging ---> skip this
+			          2 - Merged from other requests use memory_blocks */
+  block_container_t *fblocks;  /* File offset/len  */
+  block_container_t *mblocks;  /* Memory offset/len  */
+  size_t num_fblocks;          /* Number of File blocks */   
+  size_t num_mblocks;          /* Number of Memory blocks */ 
+  size_t elementsize;          /* Size of each element in the dataset */
+  hid_t dataset_id;            /* The ID of the dataset */
+  hid_t selection_id;          /* The ID of the dataspace  */
+  char *mem_buffer;            /* The Memory buffer address (contiguous) */
+  size_t mem_length;           /* Length of the Memory buffer */
 } request_list_t;
 
+
 /*----------------------------------------------------------------------------------- */
-H5_DLL int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
-					 request_list_t **list, int *numentries,
-					 int request_type);
+
+H5_DLL int H5VL_iod_create_request_list (compactor *queue, request_list_t **list, 
+				  int *numentries,   dataset_container_t **unique_datasets,
+				  int *num_datasets, int request_type);
+
 H5_DLL int H5VL_iod_sort_request_list (request_list_t **list, int num_entires, int *sorted);
 H5_DLL int H5VL_iod_extract_dims_info (hid_t dataspace, int *dims, hsize_t **dims_out);
 H5_DLL int H5VL_iod_dataset_specific_requests (request_list_t *list, 
 					       request_list_t ***dataset_list,
 					       int *num_datasets);
-H5_DLL int H5VL_iod_compact_requests  (request_list_t *list, int num_requests,
-				       request_list_t *revised, int *num_selecoted, 
-				       int **selected_requests);
+H5_DLL int H5VL_iod_compact_requests  (request_list_t **list, int num_requests);
 H5_DLL int H5VL_iod_select_overlap (hid_t dataspace1 , hid_t dataspace2, 
 				    hid_t *res_dataspace);
-H5_DLL hid_t H5VL_iod_merge_selections (hid_t dataspace1, hid_t dataspace2);
+H5_DLL int H5VL_iod_get_unique_dataset_request_sets ( request_list_t *list,
+						      int *u_datasets,
+						      int ***dataset_request_sets );
+H5_DLL int H5VL_iod_create_dataset_request_list (request_list_t *list,
+						 int *u_dataset,
+						 int **dataset_request_sets,
+						 request_list_t **dataset_list);
 /*----------------------------------------------------------------------------------------  */
 
 #endif /* H5_HAVE_EFF*/

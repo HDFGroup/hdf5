@@ -49,25 +49,28 @@
 
  *------------------------------------------------------------------*/
 
-/*Simple helper functions declaration*/
+/*--------------Simple helper functions declaration----------------*/
+
 static int H5VL_iod_request_exist (int current_index,
 				   int *selected_indices,
 				   int num_entries);
 
-static int H5VL_iod_copy_blocks_info (block_container_t *blocks,
-				      size_t numblocks,
-				      hsize_t **offsets,
-				      size_t **lens,
-				      size_t current_index);
-
 static int H5VL_iod_compare_offsets (hsize_t *offsets1,
-				     int offset1_cnt,
+				     size_t offset1_cnt,
 				     hsize_t *offsets2,
-				     int offset2_cnt);
+				     size_t offset2_cnt);
 
-static int H5VL_iod_get_selected_blocks_count (int *selected_indices,
-					      int num_entries,
-					      request_list_t *list);
+static size_t H5VL_iod_get_selected_mblocks_count (int *selected_indices,
+						   int num_entries,
+						   request_list_t *list);
+
+static size_t H5VL_iod_get_selected_fblocks_count (int *selected_indices,
+						   int num_entries,
+						   request_list_t *list);
+
+static int H5VL_iod_sort_block_container (block_container_t *io_array,
+					  size_t num_entries,
+					  int *sorted);
 
 /*---------------------------------------------------------------------*/
 
@@ -109,6 +112,7 @@ int H5VL_iod_extract_dims_info (hid_t dataspace,
 
  done:
   FUNC_LEAVE_NOAPI(ret_value);
+
 } /*end H5VL_iod_extract_dims_info*/
 
 /*-------------------------------------------------------------------------
@@ -126,9 +130,9 @@ int H5VL_iod_extract_dims_info (hid_t dataspace,
  *-------------------------------------------------------------------------
  */
 
-int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
-				  request_list_t **list, int *numentries,
-				  int request_type)
+int H5VL_iod_create_request_list (compactor *queue, request_list_t **list, 
+				  int *numentries,   dataset_container_t **u_datasets,
+				  int *numdatasets, int request_type)
 {
 
   compactor_entry *t_entry = NULL;
@@ -139,18 +143,20 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
   hg_bulk_request_t bulk_request;
   hg_bulk_block_t bulk_block_handle;
   H5S_sel_type selection_type;
-  const H5S_t *space = NULL;
   request_list_t *newlist = NULL;
-  hid_t space_id, src_id, dst_id;
+  dataset_container_t  *unique_datasets = NULL;
+  hid_t space_id, src_id, dst_id, current_dset;
   hsize_t nelmts, *offsets=NULL; 
-  block_container_t *local_cont_ptr=NULL;
+  block_container_t *local_fcont_ptr=NULL;
+  block_container_t *local_mcont_ptr=NULL;
   na_addr_t source;
   void *buf = NULL;
   char *current_pos;
   size_t size, buf_size, src_size, dst_size;
-  size_t *len, num_entries, npoints, chk_size;
-  int ret_value = HG_SUCCESS,num_requests = 0;
-  int i = 0, j = 0, request_id = 0;
+  size_t *len, num_entries, chk_size;
+  int ret_value = HG_SUCCESS,num_requests = 0, num_datasets = 0;
+  int j = 0, request_id = 0, i, current_dset_id = 0;
+  size_t ii;
 
 
   FUNC_ENTER_NOAPI(NULL)
@@ -166,7 +172,21 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
   if ( NULL == newlist){
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for request list")
   }
-      
+
+  unique_datasets = (dataset_container_t *) malloc ( num_requests * 
+						     sizeof(dataset_container_t));
+  if ( NULL == unique_datasets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for dataset list")
+  }
+    
+  for (j = 0; j < num_requests; j++){
+    unique_datasets[j].num_requests = 0;
+    unique_datasets[j].requests = (int *) malloc (num_requests * sizeof(int));
+    if (NULL == unique_datasets[j].requests)
+      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for dataset-req list")
+    
+  }
+  
   /*We have to run through the queue and try to extract all request_type 
    requests and populate the request list*/
   for ( j = 0; j < num_requests; j++)
@@ -188,6 +208,7 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
       continue;
     }
     else{
+
       /*Setting up values from the input structure*/
       op_data = (op_data_t *)t_entry->input_structure;
       input = (dset_io_in_t *)op_data->input;
@@ -196,6 +217,7 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
       space_id = input->space_id;
       src_id = input->mem_type_id;
       dst_id = input->dset_type_id;
+      
       bulk_handle = input->bulk_handle;
       
       size = HG_Bulk_handle_get_size(bulk_handle);
@@ -203,6 +225,32 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
       src_size = H5Tget_size(src_id); /*element size of memorytype */
       dst_size = H5Tget_size(dst_id); /*element size of filetype*/
       
+      
+      if (request_id == 0){
+	unique_datasets[num_datasets].dataset = iod_id;
+	unique_datasets[num_datasets].requests[num_requests] = request_id;
+	unique_datasets[num_datasets].num_requests++;
+	current_dset = iod_id;
+        current_dset_id = num_datasets;  
+        num_datasets++;
+      } 
+      else{
+       if (current_dset == (hid_t)iod_id){
+	  unique_datasets[current_dset_id].requests[num_requests] = request_id;
+	  unique_datasets[current_dset_id].num_requests++;
+	}
+	else{
+	  for (i = 0; i < num_datasets; i++){
+	    if ((hid_t)iod_id == unique_datasets[i].dataset){
+		 unique_datasets[i].requests[num_requests] = request_id;
+		 unique_datasets[num_datasets - 1].num_requests++;
+		 current_dset = iod_id;
+		 current_dset_id = num_datasets;
+	     }
+	   }           
+	 }
+      }    
+
       selection_type = H5Sget_select_type(space_id);
       
       if (selection_type == H5S_SEL_NONE){
@@ -241,41 +289,46 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
 	/***********************************************************************************/
 	/* extract offsets and lengths for this dataspace selection*/
 
-	if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
-	  HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
+	ret_value = H5Sget_offsets(space_id, dst_size, &offsets, &len, &num_entries);
 
-	if(H5S_SELECT_VALID(space) != TRUE)
-	  HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent")
-
-        npoints = H5S_GET_SELECT_NPOINTS(space);    
-	ret_value = H5S_get_offsets(space, dst_size, npoints,
-				    &offsets, &len, &num_entries);
-		
-
-      	newlist[request_id].blocks = (block_container_t *) malloc 
+      	newlist[request_id].fblocks = (block_container_t *) malloc 
 	  (num_entries * sizeof(block_container_t));
-	if (NULL == newlist[request_id].blocks){
+	if (NULL == newlist[request_id].fblocks){
 	  HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
 	}
-	
-	newlist[request_id].numblocks  = num_entries;
+
+      	newlist[request_id].mblocks = (block_container_t *) malloc 
+	  (num_entries * sizeof(block_container_t));
+	if (NULL == newlist[request_id].mblocks){
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+	}
+
+	newlist[request_id].request_id = request_id;
+	newlist[request_id].merged = 0;
+	newlist[request_id].num_fblocks = num_entries;
+	newlist[request_id].num_mblocks = num_entries; 
 	newlist[request_id].elementsize = dst_size;
-	newlist[request_id].dataset_id = dataset_id;
+	newlist[request_id].dataset_id = iod_id;
 	newlist[request_id].selection_id = space_id;
-	newlist[request_id].mem_buffer = (char *)buf;
+	/*Incase its not merged, to call the I/O operation 
+          directly with selection and memory descriptor*/
+	newlist[request_id].mem_buffer = (char *)buf; 
 	newlist[request_id].mem_length = buf_size;
-	local_cont_ptr = newlist[request_id].blocks;
+
+	local_fcont_ptr = newlist[request_id].fblocks;
+	local_mcont_ptr = newlist[request_id].mblocks;
+
 	current_pos = (char *)buf;
 	chk_size = 0;
 	
-	for ( i = 0; i < num_entries; i++){
-	  local_cont_ptr[i].offset = offsets[i];
-	  local_cont_ptr[i].len = len[i];
-	  local_cont_ptr[i].mem_offset = (hsize_t)current_pos;
-	  local_cont_ptr[i].mem_len = len[i];
-	  if (!(buf_size < (chk_size + len[i]))){
-	    current_pos += len[i];
-	    chk_size = chk_size + len[i];
+	for ( ii = 0; ii < num_entries; ii++){
+	  local_fcont_ptr[ii].offset = offsets[ii];
+	  local_fcont_ptr[ii].len = len[ii];
+	  local_mcont_ptr[ii].offset = (uintptr_t)current_pos;
+	  local_mcont_ptr[ii].len = len[ii];
+	  if (!(buf_size < (chk_size + len[ii]))){
+	    current_pos += len[ii];
+	    chk_size = chk_size + len[ii];
 	  }
 	  else{
 	    HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,"Buffer does not match the selection offsets")
@@ -284,7 +337,7 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
       } /*end else for appropriate selection*/
       request_id++;
     } /*end else for matching request type*/
-   
+  
     if (NULL != offsets){
       free(offsets);
       offsets = NULL;
@@ -301,7 +354,8 @@ int H5VL_iod_create_request_list (hid_t dataset_id, compactor *queue,
   
   *list = newlist;
   *numentries = request_id;
-
+  *u_datasets = unique_datasets;
+  *numdatasets = num_datasets;     
  done:
   FUNC_LEAVE_NOAPI(ret_value);
 } /* end  H5VL_iod_create_requests_list */
@@ -359,12 +413,12 @@ int H5VL_iod_select_overlap (hid_t dataspace_1,
   ret_value = (int) overlap;
   if ( 0 == (int) overlap){
     /*There is no overlap, lets merge the selections*/
-    *res_dataspace = H5VL_iod_merge_selections (dataspace_1, dataspace_2);
+    *res_dataspace =  H5Scombine_select(dataspace_1, H5S_SELECT_OR, dataspace_2);      
   }
   else{
     /*The requests overlap*/
     np = H5S_GET_SELECT_NPOINTS(space);
-    if (H5S_GET_SELECT_NPOINTS(space_1) > np)
+    if (np < (hsize_t)H5S_GET_SELECT_NPOINTS(space_1) )
       *res_dataspace = dataspace_1;
     else
       *res_dataspace = dataspace_2;
@@ -375,44 +429,22 @@ int H5VL_iod_select_overlap (hid_t dataspace_1,
 } /* end H5VL_iod_select_overlap */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_merge_selections
- *
- * Purpose:	Function to merge selections of the same dataset.
- *              
- * Return:	SUCCESS      : The ID for the new merged dataspace object.
- *		FAILURE      : Negative
- *
- * Programmer:  Vishwanth Venkatesan
- *              June, 2013
- *
- *-------------------------------------------------------------------------
- */
 
-hid_t H5VL_iod_merge_selections (hid_t dataspace1, hid_t dataspace2){
-
-  hid_t ret_value;
-
-  FUNC_ENTER_NOAPI(NULL)
-
-  ret_value =  H5Scombine_select(dataspace1, H5S_SELECT_OR, dataspace2);      
- 
- done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}/* end H5VL_iod_merge_selection */
-
-
-int H5VL_iod_compact_requests (request_list_t *list, int num_requests,
-			       request_list_t **revised, int *revised_requests,
-			       int **selected_requests){
-
-
-  request_list_t *lrevised = NULL;
+int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
+{
+  
+  request_list_t *list = *req_list;
   hid_t res_dataspace, current_space;
-  int ret_value = HG_SUCCESS, current_first = 0;
+  int ret_value = HG_SUCCESS;
   int *lselected_req = NULL;
   int num_selected = 0;
-  int i, j;
+  request_list_t *merged_request = NULL;  
+  hsize_t *goffsets = NULL, *moffsets = NULL;
+  block_container_t *sf_block = NULL, *sm_block = NULL;
+  size_t *glens = NULL, blck_cnt = 0, *mlen = NULL;
+  size_t m_elmnt_size = 0, g_entries = 0, j, m_entries = 0;
+  size_t fblks = 0, mblks = 0;
+  int i, *sorted = NULL;
   
   FUNC_ENTER_NOAPI(NULL)
 
@@ -422,19 +454,28 @@ int H5VL_iod_compact_requests (request_list_t *list, int num_requests,
   }
 
   current_space = list[0].selection_id;
+
   if ( 0 == H5VL_iod_select_overlap ( current_space, 
 				      list[1].selection_id,
 				      &res_dataspace)){
     lselected_req[0] = 0;
     lselected_req[1] = 1;
+    list[0].merged = 1;
+    list[1].merged = 1;
+    m_elmnt_size = list[0].elementsize;
     num_selected += 2;
   }
   else{
     if (current_space == res_dataspace){
       lselected_req[0] = 0;
+      list[0].merged = 1;
+      m_elmnt_size = list[0].elementsize;
     }
-    else
+    else{
       lselected_req[0] = 1;
+      list[1].merged = 1;
+      m_elmnt_size = list[1].elementsize;
+    }
     num_selected += 1;
   }
   
@@ -458,47 +499,179 @@ int H5VL_iod_compact_requests (request_list_t *list, int num_requests,
     current_space = res_dataspace;
   }
 
-  /*finally construct the revised request_list */
-  lrevised = (request_list_t *) malloc ( num_selected * sizeof(request_list_t));
-  if (NULL == lrevised){
-    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL, "Cannot allocate revised request list")
+
+
+  /* Now we have merged the requests, we have a merged selection */
+  /* We need  to create a request list entry for the merged selection */
+  merged_request = &list[num_requests];
+  merged_request->request_id = list[num_requests - 1].request_id + 1;
+  merged_request->merged = 2;
+
+  /*
+    Add all the selections that were added/and manually merge them
+    Make sure the memory_descriptor is updated accoringly for the 
+    merging */
+
+  fblks = H5VL_iod_get_selected_fblocks_count(lselected_req,
+					      num_selected,
+					      list);
+  sf_block = (block_container_t *) malloc ( fblks * sizeof(block_container_t));
+  if (NULL == sf_block)
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for sf_block")
+
+  mblks = H5VL_iod_get_selected_mblocks_count(lselected_req,
+					      num_selected,
+					      list);
+    
+  sm_block = (block_container_t *) malloc (mblks * sizeof(block_container_t));
+  if (NULL == sm_block)
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for sm_block")
+
+  assert (fblks == mblks);    
+
+  blck_cnt = 0;
+  for ( i = 0; i < num_requests; i++){
+    if (HG_SUCCESS == 
+	H5VL_iod_request_exist(i, lselected_req, num_selected)){
+
+        /* At this point the mblocks and fblocks will be different only
+	 for the merged selection, and we will have to handle that 
+	scenario if we for some reason do two-passes for merging 
+	So skipping here the case for num_fblocks != num_mblocks*/
+
+	for (j = blck_cnt; j < list[i].num_fblocks; j++){
+	  sf_block[j].offset = list[i].fblocks[j - blck_cnt].offset;
+	  sf_block[j].len = list[i].fblocks[j - blck_cnt].len;
+	  sm_block[j].offset = list[i].mblocks[j - blck_cnt].offset;
+	  sm_block[j].len = list[i].mblocks[j - blck_cnt].len;
+	}
+	blck_cnt = j;
+    }
+  }
+  /*
+    Sort the file-offsets and check for contiguity.
+    The contiguity check is needed to compare with the merged 
+    offsets from the combine-select function. These should be
+    same. 
+    Once sorted use the sorted indices to get the arrangement of
+    memory offests.
+    The contiguity does not affect the arrangement
+    of memory offsets as the file offsets can even shrink to one 
+    entry, but the order of memory offsets will remain constant
+  */
+
+  assert(blck_cnt == fblks);  
+
+  sorted = (int *) malloc (blck_cnt * sizeof(int));
+  if ( NULL == sorted ){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for sorted array")
   }
 
-  for ( i = 0; i < num_selected; i++){
-    
+  H5VL_iod_sort_block_container (sf_block,
+				 blck_cnt,
+				 sorted);
+  
+  moffsets = (hsize_t *) malloc (blck_cnt * sizeof(hsize_t));
+  if ( NULL == moffsets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for moffsets array")
+  }
+  mlen = (size_t *) malloc (blck_cnt * sizeof(size_t));
+  if ( NULL == moffsets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for mlen array")
   }
   
+  moffsets[0] = sf_block[0].offset;
+  mlen[0] = sf_block[0].len;
+  for ( j = 1; j < blck_cnt; j++){
+    if (moffsets[m_entries] + mlen[m_entries] ==
+	sf_block[j].offset){
+      mlen[m_entries] += sf_block[j].len;
+    }
+    else{
+      m_entries++;
+      moffsets[m_entries] = sf_block[j].offset;
+      mlen[m_entries] = sf_block[j].len;
+    }
+  }
+
+  /* Make merged offset and len arrays for the merged selection */
+  ret_value = H5Sget_offsets(current_space, m_elmnt_size,
+			     &goffsets, &glens, &g_entries);
+  merged_request->fblocks = (block_container_t *) malloc (m_entries * 
+							  sizeof(block_container_t));
+  if (NULL == merged_request->fblocks)
+    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+      
+  for ( j = 0; j<m_entries; j++){
+    merged_request->fblocks[j].offset = goffsets[j];
+    merged_request->fblocks[j].len = glens[j];
+  }
+
+  /*
+    Then compare that with automatically generated offsets
+    (the offsets have to match) */
+  ret_value = H5VL_iod_compare_offsets (goffsets,g_entries,moffsets,m_entries);
+  assert (ret_value == HG_SUCCESS);
+
+  /*At this point all consistency checks have been completed.
+    We can comfortable create the memory descriptor for the 
+    merged selection*/
+  merged_request->mblocks = (block_container_t *) malloc (mblks * 
+							  sizeof(block_container_t));
+  if (NULL == merged_request->mblocks)
+    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+      
+  for ( j = 0; j< mblks; j++){ 
+    merged_request->mblocks[j].offset = sm_block[j].offset;
+    merged_request->mblocks[j].len = sm_block[j].len;
+  }
+
+  /* We have the merged selection with its memory description.
+     append this merged_request towards the end. Proactively
+     more memory created than required for requests during 
+     generation of dataset-specific requests.
+     We can use the merged_flag to skip requests or identify merged
+     request*/  
+
+  
+ done:
+  FUNC_LEAVE_NOAPI(ret_value);  
+
 }/*end H5VL_iod_compact_requests*/
 
-int H5VL_iod_request_exist (int current_index,
-			    int *selected_indices,
-			    int num_entries){
-
+static int H5VL_iod_request_exist (int current_index,
+				   int *selected_indices,
+				   int num_entries)
+{
   int i;
+  int ret_value = -1;
+
   for (i = 0; i < num_entries; i++){
     if ( selected_indices[i] == current_index)
-      return 1;
+      ret_value = HG_SUCCESS;
   }
-  return 0;
+
+  return  ret_value;
 }/* end H5VL_iod_request_exist */
 
 
 
-int H5VL_iod_compare_offsets (hsize_t *offsets1,
-			      int offset1_cnt,
-			      hsize_t *offsets2,
-			      int offset2_cnt){
+static int H5VL_iod_compare_offsets (hsize_t *offsets1,
+				     size_t offset1_cnt,
+				     hsize_t *offsets2,
+				     size_t offset2_cnt){
   
-  int i, ret_value;
+  int ret_value = HG_SUCCESS;
+  size_t i;
   
   if (offset1_cnt != offset2_cnt){
-    ret_value =  0;
+    ret_value =  -1;
     goto done;
   }
 
   for (i = 0; i < offset1_cnt; i++){
     if (offsets1[i] != offsets2[i]){
-      ret_value = 0;
+      ret_value = -1;
       goto done;
     }
 
@@ -509,36 +682,151 @@ int H5VL_iod_compare_offsets (hsize_t *offsets1,
 
 }/*end H5VL_iod_compare_offsets */
 
-int H5VL_iod_copy_blocks_info (block_container_t *blocks,
-			       size_t numblocks,
-			       hsize_t *offsets,
-			       size_t *lens,
-			       size_t current_index){
 
-  int i;
-  if (offsets == NULL | lens == NULL){
-    /*Add error functions*/
-  }
+static size_t H5VL_iod_get_selected_mblocks_count (int *selected_indices,
+						   int num_entries,
+						   request_list_t *list)
+{
 
-  for (i = current_index; i < numblocks; i++){
-    offsets[i] = blocks[i].offset;
-    lens[i] = blocks[i].len;
-  }
-  
-}/* end H5VL_iod_copy_blocks_info */
-
-
-size_t H5VL_iod_get_selected_blocks_count (int *selected_indices,
-					   int num_entries,
-					   request_list_t *list){
-  
   int i;
   size_t ret_value = 0;
   for ( i = 0; i < num_entries; i++){
-    ret_value += list[selected_indices[i]].numblocks;
+    ret_value += list[selected_indices[i]].num_mblocks;
   }
+  
   return ret_value;
-}/* end H5VL_iod_get_selected_blocks_count*/
+}/* end H5VL_iod_get_selected_mblocks_count*/
+
+
+static size_t H5VL_iod_get_selected_fblocks_count (int *selected_indices,
+						   int num_entries,
+						   request_list_t *list)
+{
+   
+  int i;
+  size_t ret_value = 0;
+  for ( i = 0; i < num_entries; i++){
+    ret_value += list[selected_indices[i]].num_fblocks;
+  }
+   return ret_value;
+}/* end H5VL_iod_get_selected_fblocks_count*/
+
+
+
+
+static int H5VL_iod_sort_block_container (block_container_t *io_array,
+					  size_t num_entries,
+					  int *sorted)
+{
+  
+    int i = 0, j = 0;
+    size_t lm;
+    int left = 0;
+    int right = 0;
+    int largest = 0;
+    int heap_size = num_entries - 1;
+    int temp = 0;
+    unsigned char done = 0;
+    int* temp_arr = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI(NULL)
+    
+    if (NULL == sorted || NULL == io_array || num_entries == 0)
+      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HG_FAIL,"Sorted-array/io_array/entries is NULL");
+
+    temp_arr = (int*)malloc(num_entries*sizeof(int));
+    if (NULL == temp_arr) {
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for temp_arr")
+    }
+
+    temp_arr[0] = 0;
+    for (lm = 1; lm < num_entries; ++lm) {
+        temp_arr[lm] = lm;
+    }
+
+    /* num_entries can be a large no. so NO RECURSION */
+    for (i = num_entries/2-1 ; i>=0 ; i--) {
+        done = 0;
+        j = i;
+        largest = j;
+
+        while (!done) {
+            left = j*2+1;
+            right = j*2+2;
+            if ((left <= heap_size) && 
+                (io_array[temp_arr[left]].offset > io_array[temp_arr[j]].offset)) {
+                largest = left;
+            }
+            else {
+                largest = j;
+            }
+            if ((right <= heap_size) && 
+                (io_array[temp_arr[right]].offset > 
+                 io_array[temp_arr[largest]].offset)) {
+                largest = right;
+            }
+            if (largest != j) {
+                temp = temp_arr[largest];
+                temp_arr[largest] = temp_arr[j];
+                temp_arr[j] = temp;
+                j = largest;
+            }
+            else {
+                done = 1;
+            }
+        }
+    }
+
+    for (i = num_entries-1; i >=1; --i) {
+        temp = temp_arr[0];
+        temp_arr[0] = temp_arr[i];
+        temp_arr[i] = temp;            
+        heap_size--;            
+        done = 0;
+        j = 0;
+        largest = j;
+
+        while (!done) {
+            left =  j*2+1;
+            right = j*2+2;
+            
+            if ((left <= heap_size) && 
+                (io_array[temp_arr[left]].offset > 
+                 io_array[temp_arr[j]].offset)) {
+                largest = left;
+            }
+            else {
+                largest = j;
+            }
+            if ((right <= heap_size) && 
+                (io_array[temp_arr[right]].offset > 
+                 io_array[temp_arr[largest]].offset)) {
+                largest = right;
+            }
+            if (largest != j) {
+                temp = temp_arr[largest];
+                temp_arr[largest] = temp_arr[j];
+                temp_arr[j] = temp;
+                j = largest;
+            }
+            else {
+                done = 1;
+            }
+        }
+        sorted[i] = temp_arr[i];
+    }
+    sorted[0] = temp_arr[0];
+
+    if (NULL != temp_arr) {
+        free(temp_arr);
+        temp_arr = NULL;
+    }
+
+ done:
+  FUNC_LEAVE_NOAPI(ret_value);
+}
+
 
 
 
