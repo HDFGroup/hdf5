@@ -527,16 +527,18 @@ h5tools_detect_vlen_str(hid_t tid)
         }
     }
     else if(tclass == H5T_COMPOUND) {
-        int i = 0;
-        int n = H5Tget_nmembers(tid);
+        unsigned nmembs;
+        int snmembs = H5Tget_nmembers(tid);
+        unsigned u;
 
-        if(n < 0) {
-            n = ret;
+        if(snmembs < 0) {
+            ret = FAIL;
             goto done;
         }
+        nmembs = (unsigned)snmembs;
 
-        for(i = 0; i < n; i++) {
-            hid_t mtid = H5Tget_member_type(tid, i);
+        for(u = 0; u < nmembs; u++) {
+            hid_t mtid = H5Tget_member_type(tid, u);
 
             ret = h5tools_detect_vlen_str(mtid);
             if((ret == TRUE) || (ret < 0)) {
@@ -1150,6 +1152,8 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         s = *(char**) mem;
                         if (s != NULL)
                             size = HDstrlen(s);
+                        else
+                            H5E_THROW(FAIL, H5E_tools_min_id_g, "NULL string");
                     }
                     else {
                         s = (char *) mem;

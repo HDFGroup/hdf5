@@ -117,8 +117,8 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     const char  *s;
     va_list  ap;
 
-    assert (stream);
-    assert (fmt);
+    HDassert(stream);
+    HDassert(fmt);
 
     va_start (ap, fmt);
     while (*fmt) {

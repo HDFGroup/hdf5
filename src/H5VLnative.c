@@ -2125,7 +2125,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
+H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t UNUSED dxpl_id, 
+                          void UNUSED **req, va_list arguments)
 {
     H5F_t        *f = NULL;           /* File */
     herr_t       ret_value = SUCCEED;    /* Return value */
@@ -2136,14 +2137,18 @@ H5VL_native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t U
         /* H5Fget_filesize */
         case H5VL_FILE_GET_SIZE:
             {
-                haddr_t    eof;                     /* End of file address */
+                haddr_t     eof;                    /* End of file address */
+                haddr_t     base_addr;              /* Base address for the file */
                 hsize_t    *ret = va_arg (arguments, hsize_t *);
 
                 f = (H5F_t *)obj;
                 /* Go get the actual file size */
-                if(HADDR_UNDEF == (eof = H5FDget_eof(f->shared->lf)))
+                if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
-                *ret = (hsize_t)eof;
+                base_addr = H5FD_get_base_addr(f->shared->lf);
+
+                if(ret)
+                    *ret = (hsize_t)(eof + base_addr);     /* Convert relative base address for file to absolute address */
                 break;
             }
         /* H5Fget_file_image */

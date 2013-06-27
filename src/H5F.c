@@ -916,15 +916,13 @@ done:
  *              david.pitt@bigpond.com
  *              Apr 27, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
     H5VL_t     *vol_plugin;
-    void       *obj;
+    void       *file;
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -935,10 +933,11 @@ H5Fget_filesize(hid_t file_id, hsize_t *size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
     /* get the file object */
-    if(NULL == (obj = (void *)H5I_object(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    if(NULL == (file = (void *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
-    if((ret_value = H5VL_file_optional(obj, vol_plugin, H5VL_FILE_GET_SIZE, H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, size)) < 0)
+    if((ret_value = H5VL_file_optional(file, vol_plugin, H5VL_FILE_GET_SIZE, 
+				       H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, size)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get file size")
 
 done:

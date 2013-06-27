@@ -135,7 +135,7 @@ H5G__component(const char *name, size_t *size_p)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    assert(name);
+    HDassert(name);
 
     while ('/' == *name)
         name++;
@@ -236,13 +236,13 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 
     /* Get component of each name */
     fullpath=H5RS_get_str(fullpath_r);
-    assert(fullpath);
+    HDassert(fullpath);
     fullpath=H5G__component(fullpath,&nchars1);
-    assert(fullpath);
+    HDassert(fullpath);
     prefix=H5RS_get_str(prefix_r);
-    assert(prefix);
+    HDassert(prefix);
     prefix=H5G__component(prefix,&nchars2);
-    assert(prefix);
+    HDassert(prefix);
 
     /* Check if we have a real string for each component */
     while(*fullpath && *prefix) {
@@ -256,9 +256,9 @@ H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r)
 
                 /* Get next component of each name */
                 fullpath=H5G__component(fullpath,&nchars1);
-                assert(fullpath);
+                HDassert(fullpath);
                 prefix=H5G__component(prefix,&nchars2);
-                assert(prefix);
+                HDassert(prefix);
             } /* end if */
             else
                 HGOTO_DONE(FALSE)

@@ -78,7 +78,7 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
     Many other common questions and hints are located online and being updated
     in the HDF5 FAQ.  For Windows-specific questions, please see:
     
-        http://www.hdfgroup.org/windows/faq.html
+        http://www.hdfgroup.org/HDF5/faq/windows.html
         
     For all other general questions, you can look in the general FAQ:
     

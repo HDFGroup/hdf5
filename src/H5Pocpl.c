@@ -1453,7 +1453,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
 
     /* Filter configuration (assume filter ID has already been checked) */
     if(filter_config)
-        H5Zget_filter_info(filter->id, filter_config);
+        H5Z_get_filter_info(filter->id, filter_config);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_get_filter() */

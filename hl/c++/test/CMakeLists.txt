@@ -17,6 +17,7 @@ IF (BUILD_TESTING)
   INCLUDE_DIRECTORIES (${HDF5_CPP_SRC_DIR}/src)
 
   ADD_EXECUTABLE (hl_ptableTest ${HDF5_HL_CPP_TEST_SOURCE_DIR}/ptableTest.cpp)
+  TARGET_C_PROPERTIES (hl_ptableTest " " " ")
   TARGET_NAMING (hl_ptableTest ${LIB_TYPE})
   TARGET_LINK_LIBRARIES (
       hl_ptableTest
