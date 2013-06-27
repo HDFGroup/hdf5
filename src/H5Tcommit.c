@@ -928,7 +928,7 @@ H5T_update_shared(H5T_t *dt)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tget_vol_named_type(hid_t type_id, void *dt_obj)
+H5Tget_vol_named_type(hid_t type_id, void **dt_obj)
 {
     H5T_t *type;                /* datatype for operation */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -939,7 +939,7 @@ H5Tget_vol_named_type(hid_t type_id, void *dt_obj)
     if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-    dt_obj = H5T_get_named_type(type);
+    *dt_obj = H5T_get_named_type(type);
 
 done:
     FUNC_LEAVE_API(ret_value)
