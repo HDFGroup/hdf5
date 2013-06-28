@@ -22,6 +22,17 @@
 
 #ifdef H5_HAVE_EFF
 
+/* -----------------------------------------------------------------
+ * Programmer:  Vishwanath Venkatesan <vish@hdfgroup.gov>
+ *              June, 2013
+ *
+ * Purpose:	Request Compactor server-side routine headers
+
+ *------------------------------------------------------------------*/
+
+
+
+
 #include "H5VLiod_compactor_queue.h"
 
 typedef struct {

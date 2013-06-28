@@ -40,7 +40,6 @@
 
 #ifdef H5_HAVE_EFF
 
-
 /* -----------------------------------------------------------------
  * Programmer:  Vishwanath Venkatesan <vish@hdfgroup.gov>
  *              June, 2013
@@ -364,6 +363,8 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
  * Function:	H5VL_iod_select_overlap
  *
  * Purpose:	Function to check whether two selections overlap
+ *              If the selections overlap, it returns the largest selection
+ *              Else it returns the merged selection
  *
  * Return:	SUCCESS      : 0 if no overlap / > 0 therwise
  *    		FAILURE      : Negative
@@ -429,6 +430,21 @@ int H5VL_iod_select_overlap (hid_t dataspace_1,
 } /* end H5VL_iod_select_overlap */
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_compact_request
+ *
+ * Purpose:	Looks at the request list and tries to compact every request
+ *              with every other request. This functions assumes that all
+ *              requests belong to the same dataset.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
 int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 {
@@ -639,6 +655,22 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 
 }/*end H5VL_iod_compact_requests*/
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_request_exist
+ *
+ * Purpose:	Checks whether the current request was selected for merging
+ *
+ * Return:	Success:	HG_SUCCESS
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
 static int H5VL_iod_request_exist (int current_index,
 				   int *selected_indices,
 				   int num_entries)
@@ -655,6 +687,22 @@ static int H5VL_iod_request_exist (int current_index,
 }/* end H5VL_iod_request_exist */
 
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_compare_offsets
+ *
+ * Purpose:	Compares offset arrays, To be used for sanity check after
+ *              compaction
+ *
+ * Return:	Success:	HG_SUCCESS
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
 static int H5VL_iod_compare_offsets (hsize_t *offsets1,
 				     size_t offset1_cnt,
@@ -683,6 +731,23 @@ static int H5VL_iod_compare_offsets (hsize_t *offsets1,
 }/*end H5VL_iod_compare_offsets */
 
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_get_selected_mblocks_count
+ *
+ * Purpose:	Gets the number of memory off-len pair in all requests
+ *              Selected
+ *
+ * Return:	Success:	Positive
+ *		Failure:	0
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static size_t H5VL_iod_get_selected_mblocks_count (int *selected_indices,
 						   int num_entries,
 						   request_list_t *list)
@@ -698,6 +763,21 @@ static size_t H5VL_iod_get_selected_mblocks_count (int *selected_indices,
 }/* end H5VL_iod_get_selected_mblocks_count*/
 
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_get_selected_fblocks_count
+ *
+ * Purpose:	Gets the number of memory off-len pair in all requests
+ *              Selected
+ *
+ * Return:	Success:	Positive
+ *		Failure:	0
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static size_t H5VL_iod_get_selected_fblocks_count (int *selected_indices,
 						   int num_entries,
 						   request_list_t *list)
@@ -710,6 +790,23 @@ static size_t H5VL_iod_get_selected_fblocks_count (int *selected_indices,
   }
    return ret_value;
 }/* end H5VL_iod_get_selected_fblocks_count*/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_sort_block_container
+ *
+ * Purpose:	Sort a given set of off-len pair in-place by providing a
+ *              sorted array
+ *
+ * Return:	Success:	HG_SUCCESS
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
 
 
@@ -826,9 +923,6 @@ static int H5VL_iod_sort_block_container (block_container_t *io_array,
  done:
   FUNC_LEAVE_NOAPI(ret_value);
 }
-
-
-
 
 
 #endif /* H5_HAVE_EFF*/
