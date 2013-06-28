@@ -77,7 +77,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     if(0 == ret || EEXISTS == ret) {
         /* root group has been created, open it */
         if (iod_obj_open_write(coh, input->root_id, NULL, &root_oh, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open root group");
     }
     else {
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create root group");
@@ -183,6 +183,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start file open %s %d %d\n", input->name, input->flags, input->fapl_id);
 #endif
 
+    /* open the container */
     if(iod_container_open(input->name, NULL /*hints*/, mode, &coh, NULL /*event*/))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open file");
 
