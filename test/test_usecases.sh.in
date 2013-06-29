@@ -72,7 +72,7 @@ TOOLTEST() {
     # Run test.
     TESTING $program $@
     (
-      $RUNSERIAL $program "$@"
+      $RUNSERIAL ./$program "$@"
     ) >$actual 2>$actual_err
     exit_code=$?
 
