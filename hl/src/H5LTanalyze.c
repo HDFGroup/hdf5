@@ -1400,54 +1400,58 @@ case 57:
 YY_RULE_SETUP
 #line 159 "H5LTanalyze.l"
 {
+#ifdef H5_HAVE_WIN32_API
+                    H5LTyylval.sval = _strdup(yytext);
+#else /* H5_HAVE_WIN32_API */
                     H5LTyylval.sval = strdup(yytext);
+#endif  /* H5_HAVE_WIN32_API */
                     BEGIN INITIAL;
                     return STRING;
                  }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 165 "H5LTanalyze.l"
+#line 169 "H5LTanalyze.l"
 {return token('{');}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 166 "H5LTanalyze.l"
+#line 170 "H5LTanalyze.l"
 {return token('}');}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 167 "H5LTanalyze.l"
+#line 171 "H5LTanalyze.l"
 {return token('[');}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 168 "H5LTanalyze.l"
+#line 172 "H5LTanalyze.l"
 {return token(']');}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 169 "H5LTanalyze.l"
+#line 173 "H5LTanalyze.l"
 {return token(':');}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 170 "H5LTanalyze.l"
+#line 174 "H5LTanalyze.l"
 {return token(';');}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 171 "H5LTanalyze.l"
+#line 175 "H5LTanalyze.l"
 ;
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 172 "H5LTanalyze.l"
+#line 176 "H5LTanalyze.l"
 { return 0; }
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 174 "H5LTanalyze.l"
+#line 178 "H5LTanalyze.l"
 ECHO;
 	YY_BREAK
 #line 1432 "H5LTanalyze.c"
@@ -2032,7 +2036,11 @@ FILE *file;
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
-	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+#ifdef H5_HAVE_WIN32_API
+    b->yy_is_interactive = file ? (isatty( _fileno(file) ) > 0) : 0;
+#else /* H5_HAVE_WIN32_API */
+    b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+#endif  /* H5_HAVE_WIN32_API */
 #endif
 #endif
 	}
@@ -2327,7 +2335,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 174 "H5LTanalyze.l"
+#line 178 "H5LTanalyze.l"
 
 int my_yyinput(char *buf, int max_size)
 {
