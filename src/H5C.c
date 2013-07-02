@@ -75,6 +75,9 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
+#ifdef H5_HAVE_PARALLEL
+#include "H5ACprivate.h"        /* Metadata cache                       */
+#endif /* H5_HAVE_PARALLEL */
 #include "H5Cpkg.h"		/* Cache				*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -8277,37 +8280,27 @@ H5C_flush_single_entry(H5F_t *	   	   f,
 
 #ifdef H5_HAVE_PARALLEL
 #ifndef NDEBUG
-
         /* If MPI based VFD is used, do special parallel I/O sanity checks.
          * Note that we only do these sanity checks when the clear_only flag
          * is not set, and the entry to be flushed is dirty.  Don't bother
          * otherwise as no file I/O can result.
          */
-        if ( ( ! clear_only ) &&
-             ( entry_ptr->is_dirty ) &&
-             (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI) ) ) {
-
-            H5P_genplist_t *dxpl;           /* Dataset transfer property list */
-            H5FD_mpio_xfer_t xfer_mode;     /* I/O xfer mode property value */
+        if(!clear_only && entry_ptr->is_dirty &&
+                H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+            H5P_genplist_t *dxpl;       /* Dataset transfer property list */
+            unsigned coll_meta;         /* Collective metadata write flag */
 
             /* Get the dataset transfer property list */
-            if ( NULL == (dxpl = H5I_object(primary_dxpl_id)) ) {
+            if(NULL == (dxpl = H5I_object(primary_dxpl_id)))
+                HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                            "not a dataset transfer property list")
-            }
+            /* Get the collective metadata write property */
+            if(H5P_get(dxpl, H5AC_COLLECTIVE_META_WRITE_NAME, &coll_meta) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve xfer mode")
 
-            /* Get the transfer mode property */
-            if( H5P_get(dxpl, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0 ) {
-
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, \
-                            "can't retrieve xfer mode")
-            }
-
-            /* Sanity check transfer mode */
-            HDassert( xfer_mode == H5FD_MPIO_COLLECTIVE );
-        }
-
+            /* Sanity check collective metadata write flag */
+            HDassert(coll_meta);
+        } /* end if */
 #endif /* NDEBUG */
 #endif /* H5_HAVE_PARALLEL */
 

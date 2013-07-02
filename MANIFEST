@@ -293,6 +293,8 @@
 ./fortran/src/H5FDmpioff.f90
 ./fortran/src/H5Ff.c
 ./fortran/src/H5Fff.f90
+./fortran/src/H5Fff_F90.f90
+./fortran/src/H5Fff_F03.f90
 ./fortran/src/H5Gf.c
 ./fortran/src/H5Gff.f90
 ./fortran/src/H5If.c
@@ -354,6 +356,7 @@
 ./fortran/test/tH5E_F03.f90
 ./fortran/test/tH5E.f90
 ./fortran/test/tH5F.f90
+./fortran/test/tH5F_F03.f90
 ./fortran/test/tH5G.f90
 ./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
@@ -526,19 +529,18 @@
 ./perform/sio_timer.h
 ./perform/zip_perf.c
 
-./release_docs/CMake.txt
+./release_docs/INSTALL_CMake.txt
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_9.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
-./release_docs/INSTALL_MinGW.txt
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_VMS.txt
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/RELEASE.txt
-./release_docs/USING_CMake.txt
-./release_docs/USING_Windows.txt
+./release_docs/USING_HDF5_CMake.txt
+./release_docs/USING_HDF5_VS.txt
 
 ./src/.indent.pro      _DO_NOT_DISTRIBUTE_
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
@@ -846,6 +848,9 @@
 ./src/H5Ppublic.h
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
+./src/H5PL.c
+./src/H5PLprivate.h
+./src/H5PLextern.h
 ./src/H5R.c
 ./src/H5Rdeprec.c
 ./src/H5Rpkg.h
@@ -955,6 +960,9 @@
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
+./test/dynlib1.c
+./test/dynlib2.c
+./test/dynlib3.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
@@ -1027,6 +1035,7 @@
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/objcopy.c
+./test/plugin.c
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
@@ -1049,6 +1058,7 @@
 ./test/testhdf5.c
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
+./test/test_plugin.sh.in
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
@@ -2128,16 +2138,18 @@
 ./tools/h5copy/testfiles/h5copy_misc1.out
 
 # test files for h5mkgrp
-./tools/testfiles/h5mkgrp_help.ls
-./tools/testfiles/h5mkgrp_nested.ls
-./tools/testfiles/h5mkgrp_nested_latest.ls
-./tools/testfiles/h5mkgrp_nested_mult.ls
-./tools/testfiles/h5mkgrp_nested_mult_latest.ls
+./tools/testfiles/h5mkgrp_nested_p.ls
+./tools/testfiles/h5mkgrp_nested_lp.ls
+./tools/testfiles/h5mkgrp_nested_mult_p.ls
+./tools/testfiles/h5mkgrp_nested_mult_lp.ls
 ./tools/testfiles/h5mkgrp_several.ls
-./tools/testfiles/h5mkgrp_several_latest.ls
+./tools/testfiles/h5mkgrp_several_v.ls
+./tools/testfiles/h5mkgrp_several_p.ls
+./tools/testfiles/h5mkgrp_several_l.ls
 ./tools/testfiles/h5mkgrp_single.ls
-./tools/testfiles/h5mkgrp_single_latest.ls
-./tools/testfiles/h5mkgrp_version.ls
+./tools/testfiles/h5mkgrp_single_v.ls
+./tools/testfiles/h5mkgrp_single_p.ls
+./tools/testfiles/h5mkgrp_single_l.ls
 
 
 # high level libraries

@@ -26,7 +26,7 @@
 /*
  * Definitions for the testing structure.
  */
-#define MAXNUMOFTESTS   50
+#define MAXNUMOFTESTS   60
 #define MAXTESTNAME     16
 #define MAXTESTDESC     64
 
@@ -73,7 +73,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
 {
     /* Sanity checking */
     if (Index >= MAXNUMOFTESTS) {
-        printf("Too many tests added, increase MAXNUMOFTEST(%d).\n",
+        printf("Too many tests added, increase MAXNUMOFTESTS(%d).\n",
 		MAXNUMOFTESTS);
         exit(-1);
     }                           /* end if */
@@ -155,8 +155,8 @@ void TestUsage(void)
 
 	print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n",
 	    TestProgName, (TestPrivateUsage ? "<extra options>" : ""));
-	print_func("              [-[e]x[clude] name+] \n");
-	print_func("              [-o[nly] name+] \n");
+	print_func("              [-[e]x[clude] name]+ \n");
+	print_func("              [-o[nly] name]+ \n");
 	print_func("              [-b[egin] name] \n");
 	print_func("              [-s[ummary]]  \n");
 	print_func("              [-c[leanoff]]  \n");

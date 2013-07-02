@@ -811,6 +811,10 @@ HDmemset(f->shared->accum.buf + size, 0, (f->shared->accum.alloc_size - size));
         } /* end else */
     } /* end if */
     else {
+    #ifdef JK_DBG
+    printf ("JKDBG p:%d %s:%d COUNT=0> f->shared:%x\n", getpid(), __FUNCTION__,__LINE__,f->shared);
+    fflush(stdout);
+    #endif
         /* Write the data */
         if(H5FD_write(f->shared->lf, dxpl_id, map_type, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")

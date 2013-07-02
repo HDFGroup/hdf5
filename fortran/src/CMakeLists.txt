@@ -188,6 +188,7 @@ SET (f90_F_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Eff${F_STATUS}.f90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Fff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Lff${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Off${F_STATUS}.f90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff${F_STATUS}.f90
@@ -253,7 +254,7 @@ INSTALL (
         ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
         ${HDF5_F90_BINARY_DIR}/H5fortran_types.f90
     DESTINATION 
-        ${HDF5_INSTALL_INCLUDE_DIR}/fortran 
+        ${HDF5_INSTALL_INCLUDE_DIR}
     COMPONENT 
         fortheaders
 )
@@ -263,7 +264,7 @@ IF (WIN32 AND NOT CYGWIN)
       DIRECTORY
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+          ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
@@ -272,7 +273,7 @@ ELSE (WIN32 AND NOT CYGWIN)
       DIRECTORY
           ${CMAKE_Fortran_MODULE_DIRECTORY}/
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+          ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )

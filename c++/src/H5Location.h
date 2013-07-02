@@ -79,11 +79,15 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// misleading, so getRefObjType is used in the new function instead.
 
 	// Iterate user's function over the attributes at this location.
-	int iterateAttrs( attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL );
+	int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
+
+	// Checks whether the named attribute exists at this location.
+	bool attrExists(const char* name) const;
+	bool attrExists(const H5std_string& name) const;
 
 	// Removes the named attribute from this location.
-	void removeAttr( const char* name ) const;
-	void removeAttr( const H5std_string& name ) const;
+	void removeAttr(const char* name) const;
+	void removeAttr(const H5std_string& name) const;
 
 	// Renames the named attribute to a new name.
 	void renameAttr(const char* oldname, const char* newname) const;

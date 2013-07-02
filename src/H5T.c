@@ -4389,7 +4389,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	H5T_g.apaths = 128;
 	if(NULL == (H5T_g.path[0] = H5FL_CALLOC(H5T_path_t)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for no-op conversion path")
-	HDstrcpy(H5T_g.path[0]->name, "no-op");
+        HDsnprintf(H5T_g.path[0]->name, sizeof(H5T_g.path[0]->name), "no-op");
 	H5T_g.path[0]->func = H5T__conv_noop;
 	H5T_g.path[0]->cdata.command = H5T_CONV_INIT;
 	if(H5T__conv_noop(FAIL, FAIL, &(H5T_g.path[0]->cdata), (size_t)0, (size_t)0, (size_t)0, NULL, NULL, dxpl_id) < 0) {
@@ -4457,7 +4457,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    path->name[H5T_NAMELEN - 1] = '\0';
         } /* end if */
 	else
-	    HDstrcpy(path->name, "NONAME");
+	    HDsnprintf(path->name, sizeof(path->name), "NONAME");
 	if(NULL == (path->src = H5T_copy(src, H5T_COPY_ALL)))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy datatype for conversion path")
         if(NULL == (path->dst = H5T_copy(dst, H5T_COPY_ALL)))

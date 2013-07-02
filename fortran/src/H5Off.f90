@@ -31,7 +31,7 @@
 ! NOTES
 !                         *** IMPORTANT ***
 !  If you add a new H5O function you must add the function name to the
-!  Windows dll file 'hdf5_fortrandll.def' in the fortran/src directory.
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
 !*****
@@ -191,7 +191,7 @@ CONTAINS
   SUBROUTINE h5oclose_f(object_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)   :: object_id
-    INTEGER       ,  INTENT(OUT) :: hdferr
+    INTEGER       , INTENT(OUT) :: hdferr
 !*****
     INTERFACE
        INTEGER FUNCTION h5oclose_c(object_id)
@@ -565,7 +565,7 @@ CONTAINS
 !  obj_id  - Object identifier.
 !
 ! Outputs: 
-!  hdferr     - Returns 0 if successful and -1 if fails.
+!  hdferr  - Returns 0 if successful and -1 if fails.
 !
 ! AUTHOR	
 !  M. Scot Breitenfeld
@@ -717,16 +717,16 @@ CONTAINS
 !  Sets comment for specified object. 
 !
 ! Inputs:  
-!  loc_id - Identifier of a file, group, dataset, or named datatype.
-!  name      - Name of the object whose comment is to be set or reset, 
+!  loc_id   - Identifier of a file, group, dataset, or named datatype.
+!  name     - Name of the object whose comment is to be set or reset, 
 !              specified as a path relative to loc_id. 
-!  comment   - The new comment.
+!  comment  - The new comment.
 !
 ! Outputs: 
-!  hdferr    - Returns 0 if successful and -1 if fails.
+!  hdferr   - Returns 0 if successful and -1 if fails.
 !
 ! Optional parameters:
-!  lapl_id   - Link access property list identifier.
+!  lapl_id  - Link access property list identifier.
 !
 ! AUTHOR	
 !  M. Scot Breitenfeld

@@ -1370,7 +1370,6 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->f);
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -1572,6 +1571,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
     }
+
 
     /* How many bytes were actually read? */
     /* [This works because the "basic elements" we use for all our MPI derived

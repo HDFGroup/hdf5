@@ -3014,17 +3014,17 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 {
     H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
     H5T_vlen_alloc_info_t *vl_alloc_info = &_vl_alloc_info;   /* VL allocation info */
-    H5T_path_t	*tpath;			/* Type conversion path		     */
+    H5T_path_t	*tpath = NULL;		/* Type conversion path		     */
     hbool_t     noop_conv = FALSE;      /* Flag to indicate a noop conversion */
     hbool_t     write_to_file = FALSE;  /* Flag to indicate writing to file */
     hbool_t     parent_is_vlen;         /* Flag to indicate parent is vlen datatyp */
     hid_t   	tsrc_id = -1, tdst_id = -1;/*temporary type atoms	     */
-    H5T_t	*src;			/*source datatype		     */
-    H5T_t	*dst;			/*destination datatype		     */
+    H5T_t	*src = NULL;		/*source datatype		     */
+    H5T_t	*dst = NULL;		/*destination datatype		     */
     H5HG_t	bg_hobjid, parent_hobjid;
-    uint8_t	*s;		        /*source buffer			*/
-    uint8_t	*d;		        /*destination buffer		*/
-    uint8_t	*b;		        /*background buffer		*/
+    uint8_t	*s = NULL;		/*source buffer			*/
+    uint8_t	*d = NULL;		/*destination buffer		*/
+    uint8_t	*b = NULL;		/*background buffer		*/
     ssize_t	s_stride, d_stride;	/*src and dst strides		*/
     ssize_t	b_stride;	        /*bkg stride			*/
     size_t      safe;                   /*how many elements are safe to process in each pass */
@@ -3120,7 +3120,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(tpath->cdata.need_bkg || parent_is_vlen) {
                 /* Set up initial background buffer */
                 tmp_buf_size = MAX(src_base_size, dst_base_size);
-                if(NULL == (tmp_buf = H5FL_BLK_MALLOC(vlen_seq,tmp_buf_size)))
+                if(NULL == (tmp_buf = H5FL_BLK_CALLOC(vlen_seq,tmp_buf_size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
             } /* end if */
 
@@ -3200,7 +3200,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                              */
 			    if(!seq_len && !conv_buf) {
                                 conv_buf_size = ((1 / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
-                                if(NULL == (conv_buf = H5FL_BLK_MALLOC(vlen_seq, conv_buf_size)))
+                                if(NULL == (conv_buf = H5FL_BLK_CALLOC(vlen_seq, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
 			    }
                             else if(conv_buf_size < MAX(src_size, dst_size)) {
@@ -3208,6 +3208,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 conv_buf_size = ((MAX(src_size, dst_size) / H5T_VLEN_MIN_CONF_BUF_SIZE) + 1) * H5T_VLEN_MIN_CONF_BUF_SIZE;
                                 if(NULL == (conv_buf = H5FL_BLK_REALLOC(vlen_seq, conv_buf, conv_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                                HDmemset(conv_buf, 0, conv_buf_size);
                             } /* end if */
 
                             /* Read in VL sequence */
@@ -3223,6 +3224,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 tmp_buf_size = conv_buf_size;
                                 if(NULL == (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                                HDmemset(tmp_buf, 0, tmp_buf_size);
                             } /* end if */
 
                             /* If we are writing and there is a nested VL type, read
@@ -3236,6 +3238,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                         tmp_buf_size = (bg_seq_len * MAX(src_base_size, dst_base_size));
                                         if(NULL == (tmp_buf = H5FL_BLK_REALLOC(vlen_seq, tmp_buf, tmp_buf_size)))
                                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                                        HDmemset(tmp_buf, 0, tmp_buf_size);
                                     } /* end if */
                                     H5F_addr_decode(dst->shared->u.vlen.f, (const uint8_t **)&tmp, &(bg_hobjid.addr));
                                     INT32DECODE(tmp, bg_hobjid.idx);

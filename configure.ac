@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.144], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.150], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -434,9 +434,11 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## --------------------------------------------------------------------
   ## General Fortran flags
-  ##
-  AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-  FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  ## Only add FFLAGS to FCFLAGS if it's set.
+  if test "x$FFLAGS" != "x" ; then
+    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
+    FCFLAGS="${FCFLAGS} ${FFLAGS}"
+  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
@@ -1242,9 +1244,10 @@ case "X-$enable_production" in
 esac
 
 ## ----------------------------------------------------------------------
-## Check for system libraries.
+## Check for system libraries. "dl" stands for dynamically loaded library
 ##
 AC_CHECK_LIB([m], [ceil])
+AC_CHECK_LIB([dl], [dlopen])
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   ## ...for Solaris
@@ -1274,6 +1277,7 @@ AC_CHECK_FUNCS([clock_gettime],[have_clock_gettime="yes"],[have_clock_gettime="n
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
+AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
 ## Darwin
@@ -1615,9 +1619,10 @@ AC_ARG_WITH([dmalloc],
 case $withval in
   yes)
     HAVE_DMALLOC="yes"
-    AC_CHECK_HEADERS([dmalloc.h])
-    AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [unset HAVE_DMALLOC])
-
+    AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [unset HAVE_DMALLOC])
+    fi
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find dmalloc library])
     fi
@@ -1661,14 +1666,16 @@ case $withval in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc"
     fi
 
-    AC_CHECK_HEADERS([dmalloc.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+    AC_CHECK_HEADERS([dmalloc.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_DMALLOC])
 
-    if test -n "$dmalloc_lib"; then
-      LDFLAGS="$LDFLAGS -L$dmalloc_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
+    if test "x$HAVE_DMALLOC" = "xyes"; then
+      if test -n "$dmalloc_lib"; then
+        LDFLAGS="$LDFLAGS -L$dmalloc_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
+      fi
+
+      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC])
     fi
-
-    AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC])
 
     if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find dmalloc library])
@@ -1692,12 +1699,16 @@ AC_ARG_WITH([zlib],
 case $withval in
   yes)
     HAVE_ZLIB="yes"
-    AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"])
-    AC_CHECK_LIB([z], [compress2],, [unset HAVE_ZLIB])
-    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
-
-    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find zlib library])
+    AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H="yes"], [unset HAVE_ZLIB])
+    if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([z], [compress2],, [unset HAVE_ZLIB])
+    fi
+    if test -z "$HAVE_ZLIB"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        AC_MSG_ERROR([couldn't find zlib library])
+      fi
+    else
+      AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
   no)
@@ -1709,8 +1720,8 @@ case $withval in
     HAVE_ZLIB="yes"
     case "$withval" in
       *,*)
-        zlib_inc="`echo $withval |cut -f1 -d,`"
-        zlib_lib="`echo $withval |cut -f2 -d, -s`"
+        zlib_inc="`echo $withval | cut -f1 -d,`"
+        zlib_lib="`echo $withval | cut -f2 -d, -s`"
         ;;
       *)
         if test -n "$withval"; then
@@ -1741,32 +1752,37 @@ case $withval in
 
     AC_CHECK_HEADERS([zlib.h],
                      [HAVE_ZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_ZLIB])
 
     if test -n "$zlib_lib"; then
       LDFLAGS="$LDFLAGS -L$zlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$zlib_lib"
     fi
 
-    AC_CHECK_LIB([z], [compress2],,
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ZLIB])
-    AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
+    if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([z], [compress2],,
+                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_ZLIB])
+    fi
 
-    if test -z "$HAVE_ZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find zlib library])
+    if test -z "$HAVE_ZLIB"; then
+      if test -n "$HDF5_CONFIG_ABORT"; then
+        AC_MSG_ERROR([couldn't find zlib library])
+      fi
+    else
+      AC_CHECK_FUNC([compress2], [HAVE_COMPRESS2="yes"])
     fi
     ;;
 esac
 
 if test "x$HAVE_ZLIB" = "xyes" -a "x$HAVE_ZLIB_H" = "xyes" -a "x$HAVE_COMPRESS2" = "xyes"; then
-    AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate (zlib) filter is enabled])
-    USE_FILTER_DEFLATE="yes"
+  AC_DEFINE([HAVE_FILTER_DEFLATE], [1], [Define if support for deflate (zlib) filter is enabled])
+  USE_FILTER_DEFLATE="yes"
 
-    ## Add "deflate" to external filter list
-    if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-    fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
+  ## Add "deflate" to external filter list
+  if test "X$EXTERNAL_FILTERS" != "X"; then
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+  fi
+  EXTERNAL_FILTERS="${EXTERNAL_FILTERS}deflate(zlib)"
 fi
 
 
@@ -1786,9 +1802,10 @@ AC_ARG_WITH([szlib],
 case $withval in
   yes)
     HAVE_SZLIB="yes"
-    AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"])
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
-
+    AC_CHECK_HEADERS([szlib.h], [HAVE_SZLIB_H="yes"], [unset HAVE_SZLIB])
+    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],, [unset HAVE_SZLIB])
+    fi
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
     fi
@@ -1834,15 +1851,17 @@ case $withval in
     
     AC_CHECK_HEADERS([szlib.h],
                      [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"])
+                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
 
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
     
-    AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                 [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+      AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
+                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+    fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find szlib library])
@@ -1851,21 +1870,21 @@ case $withval in
 esac
 
 if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
-    ## SZLIB library is available.  Check if it can encode
-    AC_MSG_CHECKING([for szlib encoder])
+  ## SZLIB library is available.  Check if it can encode
+  AC_MSG_CHECKING([for szlib encoder])
 
-    ## Set LD_LIBRARY_PATH so encoder test can find the library and run.
-    ## Also add LL_PATH substitution to Makefiles so they can use the 
-    ## path as well, for testing examples.
-    if test -z "$LD_LIBRARY_PATH"; then
+  ## Set LD_LIBRARY_PATH so encoder test can find the library and run.
+  ## Also add LL_PATH substitution to Makefiles so they can use the 
+  ## path as well, for testing examples.
+  if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
-    else
+  else
     export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
-    fi
+  fi
 
-    AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
+  AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"
 
-    AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
+  AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_TRY_RUN([
         #include <szlib.h>
         
@@ -1879,31 +1898,30 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         }
         ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
     
-    AC_DEFINE([HAVE_FILTER_SZIP], [1], 
+  AC_DEFINE([HAVE_FILTER_SZIP], [1], 
             [Define if support for szip filter is enabled])
-    USE_FILTER_SZIP="yes"
+  USE_FILTER_SZIP="yes"
 
-    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        AC_MSG_RESULT([yes])
-    fi 
-    if test ${hdf5_cv_szlib_can_encode} = "no"; then
-        AC_MSG_RESULT([no])
-    fi 
+  if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+    AC_MSG_RESULT([yes])
+  fi 
+  if test ${hdf5_cv_szlib_can_encode} = "no"; then
+    AC_MSG_RESULT([no])
+  fi 
     
-    ## Add "szip" to external filter list
-    if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        if test "X$EXTERNAL_FILTERS" != "X"; then
-            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-        fi
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
-    fi 
-    if test ${hdf5_cv_szlib_can_encode} = "no"; then
-        if test "X$EXTERNAL_FILTERS" != "X"; then
-            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-        fi
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+  ## Add "szip" to external filter list
+  if test ${hdf5_cv_szlib_can_encode} = "yes"; then
+    if test "X$EXTERNAL_FILTERS" != "X"; then
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
     fi
-
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
+  fi 
+  if test ${hdf5_cv_szlib_can_encode} = "no"; then
+    if test "X$EXTERNAL_FILTERS" != "X"; then
+      EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+    fi
+    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+  fi
 fi
 
 AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xyes" && test "X$LL_PATH" != "X"])
@@ -1918,7 +1936,7 @@ AC_CACHE_SAVE
 ## and/or a library path.  If the library path is specified then it must
 ## be preceded by a comma.
 ##
-AC_SUBST([PTHREAD]) PTHREAD=yes
+AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
 AC_ARG_WITH([pthread],
             [AS_HELP_STRING([--with-pthread=DIR],
                             [Use the Pthreads library [default=no]])],,
@@ -1926,13 +1944,15 @@ AC_ARG_WITH([pthread],
 
 case "$withval" in
   yes)
-    AC_CHECK_HEADERS([pthread.h])
-    AC_CHECK_LIB([pthread], [pthread_self],, [unset PTHREAD])
+    AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
+    if test "x$HAVE_PTHREAD" = "xyes"; then
+      AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+    fi
     ;;
   no)
     AC_MSG_CHECKING([for pthread])
     AC_MSG_RESULT([suppressed])
-    unset PTHREAD
+    unset HAVE_PTHREAD
     ;;
   *)
     case "$withval" in
@@ -1962,21 +1982,22 @@ case "$withval" in
       saved_AM_CPPFLAGS="$AM_CPPFLAGS"
       CPPFLAGS="$CPPFLAGS -I$pthread_inc"
       AM_CPPFLAGS="$AM_CPPFLAGS -I$pthread_inc"
-      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset PTHREAD])
+      AC_CHECK_HEADERS([pthread.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset HAVE_PTHREAD])
     else
-      AC_CHECK_HEADERS([pthread.h],, [unset PTHREAD])
+      AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
     fi
 
-    if test -n "$pthread_lib"; then
-      saved_LDFLAGS="$LDFLAGS"
-      saved_AM_LDFLAGS="$AM_LDFLAGS"
-      LDFLAGS="$LDFLAGS -L$pthread_lib"
-      AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
-      AC_CHECK_LIB([pthread], [pthread_self],,
-                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset PTHREAD])
-
-    else
-      AC_CHECK_LIB([pthread], [pthread_self],, [unset PTHREAD])
+    if test "x$HAVE_PTHREAD" = "xyes"; then
+      if test -n "$pthread_lib"; then
+        saved_LDFLAGS="$LDFLAGS"
+        saved_AM_LDFLAGS="$AM_LDFLAGS"
+        LDFLAGS="$LDFLAGS -L$pthread_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$pthread_lib"
+        AC_CHECK_LIB([pthread], [pthread_self],,
+                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_PTHREAD])
+      else
+        AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
+      fi
     fi
     ;;
 esac
@@ -4415,6 +4436,64 @@ if test -n "$TESTPARALLEL"; then
     FORTRAN_PARALLEL_MAKE=fortran/$TESTPARALLEL/Makefile
   fi
 fi
+LT_OUTPUT
+no_create=$saved_no_create
+
+## Then the stamp2 file for H5config.h
+touch ./config/stamp2
+
+## Finally the makefiles
+test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+## Post processing to patch up some deficiencies in libtool
+case $host_os in
+  linux* | freebsd* )
+    ## If gcc is not used, need to set $wl to use "-Wl,"
+    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
+      : using gcc
+    else
+      echo 'fixing $wl in' $ofile
+ed - $ofile <<EOF 2> /dev/null
+g/^wl=""/s//wl="-Wl,"/
+w
+q
+EOF
+    fi
+    ;;
+esac
+
+## Are we compiling static libraries, shared libraries, or both?  This
+## is only used for the libhdf5.settings file. We can't just look at
+## $enable_static and $enable_shared because if they're yes the ltconfig
+## might have decided that one or the other is simply not possible.
+## Therefore we have to ask the generated `libtool' shell script
+## which 'features' it has enabled.
+if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
+  enable_shared=yes
+else
+  enable_shared=no
+fi
+
+if (./libtool --features | grep '^enable static libraries' > /dev/null); then
+  enable_static=yes
+else
+  enable_static=no
+fi
+
+if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="static, shared"
+elif test "X$enable_static" = "Xyes"; then
+  STATIC_SHARED="static"
+elif test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="shared"
+else
+  STATIC_SHARED="none"
+fi
+
+## ----------------------------------------------------------------------
+## Set a macro if shared library is enabled.
+##
+AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
@@ -4425,6 +4504,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/test_plugin.sh
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile
@@ -4493,59 +4573,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
 AC_OUTPUT
-LT_OUTPUT
-no_create=$saved_no_create
-
-## Then the stamp2 file for H5config.h
-touch ./config/stamp2
-
-## Finally the makefiles
-test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
-
-## Post processing to patch up some deficiencies in libtool
-case $host_os in
-  linux* | freebsd* )
-    ## If gcc is not used, need to set $wl to use "-Wl,"
-    if $CC -v 2>&1 | grep '^gcc' > /dev/null ; then
-      : using gcc
-    else
-      echo 'fixing $wl in' $ofile
-ed - $ofile <<EOF 2> /dev/null
-g/^wl=""/s//wl="-Wl,"/
-w
-q
-EOF
-    fi
-    ;;
-esac
-
-## Are we compiling static libraries, shared libraries, or both?  This
-## is only used for the libhdf5.settings file. We can't just look at
-## $enable_static and $enable_shared because if they're yes the ltconfig
-## might have decided that one or the other is simply not possible.
-## Therefore we have to ask the generated `libtool' shell script
-## which 'features' it has enabled.
-if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
-  enable_shared=yes
-else
-  enable_shared=no
-fi
-
-if (./libtool --features | grep '^enable static libraries' > /dev/null); then
-  enable_static=yes
-else
-  enable_static=no
-fi
-
-if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="static, shared"
-elif test "X$enable_static" = "Xyes"; then
-  STATIC_SHARED="static"
-elif test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="shared"
-else
-  STATIC_SHARED="none"
-fi
 
 chmod 755 tools/misc/h5cc
 

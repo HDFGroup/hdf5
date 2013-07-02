@@ -68,7 +68,7 @@ fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
 
 if FORTRAN_2003_CONDITIONAL_F
    fortranlib_test_F03_SOURCES = fortranlib_test_F03.f90 \
-	tH5F.f90 tH5E_F03.f90 tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90
+	tH5F.f90 tH5E_F03.f90 tH5F_F03.f90 tH5L_F03.f90 tH5O_F03.f90 tH5P_F03.f90 tH5T_F03.f90
 endif
 
 
