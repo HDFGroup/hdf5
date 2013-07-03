@@ -189,7 +189,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             }
 
             /* Extra type modifiers */
-            if(HDstrchr("ZHhlqLI", *s)) {
+            if(HDstrchr("zZHhlqLI", *s)) {
                 switch(*s) {
                     /*lint --e{506} Don't issue warnings about constant value booleans */
                     /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
@@ -203,6 +203,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         break;
 
                     case 'Z':
+                    case 'z':
                         if(sizeof(size_t) < sizeof(long))
                             modifier[0] = '\0';
                         else if(sizeof(size_t) == sizeof(long))

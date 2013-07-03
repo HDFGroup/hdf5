@@ -1179,9 +1179,9 @@ dump_fcpl(hid_t fid)
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %u\n","OBJECTHEADER_VERSION", finfo.sohm.version);
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream,"%s %Hd\n","OFFSET_SIZE", (long long)off_size);
+    PRINTSTREAM(rawoutstream,"%s %zu\n","OFFSET_SIZE", off_size);
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream,"%s %Hd\n","LENGTH_SIZE", (long long)len_size);
+    PRINTSTREAM(rawoutstream,"%s %zu\n","LENGTH_SIZE", len_size);
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %u\n","BTREE_RANK", sym_ik);
     indentation(dump_indent + COL);
