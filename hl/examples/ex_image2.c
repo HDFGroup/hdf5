@@ -46,6 +46,10 @@ int main( void )
 
  /* make the image */
  status=H5IMmake_image_8bit( file_id, IMAGE1_NAME, width, height, gbuf );
+ if (gbuf) {
+    free(gbuf);
+    gbuf = NULL;
+ }
 
 /*-------------------------------------------------------------------------
  * define a palette, blue to red tones
@@ -75,6 +79,10 @@ int main( void )
 
  /* make dataset */
  status=H5IMmake_image_24bit( file_id, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", gbuf );
+ if (gbuf) {
+    free(gbuf);
+    gbuf = NULL;
+ }
 
  /* close the file. */
  H5Fclose( file_id );

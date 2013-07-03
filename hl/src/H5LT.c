@@ -2175,8 +2175,10 @@ hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
     input_len = HDstrlen(text);
     myinput = HDstrdup(text);
 
-    if((type_id = H5LTyyparse()) < 0)
+    if((type_id = H5LTyyparse()) < 0) {
+        HDfree(myinput);
         goto out;
+    }
 
     HDfree(myinput);
     input_len = 0;
