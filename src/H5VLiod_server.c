@@ -30,11 +30,13 @@
 #include "H5VLprivate.h"	/* VOL plugins				*/
 #include "H5VLiod_server.h"
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5VLiod_compactor_queue.h"
+#include "H5VLiod_compactor.h"
 
 #ifdef H5_HAVE_EFF
 
 #define H5_DO_NATIVE 0
-
+#define DEBUG_COMPACTOR 1
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2013
@@ -48,7 +50,13 @@ static iod_obj_id_t ROOT_ID;
 static int num_peers = 0;
 static int terminate_requests = 0;
 static hbool_t shutdown = FALSE;
+static int compactor_queue_flag = 0, request_id = 0;
+static compactor *curr_queue = NULL;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
+#if DEBUG_COMPACTOR
+FILE *fp;
+#endif
 #define EEXISTS 1
 
 H5FL_BLK_EXTERN(type_conv);
@@ -141,6 +149,10 @@ static void H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine,
                                           size_t num_n_parents, AXE_task_t n_parents[], 
                                           size_t num_s_parents, AXE_task_t s_parents[], 
                                           void *op_data);
+static void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,  
+					      size_t num_n_parents, AXE_task_t n_parents[], 
+					      size_t num_s_parents, AXE_task_t s_parents[], 
+					      void *queue);
 static void H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine,  
                                                size_t num_n_parents, AXE_task_t n_parents[], 
                                                size_t num_s_parents, AXE_task_t s_parents[], 
@@ -208,6 +220,10 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_procs);
+    
+#if DEBUG_COMPACTOR
+    fp = fopen("compactor.out", "w+");
+#endif
 
     iod_comm = comm;
 
@@ -1427,7 +1443,108 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_read() */
 
-
+
+/*---------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_compactor
+ *
+ * Purpose:	Call for compactor
+ *              Insert the real worker routine into the 
+ *              Async engine/compactor queue.
+ *
+ * Return:	Success:	CP_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanath Venkatesan
+ *              July, 2013
+ *
+ * -------------------------------------------------------------------
+*/
+
+int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
+{
+
+  int ret_value = CP_SUCCESS;
+  dset_io_in_t *input = NULL;
+
+  FUNC_ENTER_NOAPI_NOINIT
+
+#if DEBUG_COMPACTOR
+  fprintf (fp, "id: %d, Enters the the dset_compactor, compactor_flag :%d\n",
+	   request_id,
+	   compactor_queue_flag);
+  fflush(fp);
+
+  if (NULL == curr_queue)
+    fprintf(fp,"Compactor Not present\n");
+  else
+    fprintf(fp,"Queue exists with compactor_flag : %d, and %d reqs\n",
+	    compactor_queue_flag,
+	    H5VL_iod_get_number_of_requests(curr_queue));
+  fflush(fp);
+  
+#endif  
+  
+  input = (dset_io_in_t *)op_data->input;
+  
+  if (!compactor_queue_flag && (curr_queue == NULL)){
+  
+    if (CP_SUCCESS != H5VL_iod_init_compactor_queue(&curr_queue)){
+      HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, CP_FAIL, "Queue initialization error");
+    }
+
+    fprintf (fp, "Completed creating a queue : %p\n", curr_queue);
+    fflush(fp);
+    
+  }
+  
+  compactor_entry entry;
+  entry.input_structure = op_data;
+  entry.type_request = request_type;
+  entry.request_id = request_id;
+
+
+#if DEBUG_COMPACTOR
+  fprintf (fp,"op_data : %p, input_struct : %p\n",
+	  entry.input_structure, 
+	  op_data);
+  fflush(fp);
+#endif
+
+  if (CP_SUCCESS != 
+      H5VL_iod_add_requests_to_compactor (curr_queue, 
+					  entry)){
+    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert req into queue");
+  }
+  if (!compactor_queue_flag){
+#if DEBUG_COMPACTOR
+    fprintf (fp, "Adding a barrier task!\n ");
+    fflush(fp);
+#endif
+    if (AXE_SUCCEED != AXEcreate_barrier_task(engine, input->axe_id,
+					      H5VL_iod_server_dset_compactor_cb, curr_queue, NULL))
+      HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+
+#if DEBUG_COMPACTOR
+    fprintf (fp, "Completed Adding a barrier task\n");
+    fflush(fp);
+#endif
+
+    pthread_mutex_lock(&lock);
+    compactor_queue_flag = 1;
+    pthread_mutex_unlock(&lock);
+  }
+
+#if DEBUG_COMPACTOR
+    fprintf(fp, "Exiting the compactor function \n");
+    fflush(fp);
+#endif
+    request_id++;
+ done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_dset_write
  *
@@ -1467,6 +1584,7 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
+#if 0
     if(input->parent_axe_id) {
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
                                           1, &input->parent_axe_id, 0, NULL, 
@@ -1478,7 +1596,12 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
                                           H5VL_iod_server_dset_write_cb, op_data, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
     }
-
+#endif
+#if 1 
+    if(CP_SUCCESS != H5VL_iod_server_dset_compactor(op_data, WRITE)){
+      HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "compactor task failed for WRITE\n");
+    }
+#endif
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_write() */
@@ -3542,6 +3665,78 @@ done:
     }
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_read_cb() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_compactor_cb
+ *
+ * Purpose:     Compacts the requests and calls the appropriate read/write.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanath Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+ 
+static void
+H5VL_iod_server_dset_compactor_cb (AXE_engine_t UNUSED axe_engine, 
+				   size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+				   size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+				   void *_queue)
+{
+
+  compactor *cqueue = (compactor *)_queue;
+  int n_requests, i = 0;
+  op_data_t *op_data = NULL;
+  herr_t ret_value = SUCCEED;
+
+  FUNC_ENTER_NOAPI_NOINIT
+
+#if DEBUG_COMPACTOR
+    fprintf(fp, "Enters Call BACK!\n");
+    fprintf (fp, "Number of requests : %d from call back in queue : %p\n", 
+	     H5VL_iod_get_number_of_requests(cqueue), cqueue);
+    fflush(fp);
+#endif
+
+    pthread_mutex_lock(&lock);
+    compactor_queue_flag = 0;
+    curr_queue = NULL;
+    pthread_mutex_unlock(&lock);  
+    
+    n_requests = H5VL_iod_get_number_of_requests(cqueue);
+
+    while ( n_requests > 0){
+      compactor_entry t_entry;
+      H5VL_iod_remove_request_from_compactor (cqueue, &t_entry);
+      if ( t_entry.type_request == WRITE){
+#if DEBUG_COMPACTOR
+	fprintf (fp, "Request: %d is a WRITE request\n ", t_entry.request_id);
+	fprintf (fp, "With op_data : %p\n ",
+		 t_entry.input_structure,
+		 t_entry.request_id);
+	fflush(fp);
+#endif
+	op_data = NULL;
+	op_data = t_entry.input_structure;
+	H5VL_iod_server_dset_write_cb (NULL,NULL,NULL,NULL,NULL,op_data);
+      }
+      else{
+	fprintf (fp, "Request: %d is a READ request\n ", t_entry.request_id);
+	/*  Have to do the same for READ requests!*/
+      }
+      n_requests--;
+    }
+
+    if (CP_SUCCESS != H5VL_iod_destroy_compactor_queue(cqueue)){
+      HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, CP_FAIL, "Cannot free NULL queue\n");
+    }
+    
+ done:
+    FUNC_LEAVE_NOAPI_VOID   
+}
 
 
 /*-------------------------------------------------------------------------

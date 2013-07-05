@@ -18,9 +18,9 @@
  
 #define READ 100
 #define WRITE 150
-#define SUCCESS 0
-#define ERROR 1
 
+#define CP_SUCCESS 0
+#define CP_FAIL -1
 
  
 typedef struct {
@@ -52,6 +52,9 @@ H5_DLL int H5VL_iod_get_request_at_front (compactor *, compactor_entry *);
 H5_DLL int H5VL_iod_display_compactor_requests(compactor*);
 H5_DLL int H5VL_iod_remove_element_from_queue(compactor* s, node* d);
 H5_DLL int H5VL_iod_get_number_of_requests (compactor *s); 
+H5_DLL int H5VL_iod_init_compactor_queue(compactor **s);
+H5_DLL int H5VL_iod_destroy_compactor_queue(compactor *s);
+
  
 #endif /*H5_HAVE_EFF*/
 #endif /*H5VLiod_compactor_queue_H*/

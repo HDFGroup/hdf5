@@ -75,6 +75,8 @@ H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_compactor(op_data_t *op_data, 
+					  int request_type);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

@@ -80,7 +80,7 @@ static int H5VL_iod_sort_block_container (block_container_t *io_array,
  *
  * Purpose:	Function to extract the number of dimensions/dimensions
  *
- * Return:	Success:	HG_SUCCESS 
+ * Return:	Success:	CP_SUCCESS 
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
@@ -93,7 +93,7 @@ int H5VL_iod_extract_dims_info (hid_t dataspace,
 				int *ndims, 
 				hsize_t **dims){
   
-  int ldims, ret_value = HG_SUCCESS;
+  int ldims, ret_value = CP_SUCCESS;
   hsize_t *dims_out = NULL;
 
   FUNC_ENTER_NOAPI_NOINIT
@@ -120,7 +120,7 @@ int H5VL_iod_extract_dims_info (hid_t dataspace,
  * Purpose:	Function to create a request list for each type of request 
  *              retrieved from the compactor queue
  *
- * Return:	Success:	HG_SUCCESS 
+ * Return:	Success:	CP_SUCCESS 
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
@@ -153,7 +153,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   char *current_pos;
   size_t size, buf_size, src_size, dst_size;
   size_t *len, num_entries, chk_size;
-  int ret_value = HG_SUCCESS,num_requests = 0, num_datasets = 0;
+  int ret_value = CP_SUCCESS,num_requests = 0, num_datasets = 0;
   int j = 0, request_id = 0, i, current_dset_id = 0;
   size_t ii;
 
@@ -274,15 +274,15 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
 	
 	/* Write bulk data here and wait for the data to be there  */
-	if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
+	if(CP_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
 	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper")
 	
 	/* wait for it to complete */
-	if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
+	if(CP_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
 	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper")
 	
 	/* free the bds block handle */
-	if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+	if(CP_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
 	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle")
 
 	/***********************************************************************************/
@@ -437,7 +437,7 @@ int H5VL_iod_select_overlap (hid_t dataspace_1,
  *              with every other request. This functions assumes that all
  *              requests belong to the same dataset.
  *
- * Return:	Success:	HG_SUCCESS 
+ * Return:	Success:	CP_SUCCESS 
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
@@ -451,7 +451,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   
   request_list_t *list = *req_list;
   hid_t res_dataspace, current_space;
-  int ret_value = HG_SUCCESS;
+  int ret_value = CP_SUCCESS;
   int *lselected_req = NULL;
   int num_selected = 0;
   request_list_t *merged_request = NULL;  
@@ -547,7 +547,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 
   blck_cnt = 0;
   for ( i = 0; i < num_requests; i++){
-    if (HG_SUCCESS == 
+    if (CP_SUCCESS == 
 	H5VL_iod_request_exist(i, lselected_req, num_selected)){
 
         /* At this point the mblocks and fblocks will be different only
@@ -627,7 +627,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
     Then compare that with automatically generated offsets
     (the offsets have to match) */
   ret_value = H5VL_iod_compare_offsets (goffsets,g_entries,moffsets,m_entries);
-  assert (ret_value == HG_SUCCESS);
+  assert (ret_value == CP_SUCCESS);
 
   /*At this point all consistency checks have been completed.
     We can comfortable create the memory descriptor for the 
@@ -661,7 +661,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
  *
  * Purpose:	Checks whether the current request was selected for merging
  *
- * Return:	Success:	HG_SUCCESS
+ * Return:	Success:	CP_SUCCESS
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
@@ -680,7 +680,7 @@ static int H5VL_iod_request_exist (int current_index,
 
   for (i = 0; i < num_entries; i++){
     if ( selected_indices[i] == current_index)
-      ret_value = HG_SUCCESS;
+      ret_value = CP_SUCCESS;
   }
 
   return  ret_value;
@@ -695,7 +695,7 @@ static int H5VL_iod_request_exist (int current_index,
  * Purpose:	Compares offset arrays, To be used for sanity check after
  *              compaction
  *
- * Return:	Success:	HG_SUCCESS
+ * Return:	Success:	CP_SUCCESS
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
@@ -709,7 +709,7 @@ static int H5VL_iod_compare_offsets (hsize_t *offsets1,
 				     hsize_t *offsets2,
 				     size_t offset2_cnt){
   
-  int ret_value = HG_SUCCESS;
+  int ret_value = CP_SUCCESS;
   size_t i;
   
   if (offset1_cnt != offset2_cnt){
@@ -799,7 +799,7 @@ static size_t H5VL_iod_get_selected_fblocks_count (int *selected_indices,
  * Purpose:	Sort a given set of off-len pair in-place by providing a
  *              sorted array
  *
- * Return:	Success:	HG_SUCCESS
+ * Return:	Success:	CP_SUCCESS
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
@@ -825,7 +825,7 @@ static int H5VL_iod_sort_block_container (block_container_t *io_array,
     int temp = 0;
     unsigned char done = 0;
     int* temp_arr = NULL;
-    int ret_value = HG_SUCCESS;
+    int ret_value = CP_SUCCESS;
 
     FUNC_ENTER_NOAPI(NULL)
     
