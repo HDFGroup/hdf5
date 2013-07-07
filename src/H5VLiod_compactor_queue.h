@@ -4,6 +4,7 @@
 
 #include "H5VLiod_common.h"
 
+
 #ifdef H5_HAVE_EFF
 
 /* -----------------------------------------------------------------
@@ -21,6 +22,8 @@
 
 #define CP_SUCCESS 0
 #define CP_FAIL -1
+
+#define DEBUG_COMPACTOR 1
 
  
 typedef struct {
@@ -45,6 +48,7 @@ struct cqlist
 };
  
 typedef struct cqlist compactor; 
+
 
 H5_DLL int H5VL_iod_add_requests_to_compactor(compactor*, compactor_entry request);
 H5_DLL int H5VL_iod_remove_request_from_compactor(compactor*, compactor_entry *); 

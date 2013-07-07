@@ -36,7 +36,7 @@
 #ifdef H5_HAVE_EFF
 
 #define H5_DO_NATIVE 0
-#define DEBUG_COMPACTOR 1
+
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2013
@@ -57,6 +57,7 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 #if DEBUG_COMPACTOR
 FILE *fp;
 #endif
+
 #define EEXISTS 1
 
 H5FL_BLK_EXTERN(type_conv);
@@ -220,7 +221,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     herr_t ret_value = SUCCEED;
 
     MPI_Comm_size(comm, &num_procs);
-    
+
 #if DEBUG_COMPACTOR
     fp = fopen("compactor.out", "w+");
 #endif
@@ -3691,6 +3692,9 @@ H5VL_iod_server_dset_compactor_cb (AXE_engine_t UNUSED axe_engine,
   int n_requests, i = 0;
   op_data_t *op_data = NULL;
   herr_t ret_value = SUCCEED;
+  request_list_t *wlist=NULL;
+  dataset_container_t *dlist=NULL;
+  int nentries = 0, ndatasets = 0;
 
   FUNC_ENTER_NOAPI_NOINIT
 
@@ -3706,8 +3710,50 @@ H5VL_iod_server_dset_compactor_cb (AXE_engine_t UNUSED axe_engine,
     curr_queue = NULL;
     pthread_mutex_unlock(&lock);  
     
-    n_requests = H5VL_iod_get_number_of_requests(cqueue);
+#ifdef DEBUG_COMPACTOR    
+    ret_value = H5VL_iod_create_request_list (cqueue,
+					      &wlist,
+					      &nentries,
+					      &dlist,
+					      &ndatasets,
+					      WRITE,
+					      fp);
+#else
+    ret_value = H5VL_iod_create_request_list (cqueue,
+					      &wlist,
+					      &nentries,
+					      &dlist,
+					      &ndatasets,
+					      WRITE,
+					      fp);
+#endif
+#if DEBUG_COMPACTOR
+    if (ret_value != CP_SUCCESS){
+      fprintf(fp,"ERROR !! Compactor create request list failed with error %d  \n",
+	      ret_value);
+    }
+#endif
+   
+   
+#if DEBUG_COMPACTOR
+    fprintf(fp,"nentires : %d############################################\n", nentries);
+    fprintf(fp,"Compactor Request List \n");
+    fprintf(fp,"id -- dataset -- dataspace -- fileblocks -- memblocks\n");
+    for ( i = 0; i < nentries; i++){
+      fprintf(fp, "%d -- %d -- %d -- %zd -- %zd\n",
+	      wlist[i].request_id,
+	      wlist[i].dataset_id,
+	      wlist[i].selection_id,
+	      wlist[i].num_fblocks,
+	      wlist[i].num_mblocks);
+    }
+    fprintf(fp,"#############################################\n");
+#endif
 
+    n_requests = H5VL_iod_get_number_of_requests(cqueue);
+    
+
+    
     while ( n_requests > 0){
       compactor_entry t_entry;
       H5VL_iod_remove_request_from_compactor (cqueue, &t_entry);

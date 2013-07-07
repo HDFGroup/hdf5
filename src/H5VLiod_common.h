@@ -30,6 +30,7 @@
 #define IOD_ID_UNDEFINED (pow(2.0,64.0) - 1)
 #define H5VL_IOD_DEBUG 1
 
+
 typedef enum H5VL_iod_state_t {
     H5VL_IOD_PENDING,
     H5VL_IOD_COMPLETED,
@@ -56,6 +57,7 @@ typedef struct name_t {
     ssize_t *value_size;
     char *value;
 } name_t;
+
 
 H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_hid_t(hg_proc_t proc, void *data);

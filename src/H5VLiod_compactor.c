@@ -40,6 +40,7 @@
 
 #ifdef H5_HAVE_EFF
 
+
 /* -----------------------------------------------------------------
  * Programmer:  Vishwanath Venkatesan <vish@hdfgroup.gov>
  *              June, 2013
@@ -102,7 +103,7 @@ int H5VL_iod_extract_dims_info (hid_t dataspace,
   dims_out = (hsize_t *) malloc ( ldims * sizeof(hsize_t));
 
   if (NULL == dims){
-    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL, "Cannot initialize dims array")
+    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, CP_FAIL, "Cannot initialize dims array")
   }
   
   *ndims = ldims;
@@ -129,11 +130,19 @@ int H5VL_iod_extract_dims_info (hid_t dataspace,
  *-------------------------------------------------------------------------
  */
 
+#ifdef DEBUG_COMPACTOR
+int H5VL_iod_create_request_list (compactor *queue, request_list_t **list, 
+				  int *numentries,   dataset_container_t **u_datasets,
+				  int *numdatasets, int request_type, FILE *fp_new)
+#else
 int H5VL_iod_create_request_list (compactor *queue, request_list_t **list, 
 				  int *numentries,   dataset_container_t **u_datasets,
 				  int *numdatasets, int request_type)
+#endif
+
 {
 
+  
   compactor_entry *t_entry = NULL;
   op_data_t *op_data;
   dset_io_in_t *input;
@@ -154,37 +163,43 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   size_t size, buf_size, src_size, dst_size;
   size_t *len, num_entries, chk_size;
   int ret_value = CP_SUCCESS,num_requests = 0, num_datasets = 0;
-  int j = 0, request_id = 0, i, current_dset_id = 0;
+  int j = 0, request_id = 0, i, current_dset_id = 0, lreq = 0;
   size_t ii;
 
 
   FUNC_ENTER_NOAPI(NULL)
 
   if (NULL == queue)
-    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HG_FAIL, "Compactor queue is NULL")
+    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, CP_FAIL, "Compactor queue is NULL")
  
   /* Determine the total number of requests in the compactor queue*/
   num_requests = H5VL_iod_get_number_of_requests (queue);
 
+#if DEBUG_COMPACTOR
+  fprintf(fp_new,"in %s:(%d), Number of requests :%d\n",
+	  __FILE__,__LINE__,
+	  num_requests);
+#endif
   /*Create a local request list*/
   newlist = (request_list_t *) malloc ( num_requests * sizeof(request_list_t));
   if ( NULL == newlist){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for request list")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for request list");
   }
 
   unique_datasets = (dataset_container_t *) malloc ( num_requests * 
 						     sizeof(dataset_container_t));
   if ( NULL == unique_datasets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for dataset list")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for dataset list");
   }
     
   for (j = 0; j < num_requests; j++){
     unique_datasets[j].num_requests = 0;
     unique_datasets[j].requests = (int *) malloc (num_requests * sizeof(int));
     if (NULL == unique_datasets[j].requests)
-      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for dataset-req list")
+      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for dataset-req list");
     
   }
+
   
   /*We have to run through the queue and try to extract all request_type 
    requests and populate the request list*/
@@ -193,13 +208,17 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
     
     t_entry = (compactor_entry *) malloc (sizeof(compactor_entry));
     if (NULL == t_entry){
-      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL, "Memory allocation error for request list")
+      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL, "Memory allocation error for request list");
     }  
     t_entry->request_id = -1; 
-    
-    H5VL_iod_remove_request_from_compactor(queue, t_entry);
+    H5VL_iod_get_request_at_front (queue, t_entry);
+    /*    H5VL_iod_remove_request_from_compactor(queue, t_entry);*/
     if ( -1 == t_entry->request_id){
-          HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, HG_FAIL, "Compactor queue is empty")
+#if DEBUG_COMPACTOR
+      fprintf(fp_new,"in %s:%d Compactor failure case entered \n",
+	      __FILE__,__LINE__);
+#endif
+      HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, CP_FAIL, "Compactor queue is empty");
     }
     if (t_entry->type_request != request_type){
       free(t_entry);
@@ -207,6 +226,11 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
       continue;
     }
     else{
+
+#if DEBUG_COMPACTOR
+      fprintf(fp_new,"in %s:%d Enters CASE -- means we have requests! \n",
+	      __FILE__,__LINE__);
+#endif
 
       /*Setting up values from the input structure*/
       op_data = (op_data_t *)t_entry->input_structure;
@@ -216,6 +240,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
       space_id = input->space_id;
       src_id = input->mem_type_id;
       dst_id = input->dset_type_id;
+ 
       
       bulk_handle = input->bulk_handle;
       
@@ -224,36 +249,87 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
       src_size = H5Tget_size(src_id); /*element size of memorytype */
       dst_size = H5Tget_size(dst_id); /*element size of filetype*/
       
+#if DEBUG_COMPACTOR
+      fprintf(fp_new,"in %s(%d) op_data: %p, space: %d, src_id: %d, dst_id: %d, size: %zd\n",
+	      __FILE__,__LINE__, (void *)op_data, space_id, src_id, dst_id, size);
+#endif
       
       if (request_id == 0){
+
 	unique_datasets[num_datasets].dataset = iod_id;
-	unique_datasets[num_datasets].requests[num_requests] = request_id;
-	unique_datasets[num_datasets].num_requests++;
+#if DEBUG_COMPACTOR
+	fprintf(fp_new, "dataset: %d has the request %d at %d \n",
+		unique_datasets[num_datasets].dataset,
+		request_id,
+		unique_datasets[num_datasets].num_requests);
+#endif
+
+	/* convenience def */
+	lreq = unique_datasets[num_datasets].num_requests;
+	unique_datasets[num_datasets].requests[lreq]= request_id;
+	unique_datasets[num_datasets].num_requests += 1;
 	current_dset = iod_id;
         current_dset_id = num_datasets;  
         num_datasets++;
+
       } 
       else{
-       if (current_dset == (hid_t)iod_id){
-	  unique_datasets[current_dset_id].requests[num_requests] = request_id;
+	if (current_dset == (hid_t)iod_id){
+#if DEBUG_COMPACTOR
+	  fprintf(fp_new, " current dataset: %d has the request %d at %d \n",
+		  unique_datasets[current_dset_id].dataset,
+		  request_id,
+		  unique_datasets[current_dset_id].num_requests);
+#endif
+	  lreq = unique_datasets[current_dset_id].num_requests;
+	  unique_datasets[current_dset_id].requests[lreq] = request_id;
 	  unique_datasets[current_dset_id].num_requests++;
+	  
 	}
 	else{
 	  for (i = 0; i < num_datasets; i++){
 	    if ((hid_t)iod_id == unique_datasets[i].dataset){
-		 unique_datasets[i].requests[num_requests] = request_id;
-		 unique_datasets[num_datasets - 1].num_requests++;
-		 current_dset = iod_id;
-		 current_dset_id = num_datasets;
-	     }
-	   }           
-	 }
+	      lreq = unique_datasets[i].num_requests;
+	      unique_datasets[i].requests[lreq] = request_id;
+#if DEBUG_COMPACTOR
+	      fprintf(fp_new, "old dataset: %d has the request %d at %d \n",
+		      unique_datasets[i].dataset,
+		      request_id,
+		      unique_datasets[i].num_requests);
+#endif
+	      
+	      unique_datasets[i].num_requests++;
+	      current_dset = iod_id;
+	      current_dset_id = i;
+	    }
+	    else{ /*the iod_id is new and not present in the list*/
+	      lreq = unique_datasets[num_datasets].num_requests;
+	      unique_datasets[num_datasets].requests[lreq] = request_id;
+#if DEBUG_COMPACTOR
+	      fprintf(fp_new, "new dataset: %d has the request %d at %d \n",
+		      unique_datasets[i].dataset,
+		      request_id,
+		      unique_datasets[i].num_requests);
+#endif
+	      unique_datasets[num_datasets].num_requests++;
+	      current_dset = iod_id;
+	      current_dset_id = num_datasets;
+	      num_datasets++;
+
+	      
+	    }
+	  }           
+	}
       }    
 
       selection_type = H5Sget_select_type(space_id);
       
       if (selection_type == H5S_SEL_NONE){
-	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, HG_FAIL,"There is no selection in the dataspace")
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"%s(%d) There is no selection in the dataspace\n",
+		__FILE__,__LINE__);
+#endif
+	HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, CP_FAIL,"There is no selection in the dataspace");
       }
       else{
 	/* adjust buffer size for datatype conversion */
@@ -264,47 +340,93 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	  buf_size = src_size * nelmts;
 	  assert(buf_size == size);
 	}
-	
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d buf_size : %zd\n", 
+	  __FILE__,__LINE__, buf_size);
+#endif
+
 	/*Allocation buffer and retrieving the buffer associated with the selection 
 	  through the function shipper*/
-	
 	if(NULL == (buf = malloc(buf_size)))
-	  HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't allocate read buffer")
-	
+	  HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, CP_FAIL, "can't allocate read buffer");
+
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d Before creating handle\n", 
+	  __FILE__,__LINE__);
+#endif
 	HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
 	
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d After creating handle\n", 
+	  __FILE__,__LINE__);
+#endif
+
 	/* Write bulk data here and wait for the data to be there  */
-	if(CP_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
-	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper")
+	if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
+	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
 	
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d After reading from handle\n", 
+	  __FILE__,__LINE__);
+#endif
+
 	/* wait for it to complete */
-	if(CP_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
-	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper")
+	if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
+	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
+
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d After HG wait\n", 
+	  __FILE__,__LINE__);
+#endif
 	
 	/* free the bds block handle */
-	if(CP_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle")
+	if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't free bds block handle");
+
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d After freeing block handle, data now in buf : %u\n", 
+		__FILE__,__LINE__, (uintptr_t)buf);
+#endif
+
 
 	/***********************************************************************************/
 	/* extract offsets and lengths for this dataspace selection*/
 
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d Before get offsets\n", 
+	  __FILE__,__LINE__);
+#endif
+
 	ret_value = H5Sget_offsets(space_id, dst_size, &offsets, &len, &num_entries);
 
+	
+#if DEBUG_COMPACTOR
+	fprintf(fp_new,"in %s:%d for request_id: %d ret_value %d, num_entries %d from get_offsets\n", 
+		__FILE__,__LINE__, request_id, ret_value, num_entries);
+
+	for (ii = 0; ii < num_entries; ii++){
+	  fprintf (fp_new,"offsets[%zd]: %lli, size[%zd]: %zd\n",
+		   ii, offsets[ii], ii, len[ii]);
+	}
+#endif
+
+	
       	newlist[request_id].fblocks = (block_container_t *) malloc 
 	  (num_entries * sizeof(block_container_t));
 	if (NULL == newlist[request_id].fblocks){
-	  HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+	HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, CP_FAIL,"Allocation error for block container");
 	}
 
       	newlist[request_id].mblocks = (block_container_t *) malloc 
 	  (num_entries * sizeof(block_container_t));
 	if (NULL == newlist[request_id].mblocks){
-	  HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, CP_FAIL,"Allocation error for block container")
 	}
 
 	newlist[request_id].request_id = request_id;
 	newlist[request_id].merged = 0;
 	newlist[request_id].num_fblocks = num_entries;
+
 	newlist[request_id].num_mblocks = num_entries; 
 	newlist[request_id].elementsize = dst_size;
 	newlist[request_id].dataset_id = iod_id;
@@ -330,13 +452,23 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	    chk_size = chk_size + len[ii];
 	  }
 	  else{
-	    HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,"Buffer does not match the selection offsets")
+	    #if DEBUG_COMPACTOR
+	    fprintf(fp_new, "%s(%d) Buffer does not match the selection offsets\n",
+		    __FILE__,__LINE__);
+	    #endif
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,"Buffer does not match the selection offsets");
 	  }
-	}
+#if DEBUG_COMPACTOR
+	  fprintf(fp_new,
+		  "\n %zd: foffsets %lli,  flen: %zd, moffset: %lli, mlen : %zd\n",
+		  ii,offsets[ii],len[ii],local_mcont_ptr[ii].offset, len[ii]);
+#endif
+
+        }
       } /*end else for appropriate selection*/
       request_id++;
     } /*end else for matching request type*/
-  
+    
     if (NULL != offsets){
       free(offsets);
       offsets = NULL;
@@ -350,6 +482,31 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
       t_entry = NULL;
     }
   }
+
+#if DEBUG_COMPACTOR
+  fprintf(fp_new,"nentires : %d############################################\n",
+	  request_id);
+  fprintf(fp_new,"Compactor Request List \n");
+  fprintf(fp_new,"id -- dataset -- dataspace -- fileblocks -- memblocks\n");
+  for ( i = 0; i < request_id; i++){
+    fprintf(fp_new, "%d -- %d -- %d -- %zd -- %zd\n",
+	    newlist[i].request_id,
+	    newlist[i].dataset_id,
+	    newlist[i].selection_id,
+	    newlist[i].num_fblocks,
+	    newlist[i].num_mblocks);
+  }
+  fprintf(fp_new,"#############################################\n");
+  for ( i = 0; i < num_datasets; i++){
+    fprintf(fp_new, "dataset: %d has %d requests \n ", unique_datasets[i].dataset,
+	    unique_datasets[i].num_requests);
+    for (j = 0; j < unique_datasets[i].num_requests; j++){
+      fprintf (fp_new, "%d ", unique_datasets[i].requests[j]);
+    }
+    fprintf(fp_new,"\n");
+
+  }
+#endif
   
   *list = newlist;
   *numentries = request_id;
@@ -440,7 +597,7 @@ int H5VL_iod_select_overlap (hid_t dataspace_1,
  * Return:	Success:	CP_SUCCESS 
  *		Failure:	Negative
  *
- * Programmer:  Vishwanth Venkatesan
+o * Programmer:  Vishwanth Venkatesan
  *              June, 2013
  *
  *-------------------------------------------------------------------------
@@ -466,7 +623,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 
   lselected_req = (int *) malloc ( num_requests * sizeof(int));
   if ( NULL == lselected_req){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Memory allocation error for selected requests")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for selected requests")
   }
 
   current_space = list[0].selection_id;
@@ -533,7 +690,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 					      list);
   sf_block = (block_container_t *) malloc ( fblks * sizeof(block_container_t));
   if (NULL == sf_block)
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for sf_block")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for sf_block")
 
   mblks = H5VL_iod_get_selected_mblocks_count(lselected_req,
 					      num_selected,
@@ -541,7 +698,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
     
   sm_block = (block_container_t *) malloc (mblks * sizeof(block_container_t));
   if (NULL == sm_block)
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for sm_block")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for sm_block")
 
   assert (fblks == mblks);    
 
@@ -580,7 +737,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 
   sorted = (int *) malloc (blck_cnt * sizeof(int));
   if ( NULL == sorted ){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for sorted array")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for sorted array")
   }
 
   H5VL_iod_sort_block_container (sf_block,
@@ -589,11 +746,11 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   
   moffsets = (hsize_t *) malloc (blck_cnt * sizeof(hsize_t));
   if ( NULL == moffsets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for moffsets array")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for moffsets array")
   }
   mlen = (size_t *) malloc (blck_cnt * sizeof(size_t));
   if ( NULL == moffsets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for mlen array")
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for mlen array")
   }
   
   moffsets[0] = sf_block[0].offset;
@@ -616,7 +773,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   merged_request->fblocks = (block_container_t *) malloc (m_entries * 
 							  sizeof(block_container_t));
   if (NULL == merged_request->fblocks)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, CP_FAIL,"Allocation error for block container")
       
   for ( j = 0; j<m_entries; j++){
     merged_request->fblocks[j].offset = goffsets[j];
@@ -635,7 +792,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   merged_request->mblocks = (block_container_t *) malloc (mblks * 
 							  sizeof(block_container_t));
   if (NULL == merged_request->mblocks)
-    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, HG_FAIL,"Allocation error for block container")
+    HGOTO_ERROR(H5E_SYM, H5E_CANTALLOC, CP_FAIL,"Allocation error for block container")
       
   for ( j = 0; j< mblks; j++){ 
     merged_request->mblocks[j].offset = sm_block[j].offset;
@@ -830,11 +987,11 @@ static int H5VL_iod_sort_block_container (block_container_t *io_array,
     FUNC_ENTER_NOAPI(NULL)
     
     if (NULL == sorted || NULL == io_array || num_entries == 0)
-      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HG_FAIL,"Sorted-array/io_array/entries is NULL");
+      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, CP_FAIL,"Sorted-array/io_array/entries is NULL");
 
     temp_arr = (int*)malloc(num_entries*sizeof(int));
     if (NULL == temp_arr) {
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, HG_FAIL,"Allocation error for temp_arr")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for temp_arr")
     }
 
     temp_arr[0] = 0;

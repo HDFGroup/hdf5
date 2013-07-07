@@ -23,6 +23,8 @@
 
 #ifdef H5_HAVE_EFF
 
+
+
 /* the AXE op data strucutre stored with every operation */
 typedef struct op_data_t {
     void *input;
@@ -36,6 +38,8 @@ typedef struct scratch_pad_t {
     iod_obj_id_t filler1_id;   /* filler value - not used */
     iod_obj_id_t filler2_id;   /* filler value - not used */
 } scratch_pad_t;
+
+
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
@@ -75,6 +79,7 @@ H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
+
 H5_DLL int H5VL_iod_server_dset_compactor(op_data_t *op_data, 
 					  int request_type);
 
