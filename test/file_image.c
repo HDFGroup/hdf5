@@ -1207,6 +1207,9 @@ test_get_file_image_error_rejection(void)
     err = H5Fclose(file_id);
     VERIFY(err == SUCCEED, "H5Fclose(2) failed.");
 
+    /* tidy up */
+    result = h5_cleanup(FILENAME2, fapl_id);
+    VERIFY(result != 0, "h5_cleanup(2 failed.");
 
     /************************** Test #4 **********************************/
     /* set up a family file driver test file, and try to get its image 

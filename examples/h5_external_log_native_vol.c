@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "mpi.h"
 #include "hdf5.h"
 
 #define LOG 502
@@ -58,6 +57,7 @@ static const H5VL_class_t H5VL_log_g = {
         NULL, //H5VL_log_attr_open,                  /* open */
         NULL, //H5VL_log_attr_read,                  /* read */
         NULL, //H5VL_log_attr_write,                 /* write */
+        NULL, //H5VL_log_attr_iterate,
         NULL, //H5VL_log_attr_get,                   /* get */
         NULL, //H5VL_log_attr_remove,                /* remove */
         NULL  //H5VL_log_attr_close                  /* close */
@@ -66,6 +66,7 @@ static const H5VL_class_t H5VL_log_g = {
         H5VL_log_datatype_commit,            /* commit */
         H5VL_log_datatype_open,              /* open */
         H5VL_log_datatype_get_binary,          /* get_size */
+        NULL,//H5VL_log_datatype_get
         H5VL_log_datatype_close              /* close */
     },
     {                                           /* dataset_cls */
@@ -162,8 +163,6 @@ int main(int argc, char **argv) {
         char name[25];
         static hsize_t      ds_size[2] = {10, 20};
 
-	MPI_Init(&argc, &argv);
-
         under_fapl = H5Pcreate (H5P_FILE_ACCESS);
         H5Pset_fapl_native(under_fapl);
         vol_id = H5VLregister (&H5VL_log_g);
@@ -184,7 +183,7 @@ int main(int argc, char **argv) {
         printf ("DT COMMIT name = %s  %d\n", name, len);
         H5Tclose(int_id);
 
-        int_id = H5Topen(file_id, "int", H5P_DEFAULT);
+        int_id = H5Topen2(file_id, "int", H5P_DEFAULT);
         len = H5VLget_plugin_name(int_id, name, 50);
         printf ("DT OPEN name = %s  %d\n", name, len);
         H5Tclose(int_id);
@@ -205,7 +204,7 @@ int main(int argc, char **argv) {
         space = H5Screate_simple (2, ds_size, ds_size);
 
 	sprintf(fullpath,"%s/%s",group_name,dataset_name);
-	datasetId = H5Dcreate(file_id,fullpath,H5T_NATIVE_INT,dataspaceId,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+	datasetId = H5Dcreate2(file_id,fullpath,H5T_NATIVE_INT,dataspaceId,H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
 	H5Sclose(dataspaceId);
 
         len = H5VLget_plugin_name(datasetId, name, 50);
@@ -245,7 +244,6 @@ int main(int argc, char **argv) {
         H5Pclose(under_fapl);
         
         H5VLunregister (vol_id);
-	MPI_Finalize();
 
 	return 0;
 }

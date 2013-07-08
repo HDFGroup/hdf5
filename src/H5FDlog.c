@@ -795,7 +795,7 @@ H5FD_log_close(H5FD_t *_file)
         if(file->fa.flags & H5FD_LOG_FLAVOR)
             file->flavor = (unsigned char *)H5MM_xfree(file->flavor);
         if(file->logfp != stderr)
-            fclose(file->logfp);
+            HDfclose(file->logfp);
     } /* end if */
 
     /* Release the file info */

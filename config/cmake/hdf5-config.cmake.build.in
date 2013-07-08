@@ -18,9 +18,17 @@ SET (HDF5_ENABLE_SZIP_ENCODING @HDF5_ENABLE_SZIP_ENCODING@)
 SET (HDF5_BUILD_SHARED_LIBS    @BUILD_SHARED_LIBS@)
 
 #-----------------------------------------------------------------------------
+# Dependencies
+#-----------------------------------------------------------------------------
+IF(HDF5_ENABLE_PARALLEL)
+  SET(HDF5_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_PATH@")
+  SET(HDF5_MPI_C_LIBRARIES    "@MPI_C_LIBRARIES@")
+ENDIF(HDF5_ENABLE_PARALLEL)
+
+#-----------------------------------------------------------------------------
 # Directories
 #-----------------------------------------------------------------------------
-SET (HDF5_INCLUDE_DIR "@HDF5_INCLUDES_BUILD_TIME@")
+SET (HDF5_INCLUDE_DIR "@HDF5_INCLUDES_BUILD_TIME@" "${HDF5_MPI_C_INCLUDE_PATH}" )
 
 IF (HDF5_BUILD_FORTRAN)
   SET (HDF5_INCLUDE_DIR_FORTRAN "@CMAKE_Fortran_MODULE_DIRECTORY@" )

@@ -149,6 +149,17 @@
 #   include <io.h>
 #endif
 
+/*
+ * Dynamic library handling.  These are needed for dynamically loading I/O
+ * filters and VFDs.
+ */
+#ifdef H5_HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+#ifdef H5_HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 
 #ifdef H5_HAVE_WIN32_API
 /* The following two defines must be before any windows headers are included */
@@ -833,6 +844,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDgetgroups
     #define HDgetgroups(Z,G)  getgroups(Z,G)
 #endif /* HDgetgroups */
+#ifndef HDgethostname
+    #define HDgethostname(N,L)    gethostname(N,L)
+#endif /* HDgetlogin */
 #ifndef HDgetlogin
     #define HDgetlogin()    getlogin()
 #endif /* HDgetlogin */
@@ -2335,7 +2349,11 @@ func_init_failed:                    \
 #define H5_GLUE4(w,x,y,z)  w##x##y##z
 
 /* Compile-time "assert" macro */
-#define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
+#define HDcompile_assert(e)     ((void)sizeof(char[ !!(e) ? 1 : -1]))
+/* Variants that are correct, but generate compile-time warnings in some circumstances:
+  #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
+  #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
+*/
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
@@ -2346,12 +2364,14 @@ H5_DLL int H5A_term_interface(void);
 H5_DLL int H5AC_term_interface(void);
 H5_DLL int H5D_term_interface(void);
 H5_DLL int H5E_term_interface(void);
+H5_DLL int H5EQ_term_interface(void);
 H5_DLL int H5F_term_interface(void);
 H5_DLL int H5FS_term_interface(void);
 H5_DLL int H5G_term_interface(void);
 H5_DLL int H5I_term_interface(void);
 H5_DLL int H5L_term_interface(void);
 H5_DLL int H5P_term_interface(void);
+H5_DLL int H5PL_term_interface(void);
 H5_DLL int H5R_term_interface(void);
 H5_DLL int H5S_term_interface(void);
 H5_DLL int H5T_term_interface(void);

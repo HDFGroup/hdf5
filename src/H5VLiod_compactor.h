@@ -31,9 +31,10 @@
  *------------------------------------------------------------------*/
 
 
-
-
 #include "H5VLiod_compactor_queue.h"
+
+
+compactor *curr_queue;
 
 typedef struct {
   hsize_t offset;
@@ -62,6 +63,7 @@ typedef struct {
   char *mem_buffer;            /* The Memory buffer address (contiguous) */
   size_t mem_length;           /* Length of the Memory buffer */
 } request_list_t;
+
 
 
 /*----------------------------------------------------------------------------------- */

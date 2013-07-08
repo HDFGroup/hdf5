@@ -54,6 +54,9 @@ H5_DLL void *H5VL_attr_create(void *obj, H5VL_loc_params_t loc_params, H5VL_t *v
 H5_DLL void *H5VL_attr_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t aapl_id, hid_t dxpl_id, hid_t event_q);
 H5_DLL herr_t H5VL_attr_read(void *attr, H5VL_t *vol_plugin, hid_t dtype_id, void *buf, hid_t dxpl_id, hid_t event_q);
 H5_DLL herr_t H5VL_attr_write(void *attr, H5VL_t *vol_plugin, hid_t dtype_id, const void *buf, hid_t dxpl_id, hid_t event_q);
+H5_DLL herr_t H5VL_attr_iterate(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, 
+                                H5_index_t idx_type, H5_iter_order_t order, hsize_t *n, 
+                                H5A_operator2_t op, void *op_data, hid_t dxpl_id, hid_t event_q);
 H5_DLL herr_t H5VL_attr_get(void *attr, H5VL_t *vol_plugin, H5VL_attr_get_t get_type, hid_t dxpl_id, hid_t event_q, ...);
 H5_DLL herr_t H5VL_attr_remove(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin,  const char *attr_name, hid_t dxpl_id, hid_t event_q);
 H5_DLL herr_t H5VL_attr_close(void *attr, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t event_q);
@@ -69,6 +72,7 @@ H5_DLL herr_t H5VL_dataset_close(void *dset, H5VL_t *vol_plugin, hid_t dxpl_id, 
 H5_DLL void *H5VL_datatype_commit(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, hid_t event_q);
 H5_DLL void *H5VL_datatype_open(void *obj, H5VL_loc_params_t loc_params, H5VL_t *vol_plugin, const char *name, hid_t tapl_id, hid_t dxpl_id, hid_t event_q);
 H5_DLL ssize_t H5VL_datatype_get_binary(void *obj, H5VL_t *vol_plugin, unsigned char *buf, size_t size, hid_t dxpl_id, hid_t event_q);
+H5_DLL herr_t H5VL_datatype_get(void *dt, H5VL_t *vol_plugin, H5VL_datatype_get_t get_type, hid_t dxpl_id, hid_t event_q, ...);
 H5_DLL herr_t H5VL_datatype_close(void *dt, H5VL_t *vol_plugin, hid_t dxpl_id, hid_t event_q);
 
 H5_DLL void *H5VL_file_create(H5VL_t **vol_plugin, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, hid_t event_q);

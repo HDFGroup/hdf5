@@ -129,7 +129,7 @@ H5EQ_init_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Initialize the atom group for the file IDs */
+    /* Initialize the atom group for the EQ IDs */
     if(H5I_register_type(H5I_EQ_CLS) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize interface")
 

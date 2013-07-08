@@ -94,6 +94,7 @@ static herr_t H5VL_iod_attribute_close(void *attr, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static ssize_t H5VL_iod_datatype_get_binary(void *obj, unsigned char *buf, size_t size, hid_t dxpl_id, void **req);
+static herr_t H5VL_iod_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
@@ -178,6 +179,7 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_attribute_open,                /* open */
         H5VL_iod_attribute_read,                /* read */
         H5VL_iod_attribute_write,               /* write */
+        NULL,//H5VL_iod_attr_iterate,               /* iterate */
         H5VL_iod_attribute_get,                 /* get */
         H5VL_iod_attribute_remove,              /* remove */
         H5VL_iod_attribute_close                /* close */
@@ -186,6 +188,7 @@ static H5VL_class_t H5VL_iod_g = {
         H5VL_iod_datatype_commit,               /* commit */
         H5VL_iod_datatype_open,                 /* open */
         H5VL_iod_datatype_get_binary,           /* get_size */
+        H5VL_iod_datatype_get,                  /* get */
         H5VL_iod_datatype_close                 /* close */
     },
     {                                           /* dataset_cls */
@@ -312,16 +315,22 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     MPI_Comm_size(comm, &num_procs);
     MPI_Comm_rank(comm, &my_rank);
 
+    /* generate global variables to create and track axe_ids for every
+       operation. Each process owns a portion of the ID space and uses
+       that space incrementally. */
     axe_seed = (pow(2.0,64.0) - 1) / num_procs;
     axe_id = axe_seed * my_rank + 1;
     axe_bound = axe_seed * (my_rank + 1);
 
+    /* This is a temporary solution for connecting to the server using
+       mercury */
     if ((config = fopen("port.cfg", "r")) != NULL) {
         fread(mpi_port_name, sizeof(char), MPI_MAX_PORT_NAME, config);
         printf("Using MPI port name: %s.\n", mpi_port_name);
         fclose(config);
     }
 
+    /* initialize Mercury stuff */
     network_class = NA_MPI_Init(NULL, 0);
     if (HG_SUCCESS != HG_Init(network_class))
         return FAIL;
@@ -382,54 +391,11 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
 
     H5VL_CANCEL_OP_ID = MERCURY_REGISTER("cancel_op", uint64_t, uint8_t);
 
-    /* forward the init call to the IONs */
+    /* forward the init call to the ION and wait for its completion */
     if(HG_Forward(PEER, H5VL_EFF_INIT_ID, &num_procs, &ret_value, &hg_req) < 0)
         return FAIL;
-
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
 
-#if 0
-    {
-        int i;
-        uint64_t id;
-
-        for(i=0; i<10; i++) {
-            H5VL_iod_gen_obj_id(my_rank, num_procs, i, IOD_OBJ_KV, &id);
-            fprintf(stderr,"%d ID %d = %llu\n", my_rank, i, id);
-            while (id) {
-                if (id & 1)
-                    fprintf(stderr,"1");
-                else
-                    fprintf(stderr,"0");
-
-                id >>= 1;
-            }
-            fprintf(stderr,"\n");
-            H5VL_iod_gen_obj_id(my_rank, num_procs, i, IOD_OBJ_BLOB, &id);
-            fprintf(stderr,"%d ID %d = %llu\n", my_rank, i, id);
-            while (id) {
-                if (id & 1)
-                    fprintf(stderr,"1");
-                else
-                    fprintf(stderr,"0");
-
-                id >>= 1;
-            }
-            fprintf(stderr,"\n");
-            H5VL_iod_gen_obj_id(my_rank, num_procs, i, IOD_OBJ_ARRAY, &id);
-            fprintf(stderr,"%d ID %d = %llu\n", my_rank, i, id);
-            while (id) {
-                if (id & 1)
-                    fprintf(stderr,"1");
-                else
-                    fprintf(stderr,"0");
-
-                id >>= 1;
-            }
-            fprintf(stderr,"\n");
-        }
-    }
-#endif
     return ret_value;
 } /* end EFF_init() */
 
@@ -452,10 +418,9 @@ EFF_finalize(void)
     hg_request_t hg_req;
     herr_t ret_value = SUCCEED;
 
-    /* forward the finalize call to the IONs */
+    /* forward the finalize call to the ION and wait for it to complete */
     if(HG_Forward(PEER, H5VL_EFF_FINALIZE_ID, &ret_value, &ret_value, &hg_req) < 0)
         return FAIL;
-
     HG_Wait(hg_req, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE);
 
     /* Free addr id */
@@ -541,7 +506,7 @@ H5VL_iod_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
     /* Copy the general information */
-    //HDmemcpy(new_fa, old_fa, sizeof(H5VL_iod_fapl_t));
+    /* HDmemcpy(new_fa, old_fa, sizeof(H5VL_iod_fapl_t)); */
 
     /* Duplicate communicator and Info object. */
     if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
@@ -593,6 +558,21 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_fapl_free() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dxpl_checksum
+ *
+ * Purpose:     Modify the dataset transfer property list to set a
+ *              checksum value for the data to be transfered. 
+ *              This is used with write operations.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dxpl_checksum(hid_t dxpl_id, uint32_t cs)
 {
@@ -617,6 +597,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_checksum() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dxpl_checksum
+ *
+ * Purpose:     Retrieve the checksum value that was set using 
+ *              H5Pset_dxpl_checksum.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dxpl_checksum(hid_t dxpl_id, uint32_t *cs/*out*/)
 {
@@ -638,6 +632,21 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_checksum() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dxpl_checksum_ptr
+ *
+ * Purpose:     Set a pointer to tell the library where to insert the
+ *              checksum that is received from a remote location. 
+ *              This is used with read operations.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t *cs)
 {
@@ -662,6 +671,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_checksum_ptr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dxpl_checksum_ptr
+ *
+ * Purpose:     Retrieve the checksum pointer value that was set using 
+ *              H5Pset_dxpl_checksum_ptr.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dxpl_checksum_ptr(hid_t dxpl_id, uint32_t **cs/*out*/)
 {
@@ -683,6 +706,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_checksum_ptr() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dxpl_inject_corruption
+ *
+ * Purpose:     Temporary routine to set a boolean flag that tells the 
+ *              library to inject corruption in the stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dxpl_inject_corruption(hid_t dxpl_id, hbool_t flag)
 {
@@ -707,6 +744,20 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dxpl_inject_corruption() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dxpl_inject_corruption
+ *
+ * Purpose:     Temporary routine to retrieve the boolean flag that tells the 
+ *              library to inject corruption in the stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dxpl_inject_corruption(hid_t dxpl_id, hbool_t *flag/*out*/)
 {
@@ -728,6 +779,21 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_dxpl_inject_corruption() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dcpl_append_only
+ *
+ * Purpose:     Set a boolean flag on the dataset creation property list 
+ *              to indicate to the VOL plugin that access to this dataset 
+ *              will always be in an append/sequence only manner.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pset_dcpl_append_only(hid_t dcpl_id, hbool_t flag)
 {
@@ -752,6 +818,21 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dcpl_append_only() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_dcpl_append_only
+ *
+ * Purpose:     Retrieve a boolean flag on the dataset creation property list 
+ *              that indicates whether access to this dataset 
+ *              will always be in an append/sequence only manner.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Pget_dcpl_append_only(hid_t dcpl_id, hbool_t *flag/*out*/)
 {
@@ -870,7 +951,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
 
     file->common.obj_type = H5I_FILE;
     /* The name of the location is the root's object name "\" */
-    file->common.obj_name = strdup("/");
+    file->common.obj_name = HDstrdup("/");
     file->common.obj_name[1] = '\0';
     file->common.file = file;
 
@@ -1003,7 +1084,7 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
 
     file->common.obj_type = H5I_FILE; 
     /* The name of the location is the root's object name "\" */
-    file->common.obj_name = strdup("/");
+    file->common.obj_name = HDstrdup("/");
     file->common.obj_name[1] = '\0';
     file->common.file = file;
 
@@ -1470,7 +1551,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
-    char *new_name; /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -1545,12 +1626,16 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
-    if (NULL == (grp->common.obj_name = (char *)malloc
-                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcpy(grp->common.obj_name, obj->obj_name);
-    HDstrcat(grp->common.obj_name, name);
-    grp->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(grp->common.obj_name+obj_name_len, name, name_len);
+        grp->common.obj_name[obj_name_len+name_len] = '\0';
+    }
 
     /* copy property lists */
     if((grp->remote_group.gcpl_id = H5Pcopy(gcpl_id)) < 0)
@@ -1606,7 +1691,7 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     ret_value = (void *)grp;
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_create() */
 
@@ -1634,7 +1719,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
-    char *new_name; /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -1690,12 +1775,16 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
-    if (NULL == (grp->common.obj_name = (char *)malloc
-                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcpy(grp->common.obj_name, obj->obj_name);
-    HDstrcat(grp->common.obj_name, name);
-    grp->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(grp->common.obj_name+obj_name_len, name, name_len);
+        grp->common.obj_name[obj_name_len+name_len] = '\0';
+    }
 
     /* copy property lists */
     if((grp->gapl_id = H5Pcopy(gapl_id)) < 0)
@@ -1749,7 +1838,7 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     ret_value = (void *)grp;
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_open() */
 
@@ -1828,6 +1917,13 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(!do_async) {
+        if(H5VL_iod_request_wait_some(grp->common.file, grp) < 0)
+            HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
+    }
 
     /* allocate an integer to receive the return value if the group close succeeded or not */
     status = (int *)malloc(sizeof(int));
@@ -1926,7 +2022,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
-    char *new_name; /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -2003,12 +2099,16 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
-    if (NULL == (dset->common.obj_name = (char *)malloc
-                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcpy(dset->common.obj_name, obj->obj_name);
-    HDstrcat(dset->common.obj_name, name);
-    dset->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(dset->common.obj_name+obj_name_len, name, name_len);
+        dset->common.obj_name[obj_name_len+name_len] = '\0';
+    }
 
     /* copy property lists, dtype, and dspace*/
     if((dset->remote_dset.dcpl_id = H5Pcopy(dcpl_id)) < 0)
@@ -2069,7 +2169,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     ret_value = (void *)dset;
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_create() */
 
@@ -2097,7 +2197,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
-    char *new_name; /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -2151,14 +2251,22 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
-    if (NULL == (dset->common.obj_name = (char *)malloc
-                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcpy(dset->common.obj_name, obj->obj_name);
-    HDstrcat(dset->common.obj_name, name);
-    dset->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(dset->common.obj_name+obj_name_len, name, name_len);
+        dset->common.obj_name[obj_name_len+name_len] = '\0';
+    }
+
+#if H5VL_IOD_DEBUG
     printf("Dataset Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
            dset->common.obj_name, input.loc_id, input.axe_id, input.parent_axe_id);
+#endif
+
     if((dset->dapl_id = H5Pcopy(dapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
@@ -2211,7 +2319,7 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     ret_value = (void *)dset;
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_open() */
 
@@ -2400,12 +2508,13 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     info->buf_ptr = buf;
     info->nelmts = nelmts;
     info->type_size = type_size;
+    info->cs_ptr = NULL;
     /* store a copy of the dataspace selection to be able to calculate the checksum later */
     if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
     /* Get the dxpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     /* store the pointer to the buffer where the checksum needs to be placed */
     if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
@@ -2558,7 +2667,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
         /* Get the dcpl plist structure */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
         if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
@@ -2966,8 +3075,15 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
        -1 == dset->remote_dset.space_id) {
         /* Synchronously wait on the request attached to the dataset */
         if(H5VL_iod_request_wait(dset->common.file, dset->common.request) < 0)
-            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait dset request");
         dset->common.request = NULL;
+    }
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(!do_async) {
+        if(H5VL_iod_request_wait_some(dset->common.file, dset) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
 
     /* determine the parent axe IDs array for this operation*/
@@ -3045,6 +3161,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
         /* Synchronously wait on the request */
         if(H5VL_iod_request_wait(dset->common.file, request) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on HG request");
+
         /* Sanity check */
         HDassert(request == &_request);
     } /* end else */
@@ -3079,7 +3196,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     dtype_commit_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
-    char *new_name; /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -3143,12 +3260,16 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
 
     /* setup the local datatype struct */
     /* store the entire path of the datatype locally */
-    if (NULL == (dtype->common.obj_name = (char *)malloc
-                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcpy(dtype->common.obj_name, obj->obj_name);
-    HDstrcat(dtype->common.obj_name, name);
-    dtype->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (dtype->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(dtype->common.obj_name+obj_name_len, name, name_len);
+        dtype->common.obj_name[obj_name_len+name_len] = '\0';
+    }
 
     /* store a copy of the datatype parameters*/
     if((dtype->remote_dtype.tcpl_id = H5Pcopy(tcpl_id)) < 0)
@@ -3206,6 +3327,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
 
     ret_value = (void *)dtype;
 done:
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_datatype_commit() */
 
@@ -3232,7 +3354,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     dtype_open_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
-    char *new_name; /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -3286,12 +3408,16 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
 
     /* setup the local datatype struct */
     /* store the entire path of the datatype locally */
-    if (NULL == (dtype->common.obj_name = (char *)malloc
-                 (HDstrlen(obj->obj_name) + HDstrlen(name) + 1)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-    HDstrcpy(dtype->common.obj_name, obj->obj_name);
-    HDstrcat(dtype->common.obj_name, name);
-    dtype->common.obj_name[HDstrlen(obj->obj_name) + HDstrlen(name) + 1] = '\0';
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (dtype->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(dtype->common.obj_name+obj_name_len, name, name_len);
+        dtype->common.obj_name[obj_name_len+name_len] = '\0';
+    }
 
     if((dtype->tapl_id = H5Pcopy(tapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy tapl");
@@ -3345,6 +3471,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     ret_value = (void *)dtype;
 
 done:
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_datatype_open() */
 
@@ -3383,6 +3510,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_datatype_get
+ *
+ * Purpose:	Gets certain information about a datatype
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_datatype_get(void UNUSED *obj, H5VL_datatype_get_t get_type, 
+                      hid_t UNUSED dxpl_id, void UNUSED **req, va_list arguments)
+{
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        /* H5Tget_create_plist */
+        case H5VL_DATATYPE_GET_TCPL:
+            {
+                /* Nothing to return here */
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from datatype")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_datatype_get() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_datatype_close
  *
  * Purpose:	Closes an datatype.
@@ -3405,11 +3569,17 @@ H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
-    uint64_t parent_axe_id;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(!do_async) {
+        if(H5VL_iod_request_wait_some(dtype->common.file, dtype) < 0)
+            HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
+    }
 
     /* set the parent axe id */
     if(dtype->common.request)
@@ -3454,6 +3624,11 @@ H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
     request->next = request->prev = NULL;
     /* add request to container's linked list */
     H5VL_iod_request_add(dtype->common.file, request);
+
+#if H5VL_IOD_DEBUG
+    printf("Datatype Close %s, axe id %llu, parent %d\n", 
+           dtype->common.obj_name, input.axe_id, input.parent_axe_id);
+#endif
 
     /* Store/wait on request */
     if(do_async) {
@@ -3501,7 +3676,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     H5P_genplist_t *plist;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
-    char *new_name;   /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL;   /* resolved path to where we need to start traversal at the server */
     const char *path; /* path on where the traversal starts relative to the location object specified */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -3558,11 +3733,6 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.space_id = space_id;
     input.axe_id = axe_id ++;
 
-#if H5VL_IOD_DEBUG
-    printf("Attribute Create %s IOD ID %llu, axe id %llu, parent %llu\n", 
-           attr_name, input.attr_id, input.axe_id, input.parent_axe_id);
-#endif
-
     /* get a function shipper request */
     if(do_async) {
         if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
@@ -3583,17 +3753,26 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
         attr->loc_name = HDstrdup(obj->obj_name);
     }
     else if (loc_params.type == H5VL_OBJECT_BY_NAME) {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len;
+
         path = loc_params.loc_data.loc_by_name.name;
-        if (NULL == (attr->loc_name = (char *)malloc
-                     (HDstrlen(obj->obj_name) + HDstrlen(path) + 1)))
+        name_len = HDstrlen(path);
+
+        if (NULL == (attr->loc_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-        HDstrcpy(attr->loc_name, obj->obj_name);
-        HDstrcat(attr->loc_name, path);
-        attr->loc_name[HDstrlen(obj->obj_name) + HDstrlen(path) + 1] = '\0';
+        HDmemcpy(attr->loc_name, obj->obj_name, obj_name_len);
+        HDmemcpy(attr->loc_name+obj_name_len, path, name_len);
+        attr->loc_name[obj_name_len+name_len] = '\0';
     }
 
     /* store the name of the attribute locally */
     attr->common.obj_name = strdup(attr_name);
+
+#if H5VL_IOD_DEBUG
+    printf("Attribute Create %s IOD ID %llu, axe id %llu, parent %llu\n", 
+           attr_name, input.attr_id, input.axe_id, input.parent_axe_id);
+#endif
 
     /* copy property lists, dtype, and dspace*/
     if((attr->remote_attr.acpl_id = H5Pcopy(acpl_id)) < 0)
@@ -3652,7 +3831,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     ret_value = (void *)attr;
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_create() */
 
@@ -3677,7 +3856,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the attribute */
     H5VL_iod_attr_t *attr = NULL; /* the attribute object that is created and passed to the user */
     attr_open_in_t input;
-    char *new_name;   /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL;   /* resolved path to where we need to start traversal at the server */
     const char *path; /* path on where the traversal starts relative to the location object specified */
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
@@ -3741,13 +3920,17 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
         attr->loc_name = HDstrdup(obj->obj_name);
     }
     else if (loc_params.type == H5VL_OBJECT_BY_NAME) {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len;
+
         path = loc_params.loc_data.loc_by_name.name;
-        if (NULL == (attr->loc_name = (char *)malloc
-                     (HDstrlen(obj->obj_name) + HDstrlen(path) + 1)))
+        name_len = HDstrlen(path);
+
+        if (NULL == (attr->loc_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-        HDstrcpy(attr->loc_name, obj->obj_name);
-        HDstrcat(attr->loc_name, path);
-        attr->loc_name[HDstrlen(obj->obj_name) + HDstrlen(path) + 1] = '\0';
+        HDmemcpy(attr->loc_name, obj->obj_name, obj_name_len);
+        HDmemcpy(attr->loc_name+obj_name_len, path, name_len);
+        attr->loc_name[obj_name_len+name_len] = '\0';
     }
 
     /* store the name of the attribute locally */
@@ -3802,7 +3985,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     ret_value = (void *)attr;
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_open() */
 
@@ -4095,7 +4278,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     attr_op_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
-    char *new_name;   /* resolved path to where we need to start traversal at the server */
+    char *new_name = NULL;   /* resolved path to where we need to start traversal at the server */
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
     H5VL_iod_request_t _request; /* Local request, for sync. operations */
@@ -4172,9 +4355,7 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     } /* end else */
 
 done:
-
-    free(new_name);
-
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_remove() */
 
@@ -4299,7 +4480,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 H5VL_loc_params_t loc_params = va_arg (arguments, H5VL_loc_params_t);
                 char *attr_name = va_arg (arguments, char *);
                 htri_t *ret = va_arg (arguments, htri_t *);
-                char *new_name;
+                char *new_name = NULL;
                 attr_op_in_t input;
 
                 /* Retrieve the parent AXE id by traversing the path where the
@@ -4364,7 +4545,7 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                     HDassert(request == &_request);
                 } /* end else */
 
-                free(new_name);
+                if(new_name) free(new_name);
                 break;
             }
         /* H5Aget_info */
@@ -4441,6 +4622,13 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
         if(H5VL_iod_request_wait(attr->common.file, attr->common.request) < 0)
             HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
         attr->common.request = NULL;
+    }
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(!do_async) {
+        if(H5VL_iod_request_wait_some(attr->common.file, attr) < 0)
+            HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
 
     /* get all the parents required to complete before this operation can start */
@@ -4740,10 +4928,10 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
         HDassert(request == &_request);
     } /* end else */
 
-    free(loc_name);
-    free(new_name);
-
 done:
+    if(loc_name) free(loc_name);
+    if(new_name) free(new_name);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_create() */
 
@@ -4804,13 +4992,16 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
         char *link_name = NULL;
 
         /* generate the entire path of the new link */
-        if (NULL == (link_name = (char *)malloc(HDstrlen(dst_obj->obj_name) + 
-                                                HDstrlen(loc_params2.loc_data.loc_by_name.name) + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
-        HDstrcpy(link_name, dst_obj->obj_name);
-        HDstrcat(link_name, loc_params2.loc_data.loc_by_name.name);
-        link_name[HDstrlen(dst_obj->obj_name) + 
-                  HDstrlen(loc_params2.loc_data.loc_by_name.name) + 1] = '\0';
+        {
+            size_t obj_name_len = HDstrlen(dst_obj->obj_name);
+            size_t name_len = HDstrlen(loc_params2.loc_data.loc_by_name.name);
+
+            if (NULL == (link_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate");
+            HDmemcpy(link_name, dst_obj->obj_name, obj_name_len);
+            HDmemcpy(link_name+obj_name_len, loc_params2.loc_data.loc_by_name.name, name_len);
+            link_name[obj_name_len+name_len] = '\0';
+        }
         //H5VL_iod_update_link(dst_obj, loc_params2, link_name);
         free(link_name);
     }
@@ -4888,8 +5079,8 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     } /* end else */
 
 done:
-    free(src_name);
-    free(dst_name);
+    if(src_name) free(src_name);
+    if(dst_name) free(dst_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_move() */
@@ -5022,7 +5213,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                     HDassert(request == &_request);
                 } /* end else */
 
-                free(new_name);
+                if(new_name) free(new_name);
                 break;
             }
         /* H5Lget_info/H5Lget_info_by_idx */
@@ -5153,8 +5344,8 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
         HDassert(request == &_request);
     } /* end else */
 
-    free(new_name);
 done:
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_remove() */
 
@@ -5181,7 +5372,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     H5VL_iod_request_t request; /* Local request, for sync. operations */
     H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
     object_op_in_t input;
-    char *new_name;
+    char *new_name = NULL;
     void *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -5243,14 +5434,18 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 /* setup the local dataset struct */
                 /* store the entire path of the dataset locally */
-                if (NULL == (dset->common.obj_name = (char *)malloc
-                             (HDstrlen(obj->obj_name) + 
-                              HDstrlen(loc_params.loc_data.loc_by_name.name) + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDstrcpy(dset->common.obj_name, obj->obj_name);
-                HDstrcat(dset->common.obj_name, loc_params.loc_data.loc_by_name.name);
-                dset->common.obj_name[HDstrlen(obj->obj_name) + 
-                                      HDstrlen(loc_params.loc_data.loc_by_name.name) + 1] = '\0';
+                {
+                    size_t obj_name_len = HDstrlen(obj->obj_name);
+                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+                    if (NULL == (dset->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                    HDmemcpy(dset->common.obj_name, obj->obj_name, obj_name_len);
+                    HDmemcpy(dset->common.obj_name+obj_name_len, 
+                             loc_params.loc_data.loc_by_name.name, name_len);
+                    dset->common.obj_name[obj_name_len+name_len] = '\0';
+                }
+
                 if((dset->dapl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
@@ -5284,14 +5479,19 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 /* setup the local dataset struct */
                 /* store the entire path of the dataset locally */
-                if (NULL == (dtype->common.obj_name = (char *)malloc
-                             (HDstrlen(obj->obj_name) + 
-                              HDstrlen(loc_params.loc_data.loc_by_name.name) + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDstrcpy(dtype->common.obj_name, obj->obj_name);
-                HDstrcat(dtype->common.obj_name, loc_params.loc_data.loc_by_name.name);
-                dtype->common.obj_name[HDstrlen(obj->obj_name) + 
-                                      HDstrlen(loc_params.loc_data.loc_by_name.name) + 1] = '\0';
+                {
+                    size_t obj_name_len = HDstrlen(obj->obj_name);
+                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+                    if (NULL == (dtype->common.obj_name = (char *)HDmalloc
+                                 (obj_name_len + name_len + 1)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                    HDmemcpy(dtype->common.obj_name, obj->obj_name, obj_name_len);
+                    HDmemcpy(dtype->common.obj_name+obj_name_len, 
+                             loc_params.loc_data.loc_by_name.name, name_len);
+                    dtype->common.obj_name[obj_name_len+name_len] = '\0';
+                }
+
                 if((dtype->tapl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
@@ -5323,14 +5523,18 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
                 /* setup the local dataset struct */
                 /* store the entire path of the dataset locally */
-                if (NULL == (grp->common.obj_name = (char *)malloc
-                             (HDstrlen(obj->obj_name) + 
-                              HDstrlen(loc_params.loc_data.loc_by_name.name) + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-                HDstrcpy(grp->common.obj_name, obj->obj_name);
-                HDstrcat(grp->common.obj_name, loc_params.loc_data.loc_by_name.name);
-                grp->common.obj_name[HDstrlen(obj->obj_name) + 
-                                      HDstrlen(loc_params.loc_data.loc_by_name.name) + 1] = '\0';
+                {
+                    size_t obj_name_len = HDstrlen(obj->obj_name);
+                    size_t name_len = HDstrlen(loc_params.loc_data.loc_by_name.name);
+
+                    if (NULL == (grp->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                    HDmemcpy(grp->common.obj_name, obj->obj_name, obj_name_len);
+                    HDmemcpy(grp->common.obj_name+obj_name_len, 
+                             loc_params.loc_data.loc_by_name.name, name_len);
+                    grp->common.obj_name[obj_name_len+name_len] = '\0';
+                }
+
                 if((grp->gapl_id = H5Pcopy(H5P_GROUP_CREATE_DEFAULT)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
 
@@ -5348,7 +5552,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
     }
 
 done:
-    free(new_name);
+    if(new_name) free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_open */
 
@@ -5467,8 +5671,8 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *
     } /* end else */
 
 done:
-    free(new_src_name);
-    free(new_dst_name);
+    if(new_src_name) free(new_src_name);
+    if(new_dst_name) free(new_dst_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_copy() */
@@ -5537,7 +5741,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
             {
                 const char    *old_name  = va_arg (arguments, const char *);
                 const char    *new_name  = va_arg (arguments, const char *);
-                char *loc_name;
+                char *loc_name = NULL;
                 attr_rename_in_t input;
 
                 /* Retrieve the parent AXE id by traversing the path where the
@@ -5608,7 +5812,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                     HDassert(request == &_request);
                 } /* end else */
 
-                free(loc_name);
+                if(loc_name) free(loc_name);
                 break;
             }
         /* H5Oset_comment */
@@ -5682,7 +5886,7 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 if(loc_params.type == H5VL_OBJECT_BY_SELF)
                     obj->comment = HDstrdup(comment);
 
-                free(loc_name);
+                if(loc_name) free(loc_name);
                 break;
             }
         /* H5Oincr_refcount / H5Odecr_refcount */
@@ -5810,7 +6014,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HDassert(request == &_request);
                 } /* end else */
 
-                free(new_name);
+                if(new_name) free(new_name);
                 break;
             }
         /* H5Oget_comment / H5Oget_comment_by_name */
@@ -5915,7 +6119,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                     HDassert(request == &_request);
                 } /* end else */
 
-                free(new_name);
+                if(new_name) free(new_name);
                 break;
             }
         /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */

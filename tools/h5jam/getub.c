@@ -153,7 +153,7 @@ main (int argc, const char *argv[])
       exit (EXIT_FAILURE);
     }
 
-  buf = malloc ((unsigned)(size + 1));
+  buf = (char *)HDmalloc ((unsigned)(size + 1));
   if (buf == NULL)
     {
       HDclose (fd);

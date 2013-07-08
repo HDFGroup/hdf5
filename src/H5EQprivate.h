@@ -59,7 +59,6 @@ typedef struct H5EQ_t {
 /* Library Private Prototypes */
 /******************************/
 
-H5_DLL int H5EQ_term_interface(void);
 herr_t H5EQ_init(void);
 
 /* API wrappers */

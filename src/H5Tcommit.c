@@ -684,19 +684,20 @@ H5Tget_create_plist(hid_t dtype_id)
 
     /* Retrieve further information, if the datatype is committed */
     if(status > 0) {
-        H5P_genplist_t  *new_plist;     /* New datatype creation property list */
+        H5VL_t  *vol_plugin;        /* VOL plugin information */
+
+        /* get the plugin pointer */
+        if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(dtype_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
 
         /* get the named datatype object */
         if(NULL == (type = (H5T_t *)H5VL_get_object(dtype_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-        /* Get property list object for new TCPL */
-        if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_tcpl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-
-        /* Retrieve any object creation properties */
-        if(H5O_get_create_plist(&type->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
+        /* get the rest of the plist through the VOL */
+        if(H5VL_datatype_get(type, vol_plugin, H5VL_DATATYPE_GET_TCPL, 
+                             H5AC_dxpl_id, H5_EVENT_QUEUE_NULL, new_tcpl_id) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get datatype")
     } /* end if */
 
     /* Set the return value */
@@ -914,14 +915,47 @@ H5T_update_shared(H5T_t *dt)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Tget_named_type
+ *
+ * Purpose:	returns the VOL object or the named datatype structure 
+ *              if it exists. This is the public wrapper for H5T_get_named_type.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              June 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tget_vol_named_type(hid_t type_id, void **dt_obj)
+{
+    H5T_t *type;                /* datatype for operation */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i**x", type_id, dt_obj);
+
+    /* Check arguments */
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    *dt_obj = H5T_get_named_type(type);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tget_named_type() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_get_named_type
  *
  * Purpose:	returns the VOL object or the named datatype structure 
  *              if it exists
  *
- * Return:	Success:	Non-negative
+ * Return:	Success:	Pointer to the VOL Datatype object
  *
- *		Failure:	Negative
+ *		Failure:	NULL
  *
  * Programmer:	Mohamad Chaarawi
  *              June 2012

@@ -263,8 +263,8 @@ H5FD_mpiposix_init(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5I_VFL != H5Iget_type(H5FD_MPIPOSIX_g))
-        H5FD_MPIPOSIX_g = H5FD_register((const H5FD_class_t *)&H5FD_mpiposix_g,sizeof(H5FD_class_mpi_t),FALSE);
+    if(H5I_VFL != H5I_get_type(H5FD_MPIPOSIX_g))
+        H5FD_MPIPOSIX_g = H5FD_register((const H5FD_class_t *)&H5FD_mpiposix_g, sizeof(H5FD_class_mpi_t), FALSE);
 
     /* Set return value */
     ret_value = H5FD_MPIPOSIX_g;

@@ -1164,7 +1164,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
             minval |= minval_mask;
         }
 
-        assert(minbits <= p.size * 8);
+        HDassert(minbits <= p.size * 8);
         p.minbits = minbits;
 
         /* calculate size of output buffer after decompression */
@@ -1241,7 +1241,7 @@ H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts, const unsigned cd_value
                     HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, 0, "pre-compression failed")
             }
 
-        assert(minbits <= p.size * 8);
+        HDassert(minbits <= p.size * 8);
 
         /* calculate buffer size after compression
          * minbits and minval are stored in the front of the compressed buffer

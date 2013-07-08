@@ -592,6 +592,9 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
 
+/* VOL named datatype rouines */
+H5_DLL herr_t H5Tget_vol_named_type(hid_t type_id, void **dt_obj);
+
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
  * Use of these symbols is deprecated.

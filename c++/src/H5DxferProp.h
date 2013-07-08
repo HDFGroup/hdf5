@@ -66,12 +66,6 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 	void getVlenMemManager( H5MM_allocate_t& alloc, void** alloc_info,
 				H5MM_free_t& free, void** free_info ) const;
 
-	// Sets the data transfer property list for the multi-file driver.
-	void setMulti(const hid_t *memb_dxpl);
-
-	// Returns multi-file data transfer property list information.
-	void getMulti(hid_t *memb_dxpl);
-
 	// Sets the size of a contiguous block reserved for small data.
 	void setSmallDataBlockSize(hsize_t size);
 
@@ -109,3 +103,4 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 }
 #endif
 #endif
+

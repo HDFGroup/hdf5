@@ -62,6 +62,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5VL.c H5VLint.c H5VLnative.c \
         H5VLiod.c H5VLiod_client.c H5VLiod_server.c \
 	H5VLiod_encdec.c H5VLiod_compactor.c H5VLiod_compactor_queue.c \
+        H5VLiod_file.c H5VLiod_group.c H5VLiod_dset.c H5VLiod_dtype.c H5VLiod_attr.c H5VLiod_link.c H5VLiod_obj.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDint.c H5FDlog.c H5FDmpi.c H5FDmpio.c \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
@@ -94,6 +95,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c H5Pint.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5PL.c \
         H5R.c H5Rdeprec.c \
         H5RC.c \
         H5RS.c \
@@ -122,7 +124,9 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5VLpublic.h H5VLnative.h H5VLiod.h H5FFpublic.h H5EQpublic.h\
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
-        H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
+        H5MMpublic.h H5Opublic.h H5Ppublic.h \
+        H5PLextern.h \
+        H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h
 
 # install libhdf5.settings in lib directory

@@ -21,9 +21,12 @@
 
 #include "H5VLiod_common.h"
 
+
 #ifdef H5_HAVE_EFF
 
-
+#define EEXISTS 1
+#define H5_DO_NATIVE 0
+#define DEBUG_COMPACTOR 1
 
 /* the AXE op data strucutre stored with every operation */
 typedef struct op_data_t {
@@ -40,6 +43,12 @@ typedef struct scratch_pad_t {
 } scratch_pad_t;
 
 
+#if DEBUG_COMPACTOR
+FILE *fp;
+#endif
+
+int compactor_queue_flag;
+pthread_mutex_t lock;
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
@@ -82,6 +91,151 @@ H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
 
 H5_DLL int H5VL_iod_server_dset_compactor(op_data_t *op_data, 
 					  int request_type);
+
+
+H5_DLL void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,  
+					      size_t num_n_parents, AXE_task_t n_parents[], 
+					      size_t num_s_parents, AXE_task_t s_parents[], 
+					      void *queue);
+
+
+H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+H5_DLL void H5VL_iod_server_file_close_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_file_flush_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_attr_create_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_attr_open_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+H5_DLL void H5VL_iod_server_attr_read_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+H5_DLL void H5VL_iod_server_attr_write_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_attr_exists_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_attr_rename_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_attr_remove_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_attr_close_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_group_create_cb(AXE_engine_t axe_engine,  
+                                            size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
+                                            void *op_data);
+H5_DLL void H5VL_iod_server_group_open_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_group_close_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_dset_create_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_dset_open_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+H5_DLL void H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,  
+                                         size_t num_n_parents, AXE_task_t n_parents[], 
+                                         size_t num_s_parents, AXE_task_t s_parents[], 
+                                         void *op_data);
+H5_DLL void H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_dset_set_extent_cb(AXE_engine_t axe_engine,  
+                                               size_t num_n_parents, AXE_task_t n_parents[], 
+                                               size_t num_s_parents, AXE_task_t s_parents[], 
+                                               void *op_data);
+H5_DLL void H5VL_iod_server_dset_close_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_dtype_commit_cb(AXE_engine_t axe_engine,  
+                                            size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
+                                            void *op_data);
+H5_DLL void H5VL_iod_server_dtype_open_cb(AXE_engine_t axe_engine,  
+                                          size_t num_n_parents, AXE_task_t n_parents[], 
+                                          size_t num_s_parents, AXE_task_t s_parents[], 
+                                          void *op_data);
+H5_DLL void H5VL_iod_server_dtype_close_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_link_create_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_link_move_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_link_exists_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_link_remove_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+
+H5_DLL void H5VL_iod_server_object_open_cb(AXE_engine_t axe_engine,  
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_object_copy_cb(AXE_engine_t axe_engine, 
+                                           size_t num_n_parents, AXE_task_t n_parents[], 
+                                           size_t num_s_parents, AXE_task_t s_parents[], 
+                                           void *op_data);
+H5_DLL void H5VL_iod_server_object_exists_cb(AXE_engine_t axe_engine, 
+                                             size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
+                                             void *op_data);
+H5_DLL void H5VL_iod_server_object_set_comment_cb(AXE_engine_t axe_engine, 
+                                                  size_t num_n_parents, AXE_task_t n_parents[], 
+                                                  size_t num_s_parents, AXE_task_t s_parents[], 
+                                                  void *op_data);
+H5_DLL void H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine, 
+                                                  size_t num_n_parents, AXE_task_t n_parents[], 
+                                                  size_t num_s_parents, AXE_task_t s_parents[], 
+                                                  void *_op_data);
+
+H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
+                                       const char *path, hbool_t create_interm_grps,
+                                       char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

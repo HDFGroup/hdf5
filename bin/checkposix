@@ -27,60 +27,93 @@ require 5.003;
 #	   use `next-error' (usually bound to M-`) to find each name
 #	   violation.
 
-while (<>) {
+if(<>) {
+    if($ARGV =~ /\//) {
+        ($filename) = ($ARGV =~ /^.*\/([A-Za-z0-9_]*)\.c$/);
+    } else {
+        ($filename) = ($ARGV =~ /([A-Za-z0-9_]*)\.c$/);
+    }
 
-   # Get rid of comments by removing the inside part.
-   s|/\*.*?\*/||g;
-   if ($in_comment) {
-      if (/\*\//) {
-         s|.*?\*/||;
-         $in_comment = 0;
-      } else {
-         $_="\n";
-      }
-   } elsif (m|/\*|) {
-      s|/\*.*||;
-      $in_comment = 1;
-   }
+    if($filename =~ /H5FDmulti|H5FDstdio/) {
+        print "$ARGV is exempt from using Standard library macro wrappers\n";
+    } else {
+        while (<>) {
 
-   # Get rid of string constants if they begin and end on this line.
-   s/([\'\"])([^\1]|\\\1)*?\1/$1$1/g;
+           # Get rid of comments by removing the inside part.
+           s|/\*.*?\*/||g;
+           if ($in_comment) {
+              if (/\*\//) {
+                 s|.*?\*/||;
+                 $in_comment = 0;
+              } else {
+                 $_="\n";
+              }
+           } elsif (m|/\*|) {
+              s|/\*.*||;
+              $in_comment = 1;
+           }
 
-   # Get rid of preprocessor directives
-   s/^\#.*//;
+           # Get rid of string constants if they begin and end on this line.
+           s/([\'\"])([^\1]|\\\1)*?\1/$1$1/g;
 
-   # Now find all function calls on this line
-   while (($name)=/\b([a-gi-z_A-GI-Z]\w*)\s*\(/) {
-      $_ = $';
-      
-      # Ignore C statements that look sort of like function
-      # calls.
-      next if $name =~ /^(if|for|return|sizeof|switch|while|void)$/;
+           # Get rid of preprocessor directives
+           s/^\#.*//;
 
-      # Ignore things that get misdetected because of the simplified
-      # parsing that takes place here.
-      next if $name =~ /^int$/;
+           # Skip callbacks invoked as methods in a struct
+           next if $_ =~ /\b(\)?->|\.)\(?([a-z_A-Z]\w*)\s*\(/;
 
-      # These are really HDF5 functions/macros even though they don't
-      # start with `h' or `H'.
-      next if $name =~ /^FUNC_(ENTER|LEAVE)(_INIT)?$/;
-      next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)$/;
-      next if $name =~ /^(MIN3?|MAX3?|NELMTS|BOUND|CONSTR)$/;
-      next if $name =~ /^IS_H5FD_MPIO$/;
-      next if $name =~ /^addr_defined$/;
+           # Now find all function calls on this line which don't start with 'H'
+           while (($name)=/\b([a-z_A-GI-Z]\w*)\s*\(/) {
+              $_ = $';
+              
+              # Ignore C statements that look sort of like function
+              # calls.
+              next if $name =~ /^(if|for|offsetof|return|sizeof|switch|while|void)$/;
 
-      # These functions/macros are exempt.
-      next if $name =~ /^(assert|main|[fs]?printf|va_(start|arg|end))$/;
+              # Ignore things that get misdetected because of the simplified
+              # parsing that takes place here.
+              next if $name =~ /^(int|herr_t|_term_interface)$/;
 
-      # These are MPI function calls. Ignore them.
-      next if $name =~ /^MPI_/;
+              # These are really HDF5 functions/macros even though they don't
+              # start with `h' or `H'.
+              next if $name =~ /^FUNC_(ENTER|LEAVE)(_(NO)?API|_PACKAGE|_STATIC)?(_NOFS|_NOCLEAR|_NOINIT)?(_NOFUNC|_TAG)?$/;
+              next if $name =~ /^(BEGIN|END)_FUNC$/;
+              next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)(_VAR)?$/;
+              next if $name =~ /^CI_(PRINT_STATS|INC_SRC|INC_DST)$/;
+              next if $name =~ /^(ABS|ADDR_OVERFLOW|ALL_MEMBERS|BOUND|CONSTR|DETECT_[I|F|M]|DOWN)$/;
+              next if $name =~ /^(MIN3?|MAX3?|NELMTS|POWER_OF_TWO|REGION_OVERFLOW)$/;
+              next if $name =~ /^(UNIQUE_MEMBERS)$/;
+              next if $name =~ /^(IS_H5FD_MPIO|IS_H5FD_MPIPOSIX)$/;
+              next if $name =~ /^addr_defined$/;
 
-      # These are POSIX threads function calls. Ignore them.
-      next if $name =~ /^pthread_/;
+              # These functions/macros are exempt.
+              next if $name =~ /^(main|[fs]?printf|va_(start|arg|end))$/;
 
-      print "$ARGV:$.: $name\n";
-   }
+              # These are Windows system calls. Ignore them.
+              next if $name =~ /^(_get_osfhandle|GetFileInformationByHandle|SetFilePointer|GetLastError|SetEndOfFile)$/;
+              next if $name =~ /^(FindNextFile|FindClose|_tzset|Wgettimeofday|GetSystemTimeAsFileTime|Wgetlogin|GetUserName)$/;
 
-} continue {
-   close ARGV if eof;
+              # These are GPFS function calls. Ignore them.
+              next if $name =~ /^gpfs_fcntl$/;
+
+              # These are MPI function calls. Ignore them.
+              next if $name =~ /^(MPI_|MPE_)/;
+
+              # These are POSIX threads function calls. Ignore them.
+              next if $name =~ /^pthread_/;
+
+              # These are Windows threads function calls. Ignore them.
+              next if $name =~ /^(_beginthread|(Initialize|Enter|Leave)CriticalSection|TlsAlloc)$/;
+
+              # These are zlib & szlib function calls. Ignore them.
+              next if $name =~ /^(inflate|SZ_)/;
+              next if $name =~ /^compress2$/;
+
+              print "$ARGV:$.: $name\n";
+           }
+
+        } continue {
+           close ARGV if eof;       # reset line number
+        }
+    }
 }

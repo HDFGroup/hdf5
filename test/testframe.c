@@ -26,7 +26,7 @@
 /*
  * Definitions for the testing structure.
  */
-#define MAXNUMOFTESTS   50
+#define MAXNUMOFTESTS   60
 #define MAXTESTNAME     16
 #define MAXTESTDESC     64
 
@@ -73,7 +73,7 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
 {
     /* Sanity checking */
     if (Index >= MAXNUMOFTESTS) {
-        printf("Too many tests added, increase MAXNUMOFTEST(%d).\n",
+        printf("Too many tests added, increase MAXNUMOFTESTS(%d).\n",
 		MAXNUMOFTESTS);
         exit(-1);
     }                           /* end if */

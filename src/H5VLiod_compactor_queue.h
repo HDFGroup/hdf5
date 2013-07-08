@@ -23,7 +23,7 @@
 #define CP_SUCCESS 0
 #define CP_FAIL -1
 
-#define DEBUG_COMPACTOR 1
+
 
  
 typedef struct {

@@ -118,8 +118,9 @@ usage() {
   echo "                   subdirectories [default: $prefix]"
   echo "    -show        Show the commands without executing them"
   echo "    -showconfig  Show the HDF5 library configuration summary"
-  echo "    -shlib       Compile with shared HDF5 libraries"
-  echo "    -noshlib     Compile with static HDF5 libraries [default]"
+  echo "    -shlib       Compile with shared HDF5 libraries [default when built with"
+  echo "                                                     disable-static]"
+  echo "    -noshlib     Compile with static HDF5 libraries [default when static available]"
   echo " "
   echo "  <compile line>  - the normal compile line options for your compiler."
   echo "                    $prog_name uses the same compiler you used to compile"
@@ -316,20 +317,6 @@ if test "x$do_link" = "xyes"; then
 
   if test -n "$flag"; then
     shared_link="${flag}${libdir}"
-    # Any libraries in LDFLAGS or H5BLD_LDFLAGS also should have rpaths embedded
-    # in the executables created by h5cc (reduces need for LD_LIBRARY_PATH).
-    if test -n "$LDFLAGS"; then
-      for entry in $LDFLAGS; do
-        extdir=`echo $entry | sed '/^-L/ s/^-L//'`
-        shared_link="${shared_link} ${flag}${extdir}"
-      done
-    fi
-    if test -n "$H5BLD_LDFLAGS"; then
-      for entry in $H5BLD_LDFLAGS; do
-        extdir=`echo $entry | sed '/^-L/ s/^-L//'`
-        shared_link="${shared_link} ${flag}${extdir}"
-      done
-    fi
   fi
 
   if test "x$USE_SHARED_LIB" != "xyes"; then

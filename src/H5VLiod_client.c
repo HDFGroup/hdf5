@@ -141,7 +141,7 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
             H5VL_iod_request_t *tmp_req = NULL;
 
             if(cur_req) {
-                if(cur_req->req != request->req) {
+                if(HG_FILE_CLOSE != cur_req->type && cur_req->req != request->req) {
                     hg_status_t tmp_status;
 
                     tmp_req = cur_req->next;
@@ -243,15 +243,15 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                 fprintf(stderr, "failed to wait on request\n");
                 cur_req->status = H5AO_FAILED;
                 cur_req->state = H5VL_IOD_COMPLETED;
+                H5VL_iod_request_delete(file, cur_req);
             }
             else {
                 HDassert(status);
                 cur_req->status = H5AO_SUCCEEDED;
                 cur_req->state = H5VL_IOD_COMPLETED;
+                if(H5VL_iod_request_complete(file, cur_req) < 0)
+                    fprintf(stderr, "Operation Failed!\n");
             }
-
-            if(H5VL_iod_request_complete(file, cur_req) < 0)
-                fprintf(stderr, "Operation Failed!\n");
         }
         cur_req = tmp_req;
     }
@@ -360,9 +360,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                     req->state = H5VL_IOD_COMPLETED;
                 }
                 else {
-                    uint32_t internal_cs;
+                    uint32_t internal_cs = 0;
 
-                    fprintf(stderr, "size %d nelmts %d\n", info->type_size, info->nelmts);
                     /* calculate a checksum for the data recieved */
                     internal_cs = H5S_checksum(info->buf_ptr, info->type_size, 
                                                info->nelmts, info->space);
@@ -511,7 +510,10 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free attr components */
-            free(attr->common.obj_name);
+            if(attr->common.obj_name)
+                free(attr->common.obj_name);
+            if(attr->loc_name)
+                free(attr->loc_name);
             if(attr->common.comment)
                 HDfree(attr->common.comment);
             if(attr->remote_attr.acpl_id != H5P_ATTRIBUTE_CREATE_DEFAULT &&
@@ -766,7 +768,10 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free attr components */
-            free(attr->common.obj_name);
+            if(attr->common.obj_name)
+                free(attr->common.obj_name);
+            if(attr->loc_name)
+                free(attr->loc_name);
             if(attr->common.comment)
                 HDfree(attr->common.comment);
             if(attr->remote_attr.acpl_id != 0 &&
