@@ -289,6 +289,15 @@ static int test_simple(void)
     *-------------------------------------------------------------------------
     */
 
+    if(buf1)
+        HDfree(buf1);
+    if(buf2)
+        HDfree(buf2);
+    if(buf1_out)
+        HDfree(buf1_out);
+    if(buf2_out)
+        HDfree(buf2_out);
+
     /* Close the file. */
     if(H5Fclose( fid ) < 0)
         goto out;

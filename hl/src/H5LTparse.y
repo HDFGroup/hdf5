@@ -329,7 +329,11 @@ enum_list       :
                 ;
 enum_def        :       '"' enum_symbol '"' {
                                                 is_enum_memb = 1; /*indicate member of enum*/
+#ifdef H5_HAVE_WIN32_API
+                                                enum_memb_symbol = _strdup(yylval.sval); 
+#else /* H5_HAVE_WIN32_API */
                                                 enum_memb_symbol = strdup(yylval.sval); 
+#endif  /* H5_HAVE_WIN32_API */
                                             }
                         enum_val ';'
                             {
