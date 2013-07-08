@@ -324,7 +324,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 
       selection_type = H5Sget_select_type(space_id);
       
-      if (selection_type == H5S_SEL_NONE){
+      if (selection_type == H5S_SEL_NONE || selection_type == H5S_SEL_ALL){
 #if DEBUG_COMPACTOR
 	fprintf(fp_new,"%s(%d) There is no selection in the dataspace\n",
 		__FILE__,__LINE__);
@@ -430,7 +430,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	newlist[request_id].num_mblocks = num_entries; 
 	newlist[request_id].elementsize = dst_size;
 	newlist[request_id].dataset_id = iod_id;
-	newlist[request_id].selection_id = space_id;
+	newlist[request_id].selection_id = H5Scopy(space_id);
 	/*Incase its not merged, to call the I/O operation 
           directly with selection and memory descriptor*/
 	newlist[request_id].mem_buffer = (char *)buf; 
@@ -603,7 +603,8 @@ o * Programmer:  Vishwanth Venkatesan
  *-------------------------------------------------------------------------
  */
 
-int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
+int H5VL_iod_compact_requests (request_list_t **req_list, int *total_requests,
+			       int num_requests, int *request_list)
 {
   
   request_list_t *list = *req_list;
@@ -620,34 +621,34 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   int i, *sorted = NULL;
   
   FUNC_ENTER_NOAPI(NULL)
-
+    
   lselected_req = (int *) malloc ( num_requests * sizeof(int));
   if ( NULL == lselected_req){
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for selected requests")
   }
 
-  current_space = list[0].selection_id;
+  current_space = list[request_list[0]].selection_id;
 
   if ( 0 == H5VL_iod_select_overlap ( current_space, 
-				      list[1].selection_id,
+				      list[request_list[1]].selection_id,
 				      &res_dataspace)){
     lselected_req[0] = 0;
     lselected_req[1] = 1;
-    list[0].merged = 1;
-    list[1].merged = 1;
-    m_elmnt_size = list[0].elementsize;
+    list[request_list[0]].merged = 1;
+    list[request_list[1]].merged = 1;
+    m_elmnt_size = list[request_list[0]].elementsize;
     num_selected += 2;
   }
   else{
     if (current_space == res_dataspace){
       lselected_req[0] = 0;
-      list[0].merged = 1;
-      m_elmnt_size = list[0].elementsize;
+      list[request_list[0]].merged = 1;
+      m_elmnt_size = list[request_list[0]].elementsize;
     }
     else{
       lselected_req[0] = 1;
-      list[1].merged = 1;
-      m_elmnt_size = list[1].elementsize;
+      list[request_list[1]].merged = 1;
+      m_elmnt_size = list[request_list[1]].elementsize;
     }
     num_selected += 1;
   }
@@ -656,7 +657,7 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   
   for (i = 2; i < num_requests; i++){
     if ( 0 == H5VL_iod_select_overlap ( current_space, 
-					list[i].selection_id,
+					list[request_list[i]].selection_id,
 					&res_dataspace)){
       /*The dataspaces do not overlap*/
       lselected_req[num_selected] = i ;
@@ -672,14 +673,18 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
     current_space = res_dataspace;
   }
 
-
+  list = (request_list_t *) realloc (list, ((*total_requests) + 1)
+				     * sizeof(request_list_t));
+  
+  if (NULL != list) {
+    merged_request = list;
+  }
 
   /* Now we have merged the requests, we have a merged selection */
   /* We need  to create a request list entry for the merged selection */
-  merged_request = &list[num_requests];
-  merged_request->request_id = list[num_requests - 1].request_id + 1;
-  merged_request->merged = 2;
-
+  list[*total_requests].request_id = list[*total_requests - 1].request_id + 1;
+  list[*total_requests].merged = 2;
+  
   /*
     Add all the selections that were added/and manually merge them
     Make sure the memory_descriptor is updated accoringly for the 
@@ -712,16 +717,17 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
 	scenario if we for some reason do two-passes for merging 
 	So skipping here the case for num_fblocks != num_mblocks*/
 
-	for (j = blck_cnt; j < list[i].num_fblocks; j++){
-	  sf_block[j].offset = list[i].fblocks[j - blck_cnt].offset;
-	  sf_block[j].len = list[i].fblocks[j - blck_cnt].len;
-	  sm_block[j].offset = list[i].mblocks[j - blck_cnt].offset;
-	  sm_block[j].len = list[i].mblocks[j - blck_cnt].len;
+	for (j = blck_cnt; j < list[request_list[i]].num_fblocks; j++){
+	  sf_block[j].offset = list[request_list[i]].fblocks[j - blck_cnt].offset;
+	  sf_block[j].len = list[request_list[i]].fblocks[j - blck_cnt].len;
+	  sm_block[j].offset = list[request_list[i]].mblocks[j - blck_cnt].offset;
+	  sm_block[j].len = list[request_list[i]].mblocks[j - blck_cnt].len;
 	}
 	blck_cnt = j;
     }
   }
-  /*
+
+  /*---------------------------------------------------------------------
     Sort the file-offsets and check for contiguity.
     The contiguity check is needed to compare with the merged 
     offsets from the combine-select function. These should be
@@ -731,10 +737,10 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
     The contiguity does not affect the arrangement
     of memory offsets as the file offsets can even shrink to one 
     entry, but the order of memory offsets will remain constant
-  */
+    --------------------------------------------------------------------*/
 
   assert(blck_cnt == fblks);  
-
+  
   sorted = (int *) malloc (blck_cnt * sizeof(int));
   if ( NULL == sorted ){
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for sorted array")
@@ -748,13 +754,17 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
   if ( NULL == moffsets){
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for moffsets array")
   }
+  
   mlen = (size_t *) malloc (blck_cnt * sizeof(size_t));
   if ( NULL == moffsets){
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for mlen array")
   }
   
+  /*moffsets and mlen for the merged offsets... manually merging from individual off-len
+   pairs*/
   moffsets[0] = sf_block[0].offset;
   mlen[0] = sf_block[0].len;
+
   for ( j = 1; j < blck_cnt; j++){
     if (moffsets[m_entries] + mlen[m_entries] ==
 	sf_block[j].offset){
@@ -779,7 +789,6 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
     merged_request->fblocks[j].offset = goffsets[j];
     merged_request->fblocks[j].len = glens[j];
   }
-
   /*
     Then compare that with automatically generated offsets
     (the offsets have to match) */
@@ -806,7 +815,8 @@ int H5VL_iod_compact_requests (request_list_t **req_list, int num_requests)
      We can use the merged_flag to skip requests or identify merged
      request*/  
 
-  
+ *total_requests++;
+ *request_list = list;
  done:
   FUNC_LEAVE_NOAPI(ret_value);  
 

@@ -81,7 +81,8 @@ H5_DLL int H5VL_iod_extract_dims_info (hid_t dataspace, int *dims, hsize_t **dim
 H5_DLL int H5VL_iod_dataset_specific_requests (request_list_t *list, 
 					       request_list_t ***dataset_list,
 					       int *num_datasets);
-H5_DLL int H5VL_iod_compact_requests  (request_list_t **list, int num_requests);
+H5_DLL int H5VL_iod_compact_requests (request_list_t **req_list, int *total_requests,
+				      int num_requests, int *request_list);
 H5_DLL int H5VL_iod_select_overlap (hid_t dataspace1 , hid_t dataspace2, 
 				    hid_t *res_dataspace);
 H5_DLL int H5VL_iod_get_unique_dataset_request_sets ( request_list_t *list,

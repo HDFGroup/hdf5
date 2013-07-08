@@ -3724,8 +3724,7 @@ H5VL_iod_server_dset_compactor_cb (AXE_engine_t UNUSED axe_engine,
 					      &nentries,
 					      &dlist,
 					      &ndatasets,
-					      WRITE,
-					      fp);
+					      WRITE);
 #endif
 #if DEBUG_COMPACTOR
     if (ret_value != CP_SUCCESS){
@@ -3749,6 +3748,14 @@ H5VL_iod_server_dset_compactor_cb (AXE_engine_t UNUSED axe_engine,
     }
     fprintf(fp,"#############################################\n");
 #endif
+
+    for ( i = 0; i < ndatasets; i ++){
+      
+      H5VL_iod_compact_requests (&wlist, &nentries,dlist[i].num_requests,
+				 dlist[i].requests);
+    }
+	
+    
 
     n_requests = H5VL_iod_get_number_of_requests(cqueue);
     
