@@ -195,6 +195,9 @@ They are built with the configure process unless specified otherwise.
                                   Visual Studio 2012 w/ Intel Fortran 13 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
+    Windows 8                     Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+
+    Windows 8 x64                 Visual Studio 2012 w/ Intel Fortran 13 (cmake)
 
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
@@ -232,6 +235,8 @@ Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
 Windows 7 Cygwin                        n        y/n    n        y    y     y
 Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
+Windows 8                               y        y/y    n        y    y     y
+Windows 8     x64                       y        y/y    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.1 64-bit    n        y/y    n        y    y     y
@@ -255,6 +260,8 @@ Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
 Windows 7 Cygwin                           n       n         n         y
 Windows 7 x64 Cygwin                       n       n         n         y
+Windows 8                                  y       y         y         y
+Windows 8 x64                              y       y         y         y
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
 Mac OS X Mountain Lion 10.8.1 64-bit       y       n         y         y        
@@ -295,14 +302,14 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Debian6.0.7 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
-                                  gcc (Debian 4.4.5-8) 4.4.5
-                                  GNU Fortran (Debian 4.4.5-8) 4.4.5
+    Debian7.1.0 3.2.0-4-amd64 #1 SMP Debian 3.2.46-1 x86_64 GNU/Linux
+                                  gcc (Debian 4.7.2-5) 4.7.2
+                                  GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
-    Fedora18 3.7.9-205.fc18.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.7.2 20121109 (Red Hat 4.7.2-8)
-                                  GNU Fortran (GCC) 4.7.2 20120507 (Red Hat 4.7.2-8)
+    Fedora19 3.9.9-301.fc19.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
+                                  GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   (cmake and autotools)
 
     SUSE 12.3 3.7.10-1.1-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
@@ -310,9 +317,9 @@ The following platforms are not supported but have been tested for this release.
                                   GNU Fortran (SUSE Linux) 4.7.2 
                                   (cmake and autotools)
 
-    Ubuntu 12.10 3.5.0-25-generic #39-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
-                                  GNU Fortran (Ubuntu/Linaro 4.7.2-2ubuntu1) 4.7.2
+    Ubuntu 13.04 3.8.0-26-generic #38-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+                                  GNU Fortran (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
                                   (cmake and autotools)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
