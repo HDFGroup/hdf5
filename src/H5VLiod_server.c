@@ -14,22 +14,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Apublic.h"		/* Attributes				*/
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Oprivate.h"         /* Object headers			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspaces				*/
-#include "H5Tprivate.h"		/* Datatypes				*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
-#include "H5VLiod_server.h"
+#include "H5Sprivate.h"		/* Dataspaces		  		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+#include "H5VLiod_server.h"
 
 #ifdef H5_HAVE_EFF
 
@@ -355,6 +344,7 @@ H5VL_iod_server_file_create(hg_handle_t handle)
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
+
     if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                       H5VL_iod_server_file_create_cb, op_data, NULL))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
@@ -1441,6 +1431,18 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     op_data->input = (void *)input;
 
     if(input->parent_axe_ids.count) {
+#if 0
+        int i;
+        AXE_status_t status;
+        for(i=0 ; i<input->parent_axe_ids.count ; i++) {
+            if(AXEget_status(engine, input->parent_axe_ids.ids[i], &status) < 0) {
+                fprintf(stderr, "GET STATUS FAILED\n");
+                exit(1);
+            }
+            fprintf(stderr, "%d: AXE ID %llu status %d\n", 
+                    i, input->parent_axe_ids.ids[i], status);
+        }
+#endif
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
                                           input->parent_axe_ids.count, input->parent_axe_ids.ids, 
                                           0, NULL, 
@@ -2329,6 +2331,133 @@ H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc
 
     *iod_id = cur_id;
     *iod_oh = cur_oh;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
+{
+    hssize_t num_descriptors = 0, n;
+    int ndims = 0, i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the rank of this dataspace */
+    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+
+    switch(H5Sget_select_type(space_id)) {
+    case H5S_SEL_NONE:
+        /* nothing selected */
+        num_descriptors = 0;
+        HGOTO_DONE(SUCCEED);
+    case H5S_SEL_ALL:
+        /* The entire dataspace is selected, 1 large iod hyperslab is needed */
+        num_descriptors = 1;
+
+        if(NULL != hslabs) {
+            hsize_t dims[H5S_MAX_RANK];
+
+            /* get the dimensions sizes of the dataspace */
+            if(H5Sget_simple_extent_dims(space_id, dims, NULL) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion sizes");
+            /* populate the hyperslab */
+            for(i=0 ; i<ndims ; i++) {
+                hslabs[0].start[i] = 0;
+                hslabs[0].stride[i] = 1;
+                hslabs[0].block[i] = dims[i];
+                hslabs[0].count[i] = 1;
+            }
+        }
+        break;
+    case H5S_SEL_POINTS:
+        {
+            /* we need a hyperslab element for each point */
+            if((num_descriptors = H5Sget_select_elem_npoints(space_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "invalid point selection");
+
+            if(NULL != hslabs) {
+                hsize_t *points = NULL;
+
+                if(NULL == (points = (hsize_t *)malloc(sizeof(hsize_t) * ndims * 
+                                                       (hsize_t)num_descriptors)))
+                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
+
+                if(H5Sget_select_elem_pointlist(space_id, (hsize_t)0, 
+                                                (hsize_t)num_descriptors, points) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve point coordinates");
+
+                /* populate the hyperslab */
+                for(n=0 ; n<num_descriptors ; n++) {
+                    for(i=0 ; i<ndims ; i++) {
+                        hslabs[n].start[i] = *points++;
+                        hslabs[n].stride[i] = 1;
+                        hslabs[n].block[i] = 1;
+                        hslabs[n].count[i] = 1;
+                    }
+                }
+                free(points);
+            }
+            break;
+        }
+    case H5S_SEL_HYPERSLABS:
+        {
+            /* if the selection is a regular hyperslab
+               selection, only 1 iod hyperslab object is
+               needed */
+            if(H5Sselect_is_regular(space_id)) {
+                num_descriptors = 1;
+
+                if(NULL != hslabs) {
+                    if(H5Sget_reg_hyperslab_params(space_id, 
+                                                   hslabs[0].start, 
+                                                   hslabs[0].stride,
+                                                   hslabs[0].count,
+                                                   hslabs[0].block) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve hyperslab selection");
+                }
+            }
+            /* Otherwise populate the hslabs by gettinge very block */
+            else {
+                if((num_descriptors = H5Sget_select_hyper_nblocks(space_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "invalid hyperslab selection");
+
+                if(NULL != hslabs) {
+                    hsize_t *blocks;
+
+                    if(NULL == (blocks = (hsize_t *)malloc(sizeof(hsize_t) * 2 * 
+                                                           ndims * num_descriptors)))
+                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
+
+                    if(H5Sget_select_hyper_blocklist(space_id, (hsize_t)0, 
+                                                     (hsize_t)num_descriptors, blocks) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve point coordinates");
+
+                    /* populate the hyperslab */
+                    for(n=0 ; n<num_descriptors ; n++) {
+                        for(i=0 ; i<ndims ; i++) {
+                            hslabs[n].start[i] = *blocks++;
+                            hslabs[n].stride[i] = 1;
+                            hslabs[n].block[i] = 1;
+                            hslabs[n].count[i] = *blocks++;
+                        }
+                    }
+
+                    free(blocks);
+                }
+            }
+            break;
+        }
+    case H5S_SEL_ERROR:
+    case H5S_SEL_N:
+    default:
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "Invalid Selection type");
+    }
+
+    *count = num_descriptors;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

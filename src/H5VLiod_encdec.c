@@ -19,6 +19,8 @@
  */
 
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Ppublic.h"
+#include "H5Spublic.h"
 #include "H5VLiod_common.h"     /* IOD Common Header			*/
 
 #ifdef H5_HAVE_EFF
@@ -176,7 +178,7 @@ int hg_proc_dims_t(hg_proc_t proc, void *data)
         break;
     case HG_DECODE:
         if(struct_data->rank)
-            struct_data->size = malloc (sizeof(hsize_t) * struct_data->rank);
+            struct_data->size = (hsize_t *)malloc (sizeof(hsize_t) * struct_data->rank);
 
         for(i=0 ; i<struct_data->rank ; i++) {
             ret = hg_proc_uint64_t(proc, &struct_data->size[i]);
@@ -204,7 +206,8 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
     size_t size;
     name_t *struct_data = (name_t *) data;
 
-    ret = hg_proc_int64_t(proc, struct_data->value_size);
+    ret = hg_proc_memcpy(proc, struct_data->value_size, sizeof(ssize_t));
+    //ret = hg_proc_int64_t(proc, struct_data->value_size);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
@@ -212,7 +215,8 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
     }
     size = (size_t)(*struct_data->value_size);
 
-    ret = hg_proc_uint64_t(proc, &struct_data->size);
+    ret = hg_proc_memcpy(proc, &struct_data->size, sizeof(size_t));
+    //ret = hg_proc_uint64_t(proc, &struct_data->size);
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
@@ -221,7 +225,7 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
 
     if(NULL != struct_data->value && struct_data->size != 0) {
         ret = hg_proc_raw(proc, struct_data->value, 
-                          MIN(size+1, struct_data->size));
+                          MIN(size, struct_data->size));
         if (ret != HG_SUCCESS) {
             HG_ERROR_DEFAULT("Proc error");
             ret = HG_FAIL;

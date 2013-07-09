@@ -113,6 +113,13 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t _stride[],
 				   const hsize_t count[],
 				   const hsize_t _block[]);
+H5_DLL htri_t H5Sselect_is_regular(hid_t space_id);
+H5_DLL herr_t H5Sget_reg_hyperslab_params(hid_t space_id,
+                                          hsize_t start[],
+                                          hsize_t stride[],
+                                          hsize_t count[],
+                                          hsize_t block[]);
+
 /* #define NEW_HYPERSLAB_API */
 /* Note that these haven't been working for a while and were never
  *      publicly released - QAK */

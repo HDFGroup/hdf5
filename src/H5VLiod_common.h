@@ -19,7 +19,7 @@
 #ifndef _H5VLiod_common_H
 #define _H5VLiod_common_H
 
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5public.h"
 #include "H5VLpublic.h"
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 

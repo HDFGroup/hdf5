@@ -22,14 +22,12 @@
 /* System headers needed by this file */
 
 /* Public headers needed by this file */
+#include "H5public.h"
+#include "H5Ipublic.h"
 
 /*****************/
 /* Public Macros */
 /*****************/
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*******************/
 /* Public Typedefs */
@@ -43,7 +41,7 @@ typedef void * H5_request_t;
 /********************/
 
 /* Asynchronous operation status */
-typedef enum {
+typedef enum H5_status_t{
     H5AO_PENDING,       /* Operation has not yet completed */
     H5AO_SUCCEEDED,     /* Operation has completed, successfully */
     H5AO_FAILED,        /* Operation has completed, but failed */
@@ -53,12 +51,16 @@ typedef enum {
 #define H5_REQUEST_NULL NULL
 #define H5_EVENT_QUEUE_NULL -1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*********************/
 /* Public Prototypes */
 /*********************/
 
 /* API wrappers */
-H5_DLL hid_t  H5EQcreate(hid_t fapl_id);
+H5_DLL hid_t H5EQcreate(hid_t fapl_id);
 H5_DLL herr_t H5EQinsert(hid_t event_q, H5_request_t req);
 H5_DLL herr_t H5EQpop(hid_t event_q, H5_request_t *req);
 H5_DLL herr_t H5EQwait(hid_t event_q, int *num_requests, H5_status_t **status);
@@ -73,5 +75,4 @@ H5_DLL herr_t H5AOwait(H5_request_t req, H5_status_t *status);
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* _H5EQpublic_H */

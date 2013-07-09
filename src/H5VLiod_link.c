@@ -135,10 +135,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
     HDfree(kv.key);
 
-    /* close the source group */
-    if(src_oh.cookie != input->loc_oh.cookie) {
-        iod_obj_close(src_oh, NULL, NULL);
-    }
+    iod_obj_close(src_oh, NULL, NULL);
 
     /* open the target object */
     if (iod_obj_open_write(coh, target_id, NULL, &target_oh, NULL) < 0)

@@ -612,6 +612,7 @@ int main(int argc, char **argv) {
         H5Sclose(mem_space);
     }
 
+    H5Sclose(dataspaceId);
     assert(H5Dclose(did1) == 0);
 
     /* open attribute on dataset D1. This is asynchronous */
@@ -658,7 +659,6 @@ int main(int argc, char **argv) {
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
-    H5Sclose(dataspaceId);
 
     /*
     assert(H5AOwait(&req1, &status1) == 0);

@@ -8853,3 +8853,79 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned UNUSED flags, H5S_sel_iter_t
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_seq_list() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sselect_is_regular
+ PURPOSE
+    Check if hyperslab selection is a regular selection
+ RETURNS
+    TRUE/FALSE/FAIL
+--------------------------------------------------------------------------*/
+htri_t
+H5Sselect_is_regular(hid_t space_id)
+{
+    H5S_t		   *space;	/* dataspace to modify */
+    htri_t		    ret_value;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "i", space_id);
+
+    /* Check args and all the boring stuff. */
+    if ((space = (H5S_t *)H5I_object_verify(space_id,H5I_DATASPACE)) == NULL)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "not a dataspace")
+
+    if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a hyperslab selection")
+
+    if(space->select.sel_info.hslab->diminfo_valid)
+        ret_value = TRUE;
+    else
+        ret_value = FALSE;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Sget_reg_hyperslab_params
+ PURPOSE
+    retrieve the start, stride, count, block arrays of a regular 
+    hyperslab selection
+ RETURNS
+    TRUE/FALSE/FAIL
+--------------------------------------------------------------------------*/
+herr_t
+H5Sget_reg_hyperslab_params(hid_t space_id, hsize_t start[], hsize_t stride[],
+                            hsize_t count[], hsize_t block[])
+{
+    H5S_t *space = NULL;  /* Dataspace to get selection of */
+    const H5S_hyper_dim_t *diminfo; /* Alias for dataspace's diminfo information */
+    unsigned ndims; /* Rank of the dataspace */
+    unsigned u;
+    herr_t ret_value=SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*h*h*h*h", space_id, start, stride, count, block);
+
+    /* Check args */
+        if (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    if(!space->select.sel_info.hslab->diminfo_valid)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "not a regular hyperslab selection")
+
+    diminfo = space->select.sel_info.hslab->opt_diminfo;
+    ndims = space->extent.rank;
+
+    for(u=0 ; u<ndims; u++) {
+        start[u] = diminfo[u].start;
+        stride[u] = diminfo[u].stride;
+        count[u] = diminfo[u].count;
+        block[u] = diminfo[u].block;
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}

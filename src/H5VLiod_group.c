@@ -91,14 +91,6 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the group, create
        the scratch pad for it too */
     if(0 == ret) {
-        /* insert new group in kv store of parent object */
-        kv.key = HDstrdup(last_comp);
-        kv.value = &grp_id;
-        kv.value_len = sizeof(iod_obj_id_t);
-        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
-
         /* create the metadata KV object for the group */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -122,6 +114,14 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
+        /* insert new group in kv store of parent object */
+        kv.key = HDstrdup(last_comp);
+        kv.value = &grp_id;
+        kv.value_len = sizeof(iod_obj_id_t);
+        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        HDfree(kv.key);
     } /* end if */
 
     /* close parent group if it is not the location we started the
@@ -129,6 +129,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     if(loc_handle.cookie != cur_oh.cookie) {
         iod_obj_close(cur_oh, NULL, NULL);
     }
+
 #if H5_DO_NATIVE
     grp_oh.cookie = H5Gcreate2(loc_handle.cookie, name, input->lcpl_id, 
                         input->gcpl_id, input->gapl_id);
