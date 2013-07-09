@@ -418,6 +418,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Added const qualifier to source buffer parameters in H5Dgather and
+            H5D_scatter_func_t (H5Dscatter callback).  (NAF - 2013/7/02)
       - Fixed an error involving failure to write fill values to the user's
             buffer when reading unallocated chunks from datasets that have a
             fill value set to H5D_FILL_VALUE_DEFAULT. A consequence of this
