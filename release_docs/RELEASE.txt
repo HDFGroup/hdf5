@@ -1266,7 +1266,7 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Debian7.1.0 3.2.0-4-386 #1 SMP Debian 3.2.46-1 i386 GNU/Linux
+    Debian7.1.0 3.2.0-4-686 #1 SMP Debian 3.2.46-1 i686 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
