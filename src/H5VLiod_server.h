@@ -98,6 +98,9 @@ H5_DLL void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,
 					      size_t num_s_parents, AXE_task_t s_parents[], 
 					      void *queue);
 
+H5_DLL int H5VL_iod_reconstruct_parents (AXE_engine_t axe_engine,
+					 axe_ids_t *old_parents,
+					 axe_ids_t **new_parents);
 
 H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 

@@ -1353,6 +1353,8 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     }
 #endif
 
+    fprintf(fp, "Write with task ID : %d\n", input->axe_id);
+
 #if 1
     if(CP_SUCCESS != H5VL_iod_server_dset_compactor(op_data, WRITE)){
       HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "compactor task failed for WRITE\n");
@@ -1487,6 +1489,9 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_set_extent_in_t *input = NULL;
     int ret_value = HG_SUCCESS;
+    axe_ids_t *newParents = NULL;
+    size_t ii;
+    AXE_status_t status;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1506,22 +1511,95 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_ids.count) {
+    for (ii = 0; ii < input->parent_axe_ids.count; ii++){
+      if ( AXE_SUCCEED != AXEget_status(engine, input->parent_axe_ids.ids[ii], &status)){
+	fprintf (fp, "Task %ld does not exist\n", input->parent_axe_ids.ids[ii]);
+	if (SUCCEED != H5VL_iod_reconstruct_parents (engine,
+						     &input->parent_axe_ids, 
+						     &newParents)){
+	  fprintf (fp, "Error while reconstructing parents\n");
+	}
+	break; /*There is atleast one task that does not exist lets reconstruct*/
+      }
+    }
+
+    if (newParents != NULL){
+      if(newParents->count){
+	if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+					  newParents->count, newParents->ids, 
+                                          0, NULL, 
+                                          H5VL_iod_server_dset_close_cb, op_data, NULL))
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+      }
+    }
+    else{
+      if(input->parent_axe_ids.count) {
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
                                           input->parent_axe_ids.count, input->parent_axe_ids.ids, 
                                           0, NULL, 
                                           H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+      }
+      else {
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                           H5VL_iod_server_dset_set_extent_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+      }
     }
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_set_extent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_reconstruct_parents
+ *
+ * Purpose:	Parent tasks cannot point to tasks that do not exist in 
+ *              AXE
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanath Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_reconstruct_parents (AXE_engine_t axe_engine,
+			      axe_ids_t *old_parents,
+			      axe_ids_t **new_parents){
+  
+  AXE_status_t status;
+  axe_ids_t *newParents = NULL;
+  int i;
+  int ret_value = SUCCEED;  
+
+  FUNC_ENTER_NOAPI_NOINIT
+
+  newParents = (axe_ids_t *) malloc (sizeof(axe_ids_t));
+  if (NULL == newParents){
+    HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't allocate axe_ids_t array");
+  }
+  newParents->count = 0;
+  newParents->ids = (uint64_t *) malloc (old_parents->count * sizeof(uint64_t));
+  if (NULL == newParents->ids){
+    HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't allocate ids array");
+  }
+
+  for (i = 0; i < old_parents->count; i++){
+    if ( AXE_SUCCEED == AXEget_status(engine, old_parents->ids[i], &status)){
+      newParents->ids[newParents->count] = old_parents->ids[i];
+      newParents->count++;
+    }
+  }
+  assert(newParents->count != old_parents->count);
+  *new_parents = newParents;
+
+ done:
+  FUNC_LEAVE_NOAPI(ret_value)
+
+}
 
 
 /*-------------------------------------------------------------------------
@@ -1544,6 +1622,9 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     op_data_t *op_data = NULL;
     dset_close_in_t *input = NULL;
     int ret_value = HG_SUCCESS, i = 0;
+    AXE_status_t status;
+    axe_ids_t *newParents = NULL;
+    size_t ii;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1562,41 +1643,45 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
-
-    for (i = 0; i < input->parent_axe_ids.count; i++){
-      switch (input->parent_axe_ids.ids[i]){
-      case AXE_TASK_SCHEDULED:
-	fprintf(fp, "Task %d scheduled\n", input->parent_axe_ids.ids[i]);
-	break;
-      case AXE_TASK_DONE:
-	fprintf(fp, "Task %d Done\n", input->parent_axe_ids.ids[i]);
-	break;
-      case AXE_TASK_CANCELED:
-	fprintf(fp, "Task %d Canceled \n", input->parent_axe_ids.ids[i]);
-	break;	
-      case AXE_TASK_RUNNING:
-	fprintf(fp, "Task %d RUNNING\n", input->parent_axe_ids.ids[i]);
-	break;	
-      case AXE_WAITING_FOR_PARENT:
-	fprintf(fp, "Task %d waiting for parent\n", input->parent_axe_ids.ids[i]);
-	break;	
+    
+    for (ii = 0; ii < input->parent_axe_ids.count; ii++){
+      if ( AXE_SUCCEED != AXEget_status(engine, input->parent_axe_ids.ids[ii], &status)){
+	fprintf (fp, "Task %ld does not exist\n", input->parent_axe_ids.ids[ii]);
+	if (SUCCEED != H5VL_iod_reconstruct_parents (engine,
+						     &input->parent_axe_ids, 
+						     &newParents)){
+	  fprintf (fp, "Error while reconstructing parents\n");
+	}
+	break; /*There is atleast one task that does not exist lets reconstruct*/
       }
     }
 
-    if(input->parent_axe_ids.count) {
+
+    if (newParents != NULL){
+      if(newParents->count){
+	if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+					  newParents->count, newParents->ids, 
+                                          0, NULL, 
+                                          H5VL_iod_server_dset_close_cb, op_data, NULL))
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+      }
+    }
+    else{
+      if(input->parent_axe_ids.count) {
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
                                           input->parent_axe_ids.count, input->parent_axe_ids.ids, 
                                           0, NULL, 
                                           H5VL_iod_server_dset_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
-    }
-    else {
-        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+      }
+      else {
+	if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
                                           H5VL_iod_server_dset_close_cb, op_data, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+      }
+      
     }
-
-done:
+ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_close() */
 
