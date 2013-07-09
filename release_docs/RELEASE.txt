@@ -1156,19 +1156,20 @@ Supported Platforms
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
                                   Sun C++ 5.12 SunOS_sparc
 
-    Windows XP                    Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-
-    Windows XP x64                Visual Studio 2008 w/ Intel Fortran 10.1 (project files)
-
-    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+    Windows 7                     Visual Studio 2008 w/ Intel Fortran 11 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
 
-    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11.1 (cmake)
+    Windows 7 x64                 Visual Studio 2008 w/ Intel Fortran 11 (cmake)
                                   Visual Studio 2010 w/ Intel Fortran 12 (cmake)
+                                  Visual Studio 2012 w/ Intel Fortran 13 (cmake)
                                   Cygwin(CYGWIN_NT-6.1 1.7.15(0.260/5/3) gcc(4.5.3) compiler and gfortran)
                                   (cmake and autotools)
+    Windows 8                     Visual Studio 2012 w/ Intel Fortran 13 (cmake)
+
+    Windows 8 x64                 Visual Studio 2012 w/ Intel Fortran 13 (cmake)
 
     Mac OS X Snow Leopard 10.6.8  gcc i686-apple-darwin11-llvm-gcc-4.2 (GCC) 4.2.1 from Xcode 3.2.6
     Darwin Kernel Version 10.8.0  g++ i686-apple-darwin11-llvm-g++-4.2 (GCC) 4.2.1 from Xcode 3.2.6
@@ -1204,8 +1205,12 @@ Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
-Windows 7                               y        y/n    n        y    y     y
-Windows 7     x64                       y        y/n    n        y    y     y
+Windows 7                               y        y/y    n        y    y     y
+Windows 7     x64                       y        y/y    n        y    y     y
+Windows 7 Cygwin                        n        y/n    n        y    y     y
+Windows 7 x64 Cygwin                    n        y/n    n        y    y     y
+Windows 8                               y        y/y    n        y    y     y
+Windows 8     x64                       y        y/y    n        y    y     y
 Mac OS X Snow Leopard 10.6.8 64-bit     n        y/y    n        y    y     y
 Mac OS X Lion 10.7.3 32-bit             n        y/y    n        y    y     n
 Mac OS X Lion 10.7.3 64-bit             n        y/y    n        y    y     y
@@ -1226,6 +1231,10 @@ Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y        
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
+Windows 7 Cygwin                           n       n         n         y
+Windows 7 x64 Cygwin                       n       n         n         y
+Windows 8                                  y       y         y         y
+Windows 8 x64                              y       y         y         y
 Mac OS X Snow Leopard 10.6.8 64-bit        y       n         y         n        
 Mac OS X Lion 10.7.3 32-bit                y       n         y         y        
 Mac OS X Lion 10.7.3 64-bit                y       n         y         y        
@@ -1257,46 +1266,45 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
 
-    Debian6.0.3 2.6.32-5-686 #1 SMP i686 GNU/Linux
-                                  gcc (Debian 4.4.5-8) 4.4.5
-                                  GNU Fortran (Debian 4.4.5-8) 4.4.5
+    Debian7.1.0 3.2.0-4-386 #1 SMP Debian 3.2.46-1 i386 GNU/Linux
+                                  gcc (Debian 4.7.2-5) 4.7.2
+                                  GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
-    Debian6.0.3 2.6.32-5-amd64 #1 SMP x86_64 GNU/Linux
-                                  gcc (Debian 4.4.5-8) 4.4.5
-                                  GNU Fortran (Debian 4.4.5-8) 4.4.5
+    Debian7.1.0 3.2.0-4-amd64 #1 SMP Debian 3.2.46-1 x86_64 GNU/Linux
+                                  gcc (Debian 4.7.2-5) 4.7.2
+                                  GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
 
-    Fedora17 3.5.2-1.fc17.i6866 #1 SMP i686 i686 i386 GNU/Linux
-                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
-                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+    Fedora19 3.9.9-301.fc19.i6866 #1 SMP i686 i686 i386 GNU/Linux
+                                  gcc (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
+                                  GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   (cmake and autotools)
 
-    Fedora17 3.5.2-1.fc17.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
-                                  GNU Fortran (GCC) 4.7.0 20120507 (Red Hat 4.7.0-5)
+    Fedora19 3.9.9-301.fc19.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
+                                  GNU Fortran (GCC) 4.8.1 20130603 (Red Hat 4.8.1-1)
                                   (cmake and autotools)
 
-    SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
+    SUSE 12.3 3.4.6-2.10-desktop #1 SMP PREEMPT i686 i686 i386 GNU/Linux
                                   gcc (SUSE Linux) 4.7.1
                                   GNU Fortran (SUSE Linux) 4.7.1
                                   (cmake and autotools)
 
-    SUSE 12.2 3.4.6-2.10-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
+    SUSE 12.3 3.4.6-2.10-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (SUSE Linux) 4.7.1
                                   GNU Fortran (SUSE Linux) 4.7.1 
                                   (cmake and autotools)
 
-    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP i686 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
-                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+    Ubuntu 13.04 3.8.0-26-generic #38-Ubuntu SMP i686 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu1) 4.7.3
                                   (cmake and autotools)
 
-    Ubuntu 12.04 3.2.0-29-generic #46-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
-                                  GNU Fortran (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3
+    Ubuntu 13.04 3.8.0-26-generic #38-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
+                                  GNU Fortran (Ubuntu/Linaro 4.7.3-1ubuntu1) 4.7.3
                                   (cmake and autotools)
-                                  (Use optimization level -O1)
     
     Cray Linux Environment (CLE)  PrgEnv-pgi/4.0.46
     hopper.nersc.gov              pgcc 12.5-0 64-bit target on x86-64 Linux -tp shanghai
