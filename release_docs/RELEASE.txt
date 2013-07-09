@@ -97,7 +97,8 @@ Bug Fixes since HDF5-1.8.11
 
     Library
     -------
-    - None
+    - Added const qualifier to source buffer parameters in H5Dgather and
+      H5D_scatter_func_t (H5Dscatter callback).  (NAF - 2013/7/09)
 
     Parallel Library
     ----------------
