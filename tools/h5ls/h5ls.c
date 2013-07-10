@@ -45,7 +45,11 @@ static h5tool_format_t         ls_dataformat = {
         "", /*fmt_raw */
         "%d", /*fmt_int */
         "%u", /*fmt_uint */
+#ifdef H5_VMS
+        "%hd", /*fmt_schar */
+#else
         "%hhd", /*fmt_schar */
+#endif
         "%u", /*fmt_uchar */
         "%d", /*fmt_short */
         "%u", /*fmt_ushort */
