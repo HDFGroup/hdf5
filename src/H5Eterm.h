@@ -24,11 +24,11 @@
     
 H5E_FUNC_g=    
 H5E_FILE_g=    
+H5E_VOL_g=    
 H5E_SOHM_g=    
 H5E_SYM_g=    
 H5E_PLUGIN_g=    
 H5E_VFL_g=    
-H5E_VOL_g=    
 H5E_INTERNAL_g=    
 H5E_BTREE_g=    
 H5E_REFERENCE_g=    

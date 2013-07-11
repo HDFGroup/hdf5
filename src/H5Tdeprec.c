@@ -199,7 +199,7 @@ H5Topen1(hid_t loc_id, const char *name)
     hid_t     ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("i", "i*si", loc_id, name);
+    H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
      if(!name || !*name)

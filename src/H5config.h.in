@@ -20,9 +20,6 @@
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD
 
-/* Define the default vol plugin to compile */
-#undef DEFAULT_VOL
-
 /* Define if `dev_t' is a scalar */
 #undef DEV_T_IS_SCALAR
 
