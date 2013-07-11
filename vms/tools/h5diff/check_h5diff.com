@@ -553,7 +553,7 @@ $!#
 $!# Different structure, different names. 
 $!#
 $!# Exclude all the different objects. Expect return - same
-TOOLTEST h5diff_482.txt "-v --exclude-path "/group1" --exclude-path "/dset1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5"
+$ CALL TOOLTEST h5diff_482.txt "-v --exclude-path "/group1" --exclude-path "/dset1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5"
 $!# Exclude only some different objects. Expect return - diff
 $ CALL TOOLTEST h5diff_483.txt "-v --exclude-path "/group1" h5diff_exclude2-1.h5 h5diff_exclude2-2.h5"
 
