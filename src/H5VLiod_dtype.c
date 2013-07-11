@@ -93,14 +93,6 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the datatype, update
        the parent KV, create scratch pad */
     if(0 == ret) {
-        kv.key = HDstrdup(last_comp);
-        kv.value = &dtype_id;
-        kv.value_len = sizeof(iod_obj_id_t);
-        /* insert new datatype in kv store of current group */
-        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
-
         /* create the metadata KV object for the datatype */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -142,7 +134,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(cur_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+        if(iod_blob_write(dtype_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
         /* MSC - TODO store things */
@@ -181,6 +173,14 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         /* close the Metadata KV object */
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
+        kv.key = HDstrdup(last_comp);
+        kv.value = &dtype_id;
+        kv.value_len = sizeof(iod_obj_id_t);
+        /* insert new datatype in kv store of current group */
+        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        HDfree(kv.key);
     }
 #if H5_DO_NATIVE
     cur_oh.cookie = H5Tcopy(input->type_id);

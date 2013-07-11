@@ -19,6 +19,10 @@
 #ifndef _H5VLiod_server_H
 #define _H5VLiod_server_H
 
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Ppublic.h"
+#include "H5Spublic.h"
 #include "H5VLiod_common.h"
 
 
@@ -42,10 +46,6 @@ typedef struct scratch_pad_t {
     iod_obj_id_t filler2_id;   /* filler value - not used */
 } scratch_pad_t;
 
-
-#if DEBUG_COMPACTOR
-FILE *fp;
-#endif
 
 int compactor_queue_flag;
 pthread_mutex_t lock;
@@ -239,6 +239,7 @@ H5_DLL void H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
                                        const char *path, hbool_t create_interm_grps,
                                        char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
+H5_DLL herr_t H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs);
 
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

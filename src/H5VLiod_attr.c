@@ -286,9 +286,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
+    /* MSC - Dont do this check until we have a real IOD */
+#if 0
     /* if attribute KV does not exist, return error*/
     if(IOD_ID_UNDEFINED == sp.attr_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
+#endif
 
     /* open the attribute KV in scratch pad */
     if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
@@ -656,11 +659,14 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(cur_oh, NULL, NULL);
     }
 
+    /* MSC - Dont do this check until we have a real IOD */
+#if 0
     /* if attribute KV does not exist, return false*/
     if(IOD_ID_UNDEFINED == sp.attr_id) {
         ret = FALSE;
         HGOTO_DONE(SUCCEED);
     }
+#endif
 
     /* open the attribute KV in scratch pad */
     if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
@@ -757,9 +763,12 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(cur_oh, NULL, NULL);
     }
 
+    /* MSC - Dont do this check until we have a real IOD */
+#if 0
     /* if attribute KV does not exist, return error*/
     if(IOD_ID_UNDEFINED == sp.attr_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
+#endif
 
     /* open the attribute KV in scratch pad */
     if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
@@ -865,9 +874,12 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
         iod_obj_close(cur_oh, NULL, NULL);
     }
 
+    /* MSC - Dont do this check until we have a real IOD */
+#if 0
     /* if attribute KV does not exist, return error*/
     if(IOD_ID_UNDEFINED == sp.attr_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Object has no attributes");
+#endif
 
     /* open the attribute KV in scratch pad */
     if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)

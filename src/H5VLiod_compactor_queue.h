@@ -53,6 +53,7 @@ typedef struct cqlist compactor;
 H5_DLL int H5VL_iod_add_requests_to_compactor(compactor*, compactor_entry request);
 H5_DLL int H5VL_iod_remove_request_from_compactor(compactor*, compactor_entry *); 
 H5_DLL int H5VL_iod_get_request_at_front (compactor *, compactor_entry *);
+H5_DLL int H5VL_iod_get_request_at (compactor *, compactor_entry *, int j);
 H5_DLL int H5VL_iod_display_compactor_requests(compactor*);
 H5_DLL int H5VL_iod_remove_element_from_queue(compactor* s, node* d);
 H5_DLL int H5VL_iod_get_number_of_requests (compactor *s); 

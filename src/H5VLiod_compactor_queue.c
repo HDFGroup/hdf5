@@ -290,6 +290,52 @@ int H5VL_iod_remove_element_from_queue(compactor* s, node* d){
  
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_get_request_at
+ *
+ * Purpose:	Function get the requests at position 
+ *
+ * ret_value :  Success:  Request 
+ *		Failure:  Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              June, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int H5VL_iod_get_request_at (compactor *s, compactor_entry *entry, int j){
+  
+  int ret_value = CP_SUCCESS;
+  int i = 0;
+  FUNC_ENTER_NOAPI_NOINIT
+    
+  if(NULL == s){
+    HGOTO_ERROR(H5E_ARGS, H5E_NOSPACE, CP_FAIL, "Compactor queue does not exists");
+  } 
+  else if(NULL == s->head && NULL == s->tail){
+    /*Nothing to remove*/
+    ret_value = CP_FAIL;
+  }
+  else{
+    node *p = s->head;
+    while (p){
+      if ( i == j){
+	*entry =  p->request;
+	break;
+      }
+      else{
+	p = p->next;
+	i++;
+      }
+    }
+  }
+ done:
+  FUNC_LEAVE_NOAPI(ret_value);
+}
+  
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_get_number_of_requests
  *
  * Purpose:	Function get the number of requests
@@ -312,13 +358,13 @@ int H5VL_iod_get_number_of_requests (compactor *s){
   FUNC_ENTER_NOAPI(NULL)
  
   if(NULL == s){
-      HGOTO_ERROR(H5E_ARGS, H5E_NOSPACE, CP_FAIL, "Compactor queue does not exists")
+    ret_value = CP_FAIL;
   }
   else if(NULL == s->head && NULL == s->tail){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL, "List's Head and Tail cannot be null");
+    ret_value = CP_FAIL;
   }
   else if(NULL == s->head || NULL == s->tail){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL, "List's head/tail is null");
+    ret_value = CP_FAIL;
   }
   else{
     node* p = s->head;
@@ -334,11 +380,11 @@ int H5VL_iod_get_number_of_requests (compactor *s){
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_remove_request_from_compactor
+ * Function:	H5VL_iod_display_compactor_requests
  *
  * Purpose:	Function to display the current set of requests
  *
- * Ret_Valueurn:	Success:	CP_SUCCESS 
+ * ret_value:	Success:	CP_SUCCESS 
  *		Failure:	Negative
  *
  * Programmer:  Vishwanth Venkatesan
