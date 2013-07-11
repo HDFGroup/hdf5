@@ -19,6 +19,9 @@
  
 #define READ 100
 #define WRITE 150
+#define MERGED 297
+#define NOT_MERGED 298
+#define USED_IN_MERGING 299
 
 #define CP_SUCCESS 0
 #define CP_FAIL -1

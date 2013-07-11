@@ -57,11 +57,14 @@ typedef struct {
   block_container_t *mblocks;  /* Memory offset/len  */
   size_t num_fblocks;          /* Number of File blocks */   
   size_t num_mblocks;          /* Number of Memory blocks */ 
+  /*Convenience values!*/ 
   size_t elementsize;          /* Size of each element in the dataset */
   hid_t dataset_id;            /* The ID of the dataset */
   hid_t selection_id;          /* The ID of the dataspace  */
-  char *mem_buffer;            /* The Memory buffer address (contiguous) */
-  size_t mem_length;           /* Length of the Memory buffer */
+  /*------------------------------------------------------------------*/
+  void *mem_buf;
+  size_t mem_length;
+  op_data_t *op_data;          /* The datastructure that containe all the information*/
 } request_list_t;
 
 

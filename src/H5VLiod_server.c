@@ -19,11 +19,11 @@
 #include "H5Sprivate.h"		/* Dataspaces		  		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 #include "H5VLiod_server.h"
-#include "H5VLiod_compactor_queue.h"
-#include "H5VLiod_compactor.h"             /* Compactor Routine       */  
-
 
 #ifdef H5_HAVE_EFF
+
+#include "H5VLiod_compactor_queue.h"
+#include "H5VLiod_compactor.h"
 
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>

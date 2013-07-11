@@ -400,7 +400,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	}
 
 	newlist[request_id].request_id = request_id;
-	newlist[request_id].merged = 0;
+	newlist[request_id].merged = NOT_MERGED;
 	newlist[request_id].num_fblocks = num_entries;
 
 	newlist[request_id].num_mblocks = num_entries; 
@@ -409,9 +409,9 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	newlist[request_id].selection_id = space_id;
 	/*Incase its not merged, to call the I/O operation 
           directly with selection and memory descriptor*/
-	newlist[request_id].mem_buffer = (char *)buf; 
+	newlist[request_id].mem_buf = (void *)buf; 
 	newlist[request_id].mem_length = buf_size;
-
+	newlist[request_id].op_data = op_data;
 	local_fcont_ptr = newlist[request_id].fblocks;
 	local_mcont_ptr = newlist[request_id].mblocks;
 
@@ -652,7 +652,7 @@ int H5VL_iod_select_overlap (hid_t dataspace_1,
  * Return:	Success:	CP_SUCCESS 
  *		Failure:	Negative
  *
-o * Programmer:  Vishwanth Venkatesan
+ * Programmer:  Vishwanth Venkatesan
  *              June, 2013
  *
  *-------------------------------------------------------------------------
@@ -707,8 +707,8 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
 				      &res_dataspace)){
     lselected_req[0] = 0;
     lselected_req[1] = 1;
-    list[request_list[0]].merged = 1;
-    list[request_list[1]].merged = 1;
+    list[request_list[0]].merged = USED_IN_MERGING;
+    list[request_list[1]].merged = USED_IN_MERGING;
     num_selected += 2;
     if (!merge_flag){
       merge_flag = 1;
@@ -718,11 +718,11 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
   else{
     if (current_space == res_dataspace){
       lselected_req[0] = 0;
-      list[request_list[0]].merged = 1;
+      list[request_list[0]].merged = USED_IN_MERGING;
     }
     else{
       lselected_req[0] = 1;
-      list[request_list[1]].merged = 1;
+      list[request_list[1]].merged = USED_IN_MERGING;
     }
     num_selected += 1;
   }
@@ -754,7 +754,7 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
 	  merge_flag = 0;
 	  /* We need  to create a request list entry for the merged selection */
 	  list[original_requests].request_id = list[original_requests - 1].request_id + 1;
-	  list[original_requests].merged = 2;
+	  list[original_requests].merged = MERGED ;
 	  list[original_requests].selection_id = last_merged;
 	  original_requests++;	  
 	  if (CP_SUCCESS != H5VL_iod_construct_merged_request(list,
@@ -804,7 +804,7 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
   if(merge_flag){
     list[original_requests].request_id = list[original_requests - 1].request_id + 1;
     list[original_requests].dataset_id = list[request_list[0]].dataset_id;
-    list[original_requests].merged = 2;
+    list[original_requests].merged = MERGED;
     list[original_requests].selection_id = last_merged;
     original_requests++;	  
     if (CP_SUCCESS != H5VL_iod_construct_merged_request(list,
@@ -843,6 +843,22 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
   FUNC_LEAVE_NOAPI(ret_value);  
   
 }/*end H5VL_iod_compact_requests*/
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_construct_merged_request
+ *
+ * Purpose:	Whenever there is a merged request, we need to construct the
+ *              entry with appropriate memory description 
+ *
+ * Return:	Success:	CP_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
 static 
 int H5VL_iod_construct_merged_request (request_list_t *list,
@@ -1044,6 +1060,8 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
   FUNC_LEAVE_NOAPI(ret_value);  
   
  }/*end  H5VL_iod_construct_merged_request*/
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_request_exist
  *
