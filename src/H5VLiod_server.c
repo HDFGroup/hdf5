@@ -101,6 +101,23 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MERCURY_HANDLER_REGISTER("group_close", H5VL_iod_server_group_close, 
                              group_close_in_t, ret_t);
 
+    MERCURY_HANDLER_REGISTER("map_create", H5VL_iod_server_map_create,
+                             map_create_in_t, map_create_out_t);
+    MERCURY_HANDLER_REGISTER("map_open", H5VL_iod_server_map_open,
+                             map_open_in_t, map_open_out_t);
+    MERCURY_HANDLER_REGISTER("map_set", H5VL_iod_server_map_set,
+                             map_set_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("map_get", H5VL_iod_server_map_get,
+                             map_get_in_t, map_get_out_t);
+    MERCURY_HANDLER_REGISTER("map_get_count", H5VL_iod_server_map_get_count,
+                             map_get_count_in_t, int64_t);
+    MERCURY_HANDLER_REGISTER("map_exists", H5VL_iod_server_map_exists,
+                             map_op_in_t, hbool_t);
+    MERCURY_HANDLER_REGISTER("map_delete", H5VL_iod_server_map_delete,
+                             map_op_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("map_close", H5VL_iod_server_map_close,
+                             map_close_in_t, ret_t);
+
     MERCURY_HANDLER_REGISTER("dset_create", H5VL_iod_server_dset_create, 
                              dset_create_in_t, dset_create_out_t);
     MERCURY_HANDLER_REGISTER("dset_open", H5VL_iod_server_dset_open, 
@@ -2244,6 +2261,447 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_object_get_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_create
+ *
+ * Purpose:	Function shipper registered call for Map Create.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_create(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_create_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_create_in_t *)H5MM_malloc(sizeof(map_create_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_open
+ *
+ * Purpose:	Function shipper registered call for Map Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_open(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_open_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_open_in_t *)H5MM_malloc(sizeof(map_open_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_set
+ *
+ * Purpose:	Function shipper registered call for Map Set.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_set(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_set_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_set_in_t *)H5MM_malloc(sizeof(map_set_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_set_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_set_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_get
+ *
+ * Purpose:	Function shipper registered call for Map Get.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_get(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_get_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_get_in_t *)H5MM_malloc(sizeof(map_get_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_get_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_get_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_get_count
+ *
+ * Purpose:	Function shipper registered call for Map Get_Count.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_get_count(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_get_count_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_get_count_in_t *)H5MM_malloc(sizeof(map_get_count_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_get_count_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_get_count_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_get_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_exists
+ *
+ * Purpose:	Function shipper registered call for Map Exists.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_exists(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_op_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_op_in_t *)H5MM_malloc(sizeof(map_op_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_exists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_delete
+ *
+ * Purpose:	Function shipper registered call for Map Delete.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_delete(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_op_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_op_in_t *)H5MM_malloc(sizeof(map_op_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_delete_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_delete_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_close
+ *
+ * Purpose:	Function shipper registered call for Map Close.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_close(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_close_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_close_in_t *)H5MM_malloc(sizeof(map_close_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_ids.count) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
+                                          0, NULL, 
+                                          H5VL_iod_server_map_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_close() */
 
 herr_t 
 H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 

@@ -619,7 +619,7 @@ done:
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
         if(iod_obj_close(iod_oh, NULL, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_read_cb() */
@@ -748,7 +748,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         int *ptr = (int *)buf;
 
         fprintf(stderr, "DWRITE Received a buffer of size %d with values: ", size);
-        for(i=0;i<60;++i)
+        for(i=0 ; i<size/sizeof(int) ; ++i)
             fprintf(stderr, "%d ", ptr[i]);
         fprintf(stderr, "\n");
     }
@@ -850,7 +850,7 @@ done:
     /* close the dataset if we opened it in this routine */
     if(opened_locally) {
         if(iod_obj_close(iod_oh, NULL, NULL))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
     }
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_write_cb() */

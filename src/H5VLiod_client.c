@@ -307,6 +307,20 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+    case HG_MAP_CREATE:
+    case HG_MAP_OPEN:
+        {
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+
+            if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.cookie) {
+                fprintf(stderr, "failed to create/open Map\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
     case HG_DSET_CREATE:
     case HG_DSET_OPEN:
         {
@@ -411,6 +425,64 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             info->status = NULL;
             info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
             info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_SET:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "MAP set failed at the server");
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_DELETE:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "MAP delete failed at the server");
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_GET:
+        {
+            map_get_out_t *output = (map_get_out_t *)req->data;
+
+            if(SUCCEED != output->ret)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "MAP get failed at the server");
+
+            free(output);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_GET_COUNT:
+        {
+            hsize_t *count = (hsize_t *)req->data;
+
+            if(*count < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP get_count failed at the server");
+
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_EXISTS:
+        {
+            htri_t *exists = (hbool_t *)req->data;
+
+            if(*exists < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP exists failed at the server");
+
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
             break;
@@ -595,6 +667,30 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
             break;
         }
+    case HG_MAP_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "map close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            map->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free map components */
+            free(map->common.obj_name);
+            if(map->common.comment)
+                HDfree(map->common.comment);
+            if(H5Tclose(map->remote_map.keytype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(H5Tclose(map->remote_map.valtype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            map = H5FL_FREE(H5VL_iod_map_t, map);
+            break;
+        }
     case HG_DTYPE_CLOSE:
         {
             int *status = (int *)req->data;
@@ -747,6 +843,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_ATTR_EXISTS:
     case HG_LINK_EXISTS:
     case HG_OBJECT_EXISTS:
+    case HG_MAP_GET_COUNT:
+    case HG_MAP_EXISTS:
         {
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
@@ -857,6 +955,29 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
             break;
         }
+    case HG_MAP_CREATE:
+    case HG_MAP_OPEN:
+    case HG_MAP_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            map->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free map components */
+            free(map->common.obj_name);
+            if(map->common.comment)
+                HDfree(map->common.comment);
+            if(H5Tclose(map->remote_map.keytype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(H5Tclose(map->remote_map.valtype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            map = H5FL_FREE(H5VL_iod_map_t, map);
+            break;
+        }
     case HG_DTYPE_COMMIT:
     case HG_DTYPE_OPEN:
     case HG_DTYPE_CLOSE:
@@ -886,6 +1007,18 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
             break;
         }
+
+    case HG_MAP_GET:
+        {
+            map_get_out_t *output = (map_get_out_t *)req->data;
+
+            free(output);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_SET:
+    case HG_MAP_DELETE:
     case HG_LINK_CREATE:
     case HG_LINK_MOVE:
     case HG_LINK_REMOVE:
