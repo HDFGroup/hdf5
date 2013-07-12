@@ -1055,6 +1055,10 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     /*OKAY: CAST DISCARDS CONST*/
     if(MPI_SUCCESS != (mpi_code = MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
+    #ifdef JK_DBG
+    printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x,  addr fd:%x\n", getpid(), __FUNCTION__,__LINE__, fh, &fh);
+    fflush(stdout);
+    #endif
     file_opened=1;
 
     /* Get the MPI rank of this process and the total number of processes */
@@ -1370,6 +1374,14 @@ H5FD_mpio_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
 
     *file_handle = &(file->f);
+    #ifdef JK_COUNT0_DBG
+    //printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x,  addr fd:%x\n", getpid(), __FUNCTION__,__LINE__, file->f, &(file->f));
+    fflush(stdout);
+    printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x, fd addr:%x\n", getpid(), __FUNCTION__,__LINE__, *(MPI_File*)(*file_handle), *file_handle);
+    //printf ("JKDBG p:%d %s:%d COUNT=0> MPI_File - fd:%x, fd addr:%x\n", getpid(), __FUNCTION__,__LINE__, **file_handle), *file_handle);
+    fflush(stdout);
+    #endif
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }

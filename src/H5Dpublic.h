@@ -92,6 +92,18 @@ typedef enum H5D_fill_value_t {
     H5D_FILL_VALUE_USER_DEFINED =2
 } H5D_fill_value_t;
 
+#ifndef JK_WORK
+typedef struct H5D_rw_multi_t
+{
+    hid_t dset_id;          /* dstaset id */
+    hid_t file_space_id;    
+    void *rbuf;             /* read buffer */
+    const void *wbuf;       /* write buffer */
+    hid_t mem_type_id;      /* memory type id */
+    hid_t mem_space_id;
+} H5D_rw_multi_t;
+#endif
+
 /********************/
 /* Public Variables */
 /********************/
@@ -133,6 +145,10 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
+#ifndef JK_WORK             
+H5_DLL herr_t H5Dread_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
+H5_DLL herr_t H5Dwrite_multi(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_id);
+#endif
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
             H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);

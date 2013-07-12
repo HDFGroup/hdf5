@@ -102,6 +102,10 @@ H5FL_BLK_EXTERN(sieve_buf);
 
 /* Declare the external free list to manage the H5D_chunk_info_t struct */
 H5FL_EXTERN(H5D_chunk_info_t);
+#ifndef JK_WORK
+/* Declare the external free list to manage the H5D_piece_info_t struct */
+H5FL_EXTERN(H5D_piece_info_t);
+#endif
 
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
@@ -1390,6 +1394,19 @@ H5D_close(H5D_t *dataset)
         /* Free cached information for each kind of dataset */
         switch(dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
+                #ifndef JK_SLCOSE_ISSUE
+                /* Check for skip list for iterating over pieces during I/O to close */
+                if(dataset->shared->cache.sel_pieces) {
+                    size_t cnt=0; 
+                    cnt = H5SL_count(dataset->shared->cache.sel_pieces);
+                    #ifdef JK_DBG
+                    printf("JKDBG %s:%d> sel_piece COUNT: %d\n", __FILE__, __LINE__, cnt);
+                    #endif
+                    HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
+                    H5SL_close(dataset->shared->cache.sel_pieces);
+                    dataset->shared->cache.sel_pieces = NULL;
+                } /* end if */
+                #endif
                 break;
 
             case H5D_CHUNKED:
@@ -1399,6 +1416,23 @@ H5D_close(H5D_t *dataset)
                     H5SL_close(dataset->shared->cache.chunk.sel_chunks);
                     dataset->shared->cache.chunk.sel_chunks = NULL;
                 } /* end if */
+                #ifndef JK_SLCOSE_ISSUE
+                /* Check for skip list for iterating over pieces during I/O to close */
+                if(dataset->shared->cache.sel_pieces) {
+                    size_t cnt=0; 
+                    cnt = H5SL_count(dataset->shared->cache.sel_pieces);
+                    #ifdef JK_DBG
+                    printf("JKDBG %s:%d> sel_piece COUNT: %d\n", __FILE__, __LINE__, cnt);
+                    #endif
+                    HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
+                    H5SL_close(dataset->shared->cache.sel_pieces);
+                    dataset->shared->cache.sel_pieces = NULL;
+                    #ifdef JK_DEBUG_SLMEM
+                    printf("JKDBG %s|%d p:%d>  SL_CLOSE\n", __FUNCTION__, __LINE__, getpid());
+                    fflush (stdout);
+                    #endif
+                } /* end if */
+                #endif
 
                 /* Check for cached single chunk dataspace */
                 if(dataset->shared->cache.chunk.single_space) {
@@ -1411,6 +1445,13 @@ H5D_close(H5D_t *dataset)
                     dataset->shared->cache.chunk.single_chunk_info = H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
                     dataset->shared->cache.chunk.single_chunk_info = NULL;
                 } /* end if */
+                #ifndef JK_WORK
+                /* Check for cached single element piece info */
+                if(dataset->shared->cache.chunk.single_piece_info) {
+                    dataset->shared->cache.chunk.single_piece_info = H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
+                    dataset->shared->cache.chunk.single_piece_info = NULL;
+                } /* end if */
+                #endif
 
                 /* Flush and destroy chunks in the cache. Continue to close even if 
                  * it fails. */

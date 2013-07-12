@@ -178,14 +178,28 @@ static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
+#ifndef JK_WORK    
+static herr_t H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md,
+    const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
+    const H5S_t *mem_space, H5D_dset_info_t *dinfo);
+#endif
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *fm);
+#ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+static herr_t H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md);
+#endif
 static herr_t H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
+#ifndef JK_WORK
+ #ifdef JK_TODO_MAY_PUT_BACK // also use in H5Dcontig.c
+static 
+ #endif
+herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
+#endif
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 
 /* "Nonexistent" layout operation callback */
@@ -206,15 +220,44 @@ static herr_t H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last,
 static hbool_t H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last,
     H5D_chunk_ud_t *udata);
 static herr_t H5D__free_chunk_info(void *item, void *key, void *opdata);
+#ifndef JK_WORK
+static herr_t H5D__free_piece_info(void *item, void *key, void *opdata);
+#endif
 static herr_t H5D__create_chunk_map_single(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
+#ifndef JK_WORK
+static herr_t
+H5D__create_piece_map_single(H5D_dset_info_t *di, 
+    const H5D_io_info_md_t* io_info_md);
+#endif
 static herr_t H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
+#ifndef JK_WORK
+static herr_t
+H5D__create_piece_file_map_hyper(H5D_dset_info_t *di, 
+    const H5D_io_info_md_t *io_info_md);
+
+#endif
 static herr_t H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
+#ifndef JK_WORK
+ #ifdef JK_MAY_PUT_BACK
+ herr_t
+ #else
+ static herr_t
+ #endif
+ H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md,
+    const H5D_dset_info_t *dinfo);
+#endif
 static herr_t H5D__chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
 static herr_t H5D__chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
+#ifndef JK_WORK    
+static herr_t H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, 
+    const hsize_t *coords, void *_opdata);
+static herr_t H5D__piece_mem_cb(void *elem, hid_t type_id, unsigned ndims,
+    const hsize_t *coords, void *_opdata);
+#endif
 static herr_t H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t H5D__chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
@@ -234,16 +277,31 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D__chunk_init,
     H5D__chunk_is_space_alloc,
     H5D__chunk_io_init,
+    #ifndef JK_WORK
+    H5D__chunk_io_init_mdset,
+    #endif    
     H5D__chunk_read,
     H5D__chunk_write,
+    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+    // H5D__chunk_read_mdset,
+    //H5D__chunk_write_mdset,
+    #endif
 #ifdef H5_HAVE_PARALLEL
     H5D__chunk_collective_read,
     H5D__chunk_collective_write,
+    #ifndef JK_WORK
+    H5D__mdset_collective_read,
+    H5D__mdset_collective_write,
+    #endif
 #endif /* H5_HAVE_PARALLEL */
     NULL,
     NULL,
     H5D__chunk_flush,
-    H5D__chunk_io_term
+    H5D__chunk_io_term,
+    #ifndef JK_WORK
+    H5D__piece_io_term_mdset
+    #endif
+    
 }};
 
 
@@ -257,16 +315,30 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
     NULL,
     NULL,
     NULL,
+    #ifndef JK_WORK
+    NULL,
+    #endif      
     NULL,
     NULL,
+    #ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+    // NULL, 
+    //NULL,
+    #endif
 #ifdef H5_HAVE_PARALLEL
     NULL,
     NULL,
+    #ifndef JK_WORK
+    NULL,
+    NULL,
+    #endif      
 #endif /* H5_HAVE_PARALLEL */
     H5D__nonexistent_readvv,
     NULL,
     NULL,
+    NULL,
+    #ifndef JK_WORK
     NULL
+    #endif      
 }};
 
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */
@@ -277,6 +349,10 @@ H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
 H5FL_DEFINE(H5D_chunk_info_t);
+#ifndef JK_WORK
+/* Declare a free list to manage the H5D_piece_info_t struct */
+H5FL_DEFINE(H5D_piece_info_t);
+#endif
 
 /* Declare a free list to manage the chunk sequence information */
 H5FL_BLK_DEFINE_STATIC(chunk);
@@ -950,6 +1026,466 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_init() */
 
+#ifndef JK_WORK
+static herr_t
+H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *type_info,
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_dset_info_t *dinfo)
+    //H5D_chunk_map_t *fm)
+{
+    #ifdef JK_ORI
+    H5D_t *dataset = io_info->dset;     /* Local pointer to dataset info */
+    #else
+    H5D_t *dataset = dinfo->dset;     /* Local pointer to dataset info */
+    #endif
+
+    const H5T_t *mem_type = type_info->mem_type;        /* Local pointer to memory datatype */
+    H5S_t *tmp_mspace = NULL;   /* Temporary memory dataspace */
+    hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
+    htri_t file_space_normalized = FALSE;   /* File dataspace was normalized */
+    hid_t f_tid = (-1);           /* Temporary copy of file datatype for iteration */
+    hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
+    unsigned f_ndims;           /* The number of dimensions of the file's dataspace */
+    int sm_ndims;               /* The number of dimensions of the memory buffer's dataspace (signed) */
+    H5SL_node_t *curr_node;     /* Current node in skip list */
+    H5S_sel_type fsel_type;     /* Selection type on disk */
+    char bogus;                 /* "bogus" buffer to pass to selection iterator */
+    unsigned u;                 /* Local index variable */
+    hbool_t sel_hyper_flag;
+    #ifndef JK_WORK_NEW
+    H5D_io_info_md_wrap_t io_info_md_wrap;
+    #endif
+    herr_t ret_value = SUCCEED;	/* Return value		*/
+
+    FUNC_ENTER_STATIC
+
+    /* Get layout for dataset */
+    dinfo->layout = &(dataset->shared->layout);
+    /* num of element selected */
+    dinfo->nelmts = nelmts;
+
+    /* Check if the memory space is scalar & make equivalent memory space */
+    if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
+    /* Set the number of dimensions for the memory dataspace */
+    H5_ASSIGN_OVERFLOW(dinfo->m_ndims, sm_ndims, int, unsigned);
+
+    /* Get dim number and dimensionality for each dataspace */
+    dinfo->f_ndims = f_ndims = dataset->shared->layout.u.chunk.ndims - 1;
+    if(H5S_get_simple_extent_dims(file_space, dinfo->f_dims, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
+    #ifdef JK_DBG
+    printf("JKDBG %s|%d> dinfo->f_ndims: %d\n", __FUNCTION__, __LINE__,dinfo->f_ndims);
+    #endif
+
+    /* Normalize hyperslab selections by adjusting them by the offset */
+    /* (It might be worthwhile to normalize both the file and memory dataspaces
+     * before any (contiguous, chunked, etc) file I/O operation, in order to
+     * speed up hyperslab calculations by removing the extra checks and/or
+     * additions involving the offset and the hyperslab selection -QAK)
+     */
+    if((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+
+    /* Decide the number of chunks in each dimension*/
+    for(u = 0; u < f_ndims; u++) {
+        /* Keep the size of the chunk dimensions as hsize_t for various routines */
+        dinfo->chunk_dim[u] = dinfo->layout->u.chunk.dim[u];
+    } /* end for */
+
+#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE ---I
+#ifdef H5_HAVE_PARALLEL
+    /* Calculate total chunk in file map*/
+    #ifdef JK_ORI
+    fm->select_chunk = NULL;
+    #else
+     #ifdef JK_MULTI_DSET // ORI REMOVE - init in H5D__write_mdset() out of loop
+    //io_info_md->select_piece = NULL;
+     #endif
+    #endif
+    if(io_info_md->using_mpi_vfd) {
+        #ifndef JK_MULTI_DSET
+        size_t pieces_size;
+        H5D_piece_info_t ** buf_ptr;
+        H5D_piece_info_t ** new_total_pieces;
+        #endif
+        H5_CHECK_OVERFLOW(dinfo->layout->u.chunk.nchunks, hsize_t, size_t);
+        #ifdef JK_ORI
+        if(NULL == (dinfo->select_chunk = (H5D_chunk_info_t **)H5MM_calloc((size_t)dinfo->layout->u.chunk.nchunks * sizeof(H5D_chunk_info_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+        #else
+         #ifndef JK_MULTI_DSET
+        // JK_TODO_LATER_CONSIDER : Also consider canculate how many piece_info out of loop and pass here to malloc all at once (this should include chunked and contig dsets).
+        /* first time */
+        pieces_size = (size_t)dinfo->layout->u.chunk.nchunks * sizeof(H5D_piece_info_t *);
+
+        if(NULL == io_info_md->select_piece)
+            buf_ptr = NULL;
+        else {
+            buf_ptr = io_info_md->select_piece;
+            pieces_size += io_info_md->select_piece_last_size;
+        }
+
+        #ifdef JK_DBG
+        printf ("JKDBG p:%d %s:%d> pieces_size: %d\n", getpid(), __FILE__, __LINE__, pieces_size);
+        #endif
+
+
+        /* alloc accumulativly for all pieces from multi dsets */
+        if(NULL == (new_total_pieces = (H5D_piece_info_t **)H5MM_realloc(buf_ptr, pieces_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate piece info")
+
+        io_info_md->select_piece = new_total_pieces;
+        io_info_md->select_piece_last_size = pieces_size;
+         #else
+        if(NULL == (io_info_md->select_piece = (H5D_piece_info_t **)H5MM_calloc((size_t)dinfo->layout->u.chunk.nchunks * sizeof(H5D_piece_info_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate piece info")
+         #endif 
+        #endif
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE ---O
+
+
+    /* Initialize "last chunk" information */
+    dinfo->last_index = (hsize_t)-1;
+    dinfo->last_piece_info = NULL;
+
+    /* Point at the dataspaces */
+    dinfo->file_space = file_space;
+    dinfo->mem_space = mem_space;
+
+    /* Special case for only one element in selection */
+    /* (usually appending a record) */
+    #ifdef JK_DBG
+    printf("JKDBG %s|%d> nelmts:%llu, ftype:%d\n", __FUNCTION__, __LINE__, nelmts, H5S_GET_SELECT_TYPE(file_space));
+    #ifdef H5_HAVE_PARALLEL
+    printf("JKDBG %s|%d> H5_HAVE_PARALLEL defined\n", __FUNCTION__, __LINE__ );
+    if (!(io_info_md->using_mpi_vfd))
+        printf("JKDBG %s|%d> using_mpi_vfd condition Met: %d\n", __FUNCTION__, __LINE__, !(io_info_md->using_mpi_vfd));
+    #endif
+    if (H5S_SEL_ALL != H5S_GET_SELECT_TYPE(file_space))
+        printf("JKDBG %s|%d> ftype condition Met: %d\n", __FUNCTION__, __LINE__, (H5S_SEL_ALL != H5S_GET_SELECT_TYPE(file_space)) );
+        
+    #endif
+    if(nelmts == 1
+#ifdef H5_HAVE_PARALLEL
+            && !(io_info_md->using_mpi_vfd)
+#endif /* H5_HAVE_PARALLEL */
+            && H5S_SEL_ALL != H5S_GET_SELECT_TYPE(file_space)) {
+        /* Initialize skip list for chunk selections */
+        #ifdef JK_ORI
+        dinfo->sel_chunks = NULL;
+        #else
+        io_info_md->sel_pieces = NULL;
+        #endif
+        dinfo->use_single = TRUE;
+
+        /* Initialize single chunk dataspace */
+        if(NULL == dataset->shared->cache.chunk.single_space) {
+            /* Make a copy of the dataspace for the dataset */
+            if((dataset->shared->cache.chunk.single_space = H5S_copy(file_space, TRUE, FALSE)) == NULL)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space")
+
+            /* Resize chunk's dataspace dimensions to size of chunk */
+            if(H5S_set_extent_real(dataset->shared->cache.chunk.single_space, dinfo->chunk_dim) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "can't adjust chunk dimensions")
+
+            /* Set the single chunk dataspace to 'all' selection */
+            if(H5S_select_all(dataset->shared->cache.chunk.single_space, TRUE) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "unable to set all selection")
+        } /* end if */
+        dinfo->single_space = dataset->shared->cache.chunk.single_space;
+        HDassert(dinfo->single_space);
+
+        #ifdef JK_ORI
+        /* Allocate the single chunk information */
+        if(NULL == dataset->shared->cache.chunk.single_chunk_info) {
+            if(NULL == (dataset->shared->cache.chunk.single_chunk_info = H5FL_MALLOC(H5D_chunk_info_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+        } /* end if */
+        dinfo->single_chunk_info = dataset->shared->cache.chunk.single_chunk_info;
+        HDassert(dinfo->single_chunk_info);
+        #else
+        /* Allocate the single piece information */
+        if(NULL == dataset->shared->cache.chunk.single_piece_info) {
+            if(NULL == (dataset->shared->cache.chunk.single_piece_info = H5FL_MALLOC(H5D_piece_info_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate piece info")
+        } /* end if */
+        dinfo->single_piece_info = dataset->shared->cache.chunk.single_piece_info;
+        HDassert(dinfo->single_piece_info);
+        #endif
+
+        /* Reset chunk template information */
+        dinfo->mchunk_tmpl = NULL;
+
+        /* Set up chunk mapping for single element */
+        if(H5D__create_piece_map_single(dinfo, io_info_md) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk selections for single element")
+    } /* end if */
+
+    else {
+        /* Initialize skip list for piece selections */
+        #ifndef JK_MULTI_DSET
+        /* Only need single skip list point over multiple read/write IO 
+         * and multiple dsets until H5D_close. Thus check both 
+         * since io_info_md->sel_pieces only lives single write/read IO, 
+         * even cache.sel_pieces lives until Dclose */
+        if(NULL == dataset->shared->cache.sel_pieces && 
+           NULL == io_info_md->sel_pieces) {
+            #ifndef JK_SL_P_FADDR
+            if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
+
+            #ifdef JK_DEBUG_SLMEM
+            io_info_md->mc_cnt++;
+            printf("JKDBG %s|%d p:%d>  SL_CREATE COUNT: %u\n", __FUNCTION__, __LINE__, getpid(), io_info_md->mc_cnt);
+            fflush (stdout);
+            #endif
+
+            #ifndef JK_SLCOSE_ISSUE
+            /* keep the skip list in cache, so do not need to recreate until close */
+            io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+            #endif
+        } /* end if */
+
+        /* this is need when multiple write/read occurs on the same dsets,
+         * just pass the previously created pointer */
+        if (NULL == io_info_md->sel_pieces)
+            io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+
+        HDassert(io_info_md->sel_pieces);
+        #else
+        if(NULL == dataset->shared->cache.sel_pieces) {
+            #ifndef JK_SL_P_FADDR
+            if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+            #else
+            if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HSIZE, NULL)))
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
+        } /* end if */
+        io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
+        HDassert(io_info_md->sel_pieces);
+        #endif // JK_MULTI_DSET
+
+        /* We are not using single element mode */
+        dinfo->use_single = FALSE;
+
+        /* Get type of selection on disk & in memory */
+        if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
+        if((dinfo->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
+
+        /* If the selection is NONE or POINTS, set the flag to FALSE */
+        if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
+            sel_hyper_flag = FALSE;
+        else
+            sel_hyper_flag = TRUE;
+
+        #ifdef JK_TODO_TEST_POINT_NONE
+        sel_hyper_flag = FALSE;
+        #endif
+
+        /* Check if file selection is a not a hyperslab selection */
+        if(sel_hyper_flag) {
+            #ifdef JK_DBG
+            printf("JKDBG %s|%d>  HYPER SELECT nelmts:%llu\n", __FUNCTION__, __LINE__, nelmts);
+            #endif
+            /* Build the file selection for each chunk */
+            if(H5D__create_piece_file_map_hyper(dinfo, io_info_md) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
+
+            /* Clean file chunks' hyperslab span "scratch" information */
+            #ifdef JK_ORI
+            curr_node = H5SL_first(fm->sel_chunks);
+            #else
+            curr_node = H5SL_first(io_info_md->sel_pieces);
+            #endif
+
+            while(curr_node) {
+                H5D_piece_info_t *piece_info;   /* Pointer piece information */
+
+                /* Get pointer to piece's information */
+                piece_info = (H5D_piece_info_t *)H5SL_item(curr_node);
+                HDassert(piece_info);
+                
+                #ifndef JK_PER_DSET
+                /* only for current dset */
+                if (piece_info->dset_info == dinfo)
+                {
+                #endif
+                /* Clean hyperslab span's "scratch" information */
+                if(H5S_hyper_reset_scratch(piece_info->fspace) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
+                #ifndef JK_PER_DSET
+                }
+                #endif
+
+                /* Get the next piece node in the skip list */
+                curr_node = H5SL_next(curr_node);
+            } /* end while */
+        } /* end if */
+        // JK Test POINT|NONE Selection
+        else {
+            #ifdef JK_DBG
+            printf("JKDBG %s|%d> POINT or NONE SELECT nelmts:%llu\n", __FUNCTION__, __LINE__,nelmts);
+            #endif
+
+            /* Create temporary datatypes for selection iteration */
+            if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL), FALSE)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+
+            #ifndef JK_WORK_NEW
+            /* set opdata for H5D__piece_mem_cb */
+            io_info_md_wrap.io_info_md = io_info_md;
+            io_info_md_wrap.dinfo = dinfo;
+            #endif
+            /* Spaces might not be the same shape, iterate over the file selection directly */
+            #ifdef JK_ORI
+            if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__chunk_file_cb, dinfo) < 0)
+            #else
+            if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__piece_file_cb, &io_info_md_wrap) < 0)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
+
+            /* Reset "last chunk" info */
+            dinfo->last_index = (hsize_t)-1;
+            dinfo->last_piece_info = NULL;
+        } /* end else */
+
+    #ifndef JK_TODO_TEST_NOT_SAME_SHAPE 
+        /* Build the memory selection for each chunk */
+        if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
+            /* Reset chunk template information */
+            dinfo->mchunk_tmpl = NULL;
+
+            #ifdef JK_DBG
+            printf ("JKDBG p:%d %s:%d> SHPAE SMAE, dType: %d\n", getpid(), __FILE__, __LINE__,dinfo->layout->type);
+            #endif
+            /* If the selections are the same shape, use the file chunk information
+             * to generate the memory chunk information quickly.
+             */
+            
+            #ifdef JK_ORI
+            if(H5D__create_chunk_mem_map_hyper(fm) < 0)
+            #else
+            if(H5D__create_piece_mem_map_hyper(io_info_md, dinfo) < 0)
+            #endif
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
+        } /* end if */
+        else {
+    #else
+    {
+    #endif // JK_TODO_TEST_NOT_SAME_SHAPE
+            size_t elmt_size;           /* Memory datatype size */
+            #ifdef JK_DBG
+            printf ("JKDBG p:%d %s:%d> NOT  SMAE\n", getpid(), __FILE__, __LINE__);
+            #endif
+
+            /* Make a copy of equivalent memory space */
+            if((tmp_mspace = H5S_copy(mem_space, TRUE, FALSE)) == NULL)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+            /* De-select the mem space copy */
+            if(H5S_select_none(tmp_mspace) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space")
+
+            /* Save chunk template information */
+            dinfo->mchunk_tmpl = tmp_mspace;
+
+            /* Create temporary datatypes for selection iteration */
+            if(f_tid < 0) {
+                if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL), FALSE)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+            } /* end if */
+
+            /* Create selection iterator for memory selection */
+            if(0 == (elmt_size = H5T_get_size(mem_type)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
+            if(H5S_select_iter_init(&(dinfo->mem_iter), mem_space, elmt_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+            iter_init = TRUE;	/* Selection iteration info has been initialized */
+
+            #ifndef JK_WORK_NEW
+            /* set opdata for H5D__piece_mem_cb */
+            io_info_md_wrap.io_info_md = io_info_md;
+            io_info_md_wrap.dinfo = dinfo;
+            #endif
+            /* Spaces aren't the same shape, iterate over the memory selection directly */
+            if(H5S_select_iterate(&bogus, f_tid, file_space, H5D__piece_mem_cb, &io_info_md_wrap) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
+
+            /* Clean up hyperslab stuff, if necessary */
+            if(dinfo->msel_type != H5S_SEL_POINTS) {
+                /* Clean memory pieces' hyperslab span "scratch" information */
+                curr_node = H5SL_first(io_info_md->sel_pieces);
+                while(curr_node) {
+                    H5D_piece_info_t *piece_info;   /* Pointer piece information */
+
+                    /* Get pointer to piece's information */
+                    piece_info = (H5D_piece_info_t *)H5SL_item(curr_node);
+                    HDassert(piece_info);
+
+                    #ifndef JK_PER_DSET
+                    /* only for current dset */
+                    if (piece_info->dset_info == dinfo)
+                    {
+                    #endif
+                    /* Clean hyperslab span's "scratch" information */
+                    if(H5S_hyper_reset_scratch(piece_info->mspace) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
+
+                    #ifndef JK_PER_DSET
+                    }
+                    #endif
+
+                    /* Get the next piece node in the skip list */
+                    curr_node = H5SL_next(curr_node);
+                } /* end while */
+            } /* end if */
+        } /* end else */
+    } /* end else */
+
+
+done:
+    /* Release the [potentially partially built] chunk mapping information if an error occurs */
+    if(ret_value < 0) {
+        if(tmp_mspace && !dinfo->mchunk_tmpl) {
+            if(H5S_close(tmp_mspace) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
+        } /* end if */
+
+        #ifdef JK_ORI
+        if(H5D__chunk_io_term(fm) < 0)
+        #else
+        if(H5D__piece_io_term_mdset(dinfo, io_info_md) < 0)
+        #endif
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
+    } /* end if */
+
+    #ifdef JK_ORI_REMOVE // JK_COUNT0 work
+    /* Reset the global dataspace info */
+    dinfo->file_space = NULL;
+    dinfo->mem_space = NULL;
+    #endif
+
+    if(iter_init && H5S_SELECT_ITER_RELEASE(&(dinfo->mem_iter)) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(f_tid != (-1) && H5I_dec_ref(f_tid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+
+    if(file_space_normalized) {
+        /* (Casting away const OK -QAK) */
+        if(H5S_hyper_denormalize_offset((H5S_t *)file_space, old_offset) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_io_init_mdset() */
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_alloc
@@ -1091,6 +1627,33 @@ H5D__free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
     FUNC_LEAVE_NOAPI(0)
 }   /* H5D__free_chunk_info() */
 
+#ifndef JK_WORK
+static herr_t
+H5D__free_piece_info(void *item, void UNUSED *key, void UNUSED *opdata)
+{
+    H5D_piece_info_t *piece_info = (H5D_piece_info_t *)item;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(piece_info);
+
+    /* Close the piece's file dataspace, if it's not shared */
+    if(!piece_info->fspace_shared)
+        (void)H5S_close(piece_info->fspace);
+    else
+        H5S_select_all(piece_info->fspace, TRUE);
+
+    /* Close the piece's memory dataspace, if it's not shared */
+    if(!piece_info->mspace_shared && piece_info->mspace)
+        (void)H5S_close(piece_info->mspace);
+
+    /* Free the actual piece info */
+    piece_info = H5FL_FREE(H5D_piece_info_t, piece_info);
+
+    FUNC_LEAVE_NOAPI(0)
+}   /* H5D__free_piece_info() */
+#endif // JK_WORK
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__create_chunk_map_single
@@ -1171,6 +1734,118 @@ H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_map_single() */
+
+#ifndef JK_WORK
+static herr_t
+H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
+#ifndef H5_HAVE_PARALLEL
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *io_info_md)
+{
+    #ifdef JK_ORI
+    H5D_chunk_info_t *chunk_info;           /* Chunk information to insert into skip list */
+    #else
+    H5D_piece_info_t *piece_info;           /* Piece information to insert into skip list */
+    #endif
+    hsize_t     sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
+    hsize_t     sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
+    unsigned    u;                          /* Local index variable */
+    #ifndef JK_SL_P_FADDR
+    haddr_t prev_tag = HADDR_UNDEF;
+    H5D_chunk_ud_t udata;   /* User data for querying piece info */
+    #endif
+    herr_t	ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(di->f_ndims > 0);
+
+    /* Get coordinate for selection */
+    if(H5S_SELECT_BOUNDS(di->file_space, sel_start, sel_end) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+    /* Initialize the 'single chunk' file & memory chunk information */
+    #ifdef JK_ORI
+    chunk_info = di->single_chunk_info;
+    chunk_info->chunk_points = 1;
+    #else
+    piece_info = di->single_piece_info;
+    piece_info->piece_points = 1;
+    #endif
+
+    /* Set chunk location & hyperslab size */
+    for(u = 0; u < di->f_ndims; u++) {
+        HDassert(sel_start[u] == sel_end[u]);
+        piece_info->coords[u] = (sel_start[u] / di->layout->u.chunk.dim[u]) * di->layout->u.chunk.dim[u];
+    } /* end for */
+    piece_info->coords[di->f_ndims] = 0;
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(di->f_ndims, piece_info->coords, di->layout->u.chunk.dim, di->layout->u.chunk.down_chunks, &piece_info->index) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Copy selection for file's dataspace into chunk dataspace */
+    if(H5S_select_copy(di->single_space, di->file_space, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file selection")
+
+    /* Move selection back to have correct offset in chunk */
+    if(H5S_SELECT_ADJUST_U(di->single_space, piece_info->coords) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
+
+#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+#ifdef H5_HAVE_PARALLEL
+    /* store chunk selection information */
+    if(io_info_md->using_mpi_vfd)
+        #ifdef JK_ORI
+        fm->select_chunk[chunk_info->index] = chunk_info;
+        #else
+        io_info_md->select_piece[piece_info->index] = piece_info;
+        #endif
+#endif /* H5_HAVE_PARALLEL */
+#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+
+    /* Set the file dataspace for the chunk to the shared 'single' dataspace */
+    piece_info->fspace = di->single_space;
+
+    /* Indicate that the chunk's file dataspace is shared */
+    piece_info->fspace_shared = TRUE;
+
+    /* Just point at the memory dataspace & selection */
+    /* (Casting away const OK -QAK) */
+    piece_info->mspace = (H5S_t *)di->mem_space;
+
+    /* Indicate that the chunk's memory dataspace is shared */
+    piece_info->mspace_shared = TRUE;
+
+    #ifndef JK_WORK_NEW
+    /* make connection to related dset info from this piece_info */
+    piece_info->dset_info = di;
+    #endif
+    #ifndef JK_SL_P_FADDR
+    /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
+    if(H5AC_tag(io_info_md->dxpl_id, piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+    /* get chunk file address */
+    if(H5D__chunk_lookup(piece_info->dset_info->dset, io_info_md->dxpl_id,
+            piece_info->coords, piece_info->index, &udata) < 0)
+        HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+    piece_info->faddr = udata.addr;
+    /* Reset metadata tagging */
+    if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
+        HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+     //If CONTIG : piece_info->faddr = io_info_md->store->contig->dset_addr;
+    #endif
+
+    #ifdef JK_DBG
+    printf("JKDBG %s|%d H5D__create_piece_map_single()> piece_info->faddr: %x\n", __FILE__, __LINE__,piece_info->faddr);
+    #endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__create_piece_map_single() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1350,6 +2025,213 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_file_map_hyper() */
 
+#ifndef JK_WORK
+static herr_t
+H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
+#ifndef H5_HAVE_PARALLEL
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *io_info_md)
+{
+    hsize_t     sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hsize_t     sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hsize_t     sel_points;                 /* Number of elements in file selection */
+    hsize_t     start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
+    hsize_t     coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
+    hsize_t     end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
+    hsize_t     chunk_index;                /* Index of chunk */
+    int         curr_dim;                   /* Current dimension to increment */
+    unsigned    u;                          /* Local index variable */
+    herr_t	ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(dinfo->f_ndims > 0);
+
+    /* Get number of elements selected in file */
+    sel_points = dinfo->nelmts;
+
+    /* Get bounding box for selection (to reduce the number of chunks to iterate over) */
+    if(H5S_SELECT_BOUNDS(dinfo->file_space, sel_start, sel_end) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+    /* Set initial chunk location & hyperslab size */
+    for(u = 0; u < dinfo->f_ndims; u++) {
+        start_coords[u] = (sel_start[u] / dinfo->layout->u.chunk.dim[u]) * dinfo->layout->u.chunk.dim[u];
+        coords[u] = start_coords[u];
+        end[u] = (coords[u] + dinfo->chunk_dim[u]) - 1;
+        #ifdef JK_DBG
+        printf("JKDBG %s|%d> [%u] sel_start:%llu, sel_end:%llu | start_coords:%llu | coords:%llu, end:%llu\n", __FUNCTION__, __LINE__, u, sel_start[u], sel_end[u], start_coords[u], coords[u], end[u]);
+        #endif
+    } /* end for */
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(dinfo->f_ndims, coords, dinfo->layout->u.chunk.dim, dinfo->layout->u.chunk.down_chunks, &chunk_index) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Iterate through each chunk in the dataset */
+    while(sel_points) {
+        #ifndef JK_SL_P_FADDR
+        haddr_t prev_tag = HADDR_UNDEF;
+        H5D_chunk_ud_t udata;   /* User data for querying chunk info */
+        #endif
+        /* Check for intersection of temporary chunk and file selection */
+        /* (Casting away const OK - QAK) */
+        if(TRUE == H5S_hyper_intersect_block((H5S_t *)dinfo->file_space, coords, end)) {
+            H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
+            H5D_piece_info_t *new_piece_info;   /* chunk information to insert into skip list */
+            hssize_t    schunk_points;          /* Number of elements in chunk selection */
+
+            /* Create "temporary" chunk for selection operations (copy file space) */
+            if(NULL == (tmp_fchunk = H5S_copy(dinfo->file_space, TRUE, FALSE)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+            /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
+            if(H5S_hyper_convert(tmp_fchunk) < 0) {
+                (void)H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to convert selection to span trees")
+            } /* end if */
+
+            /* "AND" temporary chunk and current chunk */
+            if(H5S_select_hyperslab(tmp_fchunk,H5S_SELECT_AND,coords,NULL,dinfo->chunk_dim,NULL) < 0) {
+                (void)H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't create chunk selection")
+            } /* end if */
+
+            /* Resize chunk's dataspace dimensions to size of chunk */
+            if(H5S_set_extent_real(tmp_fchunk,dinfo->chunk_dim) < 0) {
+                (void)H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk dimensions")
+            } /* end if */
+
+            /* Move selection back to have correct offset in chunk */
+            if(H5S_SELECT_ADJUST_U(tmp_fchunk, coords) < 0) {
+                (void)H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
+            } /* end if */
+
+            /* Add temporary chunk to the list of chunks */
+
+            /* Allocate the file & memory chunk information */
+            if (NULL==(new_piece_info = H5FL_MALLOC (H5D_piece_info_t))) {
+                (void)H5S_close(tmp_fchunk);
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+            } /* end if */
+
+            /* Initialize the chunk information */
+
+            /* Set the chunk index */
+            new_piece_info->index=chunk_index;
+
+#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+#ifdef H5_HAVE_PARALLEL
+            /* store chunk selection information */
+            if(io_info_md->using_mpi_vfd)
+                #ifdef JK_WORK
+                fm->select_chunk[chunk_index] = new_chunk_info;
+                #else
+                io_info_md->select_piece[chunk_index] = new_piece_info;
+                #endif
+#endif /* H5_HAVE_PARALLEL */
+#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+
+            /* Set the file chunk dataspace */
+            new_piece_info->fspace = tmp_fchunk;
+            new_piece_info->fspace_shared = FALSE;
+
+            /* Set the memory chunk dataspace */
+            new_piece_info->mspace=NULL;
+            new_piece_info->mspace_shared = FALSE;
+
+            /* Copy the chunk's coordinates */
+            for(u=0; u<dinfo->f_ndims; u++)
+                new_piece_info->coords[u]=coords[u];
+            new_piece_info->coords[dinfo->f_ndims]=0;
+
+            #ifndef JK_WORK_NEW
+            /* make connection to related dset info from this piece_info */
+            new_piece_info->dset_info = dinfo;
+            #endif
+            #ifndef JK_SL_P_FADDR
+            /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
+            if(H5AC_tag(io_info_md->dxpl_id, new_piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+            /* get chunk file address */
+            if(H5D__chunk_lookup(new_piece_info->dset_info->dset, io_info_md->dxpl_id,
+                    new_piece_info->coords, new_piece_info->index, &udata) < 0)
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+            new_piece_info->faddr = udata.addr;
+            /* Reset metadata tagging */
+            if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+            //If CONTIG : new_piece_info->faddr = io_info_md->store->contig->dset_addr;
+            #endif
+
+            #ifdef JK_DBG
+            printf("JKDBG %s|%d H5D__create_piece_file_map_hyper()> new_piece_info->faddr: %x\n", __FILE__, __LINE__,new_piece_info->faddr);
+            #endif
+            
+
+            /* Insert the new piece into the skip list */
+            #ifndef JK_SL_P_FADDR
+            if(H5SL_insert(io_info_md->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
+            //if(H5SL_insert(io_info_md->sel_pieces, new_chunk_info, &new_chunk_info->index) < 0) 
+            #endif
+                    H5D__free_piece_info(new_piece_info, NULL, NULL);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
+            } /* end if */
+
+            /* Get number of elements selected in chunk */
+            if((schunk_points = H5S_GET_SELECT_NPOINTS(tmp_fchunk)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
+            H5_ASSIGN_OVERFLOW(new_piece_info->piece_points, schunk_points, hssize_t, uint32_t);
+
+            /* Decrement # of points left in file selection */
+            sel_points -= (hsize_t)schunk_points;
+
+            /* Leave if we are done */
+            if(sel_points == 0)
+                HGOTO_DONE(SUCCEED)
+        } /* end if */
+
+        /* Increment chunk index */
+        chunk_index++;
+
+        /* Set current increment dimension */
+        curr_dim=(int)dinfo->f_ndims-1;
+
+        /* Increment chunk location in fastest changing dimension */
+        H5_CHECK_OVERFLOW(dinfo->chunk_dim[curr_dim],hsize_t,hssize_t);
+        coords[curr_dim]+=dinfo->chunk_dim[curr_dim];
+        end[curr_dim]+=dinfo->chunk_dim[curr_dim];
+
+        /* Bring chunk location back into bounds, if necessary */
+        if(coords[curr_dim] > sel_end[curr_dim]) {
+            do {
+                /* Reset current dimension's location to 0 */
+                coords[curr_dim] = start_coords[curr_dim]; /*lint !e771 The start_coords will always be initialized */
+                end[curr_dim] = (coords[curr_dim] + dinfo->chunk_dim[curr_dim]) - 1;
+
+                /* Decrement current dimension */
+                curr_dim--;
+
+                /* Increment chunk location in current dimension */
+                coords[curr_dim] += dinfo->chunk_dim[curr_dim];
+                end[curr_dim] = (coords[curr_dim] + dinfo->chunk_dim[curr_dim]) - 1;
+            } while(coords[curr_dim] > sel_end[curr_dim]);
+
+            /* Re-calculate the index of this chunk */
+            if(H5V_chunk_index(dinfo->f_ndims, coords, dinfo->layout->u.chunk.dim, dinfo->layout->u.chunk.down_chunks, &chunk_index) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+        } /* end if */
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__create_chunk_file_map_hyper() */
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__create_chunk_mem_map_hyper
@@ -1461,6 +2343,126 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__create_chunk_mem_map_hyper() */
+
+#ifndef JK_WORK
+ #ifdef JK_MAY_PUT_BACK
+ herr_t
+ #else
+static herr_t
+ #endif
+H5D__create_piece_mem_map_hyper(const H5D_io_info_md_t *io_info_md, const H5D_dset_info_t *dinfo)
+{
+    H5SL_node_t *curr_node;                 /* Current node in skip list */
+    hsize_t    file_sel_start[H5O_LAYOUT_NDIMS];    /* Offset of low bound of file selection */
+    hsize_t    file_sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
+    hsize_t    mem_sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
+    hsize_t    mem_sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
+    hssize_t adjust[H5O_LAYOUT_NDIMS];      /* Adjustment to make to all file chunks */
+    hssize_t piece_adjust[H5O_LAYOUT_NDIMS];  /* Adjustment to make to a particular chunk */
+    unsigned    u;                          /* Local index variable */
+    herr_t	ret_value = SUCCEED;        /* Return value */
+    #ifndef JK_DBG
+    unsigned cnt_piece=0;
+    #endif
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    assert(dinfo->f_ndims>0);
+    #ifdef JK_DBG
+    cnt_piece=H5SL_count(io_info_md->sel_pieces);
+    printf ("JKDBG p:%d %s:%d> num-piece: %d, m_ndims:%d, f_ndims:%d\n", getpid(), __FUNCTION__, __LINE__,cnt_piece, dinfo->m_ndims, dinfo->f_ndims );
+
+    #endif
+
+    /* Check for all I/O going to a single chunk */
+    if(H5SL_count(io_info_md->sel_pieces)==1) {
+        H5D_piece_info_t *piece_info;   /* Pointer to piece information */
+
+        /* Get the node */
+        curr_node=H5SL_first(io_info_md->sel_pieces);
+
+        /* Get pointer to piece's information */
+        piece_info = (H5D_piece_info_t *)H5SL_item(curr_node);
+        assert(piece_info);
+
+        /* Just point at the memory dataspace & selection */
+        /* (Casting away const OK -QAK) */
+        piece_info->mspace = (H5S_t *)dinfo->mem_space;
+
+        /* Indicate that the piece's memory space is shared */
+        piece_info->mspace_shared = TRUE;
+    } /* end if */
+    else {
+        /* Get bounding box for file selection */
+        if(H5S_SELECT_BOUNDS(dinfo->file_space, file_sel_start, file_sel_end) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+        /* Get bounding box for memory selection */
+        if(H5S_SELECT_BOUNDS(dinfo->mem_space, mem_sel_start, mem_sel_end) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+        /* Calculate the adjustment for memory selection from file selection */
+        assert(dinfo->m_ndims==dinfo->f_ndims);
+        for(u=0; u<dinfo->f_ndims; u++) {
+            H5_CHECK_OVERFLOW(file_sel_start[u],hsize_t,hssize_t);
+            H5_CHECK_OVERFLOW(mem_sel_start[u],hsize_t,hssize_t);
+            adjust[u]=(hssize_t)file_sel_start[u]-(hssize_t)mem_sel_start[u];
+            #ifdef JK_DBG
+            printf ("JKDBG p:%d %s:%d> %u: f_sel_start: %llu, m_sel_start:%llu, adjust:%lld\n", getpid(), __FUNCTION__, __LINE__,u, file_sel_start[u], mem_sel_start[u], adjust[u] );
+            #endif
+        } /* end for */
+
+        /* Iterate over each piece in the chunk list */
+        curr_node=H5SL_first(io_info_md->sel_pieces);
+        while(curr_node) {
+            H5D_piece_info_t *piece_info;   /* Pointer to piece information */
+
+            /* Get pointer to piece's information */
+            piece_info = (H5D_piece_info_t *)H5SL_item(curr_node);
+            assert(piece_info);
+
+            /* Copy the information */
+
+           #ifndef JK_PER_DSET
+           /* only for current dset */
+           if (piece_info->dset_info == dinfo)
+           {
+           #endif
+            /* Copy the memory dataspace */
+            if((piece_info->mspace = H5S_copy(dinfo->mem_space, TRUE, FALSE)) == NULL)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+            /* Release the current selection */
+            if(H5S_SELECT_RELEASE(piece_info->mspace) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection")
+
+            /* Copy the file piece's selection */
+            if(H5S_select_copy(piece_info->mspace, piece_info->fspace, FALSE) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy selection")
+
+            /* Compensate for the piece offset */
+            for(u=0; u<dinfo->f_ndims; u++) {
+                H5_CHECK_OVERFLOW(piece_info->coords[u],hsize_t,hssize_t);
+                piece_adjust[u]=adjust[u]-(hssize_t)piece_info->coords[u]; /*lint !e771 The adjust array will always be initialized */
+            } /* end for */
+
+            /* Adjust the selection */
+            if(H5S_hyper_adjust_s(piece_info->mspace,piece_adjust) < 0) /*lint !e772 The piece_adjust array will always be initialized */
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
+           #ifndef JK_PER_DSET
+           }
+           #endif
+
+            /* Get the next piece node in the skip list */
+            curr_node=H5SL_next(curr_node);
+        } /* end while */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__create_piece_mem_map_hyper() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1574,6 +2576,166 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_file_cb() */
 
+#ifndef JK_WORK
+static herr_t
+H5D__piece_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
+{
+    #ifdef JK_ORI
+    H5D_chunk_map_t      *fm = (H5D_chunk_map_t *)_fm;  /* File<->memory chunk mapping info */
+    H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
+    #else
+    H5D_io_info_md_wrap_t *opdata = (H5D_io_info_md_wrap_t *)_opdata;
+    H5D_io_info_md_t *io_info_md = (H5D_io_info_md_t *) opdata->io_info_md;  /* io info for mumti dset */
+    H5D_dset_info_t *dinfo = (H5D_dset_info_t *) opdata->dinfo;   /* File<->memory chunk mapping info */
+    H5D_piece_info_t *piece_info;               /* Chunk information for current piece */
+    #endif
+
+    hsize_t    coords_in_chunk[H5O_LAYOUT_NDIMS];        /* Coordinates of element in chunk */
+    hsize_t     chunk_index;                    /* Chunk index */
+    unsigned    u;                              /* Local index variable */
+    herr_t	ret_value = SUCCEED;            /* Return value		*/
+
+    FUNC_ENTER_STATIC
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(ndims, coords, dinfo->layout->u.chunk.dim, dinfo->layout->u.chunk.down_chunks, &chunk_index) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Find correct chunk in file & memory skip list */
+    if(chunk_index==dinfo->last_index) {
+        /* If the chunk index is the same as the last chunk index we used,
+         * get the cached info to operate on.
+         */
+        piece_info=dinfo->last_piece_info;
+    } /* end if */
+    else {
+        #ifndef JK_SL_P_FADDR
+        haddr_t prev_tag = HADDR_UNDEF;
+        H5D_chunk_ud_t udata;   /* User data for querying piece info */
+        H5SL_node_t    *piece_node;
+        #endif
+        /* If the chunk index is not the same as the last chunk index we used,
+         * find the chunk in the skip list.
+         */
+        /* Get the chunk node from the skip list */
+        #ifndef JK_SL_P_FADDR  // linear search
+        /* find piece info with chunk_index from skip list. 
+         * can't use H5SL_search() as key is faddr not index */
+        //printf("JKDBG %s> H5SL_search (mem) cindex: %llu\n", __FUNCTION__, chunk_index);
+        piece_node = H5SL_first(io_info_md->sel_pieces);
+
+        /* search with index if piece node exist */
+        while(piece_node) {
+            if(NULL == (piece_info = H5SL_item(piece_node)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece info from skipped list")
+            if(piece_info->index == chunk_index) 
+                break; /* found, break while */   
+            piece_node = H5SL_next(piece_node);
+        }
+
+        /* did not find piece info in skip list, then create new node */
+        if(NULL == piece_node) {
+        #else
+        if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_search(io_info_md->sel_pieces, &chunk_index))) {
+        #endif
+            H5S_t *fspace;                      /* Memory chunk's dataspace */
+
+
+            /* Allocate the file & memory chunk information */
+            if (NULL==(piece_info = H5FL_MALLOC (H5D_piece_info_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+
+            /* Initialize the chunk information */
+
+            /* Set the chunk index */
+            piece_info->index=chunk_index;
+
+            /* Create a dataspace for the chunk */
+            if((fspace = H5S_create_simple(dinfo->f_ndims,dinfo->chunk_dim,NULL))==NULL) {
+                piece_info = H5FL_FREE(H5D_piece_info_t, piece_info);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace for chunk")
+            } /* end if */
+
+            /* De-select the chunk space */
+            if(H5S_select_none(fspace) < 0) {
+                (void)H5S_close(fspace);
+                piece_info = H5FL_FREE(H5D_piece_info_t, piece_info);
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select dataspace")
+            } /* end if */
+
+            /* Set the file chunk dataspace */
+            piece_info->fspace = fspace;
+            piece_info->fspace_shared = FALSE;
+
+            /* Set the memory chunk dataspace */
+            piece_info->mspace = NULL;
+            piece_info->mspace_shared = FALSE;
+
+            /* Set the number of selected elements in chunk to zero */
+            piece_info->piece_points = 0;
+
+            /* Compute the chunk's coordinates */
+            for(u = 0; u < dinfo->f_ndims; u++) {
+                H5_CHECK_OVERFLOW(dinfo->layout->u.chunk.dim[u], hsize_t, hssize_t);
+                piece_info->coords[u] = (coords[u] / (hssize_t)dinfo->layout->u.chunk.dim[u]) * (hssize_t)dinfo->layout->u.chunk.dim[u];
+            } /* end for */
+            piece_info->coords[dinfo->f_ndims] = 0;
+
+            #ifndef JK_WORK_NEW
+            /* make connection to related dset info from this piece_info */
+            piece_info->dset_info = dinfo;
+            #endif
+            #ifndef JK_SL_P_FADDR
+            /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
+            if(H5AC_tag(io_info_md->dxpl_id, piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+            /* get chunk file address */
+            if(H5D__chunk_lookup(piece_info->dset_info->dset, io_info_md->dxpl_id,
+                    piece_info->coords, piece_info->index, &udata) < 0)
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+            piece_info->faddr = udata.addr;
+            /* Reset metadata tagging */
+            if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+            //If CONTIG : piece_info->faddr = io_info_md->store->contig->dset_addr;
+            #endif
+
+            #ifdef JK_DBG
+            printf("JKDBG %s|%d H5D__piece_file_cb()> piece_info->faddr: %x\n", __FILE__, __LINE__,piece_info->faddr);
+            #endif
+
+            /* Insert the new chunk into the skip list */
+            #ifndef JK_SL_P_FADDR
+            if(H5SL_insert(io_info_md->sel_pieces,piece_info,&piece_info->faddr) < 0) {
+            #else
+            if(H5SL_insert(io_info_md->sel_pieces,piece_info,&piece_info->index) < 0) {
+            #endif
+                    H5D__free_piece_info(piece_info,NULL,NULL);
+                HGOTO_ERROR(H5E_DATASPACE,H5E_CANTINSERT,FAIL,"can't insert chunk into skip list")
+            } /* end if */
+        } /* end if */
+
+        /* Update the "last chunk seen" information */
+        dinfo->last_index=chunk_index;
+        dinfo->last_piece_info=piece_info;
+    } /* end else */
+
+    /* Get the coordinates of the element in the chunk */
+    for(u = 0; u < dinfo->f_ndims; u++)
+        coords_in_chunk[u] = coords[u] % dinfo->layout->u.chunk.dim[u];
+
+    /* Add point to file selection for chunk */
+    if(H5S_select_elements(piece_info->fspace, H5S_SELECT_APPEND, (size_t)1, coords_in_chunk) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
+
+    /* Increment the number of elemented selected in chunk */
+    piece_info->piece_points++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__piece_file_cb */
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_mem_cb
@@ -1652,6 +2814,98 @@ H5D__chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_mem_cb() */
+
+
+#ifndef JK_WORK
+static herr_t
+H5D__piece_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_opdata)
+{
+    H5D_io_info_md_wrap_t *opdata = (H5D_io_info_md_wrap_t *)_opdata;
+    H5D_io_info_md_t *io_info_md = (H5D_io_info_md_t *) opdata->io_info_md;  /* io info for mumti dset */
+    H5D_dset_info_t *dinfo = (H5D_dset_info_t *) opdata->dinfo;   /* File<->memory chunk mapping info */
+    H5D_piece_info_t *piece_info;               /* Chunk information for current piece */
+    hsize_t    coords_in_mem[H5O_LAYOUT_NDIMS];        /* Coordinates of element in memory */
+    hsize_t     chunk_index;                    /* Chunk index */
+    herr_t	ret_value = SUCCEED;            /* Return value		*/
+
+    FUNC_ENTER_STATIC
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(ndims, coords, dinfo->layout->u.chunk.dim, dinfo->layout->u.chunk.down_chunks, &chunk_index) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Find correct chunk in file & memory skip list */
+    if(chunk_index == dinfo->last_index) {
+        /* If the chunk index is the same as the last chunk index we used,
+         * get the cached spaces to operate on.
+         */
+        piece_info = dinfo->last_piece_info;
+    } /* end if */
+    else {
+        #ifndef JK_SL_P_FADDR
+        H5SL_node_t    *piece_node;
+        #endif
+        /* If the chunk index is not the same as the last chunk index we used,
+         * find the chunk in the skip list.
+         */
+        /* Get the chunk node from the skip list */
+        #ifndef JK_SL_P_FADDR  // linear search
+        /* find piece info with chunk_index from skip list. 
+         * can't use H5SL_search() as key is faddr not index */
+        //printf("JKDBG %s> H5SL_search (mem) cindex: %llu\n", __FUNCTION__, chunk_index);
+        piece_node = H5SL_first(io_info_md->sel_pieces);
+
+        /* search with index if piece node exist */
+        while(piece_node) {
+            if(NULL == (piece_info = H5SL_item(piece_node)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get piece info from skipped list")
+            if(piece_info->index == chunk_index)
+                break; /* found, break while */                 
+            piece_node = H5SL_next(piece_node);
+        }
+
+        /* did not find piece info in the skip list */
+        if(NULL == piece_node)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate piece in skip list")
+        #else
+        if(NULL == (piece_info = (H5D_piece_info_t *)H5SL_search(io_info_md->sel_pieces, &chunk_index)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate piece in skip list")
+        #endif
+
+        /* Check if the chunk already has a memory space */
+        if(NULL == piece_info->mspace) {
+            /* Copy the template memory chunk dataspace */
+            if(NULL == (piece_info->mspace = H5S_copy(dinfo->mchunk_tmpl, FALSE, FALSE)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space")
+        } /* end else */
+
+        /* Update the "last piece seen" information */
+        dinfo->last_index = chunk_index;
+        dinfo->last_piece_info = piece_info;
+    } /* end else */
+
+    /* Get coordinates of selection iterator for memory */
+    if(H5S_SELECT_ITER_COORDS(&dinfo->mem_iter, coords_in_mem) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator coordinates")
+
+    /* Add point to memory selection for chunk */
+    if(dinfo->msel_type == H5S_SEL_POINTS) {
+        if(H5S_select_elements(piece_info->mspace, H5S_SELECT_APPEND, (size_t)1, coords_in_mem) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
+    } /* end if */
+    else {
+        if(H5S_hyper_add_span_element(piece_info->mspace, dinfo->m_ndims, coords_in_mem) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
+    } /* end else */
+
+    /* Move memory selection iterator to next element in selection */
+    if(H5S_SELECT_ITER_NEXT(&dinfo->mem_iter, (size_t)1) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to move to next iterator location")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__piece_mem_cb() */
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -2028,6 +3282,30 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_write() */
 
+#ifdef JK_TODO_NOCOLLCAUSE_REMOVE
+static herr_t 
+H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md)
+{
+    size_t i;
+    herr_t	ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    #ifdef JK_DBG
+    printf("JKDBG %s|%d> count: %d\n", __FUNCTION__, __LINE__, count);
+    #endif
+
+    for(i = 0; i < count; i++) {
+        //if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    
+        //    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+#endif // JK_TODO_NOCOLLCAUSE_REMOVE
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_flush
@@ -2129,6 +3407,60 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_io_term() */
 
+#ifndef JK_WORK
+ #ifndef JK_TODO_MAY_PUT_BACK // also use in H5Dcontig.c
+ herr_t
+ #else
+static herr_t
+ #endif
+H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md)
+{
+    herr_t	ret_value = SUCCEED;	/*return value		*/
+
+    FUNC_ENTER_STATIC
+
+    /* Single element I/O vs. multiple element I/O cleanup */
+    if(di->use_single) {
+        /* Sanity checks */
+        HDassert(io_info_md->sel_pieces == NULL); 
+        HDassert(di->single_piece_info);
+        HDassert(di->single_piece_info->fspace_shared);
+        HDassert(di->single_piece_info->mspace_shared);
+
+        /* Reset the selection for the single element I/O */
+        H5S_select_all(di->single_space, TRUE);
+    } /* end if */
+    else {
+        /* Release the nodes on the list of selected pieces */
+        if(io_info_md->sel_pieces)
+            if(H5SL_free(io_info_md->sel_pieces, H5D__free_piece_info, NULL) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTNEXT, FAIL, "can't iterate over pieces")
+            #ifndef JK_MULTI_DSET
+            io_info_md->sel_pieces = NULL;
+            #endif
+    } /* end else */
+
+    /* Free the memory piece dataspace template */
+    if(di->mchunk_tmpl)
+        if(H5S_close(di->mchunk_tmpl) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory piece dataspace template")
+#ifdef JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+#ifdef H5_HAVE_PARALLEL
+    if(io_info_md->select_piece)
+    {
+        H5MM_xfree(io_info_md->select_piece);
+        #ifndef JK_MULTI_DSET
+        io_info_md->select_piece = NULL;
+        #endif
+    }
+#endif /* H5_HAVE_PARALLEL */
+#endif // JK_TEST_NO_TOTAL_SELECT_PIECE_REMOVE
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__piece_io_term_mdset() */
+#endif
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_chunk_idx_reset
@@ -2174,7 +3506,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 {
     FUNC_ENTER_PACKAGE_NOERR

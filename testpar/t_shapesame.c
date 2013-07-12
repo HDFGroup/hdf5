@@ -1380,6 +1380,9 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
     tv_ptr->count[0] = 1;
     tv_ptr->block[0] = 1;
 
+        #ifdef JK_DBG
+        printf ("JKDBG m2d_l2s:> large_rank:%d\n", __LINE__, tv_ptr->large_rank);
+        #endif
     for ( i = 1; i < tv_ptr->large_rank; i++ ) {
 
         tv_ptr->start[i] = 0;
@@ -1421,6 +1424,11 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
 
             tv_ptr->block[i] = (hsize_t)(tv_ptr->edge_size);
         }
+        #ifdef JK_DBG
+        printf ("JKDBG m2d_l2s:> large_rank:%d\n", __LINE__, tv_ptr->large_rank);
+        printf ("JKDBG p:%d %s:%d> [%d] start:%llu  stride:%llu  count:%llu  block:%llu\n", getpid(), __FUNCTION__,__LINE__,i, tv_ptr->start[i], tv_ptr->stride[i], tv_ptr->count[i] , tv_ptr->block[i]);
+        fflush(stdout);
+        #endif
     }
 
     /* zero out the in memory small ds */
@@ -1478,7 +1486,12 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
             k = 0;
         }
 
+        #ifdef JK_TEST_MAN_REMOVE
+        k = 1;          
+        {
+        #else
         do {
+        #endif
             /* since small rank >= 2 and large_rank > small_rank, we 
              * have large_rank >= 3.  Since PAR_SS_DR_MAX_RANK == 5
              * (baring major re-orgaization), this gives us:
@@ -1504,6 +1517,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                      * need for another inner loop.
                      */
 
+                     #ifndef JK_TEST_MAN_ORI
                     /* zero out this rank's slice of the on disk small data set */
                     ret = H5Dwrite(tv_ptr->small_dataset,
                                    H5T_NATIVE_UINT32,
@@ -1512,6 +1526,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                                    tv_ptr->xfer_plist,
                                    tv_ptr->small_ds_buf_2);
                     VRFY((ret >= 0), "H5Dwrite() zero slice to small ds succeeded.");
+                    #endif
 
                     /* select the portion of the in memory large cube from which we
                      * are going to write data.
@@ -1531,6 +1546,15 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                     VRFY((ret >= 0), 
                          "H5Sselect_hyperslab() mem_large_ds_sid succeeded.");
 
+    #ifdef JK_DBG
+    {
+    for (int a = 0; a < (PAR_SS_DR_MAX_RANK ); a++ ) {
+        printf ("JKDBG m2d_l2s:%d> [%d] start:%llu  stride:%llu  count:%llu  block:%llu\n", __LINE__,a, tv_ptr->start[a], tv_ptr->stride[a], tv_ptr->count[a] , tv_ptr->block[a]);
+        printf ("JKDBG m2d_l2s:%d> [%d] start_p:%llu  stride_p:%llu  count_p:%llu  block_p:%llu\n", __LINE__,a, tv_ptr->start_ptr[a], tv_ptr->stride_ptr[a], tv_ptr->count_ptr[a] , tv_ptr->block_ptr[a]);
+        fflush(stdout);
+    }
+    }
+    #endif
 
                     /* verify that H5S_select_shape_same() reports the in
                      * memory slice through the cube selection and the
@@ -1588,6 +1612,11 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                     start_index = (size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size;
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
+                    #ifdef JK_DBG
+                    printf ("JKDBG m2d_l2s:%d> i:%d  j:%d  k:%d  l:%d\n", __LINE__, i,j,k,l);
+                    printf ("JKDBG m2d_l2s:%d> start_index:%lu  stop_index:%lu small_ds_size:%lu  \n", __LINE__, start_index, stop_index, tv_ptr->small_ds_size);
+                    fflush(stdout);
+                    #endif
                     HDassert( start_index < stop_index );
                     HDassert( stop_index <= tv_ptr->small_ds_size );
 
@@ -1595,8 +1624,15 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
 
                         if ( ( n >= start_index ) && ( n <= stop_index ) ) {
 
+                            #ifdef JK_DBG
+                            printf ("JKDBG m2d_l2s:%d> expected_value:%u  value:%u , n:%u\n", __LINE__, expected_value, *ptr_1, n );
+                            fflush(stdout);
+                            #endif
                             if ( *ptr_1 != expected_value ) {
-
+                            #ifdef JK_DBG
+                            printf ("JKDBG m2d_l2s:%d> MISMATCH!\n", __LINE__, n );
+                            fflush(stdout);
+                            #endif
                                 mis_match = TRUE;
                             }
                             expected_value++;
@@ -1604,6 +1640,10 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                         } else {
 
                             if ( *ptr_1 != 0 ) {
+                            #ifdef JK_DBG
+                            printf ("JKDBG m2d_l2s:%d> MISMATCH! value:%u , n:%u\n", __LINE__, *ptr_1, n );
+                            fflush(stdout);
+                            #endif
 
                                 mis_match = TRUE;
                             }
@@ -1614,8 +1654,10 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                         ptr_1++;
                     }
 
+                    #ifndef JK_TEST_ORI
                     VRFY((mis_match == FALSE), 
                          "small slice write from large ds data good.");
+                    #endif
 
                     (tv_ptr->tests_run)++;
                 }
@@ -1628,9 +1670,13 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t * tv_ptr)
                       ( (tv_ptr->small_rank - 1) <= 1 ) &&
                       ( l < tv_ptr->edge_size ) );
             k++;
+        #ifdef JK_TEST_MAN_REMOVE
+        }
+        #else
         } while ( ( tv_ptr->large_rank > 3 ) &&
                   ( (tv_ptr->small_rank - 1) <= 2 ) &&
                   ( k < tv_ptr->edge_size ) );
+        #endif
         j++;
     } while ( ( tv_ptr->large_rank > 4 ) &&
               ( (tv_ptr->small_rank - 1) <= 3 ) &&
@@ -1788,7 +1834,12 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
             k = 0;
         }
 
+        #ifdef JK_TEST_MAN_REMOVE
+        k=1;
+        {
+        #else
         do {
+        #endif
             /* since small rank >= 2 and large_rank > small_rank, we 
              * have large_rank >= 3.  Since PAR_SS_DR_MAX_RANK == 5
              * (baring major re-orgaization), this gives us:
@@ -1863,6 +1914,15 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                     VRFY((ret != FAIL), 
                          "H5Sselect_hyperslab() target large ds slice succeeded");
 
+    #ifdef JK_DBG
+    {
+    for (int a = 0; a < (PAR_SS_DR_MAX_RANK ); a++ ) {
+        printf ("JKDBG m2d_l2s:%d> [%d] start:%llu  stride:%llu  count:%llu  block:%llu\n", __LINE__,a, tv_ptr->start[a], tv_ptr->stride[a], tv_ptr->count[a] , tv_ptr->block[a]);
+        printf ("JKDBG m2d_l2s:%d> [%d] start_p:%llu  stride_p:%llu  count_p:%llu  block_p:%llu\n", __LINE__,a, tv_ptr->start_ptr[a], tv_ptr->stride_ptr[a], tv_ptr->count_ptr[a] , tv_ptr->block_ptr[a]);
+        fflush(stdout);
+    }
+    }
+    #endif
 
                     /* verify that H5S_select_shape_same() reports the in
                      * memory small data set slice selection and the
@@ -1968,9 +2028,13 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t * tv_ptr)
                       ( (tv_ptr->small_rank - 1) <= 1 ) &&
                       ( l < tv_ptr->edge_size ) );
             k++;
+        #ifdef JK_TEST_MAN_REMOVE
+        }
+        #else
         } while ( ( tv_ptr->large_rank > 3 ) &&
                   ( (tv_ptr->small_rank - 1) <= 2 ) &&
                   ( k < tv_ptr->edge_size ) );
+        #endif
         j++;
     } while ( ( tv_ptr->large_rank > 4 ) &&
               ( (tv_ptr->small_rank - 1) <= 3 ) &&
@@ -2121,12 +2185,14 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * H5S_select_shape_same() returns true on the memory and file selections.
      */
 
+#ifndef JK_TEST_SKIP_OK1
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__d2m_l2s.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__d2m_l2s(tv_ptr);
+#endif
 
 
     /* Second, read slices of the on disk small data set into slices 
@@ -2134,12 +2200,14 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * data (and only the correct data) is read.
      */
 
+#ifndef JK_TEST_SKIP_OK2
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__d2m_s2l.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__d2m_s2l(tv_ptr);
+#endif
 
 
     /* now we go in the opposite direction, verifying that we can write
@@ -2153,12 +2221,14 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
+#ifndef JK_TEST_SKIP_ISSUE1
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__m2d_l2s.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__m2d_l2s(tv_ptr);
+#endif
 
 
     /* Now write the contents of the process's slice of the in memory 
@@ -2169,12 +2239,14 @@ contig_hs_dr_pio_test__run_test(const int test_num,
      * and file selections.
      */
 
+#ifndef JK_TEST_SKIP_OK
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
         HDfprintf(stdout, "test %d: running contig_hs_dr_pio_test__m2d_s2l.\n", test_num);
     }
 #endif /* CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG */
     contig_hs_dr_pio_test__m2d_s2l(tv_ptr);
+#endif
 
 #if CONTIG_HS_DR_PIO_TEST__RUN_TEST__DEBUG 
     if ( MAINPROCESS ) {
@@ -2289,6 +2361,9 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, independent I/O */
                     chunk_edge_size = 0;
 
+                    #ifdef JK_TEST_REMOVE
+                    if (test_num==1)
+                    #endif
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
                                                    chunk_edge_size,
@@ -2310,6 +2385,10 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* contiguous data set, collective I/O */
                     chunk_edge_size = 0;
 
+                    #ifdef JK_TEST_REMOVE
+                    // 1,3,4 failed 
+                    if (test_num==1)
+                    #endif
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
                                                    chunk_edge_size,
@@ -2331,6 +2410,9 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                     /* chunked data set, independent I/O */
                     chunk_edge_size = 5;
 
+                    #ifdef JK_TEST_REMOVE
+                    if (test_num==1)
+                    #endif
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
                                                    chunk_edge_size,
@@ -2351,6 +2433,14 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
                 case COL_CHUNKED:
                     /* chunked data set, collective I/O */
                     chunk_edge_size = 5;
+
+                    #ifdef JK_TEST_REMOVE
+                    printf ("JKDBG %s:%d p:%d> express_test:%d, test_num:%d\n", __FUNCTION__,__LINE__, getpid(), express_test, test_num );
+                    fflush(stdout);
+                    //express_test = 3;
+                    // JK_NOTE test_num = 1,3,4 - FAILED /  2,5 - OK
+                    if (test_num==1)
+                    #endif
 
                     contig_hs_dr_pio_test__run_test(test_num,
                                                    edge_size,
@@ -4422,6 +4512,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * in memory small small cube
      */
 
+#ifndef JK_TEST_OK
     ckrbrd_hs_dr_pio_test__d2m_l2s(tv_ptr);
 
 
@@ -4431,6 +4522,7 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      */
 
     ckrbrd_hs_dr_pio_test__d2m_s2l(tv_ptr);
+#endif // JK_TEST_OK
 
 
     /* now we go in the opposite direction, verifying that we can write
@@ -4444,7 +4536,9 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * the memory and file selections.
      */
 
+#ifndef JK_TEST_ISSUE1
     ckrbrd_hs_dr_pio_test__m2d_l2s(tv_ptr);
+#endif
 
 
     /* Now write the contents of the process's slice of the in memory 
@@ -4455,8 +4549,9 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num,
      * and file selections.
      */
 
+#ifndef JK_TEST_OK2
     ckrbrd_hs_dr_pio_test__m2d_s2l(tv_ptr);
-
+#endif
 
 #if CKRBRD_HS_DR_PIO_TEST__RUN_TEST__DEBUG
     if ( MAINPROCESS ) {
@@ -5134,7 +5229,9 @@ int main(int argc, char **argv)
         TestSummary();
 
     /* Clean up test files */
+    #ifndef JK_TEST_SKIP_ORI
     h5_cleanup(FILENAME, fapl);
+    #endif
 
     nerrors += GetTestNumErrs();
 
