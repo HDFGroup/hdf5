@@ -745,6 +745,7 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
       if (!merge_flag){
 	merge_flag = 1;
       }
+      list[request_list[i]].merged = USED_IN_MERGING;
       last_merged = res_dataspace; /*update the last merged!*/
     }
     else{
@@ -837,6 +838,14 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
     free(lselected_req);
     lselected_req = NULL;
   }
+  for (i = 0; i < original_requests; i ++){
+    fprintf(stderr,"%s:%d, Request :%d --> %d\n",
+	    __FILE__,
+	    __LINE__,
+	    i,
+	    list[i].merged);
+  }
+
   
   *total_requests = original_requests;
  done:
@@ -874,7 +883,7 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
   size_t  g_entries = 0, j, m_entries = 0;
   size_t *glens = NULL, blck_cnt = 0, *mlen = NULL;
   block_container_t *sf_block = NULL, *sm_block = NULL;
-  int ret_value = CP_SUCCESS;
+  int ret_value = CP_SUCCESS, set_op_data = 0;
 
   FUNC_ENTER_NOAPI(NULL)
 
@@ -890,6 +899,8 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
     }
 #endif
     
+
+
     fblks = H5VL_iod_get_selected_fblocks_count(lselected_req,
 						num_selected,
 						list);
@@ -917,7 +928,10 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
     for ( i = 0; i < num_requests; i++){
       if (CP_SUCCESS ==
 	  H5VL_iod_request_exist(request_list[i], lselected_req, num_selected)){
-	
+	if (!set_op_data){
+	  merged_request->op_data = list[request_list[i]].op_data;
+	  set_op_data;
+	}
 	for (j = 0; j < list[request_list[i]].num_fblocks; j++){
 	  sf_block[blck_cnt].offset = list[request_list[i]].fblocks[j].offset;
 	  sf_block[blck_cnt].len = list[request_list[i]].fblocks[j].len;
@@ -1021,6 +1035,8 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
       merged_request->fblocks[j].offset = goffsets[j];
       merged_request->fblocks[j].len = glens[j];
     }
+    merged_request->num_fblocks = m_entries;
+    
    /*
     Then compare that with automatically generated offsets
     (the offsets have to match) */
@@ -1044,7 +1060,10 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	       merged_request->mblocks[j].len);
 #endif
     }
-  } /*if num_selected > 1*/
+    merged_request->num_mblocks = mblks;
+  }
+  
+ /*if num_selected > 1*/
   else{
 #if DEBUG_COMPACTOR
     fprintf(stderr,"in %s:%d Should not be here with num_selected :%d \n",
