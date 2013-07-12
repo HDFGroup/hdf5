@@ -114,6 +114,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     char  modifier[8];
     int    conv;
     char  *rest, format_templ[128];
+    int    len;
     const char  *s;
     va_list  ap;
 
@@ -138,7 +139,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             s = fmt + 1;
 
             /* Flags */
-            while(HDstrchr ("-+ #", *s)) {
+            while(HDstrchr("-+ #", *s)) {
                 switch(*s) {
                     case '-':
                         leftjust = 1;
@@ -155,6 +156,9 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     case '#':
                         prefix = 1;
                         break;
+
+                    default:
+                        HDassert(0 && "Unknown format flag");
                 } /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
                 s++;
             } /* end while */
@@ -243,16 +247,17 @@ HDfprintf(FILE *stream, const char *fmt, ...)
             conv = *s++;
 
             /* Create the format template */
-            sprintf(format_templ, "%%%s%s%s%s%s", (leftjust ? "-" : ""),
+            len = 0;
+            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s", (leftjust ? "-" : ""),
                     (plussign ? "+" : ""), (ldspace ? " " : ""),
                     (prefix ? "#" : ""), (zerofill ? "0" : ""));
             if(fwidth > 0)
-                sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
+                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
             if(prec > 0)
-                sprintf(format_templ+HDstrlen(format_templ), ".%d", prec);
+                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), ".%d", prec);
             if(*modifier)
-                sprintf(format_templ+HDstrlen(format_templ), "%s", modifier);
-            sprintf (format_templ+HDstrlen(format_templ), "%c", conv);
+                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s", modifier);
+            HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
 
 
             /* Conversion */
@@ -324,31 +329,42 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         haddr_t x = va_arg (ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
 
                         if(H5F_addr_defined(x)) {
-                            sprintf(format_templ, "%%%s%s%s%s%s",
+                            len = 0;
+                            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s",
                                 (leftjust ? "-" : ""), (plussign ? "+" : ""),
                                 (ldspace ? " " : ""), (prefix ? "#" : ""),
                                 (zerofill ? "0" : ""));
                             if(fwidth > 0)
-                                sprintf(format_templ + HDstrlen(format_templ), "%d", fwidth);
+                                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
 
                             /*lint --e{506} Don't issue warnings about constant value booleans */
                             /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
-                            if(sizeof(x) == H5_SIZEOF_INT)
-                                HDstrcat(format_templ, "u");
-                            else if(sizeof(x) == H5_SIZEOF_LONG)
-                                HDstrcat(format_templ, "lu");
+                            if(sizeof(x) == H5_SIZEOF_INT) {
+                                HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
+                                len++;
+                            } /* end if */
+                            else if(sizeof(x) == H5_SIZEOF_LONG) {
+                                HDstrncat(format_templ, "lu", (sizeof(format_templ) - (size_t)(len + 1)));
+                                len++;
+                            } /* end if */
                             else if(sizeof(x) == H5_SIZEOF_LONG_LONG) {
-                                HDstrcat(format_templ, H5_PRINTF_LL_WIDTH);
-                                HDstrcat(format_templ, "u");
+                                HDstrncat(format_templ, H5_PRINTF_LL_WIDTH, (sizeof(format_templ) - (size_t)(len + 1)));
+                                len += (int)sizeof(H5_PRINTF_LL_WIDTH);
+                                HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
+                                len++;
                             }
                             n = fprintf(stream, format_templ, x);
                         } else {
-                            HDstrcpy(format_templ, "%");
-                            if(leftjust)
-                                HDstrcat(format_templ, "-");
+                            len = 0;
+                            HDstrncpy(format_templ, "%", (sizeof(format_templ) - (size_t)(len + 1)));
+                            len++;
+                            if(leftjust) {
+                                HDstrncat(format_templ, "-", (sizeof(format_templ) - (size_t)(len + 1)));
+                                len++;
+                            } /* end if */
                             if(fwidth)
-                                sprintf(format_templ+HDstrlen(format_templ), "%d", fwidth);
-                            HDstrcat(format_templ, "s");
+                                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),  "%d", fwidth);
+                            HDstrncat(format_templ, "s", (sizeof(format_templ) - (size_t)(len + 1)));
                             fprintf(stream, format_templ, "UNDEF");
                         }
                     }
@@ -457,8 +473,9 @@ HDstrtoll(const char *s, const char **rest, int base)
 
     errno = 0;
     if (!s || (base && (base<2 || base>36))) {
-  if (rest) *rest = s;
-  return 0;
+        if (rest)
+            *rest = s;
+        return 0;
     }
 
     /* Skip white space */
@@ -466,21 +483,21 @@ HDstrtoll(const char *s, const char **rest, int base)
 
     /* Optional minus or plus sign */
     if ('+'==*s) {
-  s++;
+        s++;
     } else if ('-'==*s) {
-  sign = -1;
-  s++;
+        sign = -1;
+        s++;
     }
 
     /* Zero base prefix */
     if (0==base && '0'==*s && ('x'==s[1] || 'X'==s[1])) {
-  base = 16;
-  s += 2;
+        base = 16;
+        s += 2;
     } else if (0==base && '0'==*s) {
-  base = 8;
-  s++;
+        base = 8;
+        s++;
     } else if (0==base) {
-  base = 10;
+        base = 10;
     }
 
     /* Digits */
@@ -488,34 +505,39 @@ HDstrtoll(const char *s, const char **rest, int base)
      (base>10 && ((*s>='0' && *s<='9') ||
       (*s>='a' && *s<'a'+base-10) ||
       (*s>='A' && *s<'A'+base-10)))) {
-  if (!overflow) {
-      int64_t digit = 0;
-      if (*s>='0' && *s<='9') digit = *s - '0';
-      else if (*s>='a' && *s<='z') digit = (*s-'a')+10;
-      else digit = (*s-'A')+10;
+        if (!overflow) {
+            int64_t digit = 0;
 
-      if (acc*base+digit < acc) {
-    overflow = TRUE;
-      } else {
-    acc = acc*base + digit;
-      }
-  }
-  s++;
+            if (*s>='0' && *s<='9')
+                digit = *s - '0';
+            else if (*s>='a' && *s<='z')
+                digit = (*s-'a')+10;
+            else
+                digit = (*s-'A')+10;
+
+            if (acc*base+digit < acc) {
+                overflow = TRUE;
+            } else {
+                acc = acc*base + digit;
+            }
+        }
+        s++;
     }
 
     /* Overflow */
     if (overflow) {
-  if (sign>0) {
-      acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
-  } else {
-      acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
-  }
-  errno = ERANGE;
+        if (sign>0) {
+            acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
+        } else {
+            acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
+        }
+        errno = ERANGE;
     }
 
     /* Return values */
     acc *= sign;
-    if (rest) *rest = s;
+    if (rest)
+        *rest = s;
     return acc;
 } /* end HDstrtoll() */
 
@@ -576,12 +598,13 @@ int
 HDremove_all(const char *fname)
 {
     int ret_value = -1;
+    size_t fname_len;
     char *_fname;
 
-    _fname = (char *)H5MM_malloc(HDstrlen(fname) + 3); /* to accomodate ;* and null */
+    fname_len = HDstrlen(fname) + 3;    /* to accomodate ";*" and null terminator */
+    _fname = (char *)H5MM_malloc(fname_len);
     if(_fname) {
-        HDstrcpy(_fname, fname);
-        HDstrcat(_fname,";*");
+        HDsnprintf(_fname, fname_len, "%s;*", fname);
         /* Do not use HDremove; function becomes recursive (see H5private.h file)*/
         remove(_fname);
         H5MM_xfree(_fname);
@@ -723,6 +746,10 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
+    HDassert(name);
+    HDassert(extpath);
+
     /* Clear external path pointer to begin with */
     *extpath = NULL;
 
@@ -738,11 +765,13 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
     } /* end if */
     else { /* relative pathname */
         char *retcwd;
+        size_t name_len;
         int drive;
 
         if(NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
-        if(NULL == (new_name = (char *)H5MM_strdup(name)))
+        name_len = HDstrlen(name) + 1;
+        if(NULL == (new_name = (char *)H5MM_malloc(name_len)))
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /*
@@ -754,7 +783,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         if(H5_CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
-            HDstrcpy(new_name, &name[2]);
+            HDstrncpy(new_name, &name[2], name_len);
         } /* end if */
        /*
         * Windows: name[0] is a '/' or '\'
@@ -763,20 +792,24 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         * OpenVMS: does not apply
         */
         else if(H5_CHECK_ABS_PATH(name) && (0 != (drive = HDgetdrive()))) {
-            sprintf(cwdpath, "%c:%c", (drive+'A'-1), name[0]);
+            HDsnprintf(cwdpath, MAX_PATH_LEN, "%c:%c", (drive + 'A' - 1), name[0]);
             retcwd = cwdpath;
-            HDstrcpy(new_name, &name[1]);
+            HDstrncpy(new_name, &name[1], name_len);
         }
         /* totally relative for Unix, Windows, and OpenVMS: get current working directory  */
-        else
+        else {
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
+            HDstrncpy(new_name, name, name_len);
+        } /* end if */
 
         if(retcwd != NULL) {
             size_t cwdlen;
             size_t path_len;
 
+            HDassert(cwdpath);
             cwdlen = HDstrlen(cwdpath);
             HDassert(cwdlen);
+            HDassert(new_name);
             path_len = cwdlen + HDstrlen(new_name) + 2;
             if(NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -793,7 +826,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
                 char *tmp = new_name;
 
                 full_path[cwdlen - 1] = '\0';
-                HDstrcat(full_path, ++tmp);
+                HDstrncat(full_path, ++tmp, HDstrlen(tmp));
             } /* end if */
             else
                 HDstrncat(full_path, new_name, HDstrlen(new_name));
@@ -818,9 +851,9 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 done:
     /* Release resources */
     if(cwdpath)
-  H5MM_xfree(cwdpath);
+        H5MM_xfree(cwdpath);
     if(new_name)
-  H5MM_xfree(new_name);
+        H5MM_xfree(new_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5_build_extpath() */
