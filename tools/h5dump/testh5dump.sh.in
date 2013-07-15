@@ -59,7 +59,9 @@ SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
 SRC_H5STAT_TESTFILES="$SRC_TOOLS/h5stat/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
+TEST_P_DIR=./testfiles
 TESTDIR=./testfiles/std
+test -d $TEST_P_DIR || mkdir -p $TEST_P_DIR
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 ######################################################################
@@ -173,6 +175,7 @@ $SRC_H5DUMP_TESTFILES/packedbits.ddl
 $SRC_H5DUMP_TESTFILES/tall-1.ddl
 $SRC_H5DUMP_TESTFILES/tall-2.ddl
 $SRC_H5DUMP_TESTFILES/tall-2A.ddl
+$SRC_H5DUMP_TESTFILES/tall-2A0.ddl
 $SRC_H5DUMP_TESTFILES/tall-2B.ddl
 $SRC_H5DUMP_TESTFILES/tall-3.ddl
 $SRC_H5DUMP_TESTFILES/tall-4s.ddl
@@ -274,6 +277,8 @@ $SRC_H5DUMP_TESTFILES/tno-subset.ddl
 $SRC_H5DUMP_TESTFILES/tnullspace.ddl
 $SRC_H5DUMP_TESTFILES/trawdatafile.ddl
 $SRC_H5DUMP_TESTFILES/trawdatafile.exp
+$SRC_H5DUMP_TESTFILES/trawssetfile.ddl
+$SRC_H5DUMP_TESTFILES/trawssetfile.exp
 $SRC_H5DUMP_TESTFILES/zerodim.ddl
 $SRC_H5DUMP_TESTFILES/tordergr1.ddl
 $SRC_H5DUMP_TESTFILES/tordergr2.ddl
@@ -331,6 +336,7 @@ LIST_ERROR_TEST_FILES="
 ${SRC_H5DUMP_ERRORFILES}/filter_fail.err
 ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
+${SRC_H5DUMP_ERRORFILES}/tall-2A0.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2B.err
 ${SRC_H5DUMP_ERRORFILES}/tarray1_big.err
 ${SRC_H5DUMP_ERRORFILES}/tattr-3.err
@@ -873,6 +879,7 @@ TOOLTEST tnoattrdata.ddl --enable-error-stack -A -o tattr.h5
 TOOLTEST2 trawdatafile.exp --enable-error-stack -y -o trawdatafile.txt packedbits.h5
 TOOLTEST2 tnoddlfile.exp --enable-error-stack -O -y -o tnoddlfile.txt packedbits.h5
 TOOLTEST2A twithddlfile.exp twithddl.exp --enable-error-stack --ddl=twithddl.txt -y -o twithddlfile.txt packedbits.h5
+TOOLTEST2 trawssetfile.exp --enable-error-stack -d "/dset1[1,1;;;]" -y -o trawssetfile.txt tdset.h5
 
 # test for maximum display datasets
 TOOLTEST twidedisplay.ddl --enable-error-stack -w0 packedbits.h5
@@ -999,6 +1006,9 @@ TOOLTEST tlarge_objname.ddl --enable-error-stack -w157 tlarge_objname.h5
 
 # test '-A' to suppress data but print attr's
 TOOLTEST4 tall-2A.ddl --enable-error-stack -A tall.h5
+
+# test '-A' to suppress attr's but print data
+TOOLTEST4 tall-2A0.ddl --enable-error-stack -A 0 tall.h5
 
 # test '-r' to print attributes in ASCII instead of decimal
 TOOLTEST4 tall-2B.ddl --enable-error-stack -A -r tall.h5

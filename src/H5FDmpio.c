@@ -825,10 +825,10 @@ H5FD_mpio_fapl_free(void *_fa)
 if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "in H5FD_mpio_fapl_free\n");
 #endif
-    assert(fa);
+    HDassert(fa);
 
     /* Free the internal communicator and INFO object */
-    assert(MPI_COMM_NULL!=fa->comm);
+    HDassert(MPI_COMM_NULL!=fa->comm);
     H5FD_mpi_comm_info_free(&fa->comm, &fa->info);
     H5MM_xfree(fa);
 
@@ -1171,8 +1171,8 @@ H5FD_mpio_close(H5FD_t *_file)
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_close\n");
 #endif
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     /* MPI_File_close sets argument to MPI_FILE_NULL */
     if (MPI_SUCCESS != (mpi_code=MPI_File_close(&(file->f)/*in,out*/)))
@@ -1261,8 +1261,8 @@ H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eoa)
 }
@@ -1296,8 +1296,8 @@ H5FD_mpio_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     file->eoa = addr;
 
@@ -1341,8 +1341,8 @@ H5FD_mpio_get_eof(const H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->eof)
 }
@@ -1479,12 +1479,12 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_read\n" );
 #endif
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
     /* Make certain we have the correct type of property list */
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    assert(buf);
+    HDassert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    HDassert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    HDassert(buf);
 
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat,0,sizeof(MPI_Status));
@@ -1764,12 +1764,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if (H5FD_mpio_Debug[(int)'t'])
     	fprintf(stdout, "Entering H5FD_mpio_write\n" );
 #endif
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
     /* Make certain we have the correct type of property list */
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    assert(buf);
+    HDassert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    HDassert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
+    HDassert(buf);
 
     /* Portably initialize MPI status variable */
     HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
@@ -2070,8 +2070,8 @@ H5FD_mpio_mpi_rank(const H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->mpi_rank)
 } /* end H5FD_mpio_mpi_rank() */
@@ -2099,8 +2099,8 @@ H5FD_mpio_mpi_size(const H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->mpi_size)
 } /* end H5FD_mpio_mpi_size() */
@@ -2129,8 +2129,8 @@ H5FD_mpio_communicator(const H5FD_t *_file)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     FUNC_LEAVE_NOAPI(file->comm)
 }

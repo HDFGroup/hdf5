@@ -50,10 +50,12 @@ static const char *H5_get_srcdir_filename(const char *filename)
 #ifdef H5_VMS
         if(filename[0] == '[') {
             char *tmp = filename;
-            srcdir_testpath[strlen(srcdir)-1] = '\0';
-            strcat(srcdir_testpath, ++tmp);
-        } else
-            strcat(srcdir_testpath, filename);
+
+            srcdir_testpath[HDstrlen(srcdir) - 1] = '\0';
+            HDstrcat(srcdir_testpath, ++tmp);
+        } /* end if */
+        else
+            HDstrcat(srcdir_testpath, filename);
 #else
         HDstrcat(srcdir_testpath, "/");
         HDstrcat(srcdir_testpath, filename);
@@ -83,5 +85,4 @@ static const char *H5_get_srcdir(void)
         return(NULL);
 }
 #endif /* _H5SRCDIR_H */
-
 

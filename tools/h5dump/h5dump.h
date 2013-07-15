@@ -76,6 +76,7 @@ int          display_region    = FALSE; /*print region reference data */
 int          enable_error_stack= FALSE; /* re-enable error stack */
 int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
 int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
+int          include_attrs     = TRUE; /* Display attributes */
 
 /* sort parameters */
 H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */

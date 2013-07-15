@@ -57,7 +57,7 @@ $ cobj1= "H5MFaggr, H5MF, H5MFdbg, H5MFsection, H5MM,"+-
         "H5O, H5Ocache, H5Ochunk, H5Ocont, H5Ocopy, H5Odbg, H5Odrvinfo, H5Odtype, H5Oefl, H5Ofill, H5Ofsinfo,"+-
         "H5Oginfo, H5Olayout, H5Olinfo, H5Olink, H5Omessage, H5Omtime, H5Oname, H5Onull, H5Opline,"+-
         "H5Orefcount, H5Osdspace, H5Oshared, H5Oshmesg, H5Ostab, H5Otest, H5Ounknown,"+-
-        "H5Pacpl, H5P, H5Pdapl, H5Pdcpl, H5Pdeprec, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Pint,"+-
+        "H5Pacpl, H5P, H5Pdapl, H5Pdcpl, H5Pdeprec, H5Pdxpl, H5Pencdec, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Pint,"+-
         "H5Plapl, H5Plcpl, H5Pocpl, H5Pocpypl, H5Pstrcpl, H5Ptest,"+-
         "H5R, H5RC, H5Rdeprec, H5RS, H5Sall, H5S, H5Sdbg, H5Shyper, H5SL, H5SMbtree2, H5SM, H5SMcache,"+-
         "H5SMmessage, H5Smpio, H5SMtest, H5Snone, H5Spoint, H5Sselect, H5ST, H5Stest,"+-

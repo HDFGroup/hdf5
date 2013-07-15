@@ -190,7 +190,7 @@ STRING (REGEX REPLACE ".*LT_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_MINOR ${_lt_vers_am_contents})
 STRING (REGEX REPLACE ".*LT_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_RELEASE ${_lt_vers_am_contents})
-MESSAGE (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_MINOR}.${H5_SOVERS_RELEASE}")
+MESSAGE (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 
 #-----------------------------------------------------------------------------
 # Basic HDF5 stuff here
@@ -205,7 +205,7 @@ IF (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
 ELSE (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
   SET (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
 ENDIF (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
-SET (HDF5_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_MINOR}.${H5_SOVERS_RELEASE}")
+SET (HDF5_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION_STRING}")
 SET (HDF5_PACKAGE_TARNAME "${HDF5_PACKAGE}${HDF_PACKAGE_EXT}")
 SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
@@ -351,6 +351,8 @@ ENDIF (WIN32)
 
 IF (MSVC)
   SET (CMAKE_MFC_FLAG 0)
+  SET (WIN_COMPILE_FLAGS "")
+  SET (WIN_LINK_FLAGS "")
 ENDIF (MSVC)
 
 SET (MAKE_SYSTEM)
@@ -454,6 +456,155 @@ IF (HDF5_DISABLE_COMPILER_WARNINGS)
 ENDIF (HDF5_DISABLE_COMPILER_WARNINGS)
 
 #-----------------------------------------------------------------------------
+# CDash is configured to only allow 3000 warnings, so
+# break into groups (from the config/gnu-flags file)
+#-----------------------------------------------------------------------------
+IF (NOT MSVC)
+    # Append warning flags
+    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
+    # SET (H5_CFLAGS "${H5_CFLAGS} -Wtraditional")
+    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
+    #  from GCC's assert macro
+    # SET (H5_CFLAGS "${H5_CFLAGS} -Wtraditional-conversion")
+
+    # Append warning flags from gcc-3* case
+    # (don't use -Wpadded flag for normal builds, many of the warnings its
+    #   issuing can't be fixed and they are making it hard to detect other,
+    #   more important warnings)
+    #SET (H5_CFLAGS "${H5_CFLAGS} -Wfloat-equal -Wmissing-format-attribute -Wpadded")
+    SET (H5_CFLAGS1 "${H5_CFLAGS1} -Wfloat-equal -Wmissing-format-attribute")
+
+    # Append warning flags from gcc-3.2* case
+    SET (H5_CFLAGS1 "${H5_CFLAGS1} -Wmissing-noreturn -Wpacked -Wdisabled-optimization")
+
+    # Enable more format checking flags, beyond the basic -Wformat included
+    # in -Wall
+    SET (H5_CFLAGS1 "${H5_CFLAGS1} -Wformat=2")
+
+    # The "unreachable code" warning appears to be reliable now...
+    # (this warning was removed in gcc 4.5+)
+    #SET (H5_CFLAGS "${H5_CFLAGS} -Wunreachable-code")
+
+    # Append warning flags from gcc-3.3* case
+    SET (H5_CFLAGS1 "${H5_CFLAGS1} -Wendif-labels")
+
+    # Append warning flags from gcc-3.4* case
+    SET (H5_CFLAGS2 "${H5_CFLAGS2} -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch")
+
+    # Append more extra warning flags that only gcc4.0+ know about
+    SET (H5_CFLAGS2 "${H5_CFLAGS2} -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros")
+
+    # Append more extra warning flags that only gcc 4.1+ know about
+    SET (H5_CFLAGS3 "${H5_CFLAGS3} -Wunsafe-loop-optimizations -Wc++-compat")
+
+    # Append more extra warning flags that only gcc 4.2+ know about
+    SET (H5_CFLAGS3 "${H5_CFLAGS3} -Wstrict-overflow")
+
+    # Append more extra warning flags that only gcc 4.3+ know about
+    #
+    # Technically, variable-length arrays are part of the C99 standard, but
+    #   we should approach them a bit cautiously... -QAK
+    SET (H5_CFLAGS3 "${H5_CFLAGS3} -Wlogical-op -Wlarger-than=2048 -Wvla")
+
+    # Append more extra warning flags that only gcc 4.4+ know about
+    SET (H5_CFLAGS3 "${H5_CFLAGS4} -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat")
+
+    # Append more extra warning flags that only gcc 4.5+ know about
+    SET (H5_CFLAGS4 "${H5_CFLAGS4} -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants")
+
+    # Append more extra warning flags that only gcc 4.6+ know about
+    SET (H5_CFLAGS4 "${H5_CFLAGS5} -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines")
+
+    # Append more extra warning flags that only gcc 4.7+ know about
+    SET (H5_CFLAGS4 "${H5_CFLAGS5} -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+ENDIF (NOT MSVC)
+  
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable all warnings
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_ALL_WARNINGS "Enable all warnings" OFF)
+IF (HDF5_ENABLE_ALL_WARNINGS)
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic ${H5_CFLAGS1} ${H5_CFLAGS2} ${H5_CFLAGS3} ${H5_CFLAGS4}")
+  ENDIF (MSVC)
+ENDIF (HDF5_ENABLE_ALL_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPZERO_WARNINGS "Enable group zero warnings" OFF)
+IF (HDF5_ENABLE_GROUPZERO_WARNINGS)
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W1")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W1")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic")
+  ENDIF (MSVC)
+ENDIF (HDF5_ENABLE_GROUPZERO_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPONE_WARNINGS "Enable group one warnings" OFF)
+IF (HDF5_ENABLE_GROUPONE_WARNINGS)
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W2")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W2")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS1}")
+  ENDIF (MSVC)
+ENDIF (HDF5_ENABLE_GROUPONE_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPTWO_WARNINGS "Enable group two warnings" OFF)
+IF (HDF5_ENABLE_GROUPTWO_WARNINGS)
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS2}")
+  ENDIF (MSVC)
+ENDIF (HDF5_ENABLE_GROUPTWO_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPTHREE_WARNINGS "Enable group three warnings" OFF)
+IF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
+  IF (MSVC)
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+    SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
+    STRING (REGEX REPLACE "(^| )([/-])W[0-9]( |$)" " " CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+  ELSE (MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS3}")
+  ENDIF (MSVC)
+ENDIF (HDF5_ENABLE_GROUPTHREE_WARNINGS)
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable warnings by groups
+#-----------------------------------------------------------------------------
+OPTION (HDF5_ENABLE_GROUPFOUR_WARNINGS "Enable group four warnings" OFF)
+IF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
+  IF (NOT MSVC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${H5_CFLAGS4}")
+  ENDIF (NOT MSVC)
+ENDIF (HDF5_ENABLE_GROUPFOUR_WARNINGS)
+
+#-----------------------------------------------------------------------------
 # This is in here to help some of the GCC based IDES like Eclipse
 # and code blocks parse the compiler errors and warnings better.
 #-----------------------------------------------------------------------------
@@ -522,6 +673,11 @@ IF (HDF5_USE_18_API_DEFAULT)
 ENDIF (HDF5_USE_18_API_DEFAULT)
 
 #-----------------------------------------------------------------------------
+# Include user macros
+#-----------------------------------------------------------------------------
+INCLUDE (UserMacros.cmake)
+
+#-----------------------------------------------------------------------------
 # Options for HDF5 Filters
 #-----------------------------------------------------------------------------
 MACRO (HDF5_SETUP_FILTERS FILTER)
@@ -539,12 +695,10 @@ HDF5_SETUP_FILTERS (NBIT)
 HDF5_SETUP_FILTERS (SCALEOFFSET)
 
 INCLUDE (ExternalProject)
-OPTION (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building" "NO")
-OPTION (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" 0)
-OPTION (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" 0)
+OPTION (HDF5_ALLOW_EXTERNAL_SUPPORT "Allow External Library Building (NO SVN TGZ)" "NO")
 IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
-  SET (ZLIB_USE_EXTERNAL 1)
-  SET (SZIP_USE_EXTERNAL 1)
+  OPTION (ZLIB_USE_EXTERNAL "Use External Library Building for ZLIB" 1)
+  OPTION (SZIP_USE_EXTERNAL "Use External Library Building for SZIP" 1)
   IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
     SET (ZLIB_URL ${ZLIB_SVN_URL})
     SET (SZIP_URL ${SZIP_SVN_URL})
@@ -554,6 +708,9 @@ IF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     ENDIF (NOT TGZ_PATH)
     SET (ZLIB_URL ${TGZ_PATH}/${ZLIB_TGZ_NAME})
     SET (SZIP_URL ${TGZ_PATH}/${SZIP_TGZ_NAME})
+  ELSE (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
+    SET (ZLIB_USE_EXTERNAL 0)
+    SET (SZIP_USE_EXTERNAL 0)
   ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN")
 ENDIF (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "SVN" OR HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "TGZ")
 
@@ -951,6 +1108,31 @@ INSTALL (
 )
 
 #-----------------------------------------------------------------------------
+# Configure the HDF518_Examples.cmake file and the examples
+#-----------------------------------------------------------------------------
+OPTION (HDF5_PACK_EXAMPLES_FILE  "Package the HDF5 Library Examples Compressed File" OFF)
+IF (HDF5_PACK_EXAMPLES_FILE)
+  CONFIGURE_FILE (
+      ${HDF5_RESOURCES_DIR}/HDF518_Examples.cmake.in 
+      ${HDF5_BINARY_DIR}/HDF518_Examples.cmake @ONLY
+  )
+  INSTALL (
+      FILES ${HDF5_BINARY_DIR}/HDF518_Examples.cmake
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      COMPONENT hdfdocuments
+  )
+  IF (EXISTS "${HDF5_EXAMPLES_COMPRESSED_PATH}/${HDF5_EXAMPLES_COMPRESSED_FILE}")
+    INSTALL (
+        FILES
+            ${HDF5_EXAMPLES_COMPRESSED_PATH}/${HDF5_EXAMPLES_COMPRESSED_FILE}
+            ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
+        DESTINATION ${HDF5_INSTALL_DATA_DIR}
+        COMPONENT hdfdocuments
+    )
+  ENDIF (EXISTS "${HDF5_EXAMPLES_COMPRESSED_PATH}/${HDF5_EXAMPLES_COMPRESSED_FILE}")
+ENDIF (HDF5_PACK_EXAMPLES_FILE)
+
+#-----------------------------------------------------------------------------
 # Add Document File(s) to CMake Install
 #-----------------------------------------------------------------------------
 IF (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -958,40 +1140,51 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
       FILES
           ${HDF5_SOURCE_DIR}/ACKNOWLEDGMENTS
           ${HDF5_SOURCE_DIR}/COPYING
-          ${HDF5_SOURCE_DIR}/README.txt
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
   IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     SET (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
         ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
         ${HDF5_SOURCE_DIR}/release_docs/COPYING
-        ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_9.txt
-        ${HDF5_SOURCE_DIR}/release_docs/INSTALL
         ${HDF5_SOURCE_DIR}/release_docs/RELEASE.txt
     )
     IF (WIN32 AND NOT CYGWIN)
       SET (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
-      )
-    ELSE (WIN32 AND NOT CYGWIN)
-      SET (release_files
-          ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_VMS.txt
+          ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_VS.txt
       )
     ENDIF (WIN32 AND NOT CYGWIN)
-    IF (HDF5_ENABLE_PARALLEL)
+    IF (HDF5_PACK_INSTALL_DOCS)
       SET (release_files
           ${release_files}
-          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
+          ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_8.txt
+          ${HDF5_SOURCE_DIR}/release_docs/INSTALL
       )
-    ENDIF (HDF5_ENABLE_PARALLEL)
+      IF (WIN32)
+        IF (NOT CYGWIN)
+          SET (release_files
+              ${release_files}
+              ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Windows.txt
+          )
+        ELSE (NOT CYGWIN)
+          SET (release_files
+              ${release_files}
+              ${HDF5_SOURCE_DIR}/release_docs/INSTALL_Cygwin.txt
+          )
+        ENDIF (NOT CYGWIN)
+      ENDIF (WIN32)
+      IF (HDF5_ENABLE_PARALLEL)
+        SET (release_files
+            ${release_files}
+            ${HDF5_SOURCE_DIR}/release_docs/INSTALL_parallel
+        )
+      ENDIF (HDF5_ENABLE_PARALLEL)
+    ENDIF (HDF5_PACK_INSTALL_DOCS)
     INSTALL (
         FILES ${release_files}
-        DESTINATION ${HDF5_INSTALL_DATA_DIR}/release_docs
+        DESTINATION ${HDF5_INSTALL_DATA_DIR}
         COMPONENT hdfdocuments
     )
   ENDIF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")

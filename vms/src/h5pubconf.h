@@ -99,6 +99,9 @@
 /* Define if the direct I/O virtual file driver should be compiled */
 /* #undef H5_HAVE_DIRECT */
 
+/* Define to 1 if you have the <dirent.h> header file. */
+#define H5_HAVE_DIRENT_H 1
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #define H5_HAVE_DLFCN_H 1
 
@@ -196,6 +199,9 @@
 /* Define to 1 if you have the <io.h> header file. */
 /* #undef H5_HAVE_IO_H */
 
+/* Define to 1 if you have the `dl' library (-ldl). */
+#define H5_HAVE_LIBDL 1
+
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 /* #undef H5_HAVE_LIBDMALLOC */
 
@@ -273,6 +279,9 @@
 
 /* Define to 1 if you have the `rand_r' function. */
 /* #define H5_HAVE_RAND_R 1 */
+
+/* Define to 1 if you have the `setjmp' function. */
+#define H5_HAVE_SETJMP 1
 
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define H5_HAVE_SETJMP_H 1
@@ -502,7 +511,7 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.150"
+#define H5_PACKAGE_STRING "HDF5 1.9.159"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
@@ -511,7 +520,7 @@
 #define H5_PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.150"
+#define H5_PACKAGE_VERSION "1.9.159"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "ll"
@@ -674,7 +683,7 @@
 /* #undef H5_USING_MEMCHECKER */
 
 /* Version number of package */
-#define H5_VERSION "1.9.150"
+#define H5_VERSION "1.9.159"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

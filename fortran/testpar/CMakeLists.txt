@@ -17,7 +17,7 @@ ADD_EXECUTABLE (parallel_test
     mdset.f90
 )
 TARGET_NAMING (parallel_test ${LIB_TYPE})
-TARGET_FORTRAN_WIN_PROPERTIES (parallel_test "")
+TARGET_FORTRAN_PROPERTIES (parallel_test " " " ")
 TARGET_LINK_LIBRARIES (parallel_test 
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}

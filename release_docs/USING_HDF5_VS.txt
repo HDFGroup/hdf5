@@ -7,7 +7,7 @@
 These suggestions are for Visual Studio users.
 
 Instructions for building and testing HDF5 applications using CMake can 
-be found in the USING_CMake.txt file found in this folder.
+be found in the USING_HDF5_CMake.txt file found in this folder.
 
 The following two sections are helpful if you do not use CMake to build 
 your applications.
@@ -78,7 +78,7 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
     Many other common questions and hints are located online and being updated
     in the HDF5 FAQ.  For Windows-specific questions, please see:
     
-        http://www.hdfgroup.org/windows/faq.html
+        http://www.hdfgroup.org/HDF5/faq/windows.html
         
     For all other general questions, you can look in the general FAQ:
     

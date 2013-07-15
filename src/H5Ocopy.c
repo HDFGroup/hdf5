@@ -286,9 +286,9 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
 done:
     if(loc_found && H5G_loc_free(&src_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-    if(obj_open)
-        H5O_close(&src_oloc);
+        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
+    if(obj_open && H5O_close(&src_oloc) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ocopy() */
@@ -669,7 +669,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     } /* end if */
 
     /* Add in destination's object header size now */
-    dst_oh_size += H5O_SIZEOF_HDR(oh_dst);
+    dst_oh_size += (uint64_t)H5O_SIZEOF_HDR(oh_dst);
 
     /* Allocate space for chunk in destination file */
     if(HADDR_UNDEF == (oh_dst->chunk[0].addr = H5MF_alloc(oloc_dst->file, H5FD_MEM_OHDR, dxpl_id, (hsize_t)dst_oh_size)))
@@ -1284,7 +1284,8 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
     H5O_loc_t 	dst_oloc;         	/* Copied object object location */
     H5O_loc_t	src_oloc;          	/* Temporary object location for source object */
     H5G_loc_t   dst_root_loc;           /* The location of root group of the destination file */
-    uint8_t     *p;                     /* Pointer to OID to store */
+    const uint8_t *q;                   /* Pointer to source OID to store */
+    uint8_t     *p;                     /* Pointer to destination OID to store */
     size_t      i;                      /* Local index variable */
     herr_t	ret_value = SUCCEED;
 
@@ -1318,8 +1319,8 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
         /* Making equivalent references in the destination file */
         for(i = 0; i < ref_count; i++) {
             /* Set up for the object copy for the reference */
-            p = (uint8_t *)(&src_ref[i]);
-            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(src_oloc.addr));
+            q = (uint8_t *)(&src_ref[i]);
+            H5F_addr_decode(src_oloc.file, (const uint8_t **)&q, &(src_oloc.addr));
             dst_oloc.addr = HADDR_UNDEF;
 
             /* Attempt to copy object from source to destination file */
@@ -1347,9 +1348,9 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
         /* Making equivalent references in the destination file */
         for(i = 0; i < ref_count; i++) {
             /* Get the heap ID for the dataset region */
-            p = (uint8_t *)(&src_ref[i]);
-            H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(hobjid.addr));
-            INT32DECODE(p, hobjid.idx);
+            q = (const uint8_t *)(&src_ref[i]);
+            H5F_addr_decode(src_oloc.file, (const uint8_t **)&q, &(hobjid.addr));
+            UINT32DECODE(q, hobjid.idx);
 
             if(hobjid.addr != (haddr_t)0) {
                 /* Get the dataset region from the heap (allocate inside routine) */
@@ -1357,8 +1358,8 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
                     HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
 
                 /* Get the object oid for the dataset */
-                p = (uint8_t *)buf;
-                H5F_addr_decode(src_oloc.file, (const uint8_t **)&p, &(src_oloc.addr));
+                q = (const uint8_t *)buf;
+                H5F_addr_decode(src_oloc.file, (const uint8_t **)&q, &(src_oloc.addr));
                 dst_oloc.addr = HADDR_UNDEF;
 
                 /* copy the object pointed by the ref to the destination */
@@ -1384,7 +1385,7 @@ H5O_copy_expand_ref(H5F_t *file_src, void *_src_ref, hid_t dxpl_id,
             /* Set the dataset region reference info for the destination file */
             p = (uint8_t *)(&dst_ref[i]);
             H5F_addr_encode(dst_oloc.file, &p, hobjid.addr);
-            INT32ENCODE(p, hobjid.idx);
+            UINT32ENCODE(p, hobjid.idx);
 
             /* Free the buffer allocated in H5HG_read() */
             H5MM_xfree(buf);

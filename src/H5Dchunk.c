@@ -1881,7 +1881,7 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    assert(fm->f_ndims>0);
+    HDassert(fm->f_ndims>0);
 
     /* Get number of elements selected in file */
     sel_points = fm->nelmts;
@@ -2265,7 +2265,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
     FUNC_ENTER_STATIC
 
     /* Sanity check */
-    assert(fm->f_ndims>0);
+    HDassert(fm->f_ndims>0);
 
     /* Check for all I/O going to a single chunk */
     if(H5SL_count(fm->sel_chunks)==1) {
@@ -2276,7 +2276,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 
         /* Get pointer to chunk's information */
         chunk_info = (H5D_chunk_info_t *)H5SL_item(curr_node);
-        assert(chunk_info);
+        HDassert(chunk_info);
 
         /* Just point at the memory dataspace & selection */
         /* (Casting away const OK -QAK) */
@@ -2295,7 +2295,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
 
         /* Calculate the adjustment for memory selection from file selection */
-        assert(fm->m_ndims==fm->f_ndims);
+        HDassert(fm->m_ndims==fm->f_ndims);
         for(u=0; u<fm->f_ndims; u++) {
             H5_CHECK_OVERFLOW(file_sel_start[u],hsize_t,hssize_t);
             H5_CHECK_OVERFLOW(mem_sel_start[u],hsize_t,hssize_t);
@@ -2309,7 +2309,7 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 
             /* Get pointer to chunk's information */
             chunk_info = (H5D_chunk_info_t *)H5SL_item(curr_node);
-            assert(chunk_info);
+            HDassert(chunk_info);
 
             /* Copy the information */
 
@@ -2963,8 +2963,9 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
                     /* If the fill value needs to be written then we will need
                      * to use the cache to write the fill value */
                     if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
-                            (fill->fill_time == H5D_FILL_TIME_IFSET
-                            && fill_status == H5D_FILL_VALUE_USER_DEFINED))
+                            (fill->fill_time == H5D_FILL_TIME_IFSET &&
+                            (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
+                             fill_status == H5D_FILL_VALUE_DEFAULT)))
                         ret_value = TRUE;
                     else
                         ret_value = FALSE;
@@ -3050,7 +3051,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
          * but they aren't set, set the flag to skip missing chunks.
          */
         if(fill->fill_time == H5D_FILL_TIME_NEVER ||
-                (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status != H5D_FILL_VALUE_USER_DEFINED))
+                (fill->fill_time == H5D_FILL_TIME_IFSET &&
+                 fill_status != H5D_FILL_VALUE_USER_DEFINED &&
+                 fill_status != H5D_FILL_VALUE_DEFAULT))
             skip_missing_chunks = TRUE;
     }
 
@@ -4219,7 +4222,9 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined")
 
             if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
-                    (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                    (fill->fill_time == H5D_FILL_TIME_IFSET &&
+                     (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
+                      fill_status == H5D_FILL_VALUE_DEFAULT))) {
                 /*
                  * The chunk doesn't exist in the file.  Replicate the fill
                  * value throughout the chunk, if the fill value is defined.
@@ -4644,7 +4649,9 @@ H5D__chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
      * set the "should fill" flag
      */
     if((!full_overwrite && (fill->fill_time == H5D_FILL_TIME_ALLOC ||
-            (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)))
+            (fill->fill_time == H5D_FILL_TIME_IFSET &&
+             (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
+              fill_status == H5D_FILL_VALUE_DEFAULT))))
             || pline->nused > 0)
         should_fill = TRUE;
 

@@ -113,7 +113,7 @@ H5T_get_sign(H5T_t const *dt)
 
     FUNC_ENTER_NOAPI(H5T_SGN_ERROR)
 
-    assert(dt);
+    HDassert(dt);
 
     /* Defer to parent */
     while(dt->shared->parent)

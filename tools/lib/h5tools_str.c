@@ -631,8 +631,6 @@ h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info,
     for (i = 0; i < indentlevel; i++) {
         h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
     }
-
-//    ctx->need_prefix = 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -1397,24 +1395,24 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
 	char *head = NULL;
      
 	if ( substr == NULL || replacement == NULL ) 
-		return strdup (string);
+		return HDstrdup (string);
 		
-	newstr = strdup (string);
+	newstr = HDstrdup (string);
 	head = newstr;
-	while ( (tok = strstr ( head, substr ))){
+	while ( (tok = HDstrstr ( head, substr ))){
 		oldstr = newstr;
-		newstr = HDmalloc ( strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) + 1 );
+		newstr = HDmalloc ( HDstrlen ( oldstr ) - HDstrlen ( substr ) + HDstrlen ( replacement ) + 1 );
 
         if ( newstr == NULL ){
 			HDfree (oldstr);
 			return NULL;
         }
-        memcpy ( newstr, oldstr, tok - oldstr );
-        memcpy ( newstr + (tok - oldstr), replacement, strlen ( replacement ) );
-        memcpy ( newstr + (tok - oldstr) + strlen( replacement ), tok + strlen ( substr ), strlen ( oldstr ) - strlen ( substr ) - ( tok - oldstr ) );
-        memset ( newstr + strlen ( oldstr ) - strlen ( substr ) + strlen ( replacement ) , 0, 1 );
+        HDmemcpy ( newstr, oldstr, tok - oldstr );
+        HDmemcpy ( newstr + (tok - oldstr), replacement, HDstrlen ( replacement ) );
+        HDmemcpy ( newstr + (tok - oldstr) + HDstrlen( replacement ), tok + HDstrlen ( substr ), HDstrlen ( oldstr ) - HDstrlen ( substr ) - ( tok - oldstr ) );
+        HDmemset ( newstr + HDstrlen ( oldstr ) - HDstrlen ( substr ) + HDstrlen ( replacement ) , 0, 1 );
         /* move back head right after the last replacement */
-        head = newstr + (tok - oldstr) + strlen( replacement );
+        head = newstr + (tok - oldstr) + HDstrlen( replacement );
         HDfree (oldstr);
     }
 	

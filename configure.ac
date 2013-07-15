@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.150], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.159], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -4276,7 +4276,7 @@ fi
 ## Enable strict file format checks
 ##
 AC_SUBST([STRICT_FORMAT_CHECKS])
-AC_MSG_CHECKING([Whether to perform strict file format checks]);
+AC_MSG_CHECKING([whether to perform strict file format checks]);
 AC_ARG_ENABLE([strict-format-checks],
               [AS_HELP_STRING([--enable-strict-format-checks],
                      [Enable strict file format checks, default=yes if
@@ -4309,7 +4309,7 @@ esac
 ## ----------------------------------------------------------------------
 ## Enable embedded library information
 ##
-AC_MSG_CHECKING([Whether to have library information embedded in the executables])
+AC_MSG_CHECKING([whether to have library information embedded in the executables])
 AC_ARG_ENABLE([embedded-libinfo],
     [AS_HELP_STRING([--enable-embedded-libinfo],
 	[Enable embedded library information [default=yes]])],

@@ -173,7 +173,7 @@ H5CS_print(FILE *stream)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    assert(fstack);
+    HDassert(fstack);
 
     H5CS_print_stack(fstack, stream);
 
@@ -205,8 +205,8 @@ H5CS_push(const char *func_name)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    assert (fstack);
-    assert (func_name);
+    HDassert(fstack);
+    HDassert(func_name);
 
     /*
      * Push the function if there's room.  Otherwise just increment count
@@ -242,8 +242,8 @@ H5CS_pop(void)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    assert (fstack);
-    assert (fstack->nused>0);
+    HDassert(fstack);
+    HDassert(fstack->nused>0);
 
     /* Pop the function. */
     fstack->nused--;
@@ -276,7 +276,7 @@ H5CS_copy_stack(H5CS_t *new_stack)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert (old_stack);
+    HDassert(old_stack);
 
     /* Copy old stack to new one, duplicating the strings */
     for(u = 0; u < old_stack->nused; u++)
@@ -310,7 +310,7 @@ H5CS_close_stack(H5CS_t *stack)
     FUNC_ENTER_NOAPI_NOERR_NOFS
 
     /* Sanity check */
-    HDassert (stack);
+    HDassert(stack);
 
     /* Free strings on stack */
     for(u = 0; u < stack->nused; u++)

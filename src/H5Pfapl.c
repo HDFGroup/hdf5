@@ -2289,7 +2289,7 @@ H5P_file_image_info_del(hid_t UNUSED prop_id, const char UNUSED *name, size_t UN
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "image_free callback failed")
             } /* end if */
             else
-                free(info.buffer);
+                HDfree(info.buffer);
         } /* end if */
 
         /* Free udata if it exists */

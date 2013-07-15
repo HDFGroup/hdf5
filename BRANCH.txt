@@ -6,7 +6,9 @@ H5Dread_multi() and H5Dwrite_multi() functions will be provided as new APIs.
 
 UPDATES:
 
-- This branch is updated with HDF5 trunk revision r23325.
+- This branch is updated with HDF5 trunk revision r23897. (07-15-2013)
 
-This branch was created by Jonathan Kim on Feb 14, 2013.
-- This branch is off of the HDF5 trunk revision r23278. 
+- This branch is updated with HDF5 trunk revision r23325. (07-02-2013)
+
+- This branch is off of the HDF5 trunk revision r23278. (02-13-2013)
+  - This branch was created by Jonathan Kim on Feb 14, 2013.

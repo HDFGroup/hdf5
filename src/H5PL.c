@@ -415,7 +415,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 
             /* Get info for directory entry */
             if(HDstat(pathname, &my_stat) == -1)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file: %s", strerror(errno))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't stat file: %s", HDstrerror(errno))
 
             /* If it is a directory, skip it */ 
             if(S_ISDIR(my_stat.st_mode))
@@ -437,7 +437,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 done:
     if(dirp) 
         if(HDclosedir(dirp) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", strerror(errno))
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno))
     if(pathname) 
         pathname = (char *)H5MM_xfree(pathname);
 
@@ -456,7 +456,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
     FUNC_ENTER_STATIC
 
     /* Specify a file mask. *.* = We want everything! */
-    sprintf(service, "%s\/*.dll", dir);
+    sprintf(service, "%s\\*.dll", dir);
     if((hFind = FindFirstFile(service, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 

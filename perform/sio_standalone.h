@@ -62,7 +62,15 @@
  */
 #define HDabort()               abort()
 #define HDabs(X)                abs(X)
+#ifdef H5_HAVE_WIN32_API
+#define HDaccess(F,M)           _access(F, M)
+#define R_OK    4       /* Test for read permission.  */
+#define W_OK    2       /* Test for write permission.  */
+#define X_OK    1       /* Test for execute permission.  */
+#define F_OK    0       /* Test for existence.  */
+#else /* H5_HAVE_WIN32_API */
 #define HDaccess(F,M)           access(F, M)
+#endif /* H5_HAVE_WIN32_API */
 #define HDacos(X)               acos(X)
 #ifdef H5_HAVE_ALARM
 #define HDalarm(N)              alarm(N)
@@ -214,7 +222,12 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetpwuid(U)           getpwuid(U)
 #define HDgetrusage(X,S)        getrusage(X,S)
 #define HDgets(S)               gets(S)
+#ifdef H5_HAVE_VISUAL_STUDIO
+    H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
+#define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
+#else /* H5_HAVE_VISUAL_STUDIO */
 #define HDgettimeofday(S,P)     gettimeofday(S,P)
+#endif /* H5_HAVE_VISUAL_STUDIO */
 #define HDgetuid()              getuid()
 #define HDgmtime(T)             gmtime(T)
 #define HDisalnum(C)            isalnum((int)(C)) /*cast for solaris warning*/
@@ -355,7 +368,8 @@ int HDremove_all(const char * fname);
 #define HDsinh(X)               sinh(X)
 #define HDsleep(N)              sleep(N)
 #ifdef H5_HAVE_WIN32_API
-#define HDsnprintf              _snprintf /*varargs*/
+H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
+#define HDsnprintf          c99_snprintf /*varargs*/
 #else
 #define HDsnprintf              snprintf /*varargs*/
 #endif
@@ -373,7 +387,11 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif
 /* sscanf() variable arguments */
 
+#ifdef H5_HAVE_WIN32_API
+#define HDstrcasecmp(A,B)   _stricmp(A,B)
+#else
 #define HDstrcasecmp(X,Y)      strcasecmp(X,Y)
+#endif
 #define HDstrcat(X,Y)           strcat(X,Y)
 #define HDstrchr(S,C)           strchr(S,C)
 #define HDstrcmp(X,Y)           strcmp(X,Y)
@@ -433,7 +451,8 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvprintf(FMT,A)        vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)     vsprintf(S,FMT,A)
 #ifdef H5_HAVE_WIN32_API
-#   define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
+H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
+#define HDvsnprintf         c99_vsnprintf
 #else
 #   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
 #endif

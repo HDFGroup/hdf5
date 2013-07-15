@@ -990,29 +990,31 @@
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gen_bad_ohdr.c           _DO_NOT_DISTRIBUTE_
-./test/gen_bad_compound.c       _DO_NOT_DISTRIBUTE_
-./test/gen_bogus.c              _DO_NOT_DISTRIBUTE_
-./test/gen_cross.c              _DO_NOT_DISTRIBUTE_
-./test/gen_deflate.c            _DO_NOT_DISTRIBUTE_
-./test/gen_file_image.c         _DO_NOT_DISTRIBUTE_
-./test/gen_filespace.c          _DO_NOT_DISTRIBUTE_
-./test/gen_mergemsg.c           _DO_NOT_DISTRIBUTE_
-./test/gen_new_array.c          _DO_NOT_DISTRIBUTE_
-./test/gen_new_fill.c           _DO_NOT_DISTRIBUTE_
-./test/gen_new_group.c          _DO_NOT_DISTRIBUTE_
-./test/gen_new_mtime.c          _DO_NOT_DISTRIBUTE_
-./test/gen_new_super.c          _DO_NOT_DISTRIBUTE_
-./test/gen_noencoder.c          _DO_NOT_DISTRIBUTE_
-./test/gen_nullspace.c          _DO_NOT_DISTRIBUTE_
-./test/gen_old_array.c          _DO_NOT_DISTRIBUTE_
-./test/gen_old_group.c          _DO_NOT_DISTRIBUTE_
-./test/gen_old_layout.c         _DO_NOT_DISTRIBUTE_
-./test/gen_old_mtime.c          _DO_NOT_DISTRIBUTE_
-./test/gen_plist.c              _DO_NOT_DISTRIBUTE_
-./test/gen_sizes_lheap.c        _DO_NOT_DISTRIBUTE_
-./test/gen_specmetaread.c       _DO_NOT_DISTRIBUTE_
-./test/gen_udlinks.c            _DO_NOT_DISTRIBUTE_
+# ====distribute this for now. See HDFFV-8236====
+./test/gen_bad_ohdr.c
+./test/gen_bad_compound.c
+./test/gen_bogus.c
+./test/gen_cross.c
+./test/gen_deflate.c
+./test/gen_file_image.c
+./test/gen_filespace.c
+./test/gen_mergemsg.c
+./test/gen_new_array.c
+./test/gen_new_fill.c
+./test/gen_new_group.c
+./test/gen_new_mtime.c
+./test/gen_new_super.c
+./test/gen_noencoder.c
+./test/gen_nullspace.c
+./test/gen_old_array.c
+./test/gen_old_group.c
+./test/gen_old_layout.c
+./test/gen_old_mtime.c
+./test/gen_plist.c
+./test/gen_sizes_lheap.c
+./test/gen_specmetaread.c
+./test/gen_udlinks.c
+# ====end distribute this for now. See HDFFV-8236====
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
@@ -1039,7 +1041,9 @@
 ./test/reserved.c
 ./test/pool.c
 ./test/set_extent.c
-./test/space_overflow.c      _DO_NOT_DISTRIBUTE_
+# ====distribute this for now. See HDFFV-8236====
+./test/space_overflow.c
+# ====end distribute this for now. See HDFFV-8236====
 ./test/specmetaread.h5
 ./test/stab.c
 ./test/tarray.c
@@ -1091,6 +1095,7 @@
 ./test/tvlstr.c
 ./test/tvltypes.c
 ./test/unlink.c
+./test/unregister.c
 ./test/vfd.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
@@ -1506,6 +1511,8 @@
 ./tools/testfiles/topaque.h5
 ./tools/testfiles/trawdatafile.ddl
 ./tools/testfiles/trawdatafile.exp
+./tools/testfiles/trawssetfile.ddl
+./tools/testfiles/trawssetfile.exp
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
@@ -1546,6 +1553,7 @@
 ./tools/testfiles/tudlink-2.ddl
 ./tools/testfiles/tattr2.h5
 ./tools/testfiles/tall-2A.ddl
+./tools/testfiles/tall-2A0.ddl
 ./tools/testfiles/tall-2B.ddl
 ./tools/testfiles/tattrcontents1.ddl
 ./tools/testfiles/tattrcontents2.ddl
@@ -1605,6 +1613,7 @@
 ./tools/h5dump/errfiles/filter_fail.err
 ./tools/h5dump/errfiles/tall-1.err
 ./tools/h5dump/errfiles/tall-2A.err
+./tools/h5dump/errfiles/tall-2A0.err
 ./tools/h5dump/errfiles/tall-2B.err
 ./tools/h5dump/errfiles/tarray1_big.err
 ./tools/h5dump/errfiles/tattr-3.err
@@ -2389,8 +2398,16 @@
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
 
+# CMake-specific User Files
+./config/cmake/UserMacros/Windows_MT.cmake
+
+# CMake-specific Examples Files
+./config/cmake/HDF518_Examples.cmake.in
+./release_docs/USING_CMake_Examples.txt
+
 ./CMakeLists.txt
 ./CTestConfig.cmake
+./UserMacros.cmake
 ./c++/CMakeLists.txt
 ./c++/examples/CMakeLists.txt
 ./c++/src/CMakeLists.txt

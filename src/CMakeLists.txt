@@ -774,6 +774,7 @@ INCLUDE_DIRECTORIES (${CMAKE_BINARY_DIR})
 # specific type checks inside
 #-----------------------------------------------------------------------------
 ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
+TARGET_C_PROPERTIES (H5detect " " " ")
 IF (MSVC)
   TARGET_LINK_LIBRARIES (H5detect "ws2_32.lib")
 ENDIF (MSVC)
@@ -787,6 +788,7 @@ ADD_CUSTOM_COMMAND (
 )
 
 ADD_EXECUTABLE (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
+TARGET_C_PROPERTIES (H5make_libsettings " " " ")
 IF (MSVC)
   TARGET_LINK_LIBRARIES (H5make_libsettings "ws2_32.lib")
 ENDIF (MSVC)
@@ -836,6 +838,7 @@ SET (common_SRCS ${common_SRCS} ${HDF5_BINARY_DIR}/H5overflow.h)
 SET_SOURCE_FILES_PROPERTIES (${HDF5_BINARY_DIR}/H5overflow.h GENERATED)
 
 ADD_LIBRARY (${HDF5_LIB_TARGET} ${LIB_TYPE} ${common_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS})
+TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} " " " ")
 TARGET_LINK_LIBRARIES (${HDF5_LIB_TARGET} ${LINK_LIBS})
 IF (NOT WIN32)
   TARGET_LINK_LIBRARIES (${HDF5_LIB_TARGET} dl)
