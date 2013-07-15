@@ -659,13 +659,17 @@
    FUNC_ENTER_NOAPI_NOINIT
 
  #if DEBUG_COMPACTOR
-     fprintf(stderr, "Enters Call BACK!\n");
-     fprintf (stderr, "Number of requests : %d from call back in queue : %p\n", 
+     fprintf(stderr, " COMPACTOR CB: Enters Call BACK!\n");
+     fprintf (stderr, "COMPACTOR CB: Number of requests : %d from call back in queue : %p\n", 
 	      H5VL_iod_get_number_of_requests(cqueue), (void *)cqueue);
      fflush(stderr);
- #endif
-
-     pthread_mutex_lock(&lock);
+     fprintf (stderr, "COMPACTOR CB: Sleeping NOW \n");
+ #endif     
+     usleep(1000);
+#if DEBUG_COMPACTOR
+     fprintf (stderr, "COMPACTOR CB: Done Sleeping! \n");
+#endif
+     while(pthread_mutex_trylock(&lock) != 0);
      compactor_queue_flag = 0;
      curr_queue = NULL;
      pthread_mutex_unlock(&lock);  
@@ -776,6 +780,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
       /*When the request was used in merging we have to just
 	manage the handle*/
       if (list[request_counter].merged == NOT_MERGED){
+	
 	op_data = (op_data_t *)list[request_counter].op_data;
 	input = (dset_io_in_t *)op_data->input;
 	iod_oh = input->iod_oh;
@@ -805,6 +810,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
       }
 
       if (list[request_counter].merged == MERGED){
+	
 	op_data = (op_data_t *)list[request_counter].op_data;
 	input = (dset_io_in_t *)op_data->input;
 		iod_oh = input->iod_oh;
@@ -874,7 +880,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		 num_descriptors, n);
 
 	num_bytes = 0;
-	num_elems = 1;
+	num_elems = 0;
 	
 	/* determine how many bytes the current descriptor holds */
         for(i=0 ; i<ndims ; i++){
@@ -894,7 +900,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 #if 1
 	  /* set the memory descriptor */
 	  mem_desc = (iod_mem_desc_t *) malloc (sizeof (iod_mem_desc_t));
-	  mem_desc->frag = (iod_mem_frag_t *) malloc (sizeof (iod_mem_desc_t));
+	  mem_desc->frag = (iod_mem_frag_t *) malloc (sizeof (iod_mem_frag_t));
 	  mem_desc->nfrag = 1;
 	  mem_desc->frag[0].addr = (void *)buf_ptr;
 	  mem_desc->frag[0].len = (iod_size_t)num_bytes;

@@ -1385,8 +1385,15 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
 	   compactor_queue_flag);
   fflush(stderr);
 
-  if (NULL == curr_queue)
-    fprintf(stderr,"Compactor Not present\n");
+  if (NULL == curr_queue){
+    if (compactor_queue_flag){
+      fprintf (stderr, "Compactor queue cannot be NULL when compactor_flag is %d\n",
+	       compactor_queue_flag);
+      compactor_queue_flag = 0;
+    }
+    fprintf(stderr,"Compactor Not present with flag : %d\n",
+	    compactor_queue_flag);
+  }
   else
     fprintf(stderr,"Queue exists with compactor_flag : %d, and %d reqs\n",
 	    compactor_queue_flag,
@@ -1405,7 +1412,6 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
 
     fprintf (stderr, "Completed creating a queue : %p\n", (void *)curr_queue);
     fflush(stderr);
-    
   }
   
 
@@ -1439,10 +1445,11 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
     fprintf (stderr, "Completed Adding a barrier task\n");
     fflush(stderr);
 #endif
-
     pthread_mutex_lock(&lock);
     compactor_queue_flag = 1;
     pthread_mutex_unlock(&lock);
+
+
   }
 
 #if DEBUG_COMPACTOR
@@ -2680,7 +2687,7 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
                 if(NULL != hslabs) {
                     hsize_t *blocks;
-
+		    fprintf (stderr, "num_descriptors from : %llu get file desc \n", num_descriptors);
                     if(NULL == (blocks = (hsize_t *)malloc(sizeof(hsize_t) * 2 * 
                                                            ndims * num_descriptors)))
                         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
