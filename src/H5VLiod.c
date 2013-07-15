@@ -4800,6 +4800,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 if(NULL == target_obj && obj) {
                     target_obj = obj;
                 }
+
                 /* Retrieve the parent info by traversing the path where the
                    link should be created. */
                 if(H5VL_iod_get_parent_info(target_obj, target_params, ".", 

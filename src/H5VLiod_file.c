@@ -52,7 +52,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     unsigned int mode;
     iod_handle_t coh;
     iod_handle_t root_oh, mdkv_oh;
-    iod_obj_id_t mdkv_id;
+    iod_obj_id_t mdkv_id, attr_id;
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
@@ -93,9 +93,14 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
+        /* create the attribute KV object for the root group */
+        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+                          NULL, NULL, &attr_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
         /* set values for the scratch pad object */
         sp.mdkv_id = mdkv_id;
-        sp.attr_id = IOD_ID_UNDEFINED;
+        sp.attr_id = attr_id;
         sp.filler1_id = IOD_ID_UNDEFINED;
         sp.filler2_id = IOD_ID_UNDEFINED;
 

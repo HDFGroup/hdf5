@@ -52,7 +52,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dset_id = input->dset_id; /* The ID of the dataset that needs to be created */
     iod_handle_t dset_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_obj_id_t cur_id, mdkv_id, attr_id;
     const char *name = input->name;
     char *last_comp; /* the name of the dataset obtained from the last component in the path */
     iod_kv_t kv;
@@ -115,6 +115,11 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     /* for the process that succeeded in creating the dataset, update
        the parent KV, create scratch pad */
     if(0 == ret) {
+        /* create the attribute KV object for the dataset */
+        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+                          NULL, NULL, &attr_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
         /* create the metadata KV object for the dataset */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
@@ -122,7 +127,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* set values for the scratch pad object */
         sp.mdkv_id = mdkv_id;
-        sp.attr_id = IOD_ID_UNDEFINED;
+        sp.attr_id = attr_id;
         sp.filler1_id = IOD_ID_UNDEFINED;
         sp.filler2_id = IOD_ID_UNDEFINED;
 

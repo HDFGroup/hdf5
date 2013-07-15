@@ -170,18 +170,6 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
-        /* if attribute KV does not exist, create it */
-        if(IOD_ID_UNDEFINED == sp.attr_id) {
-            /* create the attribute KV object for the parent */
-            if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
-                              NULL, NULL, &sp.attr_id, NULL)<0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create Attr KV");
-
-            /* set scratch pad in attribute */
-            if (iod_obj_set_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
-        }
-
         /* open the attribute KV in scratch pad */
         if (iod_obj_open_write(coh, sp.attr_id, NULL /*hints*/, &attr_kv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");

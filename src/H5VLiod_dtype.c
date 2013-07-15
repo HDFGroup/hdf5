@@ -52,7 +52,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dtype_id = input->dtype_id; /* The ID of the datatype that needs to be created */
     iod_handle_t dtype_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_obj_id_t cur_id, mdkv_id, attr_id;
     const char *name = input->name;
     iod_kv_t kv;
     char *last_comp; /* the name of the datatype obtained from the last component in the path */
@@ -98,9 +98,14 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
+        /* create the attribute KV object for the datatype */
+        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+                          NULL, NULL, &attr_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
         /* set values for the scratch pad object */
         sp.mdkv_id = mdkv_id;
-        sp.attr_id = IOD_ID_UNDEFINED;
+        sp.attr_id = attr_id;
         sp.filler1_id = IOD_ID_UNDEFINED;
         sp.filler2_id = IOD_ID_UNDEFINED;
 

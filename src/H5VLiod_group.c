@@ -55,7 +55,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t grp_id = input->grp_id; /* The ID of the group that needs to be created */
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     iod_handle_t grp_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     iod_kv_t kv;
     scratch_pad_t sp;
@@ -96,9 +96,14 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
+        /* create the attribute KV object for the group */
+        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+                          NULL, NULL, &attr_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
         /* set values for the scratch pad object */
         sp.mdkv_id = mdkv_id;
-        sp.attr_id = IOD_ID_UNDEFINED;
+        sp.attr_id = attr_id;
         sp.filler1_id = IOD_ID_UNDEFINED;
         sp.filler2_id = IOD_ID_UNDEFINED;
 
