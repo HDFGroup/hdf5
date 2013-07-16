@@ -889,11 +889,6 @@ H5_DLL herr_t H5D__mdset_collective_read(const hid_t file_id, const size_t count
 H5_DLL herr_t H5D__mdset_collective_write(const hid_t file_id, const size_t count, H5D_io_info_md_t *io_info_md);
 #endif
 
-#ifndef JK_SLCOSE_ISSUE
-/* JK this is needed for CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md */
-H5_DLLVAR herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
-#endif
-
 
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
@@ -910,6 +905,11 @@ H5_DLL htri_t H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t 
 #endif
 
 #endif /* H5_HAVE_PARALLEL */
+
+#ifndef JK_SLCOSE_ISSUE
+/* JK this is needed for CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md */
+H5_DLL herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
+#endif
 
 /* Testing functions */
 #ifdef H5D_TESTING

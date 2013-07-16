@@ -194,11 +194,8 @@ static herr_t H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5
 #endif
 static herr_t H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
-#ifndef JK_WORK
- #ifdef JK_TODO_MAY_PUT_BACK // also use in H5Dcontig.c
-static 
- #endif
-herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
+#ifdef JK_SLCOSE_ISSUE_REMOVE // also use in H5Dcontig.c
+//static herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
 #endif
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 
@@ -3411,7 +3408,7 @@ done:
 } /* end H5D__chunk_io_term() */
 
 #ifndef JK_WORK
- #ifndef JK_TODO_MAY_PUT_BACK // also use in H5Dcontig.c
+ #ifndef JK_SLCOSE_ISSUE // also use in H5Dcontig.c
  herr_t
  #else
 static herr_t

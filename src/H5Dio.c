@@ -737,9 +737,8 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
 
     FUNC_ENTER_STATIC
 
-    /* check dxpl_id */
+    /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
-        /* Get the default dataset transfer property list if the user didn't provide one */
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
 
     if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -790,14 +789,14 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
 
                 for(i=0; i<ndims; i++) {
                     /* Make sure the offset doesn't exceed the dataset's dimensions */
-                    if(direct_offset[j] > dims[j])
+                    if(direct_offset[i] > dims[i])
                         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset exceeds dimensions of dataset")
 
                     /* Make sure the offset fall right on a chunk's boundary */
-                    if(direct_offset[j] % dset->shared->layout.u.chunk.dim[j])
+                    if(direct_offset[i] % dset->shared->layout.u.chunk.dim[i])
                         HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL, "offset doesn't fall on chunks's boundary")
 
-                    internal_offset[j] = direct_offset[j]; 
+                    internal_offset[i] = direct_offset[i]; 
                 }
 	   
                 /* Terminate the offset with a zero */ 
@@ -899,6 +898,7 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
          * have to participate collective MPI funcs (below).
          */
         if (0 == count) {
+#ifdef H5_HAVE_PARALLEL
             int local_cause = 0;
             int global_cause = 0;
             size_t num_chunkf=0;
@@ -974,6 +974,7 @@ H5D__pre_write_mdset(hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dx
             #ifndef JK_NOCOLLCAUSE
             } /* end if !global_cause */ 
             #endif
+#endif /* H5_HAVE_PARALLEL */
         }
         else  /* this process select one or more dset to work on */
         #endif // JK_COUNT0
