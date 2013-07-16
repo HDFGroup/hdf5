@@ -178,9 +178,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Loop tp receive requests from clients */
     while(1) {
-        /* Receive new function calls */
-        if(HG_SUCCESS != HG_Handler_process(HG_HANDLER_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-            return FAIL;
+        HG_Handler_process(0, HG_STATUS_IGNORE);
         if(shutdown)
             break;
     }

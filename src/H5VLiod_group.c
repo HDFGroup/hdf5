@@ -115,18 +115,58 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
+        /* store metadata */
+        {
+            iod_kv_t kv;
+            size_t buf_size;
+            hid_t gcpl_id;
+            uint64_t count;
+
+            if(H5P_DEFAULT == input->gcpl_id)
+                gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+            else
+                gcpl_id = input->gcpl_id;
+
+            /* insert group creation properties in Metadata KV */
+            kv.key = strdup("gcpl");
+            /* determine the buffer size needed to store the encoded gcpl of the group */ 
+            if(H5Pencode(gcpl_id,  NULL, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode group gcpl");
+            if(NULL == (kv.value = malloc (buf_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate gcpl buffer");
+            /* encode gcpl of the group */ 
+            if(H5Pencode(gcpl_id, kv.value, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode group gcpl");
+            kv.value_len = (iod_size_t)buf_size;
+            /* insert kv pair into scratch pad */
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+
+            /* insert link count metadata on object */
+            if(NULL == (kv.value = malloc (sizeof(uint64_t))))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+            /* initial count is 1, since object is created now */
+            count = 1;
+            memcpy(kv.value, &count, sizeof(uint64_t));
+            kv.key = strdup("link_count");
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+        }
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* insert new group in kv store of parent object */
-        kv.key = HDstrdup(last_comp);
+        kv.key = strdup(last_comp);
         kv.value = &grp_id;
         kv.value_len = sizeof(iod_obj_id_t);
         if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
+        free(kv.key);
     } /* end if */
 
     /* close parent group if it is not the location we started the
@@ -137,7 +177,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5_DO_NATIVE
     grp_oh.cookie = H5Gcreate2(loc_handle.cookie, name, input->lcpl_id, 
-                        input->gcpl_id, input->gapl_id);
+                               input->gcpl_id, input->gapl_id);
     HDassert(grp_oh.cookie);
 #endif
 
@@ -239,16 +279,29 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - retrieve metadata */
 #if 0 
-    /* When we have a real IOD, open the scratch pad and read the
-       group's metadata */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_gcpl", NULL, 
-                        &output.gcpl_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset gcpl lookup failed");
-    if(NULL == (output.gcpl = H5MM_malloc (output.gcpl_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate gcpl buffer");
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_gcpl", output.gcpl, 
-                        &output.gcpl_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
+    {
+        void *buf = NULL;
+
+        kv_size = 0;
+        /* read the group's creation properties */
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "gcpl", NULL, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "group gcpl lookup failed");
+        if(NULL == (buf = malloc (kv_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate gcpl buffer");
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "gcpl", buf, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "group gcpl lookup failed");
+        if((output.gcpl_id = H5Pdecode(buf)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+        free(buf);
+
+        kv_size = sizeof(uint64_t);
+        /* read the group's link count */
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "link_count", output.link_count, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+    }
 #endif
 
     /* close the metadata scratch pad */

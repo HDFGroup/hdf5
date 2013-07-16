@@ -139,69 +139,93 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
-#if 0
-        /* insert layout metadata into scratch pad */
-        kv.key = HDstrdup("dataset_dcpl");
-        /* determine the buffer size needed to store the encoded dcpl of the dataset */ 
-        if(H5Pencode(input->dcpl_id,  NULL, &buf_size) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset dcpl");
-        if(NULL == (kv.value = malloc (buf_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dcpl buffer");
-        /* encode dcpl of the dataset */ 
-        if(H5Pencode(input->dcpl_id, kv.value, &buf_size) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset dcpl");
-        kv.value_len = (iod_size_t)buf_size;
-        /* insert kv pair into scratch pad */
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
-        free(kv.value);
+        {
+            size_t buf_size;
+            hid_t dcpl_id;
+            uint64_t count;
 
-        /* insert datatyoe metadata into scratch pad */
-        kv.key = HDstrdup("dataset_dtype");
-        /* determine the buffer size needed to store the encoded type of the dataset */ 
-        if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset type");
-        if(NULL == (kv.value = malloc (buf_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
-        /* encode datatype of the dataset */ 
-        if(H5Tencode(input->type_id, kv.value, &buf_size) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset type");
-        kv.value_len = (iod_size_t)buf_size;
-        /* insert kv pair into scratch pad */
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
-        free(kv.value);
+            if(H5P_DEFAULT == input->dcpl_id)
+                dcpl_id = H5P_DATASET_CREATE_DEFAULT;
+            else
+                dcpl_id = input->dcpl_id;
 
-        kv.key = HDstrdup("dataset_dspace");
-        /* determine the buffer size needed to store the encoded space of the dataset */ 
-        if(H5Sencode(input->space_id, NULL, &buf_size) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset space");
-        if(NULL == (kv.value = malloc (buf_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate space buffer");
-        /* encode dataspace of the dataset */ 
-        if(H5Sencode(input->space_id, kv.value, &buf_size) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset space");
-        kv.value_len = (iod_size_t)buf_size;
-        /* insert kv pair into scratch pad */
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
-        free(kv.value);
-#endif
+            /* insert dataset creation properties in Metadata KV */
+            kv.key = strdup("dcpl");
+            /* determine the buffer size needed to store the encoded dcpl of the dataset */ 
+            if(H5Pencode(dcpl_id,  NULL, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset dcpl");
+            if(NULL == (kv.value = malloc (buf_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dcpl buffer");
+            /* encode dcpl of the dataset */ 
+            if(H5Pencode(dcpl_id, kv.value, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset dcpl");
+            kv.value_len = (iod_size_t)buf_size;
+            /* insert kv pair into scratch pad */
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+
+            /* MSC - need to check size of datatype if it fits in
+               entry otherwise create a BLOB*/
+            /* insert datatype metadata into scratch pad */
+            kv.key = strdup("dtype");
+            /* determine the buffer size needed to store the encoded type of the dataset */ 
+            if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset type");
+            if(NULL == (kv.value = malloc (buf_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+            /* encode datatype of the dataset */ 
+            if(H5Tencode(input->type_id, kv.value, &buf_size) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset type");
+            kv.value_len = (iod_size_t)buf_size;
+            /* insert kv pair into scratch pad */
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+
+            /* insert dataspace metadata into scratch pad */
+            kv.key = strdup("dspace");
+            /* determine the buffer size needed to store the encoded space of the dataset */ 
+            if(H5Sencode(input->space_id, NULL, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset space");
+            if(NULL == (kv.value = malloc (buf_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate space buffer");
+            /* encode dataspace of the dataset */ 
+            if(H5Sencode(input->space_id, kv.value, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode dataset space");
+            kv.value_len = (iod_size_t)buf_size;
+            /* insert kv pair into scratch pad */
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+
+            /* insert link count metadata on object */
+            if(NULL == (kv.value = malloc (sizeof(uint64_t))))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+            /* initial count is 1, since object is created now */
+            count = 1;
+            memcpy(kv.value, &count, sizeof(uint64_t));
+            kv.key = strdup("link_count");
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+        }
+
         /* close the Metadata KV object */
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-        kv.key = HDstrdup(last_comp);
+        kv.key = strdup(last_comp);
         kv.value = &dset_id;
         kv.value_len = sizeof(iod_obj_id_t);
         /* insert new dataset in kv store of current group */
         if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
+        free(kv.key);
     }
 
     /* close parent group if it is not the location we started the
@@ -214,7 +238,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
     cur_oh.cookie = H5Dcreate2(loc_handle.cookie, last_comp, input->type_id, 
                                input->space_id, input->lcpl_id, 
                                input->dcpl_id, input->dapl_id);
-    HDassert(cur_oh.cookie);
+    assert(cur_oh.cookie);
 #endif
 
     output.iod_oh = cur_oh;
@@ -272,8 +296,9 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dset_id;
     char *name = input->name;
     char *last_comp;
+    void *buf = NULL;
     scratch_pad_t sp;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -288,6 +313,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+    kv_size = sizeof(iod_obj_id_t);
 
     if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &dset_id, 
                         kv_size , NULL, NULL) < 0)
@@ -311,34 +338,58 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+    /* MSC - retrieve metadata */
 #if 0
-    /* MSC - retrieve all metadata from scratch pad */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_dcpl", NULL, 
-                        &output.dcpl_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
-    if(NULL == (output.dcpl = H5MM_malloc (output.dcpl_size)))
+    kv_size = 0;
+    /* read the datasets's creation properties */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dcpl", NULL, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dcpl lookup failed");
+    if(NULL == (buf = malloc (kv_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dcpl buffer");
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_dcpl", output.dcpl, 
-                        &output.dcpl_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dcpl", buf, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dcpl lookup failed");
+    if((output.dcpl_id = H5Pdecode(buf)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dcpl");
+    free(buf);
+    buf = NULL;
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_dtype", NULL, 
-                        &output.dtype_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dtype lookup failed");
-    if(NULL == (output.dtype = H5MM_malloc (output.dtype_size)))
+    kv_size = 0;
+    /* read the datasets's datatype */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dtype", NULL, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dtype lookup failed");
+    if(NULL == (buf = H5MM_malloc (kv_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dtype buffer");
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_dtype", output.dtype, 
-                        &output.dtype_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dtype", buf, 
+                        &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dtype lookup failed");
+    if((output.type_id = H5Tdecode(buf)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode datatype");
+    free(buf);
+    buf = NULL;
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_dspace", NULL, 
-                        &output.dspace_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dspace lookup failed");
-    if(NULL == (output.dspace = H5MM_malloc (output.dspace_size)))
+    kv_size = 0;
+    /* read the datasets's dataspace */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", NULL, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dspace lookup failed");
+    if(NULL == (buf = H5MM_malloc (kv_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dspace buffer");
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_dspace", output.dspace, 
-                        &output.dspace_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", buf, 
+                        &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dspace lookup failed");
+    if((output.space_id = H5Tdecode(buf)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataspace");
+    free(buf);
+    buf = NULL;
+
+    kv_size = sizeof(uint64_t);
+    /* read the dataset's link count */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "link_count", output.link_count, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
 #endif
 
     /* close the metadata scratch pad */
@@ -484,7 +535,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     if(src_size > dst_size) {
         buf_size = src_size * nelmts;
 #if H5VL_IOD_DEBUG 
-        fprintf(stderr, "Adjusted Buffer size because of datatype conversion from %d to %d: ", 
+        fprintf(stderr, "Adjusted Buffer size because of datatype conversion from %d to %d: \n", 
                 size, buf_size);        
 #endif
     }

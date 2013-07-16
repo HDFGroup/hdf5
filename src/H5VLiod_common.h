@@ -76,6 +76,7 @@ H5_DLL int hg_proc_iod_handle_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_dims_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_axe_ids_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_name_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_value_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_binary_buf_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(eff_init_in_t, ((uint32_t)(proc_num)))

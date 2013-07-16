@@ -237,15 +237,15 @@ int main(int argc, char **argv) {
     gid1 = H5Gopen2(file_id, "G1", H5P_DEFAULT);
     assert(gid1);
     {
-        ssize_t ret_size;
+        ssize_t ret_size = 0;
         char *comment = NULL;
 
         ret_size = H5Oget_comment(gid1, NULL, 0);
         fprintf(stderr, "size of comment is %d\n", ret_size);
 
-        comment = malloc((size_t)ret_size);
+        comment = malloc((size_t)ret_size + 1);
 
-        ret_size = H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
+        H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
         fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
         free(comment);
     }

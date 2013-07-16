@@ -540,7 +540,7 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_DO_NATIVE
     if(0 != length) {
         size = H5Oget_comment(loc_oh.cookie, NULL, length);
-        comment.value = malloc(size);
+        comment.value = malloc(size+1);
     }
     if((size = H5Oget_comment(loc_oh.cookie, comment.value, length)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Unable to get object comment");

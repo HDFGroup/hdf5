@@ -830,6 +830,7 @@ H5Mclose_ff(hid_t map_id, hid_t eq_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", map_id, eq_id);
 
     /* Check args */
     if(NULL == H5I_object_verify(map_id, H5I_MAP))

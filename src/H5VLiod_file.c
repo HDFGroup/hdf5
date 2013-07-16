@@ -112,7 +112,58 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
+        /* store metadata */
+        {
+            iod_kv_t kv;
+            size_t buf_size;
+            hid_t fcpl_id;
+            uint64_t index;
+
+            if(H5P_DEFAULT == input->fcpl_id)
+                fcpl_id = H5P_FILE_CREATE_DEFAULT;
+            else
+                fcpl_id = input->fcpl_id;
+
+            /* insert file creation properties in Metadata KV */
+            kv.key = strdup("fcpl");
+            /* determine the buffer size needed to store the encoded fcpl of the file */ 
+            if(H5Pencode(fcpl_id,  NULL, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode file fcpl");
+            if(NULL == (kv.value = malloc (buf_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate fcpl buffer");
+            /* encode fcpl of the file */ 
+            if(H5Pencode(fcpl_id, kv.value, &buf_size) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode file fcpl");
+            kv.value_len = (iod_size_t)buf_size;
+            /* insert kv pair into scratch pad */
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+            free(kv.value);
+
+            /* insert initial indexes for IOD IDs */
+            if(NULL == (kv.value = malloc (sizeof(uint64_t))))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate fcpl buffer");
+            index = 1;
+            memcpy(kv.value, &index, sizeof(uint64_t));
+
+            kv.key = strdup("kv_index");
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+
+            kv.key = strdup("array_index");
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+
+            kv.key = strdup("blob_index");
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+            free(kv.key);
+
+            free(kv.value);
+        }
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
@@ -204,11 +255,43 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve metadata */
+    /* retrieve all metadata from scratch pad */
+    /* MSC - fake for now */
     output.kv_oid_index = 1;
     output.array_oid_index = 1;
     output.blob_oid_index = 1;
     output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
+
+#if 0
+    {
+        void *fcpl_buf = NULL;
+        size_t fcpl_size = 0;
+
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "fcpl", NULL, 
+                            &fcpl_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "file fcpl lookup failed");
+        if(NULL == (fcpl_buf = H5MM_malloc (output.fcpl_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate fcpl buffer");
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "file_fcpl", fcpl_buf, 
+                            &fcpl_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "file fcpl lookup failed");
+        if((output.fcpl_id = H5Pdecode(fcpl_buf)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode file fcpl");
+        free(fcpl_buf);
+
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "kv_index", &output.kv_oid_index, 
+                            sizeof(uint64_t), NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
+
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "array_index", &output.array_oid_index, 
+                            sizeof(uint64_t), NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
+
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "blob_index", &output.blob_oid_index, 
+                            sizeof(uint64_t), NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
+    }
+#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
@@ -217,7 +300,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_DO_NATIVE
     {
         coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
-        HDassert(coh.cookie);
+        assert(coh.cookie);
         root_oh.cookie = coh.cookie;
         fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
     }

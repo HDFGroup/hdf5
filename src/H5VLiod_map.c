@@ -62,6 +62,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_kv_t kv;
     scratch_pad_t sp;
     iod_ret_t ret;
+    uint64_t count;
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
     herr_t ret_value = SUCCEED;
 
@@ -117,18 +118,28 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
+        /* insert link count metadata on object */
+        if(NULL == (kv.value = malloc (sizeof(uint64_t))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+        /* initial count is 1, since object is created now */
+        count = 1;
+        memcpy(kv.value, &count, sizeof(uint64_t));
+        kv.key = strdup("link_count");
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(kv.key);
+        free(kv.value);
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* insert new map in kv store of parent object */
-        kv.key = HDstrdup(last_comp);
+        kv.key = strdup(last_comp);
         kv.value = &map_id;
         kv.value_len = sizeof(iod_obj_id_t);
         if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
+        free(kv.key);
     } /* end if */
 
     /* close parent group if it is not the location we started the
@@ -136,7 +147,6 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     if(loc_handle.cookie != cur_oh.cookie) {
         iod_obj_close(cur_oh, NULL, NULL);
     }
-
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with map create, sending response to client\n");
@@ -236,6 +246,13 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* MSC - retrieve metadata */
+#if 0
+    kv_size = sizeof(uint64_t);
+    /* read the map's link count */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "link_count", output.link_count, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))

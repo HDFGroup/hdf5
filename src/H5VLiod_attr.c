@@ -125,11 +125,10 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
-
-#if 0
-        /* insert attribute metadata into scratch pad */
-        kv.key = HDstrdup("attribute_dtype");
+        /* MSC - need to check size of datatype if it fits in
+           entry otherwise create a BLOB*/
+        /* insert datatype metadata into scratch pad */
+        kv.key = strdup("dtype");
         /* determine the buffer size needed to store the encoded type of the attribute */ 
         if(H5Tencode(input->type_id, NULL, &buf_size) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode attribute type");
@@ -142,10 +141,11 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         /* insert kv pair into scratch pad */
         if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
+        free(kv.key);
         free(kv.value);
 
-        kv.key = HDstrdup("attribute_dspace");
+        /* insert dataspace metadata into scratch pad */
+        kv.key = strdup("dspace");
         /* determine the buffer size needed to store the encoded space of the attribute */ 
         if(H5Sencode(input->space_id, NULL, &buf_size) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode attribute space");
@@ -158,9 +158,8 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
         /* insert kv pair into scratch pad */
         if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
+        free(kv.key);
         free(kv.value);
-#endif
 
         /* close the Metadata KV object */
         if(iod_obj_close(mdkv_oh, NULL, NULL))
@@ -310,7 +309,37 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve all metadata from scratch pad */
+#if 0
+    kv_size = 0;
+    /* read the attributes's datatype */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dtype", NULL, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dtype lookup failed");
+    if(NULL == (buf = H5MM_malloc (kv_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dtype buffer");
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dtype", buf, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "attribute dtype lookup failed");
+    if((output.type_id = H5Tdecode(buf)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode datatype");
+    free(buf);
+    buf = NULL;
+
+    kv_size = 0;
+    /* read the attributes's dataspace */
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", NULL, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dspace lookup failed");
+    if(NULL == (buf = H5MM_malloc (kv_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dspace buffer");
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", buf, 
+                        &kv_size, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "attribute dspace lookup failed");
+    if((output.space_id = H5Tdecode(buf)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataspace");
+    free(buf);
+    buf = NULL;
+#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
@@ -582,7 +611,7 @@ done:
     op_data = (op_data_t *)H5MM_xfree(op_data);
     free(buf);
 
-    /* close the dataset if we opened it in this routine */
+    /* close the attribute if we opened it in this routine */
     if(opened_locally) {
         if(iod_obj_close(iod_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
