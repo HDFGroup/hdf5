@@ -254,6 +254,7 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     const char *attr_name = input->attr_name;
     char *last_comp = NULL;
     scratch_pad_t sp;
+    iod_size_t kv_size = 0;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -310,7 +311,6 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
 #if 0
-    kv_size = 0;
     /* read the attributes's datatype */
     if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dtype", NULL, 
                         &kv_size, NULL, NULL) < 0)
@@ -426,8 +426,11 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
+    iod_hyperslab_t hslabs;
     size_t size;
     void *buf;
+    hid_t space_id;
+    hssize_t num_descriptors = 0;
     na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle);
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -446,14 +449,63 @@ H5VL_iod_server_attr_read_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (buf = malloc(size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate read buffer");
 
+    /* MSC - remove now till we have an IOD */
 #if 0
+    {
+        iod_handle_t mdkv_oh;
+        scratch_pad_t sp;
+        iod_size_t kv_size = 0;
+        void *space_buf = NULL;
+
+        /* get scratch pad of the attribute */
+        if(iod_obj_get_scratch(iod_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+        /* open the metadata scratch pad of the attribute */
+        if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+        /* read the attributes's dataspace */
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", NULL, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dspace lookup failed");
+        if(NULL == (space_buf = H5MM_malloc (kv_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dspace buffer");
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", space_buf, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "attribute dspace lookup failed");
+        if((space_id = H5Tdecode(space_buf)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataspace");
+        free(space_buf);
+        space_buf = NULL;
+
+        /* close the metadata scratch pad */
+        if(iod_obj_close(mdkv_oh, NULL, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    }
+
     /* create memory descriptor for reading */
     mem_desc.nfrag = 1;
     mem_desc.frag->addr = buf;
     mem_desc.frag->len = (iod_size_t)size;
 
-    /* retrieve the dataspace of the attribute and create file descriptor for reading */
-    /* MSC TODO - populate file descriptor hyperslab */
+    num_descriptors = 1;
+
+    /* get the rank of the dataspace */
+    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+
+    hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+
+    /* generate the descriptor */
+    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+
+    /* set the file descriptor */
+    file_desc = hslabs;
 #endif
 
     /* read from array object */
@@ -537,9 +589,12 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     hg_bulk_request_t bulk_request;
     iod_mem_desc_t mem_desc;
     iod_array_iodesc_t file_desc;
+    iod_hyperslab_t hslabs;
     size_t size;
     void *buf;
     ssize_t ret;
+    hid_t space_id;
+    hssize_t num_descriptors = 0;
     na_addr_t source = HG_Handler_get_addr(op_data->hg_handle);
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
@@ -582,13 +637,62 @@ H5VL_iod_server_attr_write_cb(AXE_engine_t UNUSED axe_engine,
     }
 #endif
 
+    /* MSC - remove now till we have an IOD */
 #if 0
+    {
+        iod_handle_t mdkv_oh;
+        scratch_pad_t sp;
+        iod_size_t kv_size = 0;
+        void *space_buf = NULL;
+
+        /* get scratch pad of the attribute */
+        if(iod_obj_get_scratch(iod_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+        /* open the metadata scratch pad of the attribute */
+        if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+        /* read the attributes's dataspace */
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", NULL, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dspace lookup failed");
+        if(NULL == (space_buf = H5MM_malloc (kv_size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate dspace buffer");
+        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dspace", space_buf, 
+                            &kv_size, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "attribute dspace lookup failed");
+        if((space_id = H5Tdecode(space_buf)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode dataspace");
+        free(space_buf);
+        space_buf = NULL;
+
+        /* close the metadata scratch pad */
+        if(iod_obj_close(mdkv_oh, NULL, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+    }
+
     mem_desc.nfrag = 1;
     mem_desc.frag->addr = buf;
     mem_desc.frag->len = (iod_size_t)size;
 
-    /* retrieve the dataspace of the attribute and create file descriptor for reading */
-    /* MSC TODO - populate file descriptor hyperslab */
+    num_descriptors = 1;
+
+    /* get the rank of the dataspace */
+    if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+
+    hslabs.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    hslabs.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    hslabs.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+    hslabs.count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+
+    /* generate the descriptor */
+    if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+
+    /* set the file descriptor */
+    file_desc = hslabs;
 #endif
 
     /* write from array object */

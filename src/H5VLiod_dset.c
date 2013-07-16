@@ -577,7 +577,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     /* read each descriptore from the IOD container */
     for(n=0 ; n<num_descriptors ; n++) {
         hsize_t num_bytes = 0;
-        hsize_t num_elems = 0;
+        hsize_t num_elems = 1;
 
         /* determine how many bytes the current descriptor holds */
         for(i=0 ; i<ndims ; i++)
@@ -840,7 +840,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     /* write each descriptore to the IOD container */
     for(n=0 ; n<num_descriptors ; n++) {
         hsize_t num_bytes = 0;
-        hsize_t num_elems = 0;
+        hsize_t num_elems = 1;
 
         /* determine how many bytes the current descriptor holds */
         for(i=0 ; i<ndims ; i++)
