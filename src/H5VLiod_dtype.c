@@ -307,9 +307,6 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - need to read datatype; size should be stored in metadata,
-       but since no real IOD, can't do anything now */
-
 #if 0
     kv_size = 0;
     /* read the datatypes's creation properties */

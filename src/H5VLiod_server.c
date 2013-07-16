@@ -2837,9 +2837,11 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
             if(NULL != hslabs) {
                 hsize_t *points = NULL;
+                size_t point_count = 0;
 
-                if(NULL == (points = (hsize_t *)malloc(sizeof(hsize_t) * ndims * 
-                                                       (hsize_t)num_descriptors)))
+                point_count = ndims * num_descriptors * sizeof(hsize_t);
+
+                if(NULL == (points = (hsize_t *)malloc(point_count)))
                     HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
 
                 if(H5Sget_select_elem_pointlist(space_id, (hsize_t)0, 
@@ -2848,13 +2850,18 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
                 /* populate the hyperslab */
                 for(n=0 ; n<num_descriptors ; n++) {
+                    hsize_t *cur_ptr = points; /* temp pointer into points array */
+
+                    /* adjust the current pointer to the current point */
+                    cur_ptr += n*ndims;
                     for(i=0 ; i<ndims ; i++) {
-                        hslabs[n].start[i] = *points++;
+                        hslabs[n].start[i] = *(cur_ptr+i);
                         hslabs[n].stride[i] = 1;
-                        hslabs[n].block[i] = 1;
                         hslabs[n].count[i] = 1;
+                        hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
                     }
                 }
+
                 free(points);
             }
             break;
@@ -2876,17 +2883,21 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve hyperslab selection");
                 }
             }
-            /* Otherwise populate the hslabs by gettinge very block */
+            /* Otherwise populate the hslabs by getting every block */
             else {
                 if((num_descriptors = H5Sget_select_hyper_nblocks(space_id)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "invalid hyperslab selection");
 
                 if(NULL != hslabs) {
-                    hsize_t *blocks;
+                    hsize_t *blocks = NULL;
+                    size_t block_count = 0;
 
-                    if(NULL == (blocks = (hsize_t *)malloc(sizeof(hsize_t) * 2 * 
-                                                           ndims * num_descriptors)))
+                    block_count = ndims * num_descriptors * sizeof(hsize_t) * 2;
+
+                    if(NULL == (blocks = (hsize_t *)malloc(block_count)))
                         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
+
+                    fprintf(stderr, "block count = %zu\n", block_count);
 
                     if(H5Sget_select_hyper_blocklist(space_id, (hsize_t)0, 
                                                      (hsize_t)num_descriptors, blocks) < 0)
@@ -2894,11 +2905,15 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
                     /* populate the hyperslab */
                     for(n=0 ; n<num_descriptors ; n++) {
+                        hsize_t *cur_ptr = blocks; /* temp pointer into blocks array */
+
+                        /* adjust the current pointer to the current block */
+                        cur_ptr += n*ndims*2;
                         for(i=0 ; i<ndims ; i++) {
-                            hslabs[n].start[i] = *blocks++;
+                            hslabs[n].start[i] = *(cur_ptr+i);
                             hslabs[n].stride[i] = 1;
-                            hslabs[n].block[i] = 1;
-                            hslabs[n].count[i] = *blocks++;
+                            hslabs[n].count[i] = 1;
+                            hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
                         }
                     }
 

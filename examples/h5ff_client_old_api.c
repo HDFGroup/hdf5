@@ -1,9 +1,3 @@
-/* 
- * test_client.c: Client side of Milestone 3.3 Asynchronous I/O and initial
- * IOD VOL plugin demonstration.  This is, in effect, the application program that 
- * would run on one or more compute nodes and make calls to the HDF5 API.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

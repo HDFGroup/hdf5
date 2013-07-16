@@ -1021,7 +1021,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
     }
     else {
-        /* MSC - need a way to kill object handle for this group */
+        /* MSC - need a way to kill object handle for this dataset */
         fprintf(stderr, "I do not have the OH of this dataset to close it\n");
     }
 
