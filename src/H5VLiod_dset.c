@@ -641,7 +641,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
     /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
 done:
@@ -770,7 +770,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
     /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't get data from function shipper");
 
     /* free the bds block handle */
