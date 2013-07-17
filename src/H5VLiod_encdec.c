@@ -207,7 +207,7 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
     name_t *struct_data = (name_t *) data;
 
     ret = hg_proc_memcpy(proc, struct_data->value_size, sizeof(ssize_t));
-    //ret = hg_proc_int64_t(proc, struct_data->value_size);
+
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
@@ -215,8 +215,9 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
     }
     size = (size_t)(*struct_data->value_size);
 
+
     ret = hg_proc_memcpy(proc, &struct_data->size, sizeof(size_t));
-    //ret = hg_proc_uint64_t(proc, &struct_data->size);
+
     if (ret != HG_SUCCESS) {
         HG_ERROR_DEFAULT("Proc error");
         ret = HG_FAIL;
@@ -232,6 +233,81 @@ int hg_proc_name_t(hg_proc_t proc, void *data)
             return ret;
         }
     }
+    return ret;
+}
+
+int hg_proc_binary_buf_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    size_t size;
+    hg_proc_op_t op;
+    binary_buf_t *struct_data = (binary_buf_t *) data;
+
+    ret = hg_proc_raw(proc, &struct_data->buf_size, sizeof(size_t));
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        if(NULL != struct_data->buf && struct_data->buf_size != 0) {
+            ret = hg_proc_raw(proc, struct_data->buf, struct_data->buf_size);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(struct_data->buf_size != 0) {
+            struct_data->buf = malloc (struct_data->buf_size);
+            ret = hg_proc_raw(proc, struct_data->buf, struct_data->buf_size);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        if(struct_data->buf_size != 0) {
+            free(struct_data->buf);
+        }
+        break;
+    default:
+        return HG_FAIL;
+    }
+    return ret;
+}
+
+int hg_proc_value_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    size_t size;
+    hg_proc_op_t op;
+    value_t *struct_data = (value_t *) data;
+
+    ret = hg_proc_raw(proc, &struct_data->val_size, sizeof(size_t));
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    if(NULL != struct_data->val && struct_data->val_size != 0) {
+        ret = hg_proc_raw(proc, struct_data->val, struct_data->val_size);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
+    }
+
     return ret;
 }
 
@@ -325,7 +401,6 @@ static int hg_proc_plist_t(hg_proc_t proc, hid_t *data)
     default:
         HG_ERROR_DEFAULT("PLIST unsupported op Proc error");
     }
-
     return ret;
 }
 

@@ -49,10 +49,11 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     file_create_in_t *input = (file_create_in_t *)op_data->input;
     file_create_out_t output;
-    unsigned int mode;
-    iod_handle_t coh;
-    iod_handle_t root_oh, mdkv_oh;
-    iod_obj_id_t mdkv_id;
+    unsigned int mode; /* create mode */
+    iod_handle_t coh; /* container handle */
+    iod_handle_t root_oh; /* root object handle */
+    iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
+    iod_obj_id_t mdkv_id, attr_id; /* metadata and attribute KV IDs for the file */
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
@@ -87,15 +88,26 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
        the scratch pad for it too */
     if(0 == ret) {
         scratch_pad_t sp;
+        iod_kv_t kv;
+        void *key = NULL;
+        void *value = NULL;
+        size_t buf_size;
+        hid_t fcpl_id;
+        uint64_t index;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
+        /* create the attribute KV object for the root group */
+        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+                          NULL, NULL, &attr_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
         /* set values for the scratch pad object */
         sp.mdkv_id = mdkv_id;
-        sp.attr_id = IOD_ID_UNDEFINED;
+        sp.attr_id = attr_id;
         sp.filler1_id = IOD_ID_UNDEFINED;
         sp.filler2_id = IOD_ID_UNDEFINED;
 
@@ -107,7 +119,48 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
+        /* store metadata */
+
+
+        if(H5P_DEFAULT == input->fcpl_id)
+            fcpl_id = H5P_FILE_CREATE_DEFAULT;
+        else
+            fcpl_id = input->fcpl_id;
+
+        /* insert plist metadata */
+        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, fcpl_id, 
+                                 NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert link count KV value");
+
+        /* insert initial indexes for IOD IDs */
+        if(NULL == (value = malloc (sizeof(uint64_t))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+        *((uint64_t *)value) = 1;
+        kv.value_len = sizeof(uint64_t);
+
+        key = strdup("kv_index");
+        kv.key = (char *)key;
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(key); 
+        key = NULL;
+
+        key = strdup("array_index");
+        kv.key = (char *)key;
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(key); 
+        key = NULL;
+
+        key = strdup("blob_index");
+        kv.key = (char *)key;
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(key); 
+        key = NULL;
+
+        free(value); 
+        value = NULL;
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
@@ -171,9 +224,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     file_open_in_t *input = (file_open_in_t *)op_data->input;
     file_open_out_t output;
-    unsigned int mode = input->flags;
-    iod_handle_t coh;
-    iod_handle_t root_oh, mdkv_oh;
+    unsigned int mode = input->flags; /* File Open mode */
+    iod_handle_t coh; /* container handle */
+    iod_handle_t root_oh; /* root object handle */
+    iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -199,11 +253,31 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve metadata */
+    /* retrieve all metadata from scratch pad */
+    /* MSC - fake for now */
     output.kv_oid_index = 1;
     output.array_oid_index = 1;
     output.blob_oid_index = 1;
     output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
+
+    /* MSC - NEED IOD */
+#if 0
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
+                             NULL, NULL, NULL, &output.fcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
+
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "kv_index", &output.kv_oid_index, 
+                        sizeof(uint64_t), NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
+
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "array_index", &output.array_oid_index, 
+                        sizeof(uint64_t), NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
+
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "blob_index", &output.blob_oid_index, 
+                        sizeof(uint64_t), NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
+#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
@@ -212,7 +286,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_DO_NATIVE
     {
         coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
-        HDassert(coh.cookie);
+        assert(coh.cookie);
         root_oh.cookie = coh.cookie;
         fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
     }

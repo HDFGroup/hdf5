@@ -68,81 +68,6 @@ int main(int argc, char **argv) {
     file_id = H5Fcreate_ff(file_name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, event_q);
     assert(file_id);
 
-#if 0
-    {
-        int r_data[60], r2_data[60];
-        hid_t did1;
-        unsigned read1_cs, read2_cs, cs=448091133;
-
-
-        /* create a dataspace. This is a local Bookeeping operation that 
-           does not touch the file */
-        dim = 60;
-        sid = H5Screate_simple(1, &dim, NULL);
-
-        did1 = H5Dcreate_ff(file_id,"D1",H5T_STD_I32LE,sid,
-                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, 0, event_q);
-        assert(did1);
-
-        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-        H5Pset_dxpl_checksum_ptr(dxpl_id, &read1_cs);
-        ret = H5Dread_ff(did1, H5T_STD_I32LE, sid, sid, dxpl_id, r_data, 
-                         0, event_q);
-        assert(ret == 0);
-        H5Pclose(dxpl_id);
-
-        /*
-        if(H5EQpop(event_q, &req1) < 0)
-            exit(1);
-        assert(H5AOtest(req1, &status1) == 0);
-        (status1 == H5AO_PENDING) ? fprintf(stderr, "Read is still pending\n") : fprintf(stderr, "Read has completed\n");
-        */
-
-        dxpl_id = H5Pcreate (H5P_DATASET_XFER);
-        H5Pset_dxpl_inject_corruption(dxpl_id, 1);
-        H5Pset_dxpl_checksum_ptr(dxpl_id, &read2_cs);
-        ret = H5Dread_ff(did1, H5T_STD_I32LE, sid, sid, dxpl_id, r2_data, 
-                         0, event_q);
-        assert(ret == 0);
-        H5Pclose(dxpl_id);
-
-        if(H5EQpop(event_q, &req1) < 0)
-            exit(1);
-        assert(H5AOtest(req1, &status1) == 0);
-        (status1 == H5AO_PENDING) ? fprintf(stderr, "Read is still pending\n") : fprintf(stderr, "Read has completed\n");
-
-        if(H5AO_PENDING == status1) {
-            assert(H5AOwait(req1, &status1) == 0);
-            assert (status1);
-        }
-        else
-            assert(H5AO_SUCCEEDED == status1);
-
-        assert(H5Dclose_ff(did1, event_q) == 0);
-        assert(H5Fclose_ff(file_id, event_q) == 0);
-
-        H5EQwait(event_q, &num_requests, &status);
-
-        fprintf(stderr, "Printing After Waiting ");
-        for(i=0;i<60;++i)
-            fprintf(stderr, "%d ",r_data[i]);
-        fprintf(stderr, "\n");
-        fprintf(stderr, "Checksum Receieved = %u  Checksum Computed = %u (Should be Equal)\n", read1_cs, cs);
-
-        fprintf(stderr, "Printing Corrupted Data ");
-        for(i=0;i<60;++i)
-            fprintf(stderr, "%d ",r2_data[i]);
-        fprintf(stderr, "\n");
-        fprintf(stderr, "Checksum Receieved = %u  Checksum Computed = %u (Should NOT be Equal)\n", read2_cs, cs);
-
-        assert(read1_cs == cs);
-        assert(read2_cs != cs);
-
-        H5Sclose(sid);
-    }
-#endif
-
-#if 1
     /* Create 1-D dataspace */
     dim = 0;
     max_dim = H5S_UNLIMITED;
@@ -221,7 +146,6 @@ int main(int argc, char **argv) {
     for(u = 0; u < 60; u++)
         if(read_elem[u] != write_elem[u]) 
             return 1;
-#endif
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Finalize EFF stack\n");

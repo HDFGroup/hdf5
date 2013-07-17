@@ -110,6 +110,23 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     MERCURY_HANDLER_REGISTER("group_close", H5VL_iod_server_group_close, 
                              group_close_in_t, ret_t);
 
+    MERCURY_HANDLER_REGISTER("map_create", H5VL_iod_server_map_create,
+                             map_create_in_t, map_create_out_t);
+    MERCURY_HANDLER_REGISTER("map_open", H5VL_iod_server_map_open,
+                             map_open_in_t, map_open_out_t);
+    MERCURY_HANDLER_REGISTER("map_set", H5VL_iod_server_map_set,
+                             map_set_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("map_get", H5VL_iod_server_map_get,
+                             map_get_in_t, map_get_out_t);
+    MERCURY_HANDLER_REGISTER("map_get_count", H5VL_iod_server_map_get_count,
+                             map_get_count_in_t, int64_t);
+    MERCURY_HANDLER_REGISTER("map_exists", H5VL_iod_server_map_exists,
+                             map_op_in_t, hbool_t);
+    MERCURY_HANDLER_REGISTER("map_delete", H5VL_iod_server_map_delete,
+                             map_op_in_t, ret_t);
+    MERCURY_HANDLER_REGISTER("map_close", H5VL_iod_server_map_close,
+                             map_close_in_t, ret_t);
+
     MERCURY_HANDLER_REGISTER("dset_create", H5VL_iod_server_dset_create, 
                              dset_create_in_t, dset_create_out_t);
     MERCURY_HANDLER_REGISTER("dset_open", H5VL_iod_server_dset_open, 
@@ -170,9 +187,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
 
     /* Loop tp receive requests from clients */
     while(1) {
-        /* Receive new function calls */
-        if(HG_SUCCESS != HG_Handler_process(HG_HANDLER_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-            return FAIL;
+        HG_Handler_process(0, HG_STATUS_IGNORE);
         if(shutdown)
             break;
     }
@@ -1702,6 +1717,18 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
                     i, input->parent_axe_ids.ids[i], status);
         }
 #endif
+#if 0
+        int i;
+        AXE_status_t status;
+        for(i=0 ; i<input->parent_axe_ids.count ; i++) {
+            if(AXEget_status(engine, input->parent_axe_ids.ids[i], &status) < 0) {
+                fprintf(stderr, "GET STATUS FAILED\n");
+                exit(1);
+            }
+            fprintf(stderr, "%d: AXE ID %llu status %d\n", 
+                    i, input->parent_axe_ids.ids[i], status);
+        }
+#endif
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
                                           input->parent_axe_ids.count, input->parent_axe_ids.ids, 
                                           0, NULL, 
@@ -2505,6 +2532,447 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_object_get_comment() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_create
+ *
+ * Purpose:	Function shipper registered call for Map Create.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_create(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_create_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_create_in_t *)H5MM_malloc(sizeof(map_create_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_create_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_open
+ *
+ * Purpose:	Function shipper registered call for Map Open.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_open(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_open_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_open_in_t *)H5MM_malloc(sizeof(map_open_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_open_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_set
+ *
+ * Purpose:	Function shipper registered call for Map Set.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_set(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_set_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_set_in_t *)H5MM_malloc(sizeof(map_set_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_set_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_set_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_get
+ *
+ * Purpose:	Function shipper registered call for Map Get.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_get(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_get_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_get_in_t *)H5MM_malloc(sizeof(map_get_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_get_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_get_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_get_count
+ *
+ * Purpose:	Function shipper registered call for Map Get_Count.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_get_count(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_get_count_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_get_count_in_t *)H5MM_malloc(sizeof(map_get_count_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_get_count_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_get_count_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_get_count() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_exists
+ *
+ * Purpose:	Function shipper registered call for Map Exists.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_exists(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_op_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_op_in_t *)H5MM_malloc(sizeof(map_op_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_exists_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_exists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_delete
+ *
+ * Purpose:	Function shipper registered call for Map Delete.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_delete(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_op_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_op_in_t *)H5MM_malloc(sizeof(map_op_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_map_delete_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_delete_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_map_close
+ *
+ * Purpose:	Function shipper registered call for Map Close.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_map_close(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    map_close_in_t *input;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (map_close_in_t *)H5MM_malloc(sizeof(map_close_in_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_ids.count) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
+                                          0, NULL, 
+                                          H5VL_iod_server_map_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_map_close_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_map_close() */
+
 herr_t 
 H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
                          const char *path, hbool_t create_interm_grps,
@@ -2641,9 +3109,11 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
             if(NULL != hslabs) {
                 hsize_t *points = NULL;
+                size_t point_count = 0;
 
-                if(NULL == (points = (hsize_t *)malloc(sizeof(hsize_t) * ndims * 
-                                                       (hsize_t)num_descriptors)))
+                point_count = ndims * num_descriptors * sizeof(hsize_t);
+
+                if(NULL == (points = (hsize_t *)malloc(point_count)))
                     HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
 
                 if(H5Sget_select_elem_pointlist(space_id, (hsize_t)0, 
@@ -2652,13 +3122,18 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
                 /* populate the hyperslab */
                 for(n=0 ; n<num_descriptors ; n++) {
+                    hsize_t *cur_ptr = points; /* temp pointer into points array */
+
+                    /* adjust the current pointer to the current point */
+                    cur_ptr += n*ndims;
                     for(i=0 ; i<ndims ; i++) {
-                        hslabs[n].start[i] = *points++;
+                        hslabs[n].start[i] = *(cur_ptr+i);
                         hslabs[n].stride[i] = 1;
-                        hslabs[n].block[i] = 1;
                         hslabs[n].count[i] = 1;
+                        hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
                     }
                 }
+
                 free(points);
             }
             break;
@@ -2680,17 +3155,21 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve hyperslab selection");
                 }
             }
-            /* Otherwise populate the hslabs by gettinge very block */
+            /* Otherwise populate the hslabs by getting every block */
             else {
                 if((num_descriptors = H5Sget_select_hyper_nblocks(space_id)) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "invalid hyperslab selection");
 
                 if(NULL != hslabs) {
-                    hsize_t *blocks;
-		    fprintf (stderr, "num_descriptors from : %llu get file desc \n", num_descriptors);
-                    if(NULL == (blocks = (hsize_t *)malloc(sizeof(hsize_t) * 2 * 
-                                                           ndims * num_descriptors)))
+                    hsize_t *blocks = NULL;
+                    size_t block_count = 0;
+
+                    block_count = ndims * num_descriptors * sizeof(hsize_t) * 2;
+
+                    if(NULL == (blocks = (hsize_t *)malloc(block_count)))
                         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
+
+                    fprintf(stderr, "block count = %zu\n", block_count);
 
                     if(H5Sget_select_hyper_blocklist(space_id, (hsize_t)0, 
                                                      (hsize_t)num_descriptors, blocks) < 0)
@@ -2698,11 +3177,15 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 
                     /* populate the hyperslab */
                     for(n=0 ; n<num_descriptors ; n++) {
+                        hsize_t *cur_ptr = blocks; /* temp pointer into blocks array */
+
+                        /* adjust the current pointer to the current block */
+                        cur_ptr += n*ndims*2;
                         for(i=0 ; i<ndims ; i++) {
-                            hslabs[n].start[i] = *blocks++;
+                            hslabs[n].start[i] = *(cur_ptr+i);
                             hslabs[n].stride[i] = 1;
-                            hslabs[n].block[i] = 1;
-                            hslabs[n].count[i] = *blocks++;
+                            hslabs[n].count[i] = 1;
+                            hslabs[n].block[i] = *(cur_ptr+ndims+i) + 1 - hslabs[n].start[i];
                         }
                     }
 
@@ -2722,6 +3205,322 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+herr_t 
+H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
+                      iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* insert group creation properties in Metadata KV */
+    key = strdup("create_plist");
+
+    /* determine the buffer size needed to store the encoded plist */ 
+    if(H5Pencode(plist_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode plist");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate plist buffer");
+    /* encode plist */ 
+    if(H5Pencode(plist_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode plist");
+
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
+                           iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    key = strdup("link_count");
+    if(NULL == (value = malloc (sizeof(uint64_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+    *((uint64_t *)value) = count;
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = sizeof(uint64_t);
+
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_type,
+                            iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    key = strdup("object_type");
+
+    if(NULL == (value = malloc (sizeof(int32_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+    *((int32_t *)value) = obj_type;
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = sizeof(int32_t);
+
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, char *link_name,
+                         iod_obj_id_t obj_id, iod_hint_list_t *hints, 
+                         iod_checksum_t *cs, iod_event_t *event)
+{
+    void *value = NULL;
+    iod_kv_t kv;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (value = malloc (sizeof(iod_obj_id_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+    *((int32_t *)value) = obj_id;
+    kv.key = link_name;
+    kv.value = value;
+    kv.value_len = sizeof(iod_obj_id_t);
+
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
+                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* insert group creation properties in Metadata KV */
+    key = strdup("datatype");
+
+    /* determine the buffer size needed to store the encoded type */ 
+    if(H5Tencode(type_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+    /* encode type */ 
+    if(H5Tencode(type_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
+                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* insert group creation properties in Metadata KV */
+    key = strdup("dataspace");
+
+    /* determine the buffer size needed to store the encoded space */ 
+    if(H5Sencode(space_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode space");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate space buffer");
+    /* encode space */ 
+    if(H5Sencode(space_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode space");
+
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
+                      const char *key, iod_hint_list_t *hints, iod_checksum_t *cs, 
+                      iod_event_t *event, void *ret)
+{
+    iod_size_t val_size = 0;
+    void *value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch(md_type) {
+    case H5VL_IOD_PLIST:
+        {
+            hid_t plist_id = *((hid_t *)ret);
+
+            if(iod_kv_get_value(oh, tid, key, NULL, &val_size, cs, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if(NULL == (value = malloc (val_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+            if(iod_kv_get_value(oh, tid, key, value, &val_size, hints, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if((plist_id = H5Pdecode(value)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            break;
+        }
+    case H5VL_IOD_LINK_COUNT:
+        val_size = sizeof(uint64_t);
+        if(iod_kv_get_value(oh, tid, key, ret, &val_size, cs, event) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+        break;
+    case H5VL_IOD_DATATYPE:
+        {
+            hid_t type_id = *((hid_t *)ret);
+
+            if(iod_kv_get_value(oh, tid, key, NULL, &val_size, cs, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if(NULL == (value = malloc (val_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+            if(iod_kv_get_value(oh, tid, key, value, &val_size, hints, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if((type_id = H5Tdecode(value)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            break;
+        }
+    case H5VL_IOD_DATASPACE:
+        {
+            hid_t space_id = *((hid_t *)ret);
+
+            if(iod_kv_get_value(oh, tid, key, NULL, &val_size, cs, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if(NULL == (value = malloc (val_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+            if(iod_kv_get_value(oh, tid, key, value, &val_size, hints, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if((space_id = H5Tdecode(value)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            break;
+        }
+    default:
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "invalide metadata type");
+    }
+done:
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+
 
 #if 0
 

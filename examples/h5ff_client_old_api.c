@@ -1,9 +1,3 @@
-/* 
- * test_client.c: Client side of Milestone 3.3 Asynchronous I/O and initial
- * IOD VOL plugin demonstration.  This is, in effect, the application program that 
- * would run on one or more compute nodes and make calls to the HDF5 API.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -237,15 +231,15 @@ int main(int argc, char **argv) {
     gid1 = H5Gopen2(file_id, "G1", H5P_DEFAULT);
     assert(gid1);
     {
-        ssize_t ret_size;
+        ssize_t ret_size = 0;
         char *comment = NULL;
 
         ret_size = H5Oget_comment(gid1, NULL, 0);
         fprintf(stderr, "size of comment is %d\n", ret_size);
 
-        comment = malloc((size_t)ret_size);
+        comment = malloc((size_t)ret_size + 1);
 
-        ret_size = H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
+        H5Oget_comment(gid1, comment, (size_t)ret_size + 1);
         fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
         free(comment);
     }
@@ -284,4 +278,3 @@ int main(int argc, char **argv) {
     MPI_Finalize();
     return 0;
 }
-

@@ -533,7 +533,7 @@ int main(int argc, char **argv) {
 
     /* get operations on the group */
     {
-        ssize_t ret_size;
+        ssize_t ret_size = 0;
         char *comment = NULL;
 
         ret = H5Oget_comment_ff(gid1, NULL, 0, &ret_size, 0, event_q);
@@ -545,7 +545,7 @@ int main(int argc, char **argv) {
         assert (status1);
         fprintf(stderr, "size of comment is %d\n", ret_size);
 
-        comment = malloc((size_t)ret_size);
+        comment = malloc((size_t)ret_size + 1);
 
         ret = H5Oget_comment_ff(gid1, comment, (size_t)ret_size + 1, &ret_size, 0, event_q);
         assert(ret == 0);
@@ -612,6 +612,7 @@ int main(int argc, char **argv) {
         H5Sclose(mem_space);
     }
 
+    H5Sclose(dataspaceId);
     assert(H5Dclose(did1) == 0);
 
     /* open attribute on dataset D1. This is asynchronous */
@@ -658,7 +659,6 @@ int main(int argc, char **argv) {
 
     H5EQclose(event_q);
     H5Pclose(fapl_id);
-    H5Sclose(dataspaceId);
 
     /*
     assert(H5AOwait(&req1, &status1) == 0);

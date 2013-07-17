@@ -55,9 +55,9 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t grp_id = input->grp_id; /* The ID of the group that needs to be created */
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     iod_handle_t grp_oh, cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
-    iod_kv_t kv;
+    hid_t gcpl_id;
     scratch_pad_t sp;
     iod_ret_t ret;
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
@@ -96,9 +96,14 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
                           NULL, NULL, &mdkv_id, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
 
+        /* create the attribute KV object for the group */
+        if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
+                          NULL, NULL, &attr_id, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create metadata KV object");
+
         /* set values for the scratch pad object */
         sp.mdkv_id = mdkv_id;
-        sp.attr_id = IOD_ID_UNDEFINED;
+        sp.attr_id = attr_id;
         sp.filler1_id = IOD_ID_UNDEFINED;
         sp.filler2_id = IOD_ID_UNDEFINED;
 
@@ -106,22 +111,39 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_set_scratch(grp_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
-        /* Store Metadata in scratch pad */
+        /* store metadata */
+        /* Open Metadata KV object for write */
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* MSC - TODO store things */
+        if(H5P_DEFAULT == input->gcpl_id)
+            gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        else
+            gcpl_id = input->gcpl_id;
 
+        /* insert plist metadata */
+        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, gcpl_id, 
+                                 NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* insert link count metadata */
+        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, (uint64_t)1, 
+                                      NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* insert object type metadata */
+        if(H5VL_iod_insert_object_type(mdkv_oh, IOD_TID_UNKNOWN, H5I_GROUP, 
+                                       NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* close Metadata KV object */
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-        /* insert new group in kv store of parent object */
-        kv.key = HDstrdup(last_comp);
-        kv.value = &grp_id;
-        kv.value_len = sizeof(iod_obj_id_t);
-        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        HDfree(kv.key);
+        /* add link in parent group to current object */
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, grp_id, 
+                                    NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
 
     /* close parent group if it is not the location we started the
@@ -132,7 +154,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5_DO_NATIVE
     grp_oh.cookie = H5Gcreate2(loc_handle.cookie, name, input->lcpl_id, 
-                        input->gcpl_id, input->gapl_id);
+                               input->gcpl_id, input->gapl_id);
     HDassert(grp_oh.cookie);
 #endif
 
@@ -183,12 +205,12 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     group_open_in_t *input = (group_open_in_t *)op_data->input;
     group_open_out_t output;
     iod_handle_t coh = input->coh;
-    iod_handle_t loc_handle = input->loc_oh;
-    iod_obj_id_t loc_id = input->loc_id;
-    const char *name = input->name;
+    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    const char *name = input->name; /* group name including path to open */
     iod_obj_id_t grp_id; /* The ID of the group that needs to be opened */
     iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_obj_id_t cur_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     iod_size_t kv_size;
     scratch_pad_t sp;
@@ -232,18 +254,15 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve metadata */
-#if 0 
-    /* When we have a real IOD, open the scratch pad and read the
-       group's metadata */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_gcpl", NULL, 
-                        &output.gcpl_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset gcpl lookup failed");
-    if(NULL == (output.gcpl = H5MM_malloc (output.gcpl_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate gcpl buffer");
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "dataset_gcpl", output.gcpl, 
-                        &output.gcpl_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "dataset dcpl lookup failed");
+    /* MSC - retrieve metadata, need IOD */
+#if 0
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
+                             NULL, NULL, NULL, &output.gcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
+
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
+                             NULL, NULL, NULL, &output.link_count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
 
     /* close the metadata scratch pad */

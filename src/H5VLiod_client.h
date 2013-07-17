@@ -20,6 +20,7 @@
 #define _H5VLiod_client_H
 
 #include "H5FFprivate.h"     /* FastForward wrappers            */
+#include "H5Mpublic.h"
 #include "H5VLiod_common.h"
 
 #ifdef H5_HAVE_EFF
@@ -59,6 +60,15 @@ typedef enum H5RQ_type_t {
     HG_LINK_ITERATE,
     HG_LINK_EXISTS,
     HG_LINK_REMOVE,
+    HG_MAP_CREATE,
+    HG_MAP_OPEN,
+    HG_MAP_SET,
+    HG_MAP_GET,
+    HG_MAP_GET_COUNT,
+    HG_MAP_EXISTS,
+    HG_MAP_ITERATE,
+    HG_MAP_DELETE,
+    HG_MAP_CLOSE,
     HG_OBJECT_OPEN,
     HG_OBJECT_COPY,
     HG_OBJECT_VISIT,
@@ -109,6 +119,15 @@ typedef struct H5VL_iod_remote_group_t {
     iod_obj_id_t iod_id;
     hid_t gcpl_id;
 } H5VL_iod_remote_group_t;
+
+/* struct that contains the information about the IOD map */
+typedef struct H5VL_iod_remote_map_t {
+    /* Do NOT change the order of the parameters */
+    iod_handle_t iod_oh;
+    iod_obj_id_t iod_id;
+    hid_t keytype_id;
+    hid_t valtype_id;
+} H5VL_iod_remote_map_t;
 
 /* struct that contains the information about the IOD dset */
 typedef struct H5VL_iod_remote_dset_t {
@@ -177,6 +196,12 @@ typedef struct H5VL_iod_group_t {
     hid_t gapl_id;
 } H5VL_iod_group_t;
 
+/* the client side map struct */
+typedef struct H5VL_iod_map_t {
+    H5VL_iod_object_t common; /* must be first */
+    H5VL_iod_remote_map_t remote_map;
+} H5VL_iod_map_t;
+
 /* the client side dataset struct */
 typedef struct H5VL_iod_dset_t {
     H5VL_iod_object_t common; /* must be first */
@@ -215,5 +240,30 @@ H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t
 H5_DLL herr_t H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parents);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
+
+/* private routines for map objects */
+H5_DLL herr_t H5M_init(void);
+H5_DLL void *H5VL_iod_map_create(void *obj, H5VL_loc_params_t loc_params, const char *name, 
+                                 hid_t keytype, hid_t valtype, hid_t lcpl_id, hid_t mcpl_id, 
+                                 hid_t mapl_id, uint64_t trans, void **req);
+H5_DLL void *H5VL_iod_map_open(void *obj, H5VL_loc_params_t loc_params,
+                               const char *name, hid_t mapl_id, uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_set(void *map, hid_t key_mem_type_id, const void *key, 
+                               hid_t val_mem_type_id, const void *value, hid_t dxpl_id, 
+                               uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_get(void *map, hid_t key_mem_type_id, const void *key, 
+                               hid_t val_mem_type_id, void *value, hid_t dxpl_id, 
+                               uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_get_types(void *map, hid_t *key_type_id, hid_t *val_type_id, 
+                                     uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_get_count(void *map, hsize_t *count, uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_exists(void *map, hid_t key_mem_type_id, const void *key, 
+                                  htri_t *exists, uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
+                                   H5M_iterate_func_t callback_func, void *context);
+H5_DLL herr_t H5VL_iod_map_delete(void *map, hid_t key_mem_type_id, const void *key, 
+                                  uint64_t trans, void **req);
+H5_DLL herr_t H5VL_iod_map_close(void *map, void **req);
+
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */

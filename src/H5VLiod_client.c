@@ -41,6 +41,17 @@ H5FL_EXTERN(H5VL_iod_group_t);
 H5FL_EXTERN(H5VL_iod_dset_t);
 H5FL_EXTERN(H5VL_iod_dtype_t);
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_add
+ *
+ * Purpose:     Adds a request pointer to the Doubly linked list on the
+ *              file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -63,6 +74,17 @@ H5VL_iod_request_add(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_delete
+ *
+ * Purpose:     Removes a request pointer from the Doubly linked list on the
+ *              file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -103,6 +125,22 @@ H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     FUNC_LEAVE_NOAPI(SUCCEED)
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_wait
+ *
+ * Purpose: 
+ *    Waits for a particular request to complete. This will test
+ *    the request completion using Mercury's test routine. If the
+ *    request is still pending we test for completion of other requests in
+ *    the file's linked list to try and keep making progress. Once the
+ *    original requests completes, we remove it from the linked list 
+ *    and return.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
 {
@@ -180,6 +218,16 @@ H5VL_iod_request_wait(H5VL_iod_file_t *file, H5VL_iod_request_t *request)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_wait */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_wait_all
+ *
+ * Purpose:     Wait and complete all the requests in the linked list.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
 {
@@ -218,6 +266,17 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_request_wait_all */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_wait_some
+ *
+ * Purpose:     Wait for some requests on the linked list, particularly 
+ *              the ones that are tracked with a particular object.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
 {
@@ -259,6 +318,18 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_request_wait_some */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_complete
+ *
+ * Purpose:     Completion calls for every type of request. This checks 
+ *              the return status from the server, and frees memory 
+ *              allocated by this request.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 {
@@ -300,6 +371,20 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 
             if(IOD_OH_UNDEFINED == group->remote_group.iod_oh.cookie) {
                 fprintf(stderr, "failed to create/open Group\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_CREATE:
+    case HG_MAP_OPEN:
+        {
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+
+            if(IOD_OH_UNDEFINED == map->remote_map.iod_oh.cookie) {
+                fprintf(stderr, "failed to create/open Map\n");
                 req->status = H5AO_FAILED;
                 req->state = H5VL_IOD_COMPLETED;
             }
@@ -411,6 +496,64 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             info->status = NULL;
             info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
             info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_SET:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "MAP set failed at the server");
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_DELETE:
+        {
+            int *status = (int *)req->data;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "MAP delete failed at the server");
+
+            free(status);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_GET:
+        {
+            map_get_out_t *output = (map_get_out_t *)req->data;
+
+            if(SUCCEED != output->ret)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "MAP get failed at the server");
+
+            free(output);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_GET_COUNT:
+        {
+            hsize_t *count = (hsize_t *)req->data;
+
+            if(*count < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP get_count failed at the server");
+
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_EXISTS:
+        {
+            htri_t *exists = (hbool_t *)req->data;
+
+            if(*exists < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP exists failed at the server");
+
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
             break;
@@ -595,6 +738,30 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
             break;
         }
+    case HG_MAP_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+
+            if(SUCCEED != *status)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "map close failed at the server");
+
+            free(status);
+            req->data = NULL;
+            map->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free map components */
+            free(map->common.obj_name);
+            if(map->common.comment)
+                HDfree(map->common.comment);
+            if(H5Tclose(map->remote_map.keytype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(H5Tclose(map->remote_map.valtype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            map = H5FL_FREE(H5VL_iod_map_t, map);
+            break;
+        }
     case HG_DTYPE_CLOSE:
         {
             int *status = (int *)req->data;
@@ -668,6 +835,17 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_request_complete */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_request_cancel
+ *
+ * Purpose:     Cancels a particular request by freeing memory 
+ *              associated with it.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
 {
@@ -747,6 +925,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_ATTR_EXISTS:
     case HG_LINK_EXISTS:
     case HG_OBJECT_EXISTS:
+    case HG_MAP_GET_COUNT:
+    case HG_MAP_EXISTS:
         {
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
@@ -857,6 +1037,29 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dset = H5FL_FREE(H5VL_iod_dset_t, dset);
             break;
         }
+    case HG_MAP_CREATE:
+    case HG_MAP_OPEN:
+    case HG_MAP_CLOSE:
+        {
+            int *status = (int *)req->data;
+            H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
+
+            free(status);
+            req->data = NULL;
+            map->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            /* free map components */
+            free(map->common.obj_name);
+            if(map->common.comment)
+                HDfree(map->common.comment);
+            if(H5Tclose(map->remote_map.keytype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            if(H5Tclose(map->remote_map.valtype_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close dtype");
+            map = H5FL_FREE(H5VL_iod_map_t, map);
+            break;
+        }
     case HG_DTYPE_COMMIT:
     case HG_DTYPE_OPEN:
     case HG_DTYPE_CLOSE:
@@ -886,6 +1089,18 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             dtype = H5FL_FREE(H5VL_iod_dtype_t, dtype);
             break;
         }
+
+    case HG_MAP_GET:
+        {
+            map_get_out_t *output = (map_get_out_t *)req->data;
+
+            free(output);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_MAP_SET:
+    case HG_MAP_DELETE:
     case HG_LINK_CREATE:
     case HG_LINK_MOVE:
     case HG_LINK_REMOVE:
@@ -922,8 +1137,21 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_request_cancel */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_get_axe_parents
+ *
+ * Purpose:     returns the number of axe_id tasks that are associated 
+ *              with a particular object. If the parent array is not NULL, 
+ *              the axe_ids are returned in parents too.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parents)
+H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count, 
+                         /*OUT*/ uint64_t *parents)
 {
     H5VL_iod_file_t *file = obj->file;
     H5VL_iod_request_t *cur_req = file->request_list_head;
@@ -950,10 +1178,28 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parent
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL_iod_get_axe_parents */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_get_parent_info
+ *
+ * Purpose:     This routine traverses the path in name, or in loc_params 
+ *              if the path is specified there, to determine the components
+ *              of the path that are present locally in the ID space. 
+ *              Once a component in the path is not found, the routine
+ *              breaks at that point and stores the remaining path in new_name.
+ *              This is where the traversal can begin at the server. 
+ *              The IOD ID, OH, and axe_id belonging to the last object 
+ *              present are returned too. 
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
-                         const char *name, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
-                         uint64_t *axe_id, char **new_name, H5VL_iod_object_t **last_obj)
+                         const char *name, /*OUT*/iod_obj_id_t *iod_id, 
+                         /*OUT*/iod_handle_t *iod_oh, /*OUT*/uint64_t *axe_id, 
+                         /*OUT*/char **new_name, /*OUT*/H5VL_iod_object_t **last_obj)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
@@ -1091,6 +1337,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_get_parent_info */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_get_axe_parents
+ *
+ * Purpose:     routine to generate an IOD ID based on the object type, 
+ *              rank and total ranks, and current index or 
+ *              number of pre-existing IDs.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                     iod_obj_type_t type, uint64_t *id)
