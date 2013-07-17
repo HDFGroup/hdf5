@@ -47,22 +47,22 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     dtype_commit_in_t *input = (dtype_commit_in_t *)op_data->input;
     dtype_commit_out_t output;
-    iod_handle_t coh = input->coh;
-    iod_handle_t loc_handle = input->loc_oh;
+    iod_handle_t coh = input->coh; /* container handle */
+    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dtype_id = input->dtype_id; /* The ID of the datatype that needs to be created */
     iod_handle_t dtype_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
-    const char *name = input->name;
-    iod_kv_t kv;
+    const char *name = input->name; /* name of dtype including path to commit */
+    hid_t tcpl_id;
     char *last_comp; /* the name of the datatype obtained from the last component in the path */
-    size_t buf_size;
+    size_t buf_size; /* size of the serialized datatype */
     void *buf;
-    iod_mem_desc_t mem_desc;
-    iod_blob_iodesc_t file_desc;
+    iod_mem_desc_t mem_desc; /* memory descriptor used for writing */
+    iod_blob_iodesc_t file_desc; /* file descriptor used to write */
     scratch_pad_t sp;
     iod_ret_t ret;
-    hbool_t collective = FALSE; /* MSC - change when we allow for collective */
+    hbool_t collective = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -142,67 +142,57 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_blob_write(dtype_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
+
+        if(H5P_DEFAULT == input->tcpl_id)
+            tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
+        else
+            tcpl_id = input->tcpl_id;
+
+        /* insert plist metadata */
+        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, tcpl_id, 
+                                 NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* insert link count metadata */
+        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, (uint64_t)1, 
+                                      NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* insert object type metadata */
+        if(H5VL_iod_insert_object_type(mdkv_oh, IOD_TID_UNKNOWN, H5I_DATATYPE, 
+                                       NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* store the datatype size */
         {
-            size_t tcpl_size = 0;
-            hid_t tcpl_id;
-            uint64_t count;
+            iod_kv_t kv;
+            char *key = NULL;
+            char *value = NULL;
 
-            if(H5P_DEFAULT == input->tcpl_id)
-                tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-            else
-                tcpl_id = input->tcpl_id;
-
-            /* insert datatype creation properties in Metadata KV */
-            kv.key = strdup("tcpl");
-            /* determine the buffer size needed to store the encoded tcpl of the datatype */ 
-            if(H5Pencode(tcpl_id,  NULL, &tcpl_size) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode tcpl");
-            if(NULL == (kv.value = malloc (tcpl_size)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate tcpl buffer");
-            /* encode tcpl of the datatype */ 
-            if(H5Pencode(tcpl_id, kv.value, &tcpl_size) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode tcpl");
-            kv.value_len = (iod_size_t)tcpl_size;
-            /* insert kv pair into scratch pad */
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
-            free(kv.value);
-
-            /* insert link count metadata on object */
-            if(NULL == (kv.value = malloc (sizeof(uint64_t))))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-            /* initial count is 1, since object is created now */
-            count = 1;
-            memcpy(kv.value, &count, sizeof(uint64_t));
-            kv.key = strdup("link_count");
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
-            free(kv.value);
-
-            kv.key = strdup("size");
+            key = strdup("size");
+            kv.key = key;
             kv.value_len = sizeof(iod_size_t);
-            if(NULL == (kv.value = malloc (kv.value_len)))
+
+            if(NULL == (value = malloc (kv.value_len)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-            memcpy(kv.value, &buf_size, kv.value_len);
+            *((int32_t *)value) = buf_size;
+            kv.value = value;
+
             if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
-            free(kv.value);
+
+            free(key);
+            free(value);
         }
 
         /* close the Metadata KV object */
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-        kv.key = strdup(last_comp);
-        kv.value = &dtype_id;
-        kv.value_len = sizeof(iod_obj_id_t);
-        /* insert new datatype in kv store of current group */
-        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        free(kv.key);
+        /* add link in parent group to current object */
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, dtype_id, 
+                                    NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 #if H5_DO_NATIVE
     cur_oh.cookie = H5Tcopy(input->type_id);
@@ -264,18 +254,18 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     dtype_open_in_t *input = (dtype_open_in_t *)op_data->input;
     dtype_open_out_t output;
-    iod_handle_t coh = input->coh;
-    iod_handle_t loc_handle = input->loc_oh;
-    iod_obj_id_t loc_id = input->loc_id;
-    iod_obj_id_t dtype_id;
+    iod_handle_t coh = input->coh; /* container handle */
+    iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_obj_id_t dtype_id; /* ID of datatype to open */
     iod_handle_t cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id;
-    const char *name = input->name;
+    const char *name = input->name; /* name of dtype including path to open */
     char *last_comp; /* the name of the datatype obtained from the last component in the path */
-    size_t buf_size;
-    void *buf = NULL, *tcpl = NULL;
-    iod_mem_desc_t mem_desc;
-    iod_blob_iodesc_t file_desc;
+    size_t buf_size; /* size of serialized datatype */
+    void *buf = NULL;
+    iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
+    iod_blob_iodesc_t file_desc; /* file descriptor used to write */
     iod_size_t kv_size = sizeof(iod_obj_id_t);
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
@@ -308,28 +298,15 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
 #if 0
-    kv_size = 0;
-    /* read the datatypes's creation properties */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "tcpl", NULL, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "tcpl lookup failed");
-    if(NULL == (tcpl = malloc (kv_size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate tcpl buffer");
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "tcpl", tcpl, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "tcpl lookup failed");
-    if((output.tcpl_id = H5Pdecode(tcpl)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode tcpl");
-    free(tcpl);
-    tcpl = NULL;
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
+                             NULL, NULL, NULL, &output.tcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
-    kv_size = sizeof(uint64_t);
-    /* read the datatype's link count */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "link_count", output.link_count, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
+                             NULL, NULL, NULL, &output.link_count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
-    /*retrieve blob size metadata from scratch pad */
+    /* retrieve blob size metadata from scratch pad */
     if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "size", &buf_size, 
                         sizeof(iod_size_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");

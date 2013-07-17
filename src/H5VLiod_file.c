@@ -49,10 +49,11 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     file_create_in_t *input = (file_create_in_t *)op_data->input;
     file_create_out_t output;
-    unsigned int mode;
-    iod_handle_t coh;
-    iod_handle_t root_oh, mdkv_oh;
-    iod_obj_id_t mdkv_id, attr_id;
+    unsigned int mode; /* create mode */
+    iod_handle_t coh; /* container handle */
+    iod_handle_t root_oh; /* root object handle */
+    iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
+    iod_obj_id_t mdkv_id, attr_id; /* metadata and attribute KV IDs for the file */
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
@@ -87,6 +88,12 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
        the scratch pad for it too */
     if(0 == ret) {
         scratch_pad_t sp;
+        iod_kv_t kv;
+        void *key = NULL;
+        void *value = NULL;
+        size_t buf_size;
+        hid_t fcpl_id;
+        uint64_t index;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
@@ -113,57 +120,47 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
         /* store metadata */
-        {
-            iod_kv_t kv;
-            size_t buf_size;
-            hid_t fcpl_id;
-            uint64_t index;
 
-            if(H5P_DEFAULT == input->fcpl_id)
-                fcpl_id = H5P_FILE_CREATE_DEFAULT;
-            else
-                fcpl_id = input->fcpl_id;
 
-            /* insert file creation properties in Metadata KV */
-            kv.key = strdup("fcpl");
-            /* determine the buffer size needed to store the encoded fcpl of the file */ 
-            if(H5Pencode(fcpl_id,  NULL, &buf_size) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode file fcpl");
-            if(NULL == (kv.value = malloc (buf_size)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate fcpl buffer");
-            /* encode fcpl of the file */ 
-            if(H5Pencode(fcpl_id, kv.value, &buf_size) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode file fcpl");
-            kv.value_len = (iod_size_t)buf_size;
-            /* insert kv pair into scratch pad */
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
-            free(kv.value);
+        if(H5P_DEFAULT == input->fcpl_id)
+            fcpl_id = H5P_FILE_CREATE_DEFAULT;
+        else
+            fcpl_id = input->fcpl_id;
 
-            /* insert initial indexes for IOD IDs */
-            if(NULL == (kv.value = malloc (sizeof(uint64_t))))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate fcpl buffer");
-            index = 1;
-            memcpy(kv.value, &index, sizeof(uint64_t));
+        /* insert plist metadata */
+        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, fcpl_id, 
+                                 NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert link count KV value");
 
-            kv.key = strdup("kv_index");
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
+        /* insert initial indexes for IOD IDs */
+        if(NULL == (value = malloc (sizeof(uint64_t))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+        *((uint64_t *)value) = 1;
+        kv.value_len = sizeof(uint64_t);
 
-            kv.key = strdup("array_index");
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
+        key = strdup("kv_index");
+        kv.key = (char *)key;
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(key); 
+        key = NULL;
 
-            kv.key = strdup("blob_index");
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-            free(kv.key);
+        key = strdup("array_index");
+        kv.key = (char *)key;
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(key); 
+        key = NULL;
 
-            free(kv.value);
-        }
+        key = strdup("blob_index");
+        kv.key = (char *)key;
+        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+        free(key); 
+        key = NULL;
+
+        free(value); 
+        value = NULL;
 
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close root object handle");
@@ -227,9 +224,10 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     file_open_in_t *input = (file_open_in_t *)op_data->input;
     file_open_out_t output;
-    unsigned int mode = input->flags;
-    iod_handle_t coh;
-    iod_handle_t root_oh, mdkv_oh;
+    unsigned int mode = input->flags; /* File Open mode */
+    iod_handle_t coh; /* container handle */
+    iod_handle_t root_oh; /* root object handle */
+    iod_handle_t mdkv_oh; /* metadata object handle for KV to store file's metadata */
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -262,35 +260,23 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     output.blob_oid_index = 1;
     output.fcpl_id = H5P_FILE_CREATE_DEFAULT;
 
+    /* MSC - NEED IOD */
 #if 0
-    {
-        void *fcpl_buf = NULL;
-        size_t fcpl_size = 0;
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
+                             NULL, NULL, NULL, &output.fcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
-        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "fcpl", NULL, 
-                            &fcpl_size, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "file fcpl lookup failed");
-        if(NULL == (fcpl_buf = H5MM_malloc (output.fcpl_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate fcpl buffer");
-        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "file_fcpl", fcpl_buf, 
-                            &fcpl_size, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "file fcpl lookup failed");
-        if((output.fcpl_id = H5Pdecode(fcpl_buf)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode file fcpl");
-        free(fcpl_buf);
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "kv_index", &output.kv_oid_index, 
+                        sizeof(uint64_t), NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
 
-        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "kv_index", &output.kv_oid_index, 
-                            sizeof(uint64_t), NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "array_index", &output.array_oid_index, 
+                        sizeof(uint64_t), NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
 
-        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "array_index", &output.array_oid_index, 
-                            sizeof(uint64_t), NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
-
-        if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "blob_index", &output.blob_oid_index, 
-                            sizeof(uint64_t), NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
-    }
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "blob_index", &output.blob_oid_index, 
+                        sizeof(uint64_t), NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
 #endif
 
     /* close the metadata scratch pad */

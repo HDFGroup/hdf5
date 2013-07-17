@@ -59,10 +59,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t map_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
-    iod_kv_t kv;
     scratch_pad_t sp;
     iod_ret_t ret;
-    uint64_t count;
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
     herr_t ret_value = SUCCEED;
 
@@ -114,32 +112,31 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_set_scratch(map_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set scratch pad");
 
-        /* Store Metadata in scratch pad */
+        /* Open Metadata KV object for write */
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
-        /* insert link count metadata on object */
-        if(NULL == (kv.value = malloc (sizeof(uint64_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-        /* initial count is 1, since object is created now */
-        count = 1;
-        memcpy(kv.value, &count, sizeof(uint64_t));
-        kv.key = strdup("link_count");
-        if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        free(kv.key);
-        free(kv.value);
+        /* insert link count metadata */
+        if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, (uint64_t)1, 
+                                      NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
+        /* insert object type metadata */
+        if(H5VL_iod_insert_object_type(mdkv_oh, IOD_TID_UNKNOWN, H5I_MAP, 
+                                       NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* MSC - insert Key datatype metadata */
+        /* MSC - insert Value datatype metadata */
+
+        /* close MD KV object */
         if(iod_obj_close(mdkv_oh, NULL, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-        /* insert new map in kv store of parent object */
-        kv.key = strdup(last_comp);
-        kv.value = &map_id;
-        kv.value_len = sizeof(iod_obj_id_t);
-        if (iod_kv_set(cur_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-        free(kv.key);
+        /* add link in parent group to current object */
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, map_id, 
+                                    NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
 
     /* close parent group if it is not the location we started the
@@ -245,13 +242,11 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
-    /* MSC - retrieve metadata */
+    /* MSC - retrieve metadata - need IOD*/
 #if 0
-    kv_size = sizeof(uint64_t);
-    /* read the map's link count */
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "link_count", output.link_count, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
+                             NULL, NULL, NULL, &output.link_count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
 
     /* close the metadata scratch pad */

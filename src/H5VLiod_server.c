@@ -2934,6 +2934,321 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+herr_t 
+H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
+                      iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* insert group creation properties in Metadata KV */
+    key = strdup("create_plist");
+
+    /* determine the buffer size needed to store the encoded plist */ 
+    if(H5Pencode(plist_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode plist");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate plist buffer");
+    /* encode plist */ 
+    if(H5Pencode(plist_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode plist");
+
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
+                           iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    key = strdup("link_count");
+    if(NULL == (value = malloc (sizeof(uint64_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+    *((uint64_t *)value) = count;
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = sizeof(uint64_t);
+
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_type,
+                            iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    key = strdup("object_type");
+
+    if(NULL == (value = malloc (sizeof(int32_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+    *((int32_t *)value) = obj_type;
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = sizeof(int32_t);
+
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, char *link_name,
+                         iod_obj_id_t obj_id, iod_hint_list_t *hints, 
+                         iod_checksum_t *cs, iod_event_t *event)
+{
+    void *value = NULL;
+    iod_kv_t kv;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (value = malloc (sizeof(iod_obj_id_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
+
+    *((int32_t *)value) = obj_id;
+    kv.key = link_name;
+    kv.value = value;
+    kv.value_len = sizeof(iod_obj_id_t);
+
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
+                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* insert group creation properties in Metadata KV */
+    key = strdup("datatype");
+
+    /* determine the buffer size needed to store the encoded type */ 
+    if(H5Tencode(type_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate type buffer");
+    /* encode type */ 
+    if(H5Tencode(type_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode type");
+
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
+                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event)
+{
+    void *key = NULL;
+    void *value = NULL;
+    iod_kv_t kv;
+    size_t buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* insert group creation properties in Metadata KV */
+    key = strdup("dataspace");
+
+    /* determine the buffer size needed to store the encoded space */ 
+    if(H5Sencode(space_id,  NULL, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode space");
+    if(NULL == (value = malloc (buf_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate space buffer");
+    /* encode space */ 
+    if(H5Sencode(space_id, value, &buf_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode space");
+
+    kv.key = (char *)key;
+    kv.value = value;
+    kv.value_len = (iod_size_t)buf_size;
+    /* insert kv pair into scratch pad */
+    if (iod_kv_set(oh, tid, hints, &kv, cs, event) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+done:
+    if(key) {
+        free(key); 
+        key = NULL;
+    }
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+herr_t 
+H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
+                      const char *key, iod_hint_list_t *hints, iod_checksum_t *cs, 
+                      iod_event_t *event, void *ret)
+{
+    iod_size_t val_size = 0;
+    void *value;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch(md_type) {
+    case H5VL_IOD_PLIST:
+        {
+            hid_t plist_id = *((hid_t *)ret);
+
+            if(iod_kv_get_value(oh, tid, key, NULL, &val_size, cs, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if(NULL == (value = malloc (val_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+            if(iod_kv_get_value(oh, tid, key, value, &val_size, hints, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if((plist_id = H5Pdecode(value)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            break;
+        }
+    case H5VL_IOD_LINK_COUNT:
+        val_size = sizeof(uint64_t);
+        if(iod_kv_get_value(oh, tid, key, ret, &val_size, cs, event) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "link_count lookup failed");
+        break;
+    case H5VL_IOD_DATATYPE:
+        {
+            hid_t type_id = *((hid_t *)ret);
+
+            if(iod_kv_get_value(oh, tid, key, NULL, &val_size, cs, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if(NULL == (value = malloc (val_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+            if(iod_kv_get_value(oh, tid, key, value, &val_size, hints, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if((type_id = H5Tdecode(value)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            break;
+        }
+    case H5VL_IOD_DATASPACE:
+        {
+            hid_t space_id = *((hid_t *)ret);
+
+            if(iod_kv_get_value(oh, tid, key, NULL, &val_size, cs, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if(NULL == (value = malloc (val_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+
+            if(iod_kv_get_value(oh, tid, key, value, &val_size, hints, event) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "lookup failed");
+
+            if((space_id = H5Tdecode(value)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "failed to decode gcpl");
+            break;
+        }
+    default:
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "invalide metadata type");
+    }
+done:
+    if(value) {
+        free(value); 
+        value = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+
 #if 0
 
 /*-------------------------------------------------------------------------
