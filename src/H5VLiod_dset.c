@@ -13,6 +13,7 @@
   * access to either file, you may request a copy from help@hdfgroup.org.     *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
  #include "H5VLiod_server.h"
  #include "H5VLiod_compactor_queue.h"
  #include "H5VLiod_compactor.h"
@@ -530,7 +531,7 @@
 	     num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
 	 num_bytes = num_elems * src_size;
 
- #if 0
+ #if 1
 	 /* set the memory descriptor */
 	 mem_desc.nfrag = 1;
 	 mem_desc.frag->addr = (void *)buf_ptr;
@@ -649,8 +650,7 @@
  {
 
    compactor *cqueue = (compactor *)_queue;
-   int n_requests, i = 0;
-   op_data_t *op_data = NULL;
+   int i = 0;
    herr_t ret_value = SUCCEED;
    request_list_t *wlist=NULL;
    dataset_container_t *dlist=NULL;
@@ -817,7 +817,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	iod_id = input->iod_id;
 	space_id = list[request_counter].selection_id;
 	dst_id = input->dset_type_id;
-	dst_size = H5Tget_size(dst_id);
 	
 	fprintf (stderr,"space_id: %d, selection_id: %d\n",
 		 space_id, list[request_counter].selection_id);
@@ -825,8 +824,8 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	/*Even in the case its not merged the buffer was already extracted*/
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has been merged \n", request_counter+1);
       }
-     
-      if(iod_oh.cookie == IOD_OH_UNDEFINED) {
+
+      if(iod_oh.cookie == (int)IOD_OH_UNDEFINED) {
 	if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
 	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 	opened_locally = TRUE;
@@ -871,16 +870,16 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	}
       }
 #endif
-
       curr_j = 0;
+
       for(n=0 ; n<num_descriptors ; n++) {
 	
 	fprintf (stderr,
 		 "COMPACTOR WRITE num_descriptors : %llu, n : %llu\n",
 		 num_descriptors, n);
-
+	
 	num_bytes = 0;
-	num_elems = 0;
+	num_elems = 1;
 	
 	/* determine how many bytes the current descriptor holds */
         for(i=0 ; i<ndims ; i++){
@@ -889,9 +888,10 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	num_bytes = num_elems * dst_size;
 	
 	fprintf (stderr,
-		 "COMPACTOR WRITE num_elems : %lli, num_bytes: %lli\n",
+		 "COMPACTOR WRITE num_elems : %lli, num_bytes: %lli, dst_size: %zd\n",
 		 num_elems, 
-		 num_bytes);
+		 num_bytes,
+		 dst_size);
 
 
 	if (list[request_counter].merged == NOT_MERGED){
@@ -931,7 +931,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	    if (k < num_bytes){
 
 	      if (bytes_left){
-
 		k += bytes_left;
 		mem_reqs += 1;
 		continue;
@@ -969,16 +968,18 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		   start_reqs, mem_reqs);
 	  for ( j = start_reqs; j < mem_reqs; j++){
 	    if ((j == curr_j) && (bytes_left)){
-	     mem_desc->frag[k].addr = curr_offset;
+	      mem_desc->frag[k].addr = (void *)(uintptr_t)(curr_offset);
 	      mem_desc->frag[k].len = bytes_left;
 	    }
 	    else{
-	     mem_desc->frag[k].addr = list[request_counter].mblocks[j].offset;
+	      mem_desc->frag[k].addr = (void  *)(uintptr_t)(list[request_counter].mblocks[j].offset);
 	      mem_desc->frag[k].len  = list[request_counter].mblocks[j].len;
+	      fprintf(stderr,"COMPACTOR %lli: off: %ld, off: %lli  len: %llu\n",
+		      k,
+		      (long int)mem_desc->frag[k].addr,
+		      list[request_counter].mblocks[j].offset,
+		      mem_desc->frag[k].len);		    
 	    }
-	    fprintf(stderr,"COMPACTOR %lli: len: %llu\n", 
-		    k, mem_desc->frag[k].len);
-
 	    k++;
 	  }
 	  curr_k = k;
