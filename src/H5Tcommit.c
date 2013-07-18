@@ -528,18 +528,18 @@ done:
 htri_t
 H5T_committed(const H5T_t *type)
 {
-    const H5T_t *dt;
+    htri_t ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(type);
 
-    if (NULL == type->vol_obj)
-        dt = type;
+    if(type->vol_obj)
+        ret_value = TRUE;
     else
-        dt = (const H5T_t *)type->vol_obj;
+        ret_value = (H5T_STATE_OPEN == type->shared->state || H5T_STATE_NAMED == type->shared->state);
 
-    FUNC_LEAVE_NOAPI(H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_committed() */
 
 
