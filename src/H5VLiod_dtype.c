@@ -167,22 +167,16 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         {
             iod_kv_t kv;
             char *key = NULL;
-            char *value = NULL;
 
             key = strdup("size");
             kv.key = key;
             kv.value_len = sizeof(iod_size_t);
-
-            if(NULL == (value = malloc (kv.value_len)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
-            *((int32_t *)value) = buf_size;
-            kv.value = value;
+            kv.value = &buf_size;
 
             if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
             free(key);
-            free(value);
         }
 
         /* close the Metadata KV object */
@@ -190,8 +184,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, dtype_id, 
-                                    NULL, NULL, NULL) < 0)
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+                                    H5L_TYPE_HARD, dtype_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 #if H5_DO_NATIVE
@@ -266,7 +260,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     void *buf = NULL;
     iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
     iod_blob_iodesc_t file_desc; /* file descriptor used to write */
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -281,9 +276,11 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &dtype_id, 
-                        kv_size , NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, 
+                        &kv_size , NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve BLOB ID from parent KV store");
+
+    dtype_id = iod_link.iod_id;
 
     /* open the datatype */
     if (iod_obj_open_write(coh, dtype_id, NULL /*hints*/, &cur_oh, NULL) < 0)
@@ -299,11 +296,11 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                             NULL, NULL, NULL, &output.tcpl_id) < 0)
+                             NULL, NULL, &output.tcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
-                             NULL, NULL, NULL, &output.link_count) < 0)
+                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     /* retrieve blob size metadata from scratch pad */
@@ -403,7 +400,7 @@ H5VL_iod_server_dtype_close_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     dtype_close_in_t *input = (dtype_close_in_t *)op_data->input;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_obj_id_t iod_id = input->iod_id; 
+    //iod_obj_id_t iod_id = input->iod_id; 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT

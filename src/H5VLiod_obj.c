@@ -53,9 +53,9 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t cur_oh, mdkv_oh;
     iod_obj_id_t cur_id;
     char *last_comp = NULL;
-    iod_kv_t kv;
     scratch_pad_t sp;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -68,12 +68,14 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
        to be opened to be created from. The traversal will fail if an
        intermediate group does not exist. */
     if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, FALSE, 
-                                last_comp, &cur_id, &cur_oh) < 0)
+                                &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
+
+    obj_id = iod_link.iod_id;
 
     /* close parent group if it is not the location we started the
        traversal into */
@@ -96,11 +98,11 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - NEED IOD */
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_OBJECT_TYPE, "object_type",
-                             NULL, NULL, NULL, &output.obj_type) < 0)
+                             NULL, NULL, &output.obj_type) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
-                             NULL, NULL, NULL, &output.link_count) < 0)
+                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     switch(output.obj_type) {
@@ -108,20 +110,20 @@ H5VL_iod_server_object_open_cb(AXE_engine_t UNUSED axe_engine,
         break;
     case H5I_GROUP:
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                                 NULL, NULL, NULL, &output.cpl_id) < 0)
+                                 NULL, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
         break;
     case H5I_DATASET:
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                                 NULL, NULL, NULL, &output.cpl_id) < 0)
+                                 NULL, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATATYPE, "datatype",
-                                 NULL, NULL, NULL, &output.type_id) < 0)
+                                 NULL, NULL, &output.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATASPACE, "dataspace",
-                                 NULL, NULL, NULL, &output.space_id) < 0)
+                                 NULL, NULL, &output.space_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
         break;
     case H5I_DATATYPE:
@@ -271,7 +273,8 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t mdkv_oh;/* The handle of the metadata KV for source object */
     char *last_comp = NULL, *new_name;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -295,8 +298,10 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current src location */
-    if(iod_kv_get_value(src_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(src_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+
+    obj_id = iod_link.iod_id;
 
     /* MSC - NEED IOD & a lot more work*/
 #if 0
@@ -313,7 +318,7 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_OBJECT_TYPE, "object_type",
-                             NULL, NULL, NULL, &obj_type) < 0)
+                             NULL, NULL, &obj_type) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     switch(obj_type) {
@@ -321,20 +326,20 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         break;
     case H5I_GROUP:
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                                 NULL, NULL, NULL, &output.cpl_id) < 0)
+                                 NULL, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
         break;
     case H5I_DATASET:
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                                 NULL, NULL, NULL, &output.cpl_id) < 0)
+                                 NULL, NULL, &output.cpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATATYPE, "datatype",
-                                 NULL, NULL, NULL, &output.type_id) < 0)
+                                 NULL, NULL, &output.type_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
         if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATASPACE, "dataspace",
-                                 NULL, NULL, NULL, &output.space_id) < 0)
+                                 NULL, NULL, &output.space_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
         break;
     case H5I_DATATYPE:
@@ -387,8 +392,8 @@ H5VL_iod_server_object_copy_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
     /* Insert object in the destination path */
-    if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, new_name, obj_id, 
-                                NULL, NULL, NULL) < 0)
+    if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, new_name, 
+                                H5L_TYPE_HARD, obj_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 #endif
 
@@ -457,10 +462,11 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->loc_name;
     char *last_comp = NULL;
     htri_t ret = -1;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* the traversal will retrieve the location where the object needs
        to be checked */
@@ -472,11 +478,13 @@ H5VL_iod_server_object_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* check the last component */
     if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, 
-                        &cur_id, &kv_size, NULL, NULL) < 0) {
+                        &iod_link, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
     else {
         iod_handle_t obj_oh;
+
+        cur_id = iod_link.iod_id;
         /* try to open the object */
         if (iod_obj_open_write(coh, cur_id, NULL, &obj_oh, NULL) < 0) {
             ret = FALSE;
@@ -547,7 +555,8 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     const char *comment = input->comment;
     char *last_comp = NULL;
     scratch_pad_t sp;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -560,8 +569,10 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+
+    obj_id = iod_link.iod_id;
 
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */
@@ -584,19 +595,16 @@ H5VL_iod_server_object_set_comment_cb(AXE_engine_t UNUSED axe_engine,
     {
         iod_kv_t kv;
         char *key = NULL;
-        char *value = NULL;
 
         key = strdup("comment");
         kv.key = key;
         kv.value_len = strlen(comment) + 1;
-        value = strdup(comment);
-        kv.value = value;
+        kv.value = &comment;
 
         if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
 
         free(key);
-        free(value);
     }
 
     /* close metadata KV and object */
@@ -658,7 +666,8 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp = NULL;
     iod_kv_params_t kvs;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     ssize_t size = 0;
     herr_t ret_value = SUCCEED;
@@ -673,8 +682,10 @@ H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+
+    obj_id = iod_link.iod_id;
 
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */

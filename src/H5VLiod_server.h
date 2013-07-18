@@ -53,6 +53,12 @@ typedef struct scratch_pad_t {
     iod_obj_id_t filler2_id;   /* filler value - not used */
 } scratch_pad_t;
 
+/* the link value stored in KV stores */
+typedef struct H5VL_iod_link_t {
+    iod_obj_id_t iod_id;     /* The ID of the object the link points to */
+    H5L_type_t link_type;    /* The type of the link (Hard & Soft only suppoted for now) */
+} H5VL_iod_link_t;
+
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_file_create(hg_handle_t handle);
@@ -281,11 +287,10 @@ H5_DLL herr_t H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_
                                        iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
                                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
-H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, char *link_name,
-                                       iod_obj_id_t obj_id, iod_hint_list_t *hints, 
-                                       iod_checksum_t *cs, iod_event_t *event);
+H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_name,
+                                       H5L_type_t link_type, iod_obj_id_t obj_id, 
+                                       iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
-                                    const char *key, iod_hint_list_t *hints, iod_checksum_t *cs, 
-                                    iod_event_t *event, void *ret);
+                                    const char *key, iod_checksum_t *cs, iod_event_t *event, void *ret);
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

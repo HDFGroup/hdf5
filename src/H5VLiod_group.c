@@ -141,8 +141,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, grp_id, 
-                                    NULL, NULL, NULL) < 0)
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+                                    H5L_TYPE_HARD, grp_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
 
@@ -213,6 +213,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     char *last_comp; /* the name of the group obtained from traversal function */
     iod_size_t kv_size;
+    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -229,13 +230,13 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    kv_size = sizeof(iod_obj_id_t);
+    kv_size = sizeof(H5VL_iod_link_t);
 
     /* lookup group in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &grp_id, &kv_size, NULL, NULL) < 0) {
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
-    } /* end if */
 
+    grp_id = iod_link.iod_id;
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */
     if(loc_handle.cookie != cur_oh.cookie) {
@@ -257,11 +258,11 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - retrieve metadata, need IOD */
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                             NULL, NULL, NULL, &output.gcpl_id) < 0)
+                             NULL, NULL, &output.gcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
-                             NULL, NULL, NULL, &output.link_count) < 0)
+                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
 

@@ -54,8 +54,8 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id;
     iod_obj_id_t target_id; /* The ID of the target object where link is created*/
     char *src_last_comp = NULL, *dst_last_comp = NULL;
-    iod_kv_t kv;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -72,8 +72,10 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup group in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, src_last_comp, &src_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, src_last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
+
+    src_id = iod_link.iod_id;
 
     /* close parent group if it is not the location we started the
        traversal into */
@@ -95,9 +97,18 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* lookup target object in the current location - the lookup
            must succeed since this is a hard link. */
-        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, dst_last_comp, &target_id, &kv_size, 
+        if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, dst_last_comp, &iod_link, &kv_size, 
                             NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
+
+        target_id = iod_link.iod_id;
+
+        /* add link in parent group to current object */
+        if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, dst_last_comp, 
+                                    H5L_TYPE_HARD, target_id, NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* Update link count on target object*/
     }
     else if(H5VL_LINK_CREATE_SOFT == create_type) {
         /* Retrieve the parent of the object where the new link points
@@ -110,13 +121,21 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         /* lookup target object in the current location. The lookup
            might fail since this is a soft link */
         if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, dst_last_comp, 
-                            &target_id, &kv_size, NULL, NULL) < 0) {
+                            &iod_link, &kv_size, NULL, NULL) < 0) {
             /* the lookup failed so just insert the target_id as
                undefined in the src object */
             /* MSC - Figure out what to do when reaccessing this
                object after it was created */
             target_id = IOD_ID_UNDEFINED;
         }
+        else {
+            target_id = iod_link.iod_id;
+        }
+
+        /* add link in parent group to current object */
+        if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
+                                    H5L_TYPE_SOFT, target_id, NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
     else
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid Link type");
@@ -126,14 +145,6 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     if(input->loc_oh.cookie != cur_oh.cookie) {
         iod_obj_close(cur_oh, NULL, NULL);
     }
-
-    /* insert new link (target group's ID) in kv store of the source object */
-    kv.key = HDstrdup(src_last_comp);
-    kv.value = &target_id;
-    kv.value_len = kv_size;
-    if (iod_kv_set(src_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-    HDfree(kv.key);
 
     iod_obj_close(src_oh, NULL, NULL);
 
@@ -204,10 +215,10 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t src_id; /* The ID of the src object */
     iod_handle_t dst_oh; /* The handle for the dst object where link is created*/
     iod_obj_id_t dst_id; /* The ID of the dst object where link is created*/
-    iod_obj_id_t obj_id; /* The ID of the object to be moved/copied */
     char *last_comp = NULL;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -231,26 +242,29 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current src location */
-    if(iod_kv_get_value(src_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(src_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
 
     /* Insert object in the destination path */
-    kv.key = HDstrdup(last_comp);
-    kv.value = &obj_id;
-    kv.value_len = kv_size;
-    if (iod_kv_set(dst_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+    if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, last_comp, 
+                                iod_link.link_type, iod_link.iod_id, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
 
     /* if the operation type is a Move, remove the KV pair from the source object */
     if(!copy_flag) {
         iod_kv_params_t kvs;
 
+        kv.key = last_comp;
         kvs.kv = &kv;
-        if(iod_kv_unlink_keys(src_oh,IOD_TID_UNKNOWN, NULL, 1, &kvs, NULL) < 0)
+
+        /* remove link from source object */
+        if(iod_kv_unlink_keys(src_oh, IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     }
-
-    HDfree(kv.key);
+    else {
+        ;/* adjust link count on tager obejct */
+    }
 
     /* close source group if it is not the location we started the
        traversal into */
@@ -323,7 +337,8 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path;
     char *last_comp = NULL;
     htri_t ret = -1;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -342,10 +357,11 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* check the last component */
     if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, 
-                        &cur_id, &kv_size, NULL, NULL) < 0) {
+                        &iod_link, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
     else {
+        cur_id = iod_link.iod_id;
         ret = TRUE;
     }
 
@@ -407,7 +423,8 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp = NULL;
     iod_kv_params_t kvs;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(iod_obj_id_t);
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -424,17 +441,16 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &obj_id, &kv_size, NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
 
+    obj_id = iod_link.iod_id;
+
     /* unlink object from conainer */
-    kv.key = HDstrdup(last_comp);
-    kv.value = &obj_id;
-    kv.value_len = kv_size;
+    kv.key = last_comp;
     kvs.kv = &kv;
-    if(iod_kv_unlink_keys(cur_oh, IOD_TID_UNKNOWN, NULL, 1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(cur_oh, IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
-    HDfree(kv.key);
 
     /* MSC - check the metadata information for the object and remove
        it from the container if this is the last link to it */

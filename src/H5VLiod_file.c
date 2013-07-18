@@ -91,9 +91,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_kv_t kv;
         void *key = NULL;
         void *value = NULL;
-        size_t buf_size;
         hid_t fcpl_id;
-        uint64_t index;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
@@ -263,7 +261,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - NEED IOD */
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                             NULL, NULL, NULL, &output.fcpl_id) < 0)
+                             NULL, NULL, &output.fcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
     if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "kv_index", &output.kv_oid_index, 

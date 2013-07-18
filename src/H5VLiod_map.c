@@ -134,8 +134,8 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, map_id, 
-                                    NULL, NULL, NULL) < 0)
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+                                    H5L_TYPE_HARD, map_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
 
@@ -200,6 +200,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t cur_id, mdkv_id;
     char *last_comp; /* the name of the map obtained from traversal function */
     iod_size_t kv_size;
+    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -216,13 +217,14 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    kv_size = sizeof(iod_obj_id_t);
+    kv_size = sizeof(H5VL_iod_link_t);
 
     /* lookup map in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &map_id, 
-                        &kv_size, NULL, NULL) < 0) {
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, 
+                        &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
-    } /* end if */
+
+    map_id = iod_link.iod_id;
 
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */
@@ -245,7 +247,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - retrieve metadata - need IOD*/
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
-                             NULL, NULL, NULL, &output.link_count) < 0)
+                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
 
@@ -347,7 +349,7 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
         key_size = src_size;
     }
 
-    if(NULL == (key_buf = malloc(key_size)))
+    if(NULL == (key_buf = malloc((size_t)key_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
     memcpy(key_buf, key.buf, src_size);
 
@@ -365,12 +367,11 @@ H5VL_iod_server_map_set_cb(AXE_engine_t UNUSED axe_engine,
     else {
         val_size = src_size;
     }
-    if(NULL == (val_buf = malloc(val_size)))
+    if(NULL == (val_buf = malloc((size_t)val_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
     memcpy(val_buf, val.buf, src_size);
     if(H5Tconvert(val_memtype_id, val_maptype_id, 1, val_buf, NULL, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed")
-
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
 
     kv.key = key_buf;
     kv.value = val_buf;
@@ -468,7 +469,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         key_size = src_size;
     }
 
-    if(NULL == (key_buf = malloc(key_size)))
+    if(NULL == (key_buf = malloc((size_t)key_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
     memcpy(key_buf, key.buf, src_size);
 
@@ -487,7 +488,7 @@ H5VL_iod_server_map_get_cb(AXE_engine_t UNUSED axe_engine,
         val_size = dst_size;
     }
 
-    if(NULL == (val_buf = malloc(val_size)))
+    if(NULL == (val_buf = malloc((size_t)val_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
 
     if(iod_kv_get_value(iod_oh, IOD_TID_UNKNOWN, key_buf, val_buf, 
@@ -542,7 +543,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_map_get_count_cb
  *
- * Purpose:	Get_Count a KV pair in map object
+ * Purpose:	Get number of KV pairs in map object
  *
  * Return:	Success:	SUCCEED 
  *		Failure:	Negative
@@ -596,7 +597,7 @@ H5VL_iod_server_map_get_count_cb(AXE_engine_t UNUSED axe_engine,
 done:
 
     if(ret_value < 0) {
-        num = -1;
+        num = IOD_COUNT_UNDEFINED;
         if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &num))
             HDONE_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't send result of map get_count");
     }
@@ -673,7 +674,7 @@ H5VL_iod_server_map_exists_cb(AXE_engine_t UNUSED axe_engine,
         key_size = src_size;
     }
 
-    if(NULL == (key_buf = malloc(key_size)))
+    if(NULL == (key_buf = malloc((size_t)key_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
     memcpy(key_buf, key.buf, src_size);
 
@@ -776,7 +777,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
         key_size = src_size;
     }
 
-    if(NULL == (key_buf = malloc(key_size)))
+    if(NULL == (key_buf = malloc((size_t)key_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate buffer");
     memcpy(key_buf, key.buf, src_size);
 
@@ -786,7 +787,7 @@ H5VL_iod_server_map_delete_cb(AXE_engine_t UNUSED axe_engine,
     kv.key = key_buf;
     kvs.kv = &kv;
 
-    if(iod_kv_unlink_keys(iod_oh,IOD_TID_UNKNOWN, NULL, 1, &kvs, NULL) < 0)
+    if(iod_kv_unlink_keys(iod_oh,IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
 
 done:

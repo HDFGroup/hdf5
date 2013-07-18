@@ -175,8 +175,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, dset_id, 
-                                    NULL, NULL, NULL) < 0)
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+                                    H5L_TYPE_HARD, dset_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 
@@ -244,10 +244,12 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dset_id; /* ID of the dataset to open */
-    char *name = input->name; /* name of dset including path to open */
+    const char *name = input->name; /* name of dset including path to open */
     char *last_comp; /* the name of the dataset obtained from the last component in the path */
     iod_handle_t cur_oh, mdkv_oh;
     iod_obj_id_t cur_id;
+    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
+    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -264,9 +266,11 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
                                 &last_comp, &cur_id, &cur_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &dset_id, 
-                        sizeof(iod_obj_id_t), NULL, NULL) < 0)
+    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, 
+                        &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Array ID from parent KV store");
+
+    dset_id = iod_link.iod_id;
 
     /* close parent group and its scratch pad if it is not the
        location we started the traversal into */
@@ -289,19 +293,19 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - retrieve metadata - NEED IOD */
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                             NULL, NULL, NULL, &output.dcpl_id) < 0)
+                             NULL, NULL, &output.dcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dcpl");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
-                             NULL, NULL, NULL, &output.link_count) < 0)
+                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATATYPE, "datatype",
-                             NULL, NULL, NULL, &output.type_id) < 0)
+                             NULL, NULL, &output.type_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve datatype");
 
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_DATASPACE, "dataspace",
-                             NULL, NULL, NULL, &output.space_id) < 0)
+                             NULL, NULL, &output.space_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve dataspace");
 #endif
 
@@ -633,6 +637,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     uint32_t data_cs = 0;
     hssize_t num_descriptors = 0, n; /* number of IOD file descriptors needed to describe filespace selection */
     int ndims, i; /* dataset's rank/number of dimensions */
+    unsigned u;
     void *buf;
     uint8_t *buf_ptr;
     size_t nelmts; /* number of elements selected to write */
@@ -717,8 +722,8 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
         int *ptr = (int *)buf;
 
         fprintf(stderr, "DWRITE Received a buffer of size %d with values: ", size);
-        for(i=0 ; i<size/sizeof(int) ; ++i)
-            fprintf(stderr, "%d ", ptr[i]);
+        for(u=0 ; u<size/sizeof(int) ; ++u)
+            fprintf(stderr, "%d ", ptr[u]);
         fprintf(stderr, "\n");
     }
 #endif
@@ -849,14 +854,14 @@ H5VL_iod_server_dset_set_extent_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t coh = input->coh;
     iod_handle_t iod_oh = input->iod_oh;
     iod_obj_id_t iod_id = input->iod_id; 
-    int rank = input->dims.rank; /* rank of dataset */
+    /* int rank = input->dims.rank;  rank of dataset */
     hbool_t opened_locally = FALSE;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Start dataset Extend on the first dimension to %d\n", input->dims.size[0]);
+        fprintf(stderr, "Start dataset Extend\n");
 #endif
 
     /* open the dataset if we don't have the handle yet */
@@ -916,7 +921,7 @@ H5VL_iod_server_dset_close_cb(AXE_engine_t UNUSED axe_engine,
     op_data_t *op_data = (op_data_t *)_op_data;
     dset_close_in_t *input = (dset_close_in_t *)op_data->input;
     iod_handle_t iod_oh = input->iod_oh;
-    iod_obj_id_t iod_id = input->iod_id; 
+    //iod_obj_id_t iod_id = input->iod_id; 
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT

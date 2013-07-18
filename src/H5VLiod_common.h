@@ -28,6 +28,7 @@
 #define NA_UNDEFINED NULL
 #define IOD_OH_UNDEFINED (pow(2.0,64.0) - 1)
 #define IOD_ID_UNDEFINED (pow(2.0,64.0) - 1)
+#define IOD_COUNT_UNDEFINED (pow(2.0,64.0) - 1)
 #define H5VL_IOD_DEBUG 1
 
 typedef enum H5VL_iod_state_t {

@@ -540,7 +540,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             hsize_t *count = (hsize_t *)req->data;
 
-            if(*count < 0)
+            if(*count == IOD_COUNT_UNDEFINED)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP get_count failed at the server");
 
             req->data = NULL;

@@ -454,6 +454,8 @@ EFF_finalize(void)
         return FAIL;
     if (HG_SUCCESS != HG_Finalize())
         return FAIL;
+    if(NA_SUCCESS != NA_Finalize(network_class))
+        return FAIL;
 
     return ret_value;
 } /* end EFF_finalize() */
