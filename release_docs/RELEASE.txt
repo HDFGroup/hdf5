@@ -1065,44 +1065,47 @@ Bug Fixes since HDF5-1.8.0 release
 
     C++ APIs
     --------
-  - The constructor PropList::PropList(id) was fixed to act properly
-    according to the nature of 'id'.  When 'id' is a property class id,
-    a new property list will be created.  When 'id' id a property list id,
-    a copy of the property list will be made. (BMR - 2010/5/9)
-  - The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
-    CommonFG::getComment, respectively, now have default values for
-    user's convenience.  (BMR - 2009/10/23)
-  - NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
-  - read/write methods of DataSet and Attribute classes were fixed
-    to handle string correctly.  (BMR - 2009/07/26)
-        - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
-        - Fixed bug in PropList::getClassName to use portable HDfree instead
-            of free. (BMR - 2008/04/20)
-        - Fixed a design bug which allowed an Attribute object to create/modify
-          attributes (bugzilla #1068).  The API class hierarchy was revised
-          to address the problem.  Classes AbstractDS and Attribute are moved
-          out of H5Object.  Class Attribute now multiply inherits from
-          IdComponent and AbstractDs and class DataSet from H5Object and
-          AbstractDs.  In addition, the data member IdComponent::id was
-          moved into subclasses: Attribute, DataSet, DataSpace, DataType,
-          H5File, Group, and PropList. (BMR - 2008/08/10)
-        - IdComponent::dereference was incorrect and replaced as described
-          in "New Features" section.
-          (BMR - 2008/08/10)
+    - The constructor PropList::PropList(id) was fixed to act properly
+      according to the nature of 'id'.  When 'id' is a property class id,
+      a new property list will be created.  When 'id' id a property list id,
+      a copy of the property list will be made. (BMR - 2010/5/9)
+    - The parameters 'size' and 'bufsize' in CommonFG::getLinkval and
+      CommonFG::getComment, respectively, now have default values for
+      user's convenience.  (BMR - 2009/10/23)
+    - NULL pointer accessing was fixed, bugzilla 1061.  (BMR - 2009/10/05)
+    - read/write methods of DataSet and Attribute classes were fixed
+      to handle string correctly.  (BMR - 2009/07/26)
+    - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
+    - Fixed bug in PropList::getClassName to use portable HDfree instead
+        of free. (BMR - 2008/04/20)
+    - Fixed a design bug which allowed an Attribute object to create/modify
+      attributes (bugzilla #1068).  The API class hierarchy was revised
+      to address the problem.  Classes AbstractDS and Attribute are moved
+      out of H5Object.  Class Attribute now multiply inherits from
+      IdComponent and AbstractDs and class DataSet from H5Object and
+      AbstractDs.  In addition, the data member IdComponent::id was
+      moved into subclasses: Attribute, DataSet, DataSpace, DataType,
+      H5File, Group, and PropList. (BMR - 2008/08/10)
+    - IdComponent::dereference was incorrect and replaced as described
+      in "New Features" section.
+      (BMR - 2008/08/10)
 
     Testing
     -------
-      - In some Mac system, testlibinfo.sh failed with this error:
-           Check file ../src/.libs/libhdf5.7.dylib
-           strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
-	   (unknown load command 15)
-        The strings command of Mac inspects library files and older
-	versions of strings may not know newer library format, resulting
-	in errors.  Fixed by sending the library file as stdin to the strings
-	coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
+    - tools/h5diff/testh5diff.sh is run in every "make check", even after it
+      has passed in the previous run. It should not run again if there is no
+      code changes. Fixed. (AKC - 2013/07/19 HDFFV-8392)
+    - In some Mac system, testlibinfo.sh failed with this error:
+         Check file ../src/.libs/libhdf5.7.dylib
+         strings: object: ../src/.libs/libhdf5.7.dylib malformed object \
+         (unknown load command 15)
+      The strings command of Mac inspects library files and older
+      versions of strings may not know newer library format, resulting
+      in errors.  Fixed by sending the library file as stdin to the strings
+      coommand to avoid this problem. (AKC - 2013/03/08 HDFFV-8305)
 
-      - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
-        faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
+    - Fixed a typo in the ERROR macro in test/testhdf5.h. It segmentation
+      faulted when used before. (AKC - 2013/02/12 HDFFV-8267)
 
 
 Supported Platforms
