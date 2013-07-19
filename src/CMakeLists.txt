@@ -641,6 +641,7 @@ IF (HDF5_ENABLE_EFF)
         ${HDF5_SRC_DIR}/H5VLiod.c
         ${HDF5_SRC_DIR}/H5VLiod_client.c
         ${HDF5_SRC_DIR}/H5VLiod_server.c
+        ${HDF5_SRC_DIR}/H5VLiod_util.c
         ${HDF5_SRC_DIR}/H5VLiod_file.c
         ${HDF5_SRC_DIR}/H5VLiod_group.c
         ${HDF5_SRC_DIR}/H5VLiod_dset.c

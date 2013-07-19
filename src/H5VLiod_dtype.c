@@ -252,42 +252,26 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dtype_id; /* ID of datatype to open */
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
+    iod_handle_t dtype_oh, mdkv_oh;
     const char *name = input->name; /* name of dtype including path to open */
-    char *last_comp; /* the name of the datatype obtained from the last component in the path */
     size_t buf_size; /* size of serialized datatype */
     void *buf = NULL;
     iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
     iod_blob_iodesc_t file_desc; /* file descriptor used to write */
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
-    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
+    iod_size_t kv_size;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fprintf(stderr, "Start datatype Open %s\n", name);
 
-    /* the traversal will retrieve the location where the datatype needs
-       to be opened. The traversal will fail if an intermediate group
-       does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
-
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, 
-                        &kv_size , NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve BLOB ID from parent KV store");
-
-    dtype_id = iod_link.iod_id;
-
-    /* open the datatype */
-    if (iod_obj_open_write(coh, dtype_id, NULL /*hints*/, &cur_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open datatype");
+    /* Traverse Path and open dtype */
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &dtype_id, &dtype_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the datatype */
-    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(dtype_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
@@ -299,13 +283,16 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
                              NULL, NULL, &output.tcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve tcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, H5VL_IOD_KEY_OBJ_LINK_COUNT,
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
                              NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 
+    kv_size = sizeof(iod_size_t);
+
     /* retrieve blob size metadata from scratch pad */
     if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_DTYPE_SIZE, &buf_size, 
-                        sizeof(iod_size_t), NULL, NULL) < 0)
+                        &kv_size, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "datatype size lookup failed");
 
     if(NULL == (buf = malloc(buf_size)))
@@ -328,7 +315,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     file_desc.frag->len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
-    if(iod_blob_read(cur_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+    if(iod_blob_read(dtype_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
     /* decode the datatype */
@@ -340,9 +327,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5_DO_NATIVE
     printf("datatype name %s    location %d\n", name, loc_handle.cookie);
-    cur_oh.cookie = H5Topen(loc_handle.cookie, name, input->tapl_id);
-    HDassert(cur_oh.cookie);
-    output.type_id = cur_oh.cookie;
+    dtype_oh.cookie = H5Topen(loc_handle.cookie, name, input->tapl_id);
+    HDassert(dtype_oh.cookie);
+    output.type_id = dtype_oh.cookie;
     output.tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
 #else
     /* fake a type, and tcpl */
@@ -351,7 +338,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 #endif
 
     output.iod_id = dtype_id;
-    output.iod_oh = cur_oh;
+    output.iod_oh = dtype_oh;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with dtype open, sending response to client\n");
@@ -370,7 +357,6 @@ done:
     H5Tclose(output.type_id);
 #endif
 
-    last_comp = (char *)H5MM_xfree(last_comp);
     input = (dtype_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

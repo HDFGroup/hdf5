@@ -244,12 +244,8 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_handle = input->loc_oh; /* location handle to start lookup */
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_obj_id_t dset_id; /* ID of the dataset to open */
+    iod_handle_t dset_oh, mdkv_oh;
     const char *name = input->name; /* name of dset including path to open */
-    char *last_comp; /* the name of the dataset obtained from the last component in the path */
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
-    H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -259,31 +255,12 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start dataset Open %s\n", name);
 #endif
 
-    /* the traversal will retrieve the location where the dataset needs
-       to be opened. The traversal will fail if an intermediate group
-       does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
-
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Array ID from parent KV store");
-
-    dset_id = iod_link.iod_id;
-
-    /* close parent group and its scratch pad if it is not the
-       location we started the traversal into */
-    if(loc_handle.cookie != cur_oh.cookie) {
-        iod_obj_close(cur_oh, NULL, NULL);
-    }
-
-    /* open the dataset */
-    if (iod_obj_open_write(coh, dset_id, NULL /*hints*/, &cur_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open dataset");
+    /* Traverse Path and open dset */
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &dset_id, &dset_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of the dataset */
-    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(dset_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
@@ -319,10 +296,10 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5_DO_NATIVE
         printf("dataset name %s    location %d\n", name, loc_handle.cookie);
-        cur_oh.cookie = H5Dopen(loc_handle.cookie, name, input->dapl_id);
-        HDassert(cur_oh.cookie);
-        output.space_id = H5Dget_space(cur_oh.cookie);
-        output.type_id = H5Dget_type(cur_oh.cookie);
+        dset_oh.cookie = H5Dopen(loc_handle.cookie, name, input->dapl_id);
+        HDassert(dset_oh.cookie);
+        output.space_id = H5Dget_space(dset_oh.cookie);
+        output.type_id = H5Dget_type(dset_oh.cookie);
         output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
 #else
         /* fake a dataspace, type, and dcpl */
@@ -330,7 +307,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         output.space_id = H5Screate_simple(1, dims, NULL);
         output.type_id = H5Tcopy(H5T_NATIVE_INT);
         output.dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-        cur_oh.cookie = 1;
+        dset_oh.cookie = 1;
 #endif
 
 #if 0
@@ -360,7 +337,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
 
     dset_id = 1;
     output.iod_id = dset_id;
-    output.iod_oh.cookie = cur_oh.cookie;
+    output.iod_oh.cookie = dset_oh.cookie;
 
 #if H5VL_IOD_DEBUG 
     fprintf(stderr, "Done with dset open, sending response to client\n");
@@ -380,7 +357,6 @@ done:
 
     input = (dset_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
-    last_comp = (char *)H5MM_xfree(last_comp);
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_open_cb() */

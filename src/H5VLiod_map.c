@@ -196,11 +196,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id;
     const char *name = input->name;
     iod_obj_id_t map_id; /* The ID of the map that needs to be opened */
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id, mdkv_id;
-    char *last_comp; /* the name of the map obtained from traversal function */
-    iod_size_t kv_size;
-    H5VL_iod_link_t iod_link;
+    iod_handle_t map_oh, mdkv_oh;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -210,34 +206,12 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start map open %s\n", name);
 #endif
 
-    /* the traversal will retrieve the location where the group needs
-       to be created. The traversal will fail if an intermediate group
-       does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
-
-    kv_size = sizeof(H5VL_iod_link_t);
-
-    /* lookup map in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
-
-    map_id = iod_link.iod_id;
-
-    /* close parent group and its scratch pad if it is not the
-       location we started the traversal into */
-    if(loc_handle.cookie != cur_oh.cookie) {
-        iod_obj_close(cur_oh, NULL, NULL);
-    }
-
-    /* open the map */
-    if (iod_obj_open_write(coh, map_id, NULL, &cur_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current map");
+    /* Traverse Path and open map */
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &map_id, &map_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of map */
-    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(map_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
@@ -246,7 +220,8 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - retrieve metadata - need IOD*/
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, H5VL_IOD_KEY_OBJ_LINK_COUNT,
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
                              NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
@@ -256,7 +231,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
 
     output.iod_id = map_id;
-    output.iod_oh = cur_oh;
+    output.iod_oh = map_oh;
 
     /* MSC - fake datatypes for now*/
     output.keytype_id = H5Tcopy(H5T_NATIVE_INT);
@@ -278,7 +253,6 @@ done:
     H5Tclose(output.keytype_id);
     H5Tclose(output.valtype_id);
 
-    last_comp = (char *)H5MM_xfree(last_comp);
     input = (map_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
