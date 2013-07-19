@@ -130,7 +130,9 @@ Bug Fixes since HDF5-1.8.11
 
     Testing
     -------
-    - None
+    - tools/h5diff/testh5diff.sh is run in every "make check", even after it
+      has passed in the previous run. It should not run again if there is no
+      code changes. Fixed. (AKC - 2013/07/19 HDFFV-8392)
 
 Supported Platforms
 ===================
