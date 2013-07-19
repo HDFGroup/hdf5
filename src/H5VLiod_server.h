@@ -30,6 +30,19 @@
 #define EEXISTS 1
 #define H5_DO_NATIVE 0
 
+/* Key names for Metadata stored in KV objects */
+#define H5VL_IOD_KEY_SOFT_LINK       "soft_link_value"
+#define H5VL_IOD_KEY_DTYPE_SIZE      "serialized_size"
+#define H5VL_IOD_KEY_KV_IDS_INDEX    "kv_ids_index"
+#define H5VL_IOD_KEY_ARRAY_IDS_INDEX "array_ids_index"
+#define H5VL_IOD_KEY_BLOB_IDS_INDEX  "blob_ids_index"
+#define H5VL_IOD_KEY_OBJ_COMMENT     "object_comment"
+#define H5VL_IOD_KEY_OBJ_CPL         "object_create_plist"
+#define H5VL_IOD_KEY_OBJ_LINK_COUNT  "object_link_count"
+#define H5VL_IOD_KEY_OBJ_TYPE        "object_type"
+#define H5VL_IOD_KEY_OBJ_DATATYPE    "object_datatype"
+#define H5VL_IOD_KEY_OBJ_DATASPACE   "object_dataspace"
+
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {
     H5VL_IOD_PLIST,             /*type ID for property lists     	    */

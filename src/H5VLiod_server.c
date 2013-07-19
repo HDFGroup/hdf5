@@ -2951,7 +2951,7 @@ H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* insert group creation properties in Metadata KV */
-    key = strdup("create_plist");
+    key = strdup(H5VL_IOD_KEY_OBJ_CPL);
 
     /* determine the buffer size needed to store the encoded plist */ 
     if(H5Pencode(plist_id,  NULL, &buf_size) < 0)
@@ -2992,7 +2992,7 @@ H5VL_iod_insert_link_count(iod_handle_t oh, iod_trans_id_t tid, uint64_t count,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    key = strdup("link_count");
+    key = strdup(H5VL_IOD_KEY_OBJ_LINK_COUNT);
 
     kv.key = (char *)key;
     kv.value = &count;
@@ -3019,7 +3019,7 @@ H5VL_iod_insert_object_type(iod_handle_t oh, iod_trans_id_t tid, H5I_type_t obj_
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    key = strdup("object_type");
+    key = strdup(H5VL_IOD_KEY_OBJ_TYPE);
 
     kv.key = (char *)key;
     kv.value = &obj_type;
@@ -3049,7 +3049,7 @@ H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_t type_id,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* insert group creation properties in Metadata KV */
-    key = strdup("datatype");
+    key = strdup(H5VL_IOD_KEY_OBJ_DATATYPE);
 
     /* determine the buffer size needed to store the encoded type */ 
     if(H5Tencode(type_id,  NULL, &buf_size) < 0)
@@ -3093,7 +3093,7 @@ H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* insert group creation properties in Metadata KV */
-    key = strdup("dataspace");
+    key = strdup(H5VL_IOD_KEY_OBJ_DATASPACE);
 
     /* determine the buffer size needed to store the encoded space */ 
     if(H5Sencode(space_id,  NULL, &buf_size) < 0)

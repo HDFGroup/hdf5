@@ -61,31 +61,19 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start link create\n");
+    fprintf(stderr, "Start Link create\n");
 #endif
 
     /* the traversal will retrieve the location where the link needs
        to be created from. The traversal will fail if an intermediate group
        does not exist. */
     if(H5VL_iod_server_traverse(coh, input->loc_id, input->loc_oh, input->loc_name, FALSE, 
-                                &src_last_comp, &cur_id, &cur_oh) < 0)
+                                &src_last_comp, &src_id, &src_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    /* lookup group in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, src_last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
-
-    src_id = iod_link.iod_id;
-
-    /* close parent group if it is not the location we started the
-       traversal into */
-    if(input->loc_oh.cookie != cur_oh.cookie) {
-        iod_obj_close(cur_oh, NULL, NULL);
-    }
-
-    /* open the source group for link creation*/
-    if (iod_obj_open_write(coh, src_id, NULL, &src_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "new link name = %s\n", src_last_comp);
+#endif
 
     if(H5VL_LINK_CREATE_HARD == create_type) {
         /* Retrieve the parent of the object where the new link points
@@ -104,11 +92,51 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         target_id = iod_link.iod_id;
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, dst_last_comp, 
+        if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
                                     H5L_TYPE_HARD, target_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-        /* Update link count on target object*/
+        /* MSC - NEED IOD */
+#if 0
+        /* Update link count on target object */
+        {
+            scratch_pad_t sp;
+            iod_handle_t mdkv_oh;
+            uint64_t link_count = 0;
+            
+            /* open the group */
+            if (iod_obj_open_write(coh, target_id, NULL, &target_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open target object");
+
+            /* get scratch pad */
+            if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+            /* open the metadata scratch pad */
+            if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+            if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+                                     H5VL_IOD_KEY_OBJ_LINK_COUNT,
+                                     NULL, NULL, &link_count) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
+
+            link_count ++;
+
+            /* insert link count metadata */
+            if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, link_count, 
+                                          NULL, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+            /* close the metadata scratch pad */
+            if(iod_obj_close(mdkv_oh, NULL, NULL))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+
+            /* close the target location */
+            if(iod_obj_close(target_oh, NULL, NULL))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        }
+#endif
     }
     else if(H5VL_LINK_CREATE_SOFT == create_type) {
         /* Retrieve the parent of the object where the new link points
@@ -132,10 +160,41 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
             target_id = iod_link.iod_id;
         }
 
-        /* add link in parent group to current object */
+        /* add link in parent group to the source location */
         if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
                                     H5L_TYPE_SOFT, target_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
+        /* store the link value for new symbolic link */
+        fprintf(stderr, "Full Soft link path = %s\n", input->link_value);
+        {
+            iod_kv_t kv;
+            char *key = NULL;
+            scratch_pad_t sp;
+            iod_handle_t mdkv_oh;
+
+            /* get scratch pad */
+            if(iod_obj_get_scratch(src_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
+
+            /* open the metadata scratch pad */
+            if (iod_obj_open_write(coh, sp.mdkv_id, NULL, &mdkv_oh, NULL) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
+
+            key = strdup(H5VL_IOD_KEY_SOFT_LINK);
+            kv.key = key;
+            kv.value_len = strlen(input->link_value) + 1;
+            kv.value = input->link_value;
+
+            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
+
+            free(key);
+
+            /* close the metadata scratch pad */
+            if(iod_obj_close(mdkv_oh, NULL, NULL))
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
+        }
     }
     else
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid Link type");
@@ -147,15 +206,6 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     }
 
     iod_obj_close(src_oh, NULL, NULL);
-
-    /* open the target object */
-    if (iod_obj_open_write(coh, target_id, NULL, &target_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
-
-    /* MSC - update metadata link information for this object */
-
-    /* close the target object */
-    iod_obj_close(target_oh, NULL, NULL);
 
 #if H5_DO_NATIVE
     if(H5VL_LINK_CREATE_HARD == create_type) {
