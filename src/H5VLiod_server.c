@@ -1356,7 +1356,8 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
     }
 #endif
-
+    fprintf (stderr, "AXE ID : %llu\n",
+	     input->axe_id);
 
 #if 1
     if(CP_SUCCESS != H5VL_iod_server_dset_compactor(op_data, WRITE)){
@@ -1432,6 +1433,7 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
 
   entry.input_structure = op_data;
   entry.type_request = request_type;
+  entry.num_peers = num_peers;
   entry.request_id = request_id;
 
 
@@ -1444,7 +1446,7 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
 
   if (CP_SUCCESS != 
       H5VL_iod_add_requests_to_compactor (curr_queue, 
-					  entry)){
+					   entry)){
     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, HG_FAIL, "can't insert req into queue");
   }
   if (!compactor_queue_flag){

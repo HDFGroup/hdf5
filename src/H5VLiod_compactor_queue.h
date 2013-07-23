@@ -32,6 +32,7 @@
 typedef struct {
   op_data_t *input_structure; 
   int type_request;
+  int num_peers;
   int request_id;
 }compactor_entry;
 

@@ -634,13 +634,13 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
      fprintf(stderr, " COMPACTOR CB: Enters Call BACK!\n");
      fprintf (stderr, "COMPACTOR CB: Number of requests : %d from call back in queue : %p\n", 
 	      H5VL_iod_get_number_of_requests(cqueue), (void *)cqueue);
-     fflush(stderr);
-     fprintf (stderr, "COMPACTOR CB: Sleeping NOW \n");
- #endif     
-     usleep(1000);
-#if DEBUG_COMPACTOR
-     fprintf (stderr, "COMPACTOR CB: Done Sleeping! \n");
-#endif
+    fprintf(stderr, " COMPACTOR CB: Sleeping\n");
+    fflush(stderr);
+#endif     
+    usleep(1000);
+    
+
+
      while(pthread_mutex_trylock(&lock) != 0);
      compactor_queue_flag = 0;
      curr_queue = NULL;
@@ -719,7 +719,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   iod_obj_id_t iod_id;    
   hg_bulk_t bulk_handle;
   hid_t space_id, dst_id;
-  size_t size, dst_size;
+  size_t size, dst_size, ii = 0;
   void *buf = NULL;
   uint8_t *buf_ptr;
   hssize_t num_descriptors = 0, n =0;
@@ -768,7 +768,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has not been merged \n", request_counter+1);
 	size  = list[request_counter].mem_length;
 	buf = (void *)list[request_counter].mem_buf;
-#if 1
+#if DEBUG_COMPACTOR
 	ptr = (int *) buf;
 	fprintf(stderr,"COMPACTOR WRITE: Received a buffer of size %zd with values :",
 		size);
@@ -858,7 +858,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	if (list[request_counter].merged == NOT_MERGED){
   
 	  buf_ptr = (uint8_t *)buf;
-#if 1
+
 	  /* set the memory descriptor */
 	  mem_desc = (iod_mem_desc_t *) malloc (sizeof (iod_mem_desc_t));
 	  mem_desc->frag = (iod_mem_frag_t *) malloc (sizeof (iod_mem_frag_t));
@@ -866,9 +866,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	  mem_desc->frag[0].addr = (void *)buf_ptr;
 	  mem_desc->frag[0].len = (iod_size_t)num_bytes;
 	  buf_ptr += num_bytes;
-	  
-#endif
-
 	  if (NULL != buf){
 	    free(buf);
 	  }
@@ -913,14 +910,16 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	      }
 	    }
 	  }
-	  
+
+#if 0	  
 	  fprintf (stderr,
 		   "COMPACTOR WRITE k: %lli mem_reqs: %lli start_reqs: %lli, curr_j: %lli\n",
 		   k,
 		   mem_reqs,
 		   start_reqs,
 		   curr_j);
-#if 1
+#endif
+
 	  /*Determined the number of entries in the memory block for this hslab
 	   descriptor*/
 	  mem_desc = (iod_mem_desc_t *) malloc (sizeof(iod_mem_desc_t));
@@ -934,12 +933,12 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		   start_reqs, mem_reqs);
 	  for ( j = start_reqs; j < mem_reqs; j++){
 	    if ((j == curr_j) && (bytes_left)){
-	      mem_desc->frag[k].addr = (void *)(uintmax_t)(curr_offset);
+	      mem_desc->frag[k].addr = (void *)(uintptr_t)(curr_offset);
 	      mem_desc->frag[k].len = bytes_left;
 	    }
 	    else{
-	      mem_desc->frag[k].addr = 
-		(uint64_t *)(list[request_counter].mblocks[j].offset);
+	      mem_desc->frag[k].addr =  (void *)
+		(uintptr_t)(list[request_counter].mblocks[j].offset);
 	      mem_desc->frag[k].len  = list[request_counter].mblocks[j].len;
 #if 0
 	      fprintf(stderr,"COMPACTOR %lli: off: %lli, off: %lli  len: %llu\n",
@@ -952,6 +951,16 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	    k++;
 	  }
 	  curr_k = k;
+#if DEBUG_COMPACTOR
+	  for ( j = 0; j < k; j++){
+	    ptr = (int *)mem_desc->frag[j].addr;
+	    fprintf(stderr, "COMPACTOR MERGED WRITE IOD_BUFFER j: %lli, k: %lli  len: %llu\n",
+		    j,k, mem_desc->frag[j].len);
+	    for (ii = 0; ii < mem_desc->frag[j].len/sizeof(int); ii++)
+	      fprintf(stderr, "%d ", ptr[ii]);
+	    fprintf(stderr, "\n");
+	  }
+	  fflush(stderr);
 #endif
 	}
 	
@@ -985,6 +994,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	}
 	if(hslabs)
 	  free(hslabs);
+
       }
 
       /* write from array object */

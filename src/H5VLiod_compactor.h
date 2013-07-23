@@ -61,6 +61,8 @@ typedef struct {
   size_t elementsize;          /* Size of each element in the dataset */
   hid_t dataset_id;            /* The ID of the dataset */
   hid_t selection_id;          /* The ID of the dataspace  */
+  uint64_t axe_id;
+  int num_peers;
   /*------------------------------------------------------------------*/
   void *mem_buf;
   size_t mem_length;
@@ -76,7 +78,9 @@ H5_DLL int H5VL_iod_create_request_list (compactor *queue, request_list_t **list
 					 int *num_datasets, int request_type);
 
 H5_DLL int H5VL_iod_sort_request_list (request_list_t **list, int num_entires, int *sorted);
+
 H5_DLL int H5VL_iod_extract_dims_info (hid_t dataspace, int *dims, hsize_t **dims_out);
+
 H5_DLL int H5VL_iod_dataset_specific_requests (request_list_t *list, 
 					       request_list_t ***dataset_list,
 					       int *num_datasets);
@@ -84,16 +88,40 @@ H5_DLL int H5VL_iod_dataset_specific_requests (request_list_t *list,
 H5_DLL int H5VL_iod_compact_requests (request_list_t *req_list, int *total_requests,
 				      int num_requests, int *request_list);
 
-H5_DLL int H5VL_iod_select_overlap (hid_t dataspace1 , hid_t dataspace2, 
-				    hid_t *res_dataspace);
+H5_DLL int H5VL_iod_select_overlap (hid_t dataspace1, uint64_t axe_id_1,
+				    hid_t dataspace2, uint64_t axe_id_2,
+				    hid_t *res_dataspace, int num_peers);
+
 H5_DLL int H5VL_iod_get_unique_dataset_request_sets ( request_list_t *list,
 						      int *u_datasets,
 						      int ***dataset_request_sets );
+
 H5_DLL int H5VL_iod_create_dataset_request_list (request_list_t *list,
 						 int *u_dataset,
 						 int **dataset_request_sets,
 						 request_list_t **dataset_list);
+
+H5_DLL int H5VL_iod_sort_block_container (block_container_t *io_array,
+					  size_t num_entries,
+					  int *sorted);
+
+H5_DLL int H5VL_iod_construct_merged_request (request_list_t *list,
+					       size_t m_element_size,
+					       request_list_t *merged_req,
+					       int *lselected, int num_selected,
+					       int *request_list, int num_requests);
+
+H5_DLL int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
+						     block_container_t *sm_block,
+						     block_container_t **out_sf_block,
+						     block_container_t **out_sm_block,
+						     size_t *revfblks, size_t *revmblks,
+						     size_t i, size_t j, 
+						     int *changed, int *changed_cnt);
+
+
+
 /*----------------------------------------------------------------------------------------  */
 
 #endif /* H5_HAVE_EFF*/
-#endif /* _H5VL_iod_COMPACTOR_H */
+#endif /*  */
