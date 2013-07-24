@@ -1853,6 +1853,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_UCHAR==dst_type) {
@@ -1903,6 +1904,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_SHORT==dst_type) {
@@ -1954,6 +1956,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_USHORT==dst_type) {
@@ -2004,6 +2007,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_INT==dst_type) {
@@ -2054,6 +2058,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_UINT==dst_type) {
@@ -2104,6 +2109,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_LONG==dst_type) {
@@ -2154,6 +2160,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_ULONG==dst_type) {
@@ -2204,6 +2211,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_LLONG==dst_type) {
@@ -2254,6 +2262,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_ULLONG==dst_type) {
@@ -2304,6 +2313,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         }
@@ -2482,6 +2492,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
         }
 
@@ -2535,6 +2546,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
         }
 
@@ -2578,6 +2590,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
         }
 
@@ -3867,6 +3880,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (FLT_DOUBLE==dst_type) {
@@ -3919,6 +3933,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
 #if H5_SIZEOF_LONG_DOUBLE !=0
@@ -3972,6 +3987,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case FLT_LDOUBLE:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
 #endif
@@ -4004,6 +4020,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_UCHAR==dst_type) {
@@ -4035,6 +4052,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_SHORT==dst_type) {
@@ -4066,6 +4084,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_USHORT==dst_type) {
@@ -4097,6 +4116,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_INT==dst_type) {
@@ -4128,6 +4148,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_UINT==dst_type) {
@@ -4159,6 +4180,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_LONG==dst_type) {
@@ -4190,6 +4212,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_ULONG==dst_type) {
@@ -4221,6 +4244,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_LLONG==dst_type) {
@@ -4252,6 +4276,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         } else if (INT_ULLONG==dst_type) {
@@ -4283,6 +4308,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             case INT_ULLONG:
             case OTHER:
             default:
+                HDassert(0 && "Unknown type");
                 break;
             }
         }
@@ -4549,6 +4575,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
 #endif
             case OTHER:
+            default:
+                HDassert(0 && "Unknown type");
                 break;
         }
 
@@ -4612,6 +4640,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
 #endif
             case OTHER:
+            default:
+                HDassert(0 && "Unknown type");
                 break;
         }
 
@@ -4662,6 +4692,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
 #endif
             case OTHER:
+            default:
+                HDassert(0 && "Unknown type");
                 break;
         }
 
