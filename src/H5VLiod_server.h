@@ -115,7 +115,12 @@ H5_DLL void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,
 					      size_t num_s_parents, AXE_task_t s_parents[], 
 					      void *queue);
 
-H5_DLL int H5VL_iod_server_compactor_write (void *list, int num_requests);
+H5_DLL int H5VL_iod_server_compactor_write (void *list, int num_requests, 
+					    iod_array_io_t *array_write);
+
+/*H5_DLL int H5VL_iod_server_compactor_write (void *list, int num_requests); */
+
+H5_DLL int H5VL_iod_server_send_result (void *list, int num_requests);
 
 H5_DLL int H5VL_iod_reconstruct_parents (AXE_engine_t axe_engine,
 					 axe_ids_t *old_parents,
@@ -125,6 +130,7 @@ H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine,
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
+
 H5_DLL void H5VL_iod_server_file_open_cb(AXE_engine_t axe_engine,  
                                          size_t num_n_parents, AXE_task_t n_parents[], 
                                          size_t num_s_parents, AXE_task_t s_parents[], 
