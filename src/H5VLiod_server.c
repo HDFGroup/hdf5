@@ -1396,10 +1396,11 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
   FUNC_ENTER_NOAPI_NOINIT
 
 #if DEBUG_COMPACTOR
-  fprintf (stderr, "id: %d, Enters the the dset_compactor, compactor_flag :%d\n",
+  fprintf(stderr, "id: %d, Enters the the dset_compactor, compactor_flag :%d\n",
 	   request_id,
 	   compactor_queue_flag);
   fflush(stderr);
+#endif  
 
   if (NULL == curr_queue){
     if (compactor_queue_flag){
@@ -1410,13 +1411,12 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
     fprintf(stderr,"Compactor Not present with flag : %d\n",
 	    compactor_queue_flag);
   }
-  else
-    fprintf(stderr,"Queue exists with compactor_flag : %d, and %d reqs\n",
-	    compactor_queue_flag,
-	    H5VL_iod_get_number_of_requests(curr_queue));
-  fflush(stderr);
-  
-#endif  
+  else{
+     fprintf(stderr,"Queue exists with compactor_flag : %d, and %d reqs\n", compactor_queue_flag,
+             H5VL_iod_get_number_of_requests(curr_queue));
+     fflush(stderr);
+  }
+
   
   input = (dset_io_in_t *)op_data->input;
   

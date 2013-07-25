@@ -79,9 +79,19 @@ static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
 				  size_t start,
 				  size_t j);
 
+static size_t H5VL_iod_copy_desc_reduced (block_container_t *sm_block,
+					  block_container_t *tmp_block,
+					  size_t start, size_t counter,
+					  size_t j);
+
 
 static void H5VL_print_block_container (block_container_t *cont,
 					size_t num);
+
+
+static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
+					 hsize_t end_i, hsize_t end_j);
+					 
 
 /*---------------------------------------------------------------------*/
 
@@ -475,9 +485,12 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   fprintf(stderr,"%s:%d N-entires : %d\n",
 	  __FILE__,__LINE__, request_id);
   fprintf(stderr,"%s:%d Compactor Request List \n",__FILE__,__LINE__);
-  fprintf(stderr,"Compactor-TUPLE: id -- AXE-id -- dataset -- dataspace -- fileblocks -- memblocks -- num_peers\n");
+  fprintf(stderr,
+	  "Compactor-TUPLE: id -- AXE-id -- dataset -- dataspace \
+  -- fileblocks -- memblocks -- num_peers\n");
   for ( i = 0; i < request_id; i++){
-    fprintf(stderr, "Compactor-Entry: %d -- %llu -- %d -- %d -- %zd -- %zd -- %d\n",
+    fprintf(stderr,
+	    "Compactor-Entry: %d -- %llu -- %d -- %d -- %zd -- %zd -- %d\n",
 	    newlist[i].request_id,
 	    newlist[i].axe_id,
 	    newlist[i].dataset_id,
@@ -746,6 +759,7 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
   fprintf (stderr,"%s:%d Merged with : %d\n", __FILE__, __LINE__,
 	   list[request_list[1]].selection_id);
 #endif
+
   merge_flag = 0;
   m_elmnt_size = list[request_list[0]].elementsize;
   if ( 0 == H5VL_iod_select_overlap ( current_space, 
@@ -894,6 +908,7 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
     free(lselected_req);
     lselected_req = NULL;
   }
+#if DEBUG_COMPACTOR
   for (i = 0; i < original_requests; i ++){
     fprintf(stderr,"%s:%d, Request :%d --> %d\n",
 	    __FILE__,
@@ -901,13 +916,32 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
 	    i,
 	    list[i].merged);
   }
-
+#endif
   
   *total_requests = original_requests;
  done:
   FUNC_LEAVE_NOAPI(ret_value);  
   
 }/*end H5VL_iod_compact_requests*/
+
+static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
+					 hsize_t end_i, hsize_t end_j){
+
+  if (start_i < start_j){
+    if (start_j >= end_i){
+      return 0;
+    }
+    return 1;
+  }
+  else if (start_i > start_j){
+    if (start_i >= end_j){
+      return 0;
+    }
+    return 1;
+  }
+  else
+    return 1;
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_reconstruct_overlapped_request
@@ -937,26 +971,38 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
   size_t rev_mblks, rev_fblks;
   block_container_t *rev_sm_block=NULL, *rev_sf_block=NULL;
   int  ret_value = CP_SUCCESS;
+  hsize_t start_i , start_j, end_i, end_j;
   int changed_cnt = 0, ii;
   FUNC_ENTER_NOAPI(NULL)
 
   rev_mblks = 0;
   rev_fblks = 0;
   
-  rev_sm_block = (block_container_t *) malloc (4 * sizeof (block_container_t));
-  if (NULL == rev_sm_block)
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for rev_sm_block");
-  rev_sf_block = (block_container_t *) malloc (4 * sizeof (block_container_t));
-  if (NULL == rev_sf_block)
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for rev_sf_block");
   
+#if DEBUG_COMPACTOR
+  fprintf (stderr,
+	   "in %s:%d sf[%zd].offset : %lli, sf[%zd].len: %zd\n",
+	   __FILE__, __LINE__,i,sf_block[i].offset,i,sf_block[i].len);
+  fprintf (stderr,
+	   "in %s:%d sf[%zd].offset: %lli, sf[%zd].len : %zd\n",
+	   __FILE__,__LINE__,j,sf_block[j].offset,j,sf_block[j].len);
+#endif
+  
+  start_i = sf_block[i].offset;
+  start_j = sf_block[j].offset;
+  end_i = sf_block[i].offset + sf_block[i].len;
+  end_j = sf_block[j].offset + sf_block[j].len;
+  
+  if(H5VL_check_overlapped_offsets(start_i, start_j, 
+				   end_i, end_j)){
 
-  fprintf (stderr, "sf[%zd].offset : %lli, sf[%zd].len: %zd, sf[%zd].offset: %lli, sf[%zd].len : %zd\n",
-	   i,sf_block[i].offset,i,sf_block[i].len,j,sf_block[j].offset,j,sf_block[j].len);
- 
-  if(sf_block[i].offset + sf_block[i].len >
-     sf_block[j].offset){
-    
+    rev_sm_block = (block_container_t *) malloc (4 * sizeof (block_container_t));
+    if (NULL == rev_sm_block)
+      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for rev_sm_block");
+    rev_sf_block = (block_container_t *) malloc (4 * sizeof (block_container_t));
+    if (NULL == rev_sf_block)
+      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for rev_sf_block");
+
     if (sf_block[i].offset + sf_block[i].len <= 
 	sf_block[j].offset + sf_block[j].len ){
       /*This means the latest write entry starts in-between 
@@ -976,11 +1022,9 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 	changed_cnt++;
       }
       else{
-	/* j's start offset is different than I but in total they 
-	   write the same or j write more.. so modify i's len..
-	   the offsets still remain untouched!*/
-	rem_len = (size_t)(sf_block[i].offset + sf_block[i].len)
-	  - sf_block[j].offset;
+	/*j's start offset is greater than 
+	 i's + */
+	rem_len = (size_t)(sf_block[j].offset - sf_block[i].offset);
 	rev_sf_block[rev_fblks].offset = sf_block[i].offset;
 	rev_sm_block[rev_mblks].offset = sm_block[i].offset;
 	rev_sf_block[rev_fblks].len = rem_len;
@@ -1039,7 +1083,8 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 	rev_sf_block[rev_fblks].offset =
 	  sf_block[j].offset + sf_block[j].len;
 	rev_sm_block[rev_mblks].offset = 
-	  sm_block[i].offset + ((sf_block[j].offset +sf_block[j].len) - sf_block[i].offset);
+	  sm_block[i].offset + 
+	  ((sf_block[j].offset +sf_block[j].len) - sf_block[i].offset);
 	rev_sf_block[rev_fblks].len = rem_len;
 	rev_sm_block[rev_mblks].len = rem_len;
 	changed[changed_cnt] = i;
@@ -1054,6 +1099,7 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 
       }
       else{
+
 	rem_len = (sf_block[j].offset + sf_block[j].len)
 	  - sf_block[i].offset;
 	rev_sf_block[rev_fblks].offset = 
@@ -1095,8 +1141,10 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
   fprintf (stderr,"rev_fblks: %zd\n",
 	   rev_fblks);
   for (jj = 0; jj < rev_fblks; jj++){
-    fprintf (stderr, "rev_blks[%zd]: %lli, rev_blks[%zd]: %zd\n",
-	     jj, rev_sf_block[jj].offset, jj, rev_sf_block[jj].len);
+    fprintf (stderr,
+	     "rev_blks[%zd]: %lli, rev_blks[%zd]: %zd\n",
+	     jj, rev_sf_block[jj].offset, jj, 
+	     rev_sf_block[jj].len);
   }
   fflush(stderr);
 #endif
@@ -1218,7 +1266,6 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	  sm_block[blck_cnt].offset = list[request_list[i]].mblocks[j].offset;
 	  sm_block[blck_cnt].len = list[request_list[i]].mblocks[j].len;
 	  axe_id_list[blck_cnt] = list[request_list[i]].axe_id;
-	  
 #if DEBUG_COMPACTOR
 	  fprintf(stderr, "in %s:%d foffset: %lli len: %zd, moffset: %lli, len: %zd\n",
 		  __FILE__, __LINE__,
@@ -1233,10 +1280,11 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
     assert(blck_cnt == fblks);  
     
     loop_blks = fblks;
+
+    /* =============================================================================================*/
     /* If its the same client, we do allow overlaps*/
     /* In that case its assumed that the requests flow in temporally
        So we can replace the memory buffer with the latest request */
-
     if (overlap_flag){
 
       rev_mblks = 0;
@@ -1268,22 +1316,25 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 								      ii, j,
 								      changed,
 								      &changed_cnt)){
-	      HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, CP_FAIL, "overlapped request construct error\n");
+	      HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, CP_FAIL,
+			  "overlapped request construct error\n");
 	    }
 	    
 	    if (changed_cnt == 0){
 #if DEBUG_COMPACTOR
 	      fprintf(stderr,
-		      "Continuing no change with that combination.. the offsets remain as follows: \n");
-	      H5VL_print_block_container (f_block, loop_blks);
-	      H5VL_print_block_container (m_block, loop_blks);
+		      "Continuing no change with that combination..\n");
+	      /*	      H5VL_print_block_container (f_block, loop_blks);
+			      H5VL_print_block_container (m_block, loop_blks); */
 #endif
 	      continue;
 	    }
 	    
 #if DEBUG_COMPACTOR
 	    fprintf (stderr, 
-		     "in %s:%d Completed reconstructing overlapped request changed: %zd fblks: %zd, mblks: %zd\n",
+		     "in %s:%d Completed reconstructing request\n", 
+		     __FILE__, __LINE__);
+	    fprintf(stderr,"in %s:%d changed: %zd fblks: %zd, mblks: %zd\n",
 		     __FILE__, __LINE__, changed_cnt ,rev_fblks, rev_mblks);
 	    for (k = 0; k < rev_fblks; k++){
 	      fprintf (stderr, "%zd: OFFSET: %lli, LEN: %zd\n",
@@ -1291,74 +1342,58 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	    }
 #endif
 
-	    tmp_block = (block_container_t *) malloc ((fblks+(rev_fblks - 2)) * sizeof(block_container_t));
+	    tmp_block = 
+	      (block_container_t *) 
+	      malloc ((fblks+(rev_fblks - 2)) * sizeof(block_container_t));
 	    if (NULL == tmp_block){
-	      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for tmp_block");
+	      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,
+			  "Allocation error for tmp_block");
 	    }
 
-	    tmpf_block = (block_container_t *) malloc ((fblks+(rev_fblks - 2)) * sizeof(block_container_t));
+	    tmpf_block = 
+	      (block_container_t *) 
+	      malloc ((fblks+(rev_fblks - 2)) * sizeof(block_container_t));
 	    if (NULL == tmpf_block){
-	      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for tmpf_block");
+	      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,
+			  "Allocation error for tmpf_block");
 	    }
 
 	    new_blks = 0;
 	    switch(changed_cnt){
 	    case 1:
 	      if (changed[0] == (int)ii){
-#if DEBUG_COMPACTOR
-		fprintf (stderr,"Enters CASE 1 with changed_cnt : %d\n",
-			 changed_cnt);
-#endif
-		  
 		H5VL_iod_copy_desc(f_block, tmpf_block, 0, ii);
 		new_blks += H5VL_iod_copy_desc(m_block, tmp_block, 0,ii);
-
-#if DEBUG_COMPACTOR
-		fprintf (stderr,"***** new_blks :%zd\n", new_blks);
 		H5VL_print_block_container (tmpf_block, new_blks);
-		H5VL_print_block_container (tmp_block, new_blks);
-#endif
 		tmpf_block[new_blks].offset = tf_block[0].offset;
 		tmpf_block[new_blks].len = tf_block[0].len;
 		tmp_block[new_blks].offset = tm_block[0].offset;
 		tmp_block[new_blks].len = tm_block[0].len;
 		new_blks++;
-
-#if DEBUG_COMPACTOR
 		H5VL_print_block_container (tmpf_block, new_blks);
-		H5VL_print_block_container (tmp_block, new_blks);
-
-		fprintf (stderr, "ii+1 : %zd, j: %zd\n", ii+1, j);
-#endif
 		new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, j);
 		H5VL_iod_copy_desc(m_block, tmp_block, ii+1, j);
-
+		H5VL_print_block_container (tmpf_block, new_blks);
+		H5VL_iod_copy_desc_reduced(f_block, tmpf_block, 
+						       j+1, new_blks,
+						       loop_blks);
+		new_blks += H5VL_iod_copy_desc_reduced(m_block,
+						       tmp_block,
+						       j+1, new_blks,
+						       loop_blks);
 		loop_blks -= 1;
-
-		H5VL_iod_copy_desc(f_block, tmpf_block, j+1, loop_blks);
-		H5VL_iod_copy_desc(m_block, tmp_block, j+1, loop_blks);
-#if DEBUG_COMPACTOR
-		H5VL_print_block_container (tmpf_block, loop_blks);
-		H5VL_print_block_container (tmp_block, loop_blks);
-#endif
-		ii -= 1;
+		H5VL_print_block_container (tmpf_block, new_blks);
+		fprintf (stderr, "new_blks: %zd, loop_blks: %zd\n",
+			 new_blks, loop_blks);
+		if (!((int)(ii - 1) < 0))
+		  ii -= 1;
 	      }
 	      break;
 	    case 2:
-#if DEBUG_COMPACTOR
-		fprintf (stderr,"Enters CASE 2 with changed_cnt : %d\n",
-			 changed_cnt);
-#endif
-
 	      for (i = 0; i < 2; i++){
 		if (changed[i] == (int)ii){
 		  new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, 0, ii);
 		  H5VL_iod_copy_desc(m_block, tmp_block, 0, ii);
-#if DEBUG_COMPACTOR
-		  fprintf (stderr,"***** new_blks :%zd\n", new_blks);
-		  H5VL_print_block_container (tmpf_block, new_blks);
-		  H5VL_print_block_container (tmp_block, new_blks);
-#endif
   		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
 		  tmp_block[new_blks].offset = tm_block[i].offset;
@@ -1385,22 +1420,14 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	    case 3:
 	      for (i = 0; i < 3; i ++){
 		if (changed[i] == (int)ii){
-#if DEBUG_COMPACTOR
-		  fprintf(stderr,"in Changed CASE 3 cnt: %zd and changed[%d]: %d, loop_blck: %zd\n", 
-			  changed_cnt,i,changed[i], loop_blks );
-
-#endif
 		  new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, 0, ii);
 		  H5VL_iod_copy_desc(m_block, tmp_block, 0, ii);
-#if DEBUG_COMPACTOR
-		  H5VL_print_block_container (tmpf_block, new_blks);
-		  H5VL_print_block_container (tmp_block, new_blks);
-#endif
 
 		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
 		  tmp_block[new_blks].offset = tm_block[i].offset;
 		  tmp_block[new_blks].len = tm_block[i].len;
+
 		  new_blks++;
 		  i++;
 		  loop_blks += 1;
@@ -1409,19 +1436,8 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 		  tmp_block[new_blks].offset = tm_block[i].offset;
 		  tmp_block[new_blks].len = tm_block[i].len;
 		  new_blks++;
-#if DEBUG_COMPACTOR
-		  fprintf (stderr, "*********** loop_blks: %zd, newblks: %zd\n",
-			   loop_blks, new_blks);
-		  H5VL_print_block_container (tmpf_block, new_blks);
-		  H5VL_print_block_container (tmp_block, new_blks);
-#endif
-
 		}
 		else{
-#if DEBUG_COMPACTOR
-		  fprintf(stderr,"in %s:%d Changed CASE 3 with Changed_cnt: %zd and changed[%d]: %d\n", 
-			  __FILE__, __LINE__,changed_cnt,i,changed[i] );
-#endif
 		  if (ii+1 < j){
 		    new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, j);
 		    H5VL_iod_copy_desc(m_block, tmp_block, ii+1, j);
@@ -1431,23 +1447,13 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 		  tmp_block[new_blks].offset = tm_block[i].offset;
 		  tmp_block[new_blks].len = tm_block[i].len;
 		  new_blks++;
-#if DEBUG_COMPACTOR
-		  fprintf (stderr, "*********** loop_blks: %zd, newblks: %zd, j: %zd\n",
-			   loop_blks, new_blks, j);
-		  H5VL_print_block_container (tmpf_block, new_blks);
-		  H5VL_print_block_container (tmp_block, new_blks);
-#endif
-		  
 		  if (new_blks < loop_blks){ 
-		    new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, j+1, loop_blks);
+		    new_blks +=
+		      H5VL_iod_copy_desc(f_block, tmpf_block, j+1, loop_blks);
 		    H5VL_iod_copy_desc(m_block, tmp_block, j+1, loop_blks);
 		  }
 		}
 	      }
-#if DEBUG_COMPACTOR
-	      fprintf (stderr, "Total revised blocks : %zd \n", 
-		       new_blks);
-#endif
 	      break;
 	    default:
 	      ret_value = CP_FAIL;
@@ -1456,7 +1462,17 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 
 	    if (new_blks < loop_blks){
 	      H5VL_iod_copy_desc(f_block, tmpf_block, new_blks, loop_blks);
-	      new_blks += H5VL_iod_copy_desc(m_block, tmp_block, new_blks, loop_blks);
+	      new_blks += 
+		H5VL_iod_copy_desc(m_block, tmp_block, new_blks, loop_blks);
+	    }
+
+	    if (NULL != tf_block){
+	      free(tf_block);
+	      tf_block = NULL;
+	    }
+	    if (NULL != tm_block){
+	      free(tm_block);
+	      tm_block = NULL;
 	    }
 
 	    if (NULL != m_block){
@@ -1467,22 +1483,18 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	      free(f_block);
 	      f_block = NULL;
 	    }
-	    if (NULL != tf_block){
-	      free(tf_block);
-	      tf_block = NULL;
-	    }
-	    if (NULL != tm_block){
-	      free(tm_block);
-	      tm_block = NULL;
-	    }
 	    f_block = tmpf_block;
 	    m_block = tmp_block;
+
 	  }
 #if DEBUG_COMPACTOR
-	  fprintf (stderr,"***********new_blks: %zd loop_blks: %zd**********\n", 
-		   new_blks, loop_blks);
+	  fprintf (stderr,
+		   "***********AFTER ITERATION i: %zd, j: %zd**************\n",
+		   ii, j);
 	  H5VL_print_block_container (f_block, loop_blks);
 	  H5VL_print_block_container (m_block, loop_blks);
+	  fprintf (stderr,
+		   "########################################################\n");
 #endif
 	
 	}
@@ -1508,7 +1520,8 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 
     sorted = (int *) malloc (blck_cnt * sizeof(int));
     if ( NULL == sorted ){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Allocation error for sorted array");
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,
+		"Allocation error for sorted array");
     }
 
 
@@ -1516,11 +1529,12 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
     
      
 #if DEBUG_COMPACTOR
-    fprintf (stderr, "********************* AFTER Adjusting for overlap **************\n");
-
+    fprintf (stderr,
+	     "********************* AFTER Adjusting for overlap **************\n");
     for ( j = 0; j < blck_cnt; j++){
-	    fprintf(stderr, "in %s:%d sorted_foffset: %lli sorted_len: %zd, sorted_moffset: %lli, sorted_mlen: %zd\n",
-		    __FILE__, __LINE__,
+	    fprintf(stderr,
+		    "sorted_foffset: %lli sorted_len: %zd,\
+                     sorted_moffset: %lli, sorted_mlen: %zd\n",
 		    sf_block[sorted[j]].offset, sf_block[sorted[j]].len,  sm_block[sorted[j]].offset,
 		    sm_block[sorted[j]].len);
 	    }
@@ -1637,11 +1651,13 @@ static void H5VL_print_block_container (block_container_t *cont,
 					size_t num){
   
   size_t k;
+#if DEBUG_COMPACTOR
   for (k = 0; k < num; k++){
     fprintf (stderr, "%zd: block.offset: %lli, block.len: %zd \n",
 	     k,
 	     cont[k].offset, cont[k].len);
   }
+#endif
 }
 
 
@@ -1652,15 +1668,30 @@ static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
 				 size_t j){
 
   size_t i, cnt  = 0;
-#if DEBUG_COMPACTOR
-  fprintf (stderr,"start: %zd, end: %zd\n",
-	   start, j);
-#endif
+
   for (i = start; i < j; i++){
     tmp_block[i].offset = sm_block[i].offset;
     tmp_block[i].len = sm_block[i].len;
     cnt++;
   }
+
+  return cnt;
+}
+
+static size_t H5VL_iod_copy_desc_reduced (block_container_t *sm_block,
+					  block_container_t *tmp_block,
+					  size_t start, size_t counter,
+					  size_t j){
+  
+  size_t i, cnt  = 0;
+
+  for (i = start; i < j; i++){
+    tmp_block[counter].offset = sm_block[i].offset;
+    tmp_block[counter].len = sm_block[i].len;
+    counter++;
+    cnt++;
+  }
+
   return cnt;
 }
 

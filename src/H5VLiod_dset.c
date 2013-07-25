@@ -768,6 +768,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has not been merged \n", request_counter+1);
 	size  = list[request_counter].mem_length;
 	buf = (void *)list[request_counter].mem_buf;
+
 #if DEBUG_COMPACTOR
 	ptr = (int *) buf;
 	fprintf(stderr,"COMPACTOR WRITE: Received a buffer of size %zd with values :",
@@ -789,11 +790,12 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	space_id = list[request_counter].selection_id;
 	dst_id = input->dset_type_id;
 	
+#if DEBUG_COMPACTOR
 	fprintf (stderr,"space_id: %d, selection_id: %d\n",
 		 space_id, list[request_counter].selection_id);
-	
 	/*Even in the case its not merged the buffer was already extracted*/
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has been merged \n", request_counter+1);
+#endif
       }
       
       dst_size = H5Tget_size(dst_id);
@@ -813,10 +815,11 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
       if(H5VL_iod_get_file_desc(space_id, &num_descriptors, NULL) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
       
+#if DEBUG_COMPACTOR
       fprintf (stderr,"COMPACTOR num_descriptors : %llu, ndims: %d\n", 
 	       num_descriptors,
 	       ndims);
-      
+#endif
       /* allocate the IOD hyperslab descriptors needed */
       if(NULL == (hslabs = (iod_hyperslab_t *)malloc
 		  (sizeof(iod_hyperslab_t) * (size_t)num_descriptors)))
@@ -849,7 +852,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 
         num_bytes = 0;
         num_elems = 1;
-
+	
         /* determine how many bytes the current descriptor holds */
         for(i=0 ; i<ndims ; i++)
             num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
@@ -874,22 +877,22 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	if (list[request_counter].merged == MERGED){
 
 #if DEBUG_COMPACTOR
-	  fprintf (stderr, "COMPACTOR WRITE i: %d, num_mblocks: %zd, num_bytes: %lli\n",
-		   request_counter, list[request_counter].num_mblocks, num_bytes);
-	  for ( j = 0; j < list[request_counter].num_mblocks; j++){
+	  fprintf (stderr, "COMPACTOR WRITE i: %d, num_mblocks: %zd, num_bytes: %lli, start_reqs: %lli\n",
+		   request_counter, list[request_counter].num_mblocks, num_bytes, start_reqs);
+	  for ( j = curr_j; j < list[request_counter].num_mblocks; j++){
 	    fprintf (stderr,"COMPACTOR WRITE j: %lli, len: %zd\n",
 		     j, list[request_counter].mblocks[j].len);
 	  }
 #endif
 	  k = 0;
-	  mem_reqs = 0; start_reqs = curr_j;
+	  mem_reqs = 0;
 	  fprintf (stderr,"COMPACTOR, curr_j: %lli, j: %lli, num_mblocks: %zd\n",
 		   curr_j, j, list[request_counter].num_mblocks);
 
+	  start_reqs = curr_j;
 	  for (j = curr_j; j < list[request_counter].num_mblocks; j++){
-	    
-	    if (k < num_bytes){
 
+	    if (k < num_bytes){
 	      if (bytes_left){
 		k += bytes_left;
 		mem_reqs += 1;
@@ -911,57 +914,49 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	    }
 	  }
 
-#if 0	  
-	  fprintf (stderr,
-		   "COMPACTOR WRITE k: %lli mem_reqs: %lli start_reqs: %lli, curr_j: %lli\n",
-		   k,
-		   mem_reqs,
-		   start_reqs,
-		   curr_j);
-#endif
+	  curr_j += 1;
+	  fprintf (stderr,"COMPACTOR WRITE  start_reqs: %lli, mem_reqs: %lli\n",
+		   start_reqs, mem_reqs);
 
 	  /*Determined the number of entries in the memory block for this hslab
 	   descriptor*/
-	  mem_desc = (iod_mem_desc_t *) malloc (sizeof(iod_mem_desc_t));
-	  mem_desc->nfrag = mem_reqs;
-	  mem_desc->frag =
-	    (iod_mem_frag_t *) malloc ((int)mem_reqs * sizeof(iod_mem_frag_t));
-	  k  = curr_k;
+	  if (NULL == mem_desc){
+	    mem_desc = (iod_mem_desc_t *) malloc (sizeof(iod_mem_desc_t));
+	    mem_desc->nfrag = mem_reqs;
+	    mem_desc->frag =
+	      (iod_mem_frag_t *) malloc ((int)mem_reqs * sizeof(iod_mem_frag_t));
+	  }
+	  k  = 0;
 
 
-	  fprintf (stderr,"COMPACTOR WRITE start_reqs: %lli, mem_reqs: %lli\n",
-		   start_reqs, mem_reqs);
-	  for ( j = start_reqs; j < mem_reqs; j++){
+	  fprintf (stderr,"COMPACTOR WRITE k: %lli start_reqs: %lli, mem_reqs: %lli\n",
+		   k, start_reqs, mem_reqs);
+
+	  for ( j = start_reqs; j < (start_reqs + mem_reqs); j++){
 	    if ((j == curr_j) && (bytes_left)){
-	      mem_desc->frag[k].addr = (void *)(uintptr_t)(curr_offset);
+	      mem_desc->frag[k].addr = (void *)(curr_offset);
 	      mem_desc->frag[k].len = bytes_left;
 	    }
 	    else{
 	      mem_desc->frag[k].addr =  (void *)
-		(uintptr_t)(list[request_counter].mblocks[j].offset);
+		(list[request_counter].mblocks[j].offset);
 	      mem_desc->frag[k].len  = list[request_counter].mblocks[j].len;
-#if 0
-	      fprintf(stderr,"COMPACTOR %lli: off: %lli, off: %lli  len: %llu\n",
-		      k,
-		      (hsize_t)mem_desc->frag[k].addr,
-		      list[request_counter].mblocks[j].offset,
-		      mem_desc->frag[k].len);		    
-#endif
 	    }
 	    k++;
 	  }
 	  curr_k = k;
-#if DEBUG_COMPACTOR
-	  for ( j = 0; j < k; j++){
+
+	  for ( j = 0 ; j <  k; j++){
+
 	    ptr = (int *)mem_desc->frag[j].addr;
 	    fprintf(stderr, "COMPACTOR MERGED WRITE IOD_BUFFER j: %lli, k: %lli  len: %llu\n",
 		    j,k, mem_desc->frag[j].len);
 	    for (ii = 0; ii < mem_desc->frag[j].len/sizeof(int); ii++)
 	      fprintf(stderr, "%d ", ptr[ii]);
 	    fprintf(stderr, "\n");
+
 	  }
 	  fflush(stderr);
-#endif
 	}
 	
 	file_desc = hslabs[n];
@@ -972,29 +967,34 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		  (size_t)file_desc.block[i], (size_t)file_desc.count[i]);
 	}
 #endif	  
-	
 	if(iod_array_write(iod_oh, IOD_TID_UNKNOWN, NULL, 
 			   mem_desc /*This is where the memory descriptor goes*/,
 			   &file_desc, 
-			 NULL, NULL) < 0)
+			   NULL, NULL) < 0)
 	  HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to array object");
 	
+	
 	if (NULL != mem_desc){
-	  if (NULL != mem_desc->frag){
-	    free(mem_desc->frag);
+	  iod_mem_frag_t *frag = mem_desc->frag;	  
+	  if (NULL != frag){
+	    free(frag);
 	  }
 	  free(mem_desc);
 	  mem_desc = NULL;
 	}
+
+      }
+
+
+      
+      if (NULL != hslabs){
 	for(n=0 ; n<num_descriptors ; n++) {
 	  free(hslabs[n].start);
 	  free(hslabs[n].stride);
 	  free(hslabs[n].block);
 	  free(hslabs[n].count);
 	}
-	if(hslabs)
-	  free(hslabs);
-
+	free(hslabs);
       }
 
       /* write from array object */
@@ -1008,7 +1008,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 #if H5VL_IOD_DEBUG 
       fprintf(stderr, "Done with dset write, sending %d response to client\n", ret_value);
 #endif
-
       
   }
   
