@@ -722,10 +722,19 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
        free(wlist);
        wlist = NULL;
      }
+     if (NULL != rlist){
+       free(rlist);
+       wlist = NULL;
+     }
      if (NULL != dlist){
        free(dlist);
        dlist = NULL;
      }
+     if (NULL != drlist){
+       free(drlist);
+       drlist = NULL;
+     }
+    
      
      if (CP_SUCCESS != H5VL_iod_destroy_compactor_queue(cqueue)){
        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, CP_FAIL, "Cannot free NULL queue\n");

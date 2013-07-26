@@ -1647,6 +1647,20 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
   
  }/*end  H5VL_iod_construct_merged_request*/
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_print_block_container
+ *
+ * Purpose:	Function to display the contents of a block container 
+ *
+ * Return:	Void
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static void H5VL_print_block_container (block_container_t *cont,
 					size_t num){
   
@@ -1660,7 +1674,19 @@ static void H5VL_print_block_container (block_container_t *cont,
 #endif
 }
 
-
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_copy_desc
+ *
+ * Purpose:	Copy block container to destination container
+ *
+ * Return:	SUCCESS : size_t elements copied
+ *             
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
 static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
 				 block_container_t *tmp_block,
@@ -1678,6 +1704,21 @@ static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
   return cnt;
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_copy_desc_reduced
+ *
+ * Purpose:	Copy block container to destination container with varible
+ *              index
+ *
+ * Return:	SUCCESS : size_t elements copied
+ *             
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static size_t H5VL_iod_copy_desc_reduced (block_container_t *sm_block,
 					  block_container_t *tmp_block,
 					  size_t start, size_t counter,
@@ -1694,6 +1735,22 @@ static size_t H5VL_iod_copy_desc_reduced (block_container_t *sm_block,
 
   return cnt;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_get_difference
+ *
+ * Purpose:	Get the difference between AXE IDs
+ *
+ * Return:	SUCCESS : Difference between AXE IDs
+ *              
+ *             
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
 
 static uint64_t H5VL_iod_get_difference (uint64_t axe_id_1,
@@ -1864,9 +1921,6 @@ static size_t H5VL_iod_get_selected_fblocks_count (int *selected_indices,
  *
  *-------------------------------------------------------------------------
  */
-
-
-
 
 int H5VL_iod_sort_block_container (block_container_t *io_array,
 				    size_t num_entries,
