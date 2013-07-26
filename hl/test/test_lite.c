@@ -1813,10 +1813,9 @@ static int test_valid_path(void)
 {
   hid_t file_id, group;
   herr_t status;
-  FILE *fp = NULL;
   htri_t path_valid;
   const char *data_string_in = "test";
-  
+   
   TESTING("H5LTpath_valid");
     
   /* Create a new file using default properties. */
