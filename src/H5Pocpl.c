@@ -1195,7 +1195,6 @@ htri_t
 H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id)
 {
     H5O_pline_t         pline;  /* Filter pipeline */
-    H5Z_filter_info_t *filter;  /* Pointer to filter information */
     htri_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
