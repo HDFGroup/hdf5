@@ -155,6 +155,8 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                     case '#':
                         prefix = 1;
                         break;
+                    default:
+                        HDassert(0 && "This Should never be executed!");
                 } /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
                 s++;
             } /* end while */
