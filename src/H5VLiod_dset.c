@@ -624,10 +624,11 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
    compactor *cqueue = (compactor *)_queue;
    int i = 0;
    herr_t ret_value = SUCCEED;
-   request_list_t *wlist=NULL;
-   dataset_container_t *dlist=NULL;
-   int nentries = 0, ndatasets = 0;
+   request_list_t *wlist=NULL, *rlist=NULL;
+   dataset_container_t *dlist=NULL, *drlist=NULL;
+   int nentries = 0, ndatasets = 0, nrentries = 0, nrdatasets = 0;
    iod_array_io_t *array_write = NULL;
+
    FUNC_ENTER_NOAPI_NOINIT
 
  #if DEBUG_COMPACTOR
@@ -655,11 +656,31 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
  #if DEBUG_COMPACTOR
      if (ret_value != CP_SUCCESS){
-       fprintf(stderr,"ERROR !! Compactor create request list failed with error %d  \n",
+       fprintf(stderr,"ERROR !! Compactor create write request list failed with error %d  \n",
 	       ret_value);
      }
 #endif
+
      
+     ret_value = H5VL_iod_create_request_list (cqueue,
+					       &rlist,
+					       &nrentries,
+					       &drlist,
+					       &nrdatasets,
+					       READ);
+
+ #if DEBUG_COMPACTOR
+     if (ret_value != CP_SUCCESS){
+       fprintf(stderr,"ERROR !! Compactor create read request list failed with error %d  \n",
+	       ret_value);
+     }
+     fprintf (stderr,"nrentries: %d, nrdatasets: %d \n",
+	      nrentries, nrdatasets);
+
+#endif
+
+     
+
      array_write = (iod_array_io_t *) malloc (ndatasets *
 					      sizeof (iod_array_io_t));
      if (NULL == array_write){
@@ -678,11 +699,14 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
        }	
      }
      
-     /*Call here iod_array_write_list 
+     /*Call here "iod_array_write_list"
+
       array_write array has been constructed. 
       The COH value can come from any of the list requests 
+
       Once that is done --> execute the func : H5VL_iod_server_send_result
       This sends results to all the clients about their completion.
+ 
       There is a flaw in the IOD construction of io_array_t datastructure.
       They seem to have mem_desc and io_desc as pointers and there is no-way to specify
       the number of descriptors!.. We need that to free the memory descriptors.
