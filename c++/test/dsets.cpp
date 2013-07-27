@@ -61,7 +61,6 @@ const int H5Z_FILTER_BOGUS = 305;
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_create
  *
@@ -284,14 +283,13 @@ test_simple_io( H5File& file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_datasize()
+test_datasize(FileAccPropList &fapl)
 {
-
     SUBTEST("DataSet::getInMemDataSize()");
     try
     {
 	// Open FILE1.
-	H5File file(FILE1, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, FileAccPropList::DEFAULT);
+	H5File file(FILE1, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
 	// Open dataset DSET_SIMPLE_IO_NAME.
 	DataSet dset = file.openDataSet (DSET_SIMPLE_IO_NAME);
@@ -332,7 +330,6 @@ test_datasize()
 	return -1;
     }
 }   // test_datasize
-
 
 /*-------------------------------------------------------------------------
  * Function:	test_tconv
@@ -455,7 +452,6 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
 {
     return nbytes;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:	test_compression
@@ -826,7 +822,6 @@ test_multiopen (H5File& file)
     }
 }   // test_multiopen
 
-
 /*-------------------------------------------------------------------------
  * Function:	test_types
  *
@@ -1074,7 +1069,7 @@ void test_dset()
 
 	// Close the file before testing data size.
 	file.close();
-	nerrors += test_datasize() <0 ? 1:0;
+	nerrors += test_datasize(fapl) <0 ? 1:0;
     }
     catch (Exception E)
     {
