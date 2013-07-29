@@ -118,7 +118,9 @@ H5_DLL void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,
 H5_DLL int H5VL_iod_server_compactor_write (void *list, int num_requests, 
 					    iod_array_io_t *array_write);
 
-/*H5_DLL int H5VL_iod_server_compactor_write (void *list, int num_requests); */
+H5_DLL int H5VL_iod_server_compactor_read (void *_list, int num_requests,
+					   iod_array_io_t *larray);
+
 
 H5_DLL int H5VL_iod_server_send_result (void *list, int num_requests);
 
