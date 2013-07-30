@@ -28,6 +28,7 @@
 #define NA_UNDEFINED NULL
 #define IOD_OH_UNDEFINED (pow(2.0,64.0) - 1)
 #define IOD_ID_UNDEFINED (pow(2.0,64.0) - 1)
+#define IOD_COUNT_UNDEFINED (pow(2.0,64.0) - 1)
 #define H5VL_IOD_DEBUG 1
 
 
@@ -211,6 +212,7 @@ MERCURY_GEN_PROC(link_create_in_t, ((int8_t)(create_type)) ((iod_handle_t)(coh))
                  ((uint64_t)(parent_axe_id)) ((hg_string_t)(loc_name))
                  ((iod_handle_t)(target_loc_oh)) ((iod_obj_id_t)(target_loc_id))
                  ((uint64_t)(target_parent_axe_id)) ((hg_string_t)(target_name))
+                 ((hg_string_t)(link_value))
                  ((hid_t)(lapl_id)) ((hid_t)(lcpl_id)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(link_move_in_t, ((hbool_t)(copy_flag)) ((iod_handle_t)(coh)) 
                  ((iod_handle_t)(src_loc_oh)) ((iod_obj_id_t)(src_loc_id))

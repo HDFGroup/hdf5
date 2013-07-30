@@ -454,6 +454,8 @@ EFF_finalize(void)
         return FAIL;
     if (HG_SUCCESS != HG_Finalize())
         return FAIL;
+    if(NA_SUCCESS != NA_Finalize(network_class))
+        return FAIL;
 
     return ret_value;
 } /* end EFF_finalize() */
@@ -4766,6 +4768,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     H5P_genplist_t    *plist;                      /* Property list pointer */
     char *loc_name = NULL, *new_name = NULL;
+    char *link_value = NULL; /* Value of soft link */
     herr_t             ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4820,6 +4823,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 input.loc_name = loc_name;
                 input.target_name = new_name;
                 input.axe_id = axe_id ++;
+                input.link_value = strdup("\0");
 
 #if H5VL_IOD_DEBUG
                 printf("Hard Link Create axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
@@ -4843,12 +4847,30 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 target_params.loc_data.loc_by_name.plist_id = lapl_id;
 
                 /* determine target object whether it is absolute or
-                   relative to the location object */
-                if('/' == *target_name)
+                   relative to the location object. Also set the link
+                   value to the full path to the target object. */
+                if('/' == *target_name) {
+                    /* The target location object is the file root */
                     target_obj = (H5VL_iod_object_t *)obj->file;
-                else
+
+                    /* The path is absolute */
+                    link_value = strdup(target_name);
+                }
+                else {
+                    size_t obj_name_len = HDstrlen(obj->obj_name);
+                    size_t name_len = HDstrlen(target_name);
+
+                    /* The target location object is the same as the source object */
                     target_obj = obj;
 
+                    /* The full path is determined by concatinating the
+                       source object location to the target_name */
+                    if (NULL == (link_value = (char *)HDmalloc(obj_name_len + name_len + 1)))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+                    HDmemcpy(link_value, obj->obj_name, obj_name_len);
+                    HDmemcpy(link_value+obj_name_len, target_name, name_len);
+                    link_value[obj_name_len+name_len] = '\0';
+                }
 
                 /* Retrieve the parent info by traversing the path where the
                    link should be created from. */
@@ -4872,6 +4894,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 input.lapl_id = lapl_id;
                 input.loc_name = loc_name;
                 input.target_name = new_name;
+                input.link_value = link_value;
 
 #if H5VL_IOD_DEBUG
                 printf("Soft Link Create axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
@@ -4954,6 +4977,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 done:
     if(loc_name) free(loc_name);
     if(new_name) free(new_name);
+    if(input.link_value) HDfree(input.link_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_create() */

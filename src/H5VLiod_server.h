@@ -32,6 +32,19 @@
 #define H5_DO_NATIVE 0
 #define DEBUG_COMPACTOR 1
 
+/* Key names for Metadata stored in KV objects */
+#define H5VL_IOD_KEY_SOFT_LINK       "soft_link_value"
+#define H5VL_IOD_KEY_DTYPE_SIZE      "serialized_size"
+#define H5VL_IOD_KEY_KV_IDS_INDEX    "kv_ids_index"
+#define H5VL_IOD_KEY_ARRAY_IDS_INDEX "array_ids_index"
+#define H5VL_IOD_KEY_BLOB_IDS_INDEX  "blob_ids_index"
+#define H5VL_IOD_KEY_OBJ_COMMENT     "object_comment"
+#define H5VL_IOD_KEY_OBJ_CPL         "object_create_plist"
+#define H5VL_IOD_KEY_OBJ_LINK_COUNT  "object_link_count"
+#define H5VL_IOD_KEY_OBJ_TYPE        "object_type"
+#define H5VL_IOD_KEY_OBJ_DATATYPE    "object_datatype"
+#define H5VL_IOD_KEY_OBJ_DATASPACE   "object_dataspace"
+
 /* Enum for metadata types stored in MD KV for HDF5->IOD objects */
 typedef enum H5VL_iod_metadata_t {
     H5VL_IOD_PLIST,             /*type ID for property lists     	    */
@@ -55,9 +68,14 @@ typedef struct scratch_pad_t {
     iod_obj_id_t filler2_id;   /* filler value - not used */
 } scratch_pad_t;
 
-
 int compactor_queue_flag;
 pthread_mutex_t lock;
+
+/* the link value stored in KV stores */
+typedef struct H5VL_iod_link_t {
+    iod_obj_id_t iod_id;     /* The ID of the object the link points to */
+    H5L_type_t link_type;    /* The type of the link (Hard & Soft only suppoted for now) */
+} H5VL_iod_link_t;
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_eff_finalize(hg_handle_t handle);
@@ -115,12 +133,8 @@ H5_DLL void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,
 					      size_t num_s_parents, AXE_task_t s_parents[], 
 					      void *queue);
 
-H5_DLL int H5VL_iod_server_compactor_write (void *list, int num_requests, 
-					    iod_array_io_t *array_write);
-
-H5_DLL int H5VL_iod_server_compactor_read (void *_list, int num_requests,
-					   iod_array_io_t *larray);
-
+H5_DLL int H5VL_iod_server_compactor_write (void *_list, int num_requests);
+H5_DLL int H5VL_iod_server_compactor_read (void *_list, int num_requests);
 
 H5_DLL int H5VL_iod_server_send_result (void *list, int num_requests);
 
@@ -299,6 +313,10 @@ H5_DLL void H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
                                        const char *path, hbool_t create_interm_grps,
                                        char **last_comp, iod_obj_id_t *iod_id, iod_handle_t *iod_oh);
+H5_DLL herr_t H5VL_iod_server_open_path(iod_handle_t coh, iod_obj_id_t loc_id, 
+                                                iod_handle_t loc_handle, const char *path, 
+                                                /*out*/iod_obj_id_t *iod_id, 
+                                                /*out*/iod_handle_t *iod_oh);
 H5_DLL herr_t H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs);
 H5_DLL herr_t H5VL_iod_insert_plist(iod_handle_t oh, iod_trans_id_t tid, hid_t plist_id,
                                     iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
@@ -310,11 +328,10 @@ H5_DLL herr_t H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_
                                        iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
                                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
-H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, char *link_name,
-                                       iod_obj_id_t obj_id, iod_hint_list_t *hints, 
-                                       iod_checksum_t *cs, iod_event_t *event);
+H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_name,
+                                       H5L_type_t link_type, iod_obj_id_t obj_id, 
+                                       iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
-                                    const char *key, iod_hint_list_t *hints, iod_checksum_t *cs, 
-                                    iod_event_t *event, void *ret);
+                                    const char *key, iod_checksum_t *cs, iod_event_t *event, void *ret);
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_server_H */

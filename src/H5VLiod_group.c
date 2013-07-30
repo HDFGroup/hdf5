@@ -141,8 +141,8 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
         /* add link in parent group to current object */
-        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, grp_id, 
-                                    NULL, NULL, NULL) < 0)
+        if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
+                                    H5L_TYPE_HARD, grp_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
 
@@ -209,10 +209,7 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     const char *name = input->name; /* group name including path to open */
     iod_obj_id_t grp_id; /* The ID of the group that needs to be opened */
-    iod_handle_t cur_oh, mdkv_oh;
-    iod_obj_id_t cur_id;
-    char *last_comp; /* the name of the group obtained from traversal function */
-    iod_size_t kv_size;
+    iod_handle_t grp_oh, mdkv_oh; /* The group handle and its metadata KV handle */
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
 
@@ -222,32 +219,12 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
     fprintf(stderr, "Start group open %s\n", name);
 #endif
 
-    /* the traversal will retrieve the location where the group needs
-       to be created. The traversal will fail if an intermediate group
-       does not exist. */
-    if(H5VL_iod_server_traverse(coh, loc_id, loc_handle, name, FALSE, 
-                                &last_comp, &cur_id, &cur_oh) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
-
-    kv_size = sizeof(iod_obj_id_t);
-
-    /* lookup group in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &grp_id, &kv_size, NULL, NULL) < 0) {
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Intermdiate group does not exist");
-    } /* end if */
-
-    /* close parent group and its scratch pad if it is not the
-       location we started the traversal into */
-    if(loc_handle.cookie != cur_oh.cookie) {
-        iod_obj_close(cur_oh, NULL, NULL);
-    }
-
-    /* open the group */
-    if (iod_obj_open_write(coh, grp_id, NULL, &cur_oh, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+    /* Traverse Path and open group */
+    if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &grp_id, &grp_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't open object");
 
     /* get scratch pad of group */
-    if(iod_obj_get_scratch(cur_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
+    if(iod_obj_get_scratch(grp_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
 
     /* open the metadata scratch pad */
@@ -256,12 +233,13 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - retrieve metadata, need IOD */
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                             NULL, NULL, NULL, &output.gcpl_id) < 0)
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, 
+                             H5VL_IOD_KEY_OBJ_CPL, NULL, NULL, &output.gcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
 
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, "link_count",
-                             NULL, NULL, NULL, &output.link_count) < 0)
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
+                             H5VL_IOD_KEY_OBJ_LINK_COUNT,
+                             NULL, NULL, &output.link_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link count");
 #endif
 
@@ -270,12 +248,12 @@ H5VL_iod_server_group_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close meta data KV handle");
 
 #if H5_DO_NATIVE
-    cur_oh.cookie = H5Gopen(loc_handle.cookie, name, input->gapl_id);
-    HDassert(cur_oh.cookie);
+    grp_oh.cookie = H5Gopen(loc_handle.cookie, name, input->gapl_id);
+    HDassert(grp_oh.cookie);
 #endif
 
     output.iod_id = grp_id;
-    output.iod_oh = cur_oh;
+    output.iod_oh = grp_oh;
     output.gcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
 #if H5VL_IOD_DEBUG
@@ -292,7 +270,6 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    last_comp = (char *)H5MM_xfree(last_comp);
     input = (group_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 

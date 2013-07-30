@@ -91,9 +91,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         iod_kv_t kv;
         void *key = NULL;
         void *value = NULL;
-        size_t buf_size;
         hid_t fcpl_id;
-        uint64_t index;
 
         /* create the metadata KV object for the root group */
         if(iod_obj_create(coh, IOD_TID_UNKNOWN, NULL, IOD_OBJ_KV, 
@@ -138,21 +136,21 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
         *((uint64_t *)value) = 1;
         kv.value_len = sizeof(uint64_t);
 
-        key = strdup("kv_index");
+        key = strdup(H5VL_IOD_KEY_KV_IDS_INDEX);
         kv.key = (char *)key;
         if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
         free(key); 
         key = NULL;
 
-        key = strdup("array_index");
+        key = strdup(H5VL_IOD_KEY_ARRAY_IDS_INDEX);
         kv.key = (char *)key;
         if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
         free(key); 
         key = NULL;
 
-        key = strdup("blob_index");
+        key = strdup(H5VL_IOD_KEY_BLOB_IDS_INDEX);
         kv.key = (char *)key;
         if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
@@ -262,19 +260,19 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - NEED IOD */
 #if 0
-    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, "create_plist",
-                             NULL, NULL, NULL, &output.fcpl_id) < 0)
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
+                             NULL, NULL, &output.fcpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve fcpl");
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "kv_index", &output.kv_oid_index, 
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_KV_IDS_INDEX, &output.kv_oid_index, 
                         sizeof(uint64_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "KV index lookup failed");
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "array_index", &output.array_oid_index, 
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_ARRAY_IDS_INDEX, &output.array_oid_index, 
                         sizeof(uint64_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Array index lookup failed");
 
-    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, "blob_index", &output.blob_oid_index, 
+    if(iod_kv_get_value(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_KEY_BLOB_IDS_INDEX, &output.blob_oid_index, 
                         sizeof(uint64_t), NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "BLOB index lookup failed");
 #endif

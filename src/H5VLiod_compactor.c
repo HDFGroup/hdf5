@@ -384,7 +384,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
 
 	/* wait for it to complete */
-	if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_BULK_MAX_IDLE_TIME, HG_BULK_STATUS_IGNORE))
+	if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
 	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
 
 	/* free the bds block handle */
