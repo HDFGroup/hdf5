@@ -76,7 +76,7 @@ IF (WIN32 AND NOT CYGWIN)
       DIRECTORY
           ${CMAKE_Fortran_MODULE_DIRECTORY}/\${BUILD_TYPE}/
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+          ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )
@@ -85,7 +85,7 @@ ELSE (WIN32 AND NOT CYGWIN)
       DIRECTORY
           ${CMAKE_Fortran_MODULE_DIRECTORY}/
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/fortran
+          ${HDF5_INSTALL_INCLUDE_DIR}
       COMPONENT
           fortheaders
   )

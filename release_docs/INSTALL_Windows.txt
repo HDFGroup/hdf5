@@ -6,8 +6,11 @@
 
 We now recommend that users build, test and install HDF5 using CMake.
 
-Instructions for building and testing HDF5 using CMake can be found in
-the CMake.txt file found in this folder.
+Instructions for building and testing HDF5 using CMake can be found in the
+INSTALL_CMake.txt file found in this folder.
 
-The old INSTALL_Windows documentation can be found in the 
-obsolete_windows_docs\ folder located with this document.
+For instructions of building and testing an application with HDF5, see 
+USING_HDF5_CMake.txt file found in this folder.
+
+Users who want to build and run an application with HDF5 in Visual Studio
+without using CMake should consult the USING_HDF5_VS.txt file.

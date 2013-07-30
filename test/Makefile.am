@@ -47,7 +47,7 @@ TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_with_endianess\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf farray earray btree2 fheap file_image
+           freespace mf farray earray btree2 fheap file_image unregister
 
 bin_PROGRAMS=swmr_generator swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
@@ -158,7 +158,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 \
     earray.h5 efc[0-5].h5 log_vfd_out.log                            \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
-    file_image_core_test.h5.copy                                     \
+    file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     swmr_data.h5 use_append_chunk.h5 use_append_mchunks.h5           \
     flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \

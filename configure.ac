@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.149-FA_a5], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.151-FA_a5], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -1945,7 +1945,7 @@ AC_ARG_WITH([pthread],
 case "$withval" in
   yes)
     AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
     fi
     ;;
@@ -1987,7 +1987,7 @@ case "$withval" in
       AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
     fi
 
-    if test "x$HAVE_DMALLOC" = "xyes"; then
+    if test "x$HAVE_PTHREAD" = "xyes"; then
       if test -n "$pthread_lib"; then
         saved_LDFLAGS="$LDFLAGS"
         saved_AM_LDFLAGS="$AM_LDFLAGS"

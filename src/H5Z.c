@@ -22,6 +22,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File		  			*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
@@ -50,6 +51,9 @@ typedef enum {
     H5Z_PRELUDE_CAN_APPLY,      /* Call "can apply" callback */
     H5Z_PRELUDE_SET_LOCAL       /* Call "set local" callback */
 } H5Z_prelude_type_t;
+
+/* Maximal number of the list of opened objects (2^16) */
+#define NUM_OBJS        65536
 
 /* Local variables */
 static size_t		H5Z_table_alloc_g = 0;
@@ -403,33 +407,133 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_unregister (H5Z_filter_t id)
+H5Z_unregister (H5Z_filter_t filter_id)
 {
-    size_t i;                   /* Local index variable */
+    hid_t  *file_list = NULL;
+    hid_t  *obj_id_list = NULL;
+    size_t num_obj_id = 0;
+    size_t num_file_id = 0;
+    H5F_t    *f = NULL;         /* File to query */
+    H5I_type_t id_type;
+    hid_t ocpl_id;
+    H5P_genplist_t  *plist;                 /* Property list */
+    size_t filter_index;                   /* Local index variable for filter */
+    int    i;
+    htri_t filter_in_pline = FALSE;
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert (id>=0 && id<=H5Z_FILTER_MAX);
+    assert (filter_id>=0 && filter_id<=H5Z_FILTER_MAX);
 
     /* Is the filter already registered? */
-    for (i=0; i<H5Z_table_used_g; i++)
-	if (H5Z_table_g[i].id==id)
+    for (filter_index=0; filter_index<H5Z_table_used_g; filter_index++)
+	if (H5Z_table_g[filter_index].id==filter_id)
             break;
 
     /* Fail if filter not found */
-    if (i>=H5Z_table_used_g)
+    if (filter_index>=H5Z_table_used_g)
         HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, FAIL, "filter is not registered")
+
+    /* Count the number of opened datasets and groups among all opened files */
+    if(H5F_get_obj_count(NULL, H5F_OBJ_DATASET | H5F_OBJ_GROUP, FALSE, &num_obj_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object number")
+
+    if(num_obj_id) {
+        if(NULL == (obj_id_list = (hid_t *)H5MM_malloc(num_obj_id*sizeof(hid_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate space")
+
+        /* Find all opened objects that may use the filter (datasets and groups).  Passing NULL as a pointer to 
+         * file structure indicates searching among all opened files */
+        if(H5F_get_obj_ids(NULL, H5F_OBJ_DATASET | H5F_OBJ_GROUP, num_obj_id, obj_id_list, FALSE, &num_obj_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get object IDs")
+    }
+
+    /* Check if any opened object (dataset or group) uses the filter.  If so, fail with a message */
+    for(i=0; i<num_obj_id; i++) {
+        if((id_type = H5I_get_type(obj_id_list[i])) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "bad object id");
+
+        switch(id_type) {
+            case H5I_GROUP:
+            {
+                H5G_t *group = NULL;
+
+                if(NULL == (group = (H5G_t *)H5I_object_verify(obj_id_list[i], H5I_GROUP)))
+	            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+
+                if((ocpl_id = H5G_get_create_plist(group)) < 0) 
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get group creation property list")
+
+            }
+                break;
+
+            case H5I_DATASET:
+            {
+                H5D_t *dataset = NULL;
+
+                if(NULL == (dataset = (H5D_t *)H5I_object_verify(obj_id_list[i], H5I_DATASET)))
+	            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+                if((ocpl_id = H5D_get_create_plist(dataset)) < 0) 
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataset creation property list")
+            }    
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object")
+        } /* end switch */
+
+	/* Get the plist structure of object creation */
+	if(NULL == (plist = H5P_object_verify(ocpl_id, H5P_OBJECT_CREATE)))
+	    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+	/* Check if the object creation property list uses the filter */
+	if((filter_in_pline = H5P_filter_in_pline(plist, filter_id)) < 0)
+	    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't check filter in pipeline")
+	
+        if(filter_in_pline)
+	    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't unregister filter because some object is still using it")
+    }
+
+    /* Count the number of opened files */
+    if(H5F_get_obj_count(NULL, H5F_OBJ_FILE, FALSE, &num_file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file number")
+   
+    /* Get the list of IDs for all opened files */ 
+    if(num_file_id) {
+        if(NULL == (file_list = (hid_t *)H5MM_malloc(num_file_id*sizeof(hid_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "failed to allocate space")
+
+        if(H5F_get_obj_ids(NULL, H5F_OBJ_FILE, num_file_id, file_list, FALSE, &num_file_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file IDs")
+    }
+
+    /* Flush all opened files in case any file uses the filter */
+    for(i=0; i<num_file_id; i++) {
+        if(NULL == (f = (H5F_t *)H5I_object_verify(file_list[i], H5I_FILE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+        /* Call the flush routine for mounted file hierarchies. Do a global flush 
+         * if the file is opened for write */
+        if(H5F_ACC_RDWR & H5F_INTENT(f)) {
+            if(H5F_flush_mounts(f, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file hierarchy")
+        } /* end if */
+    }
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-i));
+    HDmemmove(&H5Z_table_g[filter_index],&H5Z_table_g[filter_index+1],sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-filter_index));
 #ifdef H5Z_DEBUG
-    HDmemmove(&H5Z_stat_table_g[i],&H5Z_stat_table_g[i+1],sizeof(H5Z_stats_t)*((H5Z_table_used_g-1)-i));
+    HDmemmove(&H5Z_stat_table_g[filter_index],&H5Z_stat_table_g[filter_index+1],sizeof(H5Z_stats_t)*((H5Z_table_used_g-1)-filter_index));
 #endif /* H5Z_DEBUG */
     H5Z_table_used_g--;
 
 done:
+    if(file_list) H5MM_free(file_list);
+    if(obj_id_list) H5MM_free(obj_id_list);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_unregister() */
 
@@ -1272,6 +1376,49 @@ H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_filter_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_filter_in_pline
+ *
+ * Purpose:	Check wheter a filter is in the filter pipeline using the 
+ *              filter ID.  This function is very similar to H5Z_filter_info
+ *
+ * Return:	TRUE   - found filter
+ *              FALSE  - not found
+ *              FAIL   - error
+ *
+ * Programmer:	Raymond Lu
+ *              26 April 2013
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Z_filter_in_pline(const H5O_pline_t *pline, H5Z_filter_t filter)
+{
+    size_t	idx;                    /* Index of filter in pipeline */
+    htri_t      ret_value = TRUE;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(pline);
+    assert(filter>=0 && filter<=H5Z_FILTER_MAX);
+
+    /* Locate the filter in the pipeline */
+    for(idx=0; idx<pline->nused; idx++)
+        if(pline->filter[idx].id==filter)
+            break;
+
+    /* Check if the filter was not already in the pipeline */
+    if(idx>=pline->nused)
+	ret_value = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_filter_in_pline() */
+
 
 
 /*-------------------------------------------------------------------------

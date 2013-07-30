@@ -487,6 +487,8 @@ IF (HDF5_ENABLE_PARALLEL)
     # Used by Fortran + MPI
     CHECK_SYMBOL_EXISTS (MPI_Comm_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Comm)
     CHECK_SYMBOL_EXISTS (MPI_Info_c2f "${MPI_C_INCLUDE_PATH}/mpi.h"  H5_HAVE_MPI_MULTI_LANG_Info)
+  ELSE (MPI_C_FOUND)
+    MESSAGE (STATUS "Parallel libraries not found")
   ENDIF (MPI_C_FOUND)
 ENDIF (HDF5_ENABLE_PARALLEL)
 
@@ -962,8 +964,8 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   IF (EXISTS "${HDF5_SOURCE_DIR}/release_docs" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/release_docs")
     SET (release_files
-        ${HDF5_SOURCE_DIR}/release_docs/CMake.txt
-        ${HDF5_SOURCE_DIR}/release_docs/USING_CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/INSTALL_CMake.txt
+        ${HDF5_SOURCE_DIR}/release_docs/USING_HDF5_CMake.txt
         ${HDF5_SOURCE_DIR}/release_docs/COPYING
         ${HDF5_SOURCE_DIR}/release_docs/HISTORY-1_9.txt
         ${HDF5_SOURCE_DIR}/release_docs/INSTALL
