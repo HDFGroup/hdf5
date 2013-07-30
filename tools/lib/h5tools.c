@@ -36,10 +36,11 @@ hid_t H5tools_ERR_CLS_g = -1;
 hid_t H5E_tools_g = -1;
 hid_t H5E_tools_min_id_g = -1;
 int         compound_data;
-FILE       *rawattrstream;      /* should initialize to stdout but gcc moans about it */
-FILE       *rawdatastream;      /* should initialize to stdout but gcc moans about it */
-FILE       *rawoutstream;       /* should initialize to stdout but gcc moans about it */
-FILE       *rawerrorstream;     /* should initialize to stderr but gcc moans about it */
+FILE       *rawattrstream = NULL;      /* should initialize to stdout but gcc moans about it */
+FILE       *rawdatastream = NULL;      /* should initialize to stdout but gcc moans about it */
+FILE       *rawinstream = NULL;        /* should initialize to stdin but gcc moans about it */
+FILE       *rawoutstream = NULL;       /* should initialize to stdout but gcc moans about it */
+FILE       *rawerrorstream = NULL;     /* should initialize to stderr but gcc moans about it */
 int         bin_output;         /* binary output */
 int         bin_form;           /* binary form */
 int         region_output;      /* region output */
@@ -120,6 +121,8 @@ h5tools_init(void)
             rawattrstream = stdout;
         if (!rawdatastream)
             rawdatastream = stdout;
+        if (!rawinstream)
+            rawinstream = stdin;
         if (!rawoutstream)
             rawoutstream = stdout;
         if (!rawerrorstream)
@@ -172,6 +175,12 @@ h5tools_close(void)
             else
                 rawdatastream = NULL;
         }
+        if (rawinstream && rawinstream != stdin) {
+            if (fclose(rawinstream))
+                perror("closing rawinstream");
+            else
+                rawinstream = NULL;
+        }
         if (rawoutstream && rawoutstream != stdout) {
             if (fclose(rawoutstream))
                 perror("closing rawoutstream");
@@ -195,6 +204,211 @@ h5tools_close(void)
 
         h5tools_init_g = 0;
     }
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_data_output_file
+ *
+ * Purpose:     Open fname as the output file for dataset raw data.
+ *      Set rawdatastream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ * Programmer:  Albert Cheng, 2000/09/30
+ *
+ * Modifications:
+ *  pvn June, 1, 2006. Add a switch for binary output
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_data_output_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawdatastream is changed only when succeeded */
+
+    if (rawdatastream && rawdatastream != stdout) {
+        if (HDfclose(rawdatastream))
+            HDperror("closing rawdatastream");
+        else
+            rawdatastream = NULL;
+    }
+
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        /* binary output */
+        if (is_bin) {
+            if ((f = HDfopen(fname, "wb")) != NULL) {
+                rawdatastream = f;
+                retvalue = SUCCEED;
+            }
+        }
+        else {
+            if ((f = HDfopen(fname, "w")) != NULL) {
+                rawdatastream = f;
+                retvalue = SUCCEED;
+            }
+        }
+    }
+    else {
+        rawdatastream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_attr_output_file
+ *
+ * Purpose:     Open fname as the output file for attribute raw data.
+ *      Set rawattrstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_attr_output_file(const char *fname, int is_bin)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawattrstream is changed only when succeeded */
+
+    if (rawattrstream && rawattrstream != stdout) {
+        if (HDfclose(rawattrstream))
+            HDperror("closing rawattrstream");
+        else
+            rawattrstream = NULL;
+    }
+
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        if ((f = HDfopen(fname, "w")) != NULL) {
+            rawattrstream = f;
+            retvalue = SUCCEED;
+        }
+    }
+    else {
+        rawattrstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_input_file
+ *
+ * Purpose:     Open fname as the input file for raw input.
+ *      Set rawinstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_input_file(const char *fname)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawinstream is changed only when succeeded */
+
+    if (rawinstream && rawinstream != stdin) {
+        if (HDfclose(rawinstream))
+            HDperror("closing rawinstream");
+        else
+        	rawinstream = NULL;
+    }
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        if ((f = HDfopen(fname, "r")) != NULL) {
+        	rawinstream = f;
+            retvalue = SUCCEED;
+        }
+    }
+    else {
+    	rawinstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_output_file
+ *
+ * Purpose:     Open fname as the output file for raw output.
+ *      Set rawoutstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_output_file(const char *fname)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawoutstream is changed only when succeeded */
+
+    if (rawoutstream && rawoutstream != stdout) {
+        if (HDfclose(rawoutstream))
+            HDperror("closing rawoutstream");
+        else
+            rawoutstream = NULL;
+    }
+    /* First check if filename is string "NULL" */
+    if (fname != NULL) {
+        if ((f = HDfopen(fname, "w")) != NULL) {
+                rawoutstream = f;
+                retvalue = SUCCEED;
+        }
+    }
+    else {
+        rawoutstream = NULL;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_set_error_file
+ *
+ * Purpose:     Open fname as the error output file for dataset raw error.
+ *      Set rawerrorstream as its file stream.
+ *
+ * Return:      0 -- succeeded
+ *      negative -- failed
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_set_error_file(const char *fname)
+{
+    int     retvalue = FAIL;
+    FILE    *f;    /* temporary holding place for the stream pointer
+                    * so that rawerrorstream is changed only when succeeded */
+
+    if (rawerrorstream && rawerrorstream != stderr) {
+        if (HDfclose(rawerrorstream))
+            HDperror("closing rawerrorstream");
+        else
+            rawerrorstream = NULL;
+    }
+
+    if ((f = HDfopen(fname, "w")) != NULL) {
+        rawerrorstream = f;
+        retvalue = SUCCEED;
+    }
+
+    return retvalue;
 }
 
 /*-------------------------------------------------------------------------
@@ -1468,7 +1682,7 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
  *      hssize_t npoints is the number of points in the region
  *-------------------------------------------------------------------------
  */
-static int
+int
 render_bin_output_region_data_points(hid_t region_space, hid_t region_id,
         FILE *stream, hid_t container,
         int ndims, hid_t type_id, hssize_t npoints)
