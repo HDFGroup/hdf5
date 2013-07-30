@@ -57,10 +57,10 @@ H5FD_mpi_get_rank(const H5FD_t *file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file);
+    HDassert(file);
     cls = (const H5FD_class_mpi_t *)(file->cls);
-    assert(cls);
-    assert(cls->get_rank);        /* All MPI drivers must implement this */
+    HDassert(cls);
+    HDassert(cls->get_rank);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
     if ((ret_value=(cls->get_rank)(file))<0)
@@ -95,10 +95,10 @@ H5FD_mpi_get_size(const H5FD_t *file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file);
+    HDassert(file);
     cls = (const H5FD_class_mpi_t *)(file->cls);
-    assert(cls);
-    assert(cls->get_size);        /* All MPI drivers must implement this */
+    HDassert(cls);
+    HDassert(cls->get_size);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
     if ((ret_value=(cls->get_size)(file))<0)
@@ -133,10 +133,10 @@ H5FD_mpi_get_comm(const H5FD_t *file)
 
     FUNC_ENTER_NOAPI(MPI_COMM_NULL)
 
-    assert(file);
+    HDassert(file);
     cls = (const H5FD_class_mpi_t *)(file->cls);
-    assert(cls);
-    assert(cls->get_comm);        /* All MPI drivers must implement this */
+    HDassert(cls);
+    HDassert(cls->get_comm);        /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
     if ((ret_value=(cls->get_comm)(file))==MPI_COMM_NULL)
@@ -217,7 +217,7 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off/*out*/)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(mpi_off);
+    HDassert(mpi_off);
 
     /* Convert the HDF5 address into an MPI offset */
     *mpi_off = (MPI_Offset)addr;
@@ -373,8 +373,8 @@ H5FD_mpio_wait_for_left_neighbor(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
     /* Portably initialize MPI status variable */
     HDmemset(&rcvstat,0,sizeof(MPI_Status));
@@ -427,14 +427,12 @@ H5FD_mpio_signal_right_neighbor(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO==file->pub.driver_id);
 
-    if (file->mpi_rank != (file->mpi_size-1)) {
-        if (MPI_SUCCESS != (mpi_code=MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR,
-			file->mpi_rank+1, 0, file->comm)))
+    if(file->mpi_rank != (file->mpi_size - 1))
+        if(MPI_SUCCESS != (mpi_code=MPI_Send(&msgbuf, 0/*empty msg*/, MPI_CHAR, file->mpi_rank + 1, 0, file->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

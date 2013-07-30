@@ -882,7 +882,7 @@ H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *buf, size_t UNUSED 
 
     /* Get the heap information */
     H5F_addr_decode(f,(const uint8_t **)&vl,&(hobjid.addr));
-    INT32DECODE(vl,hobjid.idx);
+    UINT32DECODE(vl,hobjid.idx);
 
     /* Check if this sequence actually has any data */
     if(hobjid.addr>0) {
@@ -935,7 +935,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
 
         /* Get heap information */
         H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
-        INT32DECODE(bg, bg_hobjid.idx);
+        UINT32DECODE(bg, bg_hobjid.idx);
 
         /* Free heap object for old data */
         if(bg_hobjid.addr > 0) {
@@ -955,7 +955,7 @@ H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t UNUSED 
 
     /* Encode the heap information */
     H5F_addr_encode(f, &vl, hobjid.addr);
-    INT32ENCODE(vl, hobjid.idx);
+    UINT32ENCODE(vl, hobjid.idx);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -997,7 +997,7 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
 
         /* Get heap information */
         H5F_addr_decode(f, (const uint8_t **)&bg, &(bg_hobjid.addr));
-        INT32DECODE(bg, bg_hobjid.idx);
+        UINT32DECODE(bg, bg_hobjid.idx);
 
         /* Free heap object for old data */
         if(bg_hobjid.addr > 0) {
@@ -1012,7 +1012,7 @@ H5T_vlen_disk_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg)
 
     /* Encode the "nil" heap pointer information */
     H5F_addr_encode(f, &vl, (haddr_t)0);
-    INT32ENCODE(vl, 0);
+    UINT32ENCODE(vl, 0);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

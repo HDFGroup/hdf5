@@ -54,7 +54,7 @@ H5MM_malloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(size);
+    HDassert(size);
 
     FUNC_LEAVE_NOAPI(HDmalloc(size));
 } /* end H5MM_malloc() */
@@ -84,7 +84,7 @@ H5MM_calloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    assert(size);
+    HDassert(size);
 
     FUNC_LEAVE_NOAPI(HDcalloc(1,size));
 } /* end H5MM_calloc() */

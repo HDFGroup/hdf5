@@ -145,7 +145,6 @@ test_unregister_filters(hid_t my_fapl)
         goto error;
     } /* end if */
 
-
     /* Close the group */
     if(H5Gclose(gid) < 0) goto error;
 
@@ -176,7 +175,6 @@ test_unregister_filters(hid_t my_fapl)
         goto error;
 
     /* Unregister the filter before closing the dataset.  It should fail */
-    /*if(H5Zunregister(H5Z_FILTER_DUMMY) < 0) goto error;*/
     H5E_BEGIN_TRY {
         ret = H5Zunregister(H5Z_FILTER_DUMMY);
     } H5E_END_TRY;
@@ -244,14 +242,14 @@ main(void)
 
     if(nerrors)
         goto error;
-    printf("All dataset tests passed.\n");
+    printf("All filter unregistration tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d DATASET TEST%s FAILED! *****\n",
+    printf("***** %d FILTER UNREGISTRATION TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
