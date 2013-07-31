@@ -11,6 +11,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib)
 # --------------------------------------------------------------------
 ADD_EXECUTABLE (h5copy ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
 TARGET_NAMING (h5copy ${LIB_TYPE})
+TARGET_C_PROPERTIES (h5copy " " " ")
 TARGET_LINK_LIBRARIES (h5copy  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 SET_TARGET_PROPERTIES (h5copy PROPERTIES FOLDER tools)
 
@@ -26,6 +27,7 @@ IF (BUILD_TESTING)
   IF (HDF5_BUILD_GENERATORS AND NOT BUILD_SHARED_LIBS)
     ADD_EXECUTABLE (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
     TARGET_NAMING (h5copygentest ${LIB_TYPE})
+    TARGET_C_PROPERTIES (h5copygentest " " " ")
     TARGET_LINK_LIBRARIES (h5copygentest ${HDF5_LIB_TARGET})
     SET_TARGET_PROPERTIES (h5copygentest PROPERTIES FOLDER generator/tools)
 

@@ -456,7 +456,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
     FUNC_ENTER_STATIC
 
     /* Specify a file mask. *.* = We want everything! */
-    sprintf(service, "%s\/*.dll", dir);
+    sprintf(service, "%s\\*.dll", dir);
     if((hFind = FindFirstFile(service, &fdFile)) == INVALID_HANDLE_VALUE)
         HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
 

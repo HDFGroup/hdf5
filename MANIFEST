@@ -1555,6 +1555,8 @@
 ./tools/testfiles/topaque.h5
 ./tools/testfiles/trawdatafile.ddl
 ./tools/testfiles/trawdatafile.exp
+./tools/testfiles/trawssetfile.ddl
+./tools/testfiles/trawssetfile.exp
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscalarattrintsize.ddl
@@ -2513,6 +2515,7 @@
 
 ./CMakeLists.txt
 ./CTestConfig.cmake
+./UserMacros.cmake
 ./c++/CMakeLists.txt
 ./c++/examples/CMakeLists.txt
 ./c++/src/CMakeLists.txt

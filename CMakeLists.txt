@@ -190,7 +190,7 @@ STRING (REGEX REPLACE ".*LT_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_MINOR ${_lt_vers_am_contents})
 STRING (REGEX REPLACE ".*LT_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_RELEASE ${_lt_vers_am_contents})
-MESSAGE (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_MINOR}.${H5_SOVERS_RELEASE}")
+MESSAGE (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 
 #-----------------------------------------------------------------------------
 # Basic HDF5 stuff here
@@ -205,7 +205,7 @@ IF (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
 ELSE (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
   SET (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
 ENDIF (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
-SET (HDF5_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_MINOR}.${H5_SOVERS_RELEASE}")
+SET (HDF5_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
 SET (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION_STRING}")
 SET (HDF5_PACKAGE_TARNAME "${HDF5_PACKAGE}${HDF_PACKAGE_EXT}")
 SET (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
@@ -351,6 +351,8 @@ ENDIF (WIN32)
 
 IF (MSVC)
   SET (CMAKE_MFC_FLAG 0)
+  SET (WIN_COMPILE_FLAGS "/MD")
+  SET (WIN_LINK_FLAGS "")
 ENDIF (MSVC)
 
 SET (MAKE_SYSTEM)
@@ -520,6 +522,11 @@ IF (HDF5_USE_18_API_DEFAULT)
   SET (H5_USE_18_API_DEFAULT 1)
   SET (DEFAULT_API_VERSION "v18")
 ENDIF (HDF5_USE_18_API_DEFAULT)
+
+#-----------------------------------------------------------------------------
+# Include user macros
+#-----------------------------------------------------------------------------
+INCLUDE (UserMacros.cmake)
 
 #-----------------------------------------------------------------------------
 # Options for HDF5 Filters
