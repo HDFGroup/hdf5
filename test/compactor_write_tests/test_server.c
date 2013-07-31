@@ -41,7 +41,9 @@ int main(int argc, char **argv) {
        is finalized the operation returns. */
     H5VLiod_start_handler(MPI_COMM_WORLD, MPI_INFO_NULL);
     H5close();
+    fflush(stderr);
     MPI_Finalize();
+    fflush(stderr);
 
     return 0;
 }
