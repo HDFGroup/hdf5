@@ -1840,8 +1840,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
          * but they aren't set, set the flag to skip missing chunks.
          */
         if(fill->fill_time == H5D_FILL_TIME_NEVER ||
-                (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status != H5D_FILL_VALUE_USER_DEFINED &&
-                fill_status != H5D_FILL_VALUE_DEFAULT))
+                (fill->fill_time == H5D_FILL_TIME_IFSET &&
+                 fill_status != H5D_FILL_VALUE_USER_DEFINED &&
+                 fill_status != H5D_FILL_VALUE_DEFAULT))
             skip_missing_chunks = TRUE;
     }
 
@@ -3143,6 +3144,9 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             else {
                 H5D_fill_value_t	fill_status;
 
+		/* Sanity check */
+		HDassert(fill->alloc_time != H5D_ALLOC_TIME_EARLY);
+
                 /* Chunk size on disk isn't [likely] the same size as the final chunk
                  * size in memory, so allocate memory big enough. */
                 if(NULL == (chunk = H5D__chunk_alloc(chunk_size, pline)))
@@ -3152,7 +3156,9 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't tell if fill value defined")
 
                 if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
-                        (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                        (fill->fill_time == H5D_FILL_TIME_IFSET && 
+			 (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
+			  fill_status == H5D_FILL_VALUE_DEFAULT))) {
                     /*
                      * The chunk doesn't exist in the file.  Replicate the fill
                      * value throughout the chunk, if the fill value is defined.
@@ -3679,7 +3685,9 @@ H5D__chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
      * set the "should fill" flag
      */
     if((!full_overwrite && (fill->fill_time == H5D_FILL_TIME_ALLOC ||
-            (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)))
+            (fill->fill_time == H5D_FILL_TIME_IFSET &&
+             (fill_status == H5D_FILL_VALUE_USER_DEFINED ||
+              fill_status == H5D_FILL_VALUE_DEFAULT))))
             || pline->nused > 0)
         should_fill = TRUE;
 
