@@ -1071,6 +1071,9 @@ void test_dset()
 	nerrors += test_multiopen (file)<0	?1:0;
 	nerrors += test_types(file)<0       ?1:0;
 
+	// Close group "emit diagnostics".
+	grp.close();
+
 	// Close the file before testing data size.
 	file.close();
 	nerrors += test_datasize(fapl) <0 ? 1:0;
