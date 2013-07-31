@@ -556,19 +556,20 @@ attr_iteration(hid_t gid, unsigned attr_crt_order_flags)
 {
     /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
        in the group for attributes, then, sort by creation order, otherwise by name */
-
-    if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
-        if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-            error_msg("error getting attribute information\n");
-            h5tools_setstatus(EXIT_FAILURE);
+    if(include_attrs) {
+        if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED)) {
+            if(H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg("error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            } /* end if */
         } /* end if */
-    } /* end if */
-    else {
-        if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
-            error_msg("error getting attribute information\n");
-            h5tools_setstatus(EXIT_FAILURE);
-        } /* end if */
-    } /* end else */
+        else {
+            if(H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL) < 0) {
+                error_msg("error getting attribute information\n");
+                h5tools_setstatus(EXIT_FAILURE);
+            } /* end if */
+        } /* end else */
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -1178,9 +1179,9 @@ dump_fcpl(hid_t fid)
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %u\n","OBJECTHEADER_VERSION", finfo.sohm.version);
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream,"%s %Hd\n","OFFSET_SIZE", (long long)off_size);
+    PRINTSTREAM(rawoutstream,"%s %zu\n","OFFSET_SIZE", off_size);
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream,"%s %Hd\n","LENGTH_SIZE", (long long)len_size);
+    PRINTSTREAM(rawoutstream,"%s %zu\n","LENGTH_SIZE", len_size);
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %u\n","BTREE_RANK", sym_ik);
     indentation(dump_indent + COL);
@@ -1360,8 +1361,6 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     string_dataformat.do_escape = display_escape;
     outputformat = &string_dataformat;
 
-    //attr_name = attr + j + 1;
-	// need to replace escape characters
 	attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
 
 

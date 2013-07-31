@@ -175,6 +175,7 @@ $SRC_H5DUMP_TESTFILES/packedbits.ddl
 $SRC_H5DUMP_TESTFILES/tall-1.ddl
 $SRC_H5DUMP_TESTFILES/tall-2.ddl
 $SRC_H5DUMP_TESTFILES/tall-2A.ddl
+$SRC_H5DUMP_TESTFILES/tall-2A0.ddl
 $SRC_H5DUMP_TESTFILES/tall-2B.ddl
 $SRC_H5DUMP_TESTFILES/tall-3.ddl
 $SRC_H5DUMP_TESTFILES/tall-4s.ddl
@@ -335,6 +336,7 @@ LIST_ERROR_TEST_FILES="
 ${SRC_H5DUMP_ERRORFILES}/filter_fail.err
 ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
+${SRC_H5DUMP_ERRORFILES}/tall-2A0.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2B.err
 ${SRC_H5DUMP_ERRORFILES}/tarray1_big.err
 ${SRC_H5DUMP_ERRORFILES}/tattr-3.err
@@ -1004,6 +1006,9 @@ TOOLTEST tlarge_objname.ddl --enable-error-stack -w157 tlarge_objname.h5
 
 # test '-A' to suppress data but print attr's
 TOOLTEST4 tall-2A.ddl --enable-error-stack -A tall.h5
+
+# test '-A' to suppress attr's but print data
+TOOLTEST4 tall-2A0.ddl --enable-error-stack -A 0 tall.h5
 
 # test '-r' to print attributes in ASCII instead of decimal
 TOOLTEST4 tall-2B.ddl --enable-error-stack -A -r tall.h5

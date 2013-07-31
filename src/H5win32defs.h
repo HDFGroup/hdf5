@@ -29,6 +29,7 @@ typedef struct _stati64     h5_stat_t;
 typedef __int64             h5_stat_size_t;
 
 #define HDaccess(F,M)       _access(F,M)
+#define HDchdir(S)          _chdir(S)
 #define HDclose(F)          _close(F)
 #define HDdup(F)            _dup(F)
 #define HDfdopen(N,S)       _fdopen(N,S)
@@ -47,16 +48,15 @@ typedef __int64             h5_stat_size_t;
  */
 #define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
 #define HDread(F,M,Z)       _read(F,M,Z)
+#define HDrmdir(S)          _rmdir(S)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
 #define HDsleep(S)          Sleep(S*1000)
 #define HDstat(S,B)         _stati64(S,B)
 #define HDstrcasecmp(A,B)   _stricmp(A,B)
 #define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
 #define HDstrdup(S)         _strdup(S)
-#define HDsnprintf          _snprintf /*varargs*/
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
-#define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
 
 #ifdef H5_HAVE_VISUAL_STUDIO
@@ -75,11 +75,15 @@ struct timezone {
 #endif /* __cplusplus */
         H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
         H5_DLL char* Wgetlogin();
+        H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
+        H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
 #ifdef __cplusplus
         }
 #endif /* __cplusplus */
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
-#define HDgetlogin() Wgetlogin()
+#define HDgetlogin()        Wgetlogin()
+#define HDsnprintf          c99_snprintf /*varargs*/
+#define HDvsnprintf         c99_vsnprintf
         
 #endif /* H5_HAVE_VISUAL_STUDIO */
 

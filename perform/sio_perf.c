@@ -827,14 +827,14 @@ recover_size_and_print(long long val, const char *end)
     if (val >= ONE_KB && (val % ONE_KB) == 0) {
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
-                HDfprintf(output, "%HdGB%s", val / ONE_GB, end);
+                HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""GB%s", val / ONE_GB, end);
             else
-                HDfprintf(output, "%HdMB%s", val / ONE_MB, end);
+                HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""MB%s", val / ONE_MB, end);
         } else {
-            HDfprintf(output, "%HdKB%s", val / ONE_KB, end);
+            HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""KB%s", val / ONE_KB, end);
         }
     } else {
-        HDfprintf(output, "%Hd%s", val, end);
+        HDfprintf(output, "%" H5_PRINTF_LL_WIDTH "d""%s", val, end);
     }
 }
 
@@ -860,8 +860,8 @@ report_parameters(struct options *opts)
     HDfprintf(output, "IO API=");
     print_io_api(opts->io_types);
 
-    HDfprintf(output, "Number of iterations=%Hd\n",
-              (long long)opts->num_iters);
+    HDfprintf(output, "Number of iterations=%d\n",
+              opts->num_iters);
 
     HDfprintf(output, "Dataset size=");
 

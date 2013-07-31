@@ -52,6 +52,7 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A0.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2B.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-4s.ddl
@@ -304,6 +305,7 @@ IF (BUILD_TESTING)
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-1.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
+      ${PROJECT_SOURCE_DIR}/errfiles/tall-2A0.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2B.err
       ${PROJECT_SOURCE_DIR}/errfiles/tarray1_big.err
       ${PROJECT_SOURCE_DIR}/errfiles/tattrregR.err
@@ -1071,6 +1073,8 @@ IF (BUILD_TESTING)
           tall-2.out.err
           tall-2A.out
           tall-2A.out.err
+          tall-2A0.out
+          tall-2A0.out.err
           tall-2B.out
           tall-2B.out.err
           tall-3.out
@@ -1505,6 +1509,9 @@ IF (BUILD_TESTING)
   # test '-A' to suppress data but print attr's
   ADD_H5ERR_MASK_TEST (tall-2A 0 --enable-error-stack -A tall.h5)
 
+  # test '-A' to suppress attr's but print data
+  ADD_H5ERR_MASK_TEST (tall-2A0 0 --enable-error-stack -A 0 tall.h5)
+
   # test '-r' to print attributes in ASCII instead of decimal
   ADD_H5ERR_MASK_TEST (tall-2B 0 --enable-error-stack -A -r tall.h5)
 
@@ -1638,20 +1645,14 @@ IF (BUILD_TESTING)
   ADD_H5_TEST_IMPORT (tbin1 out1D tbinary.h5 0 --enable-error-stack -d integer -b)
 
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5DUMP-tbin2-bin-clear-objects COMMAND ${CMAKE_COMMAND} -E remove out2.bin)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin2-bin-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o out2.bin tbinary.h5)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin2 PROPERTIES DEPENDS H5DUMP-tbin2-bin-clear-objects)
+    ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o tbin2.bin tbinary.h5)
   ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
   # the NATIVE test can be validated with h5import/h5diff
   ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
   IF (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    ADD_TEST (NAME H5DUMP-tbin4-bin-clear-objects COMMAND ${CMAKE_COMMAND} -E remove out4.bin)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin4-bin-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
-    ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o out4.bin tbinary.h5)
-    SET_TESTS_PROPERTIES (H5DUMP-tbin4 PROPERTIES DEPENDS H5DUMP-tbin4-bin-clear-objects)
+    ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o tbin4.bin tbinary.h5)
   ENDIF (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
   # test for dataset region references 

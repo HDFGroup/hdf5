@@ -1,0 +1,12 @@
+The compressed examples file, located in the HDF5 install folder, 
+can be built and tested with CMake and the supplied 
+HDF518_Examples.cmake file. It is recommended that you copy those
+two files to your development location before continuing.
+
+The command line to be used is shown at the top of the file. Also,
+the location of the HDF5 installation should be verified and 
+changed if necessary.
+
+When executed, the ctest script will save the results to the log file
+indicated by the ctest command. If you wish the to see more build
+and test information, add "-VV" to the ctest command.

@@ -116,7 +116,7 @@ typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
 				 const hsize_t *point, void *operator_data);
 
 /* Define the operator function pointer for H5Dscatter() */
-typedef herr_t (*H5D_scatter_func_t)(void **src_buf/*out*/,
+typedef herr_t (*H5D_scatter_func_t)(const void **src_buf/*out*/,
                                      size_t *src_buf_bytes_used/*out*/,
                                      void *op_data);
 
@@ -152,7 +152,7 @@ H5_DLL herr_t H5Dflush(hid_t dset_id);
 H5_DLL herr_t H5Drefresh(hid_t dset_id);
 H5_DLL herr_t H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     hid_t dst_space_id, void *dst_buf);
-H5_DLL herr_t H5Dgather(hid_t src_space_id, void *src_buf, hid_t type_id,
+H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
     size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
