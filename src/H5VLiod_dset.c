@@ -781,8 +781,8 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   iod_handle_t iod_oh;
   iod_obj_id_t iod_id;    
   hg_bulk_t bulk_handle;
-  hid_t space_id, dst_id;
-  size_t size, dst_size, ii = 0;
+  hid_t space_id, dst_id, src_id;
+  size_t size, dst_size, src_size,ii = 0, hi = 0;
   void *buf = NULL;
   uint8_t *buf_ptr;
   hssize_t num_descriptors = 0, n =0;
@@ -796,8 +796,15 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   iod_array_io_t *io_array = NULL; /* arary for list I/O */
   iod_checksum_t *cs_list = NULL;
   iod_ret_t *ret_list = NULL;
+#if H5_DO_NATIVE
+  size_t native_length = 0, total_length = 0;
+  char *write_buf = NULL, *write_buf_ptr = NULL;
+  hid_t mem_dataspace;
+  hsize_t *native_dims = NULL;
+#endif
 
-  
+
+
   FUNC_ENTER_NOAPI_NOINIT
    
   if (num_requests <= 0){
@@ -854,10 +861,17 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	coh = input->coh;
 	iod_oh = input->iod_oh;
 	iod_id = input->iod_id;
-
 	space_id = list[request_counter].selection_id;
 	dst_id = input->dset_type_id;
-	
+	src_id = input->dset_type_id;
+
+#if H5_DO_NATIVE
+	for (hi = 0; hi < list[request_counter].num_mblocks; hi++){
+	  total_length += list[request_counter].mblocks[hi].len;
+	}
+	fprintf (stderr,"total_length: %zd\n", total_length);
+#endif
+
 #if DEBUG_COMPACTOR
 	fprintf (stderr,"space_id: %d, selection_id: %d\n",
 		 space_id, list[request_counter].selection_id);
@@ -867,6 +881,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
       }
       
       dst_size = H5Tget_size(dst_id);
+      src_size = H5Tget_size(src_id);
       if(iod_oh.cookie == (int)IOD_OH_UNDEFINED) {
 	if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
 	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
@@ -928,6 +943,17 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		  (sizeof(iod_ret_t), (size_t)num_descriptors)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
       
+#if H5_DO_NATIVE
+      if (list[request_counter].merged == MERGED){
+	if (NULL == write_buf){
+	  write_buf = (char *)malloc ((size_t) total_length);
+	  if (NULL == write_buf){
+	    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate write_buf");
+	  }
+	}
+      }
+#endif
+
       curr_j = 0;
       
       for(n=0 ; n<num_descriptors ; n++) {
@@ -939,6 +965,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	for(i=0 ; i<ndims ; i++)
 	  num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
 	num_bytes = num_elems * dst_size;
+
 	
 	/*new memory descriptor for this hslab descriptor*/
 	if (mem_desc != NULL)
@@ -958,11 +985,19 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	  mem_desc->nfrag = 1;
 	  mem_desc->frag[0].addr = (void *)buf_ptr;
 	  mem_desc->frag[0].len = (iod_size_t)num_bytes;
-	  buf_ptr += num_bytes;
+
 	  file_desc = hslabs[n];
+	  
+#if H5_DO_NATIVE
+	  write_buf = (char *)buf;
+#endif
+	  buf_ptr += num_bytes;
+	  
 	}
 	
 	if (list[request_counter].merged == MERGED){
+
+
 	  
 #if DEBUG_COMPACTOR
 	  fprintf (stderr, "COMPACTOR WRITE i: %d, num_mblocks: %zd, num_bytes: %lli, start_reqs: %lli\n",
@@ -972,6 +1007,11 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		     j, list[request_counter].mblocks[j].len);
 	  }
 #endif
+
+#if H5_DO_NATIVE
+	  write_buf_ptr = write_buf;
+#endif
+
 	  k = 0;
 	  mem_reqs = 0;
 	  fprintf (stderr,"COMPACTOR, curr_j: %lli, j: %lli, num_mblocks: %zd\n",
@@ -1002,9 +1042,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	  }
 	  
 	  curr_j += 1;
-	  fprintf (stderr,"COMPACTOR WRITE  start_reqs: %lli, mem_reqs: %lli\n",
-		   start_reqs, mem_reqs);
-	  
 	  /*Determined the number of entries in the memory block for this hslab
 	    descriptor*/
 	  
@@ -1017,10 +1054,10 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	  }
 	  
 	  k  = 0;
-	  fprintf (stderr,"COMPACTOR WRITE k: %lli start_reqs: %lli, mem_reqs: %lli\n",
-		   k, start_reqs, mem_reqs);
+
 	  
 	  for ( j = start_reqs; j < (start_reqs + mem_reqs); j++){
+	   
 	    if ((j == curr_j) && (bytes_left)){
 	      mem_desc->frag[k].addr = (void *)(uintptr_t)(curr_offset);
 	      mem_desc->frag[k].len = bytes_left;
@@ -1030,10 +1067,31 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		(list[request_counter].mblocks[j].offset);
 	      mem_desc->frag[k].len  = list[request_counter].mblocks[j].len;
 	    }
+
+#if H5_DO_NATIVE
+	    write_buf_ptr = write_buf + native_length;   
+	    memcpy ( (void *)write_buf_ptr, mem_desc->frag[k].addr,
+		     (size_t)mem_desc->frag[k].len);
+	    native_length += mem_desc->frag[k].len;
+	    
+#endif
 	    k++;
 	  }
 	  curr_k += k;
 	  
+	  
+#if H5_DO_NATIVE
+	  fprintf (stderr, "Printing the native constructed buffer of length :%zd\n", 
+		   native_length);
+	  ptr = (int *) write_buf;
+	  for (ii = 0; ii < native_length/sizeof(int); ii++){
+	    fprintf(stderr, "%d ", ptr[ii]);
+	  }
+	  fprintf(stderr, "\n");
+	    
+#endif
+
+
 #if DEBUG_COMPACTOR
 	  for ( j = 0 ; j <  k; j++){
 	    ptr = (int *)(mem_desc->frag[j].addr);
@@ -1055,19 +1113,39 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		  (size_t)file_desc.block[i], (size_t)file_desc.count[i]);
 	}
 #endif	 
-	
+
+
 	io_array[n].oh = iod_oh;
 	io_array[n].hints = NULL;
 	io_array[n].mem_desc = mem_desc;
 	io_array[n].io_desc = &file_desc;
 	io_array[n].cs = &cs_list[n];
 	io_array[n].ret = &ret_list[n];
+
       }
+
 
       if(iod_array_write_list(coh, IOD_TID_UNKNOWN, (iod_size_t)num_descriptors, 
 			      io_array, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't write array object");
+
       
+#if H5_DO_NATIVE
+      native_dims = (hsize_t *) malloc (sizeof(hsize_t));
+      *native_dims = (hsize_t)(total_length/src_size); 
+      /*We constructed a contiguous buffer here so the selection */
+      mem_dataspace = H5Screate_simple(1, native_dims, NULL);
+      ret_value = H5Dwrite(iod_oh.cookie,dst_id, mem_dataspace, space_id, H5P_DEFAULT, 
+			   write_buf);
+
+      if (NULL != write_buf){
+	free(write_buf);
+	write_buf = NULL;
+      }
+      if (NULL != native_dims)
+	free(native_dims);
+	
+#endif
       
       if (NULL != mem_desc){
 	free(mem_desc);

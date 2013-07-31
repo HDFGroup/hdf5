@@ -29,7 +29,7 @@
 #ifdef H5_HAVE_EFF
 
 #define EEXISTS 1
-#define H5_DO_NATIVE 0
+#define H5_DO_NATIVE 1
 #define DEBUG_COMPACTOR 1
 
 /* Key names for Metadata stored in KV objects */
