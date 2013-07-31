@@ -112,13 +112,14 @@ H5_DLL int H5VL_iod_construct_merged_request (request_list_t *list,
 					       int *request_list, int num_requests);
 
 H5_DLL int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
-						     block_container_t *sm_block,
-						     block_container_t **out_sf_block,
-						     block_container_t **out_sm_block,
-						     size_t *revfblks, size_t *revmblks,
-						     size_t i, size_t j, 
-						     int *changed, int *changed_cnt);
+						    block_container_t *sm_block,
+						    block_container_t **out_sf_block,
+						    block_container_t **out_sm_block,
+						    size_t *revfblks, size_t *revmblks,
+						    size_t i, size_t j, 
+						    int *changed, int *changed_cnt);
 
+H5_DLL int H5VL_iod_free_memory_buffer (request_list_t *list, int num_requests);
 
 
 /*----------------------------------------------------------------------------------------  */

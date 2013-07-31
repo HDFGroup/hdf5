@@ -185,6 +185,10 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   int j = 0, request_id = 0, i, current_dset_id = 0, lreq = 0, flag = 0;
   size_t ii;
   uint64_t axe_id;
+
+#if H5_DO_NATIVE
+  char dname[256], dname1[256];
+#endif
   
 
 
@@ -297,9 +301,18 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
         num_datasets++;
 	
       } 
-      /*from the second id!*/else{
+      /*from the second id!*/
+      else{
 	
+#if H5_DO_NATIVE
+	H5Iget_name (current_dset, dname, 257);
+	H5Iget_name (dataset_id, dname1, 257);
+	if ( (current_dset == (hid_t)dataset_id) ||
+	     (!(strcmp(dname, dname1))) ) {
+#else
 	if (current_dset == (hid_t)dataset_id){
+#endif
+
 #if DEBUG_COMPACTOR
 	  fprintf(stderr, "in %s:%d current dataset: %d has the request %d at %d \n",
 		  __FILE__, __LINE__,
@@ -370,6 +383,8 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	  buf_size = src_size * nelmts;
 	  assert(buf_size == size);
 	}
+
+
 
 
 	/*Allocation buffer and retrieving the buffer associated with the selection 
@@ -2036,5 +2051,24 @@ int H5VL_iod_sort_block_container (block_container_t *io_array,
   FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
+int H5VL_iod_free_memory_buffer (request_list_t *list, int num_requests){
+  
+  int ret_value = CP_SUCCESS;
+  int i;
+
+  for (i = 0; i< num_requests; i++){
+    
+    if (list[i].merged == USED_IN_MERGING){
+      if (list[i].mem_buf){
+	free(list[i].mem_buf);
+	list[i].mem_buf = NULL;
+	list[i].mem_length = 0;
+      }
+    }
+  }
+ 
+  return ret_value;
+}
 
 #endif /* H5_HAVE_EFF*/
