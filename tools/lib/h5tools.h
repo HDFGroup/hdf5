@@ -552,9 +552,9 @@ H5TOOLS_DLL void    h5tools_init(void);
 H5TOOLS_DLL void    h5tools_close(void);
 H5TOOLS_DLL int 	h5tools_set_data_output_file(const char *fname, int is_bin);
 H5TOOLS_DLL int 	h5tools_set_attr_output_file(const char *fname, int is_bin);
-H5TOOLS_DLL int 	h5tools_set_input_file(const char *fname);
-H5TOOLS_DLL int 	h5tools_set_output_file(const char *fname);
-H5TOOLS_DLL int 	h5tools_set_error_file(const char *fname);
+H5TOOLS_DLL int 	h5tools_set_input_file(const char *fname, int is_bin);
+H5TOOLS_DLL int 	h5tools_set_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int 	h5tools_set_error_file(const char *fname, int is_bin);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl,
                             const char *driver, char *drivername, size_t drivername_len);
 H5TOOLS_DLL hid_t   h5tools_get_native_type(hid_t type);

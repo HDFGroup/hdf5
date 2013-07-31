@@ -1020,7 +1020,7 @@ parse_start:
             break;
 
         case 'O':
-            if (h5tools_set_output_file(opt_arg) < 0) {
+            if (h5tools_set_output_file(opt_arg, 0) < 0) {
                 usage(h5tools_getprogname());
                 goto error;
             }
