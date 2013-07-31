@@ -1054,6 +1054,10 @@ void test_dset()
 	// list object to pass in H5File::H5File
 	FileAccPropList fapl(fapl_id);
 
+	// This is to work around the failure on OpenVMS, until an open objects
+	// can be found and closed. -BMR
+	fapl.setFcloseDegree(H5F_CLOSE_STRONG);
+
 	H5File file(FILE1, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
 	// Cause the library to emit initial messages
