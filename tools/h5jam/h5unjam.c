@@ -150,13 +150,13 @@ parse_command_line(int argc, const char *argv[])
             case 'i':
                 input_file = HDstrdup(opt_arg);
 				if (input_file)
-   				    h5tools_set_input_file(input_file);
+   				    h5tools_set_input_file(input_file, 1);
 	            break;;
 
             case 'u':
                 ub_file = HDstrdup(opt_arg);
 				if (ub_file)
-				    h5tools_set_output_file(ub_file);
+				    h5tools_set_output_file(ub_file, 1);
 				else 
 				    rawoutstream = stdout;			
                 break;
@@ -288,7 +288,7 @@ main(int argc, const char *argv[])
         goto done;
     }
 
-    res = HDfstat(fileno(rawinstream), &sbuf);
+    res = HDfstat(HDfileno(rawinstream), &sbuf);
     if(res < 0) {
         error_msg("Can't stat file \"%s\"\n", input_file);
         h5tools_setstatus(EXIT_FAILURE);
@@ -320,7 +320,7 @@ main(int argc, const char *argv[])
 
     /* copy from usize to end of file into h5fid,
      * starting at end of user block if present */
-    if(copy_to_file(rawinstream, rawdatastream, (ssize_t) usize, (ssize_t)(fsize - (ssize_t)usize)) < 0) {
+   if(copy_to_file(rawinstream, rawdatastream, (ssize_t) usize, (ssize_t)(fsize - (ssize_t)usize)) < 0) {
         error_msg("unable to copy hdf5 data to output file \"%s\"\n", output_file);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -349,54 +349,60 @@ done:
  *  Returns 0 on success, -1 on failure.
  */
 herr_t
-copy_to_file( FILE *infid, FILE *ofid, ssize_t where, ssize_t how_much )
+copy_to_file( FILE *infid, FILE *ofid, ssize_t _where, ssize_t how_much )
 {
     static char buf[COPY_BUF_SIZE];
+    off_t where = (off_t)_where;
     off_t to;
     off_t from;
-    ssize_t nchars = -1;
-    ssize_t wnchars = -1;
     herr_t ret_value = 0;
 
     /* nothing to copy */
     if(how_much <= 0)
         goto done;
 
+    /* rewind */
+    HDfseek(infid, 0L, 0);
+
     from = where;
     to = 0;
-
     while(how_much > 0) {
-        /* Seek to correct position in input file */
-        HDfseek(infid,from,SEEK_SET);
+        size_t bytes_in        = 0;    /* # of bytes to read       */
+        size_t bytes_read      = 0;    /* # of bytes actually read */
+        size_t bytes_wrote     = 0;    /* # of bytes written   */
+
+        if (how_much > COPY_BUF_SIZE)
+            bytes_in = COPY_BUF_SIZE;
+        else
+            bytes_in = how_much;
+
+			/* Seek to correct position in input file */
+        HDfseek(infid, from, SEEK_SET);
 
         /* Read data to buffer */
-        if (how_much > COPY_BUF_SIZE)
-            nchars = HDfread(buf,1,(unsigned)COPY_BUF_SIZE,infid);
-        else
-            nchars = HDfread(buf, 1,(unsigned)how_much,infid);
-        if(nchars < 0) {
+        bytes_read = HDfread(buf, (size_t)1, bytes_in, infid);
+        if(0 == bytes_read && HDferror(infid)) {
             ret_value = -1;
+            goto done;
+        } /* end if */
+        if(0 == bytes_read && HDfeof(infid)) {
             goto done;
         } /* end if */
 
         /* Seek to correct position in output file */
-        HDfseek(ofid,to,SEEK_SET);
+        HDfseek(ofid, to, SEEK_SET);
 
         /* Update positions/size */
-        how_much -= nchars;
-        from += nchars;
-        to += nchars;
+        how_much -= bytes_read;
+        from += bytes_read;
+        to += bytes_read;
 
-        /* Write nchars bytes to output file */
-        wnchars = nchars;
-        while(nchars > 0) {
-            wnchars = HDfwrite(buf, 1,(unsigned)nchars,ofid);
-            if(wnchars < 0) {
-                ret_value = -1;
-                goto done;
-            } /* end if */
-            nchars -= wnchars;
-        } /* end while */
+       /* Write nchars bytes to output file */
+		bytes_wrote = HDfwrite(buf, (size_t)1, bytes_read, ofid);
+		if(bytes_wrote != bytes_read || (0 == bytes_wrote && HDferror(ofid))) { /* error */
+			ret_value = -1;
+			goto done;
+		} /* end if */
     } /* end while */
 
 done:
