@@ -1110,8 +1110,8 @@ INSTALL (
 #-----------------------------------------------------------------------------
 # Configure the HDF518_Examples.cmake file and the examples
 #-----------------------------------------------------------------------------
-OPTION (HDF5_PACK_EXAMPLES_FILE  "Package the HDF5 Library Examples Compressed File" OFF)
-IF (HDF5_PACK_EXAMPLES_FILE)
+OPTION (HDF5_PACK_EXAMPLES  "Package the HDF5 Library Examples Compressed File" OFF)
+IF (HDF5_PACK_EXAMPLES)
   CONFIGURE_FILE (
       ${HDF5_RESOURCES_DIR}/HDF518_Examples.cmake.in 
       ${HDF5_BINARY_DIR}/HDF518_Examples.cmake @ONLY
@@ -1121,16 +1121,16 @@ IF (HDF5_PACK_EXAMPLES_FILE)
       DESTINATION ${HDF5_INSTALL_DATA_DIR}
       COMPONENT hdfdocuments
   )
-  IF (EXISTS "${HDF5_EXAMPLES_COMPRESSED_PATH}/${HDF5_EXAMPLES_COMPRESSED_FILE}")
+  IF (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
     INSTALL (
         FILES
-            ${HDF5_EXAMPLES_COMPRESSED_PATH}/${HDF5_EXAMPLES_COMPRESSED_FILE}
+            ${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}
             ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
         DESTINATION ${HDF5_INSTALL_DATA_DIR}
         COMPONENT hdfdocuments
     )
-  ENDIF (EXISTS "${HDF5_EXAMPLES_COMPRESSED_PATH}/${HDF5_EXAMPLES_COMPRESSED_FILE}")
-ENDIF (HDF5_PACK_EXAMPLES_FILE)
+  ENDIF (EXISTS "${HDF5_EXAMPLES_COMPRESSED_DIR}/${HDF5_EXAMPLES_COMPRESSED}")
+ENDIF (HDF5_PACK_EXAMPLES)
 
 #-----------------------------------------------------------------------------
 # Add Document File(s) to CMake Install
