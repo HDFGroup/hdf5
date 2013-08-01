@@ -1,35 +1,45 @@
 usage: h5dump [OPTIONS] files
   OPTIONS
      -h,   --help         Print a usage message and exit
+     -V,   --version      Print version number and exit
+--------------- Formatting Options ---------------
+     -e,   --escape       Escape non printing characters
+     -r,   --string       Print 1-byte integer datasets as ASCII
+     -y,   --noindex      Do not print array indices with the data
+     -m T, --format=T     Set the floating point output format
+     -q Q, --sort_by=Q    Sort groups and attributes by index Q
+     -z Z, --sort_order=Z Sort groups and attributes by order Z
+     --enable-error-stack Prints messages from the HDF5 error stack as they
+                          occur.
+     --no-compact-subset  Disable compact form of subsetting and allow the use
+                          of "[" in dataset names.
+     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
+                          sets the number of columns to the maximum (65535).
+                          Default width is 80 columns.
+--------------- File Options ---------------
      -n,   --contents     Print a list of the file contents and exit
                           Optional value 1 also prints attributes.
      -B,   --superblock   Print the content of the super block
      -H,   --header       Print the header only; no data is displayed
-     -A,   --onlyattr     Print the header and value of attributes
-                          Optional value 0 suppresses printing attributes.
-     -i,   --object-ids   Print the object ids
-     -r,   --string       Print 1-byte integer datasets as ASCII
-     -e,   --escape       Escape non printing characters
-     -V,   --version      Print version number and exit
+     -f D, --filedriver=D Specify which driver to open the file with
+     -o F, --output=F     Output raw data into file F
+     -b B, --binary=B     Binary file output, of form B
+     -O F, --ddl=F        Output ddl text into file F
+                          Do not use filename F to suppress ddl display
+--------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
                           slash with a preceding backslash (\).
                           (See example section below.)
      -d P, --dataset=P    Print the specified dataset
-     -y,   --noindex      Do not print array indices with the data
-     -p,   --properties   Print dataset filters, storage layout and fill value
-     -f D, --filedriver=D Specify which driver to open the file with
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link
-     -o F, --output=F     Output raw data into file F
-     -b B, --binary=B     Binary file output, of form B
      -t P, --datatype=P   Print the specified named datatype
-     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
-                          sets the number of columns to the maximum (65535).
-                          Default width is 80 columns.
-     -m T, --format=T     Set the floating point output format
-     -q Q, --sort_by=Q    Sort groups and attributes by index Q
-     -z Z, --sort_order=Z Sort groups and attributes by order Z
+     -A,   --onlyattr     Print the header and value of attributes
+                          Optional value 0 suppresses printing attributes.
+--------------- Object Property Options ---------------
+     -i,   --object-ids   Print the object ids
+     -p,   --properties   Print dataset filters, storage layout and fill value
      -M L, --packedbits=L Print packed bits as unsigned integers, using mask
                           format L for an integer dataset specified with
                           option -d. L is a list of offset,length values,
@@ -37,19 +47,15 @@ usage: h5dump [OPTIONS] files
                           the data value and length is the number of bits of
                           the mask.
      -R,   --region       Print dataset pointed by region references
+--------------- XML Options ---------------
      -x,   --xml          Output in XML using Schema
      -u,   --use-dtd      Output in XML using DTD
      -D U, --xml-dtd=U    Use the DTD or schema at U
      -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"
                           E.g., to dump a file called `-f', use h5dump -- -f
-     --enable-error-stack Prints messages from the HDF5 error stack as they
-                          occur.
-     --no-compact-subset  Disable compact form of subsetting and allow the use
-                          of "[" in dataset names.
-     -O F, --ddl=F        Output ddl text into file F
-                          Do not use filename F to suppress ddl display
 
+--------------- Subsetting Options ---------------
  Subsetting is available by using the following options with a dataset
  attribute. Subsetting is done by selecting a hyperslab from the data.
  Thus, the options mirror those for performing a hyperslab selection.
@@ -65,6 +71,7 @@ usage: h5dump [OPTIONS] files
       number of dimensions in the dataspace being queried
       (Alternate compact form of subsetting is described in the Reference Manual)
 
+--------------- Option Argument Conventions ---------------
   D - is the file driver to use in opening the file. Acceptable values
       are "sec2", "family", "split", "multi", "direct", and "stream". Without
       the file driver flag, the file will be opened with each driver in
@@ -93,7 +100,7 @@ usage: h5dump [OPTIONS] files
   Q - is the sort index type. It can be "creation_order" or "name" (default)
   Z - is the sort order type. It can be "descending" or "ascending" (default)
 
-  Examples:
+--------------- Examples ---------------
 
   1) Attribute foo of the group /bar_none in file quux.h5
 
