@@ -460,7 +460,7 @@ obj_list_t* parse_filter(const char *str,
  *  chunked. NULL, on error
  * the layout type can be:
  *  CHUNK, to apply chunking layout
- *  CONTI, to apply continuous layout
+ *  CONTI, to apply contiguous layout
  *  COMPA, to apply compact layout
  *
  * Example:
