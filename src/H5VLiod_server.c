@@ -1270,6 +1270,7 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
+#if 0
     if(input->parent_axe_id) {
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
                                           1, &input->parent_axe_id, 0, NULL, 
@@ -1281,6 +1282,14 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
                                           H5VL_iod_server_dset_read_cb, op_data, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
     }
+#endif
+
+#if 1
+    if(CP_SUCCESS != H5VL_iod_server_dset_compactor(op_data, READ)){
+      HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "compactor task failed for WRITE\n");
+    }
+#endif
+
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

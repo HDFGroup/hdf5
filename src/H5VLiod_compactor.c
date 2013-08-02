@@ -91,7 +91,10 @@ static void H5VL_print_block_container (block_container_t *cont,
 
 static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
 					 hsize_t end_i, hsize_t end_j);
-					 
+
+static int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
+				 hsize_t *start_offsets, hsize_t *end_offsets,
+				 int **requests, int *nreqs);
 
 /*---------------------------------------------------------------------*/
 
@@ -304,14 +307,13 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
       /*from the second id!*/
       else{
 	
-#if H5_DO_NATIVE
+	/*The same dataset could be opened,
+	 in which case the ids can be different*/
 	H5Iget_name (current_dset, dname, 257);
 	H5Iget_name (dataset_id, dname1, 257);
+	
 	if ( (current_dset == (hid_t)dataset_id) ||
 	     (!(strcmp(dname, dname1))) ) {
-#else
-	if (current_dset == (hid_t)dataset_id){
-#endif
 
 #if DEBUG_COMPACTOR
 	  fprintf(stderr, "in %s:%d current dataset: %d has the request %d at %d \n",
@@ -392,20 +394,18 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	if(NULL == (buf = malloc(buf_size)))
 	  HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, CP_FAIL, "can't allocate read buffer");
 
-	HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
-	
-	/* Write bulk data here and wait for the data to be there  */
-	if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
-	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
-
-	/* wait for it to complete */
-	if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
-
-	/* free the bds block handle */
-	if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't free bds block handle");
-
+	if (request_type == WRITE){
+	  HG_Bulk_block_handle_create(buf, size, HG_BULK_READWRITE, &bulk_block_handle);
+	  /* Write bulk data here and wait for the data to be there  */
+	  if(HG_SUCCESS != HG_Bulk_read_all(source, bulk_handle, bulk_block_handle, &bulk_request))
+	    HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
+	  /* wait for it to complete */
+	  if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+	    HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't get data from function shipper");
+	  /* free the bds block handle */
+	  if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+	    HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "can't free bds block handle");
+	}
 
 	/***********************************************************************************/
 	/* extract offsets and lengths for this dataspace selection*/
@@ -434,7 +434,11 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	}
 
 	newlist[request_id].request_id = request_id;
-	newlist[request_id].merged = NOT_MERGED;
+	if(request_type == WRITE)
+	  newlist[request_id].merged = NOT_MERGED;
+	else
+	  newlist[request_id].merged = NOT_SS;
+
 	newlist[request_id].num_fblocks = num_entries;
 
 	newlist[request_id].num_mblocks = num_entries; 
@@ -515,7 +519,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	    newlist[i].num_peers);
   }
 
-
+  
   for ( i = 0; i < num_datasets; i++){
     fprintf(stderr, "%s:%d dataset: %d has %d requests \n",
 	    __FILE__, __LINE__,
@@ -525,7 +529,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
       fprintf (stderr, "Compactor request %d\n", unique_datasets[i].requests[j]);
     }
     fprintf(stderr,"\n");
-
+    
   }
 #endif
   
@@ -536,6 +540,138 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
  done:
   FUNC_LEAVE_NOAPI(ret_value);
 } /* end  H5VL_iod_create_requests_list */
+
+/*--------------------------------------------------------------------------
+ *  Function:	H5VL_iod_short_circuit_reads
+ *
+ *  Purpose :   Function to check whether current read is avaible in current
+ *              writes and returns the list of request that satisfy the 
+ *              current read 
+ *
+ *  Return  :   SUCCESS : 1 (found a matching write)
+ *              FAILURE : 0 (no matching write found)
+ *
+ *  Programmer : Vishwanath Venkatesan
+ *               August, 2013
+ *--------------------------------------------------------------------------
+ */
+
+static
+int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
+			  hsize_t *start_offsets, hsize_t *end_offsets,
+			  int **requests, int *nreqs){
+  
+  int ret_value = CP_SUCCESS;
+  int i, reqs, *request_list;
+  hsize_t tmp_offset = 0;
+
+  
+  FUNC_ENTER_NOAPI(NULL);
+  
+  reqs = 0;
+  request_list = (int *) malloc (nentries * sizeof(int));
+  if (NULL == request_list){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for request_list");
+  }
+  
+  start_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
+  if (NULL == start_offsets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
+  }
+
+  end_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
+  if (NULL == end_offsets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
+  }
+
+
+  for ( i = 0; i < nentries; i++){
+    if ((start_offset >= start_offsets[i]) &&
+	(end_offset <= end_offsets[i])){
+      request_list[reqs] = i;
+      reqs++;
+      start_offset = end_offset;
+      break;
+    }
+    if ((start_offset >= start_offsets[i]) &&
+	(end_offset > end_offsets[i])){
+      request_list[reqs] = i;
+      reqs++;
+      start_offset = end_offsets[i] + 1;
+    }
+    if (start_offset < start_offsets[i]){
+      continue;
+    }
+  }
+  
+  if (start_offset != end_offset){
+    ret_value = 1;
+    *requests = request_list;
+    *nreqs = reqs;
+  }
+  else{
+    ret_value = 0;
+  }
+  
+  
+  
+ done:
+  FUNC_LEAVE_NOAPI(ret_value);
+  
+}
+
+
+/*--------------------------------------------------------------------------
+ *  Function:	H5VL_iod_short_circuit_reads
+ *
+ *  Purpose :   Function to check whether reads can be satisfied by
+ *              preexisting writes 
+ *
+ *  Return  :   SUCCESS : CP_SUCCESS
+ *              FAILURE : CP_FAIL
+ *
+ *  Programmer : Vishwanath Venkatesan
+ *               August, 2013
+ *--------------------------------------------------------------------------
+ */
+
+int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
+				   request_list_t *rlist, int nrentries){
+  
+
+  int i, j,  nreqs = 0;
+  hsize_t curr_start_offset, curr_end_offset;
+  int *requests = NULL;
+
+
+
+
+  for (i = 0; i < nrentries; i++){
+    
+    curr_start_offset = rlist[0].fblocks[0].offset;
+    curr_end_offset = rlist[num_fblocks - 1].offset + 
+      rlist[num_fblocks - 1].len - 1;
+
+    if (H5VL_get_read_spread (curr_start_offset,curr_end_offset,
+			      start_offsets, end_offsets,
+			      &requests, &nreqs) ){
+     
+      for (j = 0; j < nreqs; j++){
+	memcpy(rlist[i].mem_buf,
+	       wlist[request[j]].mem_buf,
+	       wlist[request[j]].mem_len);
+      }
+      rlist[i].merged = SS;
+    }
+
+  }
+  
+
+
+}
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_select_overlap

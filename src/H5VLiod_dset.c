@@ -362,6 +362,9 @@ done:
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_dset_open_cb() */
 
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_dset_read_cb
@@ -490,16 +493,16 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
     if(NULL == (ret_list = (iod_ret_t *)calloc
                 (sizeof(iod_ret_t), (size_t)num_descriptors)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
-
+ 
     /* Set up I/O list */
     for(n=0 ; n<num_descriptors ; n++) {
-        hsize_t num_bytes = 0;
-        hsize_t num_elems = 1;
-
-        /* determine how many bytes the current descriptor holds */
-        for(i=0 ; i<ndims ; i++)
-            num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
-        num_bytes = num_elems * src_size;
+      hsize_t num_bytes = 0;
+      hsize_t num_elems = 1;
+      
+      /* determine how many bytes the current descriptor holds */
+      for(i=0 ; i<ndims ; i++)
+	num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
+      num_bytes = num_elems * src_size;
 
 #if 0
         /* set the memory descriptor */
@@ -548,7 +551,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 #if H5_DO_NATIVE
         ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
 #else /* fake data */
-        for(i=0;i<60;++i)
+        for(i=0;i<64;++i)
             ptr[i] = i;
 #endif
 
@@ -570,11 +573,11 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t UNUSED axe_engine,
 
     /* Create a new block handle to write the data */
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
-
+ 
     /* Write bulk data here and wait for the data to be there  */
     if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-    /* wait for it to complete */
+   /* wait for it to complete */
     if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
         HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
 
@@ -705,17 +708,27 @@ done:
      
 
       for ( i = 0; i < ndatasets; i ++){
-       H5VL_iod_compact_requests (wlist, &nentries,dlist[i].num_requests,
+	H5VL_iod_compact_requests (wlist, &nentries,dlist[i].num_requests,
 				  dlist[i].requests);    
-       if (CP_SUCCESS != H5VL_iod_server_compactor_write (wlist, nentries)){
+	if (CP_SUCCESS != H5VL_iod_server_compactor_write (wlist, nentries)){
 #if DEBUG_COMPACTOR
-	 fprintf (stderr,"COMPACTOR CB: compactor write failed \n");
+	  fprintf (stderr,"COMPACTOR CB: compactor write failed \n");
 #endif
-	 HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "Lower lever write failed\n");
-       }	
-     }
-     
-     /*Call here "iod_array_write_list"
+	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "Lower lever write failed\n");
+	}	
+      }
+      
+      for ( i = 0; i < nrdatasets; i++){
+
+	if (CP_SUCCESS != H5VL_iod_server_compactor_read (rlist, nrentries)){
+#if DEBUG_COMPACTOR
+	  fprintf (stderr,"COMPACTOR CB: compactor read failed \n");
+#endif
+	  HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "Lower lever read failed\n");
+
+	}
+      }
+      /*Call here "iod_array_write_list"
 
       array_write array has been constructed. 
       The COH value can come from any of the list requests 
@@ -724,7 +737,7 @@ done:
        This sends results to all the clients about their completion.
 
      */
-      
+
       if (CP_SUCCESS != H5VL_iod_free_memory_buffer (wlist, nentries)){
 	HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, CP_FAIL, "Failed while freeing memory buffer\n");
       }
@@ -755,7 +768,256 @@ done:
     FUNC_LEAVE_NOAPI_VOID   
 } /*end H5VL_iod_server_dset_compactor_cb */
 
+/*------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_compactor_read
+ *
+ * Purpose:     Compactor lower lever read operations
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanath Venkatesan
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 
+int H5VL_iod_server_compactor_read (void *_list, int num_requests)
+{
+
+  int ret_value = CP_SUCCESS;
+  int i, request_counter= 0;
+  int ndims, *ptr = NULL;
+  request_list_t *list = (request_list_t *)_list;
+  op_data_t *op_data;
+  dset_io_in_t *input;
+  iod_handle_t coh, iod_oh;
+  iod_obj_id_t iod_id;    
+  hid_t space_id, dst_id, src_id;
+  size_t size, dst_size, src_size;
+  size_t nelmts; 
+  void *buf = NULL;
+  uint8_t *buf_ptr;
+  hg_bulk_t bulk_handle;
+  hg_bulk_block_t bulk_block_handle;
+  hg_bulk_request_t bulk_request;
+  hssize_t num_descriptors = 0, n =0;
+  hbool_t opened_locally = FALSE;
+  iod_hyperslab_t *hslabs = NULL;
+  iod_mem_desc_t *mem_desc = NULL;
+  iod_array_iodesc_t file_desc;
+  iod_array_io_t *io_array = NULL;
+  iod_checksum_t *cs_list = NULL;
+  iod_ret_t *ret_list = NULL;
+  dset_read_out_t output;
+  uint32_t cs = 0; 
+  na_addr_t dest;
+  hbool_t flag;
+ 
+
+
+  FUNC_ENTER_NOAPI_NOINIT
+    
+  if (num_requests <= 0){
+#if DEBUG_COMPACTOR
+    fprintf (stderr,"COMPACTOR_READ: Request < 0 We should not be here!\n");
+#endif
+    ret_value = CP_FAIL;
+    goto done;
+  }
+  
+#if DEBUG_COMPACTOR
+  fprintf (stderr,"Entering COMPACTOR READ with requests %d\n", num_requests);
+#endif
+
+  for (request_counter = 0; request_counter < num_requests; request_counter++){
+    
+    op_data = (op_data_t *)list[request_counter].op_data;
+    input = (dset_io_in_t *)op_data->input;
+    coh = input->coh;
+    iod_oh = input->iod_oh;
+    iod_id = input->iod_id;
+    bulk_handle = input->bulk_handle;
+    space_id = list[request_counter].selection_id;
+    dst_id = input->dset_type_id;
+    src_id = input->mem_type_id;
+    dst_size = H5Tget_size(dst_id);
+    src_size = H5Tget_size(src_id);
+    buf = list[request_counter].mem_buf;
+    
+    /* open the dataset if we don't have the handle yet */
+    if(iod_oh.cookie == (int)IOD_OH_UNDEFINED) {
+        if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
+        opened_locally = TRUE;
+    }
+
+    /* retrieve size of bulk data asked for to be read */
+    size = HG_Bulk_handle_get_size(bulk_handle);
+    
+    /* get the number of points selected */
+    nelmts = (size_t)H5Sget_select_npoints(space_id);
+    
+    if (list[request_counter].merged != SS){
+
+      /* get the rank of the dataspace */
+      if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
+      
+      /* get the number of decriptors required, i.e. the numbers of iod
+	 I/O operations needed */
+      if(H5VL_iod_get_file_desc(space_id, &num_descriptors, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+
+      /* allocate the IOD hyperslab descriptors needed */
+      if(NULL == (hslabs = (iod_hyperslab_t *)malloc
+		  (sizeof(iod_hyperslab_t) * (size_t)num_descriptors)))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array descriptors");
+    
+      for(n=0 ; n<num_descriptors ; n++) {
+	hslabs[n].start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+	hslabs[n].stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+	hslabs[n].block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+	hslabs[n].count = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
+      }
+      
+      /* generate the descriptors after allocating the array */
+      if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
+
+      buf_ptr = (uint8_t *)buf;
+      
+      /* allocate the IOD array parameters for reading */
+      if(NULL == (io_array = (iod_array_io_t *)malloc
+		  (sizeof(iod_array_io_t) * (size_t)num_descriptors)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
+      
+      /* allocate cs array */
+      if(NULL == (cs_list = (iod_checksum_t *)calloc
+		  (sizeof(iod_checksum_t), (size_t)num_descriptors)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate checksum array");
+
+      /* allocate return array */
+      if(NULL == (ret_list = (iod_ret_t *)calloc
+		  (sizeof(iod_ret_t), (size_t)num_descriptors)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate iod array");
+
+      /* Set up I/O list */
+      for(n=0 ; n<num_descriptors ; n++) {
+
+	hsize_t num_bytes = 0;
+	hsize_t num_elems = 1;
+
+	/* determine how many bytes the current descriptor holds */
+	for(i=0 ; i<ndims ; i++)
+	  num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
+	num_bytes = num_elems * src_size;
+	
+	mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
+        mem_desc->nfrag = 1;
+        mem_desc->frag[0].addr = (void *)buf_ptr;
+        mem_desc->frag[0].len = (iod_size_t)num_bytes;
+        buf_ptr += num_bytes;
+        
+	/* set the file descriptor */
+        file_desc = hslabs[n];
+	
+#if H5VL_IOD_DEBUG 
+        for(i=0 ; i<ndims ; i++) {
+            fprintf(stderr, "Dim %d:  start %zu   stride %zu   block %zu   count %zu\n", 
+                    i, (size_t)file_desc.start[i], (size_t)file_desc.stride[i], 
+                    (size_t)file_desc.block[i], (size_t)file_desc.count[i]);
+        }
+#endif
+        /* setup list I/O parameters */
+        io_array[n].oh = iod_oh;
+        io_array[n].hints = NULL;
+        io_array[n].mem_desc = mem_desc;
+        io_array[n].io_desc = &file_desc;
+        io_array[n].cs = &cs_list[n];
+        io_array[n].ret = &ret_list[n];
+      }
+      
+      /* Read list IO */
+      if(iod_array_read_list(coh, IOD_TID_UNKNOWN, (iod_size_t)num_descriptors, 
+			     io_array, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+      
+      /* verify return values */
+      for(n=0 ; n<num_descriptors ; n++) {
+        if(ret_list[n] < 0)
+	  HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+      }
+      
+      flag = FALSE;
+      ptr = (int *)buf;
+#if H5_DO_NATIVE
+      ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, H5P_DEFAULT, buf);
+#else /* fake data */
+      for(i=0;i<64;++i)
+	ptr[i] = i;
+#endif
+    
+    }  
+    
+    /* Create a new block handle to write the data */
+    HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
+    
+    dest = HG_Handler_get_addr (op_data->hg_handle);
+    
+    /* Write bulk data here and wait for the data to be there  */
+    if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
+      HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+    
+    /* wait for it to complete */
+    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+      HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+
+  done:
+    output.ret = ret_value;
+    output.cs = cs;
+    
+#if H5VL_IOD_DEBUG 
+    fprintf(stderr, "Done with dset read, checksum %u, sending response to client\n", cs);
+#endif
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
+      HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+      HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+    
+    input = (dset_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+    
+    if(buf)
+      free(buf);
+    
+    /* free allocated descriptors */
+    for(n=0 ; n<num_descriptors ; n++) {
+        free(hslabs[n].start);
+        free(hslabs[n].stride);
+        free(hslabs[n].block);
+        free(hslabs[n].count);
+    }
+    if(hslabs)
+        free(hslabs);
+    if(io_array)
+        free(io_array);
+    if(cs_list)
+        free(cs_list);
+    if(ret_list)
+        free(ret_list);
+
+    /* close the dataset if we opened it in this routine */
+    if(opened_locally) {
+        if(iod_obj_close(iod_oh, NULL, NULL))
+            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
+    }
+
+  }
+
+  FUNC_LEAVE_NOAPI(ret_value);
+
+}/* end H5VL_iod_copactor_read */
 /*------------------------------------------------------------------------
  * Function:	H5VL_iod_server_compactor_write
  *
@@ -817,11 +1079,11 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
     ret_value = CP_FAIL;
     goto done;
   }
-  
+   
 #if DEBUG_COMPACTOR
   fprintf (stderr,"Entering COMPACTOR WRITE with requests %d\n", num_requests);
 #endif
-  
+ 
   for (request_counter = 0; request_counter < num_requests; request_counter++){
      
     if (list[request_counter].merged != USED_IN_MERGING){ 

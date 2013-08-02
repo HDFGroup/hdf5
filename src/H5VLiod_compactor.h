@@ -57,7 +57,7 @@ typedef struct {
   block_container_t *mblocks;  /* Memory offset/len  */
   size_t num_fblocks;          /* Number of File blocks */   
   size_t num_mblocks;          /* Number of Memory blocks */ 
-  /*Convenience values!*/ 
+  /*Convenience def*/ 
   size_t elementsize;          /* Size of each element in the dataset */
   hid_t dataset_id;            /* The ID of the dataset */
   hid_t selection_id;          /* The ID of the dataspace  */
@@ -120,6 +120,8 @@ H5_DLL int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 						    int *changed, int *changed_cnt);
 
 H5_DLL int H5VL_iod_free_memory_buffer (request_list_t *list, int num_requests);
+H5_DLL int H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
+					 request_list_t *rlist, int nrentries);
 
 
 /*----------------------------------------------------------------------------------------  */
