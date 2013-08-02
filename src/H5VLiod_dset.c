@@ -663,7 +663,7 @@ done:
     fflush(stderr);
 #endif     
 #if H5_DO_NATIVE
-    sleep(1);
+    sleep(2);
 #endif
     
 
@@ -720,8 +720,11 @@ done:
 	}	
       }
       
-      H5VL_iod_short_circuit_reads(wlist, nentries,
-				   rlist, nrentries);
+      
+      
+      if (nentries)
+	H5VL_iod_short_circuit_reads(wlist, nentries,
+				     rlist, nrentries);
       
 
       for ( i = 0; i < nrdatasets; i++){
@@ -1063,7 +1066,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   iod_obj_id_t iod_id;    
   hg_bulk_t bulk_handle;
   hid_t space_id, dst_id, src_id;
-  size_t size, dst_size, src_size,ii = 0, hi = 0;
+  size_t size, dst_size, src_size,ii = 0;
   void *buf = NULL;
   uint8_t *buf_ptr;
   hssize_t num_descriptors = 0, n =0;
@@ -1129,7 +1132,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	/*Even in the case its not merged the buffer was already extracted*/
 	size  = list[request_counter].mem_length;
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has not been merged\n",
-		 request_counter+1, size, src_size);
+		 request_counter+1);
 	buf = (void *)list[request_counter].mem_buf;
 
 #if H5_DO_NATIVE	

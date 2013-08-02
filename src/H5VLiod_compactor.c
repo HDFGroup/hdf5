@@ -92,7 +92,7 @@ static void H5VL_print_block_container (block_container_t *cont,
 static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
 					 hsize_t end_i, hsize_t end_j);
 
-static int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
+static int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
 				 hsize_t *start_offsets, hsize_t *end_offsets,
 				 int nentries, int *requests, int *nreqs);
 
@@ -188,8 +188,10 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   int j = 0, request_id = 0, i, current_dset_id = 0, lreq = 0, flag = 0;
   size_t ii;
   uint64_t axe_id;
-  char dname[256], dname1[256];
 
+#if H5_DO_NATIVE
+  char dname[256], dname1[256];
+#endif
   
 
 
@@ -307,12 +309,16 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	
 	/*The same dataset could be opened,
 	 in which case the ids can be different*/
+
+#if H5_DO_NATIVE
 	H5Iget_name (current_dset, dname, 257);
 	H5Iget_name (dataset_id, dname1, 257);
-	
 	if ( (current_dset == (hid_t)dataset_id) ||
 	     (!(strcmp(dname, dname1))) ) {
-
+	  
+#else
+	if ( (current_dset == (hid_t)dataset_id)){
+#endif
 #if DEBUG_COMPACTOR
 	  fprintf(stderr, "in %s:%d current dataset: %d has the request %d at %d \n",
 		  __FILE__, __LINE__,
@@ -540,7 +546,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 } /* end  H5VL_iod_create_requests_list */
 
 /*--------------------------------------------------------------------------
- *  Function:	H5VL_iod_short_circuit_reads
+ *  Function:	H5VL_iod_get_read_spread
  *
  *  Purpose :   Function to check whether current read is avaible in current
  *              writes and returns the list of request that satisfy the 
@@ -555,9 +561,9 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
  */
 
 static
-int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
-			  hsize_t *start_offsets, hsize_t *end_offsets,
-			  int nentries, int *request_list, int *nreqs){
+int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
+			      hsize_t *start_offsets, hsize_t *end_offsets,
+			      int nentries, int *request_list, int *nreqs){
   
   int ret_value = CP_SUCCESS;
   int i, reqs = 0;
@@ -566,6 +572,9 @@ int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
   
   
   for ( i = 0; i < nentries; i++){
+
+    if (start_offsets[i] == -1)
+      continue;
 
     if ((start_offset >= start_offsets[i]) &&
 	(end_offset <= end_offsets[i])){
@@ -622,13 +631,21 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
   
 
   int i, j,  nreqs = 0;
+  size_t k;
   hsize_t curr_start_offset, curr_end_offset;
   hsize_t *start_offsets = NULL, *end_offsets = NULL;
   int *request_list = NULL;
   int ret_value = CP_SUCCESS;
+  uint8_t *buf_ptr;
+  size_t total_len = 0;
   
   FUNC_ENTER_NOAPI(NULL)
     
+  #if DEBUG_COMPACTOR
+    fprintf (stderr,"number of write entries from compactor -read  : %d\n",
+	     nentries);
+  #endif
+
   start_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
   if (NULL == start_offsets){
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
@@ -640,27 +657,29 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
   }
 
   for (i = 0; i < nentries; i++){
+    if (wlist[i].merged == USED_IN_MERGING){
+      start_offsets[i] = -1;
+      end_offsets[i] = -1;
+      continue;
+    }
+
+
     start_offsets[i] = wlist[i].fblocks[0].offset;
-    end_offsets[i] = wlist[i].fblocks[wlist[i].num_fblocks - 1].len +
+    end_offsets[i] = wlist[i].fblocks[wlist[i].num_fblocks - 1].offset +
       wlist[i].fblocks[wlist[i].num_fblocks - 1].len - 1;
     
 #if DEBUG_COMPACTOR
-    fprintf (stderr, "start : %lli, end: %lli \n", 
+    fprintf (stderr, "wstart : %lli, wend: %lli \n", 
 	     start_offsets[i], end_offsets[i]);
 #endif
   }
 
-  
-
   for (i = 0; i < nrentries; i++){
-
-
+    
     request_list = (int *) malloc (nentries * sizeof(int));
     if (NULL == request_list){
       HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for request_list");
     }
-    
-
     
     curr_start_offset = rlist[i].fblocks[0].offset;
     curr_end_offset = rlist[i].fblocks[rlist[i].num_fblocks - 1].offset + 
@@ -672,20 +691,30 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
 	     curr_end_offset);
 #endif
 
-    if (H5VL_get_read_spread (curr_start_offset,curr_end_offset,
-			      start_offsets, end_offsets,
-			      nentries, request_list, &nreqs) ){
-      
+    if (H5VL_iod_get_read_spread (curr_start_offset,curr_end_offset,
+				  start_offsets, end_offsets,
+				  nentries, request_list, &nreqs) ){
+
+      buf_ptr = (uint8_t *)rlist[i].mem_buf;
+      total_len = 0;
 #if DEBUG_COMPACTOR
       fprintf (stderr, "nreqs: %d\n",
 	       nreqs);
 #endif
       for (j = 0; j < nreqs; j++){
-	
-	memcpy(rlist[i].mem_buf,
-	       wlist[request_list[j]].mem_buf,
-	       wlist[request_list[j]].mem_length);
+#if DEBUG_COMPACTOR
+	fprintf (stderr, "mblocks: %zd\n",
+		 wlist[request_list[j]].num_mblocks);
+#endif
 
+	for (k = 0; k < wlist[request_list[j]].num_mblocks; k++){
+	  
+	  memcpy(buf_ptr,
+		 (void *)(uintptr_t)wlist[request_list[j]].mblocks[k].offset,
+		 wlist[request_list[j]].mblocks[k].len);
+	  total_len += wlist[request_list[j]].mblocks[k].len;
+	  buf_ptr = (uint8_t *)rlist[i].mem_buf + total_len;
+	}
       }
       rlist[i].merged = SS;
     }
@@ -1243,11 +1272,11 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 	rev_sf_block[rev_fblks].offset = 
 	  sf_block[j].offset + sf_block[j].len;
 	rev_sf_block[rev_fblks].len = 
-	  sf_block[i].len - (sf_block[j].offset + sf_block[j].len);
+	  sf_block[i].len - sf_block[j].len;
 	rev_sm_block[rev_mblks].offset = 
-	  sm_block[i].offset + (sf_block[j].offset + sf_block[j].len);
+	  sm_block[i].offset + sf_block[j].len;
 	rev_sm_block[rev_fblks].len = 
-	  sf_block[i].len - (sf_block[j].offset + sf_block[j].len);
+	  sf_block[i].len -  sf_block[j].len;
 	
 	rev_fblks++; rev_mblks++;
 	changed[changed_cnt] = i;
