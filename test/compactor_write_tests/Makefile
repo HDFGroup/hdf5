@@ -1,4 +1,4 @@
-all:	multiple-writes parallel-writes native-writes server
+all:	multiple-writes parallel-writes native-writes read-tests server
 
 multiple-writes:
 		h5pcc -o multiple-writes-test1 multiple-writes-test1.c
@@ -19,9 +19,15 @@ native-writes:
 		h5pcc -o native-write-test2 native_write_test2.c
 		h5pcc -o native-write-test3 native_write_test3.c	
 		h5pcc -o native-parallel-write native-parallel-write.c
+read-tests:
+		h5pcc -o read_test_1 read_test_1.c
+		h5pcc -o read_test_2 read_test_2.c
+
 clean:
-	rm -rf multiple-writes-test1 multiple-writes-test2 
+	rm -rf multiple-writes-test1 multiple-writes-test2 read_test_1
 	rm -rf multiple-writes-test3 multiple-writes-test4 multiple-writes-test5
 	rm -rf server *.o *~ 
 	rm -rf parallel_write native-write-basic *.cfg
 	rm -rf native-write-test1 native-write-test2
+	rm -rf native-write-basic native-write-test3 native-parallel-write
+	rm -rf read_test_1 read_test_2
