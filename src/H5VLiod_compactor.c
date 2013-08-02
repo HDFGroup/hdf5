@@ -94,7 +94,7 @@ static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
 
 static int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
 				 hsize_t *start_offsets, hsize_t *end_offsets,
-				 int **requests, int *nreqs);
+				 int nentries, int *requests, int *nreqs);
 
 /*---------------------------------------------------------------------*/
 
@@ -188,10 +188,8 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   int j = 0, request_id = 0, i, current_dset_id = 0, lreq = 0, flag = 0;
   size_t ii;
   uint64_t axe_id;
-
-#if H5_DO_NATIVE
   char dname[256], dname1[256];
-#endif
+
   
 
 
@@ -559,33 +557,16 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 static
 int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
 			  hsize_t *start_offsets, hsize_t *end_offsets,
-			  int **requests, int *nreqs){
+			  int nentries, int *request_list, int *nreqs){
   
   int ret_value = CP_SUCCESS;
-  int i, reqs, *request_list;
-  hsize_t tmp_offset = 0;
+  int i, reqs = 0;
+  
 
   
-  FUNC_ENTER_NOAPI(NULL);
   
-  reqs = 0;
-  request_list = (int *) malloc (nentries * sizeof(int));
-  if (NULL == request_list){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for request_list");
-  }
-  
-  start_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
-  if (NULL == start_offsets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
-  }
-
-  end_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
-  if (NULL == end_offsets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
-  }
-
-
   for ( i = 0; i < nentries; i++){
+
     if ((start_offset >= start_offsets[i]) &&
 	(end_offset <= end_offsets[i])){
       request_list[reqs] = i;
@@ -604,9 +585,12 @@ int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
     }
   }
   
-  if (start_offset != end_offset){
+#if DEBUG_COMPACTOR
+  fprintf (stderr, "Rstart: %lli, Rend: %lli\n",
+	   start_offset, end_offset);
+#endif
+  if (start_offset == end_offset){
     ret_value = 1;
-    *requests = request_list;
     *nreqs = reqs;
   }
   else{
@@ -615,9 +599,7 @@ int H5VL_get_read_spread (hsize_t start_offset, hsize_t end_offset,
   
   
   
- done:
-  FUNC_LEAVE_NOAPI(ret_value);
-  
+  return ret_value;
 }
 
 
@@ -641,32 +623,90 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
 
   int i, j,  nreqs = 0;
   hsize_t curr_start_offset, curr_end_offset;
-  int *requests = NULL;
+  hsize_t *start_offsets = NULL, *end_offsets = NULL;
+  int *request_list = NULL;
+  int ret_value = CP_SUCCESS;
+  
+  FUNC_ENTER_NOAPI(NULL)
+    
+  start_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
+  if (NULL == start_offsets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
+  }
+  
+  end_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
+  if (NULL == end_offsets){
+    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
+  }
 
+  for (i = 0; i < nentries; i++){
+    start_offsets[i] = wlist[i].fblocks[0].offset;
+    end_offsets[i] = wlist[i].fblocks[wlist[i].num_fblocks - 1].len +
+      wlist[i].fblocks[wlist[i].num_fblocks - 1].len - 1;
+    
+#if DEBUG_COMPACTOR
+    fprintf (stderr, "start : %lli, end: %lli \n", 
+	     start_offsets[i], end_offsets[i]);
+#endif
+  }
 
-
+  
 
   for (i = 0; i < nrentries; i++){
+
+
+    request_list = (int *) malloc (nentries * sizeof(int));
+    if (NULL == request_list){
+      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for request_list");
+    }
     
-    curr_start_offset = rlist[0].fblocks[0].offset;
-    curr_end_offset = rlist[num_fblocks - 1].offset + 
-      rlist[num_fblocks - 1].len - 1;
+
+    
+    curr_start_offset = rlist[i].fblocks[0].offset;
+    curr_end_offset = rlist[i].fblocks[rlist[i].num_fblocks - 1].offset + 
+      rlist[i].fblocks[rlist[i].num_fblocks - 1].len - 1;
+    
+#if DEBUG_COMPACTOR
+    fprintf (stderr,"curr_start: %lli, curr_end: %lli\n", 
+	     curr_start_offset,
+	     curr_end_offset);
+#endif
 
     if (H5VL_get_read_spread (curr_start_offset,curr_end_offset,
 			      start_offsets, end_offsets,
-			      &requests, &nreqs) ){
-     
+			      nentries, request_list, &nreqs) ){
+      
+#if DEBUG_COMPACTOR
+      fprintf (stderr, "nreqs: %d\n",
+	       nreqs);
+#endif
       for (j = 0; j < nreqs; j++){
+	
 	memcpy(rlist[i].mem_buf,
-	       wlist[request[j]].mem_buf,
-	       wlist[request[j]].mem_len);
+	       wlist[request_list[j]].mem_buf,
+	       wlist[request_list[j]].mem_length);
+
       }
       rlist[i].merged = SS;
     }
-
+    
+    if (NULL != request_list){
+      free(request_list);
+      request_list = NULL;
+    }
   }
-  
 
+  if (NULL != start_offsets){
+    free(start_offsets);
+    start_offsets = NULL;
+  }
+  if (NULL != end_offsets){
+    free(end_offsets);
+    end_offsets = NULL;
+  }
+
+ done:
+  FUNC_LEAVE_NOAPI(ret_value);
 
 }
 

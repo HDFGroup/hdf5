@@ -708,8 +708,10 @@ done:
      
 
       for ( i = 0; i < ndatasets; i ++){
+
 	H5VL_iod_compact_requests (wlist, &nentries,dlist[i].num_requests,
 				  dlist[i].requests);    
+
 	if (CP_SUCCESS != H5VL_iod_server_compactor_write (wlist, nentries)){
 #if DEBUG_COMPACTOR
 	  fprintf (stderr,"COMPACTOR CB: compactor write failed \n");
@@ -718,6 +720,10 @@ done:
 	}	
       }
       
+      H5VL_iod_short_circuit_reads(wlist, nentries,
+				   rlist, nrentries);
+      
+
       for ( i = 0; i < nrdatasets; i++){
 
 	if (CP_SUCCESS != H5VL_iod_server_compactor_read (rlist, nrentries)){
@@ -813,7 +819,7 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
   uint32_t cs = 0; 
   na_addr_t dest;
   hbool_t flag;
- 
+  hid_t dxpl_id ;
 
 
   FUNC_ENTER_NOAPI_NOINIT
@@ -844,7 +850,7 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
     dst_size = H5Tget_size(dst_id);
     src_size = H5Tget_size(src_id);
     buf = list[request_counter].mem_buf;
-    
+    dxpl_id = input->dxpl_id;
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.cookie == (int)IOD_OH_UNDEFINED) {
         if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
@@ -857,7 +863,7 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
     
     /* get the number of points selected */
     nelmts = (size_t)H5Sget_select_npoints(space_id);
-    
+    flag = FALSE;
     if (list[request_counter].merged != SS){
 
       /* get the rank of the dataspace */
@@ -949,20 +955,31 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
 	  HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
       }
       
-      flag = FALSE;
-      ptr = (int *)buf;
+
+
 #if H5_DO_NATIVE
-      ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, H5P_DEFAULT, buf);
+      ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
 #else /* fake data */
       for(i=0;i<64;++i)
 	ptr[i] = i;
 #endif
+    }
+    /* do data conversion */
+    if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
+      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+    /* calculate a checksum for the data to be sent */
+    cs = H5checksum(buf, size, NULL);
     
-    }  
+    /* MSC - check if client requested to corrupt data */
+    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
+      HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
+    if(flag) {
+      fprintf(stderr, "Injecting a bad data value to cause corruption \n");
+      ptr[0] = 10;
+    }
     
     /* Create a new block handle to write the data */
     HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
-    
     dest = HG_Handler_get_addr (op_data->hg_handle);
     
     /* Write bulk data here and wait for the data to be there  */
