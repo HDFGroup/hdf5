@@ -662,6 +662,7 @@ done:
     fprintf(stderr, " COMPACTOR CB: Sleeping\n");
     fflush(stderr);
 #endif     
+
 #if H5_DO_NATIVE
     sleep(2);
 #endif
@@ -672,6 +673,10 @@ done:
      compactor_queue_flag = 0;
      curr_queue = NULL;
      pthread_mutex_unlock(&lock);  
+
+#if DEBUG_COMPACTOR     
+     fprintf (stderr,"Creating WRITE request list \n");
+#endif
      
      ret_value = H5VL_iod_create_request_list (cqueue,
 					       &wlist,
@@ -688,6 +693,9 @@ done:
 #endif
 
      
+#if DEBUG_COMPACTOR     
+     fprintf (stderr,"Creating READ request list \n");
+#endif
      ret_value = H5VL_iod_create_request_list (cqueue,
 					       &rlist,
 					       &nrentries,
@@ -711,7 +719,17 @@ done:
 
 	H5VL_iod_compact_requests (wlist, &nentries,dlist[i].num_requests,
 				  dlist[i].requests);    
+      }
 
+      if (nentries){
+	H5VL_iod_steal_writes (wlist, nentries,
+			       rlist, nrentries);
+	
+	H5VL_iod_short_circuit_reads(wlist, nentries,
+				     rlist, nrentries);
+      }
+      
+      for ( i = 0; i < ndatasets; i ++){
 	if (CP_SUCCESS != H5VL_iod_server_compactor_write (wlist, nentries)){
 #if DEBUG_COMPACTOR
 	  fprintf (stderr,"COMPACTOR CB: compactor write failed \n");
@@ -722,10 +740,7 @@ done:
       
       
       
-      if (nentries)
-	H5VL_iod_short_circuit_reads(wlist, nentries,
-				     rlist, nrentries);
-      
+        
 
       for ( i = 0; i < nrdatasets; i++){
 
@@ -959,7 +974,7 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
       }
       
 
-
+      ptr = (int *)buf;
 #if H5_DO_NATIVE
       ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
 #else /* fake data */

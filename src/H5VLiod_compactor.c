@@ -89,6 +89,11 @@ static void H5VL_print_block_container (block_container_t *cont,
 					size_t num);
 
 
+static int H5VL_iod_read_write_overlap (hid_t wdataspace,
+					hid_t rdataspace,
+					hid_t *overlap_space,
+					hid_t *n_overlap_space);
+
 static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
 					 hsize_t end_i, hsize_t end_j);
 
@@ -612,6 +617,121 @@ int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
 }
 
 
+
+/*-------------------------------------------------------------------------
+ *  Function:   H5VL_iod_steal_writes 
+ *
+ *  Purpose :   Function to check whether reads can be satisfied by
+ *              preexisting writes 
+ *
+ *  Return  :   SUCCESS : CP_SUCCESS
+ *              FAILURE : CP_FAIL
+ *
+ *  Programmer : Vishwanath Venkatesan
+ *               August, 2013
+ *--------------------------------------------------------------------------
+ */
+
+ int H5VL_iod_steal_writes (request_list_t *wlist, int nentries,
+			    request_list_t *rlist, int nrentries){
+   
+   int i, j;
+   int ret_value = CP_SUCCESS;
+   hid_t overlap_space, n_overlap_space;
+   hsize_t *goffsets=NULL;
+   size_t *glens=NULL, g_entries = 0, k = 0;
+
+#if DEBUG_COMPACTOR
+   hsize_t     *bound_start;
+   hsize_t     *bound_end;
+#endif
+
+
+   FUNC_ENTER_NOAPI(NULL);
+   
+   
+   if (!nentries){
+
+#if DEBUG_COMPACTOR
+     fprintf (stderr, "in %s: %d No write entries to play with!\n",
+	      __FILE__, __LINE__);
+     ret_value = CP_FAIL;
+     goto done;
+#endif
+
+   }
+
+#if DEBUG_COMPACTOR
+   fprintf (stderr, "nentries: %d, nrentries: %d\n",
+	    nentries, nrentries);
+   ret_value = CP_FAIL;
+#endif 
+   for (i = 0; i < nrentries; i++){
+     for (j = 0; j < nentries; j++){
+       
+       if (wlist[j].merged == USED_IN_MERGING)
+	 continue;
+
+       
+       if (H5VL_iod_read_write_overlap (wlist[j].selection_id,
+					rlist[i].selection_id,
+					&overlap_space,
+					&n_overlap_space)){
+       
+#if DEBUG_COMPACTOR
+	 bound_start = (hsize_t *) malloc (2 * sizeof(hsize_t));
+	 bound_end  =  (hsize_t *) malloc (2 * sizeof(hsize_t));
+	 
+	 H5Sget_select_bounds(overlap_space,
+			      bound_start,
+			      bound_end);
+	 fprintf(stderr, 
+		 "Overlap Space : Start {%lli, %lli}, End {%lli, %lli} \n",
+		 bound_start[0], bound_start[1], bound_end[0], bound_end[1]);
+	 
+	 H5Sget_select_bounds(n_overlap_space,
+			      bound_start,
+			      bound_end);
+
+	 fprintf(stderr,
+		 "non-overlap space: Start {%lli, %lli} End {%lli, %lli}\n",
+		 bound_start[0], bound_start[1], bound_end[0], bound_end[1]);
+
+	 H5Sget_offsets(n_overlap_space,rlist[i].elementsize,
+			&goffsets, &glens, &g_entries);
+
+	 for (k = 0; k < g_entries; k++){
+	   fprintf (stderr,"%zd: OFFSET: %lli, len %zd\n",
+		    k, goffsets[k],
+		    glens[k]);
+	 }
+	 free(goffsets);
+	 free(glens);
+	 g_entries = 0;
+	 H5Sget_offsets(overlap_space,rlist[i].elementsize,
+			&goffsets, &glens, &g_entries);
+	 for (k = 0; k < g_entries; k++){
+	   fprintf (stderr,"%zd: OFFSET: %lli, len %zd\n",
+		    k, goffsets[k],
+		    glens[k]);
+	 }
+
+	 
+#endif	 
+
+
+	 
+       }
+
+     }
+   }  
+   
+ done:
+   FUNC_LEAVE_NOAPI(ret_value);
+   
+ }    
+
+
 /*--------------------------------------------------------------------------
  *  Function:	H5VL_iod_short_circuit_reads
  *
@@ -739,6 +859,84 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_read_write_overlap
+ *
+ * Purpose:	Function to check for overlapping reads with writes
+ *              Will return the overlaping dataspace and non-overlapping 
+ *              dataspace
+ *
+ * Return:	SUCCESS      : 0 if no overlap / > 0 therwise
+ *    		FAILURE      : Negative
+ *
+ * Programmer:  Vishwanth Venkatesan
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+ int H5VL_iod_read_write_overlap (hid_t wdataspace,
+				  hid_t rdataspace,
+				  hid_t *overlap_space,
+				  hid_t *n_overlap_space){
+   
+   hid_t l_overlap_space, l_n_overlap_space;
+   int ret_value = CP_SUCCESS;
+   hsize_t overlap = 0;
+   const H5S_t *rspace = NULL, *wspace = NULL;
+
+   FUNC_ENTER_NOAPI(NULL)
+
+     
+     
+   if (NULL == (wspace = (const H5S_t *)H5I_object_verify(wdataspace,
+							  H5I_DATASPACE))){
+     
+#if DEBUG_COMPACTOR
+     fprintf (stderr, "write dataspace %d is not a dataspace\n",
+	      wdataspace);
+#endif
+
+     HGOTO_ERROR(H5E_ARGS,
+		 H5E_BADTYPE,
+		 FAIL,
+		 "Wdataspace not a dataspace");
+   }
+   
+   if(H5S_SELECT_VALID(wspace) != TRUE){
+
+#if DEBUG_COMPACTOR
+     fprintf (stderr,"dataspace: %d is not a valid dataspace\n",wdataspace);
+#endif
+     HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Not a valid dataspace");
+   }
+     
+   if (NULL == (rspace = (const H5S_t *)H5I_object_verify(rdataspace, H5I_DATASPACE))){
+     
+#if DEBUG_COMPACTOR
+     fprintf (stderr, "dataspace :%d not a valid dataspace\n",rdataspace);
+#endif
+     
+     HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Not a valid dataspace\n");
+   }
+   l_overlap_space = H5Scombine_select(wdataspace, H5S_SELECT_AND, rdataspace);
+   overlap = H5Sget_select_npoints(l_overlap_space);
+   if (overlap){
+     /*This means there is overlap betweem read and write*/
+     /* So lets get the part that has to be read! */
+     l_n_overlap_space = H5Scombine_select(rdataspace, H5S_SELECT_NOTB, l_overlap_space);
+     overlap = H5Sget_select_npoints(l_overlap_space);
+      ret_value = (int) overlap;
+   }
+   
+   *overlap_space = l_overlap_space;
+   *n_overlap_space = l_n_overlap_space;
+   
+ done:
+   FUNC_LEAVE_NOAPI(ret_value);
+
+ }
+     
+    
 
 
 
@@ -765,7 +963,7 @@ int H5VL_iod_select_overlap (hid_t dataspace_1, uint64_t axe_id_1,
   
   hid_t dataspace_3;
   hsize_t overlap, np;
-  hid_t ret_value;
+  int ret_value;
   uint64_t difference;
 
 
@@ -798,7 +996,6 @@ int H5VL_iod_select_overlap (hid_t dataspace_1, uint64_t axe_id_1,
 #if DEBUG_COMPACTOR
     fprintf (stderr,"dataspace: %d is not a valid dataspace\n",dataspace_1);
 #endif
-
     HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Not a valid dataspace")
 
   }      
@@ -1393,7 +1590,6 @@ done:
  *-------------------------------------------------------------------------
  */
 
- 
 int H5VL_iod_construct_merged_request (request_list_t *list,
 					size_t m_elmnt_size,
 					request_list_t *merged_request,
