@@ -25,6 +25,21 @@
 
 #ifdef H5_HAVE_EFF
 
+int hg_proc_size_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    size_t *struct_data = (size_t *) data;
+
+    ret = hg_proc_memcpy(proc, struct_data, sizeof(size_t));
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    return ret;
+}
+
 /* Define hg_proc_ret_t */
 int hg_proc_ret_t(hg_proc_t proc, void *data)
 {

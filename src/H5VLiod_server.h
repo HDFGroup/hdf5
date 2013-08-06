@@ -100,6 +100,7 @@ H5_DLL int H5VL_iod_server_map_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_read(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_get_vl_size(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_write(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_set_extent(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_close(hg_handle_t handle);
@@ -223,6 +224,10 @@ H5_DLL void H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
                                          size_t num_n_parents, AXE_task_t n_parents[], 
                                          size_t num_s_parents, AXE_task_t s_parents[], 
                                          void *op_data);
+H5_DLL void H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t axe_engine,  
+                                                size_t num_n_parents, AXE_task_t n_parents[], 
+                                                size_t num_s_parents, AXE_task_t s_parents[], 
+                                                void *op_data);
 H5_DLL void H5VL_iod_server_dset_write_cb(AXE_engine_t axe_engine,  
                                           size_t num_n_parents, AXE_task_t n_parents[], 
                                           size_t num_s_parents, AXE_task_t s_parents[], 

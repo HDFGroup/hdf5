@@ -45,6 +45,7 @@ typedef struct axe_ids_t {
 typedef struct H5VL_iod_read_status_t {
     int ret;
     uint32_t cs;
+    size_t buf_size;
 } H5VL_iod_read_status_t;
 
 typedef struct dims_t {
@@ -69,6 +70,7 @@ typedef struct value_t {
 } value_t;
 
 H5_DLL int hg_proc_ret_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_size_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_hid_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_htri_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_hbool_t(hg_proc_t proc, void *data);
@@ -186,7 +188,10 @@ MERCURY_GEN_PROC(dset_io_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh))
                  ((hid_t)(dset_type_id)) ((hid_t)(mem_type_id))
                  ((hid_t)(space_id)) ((hid_t)(dxpl_id)) ((uint32_t)(checksum))
                  ((hg_bulk_t)(bulk_handle)) ((uint64_t)(axe_id)))
-MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint32_t)(cs)))
+MERCURY_GEN_PROC(dset_get_vl_size_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh)) 
+                 ((iod_obj_id_t)(iod_id)) ((uint64_t)(parent_axe_id)) ((hid_t)(mem_type_id))
+                 ((hid_t)(space_id)) ((hid_t)(dxpl_id)) ((uint64_t)(axe_id)))
+MERCURY_GEN_PROC(dset_read_out_t, ((int32_t)(ret)) ((uint32_t)(cs)) ((size_t)(buf_size)))
 MERCURY_GEN_PROC(dset_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
                  ((axe_ids_t)(parent_axe_ids)) ((uint64_t)(axe_id)))
 

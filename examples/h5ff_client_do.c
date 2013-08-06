@@ -71,13 +71,17 @@ int main(int argc, char **argv) {
     /* Create 1-D dataspace */
     dim = 0;
     max_dim = H5S_UNLIMITED;
-    if((sid = H5Screate_simple(1, &dim, &max_dim)) < 0) 
-        return 1;
+    if((sid = H5Screate_simple(1, &dim, &max_dim)) < 0) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
     /* Create 1-D chunked dataset */
     if((dsid = H5Dcreate_ff(file_id, "dset", H5T_NATIVE_UINT, sid, 
-                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0)
-        return 1;
+                            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
     /* Close dataspace */
     H5Sclose(sid);
@@ -93,23 +97,33 @@ int main(int argc, char **argv) {
 
     /* Append 60 elements to dataset, along proper axis */
     if(H5DOappend_ff(dsid, H5P_DEFAULT, 0, 60, H5T_NATIVE_UINT, 
-                     write_elem, 0 , event_q) < 0)
-        return 1;
+                     write_elem, 0 , event_q) < 0) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
     /* Get the dataset's dataspace now */
-    if((sid = H5Dget_space(dsid)) < 0) 
-        return 1;
+    if((sid = H5Dget_space(dsid)) < 0) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
-    if(H5Sget_simple_extent_dims(sid, &curr_size, NULL) < 0)
-        return 1;
+    if(H5Sget_simple_extent_dims(sid, &curr_size, NULL) < 0) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
     /* Verify dataset is correct size */
-    if(curr_size != 60) 
-        return 1;
+    if(curr_size != 60) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
     /* Close dataspace */
-    if(H5Sclose(sid) < 0) 
-        return 1;
+    if(H5Sclose(sid) < 0) {
+        fprintf(stderr, "Failed\n");
+        exit(1);
+    }
 
     /* Read elements back, with sequence operation */
     memset(read_elem, 0, sizeof(read_elem));
@@ -124,8 +138,116 @@ int main(int argc, char **argv) {
     assert(ret == 0);
 
     /* close dataset */
-    assert(H5Dclose_ff(dsid, event_q) == 0);
+    assert(H5Dclose(dsid) == 0);
 
+
+    {
+        hvl_t wdata[5];   /* Information to write */
+        hvl_t rdata[5];   /* Information to write */
+        hid_t tid;
+        hsize_t dims[1];
+        int increment, j, n;
+
+        n = 0;
+        increment = 4;
+        /* Allocate and initialize VL data to write */
+        for(i = 0; i < 5; i++) {
+            int temp = i*increment + increment;
+
+            wdata[i].p = malloc(temp * sizeof(unsigned int));
+            wdata[i].len = temp;
+            for(j = 0; j < temp; j++)
+                ((unsigned int *)wdata[i].p)[j] = n ++;
+        } /* end for */
+
+        /* Create a datatype to refer to */
+        tid = H5Tvlen_create (H5T_NATIVE_UINT);
+
+        /* create a dataspace. This is a local Bookeeping operation that 
+           does not touch the file */
+        dims [0] = 5;
+        sid = H5Screate_simple(1, dims, NULL);
+
+        /* Create Dataset */
+        if((dsid = H5Dcreate_ff(file_id, "dset_vl", tid, sid, 
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0) {
+            fprintf(stderr, "Failed\n");
+            exit(1);
+        }
+
+        ret = H5Dwrite(dsid, tid, sid, sid, H5P_DEFAULT, wdata);
+        assert(ret == 0);
+
+        ret = H5Dread(dsid, tid, sid, sid, H5P_DEFAULT, rdata);
+        assert(ret == 0);
+
+        /* Print VL DATA */
+        for(i = 0; i < 5; i++) {
+            int temp = i*increment + increment;
+
+            fprintf(stderr, "Element %d  size %zu: ", i, rdata[i].len);
+            for(j = 0; j < temp; j++)
+                fprintf(stderr, "%d ",((unsigned int *)rdata[i].p)[j]);
+            fprintf(stderr, "\n");
+        } /* end for */
+
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, rdata);
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, wdata);
+
+        H5Sclose(sid);
+        H5Tclose(tid);
+
+        /* close dataset */
+        assert(H5Dclose_ff(dsid, event_q) == 0);
+
+    }
+
+    {
+        hid_t tid;
+        hsize_t dims[1];
+        const char *str_wdata[4]= {
+            "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
+            "conceived in liberty and dedicated to the proposition that all men are created equal.",
+            "Now we are engaged in a great civil war,",
+            "testing whether that nation or any nation so conceived and so dedicated can long endure."
+        };   /* Information to write */
+        char *str_rdata[4];   /* Information read in */
+
+        /* create a dataspace. This is a local Bookeeping operation that 
+           does not touch the file */
+        dims [0] = 4;
+        sid = H5Screate_simple(1, dims, NULL);
+
+        /* Create a datatype to refer to */
+        tid = H5Tcopy(H5T_C_S1);
+        H5Tset_size(tid,H5T_VARIABLE);
+
+        /* Create Dataset */
+        if((dsid = H5Dcreate_ff(file_id, "dset_vl_str", tid, sid, 
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0 , event_q)) < 0) {
+            fprintf(stderr, "Failed\n");
+            exit(1);
+        }
+
+        ret = H5Dwrite(dsid, tid, sid, sid, H5P_DEFAULT, str_wdata);
+        assert(ret == 0);
+
+        ret = H5Dread(dsid, tid, sid, sid, H5P_DEFAULT, str_rdata);
+        assert(ret == 0);
+
+        fprintf(stderr, "Reading VL Strings: \n");
+        for(i=0 ; i<4 ; i++) {
+            fprintf(stderr, "%s\n", str_rdata[i]);
+        }
+
+        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, str_rdata);
+
+        H5Sclose(sid);
+        H5Tclose(tid);
+
+        /* close dataset */
+        assert(H5Dclose_ff(dsid, event_q) == 0);
+    }
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
     assert(H5Fclose_ff(file_id, event_q) == 0);
@@ -143,9 +265,12 @@ int main(int argc, char **argv) {
     free(status);
 
     /* Verify data read */
-    for(u = 0; u < 60; u++)
-        if(read_elem[u] != write_elem[u]) 
-            return 1;
+    for(u = 0; u < 60; u++) {
+        if(read_elem[u] != write_elem[u]) {
+            fprintf(stderr, "Failed\n");
+            exit(1);
+        }
+    }
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Finalize EFF stack\n");

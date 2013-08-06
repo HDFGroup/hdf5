@@ -548,7 +548,7 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-        printf("EQ ID is %d\n", eq_id); 
+
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 

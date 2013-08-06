@@ -19,8 +19,10 @@
  */
 
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg   */
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg   */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dpkg.h"		/* Datasets		  		*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -40,6 +42,23 @@ H5FL_EXTERN(H5VL_iod_attr_t);
 H5FL_EXTERN(H5VL_iod_group_t);
 H5FL_EXTERN(H5VL_iod_dset_t);
 H5FL_EXTERN(H5VL_iod_dtype_t);
+
+/* H5Diterate op-data for VL traversal */
+typedef struct {
+    size_t buf_size;
+    uint8_t *buf_ptr;
+    uint32_t checksum;
+    uint8_t **off;
+    size_t *len;
+    hsize_t curr_seq;
+    size_t *str_len; /* used only for VL strings */
+} H5VL_iod_pre_write_t;
+
+static herr_t H5VL__iod_pre_write_cb(void UNUSED *elem, hid_t type_id, unsigned ndim, 
+                                     const hsize_t *point, void *_udata);
+
+static herr_t H5VL__iod_vl_read_finalize(size_t buf_size, void *read_buf, void *user_buf, 
+                                         H5S_t *mem_space, hid_t mem_type_id, hid_t dset_type_id);
 
 
 /*-------------------------------------------------------------------------
@@ -252,9 +271,17 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
             cur_req->state = H5VL_IOD_COMPLETED;
         }
         else {
-            HDassert(status);
-            cur_req->status = H5AO_SUCCEEDED;
-            cur_req->state = H5VL_IOD_COMPLETED;
+            if(!status) {
+                fprintf(stderr, "Wait timeout reached\n");
+                cur_req->status = H5AO_FAILED;
+                cur_req->state = H5VL_IOD_COMPLETED;
+                H5VL_iod_request_delete(file, cur_req);
+                goto done;
+            }
+            else {
+                cur_req->status = H5AO_SUCCEEDED;
+                cur_req->state = H5VL_IOD_COMPLETED;
+            }
         }
 
         if(H5VL_iod_request_complete(file, cur_req) < 0)
@@ -263,6 +290,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
         cur_req = tmp_req;
     }
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_request_wait_all */
 
@@ -305,11 +333,18 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                 H5VL_iod_request_delete(file, cur_req);
             }
             else {
-                HDassert(status);
-                cur_req->status = H5AO_SUCCEEDED;
-                cur_req->state = H5VL_IOD_COMPLETED;
-                if(H5VL_iod_request_complete(file, cur_req) < 0)
-                    fprintf(stderr, "Operation Failed!\n");
+                if(!status) {
+                    fprintf(stderr, "Wait timeout reached\n");
+                    cur_req->status = H5AO_FAILED;
+                    cur_req->state = H5VL_IOD_COMPLETED;
+                    H5VL_iod_request_delete(file, cur_req);
+                }
+                else {
+                    cur_req->status = H5AO_SUCCEEDED;
+                    cur_req->state = H5VL_IOD_COMPLETED;
+                    if(H5VL_iod_request_complete(file, cur_req) < 0)
+                        fprintf(stderr, "Operation Failed!\n");
+                }
             }
         }
         cur_req = tmp_req;
@@ -470,6 +505,120 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             free(info->status);
             info->status = NULL;
             info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
+
+            if(info->vl_string_len)
+                free(info->vl_string_len);
+
+            info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_DSET_GET_VL_SIZE:
+        {
+            H5VL_iod_io_info_t *info = (H5VL_iod_io_info_t *)req->data;
+            H5VL_iod_read_status_t *status = (H5VL_iod_read_status_t *)info->status;
+
+            if(SUCCEED != status->ret) {
+                fprintf(stderr, "Errrrr!  Dataset Read Failure Reported from Server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+            else {
+                dset_io_in_t input;
+                void *read_buf;
+                H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
+                uint32_t internal_cs = 0;
+                size_t buf_size = status->buf_size;
+                hg_status_t hg_status;
+                hg_request_t hg_req;       /* Local function shipper request */
+                H5VL_iod_read_status_t vl_status;
+
+                if(NULL == (read_buf = (void *)HDmalloc(buf_size)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate VL recieve buffer");
+
+                /* Register memory with bulk_handle */
+                if(HG_SUCCESS != HG_Bulk_handle_create(read_buf, buf_size, 
+                                                       HG_BULK_READWRITE, info->bulk_handle))
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+                /* Fill input structure for reading data */
+                input.coh = file->remote_file.coh;
+                input.iod_oh = dset->remote_dset.iod_oh;
+                input.iod_id = dset->remote_dset.iod_id;
+                input.bulk_handle = *info->bulk_handle;
+                input.checksum = 0;
+                input.dxpl_id = info->dxpl_id;
+                input.space_id = info->file_space_id;
+                input.mem_type_id = info->mem_type_id;
+                input.dset_type_id = dset->remote_dset.type_id;
+                input.axe_id = info->axe_id;
+                input.parent_axe_id = 0;
+
+                /* forward call to IONs */
+                if(HG_Forward(info->peer, info->read_id, &input, &vl_status, &hg_req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
+
+                if(HG_Wait(hg_req, HG_MAX_IDLE_TIME, &hg_status) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to wait on mercury handle");
+
+                if(!hg_status) {
+                    fprintf(stderr, "Wait timeout reached\n");
+                    req->status = H5AO_FAILED;
+                    req->state = H5VL_IOD_COMPLETED;
+                    H5VL_iod_request_delete(file, req);
+                    goto done;
+                }
+
+                /* Free memory handle */
+                if(HG_SUCCESS != HG_Bulk_handle_free(*info->bulk_handle)) {
+                    fprintf(stderr, "failed to free dataset bulk handle\n");
+                    req->status = H5AO_FAILED;
+                    req->state = H5VL_IOD_COMPLETED;
+                }
+
+                if(SUCCEED != vl_status.ret) {
+                    fprintf(stderr, "Errrrr!  Dataset Read Failure Reported from Server\n");
+                    req->status = H5AO_FAILED;
+                    req->state = H5VL_IOD_COMPLETED;
+                }
+
+                /* calculate a checksum for the data recieved */
+                internal_cs = H5_checksum_lookup4(read_buf, buf_size, NULL);
+
+                /* scatter the data into the user's buffer */
+                if(H5VL__iod_vl_read_finalize(buf_size, read_buf, (void *)info->buf_ptr, 
+                                              info->space, info->mem_type_id, 
+                                              dset->remote_dset.type_id) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to store VL data in user buffer");
+
+                HDfree(read_buf);
+
+                /* verify data integrity */
+                if(internal_cs != vl_status.cs) {
+                    fprintf(stderr, "Errrrr!  Dataset Read integrity failure (expecting %u got %u).\n",
+                            internal_cs, status->cs);
+                    req->status = H5AO_FAILED;
+                    req->state = H5VL_IOD_COMPLETED;
+                }
+
+                /* If the app gave us a buffer to store the checksum, then put it there */
+                if(info->cs_ptr)
+                    *info->cs_ptr = internal_cs;
+            }
+
+            if(info->space && H5S_close(info->space) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
+            if(H5Sclose(info->file_space_id) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataspace");
+            if(H5Tclose(info->mem_type_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "unable to release datatype");
+            if(H5Pclose(info->dxpl_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "unable to release plist");
+
+            free(info->status);
+            info->status = NULL;
+            info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
             info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
@@ -549,7 +698,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_MAP_EXISTS:
         {
-            htri_t *exists = (hbool_t *)req->data;
+            htri_t *exists = (htri_t *)req->data;
 
             if(*exists < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP exists failed at the server");
@@ -870,6 +1019,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             free(info->status);
             info->status = NULL;
             info->bulk_handle = (hg_bulk_t *)H5MM_xfree(info->bulk_handle);
+            if(info->vl_string_len)
+                free(info->vl_string_len);
             info = (H5VL_iod_io_info_t *)H5MM_xfree(info);
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
@@ -1384,7 +1535,576 @@ H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index,
     *id = tmp_id;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5VL_iod_gen_obj_id */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_pre_write_cb
+ *
+ * The callback to the H5Diterate routine called in
+ * H5VL__iod_pre_write. This will generate the offset,length pair for
+ * the serialzed form of the VL data.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5VL__iod_pre_write_cb(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, 
+                       const hsize_t UNUSED *point, void *_udata)
+{
+    H5VL_iod_pre_write_t *udata = (H5VL_iod_pre_write_t *)_udata;
+    H5T_t *dt = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+    switch(H5T_get_class(dt, FALSE)) {
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_NO_CLASS:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        case H5T_COMPOUND:
+            HDassert(0 && fprintf(stderr, "Should not be here \n"));
+            break;
+
+        case H5T_STRING:
+            {
+                char **buf;
+                int i = udata->curr_seq/2;
+
+                HDassert(H5T_is_variable_str(dt));
+
+                buf = (char **)udata->buf_ptr;
+
+                udata->str_len[i] = HDstrlen(buf[i]) + 1;
+                udata->buf_size += udata->str_len[i] + sizeof(size_t);
+
+                udata->off[udata->curr_seq] = (uint8_t *)(udata->str_len+i);
+                udata->len[udata->curr_seq] = sizeof(size_t);
+                udata->curr_seq ++;
+
+                udata->off[udata->curr_seq] = (uint8_t*)buf[i];//(uint8_t *)udata->buf_ptr;
+                udata->len[udata->curr_seq] = udata->str_len[i];
+                udata->curr_seq ++;
+
+                //udata->buf_ptr += udata->str_len[udata->curr_seq];
+
+                break;
+            }
+        case H5T_VLEN:
+            {
+                H5T_t *super = NULL;
+                size_t elmt_size;
+                hvl_t *vl;
+
+                vl = (hvl_t *)udata->buf_ptr;
+
+                if(NULL == (super = H5T_get_super(dt)))
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
+
+                elmt_size = H5T_get_size(super) * vl->len;
+                udata->buf_size += elmt_size + sizeof(size_t);
+
+                udata->off[udata->curr_seq] = (uint8_t *)udata->buf_ptr;
+                udata->len[udata->curr_seq] = sizeof(size_t);
+                udata->curr_seq ++;
+
+                udata->off[udata->curr_seq] = (uint8_t *)(vl->p);
+                udata->len[udata->curr_seq] = elmt_size;
+                udata->curr_seq ++;
+
+                vl ++;
+                udata->buf_ptr = (uint8_t *)vl;
+
+                H5T_close(super);
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_pre_write_cb */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_pre_write
+ *
+ * Depending on the type, this routine generates all the necessary
+ * parameters for forwarding a write call to IOD. It sets up the
+ * Mercury Bulk handle and checksums the data.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
+                   /*out*/uint32_t *_checksum, 
+                   /*out*/hg_bulk_t *bulk_handle,
+                   /*out*/size_t **vl_str_len)
+{
+    hsize_t buf_size = 0;
+    uint32_t checksum = 0;
+    H5S_t *space = NULL;
+    H5T_t *dt = NULL;
+    size_t nelmts;
+    H5T_class_t class;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+    nelmts = H5S_GET_SELECT_NPOINTS(space);
+    class = H5T_get_class(dt, FALSE);
+    *vl_str_len = NULL;
+
+    switch(class) {
+        case H5T_STRING:
+            /* If this is a variable length string, serialize it
+               through a Mercury Segmented handle */
+            if(H5T_is_variable_str(dt)) {
+                char bogus;                 /* bogus value to pass to H5Diterate() */
+                H5VL_iod_pre_write_t udata;
+                H5_checksum_seed_t cs;
+                hg_bulk_segment_t *bulk_segments = NULL;
+                unsigned u;
+
+                /* allocate array that hold every string's length */
+                udata.str_len = (size_t *)malloc(sizeof(size_t) * nelmts);
+
+                /* set H5Diterate op_data */
+                udata.buf_size = 0;
+                udata.buf_ptr = (uint8_t *)buf;
+                udata.checksum = 0;
+                udata.off = (uint8_t **)malloc(nelmts * 2 * sizeof(uint8_t *));
+                udata.len = (size_t *)malloc(nelmts * 2 * sizeof(size_t));
+                udata.curr_seq = 0;
+
+                /* iterate over every element and compute it's size adding it to
+                   the udata buf_size */
+                if(H5D__iterate(&bogus, type_id, space, H5VL__iod_pre_write_cb, &udata) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
+
+                buf_size = udata.buf_size;
+
+                /* Register memory with segmented HG handle */
+                bulk_segments = (hg_bulk_segment_t *)malloc((size_t)udata.curr_seq * 
+                                                            sizeof(hg_bulk_segment_t));
+
+                for (u = 0; u <udata.curr_seq ; u++) {
+                    bulk_segments[u].address = (void *)udata.off[u];
+                    bulk_segments[u].size = udata.len[u];
+                }
+
+                /* create Bulk handle */
+                if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, (size_t)udata.curr_seq, 
+                                                                 HG_BULK_READWRITE, bulk_handle))
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+                free(bulk_segments);
+                bulk_segments = NULL;
+
+                /* compute checksum of length array and the actual stings array */
+                cs.a = cs.b = cs.c = cs.state = 0;
+                cs.total_length = buf_size;
+                for(u = 0; u < udata.curr_seq ; u++) {
+                    checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
+                }
+
+                /* cleanup */
+                if(udata.curr_seq) {
+                    free(udata.len);
+                    udata.len = NULL;
+                    free(udata.off);
+                    udata.off = NULL;
+                }
+
+                *vl_str_len = udata.str_len;
+
+                break;
+            }
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_NO_CLASS:
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        case H5T_COMPOUND:
+            /* Data is not variable length, so no need to iterate over
+               every element in selection */
+            /* MSC - This is not correct. Compound/Array can contian
+               VL datatypes, but for now we don't support that. Need
+               to check for that too */
+            {
+                size_t type_size;
+
+                type_size = H5T_get_size(dt);
+
+                buf_size = type_size * nelmts;
+                checksum = H5S_checksum(buf, type_size, nelmts, space);
+
+                /* If the memory selection is contiguous, create simple HG Bulk Handle */
+                if(H5S_select_is_contiguous(space)) {
+                    /* Register memory with bulk_handle */
+                    if(HG_SUCCESS != HG_Bulk_handle_create(buf, (size_t)buf_size, 
+                                                           HG_BULK_READ_ONLY, bulk_handle))
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+                }
+
+                /* if the memory selection is non-contiguous, create a segmented selection */
+                else {
+                    hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
+                    size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
+                    size_t count = 0; /* number of offset/length entries in selection */
+                    size_t i;
+                    hg_bulk_segment_t *bulk_segments = NULL;
+                    uint8_t *start_offset = (uint8_t *) buf;
+
+                    /* generate the offsets/lengths pair arrays from the memory dataspace selection */
+                    if(H5S_get_offsets(space, type_size, nelmts, &off, &len, &count) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
+
+                    /* Register memory with segmented HG handle */
+                    bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
+                    for (i = 0; i < count ; i++) {
+                        bulk_segments[i].address = (void *)(start_offset + off[i]);
+                        bulk_segments[i].size = len[i];
+                    }
+
+                    /* create Bulk handle */
+                    if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
+                                                                     HG_BULK_READWRITE, bulk_handle))
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+                    /* cleanup */
+                    if(count) {
+                        free(bulk_segments);
+                        bulk_segments = NULL;
+                        free(len);
+                        len = NULL;
+                        free(off);
+                        off = NULL;
+                    }
+                }
+                break;
+            }
+            /* If this is a variable length datatype, serialize it
+               through a Mercury Segmented handle */
+        case H5T_VLEN:
+            {
+                char bogus;                 /* bogus value to pass to H5Diterate() */
+                H5VL_iod_pre_write_t udata;
+                H5_checksum_seed_t cs;
+                hg_bulk_segment_t *bulk_segments = NULL;
+                unsigned u;
+
+                udata.buf_size = 0;
+                udata.buf_ptr = (uint8_t *)buf;
+                udata.checksum = 0;
+                udata.off = (uint8_t **)malloc(nelmts * 2 * sizeof(uint8_t *));
+                udata.len = (size_t *)malloc(nelmts * 2 * sizeof(size_t));
+                udata.curr_seq = 0;
+
+                /* iterate over every element and compute it's size adding it to
+                   the udata buf_size */
+                if(H5D__iterate(&bogus, type_id, space, H5VL__iod_pre_write_cb, &udata) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to compute buffer size");
+
+                buf_size = udata.buf_size;
+
+                /* Register memory with segmented HG handle */
+                bulk_segments = (hg_bulk_segment_t *)malloc((size_t)udata.curr_seq * 
+                                                            sizeof(hg_bulk_segment_t));
+                for (u = 0; u < udata.curr_seq ; u++) {
+                    bulk_segments[u].address = (void *)udata.off[u];
+                    bulk_segments[u].size = udata.len[u];
+                }
+
+                /* create Bulk handle */
+                if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, 
+                                                                 (size_t)udata.curr_seq, 
+                                                                 HG_BULK_READWRITE, bulk_handle))
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+                free(bulk_segments);
+                bulk_segments = NULL;
+
+                cs.a = cs.b = cs.c = cs.state = 0;
+                cs.total_length = buf_size;
+
+                for(u = 0; u < udata.curr_seq ; u++) {
+                    checksum = H5_checksum_lookup4(udata.off[u], udata.len[u], &cs);
+                }
+
+                /* cleanup */
+                if(udata.curr_seq) {
+                    free(udata.len);
+                    udata.len = NULL;
+                    free(udata.off);
+                    udata.off = NULL;
+                }
+
+                break;
+            }
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+    }
+
+    *_checksum = checksum;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_pre_write */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_pre_write
+ *
+ * Depending on the type, this routine generates all the necessary
+ * parameters for forwarding a write call to IOD. It sets up the
+ * Mercury Bulk handle and checksums the data. If the type is of
+ * variable length, then just return that it is, because special
+ * processing is required.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf, 
+                  /*out*/hg_bulk_t *bulk_handle, hbool_t *is_vl_data)
+{
+    size_t buf_size = 0;
+    H5S_t *space = NULL;
+    H5T_t *dt = NULL;
+    size_t nelmts;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataspace")
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+
+    nelmts = H5S_GET_SELECT_NPOINTS(space);
+
+    switch(H5T_get_class(dt, FALSE)) {
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_NO_CLASS:
+        case H5T_STRING:
+            if(H5T_is_variable_str(dt)) {
+                *is_vl_data = TRUE;
+                break;
+            }
+        case H5T_REFERENCE:
+        case H5T_NCLASSES:
+        case H5T_COMPOUND:
+            {
+                size_t type_size;
+
+                *is_vl_data = FALSE;
+
+                type_size = H5T_get_size(dt);
+                buf_size = type_size * nelmts;
+
+                /* If the memory selection is contiguous, create simple HG Bulk Handle */
+                if(H5S_select_is_contiguous(space)) {
+                    /* Register memory with bulk_handle */
+                    if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, 
+                                                           HG_BULK_READWRITE, bulk_handle))
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+                }
+
+                /* if the memory selection is non-contiguous, create a segmented selection */
+                else {
+                    hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
+                    size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
+                    size_t count = 0; /* number of offset/length entries in selection */
+                    size_t i;
+                    hg_bulk_segment_t *bulk_segments = NULL;
+                    uint8_t *start_offset = (uint8_t *) buf;
+
+                    /* generate the offsets/lengths pair arrays from the memory dataspace selection */
+                    if(H5S_get_offsets(space, type_size, nelmts, &off, &len, &count) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
+
+                    /* Register memory with segmented HG handle */
+                    bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
+                    for (i = 0; i < count ; i++) {
+                        bulk_segments[i].address = (void *)(start_offset + off[i]);
+                        bulk_segments[i].size = len[i];
+                    }
+
+                    /* create Bulk handle */
+                    if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
+                                                                     HG_BULK_READWRITE, bulk_handle))
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
+
+                    /* cleanup */
+                    if(count) {
+                        free(bulk_segments);
+                        bulk_segments = NULL;
+                        free(len);
+                        len = NULL;
+                        free(off);
+                        off = NULL;
+                    }
+                }
+                break;
+            }
+        case H5T_VLEN:
+            *is_vl_data = TRUE;
+            break;
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, FAIL, "unsupported datatype");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_pre_read */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__iod_vl_read_finalize
+ *
+ * Finalize the data read by deserializing it into the user's buffer.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__iod_vl_read_finalize(size_t buf_size, void *read_buf, void *user_buf, 
+                           H5S_t *mem_space, hid_t mem_type_id, hid_t dset_type_id)
+{
+    H5T_t *mem_dt = NULL;
+    H5T_t *super = NULL;
+    size_t super_size;
+    hsize_t nelmts;
+    size_t elmt_size = 0;
+    H5T_class_t class;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (mem_dt = (H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5T_NO_CLASS, "not a datatype")
+    if(NULL == (super = H5T_get_super(mem_dt)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid super type of VL type");
+    
+    super_size = H5T_get_size(super);
+    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
+    class = H5T_get_class(mem_dt, FALSE);
+
+    /* If the memory selection is contiguous, simply iterate over
+       every element and store the VL data */
+    if(H5S_select_is_contiguous(mem_space)) {
+        uint8_t *buf_ptr = (uint8_t *)read_buf;
+        unsigned u;
+
+        if(H5T_VLEN == class) {
+            size_t seq_len;
+            hvl_t *vl = (hvl_t *)user_buf;
+
+            for(u=0 ; u<nelmts ; u++) {
+                seq_len = *((size_t *)buf_ptr);
+                buf_ptr += sizeof(size_t);
+
+                elmt_size = super_size * seq_len;
+
+                vl[u].len = seq_len;
+                vl[u].p = malloc(super_size * seq_len);
+                HDmemcpy(vl[u].p, buf_ptr, elmt_size);
+                buf_ptr += elmt_size;
+            }
+        }
+        else if(H5T_STRING == class) {
+            char **buf = (char **)user_buf;
+
+            for(u=0 ; u<nelmts ; u++) {
+                elmt_size = *((size_t *)buf_ptr);
+                buf_ptr += sizeof(size_t);
+
+                buf[u] = HDstrdup((char *)buf_ptr);
+                buf_ptr += elmt_size;
+            }
+        }
+    }
+#if 0
+    else {
+        hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
+        size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
+        size_t count = 0; /* number of offset/length entries in selection */
+        size_t i;
+        hg_bulk_segment_t *bulk_segments = NULL;
+        uint8_t *start_offset = (uint8_t *) read_buf;
+
+        /* generate the offsets/lengths pair arrays from the memory dataspace selection */
+        if(H5S_get_offsets(space, type_size, nelmts, &off, &len, &count) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
+
+        /* cleanup */
+        if(count) {
+            free(bulk_segments);
+            bulk_segments = NULL;
+            free(len);
+            len = NULL;
+            free(off);
+            off = NULL;
+        }
+    }
+#endif
+
+done:
+    if(super && H5T_close(super) < 0)
+        HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "can't close super type")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_vl_read_finalize */
 
 #if 0
 static herr_t

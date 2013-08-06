@@ -68,6 +68,7 @@ static hg_id_t H5VL_MAP_CLOSE_ID;
 static hg_id_t H5VL_DSET_CREATE_ID;
 static hg_id_t H5VL_DSET_OPEN_ID;
 static hg_id_t H5VL_DSET_READ_ID;
+static hg_id_t H5VL_DSET_GET_VL_SIZE_ID;
 static hg_id_t H5VL_DSET_WRITE_ID;
 static hg_id_t H5VL_DSET_SET_EXTENT_ID;
 static hg_id_t H5VL_DSET_CLOSE_ID;
@@ -388,6 +389,8 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
     H5VL_DSET_CREATE_ID = MERCURY_REGISTER("dset_create", dset_create_in_t, dset_create_out_t);
     H5VL_DSET_OPEN_ID   = MERCURY_REGISTER("dset_open", dset_open_in_t, dset_open_out_t);
     H5VL_DSET_READ_ID   = MERCURY_REGISTER("dset_read", dset_io_in_t, dset_read_out_t);
+    H5VL_DSET_GET_VL_SIZE_ID = MERCURY_REGISTER("dset_get_vl_size", 
+                                                dset_get_vl_size_in_t, dset_read_out_t);
     H5VL_DSET_WRITE_ID  = MERCURY_REGISTER("dset_write", dset_io_in_t, ret_t);
     H5VL_DSET_SET_EXTENT_ID = MERCURY_REGISTER("dset_set_extent", 
                                                dset_set_extent_in_t, ret_t);
@@ -2367,6 +2370,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     dset_io_in_t input;
+    dset_get_vl_size_in_t input_vl;
     H5P_genplist_t *plist;
     hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
     hg_request_t *hg_req = NULL;
@@ -2377,10 +2381,11 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
     char fake_char;
-    size_t buf_size;  /* size of the contiguous buffer */
     size_t type_size; /* size of mem type */
     size_t nelmts;    /* num elements in mem dataspace */
-    H5VL_iod_io_info_t *info;
+    H5VL_iod_io_info_t *info = NULL;
+    hbool_t is_vl_data = FALSE;
+    uint64_t parent_axe_id;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
@@ -2422,9 +2427,9 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* set the parent axe id */
     if(dset->common.request)
-        input.parent_axe_id = dset->common.request->axe_id;
+        parent_axe_id = dset->common.request->axe_id;
     else {
-        input.parent_axe_id = 0;
+        parent_axe_id = 0;
     }
 
     /* get the memory type size */
@@ -2440,71 +2445,14 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     /* get the number of elements selcted in dataspace */
     nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
-    /* calculate the raw data size */
-    buf_size = nelmts * type_size;
-
     /* allocate a bulk data transfer handle */
     if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* If the memory selection is contiguous, create simple HG Bulk Handle */
-    if(H5S_select_is_contiguous(mem_space)) {
-        /* Register memory with bulk_handle */
-        if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, HG_BULK_READWRITE, bulk_handle))
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
-    }
-
-    /* if the memory selection is non-contiguous, create a segmented selection */
-    else {
-        hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
-        size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
-        size_t count = 0; /* number of offset/length entries in selection */
-        size_t i;
-        hg_bulk_segment_t *bulk_segments = NULL;
-
-        /* generate the offsets/lengths pair arrays from the memory dataspace selection */
-        if(H5S_get_offsets(mem_space, type_size, nelmts, &off, &len, &count) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
-
-        /* Register memory with segmented HG handle */
-        bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
-        for (i = 0; i < count ; i++) {
-            hsize_t start_offset = (hsize_t)buf;
-
-            bulk_segments[i].address = (void *)(start_offset + off[i]);
-            bulk_segments[i].size = len[i];
-        }
-
-        /* create Bulk handle */
-        if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
-                                                         HG_BULK_READWRITE, bulk_handle))
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
-
-        /* cleanup */
-        if(count) {
-            free(bulk_segments);
-            bulk_segments = NULL;
-            free(len);
-            len = NULL;
-            free(off);
-            off = NULL;
-        }
-    }
-
-    /* Fill input structure */
-    input.coh = dset->common.file->remote_file.coh;
-    input.iod_oh = dset->remote_dset.iod_oh;
-    input.iod_id = dset->remote_dset.iod_id;
-    input.bulk_handle = *bulk_handle;
-    input.checksum = 0;
-    input.dxpl_id = dxpl_id;
-    input.space_id = file_space_id;
-    input.dset_type_id = dset->remote_dset.type_id;
-    input.mem_type_id = mem_type_id;
-    input.axe_id = axe_id ++;
-
-    /* allocate structure to receive status of read operation (contains return value and checksum */
-    status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
+    /* compute checksum and create bulk handle */
+    if(H5VL_iod_pre_read(mem_type_id, mem_space_id, buf, 
+                         bulk_handle, &is_vl_data) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't generate read parameters");
 
     /* get a function shipper request */
     if(do_async) {
@@ -2514,25 +2462,67 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     else
         hg_req = &_hg_req;
 
+    if(!is_vl_data) {
+        /* Fill input structure for reading data */
+        input.coh = dset->common.file->remote_file.coh;
+        input.iod_oh = dset->remote_dset.iod_oh;
+        input.iod_id = dset->remote_dset.iod_id;
+        input.bulk_handle = *bulk_handle;
+        input.checksum = 0;
+        input.dxpl_id = dxpl_id;
+        input.space_id = file_space_id;
+        input.dset_type_id = dset->remote_dset.type_id;
+        input.mem_type_id = mem_type_id;
+        input.axe_id = axe_id ++;
+        input.parent_axe_id = parent_axe_id;
+    }
+    else {
+        /* Fill input structure for retrieving the buffer size needed to read */
+        input_vl.coh = dset->common.file->remote_file.coh;
+        input_vl.iod_oh = dset->remote_dset.iod_oh;
+        input_vl.iod_id = dset->remote_dset.iod_id;
+        input_vl.dxpl_id = dxpl_id;
+        input_vl.space_id = file_space_id;
+        input_vl.mem_type_id = mem_type_id;
+        input_vl.axe_id = axe_id ++;
+        input_vl.parent_axe_id = parent_axe_id;
+    }
+
+    /* allocate structure to receive status of read operation
+       (contains return value, checksum, and buffer size) */
+    status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
+
 #if H5VL_IOD_DEBUG
-    printf("Dataset Read, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
+    if(!is_vl_data)
+        printf("Dataset Read, axe id %llu, parent %llu\n", 
+               input.axe_id, input.parent_axe_id);
+    else
+        printf("Dataset GET size, axe id %llu, parent %llu\n", 
+               input_vl.axe_id, input_vl.parent_axe_id);
 #endif
 
     /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_READ_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
+    if(!is_vl_data) {
+        if(HG_Forward(PEER, H5VL_DSET_READ_ID, &input, status, hg_req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
+    }
+    else {
+        if(HG_Forward(PEER, H5VL_DSET_GET_VL_SIZE_ID, &input_vl, status, hg_req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset get VL size");
+    }
 
     /* setup info struct for I/O request. 
        This is to manage the I/O operation once the wait is called. */
     if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_calloc(sizeof(H5VL_iod_io_info_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+
     info->status = status;
     info->bulk_handle = bulk_handle;
     info->buf_ptr = buf;
     info->nelmts = nelmts;
     info->type_size = type_size;
     info->cs_ptr = NULL;
+
     /* store a copy of the dataspace selection to be able to calculate the checksum later */
     if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
@@ -2542,6 +2532,21 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     /* store the pointer to the buffer where the checksum needs to be placed */
     if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
+
+    /* If the read is of VL data, then we need the read parameters to
+       perform the actual read when the wait is called (i.e. when we
+       retrieve the buffer size) */
+    if(is_vl_data) {
+        if(NULL == (info->file_space_id = H5Scopy(file_space_id)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
+        if(NULL == (info->mem_type_id = H5Tcopy(mem_type_id)))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
+        if(NULL == (info->dxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy dxpl");
+        info->axe_id = axe_id++;
+        info->peer = PEER;
+        info->read_id = H5VL_DSET_READ_ID;
+    }
 
     /* Get async request for operation */
     if(do_async) {
@@ -2553,7 +2558,14 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DSET_READ;
+
+    if(!is_vl_data) {
+        request->type = HG_DSET_READ;
+    }
+    else {
+        request->type = HG_DSET_GET_VL_SIZE;
+    }
+
     request->data = info;
     request->req = hg_req;
     request->obj = (H5VL_iod_object_t *)dset;
@@ -2614,12 +2626,13 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     const H5S_t *file_space = NULL;
     char fake_char;
     int *status = NULL;
-    size_t buf_size;  /* size of the contiguous buffer */
+    hsize_t buf_size;  /* size of the contiguous buffer */
     size_t type_size; /* size of mem type */
     size_t nelmts;    /* num elements in mem dataspace */
-    H5VL_iod_io_info_t *info;
+    H5VL_iod_io_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
     uint64_t parent_axe_id;
-    uint32_t internal_cs;
+    uint32_t internal_cs; /* internal checksum calculated in this function */
+    size_t *vl_string_len = NULL; /* array that will contain lengths of strings if the datatype is a VL string type */
     hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
@@ -2659,31 +2672,14 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(!buf)
         buf = &fake_char;
 
-    /* set the parent axe id */
-    if(dset->common.request)
-        input.parent_axe_id = dset->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
-    }
+    /* allocate a bulk data transfer handle */
+    if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* get the memory type size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-
-        type_size = H5T_GET_SIZE(dt);
-    }
-
-    /* get the number of elements selcted in dataspace */
-    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
-
-    /* calculate the raw data size */
-    buf_size = nelmts * type_size;
-
-    /* calculate a checksum for the data */
-    internal_cs = H5S_checksum(buf, type_size, nelmts, mem_space);
+    /* compute checksum and create bulk handle */
+    if(H5VL_iod_pre_write(mem_type_id, mem_space_id, buf, 
+                          &internal_cs, bulk_handle, &vl_string_len) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
 
     /* Verify the checksum value if the dxpl contains a user defined checksum */
     if(H5P_DATASET_XFER_DEFAULT != dxpl_id) {
@@ -2703,52 +2699,11 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         }
     }
 
-    /* allocate a bulk data transfer handle */
-    if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
-
-    /* If the memory selection is contiguous, create simple HG Bulk Handle */
-    if(H5S_select_is_contiguous(mem_space)) {
-        /* Register memory with bulk_handle */
-        if(HG_SUCCESS != HG_Bulk_handle_create(buf, buf_size, HG_BULK_READ_ONLY, bulk_handle))
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
-    }
-
-    /* if the memory selection is non-contiguous, create a segmented selection */
+    /* set the parent axe id */
+    if(dset->common.request)
+        input.parent_axe_id = dset->common.request->axe_id;
     else {
-        hsize_t *off = NULL; /* array that contains the memory addresses of the memory selection */
-        size_t *len = NULL; /* array that contains the length of a contiguous block at each address */
-        size_t count = 0; /* number of offset/length entries in selection */
-        size_t i;
-        hg_bulk_segment_t *bulk_segments = NULL;
-
-        /* generate the offsets/lengths pair arrays from the memory dataspace selection */
-        if(H5S_get_offsets(mem_space, type_size, nelmts, &off, &len, &count) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't retrieve offets/lengths of memory space");
-
-        /* Register memory with segmented HG handle */
-        bulk_segments = (hg_bulk_segment_t *)malloc(count * sizeof(hg_bulk_segment_t));
-        for (i = 0; i < count ; i++) {
-            hsize_t start_offset = (hsize_t)buf;
-
-            bulk_segments[i].address = (void *)(start_offset + off[i]);
-            bulk_segments[i].size = len[i];
-        }
-
-        /* create Bulk handle */
-        if (HG_SUCCESS != HG_Bulk_handle_create_segments(bulk_segments, count, 
-                                                         HG_BULK_READWRITE, bulk_handle))
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't create Bulk Data Handle");
-
-        /* cleanup */
-        if(count) {
-            free(bulk_segments);
-            bulk_segments = NULL;
-            free(len);
-            len = NULL;
-            free(off);
-            off = NULL;
-        }
+        input.parent_axe_id = 0;
     }
 
     /* Fill input structure */
@@ -2786,8 +2741,10 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
        This is to manage the I/O operation once the wait is called. */
     if(NULL == (info = (H5VL_iod_io_info_t *)H5MM_calloc(sizeof(H5VL_iod_io_info_t))))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+
     info->status = status;
     info->bulk_handle = bulk_handle;
+    info->vl_string_len = vl_string_len;
 
     /* Get async request for operation */
     if(do_async) {

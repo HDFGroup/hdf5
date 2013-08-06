@@ -112,6 +112,8 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              dset_open_in_t, dset_open_out_t);
     MERCURY_HANDLER_REGISTER("dset_read", H5VL_iod_server_dset_read, 
                              dset_io_in_t, dset_read_out_t);
+    MERCURY_HANDLER_REGISTER("dset_get_vl_size", H5VL_iod_server_dset_get_vl_size, 
+                             dset_get_vl_size_in_t, dset_read_out_t);
     MERCURY_HANDLER_REGISTER("dset_write", H5VL_iod_server_dset_write, 
                              dset_io_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("dset_set_extent", H5VL_iod_server_dset_set_extent, 
@@ -157,7 +159,7 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
         return FAIL;
 
     /* Set number of threads in AXE engine */
-    if(AXEset_num_threads(&engine_attr, 4) != AXE_SUCCEED)
+    if(AXEset_num_threads(&engine_attr, 1) != AXE_SUCCEED)
         return FAIL;
 
     /* Create AXE engine */
@@ -1281,6 +1283,62 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_dset_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_get_vl_size
+ *
+ * Purpose:	Function shipper registered call for dset get VL buffer size.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    dset_get_vl_size_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (dset_get_vl_size_in_t *)
+                H5MM_malloc(sizeof(dset_get_vl_size_in_t))))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id) {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_dset_get_vl_size_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_dset_get_vl_size_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_dset_get_vl_size() */
 
 
 /*-------------------------------------------------------------------------

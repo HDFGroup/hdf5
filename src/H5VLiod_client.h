@@ -50,6 +50,7 @@ typedef enum H5RQ_type_t {
     HG_DSET_OPEN,
     HG_DSET_READ,
     HG_DSET_WRITE,
+    HG_DSET_GET_VL_SIZE,
     HG_DSET_SET_EXTENT,
     HG_DSET_CLOSE,
     HG_DTYPE_COMMIT,
@@ -218,13 +219,26 @@ typedef struct H5VL_iod_dtype_t {
 
 /* information about a dataset read/write request */
 typedef struct H5VL_iod_io_info_t {
+    /* read & write params */
     void *status;
     hg_bulk_t *bulk_handle;
+
+    /* write params */
+    size_t *vl_string_len;
+
+    /* read params */
     void *buf_ptr;
     size_t nelmts;
     size_t type_size;
     struct H5S_t *space;
     uint32_t *cs_ptr;
+    hid_t file_space_id;
+    hid_t mem_type_id;
+    hid_t dxpl_id;
+    uint64_t axe_id;
+    na_addr_t peer;
+    hg_id_t read_id;
+
 } H5VL_iod_io_info_t;
 
 H5_DLL herr_t H5VL_iod_request_delete(H5VL_iod_file_t *file, H5VL_iod_request_t *request);
@@ -240,6 +254,12 @@ H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t
 H5_DLL herr_t H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parents);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);
+H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, hid_t space_id, const void *buf, 
+                                 /*out*/uint32_t *_checksum, 
+                                 /*out*/hg_bulk_t *bulk_handle,
+                                 /*out*/size_t **vl_str_len);
+H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, hid_t space_id, const void *buf, 
+                                /*out*/hg_bulk_t *bulk_handle, hbool_t *is_vl_data);
 
 /* private routines for map objects */
 H5_DLL herr_t H5M_init(void);

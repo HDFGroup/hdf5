@@ -58,8 +58,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
     char *last_comp; /* the name of the datatype obtained from the last component in the path */
     size_t buf_size; /* size of the serialized datatype */
     void *buf;
-    iod_mem_desc_t mem_desc; /* memory descriptor used for writing */
-    iod_blob_iodesc_t file_desc; /* file descriptor used to write */
+    iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for writing */
+    iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
     scratch_pad_t sp;
     iod_ret_t ret;
     hbool_t collective = FALSE; /* flag to indicate whether we opened the attribute here or if it was already open */
@@ -126,22 +126,25 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         if(H5Tencode(input->type_id, buf, &buf_size) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "failed to encode datatype type");
 
-#if 0
         /* create memory descriptor for writing */
-        mem_desc.nfrag = 1;
-        mem_desc.frag->addr = buf;
-        mem_desc.frag->len = (iod_size_t)buf_size;
+        mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
+        mem_desc->nfrag = 1;
+        mem_desc->frag[0].addr = buf;
+        mem_desc->frag[0].len = (iod_size_t)buf_size;
 
         /* create file descriptor for writing */
-        file_desc.nfrag = 1;
-        file_desc.frag->offset = 0;
-        file_desc.frag->len = (iod_size_t)buf_size;
-#endif
+        file_desc = (iod_blob_iodesc_t *)malloc(sizeof(iod_blob_iodesc_t) + 
+                                                sizeof(iod_blob_iofrag_t));
+        file_desc->nfrag = 1;
+        file_desc->frag[0].offset = 0;
+        file_desc->frag[0].len = (iod_size_t)buf_size;
 
         /* write the serialized type value to the BLOB object */
-        if(iod_blob_write(dtype_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
+        if(iod_blob_write(dtype_oh, IOD_TID_UNKNOWN, NULL, mem_desc, file_desc, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
 
+        free(mem_desc);
+        free(file_desc);
 
         if(H5P_DEFAULT == input->tcpl_id)
             tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
@@ -256,8 +259,8 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     const char *name = input->name; /* name of dtype including path to open */
     size_t buf_size; /* size of serialized datatype */
     void *buf = NULL;
-    iod_mem_desc_t mem_desc; /* memory descriptor used for reading */
-    iod_blob_iodesc_t file_desc; /* file descriptor used to write */
+    iod_mem_desc_t *mem_desc = NULL; /* memory descriptor used for reading */
+    iod_blob_iodesc_t *file_desc = NULL; /* file descriptor used to write */
     scratch_pad_t sp;
     iod_size_t kv_size;
     herr_t ret_value = SUCCEED;
@@ -278,6 +281,7 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
     if (iod_obj_open_write(coh, sp.mdkv_id, NULL /*hints*/, &mdkv_oh, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
+    /* MSC  -  NEED IOD */
 #if 0
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, H5VL_IOD_KEY_OBJ_CPL,
                              NULL, NULL, &output.tcpl_id) < 0)
@@ -297,26 +301,30 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     if(NULL == (buf = malloc(buf_size)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate BLOB read buffer");
-#endif
 
     /* close the metadata scratch pad */
     if(iod_obj_close(mdkv_oh, NULL, NULL))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
 
-#if 0
-    /* create memory descriptor for reading */
-    mem_desc.nfrag = 1;
-    mem_desc.frag->addr = buf;
-    mem_desc.frag->len = (iod_size_t)buf_size;
+    /* create memory descriptor for writing */
+    mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
+    mem_desc->nfrag = 1;
+    mem_desc->frag[0].addr = buf;
+    mem_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* create file descriptor for writing */
-    file_desc.nfrag = 1;
-    file_desc.frag->offset = 0;
-    file_desc.frag->len = (iod_size_t)buf_size;
+    file_desc = (iod_blob_iodesc_t *)malloc(sizeof(iod_blob_iodesc_t) + 
+                                            sizeof(iod_blob_iofrag_t));
+    file_desc->nfrag = 1;
+    file_desc->frag[0].offset = 0;
+    file_desc->frag[0].len = (iod_size_t)buf_size;
 
     /* read the serialized type value from the BLOB object */
     if(iod_blob_read(dtype_oh, IOD_TID_UNKNOWN, NULL, &mem_desc, &file_desc, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write BLOB object");
+
+    free(mem_desc);
+    free(file_desc);
 
     /* decode the datatype */
     if((output.type_id = H5Tdecode(buf)) < 0)

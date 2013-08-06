@@ -283,7 +283,8 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
 
 #if H5_DO_NATIVE
     {
-        coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
+        H5Pset_sieve_buf_size(input->fapl_id, 0);
+        coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, input->fapl_id);
         assert(coh.cookie);
         root_oh.cookie = coh.cookie;
         fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
