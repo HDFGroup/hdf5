@@ -407,7 +407,9 @@ H5VL_iod_server_file_close_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close container");
 
 done:
+#if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with file close, sending response to client\n");
+#endif
     if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't send result of file close to client");
 

@@ -1396,17 +1396,23 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
 
   if (NULL == curr_queue){
     if (compactor_queue_flag){
+#if DEBUG_COMPACTOR
       fprintf (stderr, "Compactor queue cannot be NULL when compactor_flag is %d\n",
 	       compactor_queue_flag);
+#endif
       compactor_queue_flag = 0;
     }
+#if DEBUG_COMPACTOR
     fprintf(stderr,"Compactor Not present with flag : %d\n",
 	    compactor_queue_flag);
+#endif
   }
   else{
+#if DEBUG_COMPACTOR
      fprintf(stderr,"Queue exists with compactor_flag : %d, and %d reqs\n", compactor_queue_flag,
              H5VL_iod_get_number_of_requests(curr_queue));
      fflush(stderr);
+#endif
   }
 
   
@@ -1417,9 +1423,10 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
     if (CP_SUCCESS != H5VL_iod_init_compactor_queue(&curr_queue)){
       HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, CP_FAIL, "Queue initialization error");
     }
-
+#if DEBUG_COMPACTOR
     fprintf (stderr, "Completed creating a queue : %p\n", (void *)curr_queue);
     fflush(stderr);
+#endif
   }
   
 
@@ -1522,7 +1529,9 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't begin trying in AXE");
       }
       if ( AXE_SUCCEED != AXEget_status(engine, input->parent_axe_ids.ids[ii], &status)){
+#if DEBUG_COMPACTOR
 	fprintf (stderr, "Task %ld does not exist\n", input->parent_axe_ids.ids[ii]);
+#endif
 	if (SUCCEED != H5VL_iod_reconstruct_parents (engine,
 						     &input->parent_axe_ids, 
 						     &newParents)){
@@ -1673,7 +1682,9 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
       }
 
       if ( AXE_SUCCEED != AXEget_status(engine, input->parent_axe_ids.ids[ii], &status)){
+#if DEBUG_COMPACTOR
 	fprintf (stderr, "Task %ld does not exist\n", input->parent_axe_ids.ids[ii]);
+#endif
 	if (SUCCEED != H5VL_iod_reconstruct_parents (engine,
 						     &input->parent_axe_ids, 
 						     &newParents)){

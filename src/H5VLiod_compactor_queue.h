@@ -23,8 +23,10 @@
 #define NOT_MERGED 298
 #define USED_IN_MERGING 299
 /* Read states  */
-#define NOT_SS 300;
+#define NOT_SS 300
 #define SS 301
+#define SPLIT_FOR_SS 302
+#define USED_IN_SS 303
 /* ---------------- */
 #define CP_SUCCESS 0
 #define CP_FAIL -1

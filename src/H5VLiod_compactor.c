@@ -46,7 +46,7 @@ hbool_t overlap_flag = FALSE;
  * Programmer:  Vishwanath Venkatesan <vish@hdfgroup.gov>
  *              June, 2013
  *
- * Purpose:	Request Compactor server-side routines
+ * Purpose:	I/O Request Compactor server-side routines
 
  *------------------------------------------------------------------*/
 
@@ -89,17 +89,15 @@ static void H5VL_print_block_container (block_container_t *cont,
 					size_t num);
 
 
-static int H5VL_iod_read_write_overlap (hid_t wdataspace,
-					hid_t rdataspace,
-					hid_t *overlap_space,
-					hid_t *n_overlap_space);
+static void H5VL_iod_read_write_overlap (hid_t wdataspace,
+					 hid_t rdataspace,
+					 hid_t *overlap_space,
+					 hid_t *n_overlap_space,
+					 int *ret_values);
 
 static int H5VL_check_overlapped_offsets(hsize_t start_i, hsize_t start_j,
 					 hsize_t end_i, hsize_t end_j);
 
-static int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
-				 hsize_t *start_offsets, hsize_t *end_offsets,
-				 int nentries, int *requests, int *nreqs);
 
 /*---------------------------------------------------------------------*/
 
@@ -167,7 +165,6 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 
 {
 
-  
   compactor_entry *t_entry = NULL;
   op_data_t *op_data;
   dset_io_in_t *input;
@@ -343,6 +340,7 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	    if ((hid_t)dataset_id == unique_datasets[i].dataset){
 	      lreq = unique_datasets[i].num_requests;
 	      unique_datasets[i].requests[lreq] = request_id;
+
 #if DEBUG_COMPACTOR
 	      fprintf(stderr, "in %s:%d old dataset: %d has the request %d at %d \n",
 		      __FILE__, __LINE__,
@@ -484,12 +482,6 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 #endif
 	    HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL,"Buffer does not match the selection offsets");
 	  }
-#if DEBUG_COMPACTOR
-	  fprintf(stderr,
-		  "\n %zd: foffsets %lli,  flen: %zd, moffset: %lli, mlen : %zd\n",
-		  ii,offsets[ii],len[ii],local_mcont_ptr[ii].offset, len[ii]);
-#endif
-
         }
       } /*end else for appropriate selection*/
       request_id++;
@@ -550,85 +542,261 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
   FUNC_LEAVE_NOAPI(ret_value);
 } /* end  H5VL_iod_create_requests_list */
 
-/*--------------------------------------------------------------------------
- *  Function:	H5VL_iod_get_read_spread
+
+/*-------------------------------------------------------------------------
+ *  Function:      H5VL_iod_get_read_memory_buffer
  *
- *  Purpose :   Function to check whether current read is avaible in current
- *              writes and returns the list of request that satisfy the 
- *              current read 
+ *  Purpose :      Constructs read memory buffer, either from reads/writes
  *
- *  Return  :   SUCCESS : 1 (found a matching write)
- *              FAILURE : 0 (no matching write found)
+ *  Return:        SUCCESS : CP_SUCCESS
+ *                 FAILURE : CP_FAIL
  *
- *  Programmer : Vishwanath Venkatesan
- *               August, 2013
+ *  Programmer:    Vishwanath Venkatesan
+ *                 August, 2013
  *--------------------------------------------------------------------------
  */
 
-static
-int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
-			      hsize_t *start_offsets, hsize_t *end_offsets,
-			      int nentries, int *request_list, int *nreqs){
-  
+int H5VL_iod_get_read_memory_buffer (request_list_t *current, 
+				     request_list_t *old,
+				     hsize_t *offsets,
+				     size_t *lens,
+				     size_t entries,
+				     int type){
+  size_t l,j;
   int ret_value = CP_SUCCESS;
-  int i, reqs = 0;
+  hsize_t offset_calc;
+  size_t len_calc;
+  void *current_buf= NULL;
+  size_t current_len, len_cnt;
   
+  
+  for(l = 0; l < entries; l ++){
 
-  
-  
-  for ( i = 0; i < nentries; i++){
+    if (type == WRITE){
+      current_buf = (void *)(uintptr_t)(current->mblocks[l].offset);
+      current_len = current->mblocks[l].len;
+      len_cnt = 0;
+    }
 
-    if (start_offsets[i] == -1)
-      continue;
+    for (j = 0; j < old->num_fblocks; j++){
+      
+      if(H5VL_check_overlapped_offsets(old->fblocks[j].offset,
+				       offsets[l],
+				       (old->fblocks[j].offset + old->fblocks[j].len),
+				       (offsets[l]+lens[l]))){
+	
+	if (type == WRITE){
+	  current_buf =(void *)(uintptr_t)(current->mblocks[l].offset + len_cnt);
+	}
 
-    if ((start_offset >= start_offsets[i]) &&
-	(end_offset <= end_offsets[i])){
-      request_list[reqs] = i;
-      reqs++;
-      start_offset = end_offset;
-      break;
-    }
-    if ((start_offset >= start_offsets[i]) &&
-	(end_offset > end_offsets[i])){
-      request_list[reqs] = i;
-      reqs++;
-      start_offset = end_offsets[i] + 1;
-    }
-    if (start_offset < start_offsets[i]){
-      continue;
-    }
-  }
-  
+	if (old->fblocks[j].offset <= offsets[l]){
+	  /*The old start-offset encapsulates the read
+	    This case the begenning is covered*/
+	  if ((old->fblocks[j].offset + old->fblocks[j].len) >=
+	      (offsets[l] + lens[l])){
+	    /*The Entire current  entry falls in between this 
+	      old entry. No need to continue this ith iteration
+	      so break once done!*/
+	    offset_calc = old->mblocks[j].offset +
+	      (offsets[l] - old->fblocks[j].offset);
+	    len_calc = lens[l];  	      
+	    if (type == READ){
+	      current->mblocks[current->num_mblocks].offset = 
+		offset_calc;
+	      current->mblocks[current->num_mblocks].len =
+		len_calc;	    
+	    }
+	    else{
 #if DEBUG_COMPACTOR
-  fprintf (stderr, "Rstart: %lli, Rend: %lli\n",
-	   start_offset, end_offset);
+	      fprintf (stderr, "Current_buf: %u, Offset: %lli, len_calc: %zd\n",
+		       (uintptr_t)current_buf, offset_calc, len_calc);
 #endif
-  if (start_offset == end_offset){
-    ret_value = 1;
-    *nreqs = reqs;
+	      memcpy(current_buf, (void *)(uintptr_t)offset_calc,
+		     len_calc);
+	      len_cnt += len_calc;
+	    }
+	    if (type == READ)
+	      current->num_mblocks++;
+	    break;
+	  }
+	  else{
+	    /*Portion of the current entry falls in 
+	      this old-entry there will be some 
+	      left in the fag end*/
+	    offset_calc = old->mblocks[j].offset +
+              (offsets[l] - old->fblocks[j].offset);
+	    len_calc = lens[l] - old->mblocks[j].len;
+	    if (type == READ){
+	      current->mblocks[current->num_mblocks].offset = 
+		offset_calc;
+	      current->mblocks[current->num_mblocks].len = 
+		len_calc;
+	    }
+	    else{
+	      memcpy(current_buf, (void *)(uintptr_t)offset_calc,
+		     len_calc);
+	      len_cnt  += len_calc;		     
+	    }
+	  }
+	}
+	else{
+	  /*Ok the old entry starts after the current.
+	    Let us see if we
+	    can get some memory at all!*/
+	  if ((old->fblocks[j].offset + old->fblocks[j].len) >=
+	      (offsets[l]+ lens[l])){
+	    /*In this case the old entry spans beyond current so
+	      we can definitely get everything from the point
+	      the old starts and current ends*/
+	    offset_calc = old->mblocks[j].offset;
+	    len_calc = lens[l];
+	    if (type == READ){
+	      current->mblocks[current->num_mblocks].offset = 
+		offset_calc;
+	      current->mblocks[current->num_mblocks].len = 
+		len_calc;
+	    }
+	    else{
+	      memcpy(current_buf, (void *)(uintptr_t)offset_calc,
+		     len_calc);
+	      len_cnt += len_calc;
+	    }
+	  }
+	  else{
+	    /*old entry is in-between current
+	      In this we get everything from the point old entry starts
+	      and current entry ends */
+	    offset_calc = old->mblocks[j].offset;
+	    len_calc = old->mblocks[j].len;
+	    if (type == READ){
+	      current->mblocks[current->num_mblocks].offset = 
+		offset_calc;
+	      current->mblocks[current->num_mblocks].len = 
+		len_calc;
+	    }
+	    else{
+	      memcpy(current_buf, (void *)(uintptr_t)offset_calc,
+		     len_calc);
+	      len_cnt += len_calc;
+	    }
+	  }
+	}
+	if(type == READ)
+	  current->num_mblocks++;
+      }
+    }
   }
-  else{
-    ret_value = 0;
-  }
-  
-  
-  
   return ret_value;
 }
 
 
+/*-------------------------------------------------------------------------
+ *  Function:      H5VL_iod_short_circuit_read 
+ *
+ *  Purpose :      Replaces a READ entry write buffer values as much as 
+ *                 possible/Construct a READ request that cannot be copied.
+ *
+ *  Return:        SUCCESS : CP_SUCCESS
+ *                 FAILURE : CP_FAIL
+ *
+ *  Programmer:    Vishwanath Venkatesan
+ *                 August, 2013
+ *--------------------------------------------------------------------------
+ */
+
+int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
+				 int i, int *read_cnt, hsize_t *offsets,
+				 size_t *lens, size_t entries, 
+				 hbool_t overlap){
+  
+  size_t l;
+  int ret_value = CP_SUCCESS;
+  int rcnt = *read_cnt;
+#if DEBUG_COMPACTOR
+  int *ptr;
+  size_t m;
+#endif
+  
+  
+  
+  FUNC_ENTER_NOAPI(NULL);
+
+
+  if (overlap){
+    if (NULL == wlist || NULL == rlist ){
+      HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, CP_FAIL, "Read/Write request list is NULL");
+    }
+  }
+  else{
+    if (NULL == rlist ){
+      HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, CP_FAIL, "Read request list is NULL");
+    }
+  }
+
+  rlist[rcnt].request_id = rlist[rcnt - 1].request_id + 1;
+  rlist[rcnt].elementsize = rlist[i].elementsize;
+  rlist[rcnt].dataset_id = rlist[i].dataset_id;
+  rlist[rcnt].axe_id = rlist[i].axe_id;
+  rlist[rcnt].num_peers = rlist[i].num_peers;
+  rlist[rcnt].num_fblocks = entries;
+  rlist[rcnt].num_mblocks = 0;
+  rlist[rcnt].fblocks = (block_container_t *) 
+    malloc (entries * sizeof(block_container_t));
+  rlist[rcnt].mblocks = (block_container_t *) 
+    malloc (2 * rlist[i].num_mblocks * sizeof(block_container_t));
+
+
+
+  for (l=0; l < entries; l++){
+    rlist[rcnt].fblocks[l].offset = offsets[l];
+    rlist[rcnt].fblocks[l].len = lens[l];
+  }
+
+  H5VL_iod_get_read_memory_buffer(&rlist[rcnt], &rlist[i], offsets,
+				  lens, entries, READ);
+
+
+  if (overlap){
+
+    /*Okay we know there is a write out there we can use!*/
+    rlist[rcnt].merged = SS;
+    H5VL_iod_get_read_memory_buffer(&rlist[rcnt], wlist, offsets,
+				    lens, entries, WRITE);
+    
+#if DEBUG_COMPACTOR
+    fprintf (stderr, "Number of memory entries : %zd\n",
+	     rlist[rcnt].num_mblocks);
+    for (l = 0; l < rlist[rcnt].num_mblocks; l++){
+      ptr = (int *) (uintptr_t) rlist[rcnt].mblocks[l].offset;
+      for (m = 0; m < ((rlist[rcnt].mblocks[l].len)/sizeof(int)); m++){
+	fprintf (stderr,"ptr[%zd]: %d\n", m, ptr[m]);
+      }
+    }
+#endif
+  }
+  else{
+    rlist[rcnt].merged = SPLIT_FOR_SS;
+  }
+
+  *read_cnt = rcnt + 1;
+  
+ done:
+  FUNC_LEAVE_NOAPI(ret_value);
+  
+}
+
 
 /*-------------------------------------------------------------------------
- *  Function:   H5VL_iod_steal_writes 
+ *  Function:      H5VL_iod_steal_writes 
  *
- *  Purpose :   Function to check whether reads can be satisfied by
- *              preexisting writes 
+ *  Purpose :      Function to check whether reads can be satisfied by
+ *                 preexisting writes 
  *
- *  Return  :   SUCCESS : CP_SUCCESS
- *              FAILURE : CP_FAIL
+ *  Return:        SUCCESS : CP_SUCCESS
+ *                 FAILURE : CP_FAIL
  *
- *  Programmer : Vishwanath Venkatesan
- *               August, 2013
+ *  Programmer:    Vishwanath Venkatesan
+ *                 August, 2013
  *--------------------------------------------------------------------------
  */
 
@@ -640,16 +808,23 @@ int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
    hid_t overlap_space, n_overlap_space;
    hsize_t *goffsets=NULL;
    size_t *glens=NULL, g_entries = 0, k = 0;
+   int *return_values = NULL;
+   int modified_rd_cnt = nrentries;
 
-#if DEBUG_COMPACTOR
-   hsize_t     *bound_start;
-   hsize_t     *bound_end;
-#endif
 
 
    FUNC_ENTER_NOAPI(NULL);
    
-   
+
+   return_values = (int *) malloc (2 * sizeof(int));
+   if (NULL == return_values){
+     HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, CP_FAIL, "can't allocate return values");
+   }
+
+   for (i = 0; i < 2; i++){
+     return_values[i] = CP_SUCCESS;
+   }
+
    if (!nentries){
 
 #if DEBUG_COMPACTOR
@@ -673,33 +848,26 @@ int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
 	 continue;
 
        
-       if (H5VL_iod_read_write_overlap (wlist[j].selection_id,
-					rlist[i].selection_id,
-					&overlap_space,
-					&n_overlap_space)){
-       
+       H5VL_iod_read_write_overlap (wlist[j].selection_id,
+				    rlist[i].selection_id,
+				    &overlap_space,
+				    &n_overlap_space,
+				    return_values);
+       if (return_values[0] > 0){
+
+	 ret_value = H5Sget_offsets(overlap_space,rlist[i].elementsize,
+				    &goffsets, &glens, &g_entries);
+
+	 rlist[modified_rd_cnt].selection_id = overlap_space;
+	 H5VL_iod_short_circuit_read(&wlist[j],rlist,i,
+				     &modified_rd_cnt,
+				     goffsets, glens, g_entries, TRUE);
+	 
+	 rlist[i].merged = USED_IN_SS;
+	 
 #if DEBUG_COMPACTOR
-	 bound_start = (hsize_t *) malloc (2 * sizeof(hsize_t));
-	 bound_end  =  (hsize_t *) malloc (2 * sizeof(hsize_t));
-	 
-	 H5Sget_select_bounds(overlap_space,
-			      bound_start,
-			      bound_end);
-	 fprintf(stderr, 
-		 "Overlap Space : Start {%lli, %lli}, End {%lli, %lli} \n",
-		 bound_start[0], bound_start[1], bound_end[0], bound_end[1]);
-	 
-	 H5Sget_select_bounds(n_overlap_space,
-			      bound_start,
-			      bound_end);
-
-	 fprintf(stderr,
-		 "non-overlap space: Start {%lli, %lli} End {%lli, %lli}\n",
-		 bound_start[0], bound_start[1], bound_end[0], bound_end[1]);
-
-	 H5Sget_offsets(n_overlap_space,rlist[i].elementsize,
-			&goffsets, &glens, &g_entries);
-
+	 fprintf (stderr,"**************************************\n");
+	 fprintf (stderr,"OVERLAPPING OFFSETS\n");
 	 for (k = 0; k < g_entries; k++){
 	   fprintf (stderr,"%zd: OFFSET: %lli, len %zd\n",
 		    k, goffsets[k],
@@ -708,156 +876,43 @@ int H5VL_iod_get_read_spread (hsize_t start_offset, hsize_t end_offset,
 	 free(goffsets);
 	 free(glens);
 	 g_entries = 0;
-	 H5Sget_offsets(overlap_space,rlist[i].elementsize,
-			&goffsets, &glens, &g_entries);
-	 for (k = 0; k < g_entries; k++){
-	   fprintf (stderr,"%zd: OFFSET: %lli, len %zd\n",
-		    k, goffsets[k],
-		    glens[k]);
+#endif
+
+	 if(return_values[1] > 0){
+	   /*There is still some reads that needs to be done 
+	    We can construct an entry for them and fill the buffer*/
+	   rlist[modified_rd_cnt].selection_id = n_overlap_space;
+
+#if DEBUG_COMPACTOR
+	   H5Sget_offsets(n_overlap_space,rlist[i].elementsize,
+			  &goffsets, &glens, &g_entries);
+
+	   H5VL_iod_short_circuit_read(NULL,rlist,i,
+				       &modified_rd_cnt,
+				       goffsets, glens, g_entries,
+				       FALSE);
+
+	   fprintf (stderr,"**************************************\n");
+	   fprintf (stderr,"NON-OVERLAPPING OFFSETS\n");
+	   for (k = 0; k < g_entries; k++){
+	     fprintf (stderr,"%zd: OFFSET: %lli, len %zd\n",
+		      k, goffsets[k],
+		      glens[k]);
+	   }
+	   fprintf (stderr,"**************************************\n");
+#endif
 	 }
-
-	 
-#endif	 
-
-
 	 
        }
-
      }
-   }  
+     
+   }
    
  done:
    FUNC_LEAVE_NOAPI(ret_value);
    
  }    
 
-
-/*--------------------------------------------------------------------------
- *  Function:	H5VL_iod_short_circuit_reads
- *
- *  Purpose :   Function to check whether reads can be satisfied by
- *              preexisting writes 
- *
- *  Return  :   SUCCESS : CP_SUCCESS
- *              FAILURE : CP_FAIL
- *
- *  Programmer : Vishwanath Venkatesan
- *               August, 2013
- *--------------------------------------------------------------------------
- */
-
-int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
-				   request_list_t *rlist, int nrentries){
-  
-
-  int i, j,  nreqs = 0;
-  size_t k;
-  hsize_t curr_start_offset, curr_end_offset;
-  hsize_t *start_offsets = NULL, *end_offsets = NULL;
-  int *request_list = NULL;
-  int ret_value = CP_SUCCESS;
-  uint8_t *buf_ptr;
-  size_t total_len = 0;
-  
-  FUNC_ENTER_NOAPI(NULL)
-    
-  #if DEBUG_COMPACTOR
-    fprintf (stderr,"number of write entries from compactor -read  : %d\n",
-	     nentries);
-  #endif
-
-  start_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
-  if (NULL == start_offsets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
-  }
-  
-  end_offsets = (hsize_t *) malloc (nentries * sizeof(hsize_t));
-  if (NULL == end_offsets){
-    HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for start_offsets");
-  }
-
-  for (i = 0; i < nentries; i++){
-    if (wlist[i].merged == USED_IN_MERGING){
-      start_offsets[i] = -1;
-      end_offsets[i] = -1;
-      continue;
-    }
-
-
-    start_offsets[i] = wlist[i].fblocks[0].offset;
-    end_offsets[i] = wlist[i].fblocks[wlist[i].num_fblocks - 1].offset +
-      wlist[i].fblocks[wlist[i].num_fblocks - 1].len - 1;
-    
-#if DEBUG_COMPACTOR
-    fprintf (stderr, "wstart : %lli, wend: %lli \n", 
-	     start_offsets[i], end_offsets[i]);
-#endif
-  }
-
-  for (i = 0; i < nrentries; i++){
-    
-    request_list = (int *) malloc (nentries * sizeof(int));
-    if (NULL == request_list){
-      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for request_list");
-    }
-    
-    curr_start_offset = rlist[i].fblocks[0].offset;
-    curr_end_offset = rlist[i].fblocks[rlist[i].num_fblocks - 1].offset + 
-      rlist[i].fblocks[rlist[i].num_fblocks - 1].len - 1;
-    
-#if DEBUG_COMPACTOR
-    fprintf (stderr,"curr_start: %lli, curr_end: %lli\n", 
-	     curr_start_offset,
-	     curr_end_offset);
-#endif
-
-    if (H5VL_iod_get_read_spread (curr_start_offset,curr_end_offset,
-				  start_offsets, end_offsets,
-				  nentries, request_list, &nreqs) ){
-
-      buf_ptr = (uint8_t *)rlist[i].mem_buf;
-      total_len = 0;
-#if DEBUG_COMPACTOR
-      fprintf (stderr, "nreqs: %d\n",
-	       nreqs);
-#endif
-      for (j = 0; j < nreqs; j++){
-#if DEBUG_COMPACTOR
-	fprintf (stderr, "mblocks: %zd\n",
-		 wlist[request_list[j]].num_mblocks);
-#endif
-
-	for (k = 0; k < wlist[request_list[j]].num_mblocks; k++){
-	  
-	  memcpy(buf_ptr,
-		 (void *)(uintptr_t)wlist[request_list[j]].mblocks[k].offset,
-		 wlist[request_list[j]].mblocks[k].len);
-	  total_len += wlist[request_list[j]].mblocks[k].len;
-	  buf_ptr = (uint8_t *)rlist[i].mem_buf + total_len;
-	}
-      }
-      rlist[i].merged = SS;
-    }
-    
-    if (NULL != request_list){
-      free(request_list);
-      request_list = NULL;
-    }
-  }
-
-  if (NULL != start_offsets){
-    free(start_offsets);
-    start_offsets = NULL;
-  }
-  if (NULL != end_offsets){
-    free(end_offsets);
-    end_offsets = NULL;
-  }
-
- done:
-  FUNC_LEAVE_NOAPI(ret_value);
-
-}
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_read_write_overlap
@@ -866,44 +921,38 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
  *              Will return the overlaping dataspace and non-overlapping 
  *              dataspace
  *
- * Return:	SUCCESS      : 0 if no overlap / > 0 therwise
- *    		FAILURE      : Negative
+ * Return:	Void Function. Return values handle specific scenarios
+ *              if ret_values[0] > 0 then there is overlap b/w read/write
+ *              if ret_values[1] > 0 then there is parts that need to be read
  *
  * Programmer:  Vishwanth Venkatesan
  *              August, 2013
  *
  *-------------------------------------------------------------------------
  */
- int H5VL_iod_read_write_overlap (hid_t wdataspace,
+void H5VL_iod_read_write_overlap (hid_t wdataspace,
 				  hid_t rdataspace,
 				  hid_t *overlap_space,
-				  hid_t *n_overlap_space){
+				  hid_t *n_overlap_space,
+				  int *return_value){
    
    hid_t l_overlap_space, l_n_overlap_space;
-   int ret_value = CP_SUCCESS;
    hsize_t overlap = 0;
    const H5S_t *rspace = NULL, *wspace = NULL;
+   int ret_value = CP_SUCCESS;
 
-   FUNC_ENTER_NOAPI(NULL)
-
-     
+   FUNC_ENTER_NOAPI_NOINIT
      
    if (NULL == (wspace = (const H5S_t *)H5I_object_verify(wdataspace,
 							  H5I_DATASPACE))){
-     
 #if DEBUG_COMPACTOR
      fprintf (stderr, "write dataspace %d is not a dataspace\n",
 	      wdataspace);
 #endif
-
-     HGOTO_ERROR(H5E_ARGS,
-		 H5E_BADTYPE,
-		 FAIL,
-		 "Wdataspace not a dataspace");
+     HGOTO_ERROR(H5E_ARGS,H5E_BADTYPE,CP_FAIL,"Wdataspace not a dataspace");
    }
    
    if(H5S_SELECT_VALID(wspace) != TRUE){
-
 #if DEBUG_COMPACTOR
      fprintf (stderr,"dataspace: %d is not a valid dataspace\n",wdataspace);
 #endif
@@ -911,29 +960,28 @@ int  H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
    }
      
    if (NULL == (rspace = (const H5S_t *)H5I_object_verify(rdataspace, H5I_DATASPACE))){
-     
 #if DEBUG_COMPACTOR
      fprintf (stderr, "dataspace :%d not a valid dataspace\n",rdataspace);
 #endif
-     
      HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "Not a valid dataspace\n");
    }
+   
    l_overlap_space = H5Scombine_select(wdataspace, H5S_SELECT_AND, rdataspace);
    overlap = H5Sget_select_npoints(l_overlap_space);
+   return_value[0] = (int) overlap;
    if (overlap){
      /*This means there is overlap betweem read and write*/
      /* So lets get the part that has to be read! */
      l_n_overlap_space = H5Scombine_select(rdataspace, H5S_SELECT_NOTB, l_overlap_space);
-     overlap = H5Sget_select_npoints(l_overlap_space);
-      ret_value = (int) overlap;
+     overlap = H5Sget_select_npoints(l_n_overlap_space);
+     return_value[1] = (int) overlap;
+
    }
    
    *overlap_space = l_overlap_space;
    *n_overlap_space = l_n_overlap_space;
-   
- done:
-   FUNC_LEAVE_NOAPI(ret_value);
-
+ done:   
+   FUNC_LEAVE_NOAPI_VOID
  }
      
     
@@ -1516,7 +1564,6 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 
       }
       else{
-
 	rem_len = (sf_block[j].offset + sf_block[j].len)
 	  - sf_block[i].offset;
 	rev_sf_block[rev_fblks].offset = 
@@ -2082,6 +2129,9 @@ static void H5VL_print_block_container (block_container_t *cont,
   
   size_t k;
 #if DEBUG_COMPACTOR
+  fprintf (stderr,"blocks: %zd\n",
+	   num);
+
   for (k = 0; k < num; k++){
     fprintf (stderr, "%zd: block.offset: %lli, block.len: %zd \n",
 	     k,

@@ -30,7 +30,7 @@
 
 #define EEXISTS 1
 #define H5_DO_NATIVE 0
-#define DEBUG_COMPACTOR 1
+#define DEBUG_COMPACTOR 0
 
 /* Key names for Metadata stored in KV objects */
 #define H5VL_IOD_KEY_SOFT_LINK       "soft_link_value"
@@ -136,7 +136,9 @@ H5_DLL void H5VL_iod_server_dset_compactor_cb(AXE_engine_t axe_engine,
 H5_DLL int H5VL_iod_server_compactor_write (void *_list, int num_requests);
 H5_DLL int H5VL_iod_server_compactor_read (void *_list, int num_requests);
 
-H5_DLL int H5VL_iod_server_send_result (void *list, int num_requests);
+H5_DLL int H5VL_iod_server_send_result (void *list, int num_requests,
+					int type);
+
 
 H5_DLL int H5VL_iod_reconstruct_parents (AXE_engine_t axe_engine,
 					 axe_ids_t *old_parents,

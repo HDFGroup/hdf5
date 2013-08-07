@@ -124,10 +124,14 @@ H5_DLL int H5VL_iod_free_memory_buffer (request_list_t *list, int num_requests);
 H5_DLL int H5VL_iod_steal_writes (request_list_t *wlist, int nentries,
 				  request_list_t *rlist, int nrentries);
 
-H5_DLL int H5VL_iod_short_circuit_reads (request_list_t *wlist, int nentries,
-					 request_list_t *rlist, int nrentries);
-
-
+H5_DLL int H5VL_iod_get_read_memory_buffer (request_list_t *current, 
+					    request_list_t *old, /*can be a write entry too*/
+					    hsize_t *offsets,
+					    size_t *lens,
+					    size_t entries, int type);
+H5_DLL int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
+					int i, int *read_cnt, hsize_t *offsets,
+					size_t *lens, size_t entries, hbool_t overlap);
 /*----------------------------------------------------------------------------------------  */
 
 #endif /* H5_HAVE_EFF*/

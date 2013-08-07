@@ -654,8 +654,8 @@ done:
    int nentries = 0, ndatasets = 0, nrentries = 0, nrdatasets = 0;
 
    FUNC_ENTER_NOAPI_NOINIT
-
- #if DEBUG_COMPACTOR
+ 
+#if DEBUG_COMPACTOR
      fprintf(stderr, " COMPACTOR CB: Enters Call BACK!\n");
      fprintf (stderr, "COMPACTOR CB: Number of requests : %d from call back in queue : %p\n", 
 	      H5VL_iod_get_number_of_requests(cqueue), (void *)cqueue);
@@ -723,10 +723,9 @@ done:
 
       if (nentries){
 	H5VL_iod_steal_writes (wlist, nentries,
-			       rlist, nrentries);
-	
-	H5VL_iod_short_circuit_reads(wlist, nentries,
-				     rlist, nrentries);
+			       rlist, nrentries); 
+	/*H5VL_iod_short_circuit_reads(wlist, nentries,
+	rlist, nrentries);*/
       }
       
       for ( i = 0; i < ndatasets; i ++){
@@ -821,10 +820,9 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
   size_t size, dst_size, src_size;
   size_t nelmts; 
   void *buf = NULL;
+  size_t buf_size, x, m;
   uint8_t *buf_ptr;
   hg_bulk_t bulk_handle;
-  hg_bulk_block_t bulk_block_handle;
-  hg_bulk_request_t bulk_request;
   hssize_t num_descriptors = 0, n =0;
   hbool_t opened_locally = FALSE;
   iod_hyperslab_t *hslabs = NULL;
@@ -833,11 +831,6 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
   iod_array_io_t *io_array = NULL;
   iod_checksum_t *cs_list = NULL;
   iod_ret_t *ret_list = NULL;
-  dset_read_out_t output;
-  uint32_t cs = 0; 
-  na_addr_t dest;
-  hbool_t flag;
-  hid_t dxpl_id ;
 
 
   FUNC_ENTER_NOAPI_NOINIT
@@ -856,6 +849,9 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
 
   for (request_counter = 0; request_counter < num_requests; request_counter++){
     
+    if (list[request_counter].merged == USED_IN_SS)
+      continue;
+    
     op_data = (op_data_t *)list[request_counter].op_data;
     input = (dset_io_in_t *)op_data->input;
     coh = input->coh;
@@ -867,8 +863,11 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
     src_id = input->mem_type_id;
     dst_size = H5Tget_size(dst_id);
     src_size = H5Tget_size(src_id);
-    buf = list[request_counter].mem_buf;
-    dxpl_id = input->dxpl_id;
+
+    if (NOT_SS == list[request_counter].merged){
+      buf = (void *)list[request_counter].mem_buf;
+      buf_size = list[request_counter].mem_length;
+    }
     /* open the dataset if we don't have the handle yet */
     if(iod_oh.cookie == (int)IOD_OH_UNDEFINED) {
         if (iod_obj_open_write(coh, iod_id, NULL /*hints*/, &iod_oh, NULL) < 0)
@@ -878,10 +877,11 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
 
     /* retrieve size of bulk data asked for to be read */
     size = HG_Bulk_handle_get_size(bulk_handle);
-    
     /* get the number of points selected */
     nelmts = (size_t)H5Sget_select_npoints(space_id);
-    flag = FALSE;
+
+    
+    
     if (list[request_counter].merged != SS){
 
       /* get the rank of the dataspace */
@@ -909,7 +909,8 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
       if(H5VL_iod_get_file_desc(space_id, &num_descriptors, hslabs) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to generate IOD file descriptor from dataspace selection");
 
-      buf_ptr = (uint8_t *)buf;
+      if (list[request_counter].merged != SPLIT_FOR_SS)
+	buf_ptr = (uint8_t *)buf;
       
       /* allocate the IOD array parameters for reading */
       if(NULL == (io_array = (iod_array_io_t *)malloc
@@ -936,13 +937,28 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
 	for(i=0 ; i<ndims ; i++)
 	  num_elems *= (hslabs[n].count[i] * hslabs[n].block[i]);
 	num_bytes = num_elems * src_size;
-	
-	mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
-        mem_desc->nfrag = 1;
-        mem_desc->frag[0].addr = (void *)buf_ptr;
-        mem_desc->frag[0].len = (iod_size_t)num_bytes;
-        buf_ptr += num_bytes;
-        
+
+	if (list[request_counter].merged == SPLIT_FOR_SS){
+	  mem_desc = (iod_mem_desc_t *)
+	    malloc(sizeof(iod_mem_desc_t) + 
+		   list[request_counter].num_mblocks *
+		   sizeof(iod_mem_frag_t));
+	  mem_desc->nfrag = list[request_counter].num_mblocks;
+	  for ( x = 0; x < list[request_counter].num_mblocks;
+		x++){
+	    mem_desc->frag[x].addr = (void *)(uintptr_t)
+	      list[request_counter].mblocks[x].offset;
+	    mem_desc->frag[x].len = (iod_size_t)
+	      list[request_counter].mblocks[x].len;
+	  }
+	}
+	else{
+	  mem_desc = (iod_mem_desc_t *)malloc(sizeof(iod_mem_desc_t) + sizeof(iod_mem_frag_t));
+	  mem_desc->nfrag = 1;
+	  mem_desc->frag[0].addr = (void *)buf_ptr;
+	  mem_desc->frag[0].len = (iod_size_t)num_bytes;
+	  buf_ptr += num_bytes;
+        }
 	/* set the file descriptor */
         file_desc = hslabs[n];
 	
@@ -974,85 +990,61 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
       }
       
 
-      ptr = (int *)buf;
 #if H5_DO_NATIVE
       ret_value = H5Dread(iod_oh.cookie, src_id, H5S_ALL, space_id, dxpl_id, buf);
-#else /* fake data */
-      for(i=0;i<64;++i)
-	ptr[i] = i;
+#else 
+      /* fake data */
+      if (list[request_counter].merged == SPLIT_FOR_SS){
+	for (x = 0; x < list[request_counter].num_mblocks; x++){
+	  ptr = (int *)(uintptr_t)
+	    list[request_counter].mblocks[x].offset;
+	  for (m = 0; 
+	       m <(list[request_counter].mblocks[x].len)/sizeof(int);
+	       m++){
+	    ptr[i] = 10;
+	  }
+	}
+      }
+      else{
+	ptr = (int *)buf;
+	for(i = 0; i <(int)(buf_size/sizeof(int));++i)
+	  ptr[i] = i;
+      }
 #endif
     }
-    /* do data conversion */
-    if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
-      HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
-    /* calculate a checksum for the data to be sent */
-    cs = H5checksum(buf, size, NULL);
-    
-    /* MSC - check if client requested to corrupt data */
-    if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
-      HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
-    if(flag) {
-      fprintf(stderr, "Injecting a bad data value to cause corruption \n");
-      ptr[0] = 10;
-    }
-    
-    /* Create a new block handle to write the data */
-    HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
-    dest = HG_Handler_get_addr (op_data->hg_handle);
-    
-    /* Write bulk data here and wait for the data to be there  */
-    if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
-      HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-    
-    /* wait for it to complete */
-    if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
-      HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
-
-  done:
-    output.ret = ret_value;
-    output.cs = cs;
-    
-#if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Done with dset read, checksum %u, sending response to client\n", cs);
-#endif
-    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
-      HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
-    if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
-      HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
-    
-    input = (dset_io_in_t *)H5MM_xfree(input);
-    op_data = (op_data_t *)H5MM_xfree(op_data);
-    
-    if(buf)
-      free(buf);
-    
     /* free allocated descriptors */
     for(n=0 ; n<num_descriptors ; n++) {
-        free(hslabs[n].start);
-        free(hslabs[n].stride);
-        free(hslabs[n].block);
-        free(hslabs[n].count);
+      free(hslabs[n].start);
+      free(hslabs[n].stride);
+      free(hslabs[n].block);
+      free(hslabs[n].count);
     }
     if(hslabs)
-        free(hslabs);
+      free(hslabs);
     if(io_array)
-        free(io_array);
+      free(io_array);
     if(cs_list)
-        free(cs_list);
+      free(cs_list);
     if(ret_list)
-        free(ret_list);
-
-    /* close the dataset if we opened it in this routine */
-    if(opened_locally) {
-        if(iod_obj_close(iod_oh, NULL, NULL))
-            HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
-    }
-
+      free(ret_list);
+  }
+  
+  if (SUCCEED != 
+      H5VL_iod_server_send_result (list, num_requests, READ)){
+    HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, HG_FAIL, "Error while sending result to client");
+  }
+  
+  /* close the dataset if we opened it in this routine */
+  if(opened_locally) {
+    if(iod_obj_close(iod_oh, NULL, NULL))
+      HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close Array object");
   }
 
+ done:  
   FUNC_LEAVE_NOAPI(ret_value);
 
-}/* end H5VL_iod_copactor_read */
+}/* end H5VL_iod_compactor_read */
+
 /*------------------------------------------------------------------------
  * Function:	H5VL_iod_server_compactor_write
  *
@@ -1083,6 +1075,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   hid_t space_id, dst_id, src_id;
   size_t size, dst_size, src_size,ii = 0;
   void *buf = NULL;
+
   uint8_t *buf_ptr;
   hssize_t num_descriptors = 0, n =0;
   hbool_t opened_locally = FALSE;
@@ -1141,13 +1134,16 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
       /*When the request was used in merging we have to just
 	manage the handle*/
       if (list[request_counter].merged == NOT_MERGED){
+#if DEBUG_COMPACTOR
 	fprintf (stderr,"COMPACTOR space_id: %d, selection_id: %d\n",
 		 space_id, list[request_counter].selection_id);
-	
+#endif
 	/*Even in the case its not merged the buffer was already extracted*/
 	size  = list[request_counter].mem_length;
+#if DEBUG_COMPACTOR
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has not been merged\n",
 		 request_counter+1);
+#endif
 	buf = (void *)list[request_counter].mem_buf;
 
 #if H5_DO_NATIVE	
@@ -1272,7 +1268,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	
 	if (list[request_counter].merged == NOT_MERGED){
 
-#if DEBUG_COMPACTOR
+#if 0
 	  ptr = (int *) buf;
 	  fprintf(stderr,"COMPACTOR WRITE: Received a buffer of size %zd with values :",
 		  size);
@@ -1383,9 +1379,11 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	    ptr = (int *)(mem_desc->frag[j].addr);
 	    fprintf(stderr, "COMPACTOR MERGED WRITE IOD_BUFFER j: %lli, k: %lli  len: %llu\n",
 		    j,k, mem_desc->frag[j].len);
+#if 0
 	    for (ii = 0; ii < mem_desc->frag[j].len/sizeof(int); ii++)
 	      fprintf(stderr, "%d ", ptr[ii]);
 	    fprintf(stderr, "\n");
+#endif
 	  }
 	  fflush(stderr);
 #endif
@@ -1479,30 +1477,116 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 }/*H5VL_iod_server_compactor_write*/
 
 
+/*------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_send_result
+ *
+ * Purpose:     Send output back using the HG Handle. 
+ *              This is needed as we tend to perform reads/write
+ *              cummulatively.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Vishwanath Venkatesan
+ *              July, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+
 int H5VL_iod_server_send_result (void *_list,
-				 int num_requests){
+				 int num_requests, 
+				 int type){
   
 
   int i;
-  int ret_value = HG_SUCCESS;
+  int ret_value = SUCCEED;
   op_data_t *op_data = NULL;
   dset_io_in_t *input = NULL;
   request_list_t *list = (request_list_t *)_list;
+  hid_t src_id, dst_id, dxpl_id;
+  void *buf = NULL;
+  uint32_t cs = 0;
+  size_t size;
+  hbool_t flag;
+  hg_bulk_t bulk_handle;
+  hg_bulk_block_t bulk_block_handle;
+  hg_bulk_request_t bulk_request;
+  na_addr_t dest;
+  dset_read_out_t output;
+  size_t nelmts; 
+  int *ptr = NULL;
  
-  FUNC_ENTER_NOAPI(NULL)
+  FUNC_ENTER_NOAPI(NULL);
+  if (type == WRITE){
+    for (i = 0; i< num_requests; i++){
+      if (list[i].merged != MERGED){
+	op_data = (op_data_t *)list[i].op_data;
+	input = (dset_io_in_t *)op_data->input;
+	if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
+	  HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, HG_FAIL, "can't send result of write to client");
+	input = (dset_io_in_t *)H5MM_xfree(input);
+	op_data = (op_data_t *)H5MM_xfree(op_data);
+      }
+    }
+  }
 
-  for (i = 0; i< num_requests; i++){
-    if (list[i].merged != MERGED){
-      op_data = (op_data_t *)list[i].op_data;
-      input = (dset_io_in_t *)op_data->input;
-      if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
-	HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, HG_FAIL, "can't send result of write to client");
-      input = (dset_io_in_t *)H5MM_xfree(input);
-      op_data = (op_data_t *)H5MM_xfree(op_data);
+  else{
+    for (i = 0; i< num_requests; i++){
+      if (list[i].merged == NOT_SS || list[i].merged == USED_IN_SS){
+	op_data = (op_data_t *)list[i].op_data;
+	input = (dset_io_in_t *)op_data->input;
+	bulk_handle = input->bulk_handle;
+	buf = (void *)list[i].mem_buf;
+	dxpl_id = input->dxpl_id;
+	dst_id = input->dset_type_id;
+	src_id = input->mem_type_id;
+	size = HG_Bulk_handle_get_size(bulk_handle);
+	nelmts = (size_t)H5Sget_select_npoints(list[i].selection_id);
+	flag = FALSE;
+	ptr = (int *) buf;
+
+	if(H5Tconvert(src_id, dst_id, nelmts, buf, NULL, dxpl_id) < 0)
+	  HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+	/* calculate a checksum for the data to be sent */
+	cs = H5checksum(buf, size, NULL);
+#if DEBUG_COMPACTOR
+	fprintf (stderr,"Checksum : %lli\n",
+		 cs);
+#endif
+	if(dxpl_id != H5P_DEFAULT && H5Pget_dxpl_inject_corruption(dxpl_id, &flag) < 0)
+	  HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read property list");
+	if(flag) {
+	  fprintf(stderr, "Injecting a bad data value to cause corruption \n");
+	  ptr[0] = 10;
+	}
+
+	/* Create a new block handle to write the data */
+	HG_Bulk_block_handle_create(buf, size, HG_BULK_READ_ONLY, &bulk_block_handle);
+	dest = HG_Handler_get_addr (op_data->hg_handle);
+	if(HG_SUCCESS != HG_Bulk_write_all(dest, bulk_handle, bulk_block_handle, &bulk_request))
+	  HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+	/* wait for it to complete */
+	if(HG_SUCCESS != HG_Bulk_wait(bulk_request, HG_MAX_IDLE_TIME, HG_STATUS_IGNORE))
+	  HGOTO_ERROR(H5E_SYM, H5E_READERROR, FAIL, "can't read from array object");
+	
+	output.ret = ret_value;
+	output.cs = cs;
+	if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &output))
+	  HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't send result of write to client");
+	if(HG_SUCCESS != HG_Bulk_block_handle_free(bulk_block_handle))
+	  HDONE_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "can't free bds block handle");
+	input = (dset_io_in_t *)H5MM_xfree(input);
+	op_data = (op_data_t *)H5MM_xfree(op_data);
+	
+	if(buf)
+	  free(buf);
+      }
     }
   }
   
-
+ done:
   FUNC_LEAVE_NOAPI(ret_value);
 
 }
