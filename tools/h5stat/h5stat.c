@@ -26,10 +26,13 @@
 #define PROGRAMNAME "h5stat"
 
 /* Parameters to control statistics gathered */
-#define SIZE_SMALL_GROUPS       10
-#define SIZE_SMALL_ATTRS  10
-#define SIZE_SMALL_DSETS        10
-#define SIZE_SMALL_SECTS        10
+
+/* Default threshold for small groups/datasets/attributes */
+#define DEF_SIZE_SMALL_GROUPS       	10
+#define DEF_SIZE_SMALL_DSETS        	10
+#define DEF_SIZE_SMALL_ATTRS  		10
+
+#define SIZE_SMALL_SECTS        	10
 
 #define  H5_NFILTERS_IMPL        8     /* Number of currently implemented filters + one to
                                           accommodate for user-define filters + one
@@ -69,22 +72,22 @@ typedef struct iter_t {
 
     unsigned long max_links;            /* Maximum # of links to an object */
     hsize_t max_fanout;                 /* Maximum fanout from a group */
-    unsigned long num_small_groups[SIZE_SMALL_GROUPS];     /* Size of small groups tracked */
+    unsigned long *num_small_groups;    /* Size of small groups tracked */
     unsigned group_nbins;               /* Number of bins for group counts */
     unsigned long *group_bins;          /* Pointer to array of bins for group counts */
     ohdr_info_t group_ohdr_info;        /* Object header information for groups */
 
-    hsize_t  max_attrs;                     /* Maximum attributes from a group */
-    unsigned long num_small_attrs[SIZE_SMALL_ATTRS];    /* Size of small attributes tracked */
+    hsize_t  max_attrs;                 /* Maximum attributes from a group */
+    unsigned long *num_small_attrs;    	/* Size of small attributes tracked */
     unsigned attr_nbins;                /* Number of bins for attribute counts */
     unsigned long *attr_bins;           /* Pointer to array of bins for attribute counts */
 
     unsigned max_dset_rank;             /* Maximum rank of dataset */
     unsigned long dset_rank_count[H5S_MAX_RANK];   /* Number of datasets of each rank */
     hsize_t max_dset_dims;              /* Maximum dimension size of dataset */
-    unsigned long small_dset_dims[SIZE_SMALL_DSETS];    /* Size of dimensions of small datasets tracked */
+    unsigned long *small_dset_dims;    /* Size of dimensions of small datasets tracked */
     unsigned long dset_layouts[H5D_NLAYOUTS];           /* Type of storage for each dataset */
-    unsigned long dset_comptype[H5_NFILTERS_IMPL]; /* Number of currently implemented filters */
+    unsigned long dset_comptype[H5_NFILTERS_IMPL]; 	/* Number of currently implemented filters */
     unsigned long dset_ntypes;          /* Number of diff. dataset datatypes found */
     dtype_info_t *dset_type_info;       /* Pointer to dataset datatype information found */
     unsigned dset_dim_nbins;            /* Number of bins for dataset dimensions */
@@ -134,15 +137,19 @@ static int        display_dset_metadata = FALSE;    /* display file space info f
 
 static int        display_object = FALSE;  /* not implemented yet */
 
+/* Initialize threshold for small groups/datasets/attributes */
+static int	  sgroups_threshold = DEF_SIZE_SMALL_GROUPS;
+static int	  sdsets_threshold = DEF_SIZE_SMALL_DSETS;
+static int	  sattrs_threshold = DEF_SIZE_SMALL_ATTRS;
+
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
     size_t obj_count;
     char **obj;
 };
 
-
-static const char *s_opts ="ADdFfhGgsSTO:V";
-/* e.g. "filemetadata" has to precedue "file"; "groupmetadata" has to precede "group" etc. */
+static const char *s_opts ="Aa:Ddm:FfhGgl:sSTO:V";
+/* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},
     {"hel", no_arg, 'h'},
@@ -170,6 +177,10 @@ static struct long_options l_opts[] = {
     {"grou", no_arg, 'g'},
     {"gro", no_arg, 'g'},
     {"gr", no_arg, 'g'},
+    { "links", require_arg, 'l' },
+    { "link", require_arg, 'l' },
+    { "lin", require_arg, 'l' },
+    { "li", require_arg, 'l' },
     {"dsetmetadata", no_arg, 'D'},
     {"dsetmetadat", no_arg, 'D'},
     {"dsetmetada", no_arg, 'D'},
@@ -181,6 +192,9 @@ static struct long_options l_opts[] = {
     {"dset", no_arg, 'd'},
     {"dse", no_arg, 'd'},
     {"ds", no_arg, 'd'},
+    {"dims", require_arg, 'm'},
+    {"dim", require_arg, 'm'},
+    {"di", require_arg, 'm'},
     {"dtypemetadata", no_arg, 'T'},
     {"dtypemetadat", no_arg, 'T'},
     {"dtypemetada", no_arg, 'T'},
@@ -212,6 +226,13 @@ static struct long_options l_opts[] = {
     { "attr", no_arg, 'A' },
     { "att", no_arg, 'A' },
     { "at", no_arg, 'A' },
+    { "numattrs", require_arg, 'a' },
+    { "numattr", require_arg, 'a' },
+    { "numatt", require_arg, 'a' },
+    { "numat", require_arg, 'a' },
+    { "numa", require_arg, 'a' },
+    { "num", require_arg, 'a' },
+    { "nu", require_arg, 'a' },
     { "freespace", no_arg, 's' },
     { "freespac", no_arg, 's' },
     { "freespa", no_arg, 's' },
@@ -237,6 +258,16 @@ leave(int ret)
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: usage
+ *
+ * Purpose: Compute the ceiling of log_10(x)
+ *
+ * Return: >0 on success, 0 on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 static void usage(const char *prog)
 {
      HDfflush(stdout);
@@ -248,11 +279,20 @@ static void usage(const char *prog)
      HDfprintf(stdout, "     -f, --file            Print file information\n");
      HDfprintf(stdout, "     -F, --filemetadata    Print file space information for file's metadata\n");
      HDfprintf(stdout, "     -g, --group           Print group information\n");
+     HDfprintf(stdout, "     -l N, --links=N       Set the threshold for the # of links when printing\n");
+     HDfprintf(stdout, "                           information for small groups.  N is an integer greater\n");
+     HDfprintf(stdout, "                           than 0.  The default threshold is 10.\n");
      HDfprintf(stdout, "     -G, --groupmetadata   Print file space information for groups' metadata\n");
      HDfprintf(stdout, "     -d, --dset            Print dataset information\n");
+     HDfprintf(stdout, "     -m N, --dims=N        Set the threshold for the dimension sizes when printing\n");
+     HDfprintf(stdout, "                           information for small datasets.  N is an integer greater\n");
+     HDfprintf(stdout, "                           than 0.  The default threshold is 10.\n");
      HDfprintf(stdout, "     -D, --dsetmetadata    Print file space information for datasets' metadata\n");
      HDfprintf(stdout, "     -T, --dtypemetadata   Print datasets' datatype information\n");
      HDfprintf(stdout, "     -A, --attribute       Print attribute information\n");
+     HDfprintf(stdout, "     -a N, --numattrs=N    Set the threshold for the # of attributes when printing\n");
+     HDfprintf(stdout, "                           information for small # of attributes.  N is an integer greater\n");
+     HDfprintf(stdout, "                           than 0.  The default threshold is 10.\n");
      HDfprintf(stdout, "     -s, --freespace       Print free space information\n");
      HDfprintf(stdout, "     -S, --summary         Print summary of file space information\n");
 }
@@ -267,8 +307,6 @@ static void usage(const char *prog)
  *
  * Programmer: Quincey Koziol
  *              Monday, August 22, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -311,7 +349,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
     iter->attrs_heap_storage_size += oi->meta_size.attr.heap_size;
 
     /* Update small # of attribute count & limits */
-    if(oi->num_attrs < SIZE_SMALL_ATTRS)
+    if(oi->num_attrs <= (hsize_t)sattrs_threshold)
         (iter->num_small_attrs[(size_t)oi->num_attrs])++;
     if(oi->num_attrs > iter->max_attrs)
         iter->max_attrs = oi->num_attrs;
@@ -382,8 +420,10 @@ group_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
     HDassert(ret >= 0);
 
     /* Update link stats */
-    if(ginfo.nlinks < SIZE_SMALL_GROUPS)
+    /* Collect statistics for small groups */
+    if(ginfo.nlinks < (hsize_t)sgroups_threshold)
         (iter->num_small_groups[(size_t)ginfo.nlinks])++;
+    /* Determine maximum link count */
     if(ginfo.nlinks > iter->max_fanout)
         iter->max_fanout = ginfo.nlinks;
 
@@ -514,8 +554,11 @@ dataset_stats(iter_t *iter, const char *name, const H5O_info_t *oi)
 
     /* Only gather dim size statistics on 1-D datasets */
     if(ndims == 1) {
-       iter->max_dset_dims = dims[0];
-       if(dims[0] < SIZE_SMALL_DSETS)
+	/* Determine maximum dimension size */
+	if(dims[0] > iter->max_dset_dims)
+	    iter->max_dset_dims = dims[0];
+	/* Collect statistics for small datasets */
+       if(dims[0] < (hsize_t)sdsets_threshold)
            (iter->small_dset_dims[(size_t)dims[0]])++;
 
        /* Add dim count to proper bin */
@@ -871,6 +914,15 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 display_group = TRUE;
                 break;
 
+            case 'l':
+		sgroups_threshold = HDatoi(opt_arg);
+		if(sgroups_threshold < 1) {
+		    error_msg("Invalid threshold for small groups\n");
+		    goto error;
+		} /* end if */
+
+                break;
+
             case 'D':
                 display_all = FALSE;
                 display_dset_metadata = TRUE;
@@ -881,6 +933,15 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 display_dset = TRUE;
                 break;
 
+            case 'm':
+		sdsets_threshold = HDatoi(opt_arg);
+		if(sdsets_threshold < 1) {
+		    error_msg("Invalid threshold for small datasets\n");
+		    goto error;
+		} /* end if */
+
+                break;
+
             case 'T':
                 display_all = FALSE;
                 display_dset_dtype_meta = TRUE;
@@ -889,6 +950,15 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
             case 'A':
                 display_all = FALSE;
                 display_attr = TRUE;
+                break;
+
+            case 'a':
+		sattrs_threshold = HDatoi(opt_arg);
+		if(sattrs_threshold < 1) {
+		    error_msg("Invalid threshold for small # of attributes\n");
+		    goto error;
+		} /* end if */
+
                 break;
 
             case 's':
@@ -967,16 +1037,29 @@ error:
 static void
 iter_free(iter_t *iter)
 {
+
     /* Clear array of bins for group counts */
     if(iter->group_bins) {
         HDfree(iter->group_bins);
         iter->group_bins = NULL;
     } /* end if */
 
+    /* Clear array for tracking small groups */
+    if(iter->num_small_groups) {
+        HDfree(iter->num_small_groups);
+        iter->num_small_groups = NULL;
+    } /* end if */
+
     /* Clear array of bins for attribute counts */
     if(iter->attr_bins) {
         HDfree(iter->attr_bins);
         iter->attr_bins = NULL;
+    } /* end if */
+
+    /* Clear array for tracking small attributes */
+    if(iter->num_small_attrs) {
+        HDfree(iter->num_small_attrs);
+        iter->num_small_attrs= NULL;
     } /* end if */
 
     /* Clear dataset datatype information found */
@@ -989,6 +1072,12 @@ iter_free(iter_t *iter)
     if(iter->dset_dim_bins) {
         HDfree(iter->dset_dim_bins);
         iter->dset_dim_bins = NULL;
+    } /* end if */
+
+    /* Clear array of tracking 1-D small datasets */
+    if(iter->small_dset_dims) {
+        HDfree(iter->small_dset_dims);
+        iter->small_dset_dims = NULL;
     } /* end if */
 
     /* Clear array of bins for free-space section sizes */
@@ -1117,11 +1206,11 @@ print_group_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
-    printf("Small groups:\n");
+    printf("Small groups (with 0 to %u links):\n", sgroups_threshold-1);
     total = 0;
-    for(u = 0; u < SIZE_SMALL_GROUPS; u++) {
+    for(u = 0; u < (unsigned)sgroups_threshold; u++) {
         if(iter->num_small_groups[u] > 0) {
-            printf("\t# of groups of size %u: %lu\n", u, iter->num_small_groups[u]);
+            printf("\t# of groups with %u link(s): %lu\n", u, iter->num_small_groups[u]);
             total += iter->num_small_groups[u];
         } /* end if */
     } /* end for */
@@ -1130,13 +1219,13 @@ print_group_info(const iter_t *iter)
     printf("Group bins:\n");
     total = 0;
     if((iter->group_nbins > 0) && (iter->group_bins[0] > 0)) {
-       printf("\t# of groups of size 0: %lu\n", iter->group_bins[0]);
+       printf("\t# of groups with 0 link: %lu\n", iter->group_bins[0]);
        total = iter->group_bins[0];
     } /* end if */
     power = 1;
     for(u = 1; u < iter->group_nbins; u++) {
         if(iter->group_bins[u] > 0) {
-           printf("\t# of groups of size %lu - %lu: %lu\n", power, (power * 10) - 1,
+           printf("\t# of groups with %lu - %lu links: %lu\n", power, (power * 10) - 1,
                     iter->group_bins[u]);
            total += iter->group_bins[u];
         } /* end if */
@@ -1207,29 +1296,29 @@ print_dataset_info(const iter_t *iter)
 
         printf("1-D Dataset information:\n");
         HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %Hu\n", iter->max_dset_dims);
-        printf("\tSmall 1-D datasets:\n");
+        printf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
         total = 0;
-        for(u = 0; u < SIZE_SMALL_DSETS; u++) {
+        for(u = 0; u < (unsigned)sdsets_threshold; u++) {
             if(iter->small_dset_dims[u] > 0) {
-                printf("\t\t# of dataset dimensions of size %u: %lu\n", u,
+                printf("\t\t# of datasets with dimension sizes %u: %lu\n", u,
                          iter->small_dset_dims[u]);
                 total += iter->small_dset_dims[u];
             } /* end if */
         } /* end for */
-        printf("\t\tTotal small datasets: %lu\n", total);
+        printf("\t\tTotal # of small datasets: %lu\n", total);
 
         /* Protect against no datasets in file */
         if(iter->dset_dim_nbins > 0) {
             printf("\t1-D Dataset dimension bins:\n");
             total = 0;
             if(iter->dset_dim_bins[0] > 0) {
-                printf("\t\t# of datasets of size 0: %lu\n", iter->dset_dim_bins[0]);
+                printf("\t\t# of datasets with dimension size 0: %lu\n", iter->dset_dim_bins[0]);
                 total = iter->dset_dim_bins[0];
             } /* end if */
             power = 1;
             for(u = 1; u < iter->dset_dim_nbins; u++) {
                 if(iter->dset_dim_bins[u] > 0) {
-                    printf("\t\t# of datasets of size %lu - %lu: %lu\n", power, (power * 10) - 1,
+                    printf("\t\t# of datasets with dimension size %lu - %lu: %lu\n", power, (power * 10) - 1,
                              iter->dset_dim_bins[u]);
                     total += iter->dset_dim_bins[u];
                 } /* end if */
@@ -1346,8 +1435,6 @@ print_dset_dtype_meta(const iter_t *iter)
  * Programmer: Vailin Choi
  *             July 12, 2007
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1357,9 +1444,9 @@ print_attr_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
-    printf("Small # of attributes:\n");
+    printf("Small # of attributes (objects with 1 to %u attributes):\n", sattrs_threshold);
     total = 0;
-    for(u = 1; u < SIZE_SMALL_ATTRS; u++) {
+    for(u = 1; u <= (unsigned)sattrs_threshold; u++) {
         if(iter->num_small_attrs[u] > 0) {
             printf("\t# of objects with %u attributes: %lu\n", u, iter->num_small_attrs[u]);
             total += iter->num_small_attrs[u];
@@ -1659,6 +1746,16 @@ main(int argc, const char *argv[])
             iter.free_space = finfo.free.tot_space;
             iter.free_hdr = finfo.free.meta_size;
         } /* end else */
+
+	iter.num_small_groups = (unsigned long *)calloc((size_t)sgroups_threshold, sizeof(unsigned long));
+	iter.num_small_attrs = (unsigned long *)calloc((size_t)(sattrs_threshold+1), sizeof(unsigned long));
+	iter.small_dset_dims = (unsigned long *)calloc((size_t)sdsets_threshold, sizeof(unsigned long));
+
+	if(iter.num_small_groups == NULL || iter.num_small_attrs == NULL || iter.small_dset_dims == NULL) {
+	    error_msg("Unable to allocate memory for tracking small groups/datasets/attributes\n");
+            h5tools_setstatus(EXIT_FAILURE);
+	    goto done;
+	}
 
         if((fcpl = H5Fget_create_plist(fid)) < 0)
             warn_msg("Unable to retrieve file creation property\n");
