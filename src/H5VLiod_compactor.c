@@ -1036,8 +1036,10 @@ int H5VL_iod_select_overlap (hid_t dataspace_1, uint64_t axe_id_1,
 
   }
   
+#if DEBUG_COMPACTOR
   fprintf(stderr,"in %s:%d num_peers: %d\n",
 	  __FILE__,__LINE__,num_peers);
+#endif
   
   if(H5S_SELECT_VALID(space) != TRUE){
 
@@ -1165,7 +1167,7 @@ int H5VL_iod_select_overlap (hid_t dataspace_1, uint64_t axe_id_1,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_compact_request
+ * Function:	H5VL_iod_compact_requests
  *
  * Purpose:	Looks at the request list and tries to compact every request
  *              with every other request. This functions assumes that all
@@ -1212,13 +1214,13 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
     HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,"Memory allocation error for selected requests")
   }
 
+  current_space = list[request_list[0]].selection_id;
+  current_axe_id = list[request_list[0]].axe_id;
+
 #if DEBUG_COMPACTOR
   fprintf(stderr,"%s:%d requests: %d and %d  have to be checked for merging\n",
 	  __FILE__,__LINE__,
 	  request_list[0], request_list[1]);
-  current_space = list[request_list[0]].selection_id;
-  current_axe_id = list[request_list[0]].axe_id;
-
   fprintf (stderr,"%s:%d Current Space ID : %d\n", 
 	   __FILE__,__LINE__, current_space);
   fprintf (stderr,"%s:%d Merged with : %d\n", __FILE__, __LINE__,
@@ -2290,8 +2292,11 @@ static int H5VL_iod_compare_offsets (hsize_t *offsets1,
   
   int ret_value = CP_SUCCESS;
   size_t i;
+#if DEBUG_COMPACTOR
   fprintf (stderr, "OFFSET 1 : %zd, OFFSET 2: %zd\n",
 	   offset1_cnt, offset2_cnt);
+#endif
+
   if (offset1_cnt != offset2_cnt){
     ret_value =  CP_FAIL;
     goto done;

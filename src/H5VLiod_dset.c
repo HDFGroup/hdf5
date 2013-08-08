@@ -658,13 +658,13 @@ done:
 #if DEBUG_COMPACTOR
      fprintf(stderr, " COMPACTOR CB: Enters Call BACK!\n");
      fprintf (stderr, "COMPACTOR CB: Number of requests : %d from call back in queue : %p\n", 
-	      H5VL_iod_get_number_of_requests(cqueue), (void *)cqueue);
+	    H5VL_iod_get_number_of_requests(cqueue), (void *)cqueue);
     fprintf(stderr, " COMPACTOR CB: Sleeping\n");
     fflush(stderr);
 #endif     
 
 #if H5_DO_NATIVE
-    sleep(2);
+    usleep(1000);
 #endif
     
 
@@ -708,6 +708,7 @@ done:
        fprintf(stderr,"ERROR !! Compactor create read request list failed with error %d  \n",
 	       ret_value);
      }
+
      fprintf (stderr,"nrentries: %d, nrdatasets: %d \n",
 	      nrentries, nrdatasets);
 
@@ -720,12 +721,10 @@ done:
 	H5VL_iod_compact_requests (wlist, &nentries,dlist[i].num_requests,
 				  dlist[i].requests);    
       }
-
-      if (nentries){
+      
+      if (nentries && nrentries){
 	H5VL_iod_steal_writes (wlist, nentries,
 			       rlist, nrentries); 
-	/*H5VL_iod_short_circuit_reads(wlist, nentries,
-	rlist, nrentries);*/
       }
       
       for ( i = 0; i < ndatasets; i ++){
@@ -817,6 +816,7 @@ int H5VL_iod_server_compactor_read (void *_list, int num_requests)
   iod_handle_t coh, iod_oh;
   iod_obj_id_t iod_id;    
   hid_t space_id, dst_id, src_id;
+  hid_t dxpl_id;
   size_t size, dst_size, src_size;
   size_t nelmts; 
   void *buf = NULL;
@@ -1075,7 +1075,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   hid_t space_id, dst_id, src_id;
   size_t size, dst_size, src_size,ii = 0;
   void *buf = NULL;
-
+  size_t hi;
   uint8_t *buf_ptr;
   hssize_t num_descriptors = 0, n =0;
   hbool_t opened_locally = FALSE;
@@ -1162,6 +1162,13 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	*native_dims = (hsize_t)(total_length/src_size); 
 #endif
 
+
+#if PROFILE
+	fprintf (stdout,
+		 "# Requests Merged: %d\n",
+		 request_counter);
+
+#endif
 #if DEBUG_COMPACTOR
 	/*Even in the case its not merged the buffer was already extracted*/
 	fprintf (stderr,"COMPACTOR WRITE: Request %d has been merged \n", 
@@ -1268,7 +1275,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	
 	if (list[request_counter].merged == NOT_MERGED){
 
-#if 0
+#if DEBUG_COMPACTOR
 	  ptr = (int *) buf;
 	  fprintf(stderr,"COMPACTOR WRITE: Received a buffer of size %zd with values :",
 		  size);
@@ -1287,6 +1294,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	}
 	
 	if (list[request_counter].merged == MERGED){
+
 #if DEBUG_COMPACTOR
 	  fprintf (stderr, "COMPACTOR WRITE i: %d, num_mblocks: %zd, num_bytes: %lli, start_reqs: %lli\n",
 		   request_counter, list[request_counter].num_mblocks, num_bytes, start_reqs);
@@ -1295,6 +1303,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 		     j, list[request_counter].mblocks[j].len);
 	  }
 #endif
+
 	  
 #if H5_DO_NATIVE
 	  write_buf_ptr = write_buf;
@@ -1302,8 +1311,10 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 
 	  k = 0;
 	  mem_reqs = 0;
+#if DEBUG_COMPACTOR
 	  fprintf (stderr,"COMPACTOR, curr_j: %lli, j: %lli, num_mblocks: %zd\n",
 		   curr_j, j, list[request_counter].num_mblocks);
+#endif
 	  
 	  start_reqs = curr_j;
 	  for (j = curr_j; j < list[request_counter].num_mblocks; j++){
@@ -1358,13 +1369,13 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	    memcpy ( (void *)write_buf_ptr, mem_desc->frag[k].addr,
 		     (size_t)mem_desc->frag[k].len);
 	    native_length += mem_desc->frag[k].len;
-	    
 #endif
 	    k++;
 	  }
 	  curr_k += k;
   
 #if H5_DO_NATIVE
+#if DEBUG_COMPACTOR
 	  fprintf (stderr, "Printing the native constructed buffer of length :%zd\n", 
 		   native_length);
 	  ptr = (int *) write_buf;
@@ -1372,23 +1383,22 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	    fprintf(stderr, "%d ", ptr[ii]);
 	  }
 	  fprintf(stderr, "\n");
-	    
 #endif
+#endif
+
 #if DEBUG_COMPACTOR
 	  for ( j = 0 ; j <  k; j++){
 	    ptr = (int *)(mem_desc->frag[j].addr);
 	    fprintf(stderr, "COMPACTOR MERGED WRITE IOD_BUFFER j: %lli, k: %lli  len: %llu\n",
 		    j,k, mem_desc->frag[j].len);
-#if 0
 	    for (ii = 0; ii < mem_desc->frag[j].len/sizeof(int); ii++)
 	      fprintf(stderr, "%d ", ptr[ii]);
 	    fprintf(stderr, "\n");
-#endif
 	  }
 	  fflush(stderr);
 #endif
 	}
-
+	
 	file_desc = hslabs[n];
       
 #if H5VL_IOD_DEBUG 
@@ -1413,13 +1423,12 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 #endif
       
 #if H5_DO_NATIVE
-
-
 #if DEBUG_COMPACTOR
       fprintf(stderr,"native_dims : %lli\n", *native_dims);
 #endif
 
       mem_dataspace = H5Screate_simple(1, native_dims, NULL);
+
       ret_value = H5Dwrite(iod_oh.cookie,dst_id, mem_dataspace, space_id, H5P_DEFAULT, 
 			   write_buf);
 

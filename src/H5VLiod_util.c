@@ -454,8 +454,6 @@ H5VL_iod_get_file_desc(hid_t space_id, hssize_t *count, iod_hyperslab_t *hslabs)
                     if(NULL == (blocks = (hsize_t *)malloc(block_count)))
                         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate array for points coords");
 
-                    fprintf(stderr, "block count = %zu\n", block_count);
-
                     if(H5Sget_select_hyper_blocklist(space_id, (hsize_t)0, 
                                                      (hsize_t)num_descriptors, blocks) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "Failed to retrieve point coordinates");

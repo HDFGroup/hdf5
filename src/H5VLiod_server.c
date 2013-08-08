@@ -1472,6 +1472,7 @@ int H5VL_iod_server_dset_compactor(op_data_t *op_data, int request_type)
     fprintf(stderr, "Exiting the compactor function \n");
     fflush(stderr);
 #endif
+
     request_id++;
 
  done:
