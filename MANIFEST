@@ -1326,6 +1326,12 @@
 # h5stat test files
 ./tools/h5stat/h5stat_gentest.c
 ./tools/h5stat/testh5stat.sh.in
+./tools/h5stat/testfiles/h5stat_dims1.ddl
+./tools/h5stat/testfiles/h5stat_dims2.ddl
+./tools/h5stat/testfiles/h5stat_err1_dims.ddl
+./tools/h5stat/testfiles/h5stat_err1_links.ddl
+./tools/h5stat/testfiles/h5stat_err1_numattrs.ddl
+./tools/h5stat/testfiles/h5stat_err2_numattrs.ddl
 ./tools/h5stat/testfiles/h5stat_filters.ddl
 ./tools/h5stat/testfiles/h5stat_filters-d.ddl
 ./tools/h5stat/testfiles/h5stat_filters-dT.ddl
@@ -1337,11 +1343,22 @@
 ./tools/h5stat/testfiles/h5stat_filters.h5
 ./tools/h5stat/testfiles/h5stat_help1.ddl
 ./tools/h5stat/testfiles/h5stat_help2.ddl
+./tools/h5stat/testfiles/h5stat_links1.ddl
+./tools/h5stat/testfiles/h5stat_links2.ddl
+./tools/h5stat/testfiles/h5stat_links3.ddl
+./tools/h5stat/testfiles/h5stat_links4.ddl
+./tools/h5stat/testfiles/h5stat_links5.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat-UA.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat-UG.ddl
 ./tools/h5stat/testfiles/h5stat_newgrat.h5
+./tools/h5stat/testfiles/h5stat_nofile.ddl
 ./tools/h5stat/testfiles/h5stat_notexist.ddl
+./tools/h5stat/testfiles/h5stat_numattrs1.ddl
+./tools/h5stat/testfiles/h5stat_numattrs2.ddl
+./tools/h5stat/testfiles/h5stat_numattrs3.ddl
+./tools/h5stat/testfiles/h5stat_numattrs4.ddl
+./tools/h5stat/testfiles/h5stat_threshold.h5
 ./tools/h5stat/testfiles/h5stat_tsohm.ddl
 ./tools/h5stat/testfiles/h5stat_tsohm.h5
 
