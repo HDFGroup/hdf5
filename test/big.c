@@ -393,6 +393,10 @@ writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
         HDfprintf(stdout, "Unexpected file size of NOFILE\n");
         goto error;
         break;
+
+    default:
+        HDassert(0 && "Invalid test size.");
+        break;
     }
 
     /*
@@ -604,7 +608,6 @@ usage(void)
 int testvfd(vfd_t vfd)
 {
     hid_t	fapl=-1;
-    hsize_t	family_size;
     char	filename[1024];
     fsizes_t	testsize;
 
