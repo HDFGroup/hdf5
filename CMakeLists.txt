@@ -1230,12 +1230,12 @@ IF (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
     # Configure the Info.plist file for the install bundle
     #-----------------------------------------------------------------------------
     CONFIGURE_FILE (
-        ${CMAKE_ROOT}/Modules/CPack.Info.plist.in
+        ${HDF5_RESOURCES_DIR}/CPack.Info.plist.in
         ${HDF5_BINARY_DIR}/CMakeFiles/Info.plist @ONLY
     )
-    SET (CMAKE_BUNDLE_NAME "${HDF5_PACKAGE_STRING}")
-    SET (CMAKE_BUNDLE_LOCATION "/")    # make sure CMAKE_INSTALL_PREFIX ends in /
-    SET (CMAKE_INSTALL_PREFIX "/${CMAKE_BUNDLE_NAME}.framework/Versions/${CPACK_PACKAGE_VERSION}/${CPACK_PACKAGE_NAME}")
+    SET (CPACK_BUNDLE_NAME "${HDF5_PACKAGE_STRING}")
+    SET (CPACK_BUNDLE_LOCATION "/")    # make sure CMAKE_INSTALL_PREFIX ends in /
+    SET (CMAKE_INSTALL_PREFIX "/${CPACK_BUNDLE_NAME}.framework/Versions/${CPACK_PACKAGE_VERSION}/${CPACK_PACKAGE_NAME}/")
     SET (CPACK_BUNDLE_ICON "${HDF5_RESOURCES_DIR}/hdf.gif")
     SET (CPACK_BUNDLE_PLIST "${HDF5_BINARY_DIR}/CMakeFiles/Info.plist")
 #    SET (CPACK_BUNDLE_STARTUP_COMMAND "${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-startup.sh")
