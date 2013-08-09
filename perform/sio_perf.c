@@ -482,6 +482,11 @@ run_test(iotype iot, parameters parms, struct options *opts)
         case HDF5:
             output_report("HDF5\n");
             break;
+        default:
+            /* unknown request */
+            HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+            HDassert(0 && "Unknown IO tpe");
+            break;
     }
 
     /* allocate space for tables minmax and that it is sufficient */
