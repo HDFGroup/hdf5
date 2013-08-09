@@ -2358,7 +2358,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
+H5D__mark(H5D_t *dataset, hid_t UNUSED dxpl_id, unsigned flags)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
