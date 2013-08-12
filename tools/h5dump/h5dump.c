@@ -230,57 +230,61 @@ usage(const char *prog)
     PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] files\n", prog);
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "     -h,   --help         Print a usage message and exit\n");
+    PRINTVALSTREAM(rawoutstream, "     -V,   --version      Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- File Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -n,   --contents     Print a list of the file contents and exit\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 1 also prints attributes.\n");
     PRINTVALSTREAM(rawoutstream, "     -B,   --superblock   Print the content of the super block\n");
     PRINTVALSTREAM(rawoutstream, "     -H,   --header       Print the header only; no data is displayed\n");
-    PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
-    PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
-    PRINTVALSTREAM(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
-    PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
-    PRINTVALSTREAM(rawoutstream, "     -e,   --escape       Escape non printing characters\n");
-    PRINTVALSTREAM(rawoutstream, "     -V,   --version      Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "     -f D, --filedriver=D Specify which driver to open the file with\n");
+    PRINTVALSTREAM(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
+    PRINTVALSTREAM(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
+    PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
+    PRINTVALSTREAM(rawoutstream, "                          Do not use filename F to suppress ddl display\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
     PRINTVALSTREAM(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
     PRINTVALSTREAM(rawoutstream, "                          slash with a preceding backslash (\\).\n");
     PRINTVALSTREAM(rawoutstream, "                          (See example section below.)\n");
     PRINTVALSTREAM(rawoutstream, "     -d P, --dataset=P    Print the specified dataset\n");
-    PRINTVALSTREAM(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
-    PRINTVALSTREAM(rawoutstream, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
-    PRINTVALSTREAM(rawoutstream, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     PRINTVALSTREAM(rawoutstream, "     -g P, --group=P      Print the specified group and all members\n");
     PRINTVALSTREAM(rawoutstream, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
-    PRINTVALSTREAM(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
-    PRINTVALSTREAM(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
     PRINTVALSTREAM(rawoutstream, "     -t P, --datatype=P   Print the specified named datatype\n");
-    PRINTVALSTREAM(rawoutstream, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
-    PRINTVALSTREAM(rawoutstream, "                          sets the number of columns to the maximum (65535).\n");
-    PRINTVALSTREAM(rawoutstream, "                          Default width is 80 columns.\n");
+    PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
+    PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Object Property Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
+    PRINTVALSTREAM(rawoutstream, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
+    PRINTVALSTREAM(rawoutstream, "     -M L, --packedbits=L Print packed bits as unsigned integers, using mask\n");
+    PRINTVALSTREAM(rawoutstream, "                          format L for an integer dataset specified with\n");
+    PRINTVALSTREAM(rawoutstream, "                          option -d. L is a list of offset,length values,\n");
+    PRINTVALSTREAM(rawoutstream, "                          separated by commas. Offset is the beginning bit in\n");
+    PRINTVALSTREAM(rawoutstream, "                          the data value and length is the number of bits of\n");
+    PRINTVALSTREAM(rawoutstream, "                          the mask.\n");
+    PRINTVALSTREAM(rawoutstream, "     -R,   --region       Print dataset pointed by region references\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Formatting Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream, "     -e,   --escape       Escape non printing characters\n");
+    PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
+    PRINTVALSTREAM(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
     PRINTVALSTREAM(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
     PRINTVALSTREAM(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     PRINTVALSTREAM(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
-    PRINTVALSTREAM(rawoutstream,
-  "     -M L, --packedbits=L Print packed bits as unsigned integers, using mask\n"
-  "                          format L for an integer dataset specified with\n"
-  "                          option -d. L is a list of offset,length values,\n"
-  "                          separated by commas. Offset is the beginning bit in\n"
-  "                          the data value and length is the number of bits of\n"
-  "                          the mask.\n"
-  );
-    PRINTVALSTREAM(rawoutstream, "     -R,   --region       Print dataset pointed by region references\n");
+    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
+    PRINTVALSTREAM(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
+    PRINTVALSTREAM(rawoutstream, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
+    PRINTVALSTREAM(rawoutstream, "                          sets the number of columns to the maximum (65535).\n");
+    PRINTVALSTREAM(rawoutstream, "                          Default width is 80 columns.\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- XML Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -x,   --xml          Output in XML using Schema\n");
     PRINTVALSTREAM(rawoutstream, "     -u,   --use-dtd      Output in XML using DTD\n");
     PRINTVALSTREAM(rawoutstream, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
     PRINTVALSTREAM(rawoutstream, "     -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML\n");
     PRINTVALSTREAM(rawoutstream, "                          \":\": no namespace, default: \"hdf5:\"\n");
     PRINTVALSTREAM(rawoutstream, "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
-    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
-    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
-    PRINTVALSTREAM(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
-    PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
-    PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
-    PRINTVALSTREAM(rawoutstream, "                          Do not use filename F to suppress ddl display\n");
     PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Subsetting Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
     PRINTVALSTREAM(rawoutstream, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
     PRINTVALSTREAM(rawoutstream, " Thus, the options mirror those for performing a hyperslab selection.\n");
@@ -296,20 +300,13 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "      number of dimensions in the dataspace being queried\n");
     PRINTVALSTREAM(rawoutstream, "      (Alternate compact form of subsetting is described in the Reference Manual)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Option Argument Conventions ---------------\n");
     PRINTVALSTREAM(rawoutstream, "  D - is the file driver to use in opening the file. Acceptable values\n");
     PRINTVALSTREAM(rawoutstream, "      are \"sec2\", \"family\", \"split\", \"multi\", \"direct\", and \"stream\". Without\n");
     PRINTVALSTREAM(rawoutstream, "      the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
     PRINTVALSTREAM(rawoutstream, "      in opening the file.\n");
-    PRINTVALSTREAM(rawoutstream, "      These are the letters that are appended to the file name(without .h5) when opening\n");
-    PRINTVALSTREAM(rawoutstream, "      names for the split(m,r) and multi(s,b,r,g,l,o) drivers. They are:\n");
-    PRINTVALSTREAM(rawoutstream, "         m: All meta data when using the split driver.\n");
-    PRINTVALSTREAM(rawoutstream, "         s: The userblock, superblock, and driver info block\n");
-    PRINTVALSTREAM(rawoutstream, "         b: B-tree nodes\n");
-    PRINTVALSTREAM(rawoutstream, "         r: Dataset raw data\n");
-    PRINTVALSTREAM(rawoutstream, "         g: Global heap\n");
-    PRINTVALSTREAM(rawoutstream, "         l: local heap (object names)\n");
-    PRINTVALSTREAM(rawoutstream, "         o: object headers\n");
+    PRINTVALSTREAM(rawoutstream, "      See examples below for family, split, and multi driver special file name usage.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  F - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "  P - is the full path from the root group to the object.\n");
@@ -324,7 +321,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
     PRINTVALSTREAM(rawoutstream, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "  Examples:\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Examples ---------------\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  1) Attribute foo of the group /bar_none in file quux.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -354,6 +351,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f split splitfile\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  7) Dataset foo in multi files mf-s.h5, mf-b.h5, mf-r.h5, mf-g.h5, mf-l.h5 and mf-o.h5\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f multi mf\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f family fam%05d.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 
@@ -479,172 +484,6 @@ table_list_free(void)
     table_list.tables = NULL;
     table_list.nalloc = table_list.nused = 0;
 } /* end table_list_free() */
-
-/*-------------------------------------------------------------------------
- * Function:    set_data_output_file
- *
- * Purpose:     Open fname as the output file for dataset raw data.
- *      Set rawdatastream as its file stream.
- *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
- * Programmer:  Albert Cheng, 2000/09/30
- *
- * Modifications:
- *  pvn June, 1, 2006. Add a switch for binary output
- *
- *-------------------------------------------------------------------------
- */
-static int
-set_data_output_file(const char *fname, int is_bin)
-{
-    int     retvalue = FAIL;
-    FILE    *f;    /* temporary holding place for the stream pointer
-                    * so that rawdatastream is changed only when succeeded */
-
-    if (rawdatastream && rawdatastream != stdout) {
-        if (HDfclose(rawdatastream))
-            HDperror("closing rawdatastream");
-        else
-            rawdatastream = NULL;
-    }
-
-    /* First check if filename is string "NULL" */
-    if (fname != NULL) {
-        /* binary output */
-        if (is_bin) {
-            if ((f = HDfopen(fname, "wb")) != NULL) {
-                rawdatastream = f;
-                retvalue = SUCCEED;
-            }
-        }
-        else {
-            if ((f = HDfopen(fname, "w")) != NULL) {
-                rawdatastream = f;
-                retvalue = SUCCEED;
-            }
-        }
-    }
-    else {
-        rawdatastream = NULL;
-        retvalue = SUCCEED;
-    }
-
-    return retvalue;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    set_attr_output_file
- *
- * Purpose:     Open fname as the output file for attribute raw data.
- *      Set rawattrstream as its file stream.
- *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
- *-------------------------------------------------------------------------
- */
-static int
-set_attr_output_file(const char *fname, int is_bin)
-{
-    int     retvalue = FAIL;
-    FILE    *f;    /* temporary holding place for the stream pointer
-                    * so that rawattrstream is changed only when succeeded */
-
-    if (rawattrstream && rawattrstream != stdout) {
-        if (HDfclose(rawattrstream))
-            HDperror("closing rawattrstream");
-        else
-            rawattrstream = NULL;
-    }
-
-    /* First check if filename is string "NULL" */
-    if (fname != NULL) {
-        if ((f = HDfopen(fname, "w")) != NULL) {
-            rawattrstream = f;
-            retvalue = SUCCEED;
-        }
-    }
-    else {
-        rawattrstream = NULL;
-        retvalue = SUCCEED;
-    }
-
-    return retvalue;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    set_output_file
- *
- * Purpose:     Open fname as the output file for raw output.
- *      Set rawoutstream as its file stream.
- *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
- *-------------------------------------------------------------------------
- */
-static int
-set_output_file(const char *fname)
-{
-    int     retvalue = FAIL;
-    FILE    *f;    /* temporary holding place for the stream pointer
-                    * so that rawoutstream is changed only when succeeded */
-
-    if (rawoutstream && rawoutstream != stdout) {
-        if (HDfclose(rawoutstream))
-            HDperror("closing rawoutstream");
-        else
-            rawoutstream = NULL;
-    }
-    /* First check if filename is string "NULL" */
-    if (fname != NULL) {
-        if ((f = HDfopen(fname, "w")) != NULL) {
-                rawoutstream = f;
-                retvalue = SUCCEED;
-        }
-    }
-    else {
-        rawoutstream = NULL;
-        retvalue = SUCCEED;
-    }
-
-    return retvalue;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    set_error_file
- *
- * Purpose:     Open fname as the error output file for dataset raw error.
- *      Set rawerrorstream as its file stream.
- *
- * Return:      0 -- succeeded
- *      negative -- failed
- *
- *-------------------------------------------------------------------------
- */
-static int
-set_error_file(const char *fname)
-{
-    int     retvalue = FAIL;
-    FILE    *f;    /* temporary holding place for the stream pointer
-                    * so that rawerrorstream is changed only when succeeded */
-
-    if (rawerrorstream && rawerrorstream != stderr) {
-        if (HDfclose(rawerrorstream))
-            HDperror("closing rawerrorstream");
-        else
-            rawerrorstream = NULL;
-    }
-
-    if ((f = HDfopen(fname, "w")) != NULL) {
-        rawerrorstream = f;
-        retvalue = SUCCEED;
-    }
-
-    return retvalue;
-}
 
 /*-------------------------------------------------------------------------
  * Function:    set_binary_form
@@ -1186,7 +1025,7 @@ parse_start:
             break;
 
         case 'O':
-            if (set_output_file(opt_arg) < 0) {
+            if (h5tools_set_output_file(opt_arg, 0) < 0) {
                 usage(h5tools_getprogname());
                 goto error;
             }
@@ -1194,20 +1033,20 @@ parse_start:
 
         case 'o':
             if ( bin_output ) {
-                if (set_data_output_file(opt_arg, 1) < 0) {
+                if (h5tools_set_data_output_file(opt_arg, 1) < 0) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
             }
             else {
                 if(display_attr_data && !display_data) {
-                    if (set_attr_output_file(opt_arg, 0) < 0) {
+                    if (h5tools_set_attr_output_file(opt_arg, 0) < 0) {
                         usage(h5tools_getprogname());
                         goto error;
                     }
                 }
                 if(display_data || display_all) {
-                    if (set_data_output_file(opt_arg, 0) < 0) {
+                    if (h5tools_set_data_output_file(opt_arg, 0) < 0) {
                         usage(h5tools_getprogname());
                         goto error;
                     }
@@ -1229,7 +1068,7 @@ parse_start:
             }
             bin_output = TRUE;
             if (outfname!=NULL) {
-                if (set_data_output_file(outfname, 1) < 0)  {
+                if (h5tools_set_data_output_file(outfname, 1) < 0)  {
                     /* failed to set output file */
                     usage(h5tools_getprogname());
                     goto error;
