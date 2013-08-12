@@ -129,6 +129,6 @@ usage: h5dump [OPTIONS] files
 
   8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
 
-      h5dump -d /foo -f family fam-574932464.h5
+      h5dump -d /foo -f family fam%05d.h5
 
 h5dump error: Too many masks requested (max. 8). Mask list(0,1,0,1,1,1,2,1,3,1,4,1,5,1,6,1,7,1)

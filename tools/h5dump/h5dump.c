@@ -358,7 +358,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f family fam%05d.h5\n");
+    PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f family fam%%05d.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 

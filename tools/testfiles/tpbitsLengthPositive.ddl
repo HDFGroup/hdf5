@@ -129,6 +129,6 @@ usage: h5dump [OPTIONS] files
 
   8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
 
-      h5dump -d /foo -f family fam-574932464.h5
+      h5dump -d /foo -f family fam%05d.h5
 
 h5dump error: Packed Bit length value(0) must be positive.
