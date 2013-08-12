@@ -2,20 +2,6 @@ usage: h5dump [OPTIONS] files
   OPTIONS
      -h,   --help         Print a usage message and exit
      -V,   --version      Print version number and exit
---------------- Formatting Options ---------------
-     -e,   --escape       Escape non printing characters
-     -r,   --string       Print 1-byte integer datasets as ASCII
-     -y,   --noindex      Do not print array indices with the data
-     -m T, --format=T     Set the floating point output format
-     -q Q, --sort_by=Q    Sort groups and attributes by index Q
-     -z Z, --sort_order=Z Sort groups and attributes by order Z
-     --enable-error-stack Prints messages from the HDF5 error stack as they
-                          occur.
-     --no-compact-subset  Disable compact form of subsetting and allow the use
-                          of "[" in dataset names.
-     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
-                          sets the number of columns to the maximum (65535).
-                          Default width is 80 columns.
 --------------- File Options ---------------
      -n,   --contents     Print a list of the file contents and exit
                           Optional value 1 also prints attributes.
@@ -47,6 +33,20 @@ usage: h5dump [OPTIONS] files
                           the data value and length is the number of bits of
                           the mask.
      -R,   --region       Print dataset pointed by region references
+--------------- Formatting Options ---------------
+     -e,   --escape       Escape non printing characters
+     -r,   --string       Print 1-byte integer datasets as ASCII
+     -y,   --noindex      Do not print array indices with the data
+     -m T, --format=T     Set the floating point output format
+     -q Q, --sort_by=Q    Sort groups and attributes by index Q
+     -z Z, --sort_order=Z Sort groups and attributes by order Z
+     --enable-error-stack Prints messages from the HDF5 error stack as they
+                          occur.
+     --no-compact-subset  Disable compact form of subsetting and allow the use
+                          of "[" in dataset names.
+     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
+                          sets the number of columns to the maximum (65535).
+                          Default width is 80 columns.
 --------------- XML Options ---------------
      -x,   --xml          Output in XML using Schema
      -u,   --use-dtd      Output in XML using DTD
@@ -77,15 +77,7 @@ usage: h5dump [OPTIONS] files
       the file driver flag, the file will be opened with each driver in
       turn and in the order specified above until one driver succeeds
       in opening the file.
-      These are the letters that are appended to the file name(without .h5) when opening
-      names for the split(m,r) and multi(s,b,r,g,l,o) drivers. They are:
-         m: All meta data when using the split driver.
-         s: The userblock, superblock, and driver info block
-         b: B-tree nodes
-         r: Dataset raw data
-         g: Global heap
-         l: local heap (object names)
-         o: object headers
+      See examples below for family, split, and multi driver special file name usage.
 
   F - is a filename.
   P - is the full path from the root group to the object.
@@ -130,5 +122,13 @@ usage: h5dump [OPTIONS] files
   6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5
 
       h5dump -d /foo -f split splitfile
+
+  7) Dataset foo in multi files mf-s.h5, mf-b.h5, mf-r.h5, mf-g.h5, mf-l.h5 and mf-o.h5
+
+      h5dump -d /foo -f multi mf
+
+  8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5
+
+      h5dump -d /foo -f family fam-574932464.h5
 
 h5dump error: missing file name
