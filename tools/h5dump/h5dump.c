@@ -71,7 +71,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*N:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -188,6 +188,7 @@ static struct long_options l_opts[] = {
     { "packed-bits", require_arg, 'M' },
     { "no-compact-subset", no_arg, 'C' },
     { "ddl", optional_arg, 'O' },
+    { "any_object", require_arg, 'N' },
     { NULL, 0, '\0' }
 };
 
@@ -250,6 +251,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -g P, --group=P      Print the specified group and all members\n");
     PRINTVALSTREAM(rawoutstream, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     PRINTVALSTREAM(rawoutstream, "     -t P, --datatype=P   Print the specified named datatype\n");
+    PRINTVALSTREAM(rawoutstream, "     -N P, --any_path=P   Print any attribute, dataset, group, datatype, or link that matches P\n");
+    PRINTVALSTREAM(rawoutstream, "                          P can be the absolute path or just a relative path.\n");
     PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Property Options ---------------\n");
@@ -956,6 +959,18 @@ parse_start:
             if (h5tools_nCols <= 0) {
                 h5tools_nCols = 65535;
             }
+            last_was_dset = FALSE;
+            break;
+        case 'N':
+            display_all = 0;
+
+            for (i = 0; i < argc; i++)
+                if (!hand[i].func) {
+                    hand[i].func = handle_paths;
+                    hand[i].obj = HDstrdup(opt_arg);
+                    break;
+                }
+
             last_was_dset = FALSE;
             break;
         case 'a':

@@ -1396,6 +1396,8 @@
 ./tools/testfiles/tall-5s.ddl
 ./tools/testfiles/tall-6.ddl
 ./tools/testfiles/tall-6.exp
+./tools/testfiles/tall-7.ddl
+./tools/testfiles/tall-7N.ddl
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5

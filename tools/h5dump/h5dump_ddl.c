@@ -24,6 +24,16 @@
 #include "h5dump_extern.h"
 #include "h5dump_ddl.h"
 
+typedef struct {
+    hid_t fid;                      /* File ID being traversed */
+    char *op_name;					/* Object name wanted */
+} trav_handle_udata_t;
+
+typedef struct {
+	char *path;                     /* Path of object being searched */
+    char *op_name;					/* Object name wanted */
+} trav_attr_udata_t;
+
 /*-------------------------------------------------------------------------
  * Function:    dump_datatype
  *
@@ -1288,6 +1298,203 @@ dump_fcontents(hid_t fid)
     PRINTSTREAM(rawoutstream, " %s\n",END);
 }
 
+static herr_t
+attr_search(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *ainfo, void *_op_data)
+{
+    herr_t              ret = SUCCEED;
+    int 				i;
+    int 				j;
+    int 				k;
+    char 			   *obj_attrname;
+    char			   *obj_op_name;
+    char               *obj_name;
+	trav_attr_udata_t  *attr_data = (trav_attr_udata_t*)_op_data;
+    char               *buf = attr_data->path;
+    char			   *op_name = attr_data->op_name;
+
+    j = (int)HDstrlen(op_name) - 1;
+    /* find the last / */
+    while(j >= 0) {
+    	if (op_name[j] == '/' && (j==0 || (j>0 && op_name[j-1]!='\\')))
+    		break;
+    	j--;
+    }
+
+    obj_op_name = h5tools_str_replace(op_name + j + 1, "\\/", "/");
+
+    if(obj_op_name == NULL) {
+    	h5tools_setstatus(EXIT_FAILURE);
+    	ret = FAIL;
+    }
+    else {
+    	if(HDstrcmp(attr_name, obj_op_name)==0) {
+    	    /* object name */
+    	    i = (int)HDstrlen(buf);
+    	    j = (int)HDstrlen(op_name);
+    	    k = (size_t)i + 1 + (size_t)j + 1 + 2;
+    	    obj_name = (char *)HDmalloc((size_t)k);
+    	    if(obj_name == NULL) {
+    	    	h5tools_setstatus(EXIT_FAILURE);
+    	    	ret = FAIL;
+    	    }
+    	    else {
+    	    	HDmemset(obj_name, '\0', (size_t)k);
+    	        if(op_name[0] != '/') {
+    	        	HDstrncat(obj_name, buf, (size_t)i + 1);
+    	        	if(buf[i-1] != '/')
+    	            	HDstrncat(obj_name, "/", 2);
+    	        }
+    	        HDstrncat(obj_name, op_name, (size_t)j + 1);
+
+    	    	handle_attributes(oid, obj_name, NULL, 0, NULL);
+    	    	HDfree(obj_name);
+        	}
+    	}
+    	HDfree(obj_op_name);
+    }
+    return ret;
+} /* end attr_search() */
+
+static herr_t
+obj_search(const char *path, const H5O_info_t *oi, const char *already_visited, void *_op_data)
+{
+	trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
+    char *op_name = (char*)handle_data->op_name;
+
+    trav_attr_udata_t  attr_data;
+    attr_data.path = (char*)path;
+    attr_data.op_name = op_name;
+    H5Aiterate_by_name(handle_data->fid, path, H5_INDEX_NAME, H5_ITER_INC, NULL, attr_search, (void*)&attr_data, H5P_DEFAULT);
+
+    if(HDstrcmp(path, op_name)==0) {
+    	switch(oi->type) {
+    	case H5O_TYPE_GROUP:
+    		handle_groups(handle_data->fid, path, NULL, 0, NULL);
+    		break;
+    	case H5O_TYPE_DATASET:
+    		handle_datasets(handle_data->fid, path, NULL, 0, NULL);
+    		break;
+    	case H5O_TYPE_NAMED_DATATYPE:
+    		handle_datatypes(handle_data->fid, path, NULL, 0, NULL);
+    		break;
+    	case H5O_TYPE_UNKNOWN:
+    	case H5O_TYPE_NTYPES:
+    	default:
+    		error_msg("unknown object type value\n");
+    		h5tools_setstatus(EXIT_FAILURE);
+    	} /* end switch */
+    }
+
+    return 0;
+} /* end obj_search() */
+
+static herr_t
+lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
+{
+    int         search_len;
+    int			k;
+    char       *search_name;
+	trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
+    char *op_name = (char*)handle_data->op_name;
+
+    search_len = HDstrlen(op_name);
+    if(search_len > 0 && op_name[0] != '/') {
+    	k = 2;
+    }
+    else
+        k = 1;
+   	search_name = (char *)HDmalloc(search_len + k);
+    if(search_name == NULL) {
+		error_msg("creating temporary link\n");
+    	h5tools_setstatus(EXIT_FAILURE);
+    }
+    else {
+		if (k == 2) {
+			HDstrcpy(search_name, "/");
+			HDstrncat(search_name, op_name, (size_t)search_len + 1);
+		}
+		else
+			HDstrncpy(search_name, op_name, (size_t)search_len + 1);
+		search_name[search_len + k] = '\0';
+
+		if(HDstrcmp(path, search_name) == 0) {
+			switch(li->type) {
+			case H5L_TYPE_SOFT:
+			case H5L_TYPE_EXTERNAL:
+				handle_links(handle_data->fid, op_name, NULL, 0, NULL);
+				break;
+
+			case H5L_TYPE_HARD:
+			case H5L_TYPE_MAX:
+			case H5L_TYPE_ERROR:
+			default:
+				error_msg("unknown link type value\n");
+				h5tools_setstatus(EXIT_FAILURE);
+				break;
+			} /* end switch() */
+		}
+		HDfree(search_name);
+    }
+    return 0;
+} /* end lnk_search() */
+
+/*-------------------------------------------------------------------------
+ * Function:    handle_paths
+ *
+ * Purpose:     Handle objects from the command.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+handle_paths(hid_t fid, const char *path_name, void* data, int pe, const char *display_name)
+{
+    hid_t  obj_id = -1;
+    hid_t  gid = -1;
+    H5O_info_t       oinfo;
+
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
+        error_msg("unable to open root group\n");
+        h5tools_setstatus(EXIT_FAILURE);
+    }
+    else {
+        hid_t       gcpl_id;
+        unsigned    crt_order_flags;
+        unsigned    attr_crt_order_flags;
+
+        if ((gcpl_id = H5Gget_create_plist(gid)) < 0) {
+            error_msg("error in getting group creation property list ID\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        }
+
+        /* query the group creation properties for attributes */
+        if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0) {
+            error_msg("error in getting group creation properties\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        }
+
+        /* query the group creation properties */
+        if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) {
+            error_msg("error in getting group creation properties\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        }
+
+        if(H5Pclose(gcpl_id) < 0) {
+            error_msg("error in closing group creation property list ID\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        }
+		trav_handle_udata_t handle_udata;     /* User data for traversal */
+
+		handle_udata.fid = fid;
+		handle_udata.op_name = (char*)path_name;
+		if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata) < 0) {
+			error_msg("error traversing information\n");
+			h5tools_setstatus(EXIT_FAILURE);
+		}
+    }
+}
+
 /*-------------------------------------------------------------------------
  * Function:    handle_attributes
  *
@@ -1362,7 +1569,6 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     outputformat = &string_dataformat;
 
 	attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
-
 
     /* handle error case: cannot open the object with the attribute */
     if((oid = H5Oopen(fid, obj_name, H5P_DEFAULT)) < 0) {

@@ -58,6 +58,8 @@ IF (BUILD_TESTING)
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-4s.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-5s.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-6.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-7.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-7N.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tallfilters.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1_big.ddl
@@ -752,6 +754,39 @@ IF (BUILD_TESTING)
     ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_H5_TEST file)
 
+  MACRO (ADD_H5_TEST_N resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    IF (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (NAME H5DUMP-N-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
+      SET_TESTS_PROPERTIES (H5DUMP-N-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      IF (NOT ${resultcode} STREQUAL "0")
+        SET_TESTS_PROPERTIES (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
+      ENDIF (NOT ${resultcode} STREQUAL "0")
+      IF (NOT "${last_test}" STREQUAL "")
+        SET_TESTS_PROPERTIES (H5DUMP-N-${resultfile} PROPERTIES DEPENDS ${last_test})
+      ENDIF (NOT "${last_test}" STREQUAL "")
+    ELSE (HDF5_ENABLE_USING_MEMCHECKER)
+      ADD_TEST (
+          NAME H5DUMP-N-${resultfile}-clear-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove ${resultfile}-N.bin ${resultfile}-N.out ${resultfile}-N.out.err
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-N-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
+      ADD_TEST (
+          NAME H5DUMP-N-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}-N.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
+      )
+      SET_TESTS_PROPERTIES (H5DUMP-N-${resultfile} PROPERTIES DEPENDS "H5DUMP-N-${resultfile}-clear-objects")
+    ENDIF (HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_TEST_N file)
+
   MACRO (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
     # If using memchecker add tests without using scripts
     IF (HDF5_ENABLE_USING_MEMCHECKER)
@@ -1087,6 +1122,10 @@ IF (BUILD_TESTING)
           tall-6.txt
           tall-6.out
           tall-6.out.err
+          tall-7.out
+          tall-7.out.err
+          tall-7N.out
+          tall-7N.out.err
           tallfilters.out
           tallfilters.out.err
           tarray1.out
@@ -1415,6 +1454,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
   ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
+  ADD_H5_TEST_N (tattr-2 0 --enable-error-stack -N /\\\\/attr1 --any_object /attr4 --any_object=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5ERR_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
@@ -1427,6 +1467,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tudlink-1 0 --enable-error-stack tudlink.h5)
   # test for displaying the selected link
   ADD_H5_TEST (tslink-2 0 --enable-error-stack -l slink2 tslink.h5)
+  ADD_H5_TEST_N (tslink-2 0 --enable-error-stack -N slink2 tslink.h5)
   ADD_H5_TEST (tudlink-2 0 --enable-error-stack -l udlink2 tudlink.h5)
   # test for displaying dangling soft links
   ADD_H5ERR_MASK_TEST (tslink-D 0 --enable-error-stack -d /slink1 tslink.h5)
@@ -1436,12 +1477,15 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (thlink-2 0 --enable-error-stack -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5)
   ADD_H5_TEST (thlink-3 0 --enable-error-stack -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5)
   ADD_H5_TEST (thlink-4 0 --enable-error-stack -g /g1 thlink.h5)
+  ADD_H5_TEST_N (thlink-4 0 --enable-error-stack -N /g1 thlink.h5)
   ADD_H5_TEST (thlink-5 0 --enable-error-stack -d /dset1 -g /g2 -d /g1/dset2 thlink.h5)
+  ADD_H5_TEST_N (thlink-5 0 --enable-error-stack -N /dset1 -N /g2 -N /g1/dset2 thlink.h5)
 
   # tests for compound data types
   ADD_H5_TEST (tcomp-1 0 --enable-error-stack tcompound.h5)
   # test for named data types
   ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
+  ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_object /type2 --any_object=/group1/type3 tcompound.h5)
   # test for unamed type 
   ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
@@ -1455,6 +1499,9 @@ IF (BUILD_TESTING)
   ADD_H5ERR_MASK_TEST (tall-1 0 --enable-error-stack tall.h5)
   ADD_H5_TEST (tall-2 0 --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5)
   ADD_H5_TEST (tall-3 0 --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5)
+  ADD_H5_TEST_N (tall-3 0 --enable-error-stack -N /g2/dset2.1 -N /g1/g1.2/g1.2.1/slink tall.h5)
+  ADD_H5_TEST (tall-7 0 --enable-error-stack -a attr1 tall.h5)
+  ADD_H5_TEST (tall-7N 0 --enable-error-stack -N attr1 tall.h5)
 
   # test for loop detection
   ADD_H5_TEST (tloop-1 0 --enable-error-stack tloop.h5)
