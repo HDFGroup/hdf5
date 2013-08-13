@@ -289,10 +289,10 @@ CONTENTS
         To configure AIX 64-bit support including the Fortran and C++ APIs,
         (Note: need to set $AR to 'ar -X 64'.)
         Serial:
-            $ CFLAGS=-q64 FFLAGS=-q64 CXXFLAGS=-q64 AR='ar -X 64'\
+            $ CFLAGS=-q64 FCFLAGS=-q64 CXXFLAGS=-q64 AR='ar -X 64'\
               ./configure --enable-fortran
         Parallel: (C++ not supported with parallel)
-            $ CFLAGS=-q64 FFLAGS=-q64 AR='ar -X 64'\
+            $ CFLAGS=-q64 FCFLAGS=-q64 AR='ar -X 64'\
               ./configure --enable-fortran
 
 4.3.4. Additional compilation flags
