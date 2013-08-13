@@ -76,13 +76,8 @@ static uint64_t H5VL_iod_get_difference (uint64_t axe_id1,
 
 static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
 				  block_container_t *tmp_block,
-				  size_t start,
+				  size_t start, size_t counter,
 				  size_t j);
-
-static size_t H5VL_iod_copy_desc_reduced (block_container_t *sm_block,
-					  block_container_t *tmp_block,
-					  size_t start, size_t counter,
-					  size_t j);
 
 
 static void H5VL_print_block_container (block_container_t *cont,
@@ -392,9 +387,6 @@ int H5VL_iod_create_request_list (compactor *queue, request_list_t **list,
 	  buf_size = src_size * nelmts;
 	  assert(buf_size == size);
 	}
-
-
-
 
 	/*Allocation buffer and retrieving the buffer associated with the selection 
 	  through the function shipper*/
@@ -709,7 +701,8 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
 				 size_t *lens, size_t entries, 
 				 hbool_t overlap){
   
-  size_t l;
+
+  size_t l, total_length = 0;
   int ret_value = CP_SUCCESS;
   int rcnt = *read_cnt;
 #if DEBUG_COMPACTOR
@@ -732,8 +725,11 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
       HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, CP_FAIL, "Read request list is NULL");
     }
   }
-
+  
+  
   rlist[rcnt].request_id = rlist[rcnt - 1].request_id + 1;
+  
+  rlist[rcnt].op_data = rlist[i].op_data;
   rlist[rcnt].elementsize = rlist[i].elementsize;
   rlist[rcnt].dataset_id = rlist[i].dataset_id;
   rlist[rcnt].axe_id = rlist[i].axe_id;
@@ -767,6 +763,8 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
     fprintf (stderr, "Number of memory entries : %zd\n",
 	     rlist[rcnt].num_mblocks);
     for (l = 0; l < rlist[rcnt].num_mblocks; l++){
+      fprintf (stderr, "SS Memory offset[%zd]: %lli\n",
+	       l, rlist[rcnt].mblocks[l].offset);
       ptr = (int *) (uintptr_t) rlist[rcnt].mblocks[l].offset;
       for (m = 0; m < ((rlist[rcnt].mblocks[l].len)/sizeof(int)); m++){
 	fprintf (stderr,"ptr[%zd]: %d\n", m, ptr[m]);
@@ -776,6 +774,19 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
   }
   else{
     rlist[rcnt].merged = SPLIT_FOR_SS;
+    total_length = 0;
+    for (l = 0; l < rlist[rcnt].num_mblocks; l++){
+      total_length += rlist[rcnt].mblocks[l].len;
+    }
+    rlist[rcnt].mem_length = total_length;
+#if DEBUG_COMPACTOR
+    fprintf (stderr, "Number of memory entries : %zd\n",
+	     rlist[rcnt].num_mblocks);
+    for (l = 0; l < rlist[rcnt].num_mblocks; l++){
+      fprintf (stderr, "SPLIT Memory offset[%zd]: %lli\n",
+	       l, rlist[rcnt].mblocks[l].offset);
+    }
+#endif
   }
 
   *read_cnt = rcnt + 1;
@@ -801,7 +812,7 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
  */
 
  int H5VL_iod_steal_writes (request_list_t *wlist, int nentries,
-			    request_list_t *rlist, int nrentries){
+			    request_list_t *rlist, int *read_entries){
    
    int i, j;
    int ret_value = CP_SUCCESS;
@@ -809,9 +820,8 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
    hsize_t *goffsets=NULL;
    size_t *glens=NULL, g_entries = 0, k = 0;
    int *return_values = NULL;
+   int nrentries = *read_entries;
    int modified_rd_cnt = nrentries;
-
-
 
    FUNC_ENTER_NOAPI(NULL);
    
@@ -846,13 +856,20 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
        
        if (wlist[j].merged == USED_IN_MERGING)
 	 continue;
-
        
+#if DEBUG_COMPACTOR
+       fprintf (stderr, "in %s:%d merged: %d\n",
+		__FILE__,__LINE__, wlist[j].merged);
+#endif
        H5VL_iod_read_write_overlap (wlist[j].selection_id,
 				    rlist[i].selection_id,
 				    &overlap_space,
 				    &n_overlap_space,
 				    return_values);
+#if DEBUG_COMPACTOR
+       fprintf (stderr,"return_value[0]: %d, return_value[1]: %d\n",
+		return_values[0], return_values[1]);
+#endif
        if (return_values[0] > 0){
 
 	 ret_value = H5Sget_offsets(overlap_space,rlist[i].elementsize,
@@ -907,7 +924,7 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
      }
      
    }
-   
+   *read_entries = modified_rd_cnt;
  done:
    FUNC_LEAVE_NOAPI(ret_value);
    
@@ -1367,8 +1384,6 @@ int H5VL_iod_compact_requests (request_list_t *list, int *total_requests,
 	   __LINE__,
 	   *total_requests,
 	   original_requests);
-  
-  
 #endif
   
   if(NULL != lselected_req){
@@ -1746,6 +1761,10 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
     
     loop_blks = fblks;
 
+#if DEBUG_COMPACTOR
+    fprintf (stderr, "blck_cnt : %zd\n", blck_cnt);
+#endif
+
     /* =============================================================================================*/
     /* If its the same client, we do allow overlaps*/
     /* In that case its assumed that the requests flow in temporally
@@ -1809,7 +1828,7 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 
 	    tmp_block = 
 	      (block_container_t *) 
-	      malloc ((fblks+(rev_fblks - 2)) * sizeof(block_container_t));
+	      malloc ((loop_blks+(rev_fblks - 2)) * sizeof(block_container_t));
 	    if (NULL == tmp_block){
 	      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,
 			  "Allocation error for tmp_block");
@@ -1817,7 +1836,7 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 
 	    tmpf_block = 
 	      (block_container_t *) 
-	      malloc ((fblks+(rev_fblks - 2)) * sizeof(block_container_t));
+	      malloc ((loop_blks+(rev_fblks - 2)) * sizeof(block_container_t));
 	    if (NULL == tmpf_block){
 	      HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, CP_FAIL,
 			  "Allocation error for tmpf_block");
@@ -1827,29 +1846,30 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	    switch(changed_cnt){
 	    case 1:
 	      if (changed[0] == (int)ii){
-		H5VL_iod_copy_desc(f_block, tmpf_block, 0, ii);
-		new_blks += H5VL_iod_copy_desc(m_block, tmp_block, 0,ii);
-		H5VL_print_block_container (tmpf_block, new_blks);
+		H5VL_iod_copy_desc(f_block, tmpf_block, 0, new_blks, ii);
+		new_blks += H5VL_iod_copy_desc(m_block, tmp_block,0,new_blks,ii);
 		tmpf_block[new_blks].offset = tf_block[0].offset;
 		tmpf_block[new_blks].len = tf_block[0].len;
 		tmp_block[new_blks].offset = tm_block[0].offset;
 		tmp_block[new_blks].len = tm_block[0].len;
+
 		new_blks++;
-		H5VL_print_block_container (tmpf_block, new_blks);
-		new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, j);
-		H5VL_iod_copy_desc(m_block, tmp_block, ii+1, j);
-		H5VL_print_block_container (tmpf_block, new_blks);
-		H5VL_iod_copy_desc_reduced(f_block, tmpf_block, 
-						       j+1, new_blks,
-						       loop_blks);
-		new_blks += H5VL_iod_copy_desc_reduced(m_block,
-						       tmp_block,
-						       j+1, new_blks,
-						       loop_blks);
+
+		H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, new_blks, j);
+		new_blks += H5VL_iod_copy_desc(m_block, tmp_block, new_blks, 
+					       ii+1, j);
+		H5VL_iod_copy_desc(f_block, tmpf_block, 
+				   j+1, new_blks,
+				   loop_blks);
+		new_blks += H5VL_iod_copy_desc(m_block,
+					       tmp_block,
+					       j+1, new_blks,
+					       loop_blks);
 		loop_blks -= 1;
-		H5VL_print_block_container (tmpf_block, new_blks);
+#if DEBUG_COMPACTOR
 		fprintf (stderr, "new_blks: %zd, loop_blks: %zd\n",
 			 new_blks, loop_blks);
+#endif
 		if (!((int)(ii - 1) < 0))
 		  ii -= 1;
 	      }
@@ -1857,8 +1877,10 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	    case 2:
 	      for (i = 0; i < 2; i++){
 		if (changed[i] == (int)ii){
-		  new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, 0, ii);
-		  H5VL_iod_copy_desc(m_block, tmp_block, 0, ii);
+		  H5VL_iod_copy_desc(f_block, tmpf_block, 0, new_blks,ii);
+		  new_blks += H5VL_iod_copy_desc(m_block, tmp_block, 
+						 0,new_blks, ii);
+
   		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
 		  tmp_block[new_blks].offset = tm_block[i].offset;
@@ -1867,8 +1889,10 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 		}
 		else{
  		  if (ii+1 < j){
-		    new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, j);
-		    H5VL_iod_copy_desc(m_block, tmp_block, ii+1, j);
+		    H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, new_blks,
+				       j);
+		    new_blks += H5VL_iod_copy_desc(m_block, tmp_block, 
+						   ii+1, new_blks, j);
 		  }
 		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
@@ -1876,8 +1900,9 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 		  tmp_block[new_blks].len = tm_block[i].len;
 		  new_blks++;
 		  if (new_blks < loop_blks){
-		    H5VL_iod_copy_desc(f_block, tmpf_block, j+1, loop_blks);
-		    H5VL_iod_copy_desc(m_block, tmp_block, j+1, loop_blks);
+		    H5VL_iod_copy_desc(f_block, tmpf_block, j+1, new_blks,loop_blks);
+		    new_blks += 
+		      H5VL_iod_copy_desc(m_block, tmp_block, j+1, new_blks, loop_blks);
 		  }
 		}
 	      }
@@ -1885,40 +1910,59 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	    case 3:
 	      for (i = 0; i < 3; i ++){
 		if (changed[i] == (int)ii){
-		  new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, 0, ii);
-		  H5VL_iod_copy_desc(m_block, tmp_block, 0, ii);
 
+		  H5VL_iod_copy_desc(f_block, tmpf_block,
+				     0, new_blks ,ii);
+		  new_blks += H5VL_iod_copy_desc(m_block, tmp_block,
+						 0, new_blks,ii);
+		  
+		  H5VL_print_block_container (tmpf_block, new_blks);
 		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
 		  tmp_block[new_blks].offset = tm_block[i].offset;
 		  tmp_block[new_blks].len = tm_block[i].len;
-
 		  new_blks++;
+		  H5VL_print_block_container (tmpf_block, new_blks);
 		  i++;
-		  loop_blks += 1;
 		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
 		  tmp_block[new_blks].offset = tm_block[i].offset;
 		  tmp_block[new_blks].len = tm_block[i].len;
 		  new_blks++;
+		  H5VL_print_block_container (tmpf_block, new_blks);
 		}
 		else{
 		  if (ii+1 < j){
-		    new_blks += H5VL_iod_copy_desc(f_block, tmpf_block, ii+1, j);
-		    H5VL_iod_copy_desc(m_block, tmp_block, ii+1, j);
+		    H5VL_iod_copy_desc(f_block, tmpf_block,
+				       ii+1, new_blks,j);
+		    new_blks += H5VL_iod_copy_desc(m_block, tmp_block,
+						   ii+1, new_blks,j);
+		    H5VL_print_block_container (tmpf_block, new_blks);		    
 		  }
+		  
 		  tmpf_block[new_blks].offset = tf_block[i].offset;
 		  tmpf_block[new_blks].len = tf_block[i].len;
 		  tmp_block[new_blks].offset = tm_block[i].offset;
 		  tmp_block[new_blks].len = tm_block[i].len;
 		  new_blks++;
-		  if (new_blks < loop_blks){ 
-		    new_blks +=
-		      H5VL_iod_copy_desc(f_block, tmpf_block, j+1, loop_blks);
-		    H5VL_iod_copy_desc(m_block, tmp_block, j+1, loop_blks);
+#if DEBUG_COMPACTOR
+		  fprintf (stderr,"After 3rd insert loop_blks : %d, j: %d blck_cnt: %d, new_blks: %d!\n",
+			   loop_blks, j, blck_cnt, new_blks);
+		  H5VL_print_block_container (tmpf_block, new_blks);
+
+#endif
+		  if (new_blks <= loop_blks){ 
+		    H5VL_iod_copy_desc(f_block, tmpf_block, j+1, new_blks,
+				       loop_blks);
+		    new_blks += 
+		      H5VL_iod_copy_desc(m_block, tmp_block, j+1, new_blks,
+					 loop_blks);
+		    H5VL_print_block_container (tmpf_block, new_blks);
 		  }
+		  loop_blks += 1;
 		}
 	      }
+
 	      break;
 	    default:
 	      ret_value = CP_FAIL;
@@ -1926,9 +1970,11 @@ int H5VL_iod_construct_merged_request (request_list_t *list,
 	    }
 
 	    if (new_blks < loop_blks){
-	      H5VL_iod_copy_desc(f_block, tmpf_block, new_blks, loop_blks);
+	      H5VL_iod_copy_desc(f_block, tmpf_block, new_blks, new_blks,
+				 loop_blks);
 	      new_blks += 
-		H5VL_iod_copy_desc(m_block, tmp_block, new_blks, loop_blks);
+		H5VL_iod_copy_desc(m_block, tmp_block, new_blks, new_blks,
+				   loop_blks);
 	    }
 
 	    if (NULL != tf_block){
@@ -2145,36 +2191,6 @@ static void H5VL_print_block_container (block_container_t *cont,
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_copy_desc
  *
- * Purpose:	Copy block container to destination container
- *
- * Return:	SUCCESS : size_t elements copied
- *             
- *
- * Programmer:  Vishwanth Venkatesan
- *              July, 2013
- *
- *-------------------------------------------------------------------------
- */
-
-static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
-				 block_container_t *tmp_block,
-				 size_t start,
-				 size_t j){
-
-  size_t i, cnt  = 0;
-
-  for (i = start; i < j; i++){
-    tmp_block[i].offset = sm_block[i].offset;
-    tmp_block[i].len = sm_block[i].len;
-    cnt++;
-  }
-
-  return cnt;
-}
-
-/*-------------------------------------------------------------------------
- * Function:	H5VL_iod_copy_desc_reduced
- *
  * Purpose:	Copy block container to destination container with varible
  *              index
  *
@@ -2187,10 +2203,10 @@ static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
  *-------------------------------------------------------------------------
  */
 
-static size_t H5VL_iod_copy_desc_reduced (block_container_t *sm_block,
-					  block_container_t *tmp_block,
-					  size_t start, size_t counter,
-					  size_t j){
+static size_t H5VL_iod_copy_desc (block_container_t *sm_block,
+				  block_container_t *tmp_block,
+				  size_t start, size_t counter,
+				  size_t j){
   
   size_t i, cnt  = 0;
 

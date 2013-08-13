@@ -30,7 +30,7 @@
 
 #define EEXISTS 1
 #define H5_DO_NATIVE 1
-#define DEBUG_COMPACTOR 0
+#define DEBUG_COMPACTOR 1
 #define PROFILE 1
 
 /* Key names for Metadata stored in KV objects */
