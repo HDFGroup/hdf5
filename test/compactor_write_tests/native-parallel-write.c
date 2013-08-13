@@ -5,8 +5,8 @@
 #include "mpi.h"
 #include "hdf5.h"
 
-#define NX     8                      /* dataset dimensions */
-#define NY     8 
+#define NX     1024                     /* dataset dimensions */
+#define NY     1024
 #define RANK   2
 
 
@@ -87,7 +87,7 @@ int main (int argc, char **argv){
 	   file_id_new, dset_id);
   
   count[0] = NY/my_size;
-  count[1] = 8;
+  count[1] = NY;
   offset[0] = my_rank * count[0];
   offset[1] = 0;
 

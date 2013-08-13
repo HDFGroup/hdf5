@@ -5,8 +5,8 @@
 #include "mpi.h"
 #include "hdf5.h"
 
-#define NX     16                      /* dataset dimensions */
-#define NY     8
+#define NX     256                      /* dataset dimensions */
+#define NY     256
 #define RANK   2
 
 
@@ -75,8 +75,8 @@ int main (int argc, char **argv){
 
   dset_id = H5Dcreate(file_id, "D1", H5T_NATIVE_INT,dataspaceID, 
 		      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  count[0] = 4;
-  count[1] = 4;
+  count[0] = 256;
+  count[1] = 256;
   offset[0] = 0;
   offset[1] = 0;
 
@@ -108,8 +108,8 @@ int main (int argc, char **argv){
 		    event_q);
   assert(ret == 0);
   
-  count[0] = 4;
-  count[1] = 4;
+  count[0] = 8;
+  count[1] = 8;
   offset[0] = 6;
   offset[1] = 0;
 
@@ -146,8 +146,8 @@ int main (int argc, char **argv){
   assert(ret == 0);
 
 
-  count[0] = 4;
-  count[1] = 4;
+  count[0] = 8;
+  count[1] = 8;
   offset[0] = 3;
   offset[1] = 0;
 

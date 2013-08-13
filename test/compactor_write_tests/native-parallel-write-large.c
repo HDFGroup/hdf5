@@ -5,31 +5,30 @@
 #include "mpi.h"
 #include "hdf5.h"
 
-#define NX     16                      /* dataset dimensions */
-#define NY     16
+#define NX     8                      /* dataset dimensions */
+#define NY     8 
 #define RANK   2
 
-/*Entire write gets replaced
-write buffer values start with 10's and increases and writes increase*/
 
 
 int main (int argc, char **argv){
   
   const char filename[] = "eff_file.h5";
-  hid_t file_id;
+  hid_t file_id, file_id_new;
   hid_t dataspaceID, dataspace2;
-  hid_t dset_id;
-  hid_t fapl_id, dxpl_id;
+  hid_t dset_id, dset_id_new;
+  hid_t fapl_id, dxpl_id, fapl_self_id;
   
   const unsigned int nelem = 60;
-  int *data = NULL, *data1 = NULL;
+  int *data = NULL;
   unsigned int i = 0;
   hsize_t dimsf[2];
   hsize_t count[2], offset[2];
-  hsize_t s[2], b[2];
+
   int my_rank, my_size, ret;
   int provided;
   hid_t event_q, int_id;
+  
   int num_requests = 0;  
   H5_status_t *status = NULL;
 
@@ -39,46 +38,58 @@ int main (int argc, char **argv){
     exit(1);
   }
 
-
   EFF_init (MPI_COMM_WORLD, MPI_INFO_NULL);
 
   MPI_Comm_rank (MPI_COMM_WORLD, &my_rank);
   MPI_Comm_size (MPI_COMM_WORLD, &my_size);
 
-
-  if (my_size > 1){
-    fprintf(stderr, "APP processes = %d cannot be greater than 1 \n", my_size);
+  if (my_size > 8){
+    fprintf (stderr, "Max only 8 processes in this code!\n");
+    EFF_finalize();
     MPI_Finalize();
   }
-
+  fprintf(stderr, "APP processes = %d, my rank is %d\n", my_size, my_rank);
 
   fapl_id = H5Pcreate (H5P_FILE_ACCESS);
   H5Pset_fapl_iod(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL);
 
+
   event_q = H5EQcreate(fapl_id);
   assert(event_q);
-
-  file_id =  H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-
   dimsf[0] = NX;
   dimsf[1] = NY;
-
-
   dataspaceID = H5Screate_simple(RANK, dimsf, NULL); 
 
+  if (!my_rank){
 
+    fapl_self_id = H5Pcreate (H5P_FILE_ACCESS);
+    H5Pset_fapl_iod(fapl_self_id, MPI_COMM_SELF, MPI_INFO_NULL);
   
-  dset_id = H5Dcreate(file_id, "D1", H5T_NATIVE_INT,dataspaceID, 
+    fprintf(stderr,"Rank %d creating a File\n", my_rank);
+    file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_self_id);
+    fprintf(stderr,"Rank %d completed creating a file\n", my_rank);
+    fprintf(stderr,"Rank %d creating a dataset\n", my_rank);
+    dset_id = H5Dcreate(file_id, "D1" , H5T_NATIVE_INT, dataspaceID,
 		      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    fprintf(stderr,"completed creating a dataset\n", my_rank);
+    H5Pclose(fapl_self_id);
+    H5Dclose(dset_id);
+    H5Fclose(file_id);
+  }
+  
+  MPI_Barrier(MPI_COMM_WORLD);
+  
+  file_id_new = H5Fopen(filename, H5F_ACC_RDWR, fapl_id );
+  dset_id_new = H5Dopen(file_id_new, "D1", H5P_DEFAULT);
 
-  count[0] = NX;
-  count[1] = NY;
-  offset[0] = 0;
-  offset[1] = 0;
-
-  fprintf (stderr, "%d: count[0]:%lli, count[1]:%lli, offset[0]: %lli, offset[1]: %lli\n",
+  fprintf (stderr, "%d : file_id : %d, dset_id: %d\n",
 	   my_rank,
-	   count[0], count[1], offset[0], offset[1]);
+	   file_id_new, dset_id);
+  
+  count[0] = NY/my_size;
+  count[1] = 8;
+  offset[0] = my_rank * count[0];
+  offset[1] = 0;
 
   dataspace2 = H5Screate_simple(RANK, count, NULL);
 
@@ -88,13 +99,15 @@ int main (int argc, char **argv){
 		      NULL,
 		      count,
 		      NULL);
+
   
   data = (int *) malloc(sizeof(int)*count[0]*count[1]);
   for (i=0; i < count[0]*count[1]; i++) {
     data[i] = my_rank + 10;
   }
+  
  
-  ret = H5Dwrite_ff(dset_id, 
+  ret = H5Dwrite_ff(dset_id_new, 
 		    H5T_NATIVE_INT,
 		    dataspace2, 
 		    dataspaceID,
@@ -103,39 +116,27 @@ int main (int argc, char **argv){
 		    0,
 		    event_q);
   assert(ret == 0);
-
-  data1 = (int *) malloc(sizeof(int)*count[0]*count[1]);
-  for (i=0; i < count[0]*count[1]; i++) {
-    data1[i] = my_rank + 11;
-  }
-  ret = H5Dwrite_ff(dset_id, 
-		    H5T_NATIVE_INT,
-		    dataspace2, 
-		    dataspaceID,
-		    H5P_DEFAULT,
-		    data1,
-		    0,
-		    event_q);
-  assert(ret == 0);
- 
-
   
-  H5Dclose(dset_id);
+
+
+
+
+  H5EQwait(event_q, &num_requests, &status);
+  free(status);
+
   H5Sclose(dataspaceID);
   H5Sclose(dataspace2);
   H5Pclose(fapl_id);
-  H5Fclose(file_id);
-  H5EQwait(event_q, &num_requests, &status);
-  free(status);
-  H5EQclose (event_q);
-  free(data);
-  free(data1);
+  H5Dclose(dset_id_new);
 
+  H5Fclose(file_id_new);
+
+  H5EQclose (event_q);
+
+  free(data);
   fprintf(stderr, "\n*****************************************************************************************************************\n");
   fprintf(stderr, "Finalize EFF stack\n");
   fprintf(stderr, "*****************************************************************************************************************\n");
-
-
   EFF_finalize();
   MPI_Finalize();
   

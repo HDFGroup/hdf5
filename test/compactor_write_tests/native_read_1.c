@@ -15,13 +15,13 @@ int main (int argc, char **argv){
 
   const char filename[] = "eff_file.h5";
   hid_t file_id;
-  hid_t dataspace1, dataspace2;
   hid_t dataspace3, dataspace4;
+  hid_t dataspace7, dataspace8;
+  
   hid_t dset_id;
   hid_t fapl_id, dxpl_id;
   
   const unsigned int nelem = 60;
-  int *data = NULL, *data1 = NULL;
   int *data2 = NULL, *data3 = NULL;
   unsigned int i = 0;
   hsize_t dimsf[2];
@@ -60,49 +60,50 @@ int main (int argc, char **argv){
   event_q = H5EQcreate(fapl_id);
   assert(event_q);
 
-  file_id = H5Fcreate_ff(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id, event_q);
-  assert(file_id);
+  file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
   
   dimsf[0] = NX;
   dimsf[1] = NY;
 
-  dataspace1 = H5Screate_simple(RANK, dimsf, NULL);
-  dataspace3 = H5Screate_simple(RANK, dimsf, NULL);
 
-  dset_id  = H5Dcreate_ff (file_id, "D1", H5T_NATIVE_INT, dataspace1, 
-			   H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
+  dataspace3 = H5Screate_simple(RANK, dimsf, NULL);
+  dataspace7 = H5Screate_simple(RANK, dimsf, NULL);
+ 
+  dset_id  = H5Dcreate (file_id, "D1", H5T_NATIVE_INT, dataspace3, 
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   assert(dset_id);
   
-  count[0] = 4;
+
+
+  count[0] = 8;
   count[1] = 8;
   offset[0] = 0;
   offset[1] = 0;
-
-  dataspace2 = H5Screate_simple(RANK, count, NULL);
-  	
-  H5Sselect_hyperslab(dataspace1, 
+  H5Sselect_hyperslab(dataspace7, 
 		      H5S_SELECT_SET,
 		      offset,
 		      NULL,
 		      count,
 		      NULL);
 
-  data = (int *) malloc (sizeof(int)*count[0]*count[1]);
-
+  data3 = (int *) malloc (sizeof(int)*count[0]*count[1]);
   for (i = 0; i < count[0]*count[1]; i++){
-    data[i] = 10;
+    data3[i] = 1024;
   }
   
+  dataspace8 = H5Screate_simple(RANK, count, NULL);
+
+
   ret = H5Dwrite_ff(dset_id,
 		    H5T_NATIVE_INT,
-		    dataspace2,
-		    dataspace1,
+		    dataspace8,
+		    dataspace7,
 		    H5P_DEFAULT,
-		    data,
+		    data3,
 		    0,
 		    event_q);
   assert(ret == 0);
-
+  
   count[0] = 8;
   count[1] = 1;
   offset[0] = 0;
@@ -132,25 +133,20 @@ int main (int argc, char **argv){
 		   event_q);
   assert(ret == 0);
 
-
-
-
-  assert(H5Dclose_ff(dset_id, event_q) == 0);
-  H5Sclose(dataspace1); H5Sclose(dataspace2);
+  H5Dclose(dset_id);
   H5Sclose(dataspace3); H5Sclose(dataspace4);
+  H5Sclose(dataspace7); H5Sclose(dataspace8);
   H5Pclose(fapl_id);
-  assert(H5Fclose_ff(file_id, event_q)== 0);
+  H5Fclose(file_id);
   H5EQwait(event_q, &num_requests, &status);
   free(status);
   H5EQclose (event_q);
 
-  for (i = 0; i < (count[0] * count[1]); i++){
+  for (i = 0; i < 8; i++){
     fprintf (stderr,"data2[%d]: %d\n",
 	     i, data2[i]);
   }
 
-  free(data);
-  free(data1);
   free(data2);
   free(data3);
   fprintf(stderr, "\n*****************************************************************************************************************\n");
