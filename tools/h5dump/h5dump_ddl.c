@@ -1462,6 +1462,7 @@ handle_paths(hid_t fid, const char *path_name, void* data, int pe, const char *d
         hid_t       gcpl_id;
         unsigned    crt_order_flags;
         unsigned    attr_crt_order_flags;
+		trav_handle_udata_t handle_udata;     /* User data for traversal */
 
         if ((gcpl_id = H5Gget_create_plist(gid)) < 0) {
             error_msg("error in getting group creation property list ID\n");
@@ -1484,7 +1485,6 @@ handle_paths(hid_t fid, const char *path_name, void* data, int pe, const char *d
             error_msg("error in closing group creation property list ID\n");
             h5tools_setstatus(EXIT_FAILURE);
         }
-		trav_handle_udata_t handle_udata;     /* User data for traversal */
 
 		handle_udata.fid = fid;
 		handle_udata.op_name = (char*)path_name;
