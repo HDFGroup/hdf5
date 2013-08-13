@@ -113,6 +113,7 @@
 ./config/powerpc-ibm-aix5.x
 ./config/solaris2.x
 ./config/sv1-cray
+./config/x86_64-pc-cygwin
 ./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
