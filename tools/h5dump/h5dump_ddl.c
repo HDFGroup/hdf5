@@ -1415,7 +1415,7 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
 		}
 		else
 			HDstrncpy(search_name, op_name, (size_t)search_len + 1);
-		search_name[search_len + k] = '\0';
+		search_name[search_len + k - 1] = '\0';
 
 		if(HDstrcmp(path, search_name) == 0) {
 			switch(li->type) {
