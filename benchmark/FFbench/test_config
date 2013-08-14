@@ -1,0 +1,22 @@
+# ------------------------------------
+# Sample configuration file
+# Order of information to be provided
+# filename
+# datasetname
+# numdims
+# dims1
+# dims2
+# ...
+# dimsn
+# READ/WRITE 
+# number of read/writes
+# Overlap flag
+# --------------------------------------
+efffile.h5
+D1
+2
+16
+16
+WRITE
+10
+0

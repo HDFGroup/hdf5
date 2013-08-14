@@ -1,0 +1,6 @@
+mlog_defmask DEBUG
+#mlog_stderr 1
+mlog_syslog 1
+mlog_msgbuf_size 409600
+mlog_file /scr/vish/FF/iod_log
+#mlog_file /tmp/iod_debug.log

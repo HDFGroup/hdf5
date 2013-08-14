@@ -18,8 +18,7 @@ int main (int argc, char **argv){
   hid_t dataspaceID, dataspace2;
   hid_t dset_id;
   hid_t fapl_id, dxpl_id;
-  
-  const unsigned int nelem = 60;
+ 
   int *data = NULL;
   unsigned int i = 0;
   hsize_t dimsf[2];
