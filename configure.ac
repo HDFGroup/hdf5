@@ -2188,7 +2188,14 @@ AC_TRY_COMPILE([
 ## ----------------------------------------------------------------------
 ## How do we figure out the width of a tty in characters?
 ##
-AC_CHECK_FUNCS([_getvideoconfig gettextinfo GetConsoleScreenBufferInfo])
+AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
+case "`uname`" in
+  CYGWIN*)
+    ;;
+  *)
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
+    ;;
+esac
 AC_CHECK_FUNCS([_scrsize ioctl])
 
 AC_MSG_CHECKING([for struct videoconfig])
