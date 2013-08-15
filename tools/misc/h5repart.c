@@ -301,7 +301,7 @@ main (int argc, char *argv[])
 	n = blk_size;
 	if (dst_is_family) n = (size_t)MIN((off_t)n, dst_size-dst_offset);
 	if (left_overs) {
-	    n = (size_t)MIN (n, left_overs);
+	    n = (size_t)MIN ((off_t)n, left_overs);
 	    left_overs -= n;
 	    need_write = FALSE;
 	} else if (src_offset<src_act_size) {

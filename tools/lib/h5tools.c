@@ -75,7 +75,7 @@ static const char *drivernames[]={
 
 /* This enum should match the entries in the above drivers_list since they
  * are indexes into the drivers_list array. */
-enum {
+typedef enum {
     SEC2_IDX = 0
    ,FAMILY_IDX
    ,SPLIT_IDX

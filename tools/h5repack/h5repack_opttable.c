@@ -388,7 +388,7 @@ pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table )
 {
     unsigned int i;
-    const char tbl_path[MAX_NC_NAME+1]; /* +1 for start with "/" case */
+    char tbl_path[MAX_NC_NAME+1]; /* +1 for start with "/" case */
 
 
     for ( i = 0; i < table->nelems; i++)
