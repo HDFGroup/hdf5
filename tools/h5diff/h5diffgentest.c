@@ -4261,15 +4261,39 @@ test_enums(const char *fname)
     tid = H5Tenum_create(H5T_NATIVE_INT);
     enum_val = 0;
     status = H5Tenum_insert(tid, "YIN", &enum_val);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
     enum_val = 1;
     status = H5Tenum_insert(tid, "YANG", &enum_val);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> H5Tenum_insert failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
 
     /*-----------------------------------------------------------------------
      * Create datasets containing enum data.
      *---------------------------------------------------------------------*/
 
     status = write_dset(fid, 1, &dims, "dset1", tid, data1);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
     status = write_dset(fid, 1, &dims, "dset2", tid, data2);
+    if (status < 0)
+    {
+        fprintf(stderr, "Error: %s> write_dset failed.\n", fname);
+        status = FAIL;
+        goto out;
+    }
 
 out:
     /*-----------------------------------------------------------------------
