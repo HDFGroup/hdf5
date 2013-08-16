@@ -19,10 +19,10 @@ File space information for file metadata (in bytes):
 		Datatypes: 0/0
 	Groups:
 		B-tree/List: 470054
-		Heap: 739102
+		Heap: 739045
 	Attributes:
 		B-tree/List: 2598
-		Heap: 4442
+		Heap: 4431
 	Chunked datasets:
 		Index: 0
 	Datasets:
@@ -31,12 +31,12 @@ File space information for file metadata (in bytes):
 		Header: 0
 		B-tree/List: 0
 		Heap: 0
-Small groups:
-	# of groups of size 0: 35000
+Small groups (with 0 to 9 links):
+	# of groups with 0 link(s): 35000
 	Total # of small groups: 35000
 Group bins:
-	# of groups of size 0: 35000
-	# of groups of size 10000 - 99999: 1
+	# of groups with 0 link: 35000
+	# of groups with 10000 - 99999 links: 1
 	Total # of groups: 35001
 Dataset dimension information:
 	Max. rank of datasets: 0
@@ -44,8 +44,8 @@ Dataset dimension information:
 		# of dataset with rank 0: 1
 1-D Dataset information:
 	Max. dimension size of 1-D datasets: 0
-	Small 1-D datasets:
-		Total small datasets: 0
+	Small 1-D datasets (with dimension sizes 0 to 9):
+		Total # of small datasets: 0
 Dataset storage information:
 	Total raw data size: 0
 	Total external raw data size: 0
@@ -70,14 +70,14 @@ Dataset datatype information:
 		Count (total/named) = (1/0)
 		Size (desc./elmt) = (14/4)
 	Total dataset datatype count: 1
-Small # of attributes:
+Small # of attributes (objects with 1 to 10 attributes):
 	Total # of objects with small # of attributes: 0
 Attribute bins:
 	# of objects with 100 - 999 attributes: 1
 	Total # of objects with attributes: 1
 	Max. # of attributes to objects: 100
 Summary of file space information:
-  File metadata: 6361757 bytes
+  File metadata: 6361689 bytes
   Raw data: 0 bytes
-  Unaccounted space: 1324 bytes
-Total space: 6363081 bytes
+  Unaccounted space: 6202 bytes
+Total space: 6367891 bytes
