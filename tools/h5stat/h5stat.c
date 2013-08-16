@@ -915,11 +915,14 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'l':
-		sgroups_threshold = HDatoi(opt_arg);
-		if(sgroups_threshold < 1) {
-		    error_msg("Invalid threshold for small groups\n");
-		    goto error;
-		} /* end if */
+		if(opt_arg) {
+		    sgroups_threshold = HDatoi(opt_arg);
+		    if(sgroups_threshold < 1) {
+			error_msg("Invalid threshold for small groups\n");
+			goto error;
+		    }
+		} else
+		    error_msg("Missing threshold for small groups\n");
 
                 break;
 
@@ -934,11 +937,14 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'm':
-		sdsets_threshold = HDatoi(opt_arg);
-		if(sdsets_threshold < 1) {
-		    error_msg("Invalid threshold for small datasets\n");
-		    goto error;
-		} /* end if */
+		if(opt_arg) {
+		    sdsets_threshold = HDatoi(opt_arg);
+		    if(sdsets_threshold < 1) {
+			error_msg("Invalid threshold for small datasets\n");
+			goto error;
+		    }
+		} else
+		    error_msg("Missing threshold for small datasets\n");
 
                 break;
 
@@ -953,11 +959,14 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'a':
-		sattrs_threshold = HDatoi(opt_arg);
-		if(sattrs_threshold < 1) {
-		    error_msg("Invalid threshold for small # of attributes\n");
-		    goto error;
-		} /* end if */
+		if(opt_arg) {
+		    sattrs_threshold = HDatoi(opt_arg);
+		    if(sattrs_threshold < 1) {
+			error_msg("Invalid threshold for small # of attributes\n");
+			goto error;
+		    }
+		} else
+                    error_msg("Missing threshold for small # of attributes\n");
 
                 break;
 
