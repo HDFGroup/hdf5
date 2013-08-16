@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define FFB_SUCCESS 0
 #define FFB_FAIL -1
@@ -43,6 +44,7 @@ typedef unsigned long long length_t;
 #define DEBUG_LINE(text)
 #endif
 
+#define DEBUG_ERROR(text) fprintf(stderr,text);
 
 
 #endif /*FFBENCH_COMMON*/

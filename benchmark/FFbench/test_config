@@ -12,11 +12,11 @@
 # number of read/writes
 # Overlap flag
 # --------------------------------------
-efffile.h5
+eff_file.h5
 D1
 2
-16
-16
+12288
+12288
 WRITE
-10
+16
 0

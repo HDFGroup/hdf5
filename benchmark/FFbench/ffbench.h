@@ -1,3 +1,5 @@
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -58,6 +60,17 @@ int FFbench_create_file_and_dataset (hid_t *file_id, hid_t *dset_id,
 				     MPI_Comm comm,
 				     MPI_Info info);
   
+
+int FFbench_create_dataspaces(hid_t **f_dataspaces,
+			      hid_t **m_dataspaces,
+			      int *_num_dataspaces,
+			      hsize_t ***_count,
+			      hsize_t ***_offset,
+			      int rank,
+			      int size);
+
+
+
 
 
 #endif

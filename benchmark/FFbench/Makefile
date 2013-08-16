@@ -18,6 +18,6 @@ ffbench_util.o:		ffbench_util.c ffbench_util.h ffbench_common.h
 server:			
 			$(CC) -o server test_server.c
 clean:
-			rm -rf *.o *~ *.cfg
+			rm -rf *.o *~ *.cfg *.h5
 			rm -rf test/*~ test/test_clock
 			rm -rf eff_bench server			
