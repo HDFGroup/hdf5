@@ -201,8 +201,6 @@ void *tts_error_thread(void UNUSED *arg)
 static
 herr_t error_callback(hid_t estack_id, void *client_data)
 {
-    int ret;
-
     H5TS_mutex_lock_simple(&error_mutex);
     error_count++;
     H5TS_mutex_unlock_simple(&error_mutex);

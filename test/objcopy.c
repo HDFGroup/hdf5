@@ -9588,9 +9588,7 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t aid = -1;				/* Attribute ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
-    int i;					/* Local index variable */
     hsize_t dim1d[1];				/* dimension sizes */
-    int buf[DIM_SIZE_1];			/* Buffer for data */
     H5O_info_t oinfo;                           /* Object info */
     haddr_t exp_addr;      			/* Expected object addresses */
     char src_filename[NAME_BUF_SIZE];		/* Source file name */
@@ -9600,10 +9598,6 @@ test_copy_cdt_merge_cdt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TESTING("H5Ocopy(): merging various committed datatypes with reopen")
     else
         TESTING("H5Ocopy(): merging various committed datatypes")
-
-    /* set initial data values */
-    for (i=0; i<DIM_SIZE_1; i++)
-        buf[i] = i;
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -9821,8 +9815,6 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
     hid_t tid = -1;                             /* Datatype ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
-    unsigned int i;                             /* Local index variables */
-    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
     H5O_info_t oinfo;                           /* Object info */
     haddr_t exp_addr;                           /* Expected object address */
     char src_filename[NAME_BUF_SIZE];
@@ -9832,10 +9824,6 @@ test_copy_cdt_merge_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         TESTING("H5Ocopy(): merging committed datatypes with suggestions and reopen")
     else
         TESTING("H5Ocopy(): merging committed datatypes with suggestions")
-
-    /* set initial data values */
-    for(i = 0; i < DIM_SIZE_1; i++)
-        buf[i] = (int)i;
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
@@ -10345,9 +10333,7 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     hid_t tid_short = -1; 			/* Datatype ID */
     hid_t exp_tid = -1;				/* Expected datatype ID */
     hid_t ocpypl_id = -1;                       /* Object copy plist ID */
-    unsigned int i;                             /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
-    int buf[DIM_SIZE_1];                        /* Buffer for writing data */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
 
@@ -10355,10 +10341,6 @@ test_copy_cdt_merge_all_suggs(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         TESTING("H5Ocopy(): merging different committed datatypes with suggestions and reopen")
     else
         TESTING("H5Ocopy(): merging different committed datatypes with suggestions")
-
-    /* set initial data values */
-    for(i = 0; i < DIM_SIZE_1; i++)
-        buf[i] = (int)i;
 
     /* Initialize the filenames */
     h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);

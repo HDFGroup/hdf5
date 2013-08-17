@@ -34,6 +34,10 @@ typedef struct {
     char *op_name;					/* Object name wanted */
 } trav_attr_udata_t;
 
+/* callback function used by H5Literate() */
+static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
+static int      dump_extlink(hid_t group, const char *linkname, const char *objname);
+
 /*-------------------------------------------------------------------------
  * Function:    dump_datatype
  *
@@ -155,6 +159,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, vo
     return ret;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:    dump_all_cb
  *
@@ -176,7 +181,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, vo
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op_data)
 {
     hid_t       obj;
@@ -1305,7 +1310,6 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *ainfo, vo
     int 				i;
     int 				j;
     int 				k;
-    char 			   *obj_attrname;
     char			   *obj_op_name;
     char               *obj_name;
 	trav_attr_udata_t  *attr_data = (trav_attr_udata_t*)_op_data;
@@ -1450,9 +1454,7 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
 void
 handle_paths(hid_t fid, const char *path_name, void* data, int pe, const char *display_name)
 {
-    hid_t  obj_id = -1;
     hid_t  gid = -1;
-    H5O_info_t       oinfo;
 
     if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
         error_msg("unable to open root group\n");
@@ -2046,9 +2048,8 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
  *
  *-------------------------------------------------------------------------
  */
-
-
-static int dump_extlink(hid_t group, const char *linkname, const char *objname)
+static int
+dump_extlink(hid_t group, const char *linkname, const char *objname)
 {
     hid_t       oid;
     H5O_info_t  oi;

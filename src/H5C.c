@@ -3339,7 +3339,9 @@ H5C_move_entry(H5C_t *	     cache_ptr,
                  haddr_t 	     old_addr,
 	         haddr_t 	     new_addr)
 {
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     hbool_t			was_dirty;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	test_entry_ptr = NULL;
 #if H5C_DO_SANITY_CHECKS
@@ -3436,7 +3438,9 @@ H5C_move_entry(H5C_t *	     cache_ptr,
 
     if ( ! ( entry_ptr->destroy_in_progress ) ) {
 
+#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
         was_dirty = entry_ptr->is_dirty;
+#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 	if ( ! ( entry_ptr->flush_in_progress ) ) {
 

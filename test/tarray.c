@@ -1792,17 +1792,6 @@ test_array_bkg(void)
 static void
 test_compat(void)
 {
-    typedef struct {        /* Typedef for compound datatype */
-        short i;
-        float f;
-        long l;
-    } s2_t;
-    typedef struct {        /* Typedef for compound datatype */
-        short i;
-        float f[ARRAY1_DIM1];
-        long l[ARRAY1_DIM1];
-        double d;
-    } s3_t;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     hid_t		fid1;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
