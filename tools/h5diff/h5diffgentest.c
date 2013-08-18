@@ -560,8 +560,8 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         int          data4[3][2] = {{0,0},{0,0},{0,0}};
         int          data5[2][2] = {{0,0},{0,0}};
         unsigned int data6[3][2] = {{0,0},{0,0},{0,0}};
-        cmp1_t       data7[1] = {1,2};
-        cmp2_t       data8[1] = {1,2};
+        cmp1_t       data7[1] = {{1,2}};
+        cmp2_t       data8[1] = {{1,2}};
         hsize_t      dims3[2] = { 2,2 };
         hsize_t      dims4[1] = { 1 };
         size_t       type_size;
@@ -3664,9 +3664,6 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         };
     hsize_t dims_fixlen_str_array[]  = {FIXLEN_STR_ARRY_DIM};
 
-    /* objref */
-    hsize_t    objref_dims[1]={1};
-
     /*------------------------------------------
      * compound dataset
      *------------------------------------------*/
@@ -4873,7 +4870,7 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
     int data1[DIM_ARRY] = {0,0,0};
     int data2[DIM_ARRY] = {1,1,1};
     int data3[DIM_ARRY+1] = {1,1,1,1};
-    int data1_dim2[DIM_ARRY][1] = {0,0,0};
+    int data1_dim2[DIM_ARRY][1] = {{0,0,0}};
     int rank_attr;
     char data1_str[DIM_ARRY][STR_SIZE]= {"ab","cd","ef"};
     herr_t  status = SUCCEED;

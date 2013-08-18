@@ -1792,17 +1792,6 @@ test_array_bkg(void)
 static void
 test_compat(void)
 {
-    typedef struct {        /* Typedef for compound datatype */
-        short i;
-        float f;
-        long l;
-    } s2_t;
-    typedef struct {        /* Typedef for compound datatype */
-        short i;
-        float f[ARRAY1_DIM1];
-        long l[ARRAY1_DIM1];
-        double d;
-    } s3_t;
     char testfile[512]="";          /* Character buffer for corrected test file name */
     char *srcdir = getenv("srcdir");    /* Pointer to the directory the source code is located within */
     hid_t		fid1;		/* HDF5 File IDs		*/

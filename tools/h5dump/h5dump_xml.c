@@ -38,7 +38,7 @@ static char            *xml_escape_the_string(const char *, int);
 static char            *xml_escape_the_name(const char *);
 
 /*-------------------------------------------------------------------------
- * Function:    dump_all_cb
+ * Function:    xml_dump_all_cb
  *
  * Purpose:     function callback called by H5Literate,
  *                displays everything in the specified object
@@ -1782,7 +1782,6 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     int                 ndims;
     int                 i;
     int                 status = -1;
-    int                 stdindent = COL;    /* should be 3 */
     void               *buf = NULL;
     hsize_t             curr_pos = 0;        /* total data element position   */
     h5tools_str_t       buffer;          /* string into which to render   */

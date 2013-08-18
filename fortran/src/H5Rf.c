@@ -355,7 +355,6 @@ nh5rget_region_ptr_c(hid_t_f *dset_id, void *ref, hid_t_f *space_id)
 /******/
 {
      hid_t c_space_id;
-     hdset_reg_ref_t ref_c;
      int_f ret_value = 0;
 
      /*

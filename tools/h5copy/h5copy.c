@@ -157,35 +157,35 @@ usage: h5copy [OPTIONS] [OBJECTS...]\n\
  */
 
 
-static int parse_flag(const char* str_flag, unsigned *flag)
+static int parse_flag(const char* s_flag, unsigned *flag)
 {
     unsigned fla=0;
 
-    if (HDstrcmp(str_flag,"shallow")==0)
+    if (HDstrcmp(s_flag,"shallow")==0)
     {
         fla = H5O_COPY_SHALLOW_HIERARCHY_FLAG;
     }
-    else  if (HDstrcmp(str_flag,"soft")==0)
+    else  if (HDstrcmp(s_flag,"soft")==0)
     {
         fla = H5O_COPY_EXPAND_SOFT_LINK_FLAG;
     }
-    else  if (HDstrcmp(str_flag,"ext")==0)
+    else  if (HDstrcmp(s_flag,"ext")==0)
     {
         fla = H5O_COPY_EXPAND_EXT_LINK_FLAG;
     }
-    else  if (HDstrcmp(str_flag,"ref")==0)
+    else  if (HDstrcmp(s_flag,"ref")==0)
     {
         fla = H5O_COPY_EXPAND_REFERENCE_FLAG;
     }
-    else  if (HDstrcmp(str_flag,"noattr")==0)
+    else  if (HDstrcmp(s_flag,"noattr")==0)
     {
         fla = H5O_COPY_WITHOUT_ATTR_FLAG;
     }
-    else  if (HDstrcmp(str_flag,"allflags")==0)
+    else  if (HDstrcmp(s_flag,"allflags")==0)
     {
         fla = H5O_COPY_ALL;
     }
-    else  if (HDstrcmp(str_flag,"nullmsg")==0)
+    else  if (HDstrcmp(s_flag,"nullmsg")==0)
     {
         fla = H5O_COPY_PRESERVE_NULL_FLAG;
     }

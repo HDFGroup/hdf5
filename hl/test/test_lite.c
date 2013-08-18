@@ -1820,7 +1820,6 @@ out:
 static int test_valid_path(void)
 {
   hid_t file_id, group;
-  herr_t status;
   FILE *fp = NULL;
   htri_t path_valid;
   const char *data_string_in = "test";
@@ -1952,7 +1951,8 @@ static int test_valid_path(void)
   /*
    * Close the file.
    */
-  status = H5Fclose (file_id);
+  if(H5Fclose (file_id) < 0)
+      goto out;
 
   /* Create another file for checking external links */
 
