@@ -1454,7 +1454,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tattr-1 0 --enable-error-stack tattr.h5)
   # test for displaying the selected attributes of string type and scalar space
   ADD_H5_TEST (tattr-2 0 --enable-error-stack -a /\\\\/attr1 --attribute /attr4 --attribute=/attr5 tattr.h5)
-  ADD_H5_TEST_N (tattr-2 0 --enable-error-stack -N /\\\\/attr1 --any_object /attr4 --any_object=/attr5 tattr.h5)
+  ADD_H5_TEST_N (tattr-2 0 --enable-error-stack -N /\\\\/attr1 --any_path /attr4 --any_path=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5ERR_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
   # test for displaying attributes in shared datatype (also in group and dataset)
@@ -1485,7 +1485,7 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (tcomp-1 0 --enable-error-stack tcompound.h5)
   # test for named data types
   ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
-  ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_object /type2 --any_object=/group1/type3 tcompound.h5)
+  ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5)
   # test for unamed type 
   ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
