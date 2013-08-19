@@ -27,8 +27,10 @@ FOREACH (example ${examples})
   SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES LINKER_LANGUAGE Fortran)
   SET_TARGET_PROPERTIES (hl_f90_ex_${example} PROPERTIES FOLDER examples/hl/fortran)
 
-  IF (BUILD_TESTING)
-    ADD_TEST (NAME hl_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)
-  ENDIF (BUILD_TESTING)
-
 ENDFOREACH (example ${examples})
+
+IF (BUILD_TESTING)
+
+  INCLUDE (CMakeTests.cmake)
+
+ENDIF (BUILD_TESTING)
