@@ -241,7 +241,7 @@ static void usage(const char *prog)
  printf("      <layout type> can be:\n");
  printf("        CHUNK, to apply chunking layout\n");
  printf("        COMPA, to apply compact layout\n");
- printf("        CONTI, to apply continuous layout\n");
+ printf("        CONTI, to apply contiguous layout\n");
  printf("      <layout parameters> is optional layout information\n");
  printf("        CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension\n");
  printf("        COMPA (no parameter)\n");
