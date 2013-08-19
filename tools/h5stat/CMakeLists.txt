@@ -44,6 +44,7 @@ IF (BUILD_TESTING)
       h5stat_help1.ddl
       h5stat_help2.ddl
       h5stat_notexist.ddl
+      h5stat_nofile.ddl
       h5stat_filters.ddl
       h5stat_filters-file.ddl
       h5stat_filters-F.ddl
@@ -56,11 +57,27 @@ IF (BUILD_TESTING)
       h5stat_newgrat.ddl
       h5stat_newgrat-UG.ddl
       h5stat_newgrat-UA.ddl
+      h5stat_err1_links.ddl
+      h5stat_links1.ddl
+      h5stat_links2.ddl
+      h5stat_links3.ddl
+      h5stat_links4.ddl
+      h5stat_links5.ddl
+      h5stat_err1_dims.ddl
+      h5stat_dims1.ddl
+      h5stat_dims2.ddl
+      h5stat_err1_numattrs.ddl
+      h5stat_err2_numattrs.ddl
+      h5stat_numattrs1.ddl
+      h5stat_numattrs2.ddl
+      h5stat_numattrs3.ddl
+      h5stat_numattrs4.ddl
   )
   SET (HDF5_REFERENCE_TEST_FILES
       h5stat_filters.h5
       h5stat_tsohm.h5
       h5stat_newgrat.h5
+      h5stat_threshold.h5
   )
 
   FOREACH (ddl_file ${HDF5_REFERENCE_FILES})
@@ -140,6 +157,8 @@ IF (BUILD_TESTING)
           h5stat_help2.out.err
           h5stat_notexist.out
           h5stat_notexist.out.err
+          h5stat_nofile.out
+          h5stat_nofile.out.err
           h5stat_filters.out
           h5stat_filters.out.err
           h5stat_filters-file.out
@@ -164,6 +183,36 @@ IF (BUILD_TESTING)
           h5stat_newgrat-UG.out.err
           h5stat_newgrat-UA.out
           h5stat_newgrat-UA.out.err
+          h5stat_err1_links.out
+          h5stat_err1_links.out.err
+          h5stat_links1.out
+          h5stat_links1.out.err
+          h5stat_links2.out
+          h5stat_links2.out.err
+          h5stat_links3.out
+          h5stat_links3.out.err
+          h5stat_links4.out
+          h5stat_links4.out.err
+          h5stat_links5.out
+          h5stat_links5.out.err
+          h5stat_err1_dims.out
+          h5stat_err1_dims.out.err
+          h5stat_dims1.out
+          h5stat_dims1.out.err
+          h5stat_dims2.out
+          h5stat_dims2.out.err
+          h5stat_err1_numattrs.out
+          h5stat_err1_numattrs.out.err
+          h5stat_err2_numattrs.out
+          h5stat_err2_numattrs.out.err
+          h5stat_numattrs1.out
+          h5stat_numattrs1.out.err
+          h5stat_numattrs2.out
+          h5stat_numattrs2.out.err
+          h5stat_numattrs3.out
+          h5stat_numattrs3.out.err
+          h5stat_numattrs4.out
+          h5stat_numattrs4.out.err
     )
     IF (NOT "${last_test}" STREQUAL "")
       SET_TESTS_PROPERTIES (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
@@ -177,6 +226,7 @@ IF (BUILD_TESTING)
 
 # Test when h5stat a file that does not exist
   ADD_H5_TEST (h5stat_notexist 1 notexist.h5)
+  ADD_H5_TEST (h5stat_nofile 1 '')
 
 # Test file with groups, compressed datasets, user-applied fileters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
@@ -195,6 +245,47 @@ IF (BUILD_TESTING)
   ADD_H5_TEST (h5stat_newgrat 0 h5stat_newgrat.h5)
   ADD_H5_TEST (h5stat_newgrat-UG 0 -G h5stat_newgrat.h5)
   ADD_H5_TEST (h5stat_newgrat-UA 0 -A h5stat_newgrat.h5)
+#
+# Tests for -l (--links) option on h5stat_threshold.h5: 
+#   -l 0 (incorrect threshold value)
+#   -g -l 8
+#   --links=8
+#   --links=20 -g
+  ADD_H5_TEST (h5stat_err1_links 1 -l 0 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_links1 0 -g -l 8 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_links2 0 --links=8 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_links3 0 --links=20 -g h5stat_threshold.h5)
+#
+# Tests for -l (--links) option on h5stat_newgrat.h5: 
+#   -g
+#   -g -l 40000
+  ADD_H5_TEST (h5stat_links4 0 -g h5stat_newgrat.h5)
+  ADD_H5_TEST (h5stat_links5 0 -g -l 40000 h5stat_newgrat.h5)
+#
+# Tests for -m (--dims) option on h5stat_threshold.h5
+#   -d --dims=-1 (incorrect threshold value)
+#   -gd -m 5
+#   -d --di=15
+  ADD_H5_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_dims1 0 -gd -m 5 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_dims2 0 -d --di=15 h5stat_threshold.h5)
+#
+# Tests for -a option on h5stat_threshold.h5
+#   -a -2 (incorrect threshold value)
+#   --numattrs (without threshold value)
+#   -AS -a 10
+#   -a 1
+#   -A --numattrs=25
+  ADD_H5_TEST (h5stat_err1_numattrs 1 -a -2 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_err2_numattrs 1 --numattrs h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_numattrs1 0 -AS -a 10 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_numattrs2 0 -a 1 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_numattrs3 0 -A --numattrs=25 h5stat_threshold.h5)
+#
+# Tests for -a option on h5stat_newgrat.h5
+#   -A -a 100
+  ADD_H5_TEST (h5stat_numattrs4 0 -A -a 100 h5stat_newgrat.h5)
+#
 ENDIF (BUILD_TESTING)
 
 ##############################################################################
