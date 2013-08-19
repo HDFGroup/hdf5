@@ -112,6 +112,7 @@
 ./config/powerpc-ibm-aix5.x
 ./config/solaris2.x
 ./config/sv1-cray
+./config/x86_64-pc-cygwin
 ./config/x86_64-redstorm-linux-gnu
 
 ./config/site-specific/BlankForm
@@ -1246,6 +1247,8 @@
 ./tools/testfiles/tall-5s.ddl
 ./tools/testfiles/tall-6.ddl
 ./tools/testfiles/tall-6.exp
+./tools/testfiles/tall-7.ddl
+./tools/testfiles/tall-7N.ddl
 ./tools/testfiles/tall.h5
 ./tools/testfiles/tarray1.ddl
 ./tools/testfiles/tarray1.h5
@@ -2261,6 +2264,8 @@
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.cmake
+./config/cmake/CPack.Info.plist.in
+./config/cmake/hdf.gif
 ./config/cmake/NSIS.template.in
 ./config/cmake/NSIS.InstallOptions.ini.in
 

@@ -70,7 +70,10 @@ New Features
  
     Tools
     -----
-    - None
+    - h5dump: Added option -N --any_path, which searches the file for paths that
+              match the search path. HDFFV-7989 (ADB - 2013/08/12).
+    - h5dump: Added optional arg 0 to -A, which excludes attributes from display.
+              HDFFV-8134 (ADB - 2013/08/01).
 
     High-Level APIs
     ---------------

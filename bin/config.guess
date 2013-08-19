@@ -778,9 +778,9 @@ EOF
 		echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'` ;;
 	esac
 	exit ;;
-    i*:CYGWIN*:*)
-	echo ${UNAME_MACHINE}-pc-cygwin
-	exit ;;
+    i*:CYGWIN*:* | x*:CYGWIN*:*)
+    echo ${UNAME_MACHINE}-pc-cygwin
+    exit ;;
     *:MINGW*:*)
 	echo ${UNAME_MACHINE}-pc-mingw32
 	exit ;;
@@ -815,7 +815,7 @@ EOF
     i*:UWIN*:*)
 	echo ${UNAME_MACHINE}-pc-uwin
 	exit ;;
-    amd64:CYGWIN*:*:* | x86_64:CYGWIN*:*:*)
+    amd64:CYGWIN*:*:*)
 	echo x86_64-unknown-cygwin
 	exit ;;
     p*:CYGWIN*:*)

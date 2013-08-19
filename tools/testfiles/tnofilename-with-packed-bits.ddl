@@ -21,6 +21,8 @@ usage: h5dump [OPTIONS] files
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link
      -t P, --datatype=P   Print the specified named datatype
+     -N P, --any_path=P   Print any attribute, dataset, group, datatype, or link that matches P
+                          P can be the absolute path or just a relative path.
      -A,   --onlyattr     Print the header and value of attributes
                           Optional value 0 suppresses printing attributes.
 --------------- Object Property Options ---------------
