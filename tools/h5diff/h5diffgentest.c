@@ -560,10 +560,10 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         int          data4[3][2] = {{0,0},{0,0},{0,0}};
         int          data5[2][2] = {{0,0},{0,0}};
         unsigned int data6[3][2] = {{0,0},{0,0},{0,0}};
-        cmp1_t       data7[1] = {{1,2}};
-        cmp2_t       data8[1] = {{1,2}};
-        hsize_t      dims3[2] = { 2,2 };
-        hsize_t      dims4[1] = { 1 };
+        cmp1_t       data7[1] = {{1.0f, 2}};
+        cmp2_t       data8[1] = {{1, 2.0f}};
+        hsize_t      dims3[2] = {2, 2};
+        hsize_t      dims4[1] = {1};
         size_t       type_size;
         hid_t        tid;
 
@@ -4419,6 +4419,7 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
      * Create an attribute in root group
      */
     tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
     ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
     assert(ret >= 0);
 
@@ -4461,6 +4462,7 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     hid_t  fid;  /* HDF5 File ID */
     hid_t  did_dset; /* dataset ID   */
     hid_t  sid_dset;  /* dataset space ID */
+    hid_t  tid_attr;
     hid_t  tid_cmpd2; /* compound2 type ID */
     hid_t  tid_cmpd1; /* compound1 type ID */
     hid_t  tid_cmpd1_vlen;
@@ -4525,22 +4527,22 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
     /* Reclaim the write VL data */
     ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
-    /*-----------------------------------
-     * Create an attribute in root group
-     */
-    /* TODO: creating vlen with compound type doesn't work for attribute now. 
-     * so add this later when it's fixed 
-    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
-    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
-    assert(ret >= 0);
-    */
-
     /* ----------------
      * Close IDs */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
     ret = H5Dclose(did_dset);
     assert(ret >= 0);
     ret = H5Tclose(tid_cmpd2);
@@ -4577,6 +4579,7 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
     hid_t  fid;  /* HDF5 File IDs  */
     hid_t  did_dset; /* Dataset ID   */
     hid_t  sid_dset;       /* Dataspace ID   */
+    hid_t  tid_attr;
     hid_t  tid_cmpd1;       /* Compound1 Datatype ID   */
     hid_t  tid_arry1;       /* Array Datatype ID   */
     hid_t  tid_cmpd2;       /* Compound2 Datatype ID   */
@@ -4664,22 +4667,22 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
     ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
     /* Reclaim the write VL data */
     ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
-    /*-----------------------------------
-     * Create an attribute in root group
-     */
-    /* TODO: creating vlen with compound type doesn't work for attribute now. 
-     * so add this later when it's fixed
-    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
-    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
-    assert(ret >= 0);
-    */
-
     /*-------------------
      * Close IDs */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
     ret = H5Tclose(tid_arry1);
     assert(ret >= 0);
     ret = H5Dclose(did_dset);
@@ -4724,6 +4727,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     hid_t  fid;  /* HDF5 File ID */
     hid_t  did_dset; /* dataset ID   */
     hid_t  sid_dset;  /* dataset space ID */
+    hid_t  tid_attr;
     hid_t  tid_cmpd3; /* compound3 type ID */
     hid_t  tid_cmpd2; /* compound2 type ID */
     hid_t  tid_cmpd2_arry;
@@ -4809,22 +4813,22 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     ret = H5Dwrite(did_dset, tid_cmpd1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
+    /*-----------------------------------
+     * Create an attribute in root group
+     */
+    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
+    assert(tid_attr > 0);
+    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
+    assert(ret >= 0);
+
     /* Reclaim the write VL data */
     ret = H5Dvlen_reclaim(tid_cmpd1, sid_dset, H5P_DEFAULT, wdata);
     assert(ret >= 0);
 
-    /*-----------------------------------
-     * Create an attribute in root group
-     */
-    /* TODO: creating vlen with compound type doesn't work for attribute now.
-     * so add this later when it's fixed
-    tid_attr = H5Acreate2(fid, attr, tid_cmpd1, sid_dset, H5P_DEFAULT, H5P_DEFAULT);
-    ret = H5Awrite(tid_attr, tid_cmpd1, wdata);
-    assert(ret >= 0);
-    */
-
     /* ----------------
      * Close IDs */
+    ret = H5Aclose(tid_attr);
+    assert(ret >= 0);
     ret = H5Dclose(did_dset);
     assert(ret >= 0);
     ret = H5Sclose(sid_dset);
@@ -4870,7 +4874,7 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
     int data1[DIM_ARRY] = {0,0,0};
     int data2[DIM_ARRY] = {1,1,1};
     int data3[DIM_ARRY+1] = {1,1,1,1};
-    int data1_dim2[DIM_ARRY][1] = {{0,0,0}};
+    int data1_dim2[DIM_ARRY][1] = {0,0,0};
     int rank_attr;
     char data1_str[DIM_ARRY][STR_SIZE]= {"ab","cd","ef"};
     herr_t  status = SUCCEED;

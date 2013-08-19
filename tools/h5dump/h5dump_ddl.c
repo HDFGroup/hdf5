@@ -148,7 +148,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, vo
     outputformat = &string_dataformat;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, oid, attr_name, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id, display_ai, display_char);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {
@@ -1360,7 +1360,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *ainfo, vo
 } /* end attr_search() */
 
 static herr_t
-obj_search(const char *path, const H5O_info_t *oi, const char *already_visited, void *_op_data)
+obj_search(const char *path, const H5O_info_t *oi, const char UNUSED *already_visited, void *_op_data)
 {
 	trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
     char *op_name = (char*)handle_data->op_name;
@@ -1452,7 +1452,7 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
  *-------------------------------------------------------------------------
  */
 void
-handle_paths(hid_t fid, const char *path_name, void* data, int pe, const char *display_name)
+handle_paths(hid_t fid, const char *path_name, void UNUSED * data, int UNUSED pe, const char UNUSED *display_name)
 {
     hid_t  gid = -1;
 
@@ -1613,7 +1613,7 @@ handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int UNUSED pe
     attr_data_output = display_attr_data;
 
     h5dump_type_table = type_table;
-    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, oid, attr_name, attr_id, display_ai, display_char);
+    h5tools_dump_attribute(rawoutstream, outputformat, &ctx, attr_name, attr_id, display_ai, display_char);
     h5dump_type_table = NULL;
 
     if(attr_id < 0) {

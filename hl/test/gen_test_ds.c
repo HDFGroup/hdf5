@@ -102,7 +102,7 @@ int main(int argc , char **argv)
     nerrors += test_duplicatelong_attachscales(filename) < 0  ? 1 : 0;
     nerrors += test_samelong_scalenames(filename) < 0  ? 1 : 0;
     nerrors += test_foreign_scaleattached(filename) < 0  ? 1 : 0;
-
+    nerrors += test_long_scalenames(filename) < 0  ? 1 : 0;
 
     if(nerrors) goto error;
     printf("Dimension scales file generation passed.\n");

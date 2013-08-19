@@ -94,7 +94,7 @@ create_normal_dset(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* file and dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     int         i, j;
 
     /*
@@ -204,7 +204,7 @@ create_scale_offset_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 
@@ -304,7 +304,7 @@ create_scale_offset_dsets_double(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     double      data[NX][NY];          /* data to write */
-    double      fillvalue = -2.2;
+    double      fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 
@@ -837,7 +837,7 @@ create_fletcher_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 
@@ -937,7 +937,7 @@ create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 
@@ -1037,7 +1037,7 @@ create_szip_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 
@@ -1137,7 +1137,7 @@ create_shuffle_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dataset;         /* dataset handles */
     hid_t       dcpl;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 
@@ -1239,7 +1239,7 @@ create_nbit_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
     hid_t       dcpl;
     size_t      precision, offset;
     float       data[NX][NY];          /* data to write */
-    float       fillvalue = -2.2;
+    float       fillvalue = -2.2f;
     hsize_t     chunk[RANK] = {CHUNK0, CHUNK1};
     int         i, j;
 

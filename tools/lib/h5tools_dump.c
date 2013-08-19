@@ -3497,7 +3497,7 @@ h5tools_dump_comment(FILE *stream, const h5tool_format_t *info,
  */
 void
 h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
-        h5tools_context_t *ctx, hid_t oid, const char *attr_name, hid_t attr_id, 
+        h5tools_context_t *ctx, const char *attr_name, hid_t attr_id, 
         int display_index, int display_char)
 {
     h5tools_str_t buffer;          /* string into which to render   */
