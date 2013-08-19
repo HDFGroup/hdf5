@@ -28,7 +28,6 @@ int main (int argc, char **argv){
   int my_rank, my_size, ret;
   int provided;
   hid_t event_q, int_id;
-  
   int num_requests = 0;  
   H5_status_t *status = NULL;
 

@@ -296,7 +296,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
         //hid_t space_id, type_id;
 
 #if H5_DO_NATIVE
-        printf("dataset name %s    location %d\n", name, loc_handle.cookie);
+      /*        printf("dataset name %s    location %d\n", name, loc_handle.cookie); */
         dset_oh.cookie = H5Dopen(loc_handle.cookie, name, input->dapl_id);
         HDassert(dset_oh.cookie);
         output.space_id = H5Dget_space(dset_oh.cookie);
@@ -1143,7 +1143,8 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 {
 
   int ret_value = CP_SUCCESS;
-  int i, *ptr = NULL, request_counter= 0;
+  int i,  request_counter= 0;
+  int *ptr = NULL;
   int ndims;
   request_list_t *list = (request_list_t *)_list;
   op_data_t *op_data;
@@ -1173,7 +1174,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   size_t native_length = 0, total_length = 0;
   char *write_buf = NULL, *write_buf_ptr = NULL;
   hid_t mem_dataspace;
-  hsize_t *native_dims = NULL;
+  hsize_t native_dims[1];
 #endif
 
 
@@ -1195,9 +1196,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
   for (request_counter = 0; request_counter < num_requests; request_counter++){
      
     if (list[request_counter].merged != USED_IN_MERGING){ 
-#if H5_DO_NATIVE
-      native_dims = (hsize_t *) malloc (sizeof(hsize_t));
-#endif
 
       op_data = (op_data_t *)list[request_counter].op_data;
       input = (dset_io_in_t *)op_data->input;
@@ -1227,7 +1225,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	buf = (void *)list[request_counter].mem_buf;
 
 #if H5_DO_NATIVE	
-	*native_dims = (hsize_t)(size/src_size); 
+	native_dims[0] = (hsize_t)(size/src_size); 
 	write_buf = (char *)buf;
 #endif
 	buf_ptr = (uint8_t *)buf;
@@ -1239,13 +1237,13 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	for (hi = 0; hi < list[request_counter].num_mblocks; hi++){
 	  total_length += list[request_counter].mblocks[hi].len;
 	}
-	*native_dims = (hsize_t)(total_length/src_size); 
+	native_dims[0] = (hsize_t)(total_length/src_size); 
 #endif
 
 
 #if PROFILE
 	fprintf (stdout,
-		 "# Requests Merged: %d\n",
+		 "# Requests Merged: %d \n",
 		 request_counter);
 
 #endif
@@ -1263,7 +1261,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	  HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't open current group");
 	opened_locally = TRUE;
       }
-
       /* get the rank of the dataspace */
       if((ndims = H5Sget_simple_extent_ndims(space_id)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get dataspace dimesnsion");
@@ -1458,8 +1455,8 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 #if DEBUG_COMPACTOR
 	  fprintf (stderr, "Printing the native constructed buffer of length :%zd\n", 
 		   native_length);
-	  ptr = (int *) write_buf;
-	  for (ii = 0; ii < native_length/sizeof(int); ii++){
+	  ptr = (hsize_t *) write_buf;
+	  for (ii = 0; ii < native_length/sizeof(hsize_t); ii++){
 	    fprintf(stderr, "%d ", ptr[ii]);
 	  }
 	  fprintf(stderr, "\n");
@@ -1503,12 +1500,7 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 #endif
       
 #if H5_DO_NATIVE
-#if DEBUG_COMPACTOR
-      fprintf(stderr,"native_dims : %lli\n", *native_dims);
-#endif
-
       mem_dataspace = H5Screate_simple(1, native_dims, NULL);
-
       ret_value = H5Dwrite(iod_oh.cookie,dst_id, mem_dataspace, space_id, H5P_DEFAULT, 
 			   write_buf);
 
@@ -1516,8 +1508,6 @@ int H5VL_iod_server_compactor_write (void *_list, int num_requests)
 	free(write_buf);
 	write_buf = NULL;
       }
-      if (NULL != native_dims)
-	free(native_dims);
 #endif
       
       if (NULL != mem_desc){

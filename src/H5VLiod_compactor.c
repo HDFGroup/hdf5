@@ -818,11 +818,14 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
    int ret_value = CP_SUCCESS;
    hid_t overlap_space, n_overlap_space;
    hsize_t *goffsets=NULL;
-   size_t *glens=NULL, g_entries = 0, k = 0;
+   size_t *glens=NULL, g_entries = 0;
    int *return_values = NULL;
    int nrentries = *read_entries;
    int modified_rd_cnt = nrentries;
 
+#if DEBUG_COMPACTOR
+   size_t k;
+#endif
    FUNC_ENTER_NOAPI(NULL);
    
 
@@ -840,21 +843,24 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
 #if DEBUG_COMPACTOR
      fprintf (stderr, "in %s: %d No write entries to play with!\n",
 	      __FILE__, __LINE__);
+   
+#endif
      ret_value = CP_FAIL;
      goto done;
-#endif
+
 
    }
 
 #if DEBUG_COMPACTOR
    fprintf (stderr, "nentries: %d, nrentries: %d\n",
 	    nentries, nrentries);
-   ret_value = CP_FAIL;
 #endif 
+   
+   
    for (i = 0; i < nrentries; i++){
      for (j = 0; j < nentries; j++){
        
-       if (wlist[j].merged == USED_IN_MERGING)
+       if (wlist[j].merged == MERGED)
 	 continue;
        
 #if DEBUG_COMPACTOR
@@ -889,18 +895,20 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
 	   fprintf (stderr,"%zd: OFFSET: %lli, len %zd\n",
 		    k, goffsets[k],
 		    glens[k]);
+	 
 	 }
+#endif
 	 free(goffsets);
 	 free(glens);
 	 g_entries = 0;
-#endif
+
 
 	 if(return_values[1] > 0){
 	   /*There is still some reads that needs to be done 
 	    We can construct an entry for them and fill the buffer*/
 	   rlist[modified_rd_cnt].selection_id = n_overlap_space;
 
-#if DEBUG_COMPACTOR
+
 	   H5Sget_offsets(n_overlap_space,rlist[i].elementsize,
 			  &goffsets, &glens, &g_entries);
 
@@ -908,7 +916,7 @@ int H5VL_iod_short_circuit_read (request_list_t *wlist, request_list_t *rlist,
 				       &modified_rd_cnt,
 				       goffsets, glens, g_entries,
 				       FALSE);
-
+#if DEBUG_COMPACTOR
 	   fprintf (stderr,"**************************************\n");
 	   fprintf (stderr,"NON-OVERLAPPING OFFSETS\n");
 	   for (k = 0; k < g_entries; k++){
@@ -1449,12 +1457,19 @@ int H5VL_iod_reconstruct_overlapped_request (block_container_t *sf_block,
 					     size_t i, size_t j, 
 					     int *changed, int *changed_cnt_ret){
   
-  size_t  rem_len = 0, jj;
+  size_t  rem_len = 0;
   size_t rev_mblks, rev_fblks;
   block_container_t *rev_sm_block=NULL, *rev_sf_block=NULL;
   int  ret_value = CP_SUCCESS;
   hsize_t start_i , start_j, end_i, end_j;
-  int changed_cnt = 0, ii;
+  int changed_cnt = 0;
+
+#if DEBUG_COMPACTOR
+  int ii;
+  size_t jj;
+#endif
+
+
   FUNC_ENTER_NOAPI(NULL)
 
   rev_mblks = 0;
@@ -2179,6 +2194,7 @@ static void H5VL_print_block_container (block_container_t *cont,
 #if DEBUG_COMPACTOR
   fprintf (stderr,"blocks: %zd\n",
 	   num);
+  
 
   for (k = 0; k < num; k++){
     fprintf (stderr, "%zd: block.offset: %lli, block.len: %zd \n",

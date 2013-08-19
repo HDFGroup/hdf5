@@ -168,7 +168,7 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
     coh.cookie = H5Fcreate(input->name, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(coh.cookie);
     root_oh.cookie = coh.cookie;
-    fprintf(stderr, "Created Native file %s with ID %d\n", input->name, root_oh.cookie);
+    /*    fprintf(stderr, "Created Native file %s with ID %d\n", input->name, root_oh.cookie);*/
 #endif
 
     output.coh = coh;
@@ -286,7 +286,7 @@ H5VL_iod_server_file_open_cb(AXE_engine_t UNUSED axe_engine,
         coh.cookie = H5Fopen(input->name, H5F_ACC_RDWR, H5P_DEFAULT);
         assert(coh.cookie);
         root_oh.cookie = coh.cookie;
-        fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie);
+	/*        fprintf(stderr, "Opened Native file %s with ID %d\n", input->name, root_oh.cookie); */
     }
 #endif
 
