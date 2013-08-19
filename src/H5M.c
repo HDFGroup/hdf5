@@ -218,6 +218,20 @@ H5Mcreate_ff(hid_t loc_id, const char *name, hid_t keytype, hid_t valtype,
         if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
 
+    /* Check map creation property list */
+    if(H5P_DEFAULT == mcpl_id)
+        mcpl_id = H5P_GROUP_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(mcpl_id, H5P_GROUP_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
+
+    /* Check the group access property list */
+    if(H5P_DEFAULT == mapl_id)
+        mapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(mapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
 
@@ -305,6 +319,13 @@ H5Mopen_ff(hid_t loc_id, const char *name, hid_t mapl_id, uint64_t trans, hid_t 
     /* Check arguments */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Check the group access property list */
+    if(H5P_DEFAULT == mapl_id)
+        mapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(mapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);

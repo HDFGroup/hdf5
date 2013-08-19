@@ -18,6 +18,7 @@
  * Purpose:	IOD plugin encode/decode code
  */
 
+#include "H5FFpublic.h"
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppublic.h"
 #include "H5Spublic.h"
@@ -301,7 +302,6 @@ int hg_proc_value_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;
     size_t size;
-    hg_proc_op_t op;
     value_t *struct_data = (value_t *) data;
 
     ret = hg_proc_raw(proc, &struct_data->val_size, sizeof(size_t));
@@ -318,6 +318,90 @@ int hg_proc_value_t(hg_proc_t proc, void *data)
             ret = HG_FAIL;
             return ret;
         }
+    }
+
+    return ret;
+}
+
+int hg_proc_linfo_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    H5L_ff_info_t *struct_data = (H5L_ff_info_t *) data;
+
+    ret = hg_proc_int32_t(proc, &struct_data->type);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    if(H5L_TYPE_ERROR == struct_data->type) {
+        return ret;
+    }
+
+    ret = hg_proc_int32_t(proc, &struct_data->cset);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    if(H5L_TYPE_HARD == struct_data->type) {
+        ret = hg_proc_uint64_t(proc, &struct_data->u.address);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
+    }
+    else if(H5L_TYPE_SOFT == struct_data->type) {
+        ret = hg_proc_size_t(proc, &struct_data->u.val_size);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        }
+    }
+    else {
+        HG_ERROR_DEFAULT("Proc error - link type not supported");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    return ret;
+}
+
+int hg_proc_oinfo_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    H5O_ff_info_t *struct_data = (H5O_ff_info_t *) data;
+
+    ret = hg_proc_uint64_t(proc, &struct_data->addr);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_int32_t(proc, &struct_data->type);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_uint32_t(proc, &struct_data->rc);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_uint64_t(proc, &struct_data->num_attrs);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
     }
 
     return ret;

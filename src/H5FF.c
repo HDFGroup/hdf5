@@ -102,6 +102,9 @@ H5FF__init_interface(void)
     if(H5A_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init attribute interface")
 
+    if(H5M_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FF__init_interface() */
 
@@ -2234,6 +2237,124 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lexists_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Lget_info_ff
+ *
+ * Purpose:	Gets metadata for a link.
+ *
+ * Return:	Success:	Non-negative with information in LINFO
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lget_info_ff(hid_t loc_id, const char *name, H5L_ff_info_t *linfo /*out*/,
+               hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
+
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_INFO, 
+                                  H5AC_dxpl_id, eq_id, linfo)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lget_info_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Lget_val_ff
+ *
+ * Purpose:	Returns the link value of a link whose name is NAME.  For
+ *              symbolic links, this is the path to which the link points,
+ *              including the null terminator.  For user-defined links, it
+ *              is the link buffer.
+ *
+ *              At most SIZE bytes are copied to the BUF result buffer.
+ *
+ * Return:	Success:	Non-negative with the link value in BUF.
+ *
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lget_val_ff(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
+              hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "i*sxzi", loc_id, name, buf, size, lapl_id);
+
+    /* Check arguments */
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.obj_type = H5I_get_type(loc_id);
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get the link info through the VOL */
+    if((ret_value = H5VL_link_get(obj, loc_params, vol_plugin, H5VL_LINK_GET_VAL, 
+                                  H5AC_dxpl_id, eq_id, buf, size)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lget_val_ff() */
+
 #if 0
 
 /*-------------------------------------------------------------------------
@@ -2297,6 +2418,70 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_ff() */
 #endif
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oopen_by_addr_ff
+ *
+ * Purpose:	This function opens an object using its address within the
+ *              HDF5 file, similar to an HDF5 hard link. The open object
+ *              is identical to an object opened with H5Oopen() and should
+ *              be closed with H5Oclose() or a type-specific closing
+ *              function (such as H5Gclose() ).
+ *
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
+                   uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5I_type_t  opened_type;
+    void       *opened_obj = NULL;
+    H5VL_loc_params_t loc_params;
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("i", "ia", loc_id, addr);
+
+    loc_params.type = H5VL_OBJECT_BY_ADDR;
+    loc_params.loc_data.loc_by_addr.addr = addr;
+    loc_params.loc_data.loc_by_addr.obj_type = type;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(H5O_TYPE_NAMED_DATATYPE == type) {
+        /* Open the object through the VOL */
+        if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
+                                                  H5AC_dxpl_id, H5_EVENT_QUEUE_NULL)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    }
+    else {
+        /* Open the object through the VOL */
+        if(NULL == (opened_obj = H5VL_object_open(obj, loc_params, vol_plugin, &opened_type, 
+                                                  H5AC_dxpl_id, eq_id)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object")
+    }
+    if ((ret_value = H5VL_object_register(opened_obj, opened_type, vol_plugin, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oopen_by_addr_ff() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Olink_ff
@@ -2732,6 +2917,113 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Oget_info_ff
+ *
+ * Purpose:	Retrieve information about an object.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oget_info_ff(hid_t loc_id, H5O_ff_info_t *oinfo, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*x", loc_id, oinfo);
+
+    /* Check args */
+    if(!oinfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get the group info through the VOL using the location token */
+    if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
+                                    H5AC_dxpl_id, eq_id, oinfo)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_info_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_info_by_name_ff
+ *
+ * Purpose:	Retrieve information about an object.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oget_info_by_name_ff(hid_t loc_id, const char *name, H5O_ff_info_t *oinfo, 
+                       hid_t lapl_id, uint64_t trans, hid_t eq_id)
+{
+    void    *obj = NULL;        /* object token of loc_id */
+    H5VL_t  *vol_plugin;        /* VOL plugin information */
+    H5VL_loc_params_t loc_params;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
+
+    /* Check args */
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(!oinfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = name;
+    loc_params.loc_data.loc_by_name.plist_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the file object */
+    if(NULL == (obj = (void *)H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* get the plugin pointer */
+    if (NULL == (vol_plugin = (H5VL_t *)H5I_get_aux(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    /* Get the group info through the VOL using the location token */
+    if((ret_value = H5VL_object_get(obj, loc_params, vol_plugin, H5VL_OBJECT_GET_INFO, 
+                                    H5AC_dxpl_id, eq_id, oinfo)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_info_by_name_ff() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Oclose_ff
  *
  * Purpose:	Close an open file object.
@@ -2763,6 +3055,7 @@ H5Oclose_ff(hid_t object_id, hid_t eq_id)
         case H5I_GROUP:
         case H5I_DATATYPE:
         case H5I_DATASET:
+        case H5I_MAP:
             /* check ID */
             if(H5I_object(object_id) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object");

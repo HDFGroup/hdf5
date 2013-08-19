@@ -379,7 +379,12 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t
     switch(obj_type) {
         case H5I_GROUP:
             if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+            break;
+
+        case H5I_MAP:
+            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize map handle")
             break;
 
         case H5I_DATASET:

@@ -215,7 +215,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* add link in parent group to current object */
         if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
-                                    H5L_TYPE_HARD, dset_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_HARD, &dset_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 
@@ -292,7 +292,7 @@ H5VL_iod_server_dset_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG 
-    fprintf(stderr, "Start dataset Open %s\n", name);
+    fprintf(stderr, "Start dataset Open %s with Loc ID %llu\n", name, loc_id);
 #endif
 
     /* Traverse Path and open dset */

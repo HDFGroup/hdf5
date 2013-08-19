@@ -653,8 +653,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             int *status = (int *)req->data;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "MAP set failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "MAP set failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -665,8 +668,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             int *status = (int *)req->data;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "MAP delete failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "MAP delete failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -677,8 +683,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             map_get_out_t *output = (map_get_out_t *)req->data;
 
-            if(SUCCEED != output->ret)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "MAP get failed at the server");
+            if(SUCCEED != output->ret) {
+                fprintf(stderr, "MAP get failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(output);
             req->data = NULL;
@@ -689,8 +698,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             hsize_t *count = (hsize_t *)req->data;
 
-            if(*count == IOD_COUNT_UNDEFINED)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP get_count failed at the server");
+            if(*count == IOD_COUNT_UNDEFINED) {
+                fprintf(stderr, "MAP get_count failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
@@ -700,8 +712,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             htri_t *exists = (htri_t *)req->data;
 
-            if(*exists < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "MAP exists failed at the server");
+            if(*exists < 0) {
+                fprintf(stderr, "MAP exists failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             req->data = NULL;
             H5VL_iod_request_delete(file, req);
@@ -711,8 +726,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             int *status = (int *)req->data;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "file flush failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "File flush failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -724,8 +742,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             int *status = (int *)req->data;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "file close failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "FILE close failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -750,8 +771,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "attr rename failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "ATTR rename failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -764,8 +788,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "attr remove failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "ATTR remove failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -780,8 +807,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             htri_t *ret = (htri_t *)req->data;
             H5VL_iod_object_t *obj = (H5VL_iod_object_t *)req->obj;
 
-            if(*ret < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "exists operation failed at the server");
+            if(*ret < 0) {
+                fprintf(stderr, "EXIST OP failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             req->data = NULL;
             obj->request = NULL;
@@ -793,8 +823,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "attr close failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "ATTR close failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -823,8 +856,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_group_t *grp = (H5VL_iod_group_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "group close failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "GROUP CLOSE failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -832,7 +868,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free group components */
-            free(grp->common.obj_name);
+            if(grp->common.obj_name)
+                free(grp->common.obj_name);
             if(grp->common.comment)
                 HDfree(grp->common.comment);
             if(grp->gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5Pclose(grp->gapl_id) < 0)
@@ -848,8 +885,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "Dataset set extent failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "DATASET set extent failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -862,8 +902,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "dset close failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "DATASET CLOSE failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -871,7 +914,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free dset components */
-            free(dset->common.obj_name);
+            if(dset->common.obj_name)
+                free(dset->common.obj_name);
             if(dset->common.comment)
                 HDfree(dset->common.comment);
             if(dset->remote_dset.dcpl_id != H5P_DATASET_CREATE_DEFAULT &&
@@ -892,8 +936,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_map_t *map = (H5VL_iod_map_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "map close failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "MAP close failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -901,7 +948,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free map components */
-            free(map->common.obj_name);
+            if(map->common.obj_name)
+                free(map->common.obj_name);
             if(map->common.comment)
                 HDfree(map->common.comment);
             if(H5Tclose(map->remote_map.keytype_id) < 0)
@@ -916,8 +964,11 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             int *status = (int *)req->data;
             H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)req->obj;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "dtype close failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "DATATYPE delete failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
             req->data = NULL;
@@ -925,7 +976,8 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free dtype components */
-            free(dtype->common.obj_name);
+            if(dtype->common.obj_name)
+                free(dtype->common.obj_name);
             if(dtype->common.comment)
                 HDfree(dtype->common.comment);
             if(dtype->remote_dtype.tcpl_id != H5P_DATATYPE_CREATE_DEFAULT &&
@@ -947,10 +999,59 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         {
             int *status = (int *)req->data;
 
-            if(SUCCEED != *status)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Link operation failed at the server");
+            if(SUCCEED != *status) {
+                fprintf(stderr, "Link operation failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
 
             free(status);
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_LINK_GET_INFO:
+        {
+            H5L_ff_info_t *linfo = (H5L_ff_info_t *)req->data;
+
+            if(linfo->type == H5L_TYPE_ERROR) {
+                fprintf(stderr, "Link get_info failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_OBJECT_GET_INFO:
+        {
+            H5O_ff_info_t *oinfo = (H5O_ff_info_t *)req->data;
+
+            if(oinfo->type == H5O_TYPE_UNKNOWN) {
+                fprintf(stderr, "OBJECT get_info failed at the server\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            req->data = NULL;
+            file->common.request = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+    case HG_LINK_GET_VAL:
+        {
+            link_get_val_out_t *result = (link_get_val_out_t *)req->data;
+
+            if(SUCCEED != result->ret) {
+                fprintf(stderr, "get comment failed\n");
+                req->status = H5AO_FAILED;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            free(result);
             req->data = NULL;
             file->common.request = NULL;
             H5VL_iod_request_delete(file, req);
@@ -977,6 +1078,9 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_LINK_ITERATE:
     case HG_OBJECT_VISIT:
     default:
+        req->status = H5AO_FAILED;
+        req->state = H5VL_IOD_COMPLETED;
+        req->data = NULL;
         H5VL_iod_request_delete(file, req);
         HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "Request Type not supported");
     }
@@ -1131,7 +1235,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free group components */
-            free(grp->common.obj_name);
+            if(grp->common.obj_name)
+                free(grp->common.obj_name);
             if(grp->common.comment)
                 HDfree(grp->common.comment);
             if(grp->gapl_id != H5P_GROUP_ACCESS_DEFAULT && H5Pclose(grp->gapl_id) < 0)
@@ -1168,7 +1273,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free dset components */
-            free(dset->common.obj_name);
+            if(dset->common.obj_name)
+                free(dset->common.obj_name);
             if(dset->common.comment)
                 HDfree(dset->common.comment);
             if(dset->remote_dset.dcpl_id != 0 &&
@@ -1201,7 +1307,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free map components */
-            free(map->common.obj_name);
+            if(map->common.obj_name)
+                free(map->common.obj_name);
             if(map->common.comment)
                 HDfree(map->common.comment);
             if(H5Tclose(map->remote_map.keytype_id) < 0)
@@ -1224,7 +1331,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
 
             /* free dtype components */
-            free(dtype->common.obj_name);
+            if(dtype->common.obj_name)
+                free(dtype->common.obj_name);
             if(dtype->common.comment)
                 HDfree(dtype->common.comment);
             if(dtype->remote_dtype.tcpl_id != 0 &&
@@ -1310,7 +1418,6 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Loop to complete some requests */
     while(cur_req) {
         /* If the request is pending on the object we want, add its axe_id */
         if(cur_req->obj == obj) {

@@ -181,6 +181,7 @@ struct H5VL_loc_by_idx {
 
 struct H5VL_loc_by_addr {
     haddr_t addr;
+    H5O_type_t obj_type;
 };
 
 struct H5VL_loc_by_ref {

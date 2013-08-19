@@ -134,6 +134,10 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              link_move_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("link_exists", H5VL_iod_server_link_exists, 
                              link_op_in_t, htri_t);
+    MERCURY_HANDLER_REGISTER("link_get_info", H5VL_iod_server_link_get_info, 
+                             link_op_in_t, linfo_t);
+    MERCURY_HANDLER_REGISTER("link_get_val", H5VL_iod_server_link_get_val, 
+                             link_get_val_in_t, link_get_val_out_t);
     MERCURY_HANDLER_REGISTER("link_iterate", H5VL_iod_server_link_iterate, 
                              link_op_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("link_remove", H5VL_iod_server_link_remove, 
@@ -151,6 +155,8 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
                              object_set_comment_in_t, ret_t);
     MERCURY_HANDLER_REGISTER("get_comment", H5VL_iod_server_object_get_comment, 
                              object_get_comment_in_t, object_get_comment_out_t);
+    MERCURY_HANDLER_REGISTER("object_get_info", H5VL_iod_server_object_get_info,
+                             object_op_in_t, oinfo_t);
 
     MERCURY_HANDLER_REGISTER("cancel_op", H5VL_iod_server_cancel_op, uint64_t, uint8_t);
 
@@ -1933,6 +1939,118 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_link_get_info
+ *
+ * Purpose:	Function shipper registered call for Link get_info.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_link_get_info(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    link_op_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (link_op_in_t *)
+                H5MM_malloc(sizeof(link_op_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_link_get_info_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_link_get_info_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_link_get_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_link_get_val
+ *
+ * Purpose:	Function shipper registered call for Link get_val.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_link_get_val(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    link_get_val_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (link_get_val_in_t *)
+                H5MM_malloc(sizeof(link_get_val_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_link_get_val_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_link_get_val_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_link_get_val() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_link_remove
  *
  * Purpose:	Function shipper registered call for Link Removal.
@@ -2144,7 +2262,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_object_exists
  *
- * Purpose:	Function shipper registered call for Link Existance.
+ * Purpose:	Function shipper registered call for Object Existance.
  *              Inserts the real worker routine into the Async Engine.
  *
  * Return:	Success:	HG_SUCCESS 
@@ -2307,6 +2425,62 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_server_object_get_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_get_info
+ *
+ * Purpose:	Function shipper registered call for Object get_info.
+ *              Inserts the real worker routine into the Async Engine.
+ *
+ * Return:	Success:	HG_SUCCESS 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5VL_iod_server_object_get_info(hg_handle_t handle)
+{
+    op_data_t *op_data = NULL;
+    object_op_in_t *input = NULL;
+    int ret_value = HG_SUCCESS;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if(NULL == (op_data = (op_data_t *)H5MM_malloc(sizeof(op_data_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, HG_FAIL, "can't allocate axe op_data struct");
+
+    if(NULL == (input = (object_op_in_t *)
+                H5MM_malloc(sizeof(object_op_in_t))))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, HG_FAIL, "can't allocate input struct for decoding");
+
+    if(HG_FAIL == HG_Handler_get_input(handle, input))
+	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, HG_FAIL, "can't get input parameters");
+
+    if(NULL == engine)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    op_data->hg_handle = handle;
+    op_data->input = (void *)input;
+
+    if(input->parent_axe_id){
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 
+                                          1, &input->parent_axe_id, 0, NULL, 
+                                          H5VL_iod_server_object_get_info_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+    else {
+        if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_id, 0, NULL, 0, NULL, 
+                                          H5VL_iod_server_object_get_info_cb, op_data, NULL))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_server_object_get_info() */
 
 
 /*-------------------------------------------------------------------------

@@ -60,6 +60,8 @@ typedef enum H5RQ_type_t {
     HG_LINK_MOVE,
     HG_LINK_ITERATE,
     HG_LINK_EXISTS,
+    HG_LINK_GET_INFO,
+    HG_LINK_GET_VAL,
     HG_LINK_REMOVE,
     HG_MAP_CREATE,
     HG_MAP_OPEN,
@@ -75,7 +77,8 @@ typedef enum H5RQ_type_t {
     HG_OBJECT_VISIT,
     HG_OBJECT_EXISTS,
     HG_OBJECT_SET_COMMENT,
-    HG_OBJECT_GET_COMMENT
+    HG_OBJECT_GET_COMMENT,
+    HG_OBJECT_GET_INFO
 } H5RQ_type_t;
 
 /* the client IOD VOL request struct */
@@ -128,6 +131,7 @@ typedef struct H5VL_iod_remote_map_t {
     iod_obj_id_t iod_id;
     hid_t keytype_id;
     hid_t valtype_id;
+    hid_t mcpl_id;
 } H5VL_iod_remote_map_t;
 
 /* struct that contains the information about the IOD dset */
@@ -201,6 +205,7 @@ typedef struct H5VL_iod_group_t {
 typedef struct H5VL_iod_map_t {
     H5VL_iod_object_t common; /* must be first */
     H5VL_iod_remote_map_t remote_map;
+    hid_t mapl_id;
 } H5VL_iod_map_t;
 
 /* the client side dataset struct */

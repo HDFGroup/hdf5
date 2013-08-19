@@ -34,9 +34,27 @@ extern "C" {
 
 #ifdef H5_HAVE_EFF
 
+typedef uint64_t haddr_ff_t;
+
 /*******************/
 /* Public Typedefs */
 /*******************/
+
+typedef struct H5L_ff_info_t{
+    H5L_type_t     type;
+    H5T_cset_t     cset;
+    union {
+        haddr_ff_t  address;
+        size_t      val_size;
+    } u;
+} H5L_ff_info_t;
+
+typedef struct H5O_ff_info_t {
+    haddr_ff_t          addr;       /* Object address in file               */
+    H5O_type_t          type;       /* Basic object type                    */
+    unsigned            rc;         /* Reference count of object            */
+    hsize_t             num_attrs;  /* # of attributes attached to object   */
+} H5O_ff_info_t;
 
 /********************/
 /* Public Variables */
@@ -122,7 +140,13 @@ H5_DLL herr_t H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id,
                            uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
                            uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Lget_info_ff(hid_t link_loc_id, const char *link_name, H5L_ff_info_t *link_buff,
+                             hid_t lapl_id, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Lget_val_ff(hid_t link_loc_id, const char *link_name, void *linkval_buff, 
+                            size_t size, hid_t lapl_id, uint64_t trans, hid_t eq_id);
 
+H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, H5O_type_t type, 
+                                uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
                          hid_t lapl_id, uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, 
@@ -137,26 +161,44 @@ H5_DLL herr_t H5Oget_comment_by_name_ff(hid_t loc_id, const char *name, char *co
 H5_DLL herr_t H5Ocopy_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
                          const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id, 
                          uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oget_info_ff(hid_t object_id, H5O_ff_info_t *object_info, 
+                             uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5Oget_info_by_name_ff(hid_t loc_id, const char *object_name, 
+                                     H5O_ff_info_t *object_info, hid_t lapl_id, 
+                                     uint64_t trans, hid_t eq_id);
 H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t eq_id);
 
 /* New Routines for Dynamic Data Structures Use Case (ACG) */
-herr_t H5DOappend(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
-                  hid_t memtype, const void *buffer);
-herr_t H5DOappend_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
-                     hid_t memtype, const void *buffer, uint64_t trans, 
-                     hid_t eq_id);
-herr_t H5DOsequence(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
-                    size_t sequence, hid_t memtype, void *buffer);
-herr_t H5DOsequence_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
-                       size_t sequence, hid_t memtype, void *buffer, 
-                       uint64_t trans, hid_t eq_id);
-herr_t H5DOset(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],
-               hid_t memtype, const void *buffer);
-herr_t H5DOset_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
-                  const void *buffer, uint64_t trans, hid_t eq_id);
-herr_t H5DOget(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, void *buffer);
-herr_t H5DOget_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
-                  void *buffer, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5DOappend(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
+                         hid_t memtype, const void *buffer);
+H5_DLL herr_t H5DOappend_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
+                            hid_t memtype, const void *buffer, uint64_t trans, 
+                            hid_t eq_id);
+H5_DLL herr_t H5DOsequence(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
+                           size_t sequence, hid_t memtype, void *buffer);
+H5_DLL herr_t H5DOsequence_ff(hid_t dataset_id, hid_t dxpl_id, unsigned axis, hsize_t start, 
+                              size_t sequence, hid_t memtype, void *buffer, 
+                              uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5DOset(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],
+                      hid_t memtype, const void *buffer);
+H5_DLL herr_t H5DOset_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
+                         const void *buffer, uint64_t trans, hid_t eq_id);
+H5_DLL herr_t H5DOget(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, void *buffer);
+H5_DLL herr_t H5DOget_ff(hid_t dataset_id, hid_t dxpl_id, const hsize_t coord[],hid_t memtype, 
+                          void *buffer, uint64_t trans, hid_t eq_id);
+
+#if 0
+H5_DLL hid_t H5TRcreate(hid_t file_id, uint64_t trans_num);
+H5_DLL herr_t H5TRstart(hid_t trans_id, hid_t tripl_id, hid_t eq_id);
+H5_DLL herr_t H5TRend(hid_t trans_id, hid_t eq_id);
+H5_DLL herr_t H5TRclose(hid_t trans_id);
+H5_DLL herr_t H5TRabort(hid_t trans_id, hid_t eq_id);
+
+H5_DLL hid_t H5RVcreate(hid_t file_id, uint64_t rv_num);
+H5_DLL hid_t H5RVacquire(hid_t file_id, /*IN/OUT*/ uint64_t *rv_num, hid_t rvipl_id, hid_t eq_id);
+    H5_DLL herr_t H5RVrelease(hid_t rv_id, hid_t eq_id);
+H5_DLL herr_t H5RVclose(hid_t rv_id);
+#endif
 
 #endif /* H5_HAVE_EFF */
 

@@ -49,7 +49,8 @@ typedef enum H5VL_iod_metadata_t {
     H5VL_IOD_LINK_COUNT,        /*type ID for link count                    */
     H5VL_IOD_OBJECT_TYPE,       /*type ID for object type                   */
     H5VL_IOD_DATATYPE,          /*type ID for datatypes                     */
-    H5VL_IOD_DATASPACE          /*type ID for dataspaces                    */
+    H5VL_IOD_DATASPACE,         /*type ID for dataspaces                    */
+    H5VL_IOD_LINK               /*type ID for links                         */
 } H5VL_iod_metadata_t;
 
 /* the AXE op data strucutre stored with every operation */
@@ -68,8 +69,12 @@ typedef struct scratch_pad_t {
 
 /* the link value stored in KV stores */
 typedef struct H5VL_iod_link_t {
-    iod_obj_id_t iod_id;     /* The ID of the object the link points to */
     H5L_type_t link_type;    /* The type of the link (Hard & Soft only suppoted for now) */
+    union {
+        iod_obj_id_t iod_id;
+        char *symbolic_name;
+    } u;
+    iod_obj_id_t iod_id;     /* The ID of the object the link points to */
 } H5VL_iod_link_t;
 
 H5_DLL int H5VL_iod_server_eff_init(hg_handle_t handle);
@@ -111,6 +116,8 @@ H5_DLL int H5VL_iod_server_cancel_op(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_move(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_get_info(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_get_val(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
@@ -119,6 +126,7 @@ H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_get_info(hg_handle_t handle);
 
 H5_DLL void H5VL_iod_server_file_create_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 
@@ -264,6 +272,14 @@ H5_DLL void H5VL_iod_server_link_exists_cb(AXE_engine_t axe_engine,
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
+H5_DLL void H5VL_iod_server_link_get_info_cb(AXE_engine_t axe_engine, 
+                                             size_t num_n_parents, AXE_task_t n_parents[], 
+                                             size_t num_s_parents, AXE_task_t s_parents[], 
+                                             void *op_data);
+H5_DLL void H5VL_iod_server_link_get_val_cb(AXE_engine_t axe_engine, 
+                                            size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
+                                            void *op_data);
 H5_DLL void H5VL_iod_server_link_remove_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
@@ -285,10 +301,14 @@ H5_DLL void H5VL_iod_server_object_set_comment_cb(AXE_engine_t axe_engine,
                                                   size_t num_n_parents, AXE_task_t n_parents[], 
                                                   size_t num_s_parents, AXE_task_t s_parents[], 
                                                   void *op_data);
-H5_DLL void H5VL_iod_server_object_get_comment_cb(AXE_engine_t UNUSED axe_engine, 
+H5_DLL void H5VL_iod_server_object_get_comment_cb(AXE_engine_t axe_engine, 
                                                   size_t num_n_parents, AXE_task_t n_parents[], 
                                                   size_t num_s_parents, AXE_task_t s_parents[], 
-                                                  void *_op_data);
+                                                  void *op_data);
+H5_DLL void H5VL_iod_server_object_get_info_cb(AXE_engine_t axe_engine, 
+                                               size_t num_n_parents, AXE_task_t n_parents[], 
+                                               size_t num_s_parents, AXE_task_t s_parents[], 
+                                               void *op_data);
 
 /* Helper routines used several times in different places */
 H5_DLL herr_t H5VL_iod_server_traverse(iod_handle_t coh, iod_obj_id_t loc_id, iod_handle_t loc_handle, 
@@ -310,8 +330,9 @@ H5_DLL herr_t H5VL_iod_insert_datatype(iod_handle_t oh, iod_trans_id_t tid, hid_
 H5_DLL herr_t H5VL_iod_insert_dataspace(iod_handle_t oh, iod_trans_id_t tid, hid_t space_id,
                                         iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
 H5_DLL herr_t H5VL_iod_insert_new_link(iod_handle_t oh, iod_trans_id_t tid, const char *link_name,
-                                       H5L_type_t link_type, iod_obj_id_t obj_id, 
-                                       iod_hint_list_t *hints, iod_checksum_t *cs, iod_event_t *event);
+                                       H5L_type_t link_type, void *link_val, 
+                                       iod_hint_list_t *hints, iod_checksum_t *cs, 
+                                       iod_event_t *event);
 H5_DLL herr_t H5VL_iod_get_metadata(iod_handle_t oh, iod_trans_id_t tid, H5VL_iod_metadata_t md_type,
                                     const char *key, iod_checksum_t *cs, iod_event_t *event, void *ret);
 #endif /* H5_HAVE_EFF */

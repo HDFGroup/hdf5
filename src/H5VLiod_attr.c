@@ -150,7 +150,7 @@ H5VL_iod_server_attr_create_cb(AXE_engine_t UNUSED axe_engine,
             
         /* insert new attribute in scratch pad of current object */
         if(H5VL_iod_insert_new_link(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, 
-                                    H5L_TYPE_HARD, attr_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* close the Attribute KV object */
@@ -226,7 +226,6 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path; /* current  path to start traversal */
     const char *attr_name = input->attr_name; /* attribute's name to open */
     scratch_pad_t sp;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
@@ -256,11 +255,12 @@ H5VL_iod_server_attr_open_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, &iod_link, 
-                        &kv_size , NULL, NULL) < 0)
+    if(H5VL_iod_get_metadata(attr_kv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             attr_name, NULL, NULL, &iod_link) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
-    attr_id = iod_link.iod_id;
+    HDassert(iod_link.link_type == H5L_TYPE_HARD);
+    attr_id = iod_link.u.iod_id;
 
     /* close parent group if it is not the location we started the
        traversal into */
@@ -669,12 +669,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
     iod_handle_t obj_oh; /* current object handle accessed */
     iod_handle_t attr_kv_oh; /* KV handle holding attributes for object */
-    iod_obj_id_t obj_id, attr_id;
+    iod_obj_id_t obj_id;
     const char *loc_name = input->path; /* path to start hierarchy traversal */
     const char *attr_name = input->attr_name; /* attribute's name */
     scratch_pad_t sp;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
-    H5VL_iod_link_t iod_link;
+    iod_size_t kv_size = 0;
     htri_t ret = -1;
     herr_t ret_value = SUCCEED;
 
@@ -712,12 +711,11 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, &iod_link, 
+    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, NULL, 
                         &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     }
     else {
-        attr_id = iod_link.iod_id;
         ret = TRUE;
     }
 
@@ -776,7 +774,6 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
     const char *new_name = input->new_attr_name;
     iod_kv_params_t kvs; /* KV lists for objects - used to unlink attribute object */
     iod_kv_t kv; /* KV entry */
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
@@ -813,11 +810,12 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, old_name, &iod_link, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Attribute does not exist");
+    if(H5VL_iod_get_metadata(attr_kv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             old_name, NULL, NULL, &iod_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
-    attr_id = iod_link.iod_id;
+    HDassert(iod_link.link_type == H5L_TYPE_HARD);
+    attr_id = iod_link.u.iod_id;
 
     /* remove attribute with old name */
     kv.key = old_name;
@@ -827,7 +825,7 @@ H5VL_iod_server_attr_rename_cb(AXE_engine_t UNUSED axe_engine,
 
     /* insert attribute with new name */
     if(H5VL_iod_insert_new_link(attr_kv_oh, IOD_TID_UNKNOWN, new_name, 
-                                H5L_TYPE_HARD, attr_id, NULL, NULL, NULL) < 0)
+                                H5L_TYPE_HARD, &attr_id, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
     /* close the Attribute KV object */
@@ -884,7 +882,6 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
     const char *attr_name = input->attr_name; /* attribute's name */
     iod_kv_params_t kvs;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
     scratch_pad_t sp;
     herr_t ret_value = SUCCEED;
@@ -921,11 +918,13 @@ H5VL_iod_server_attr_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't open scratch pad");
 
     /* get attribute ID */
-    if(iod_kv_get_value(attr_kv_oh, IOD_TID_UNKNOWN, attr_name, &iod_link, 
-                        &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "Attribute does not exist");
+    /* get attribute ID */
+    if(H5VL_iod_get_metadata(attr_kv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             attr_name, NULL, NULL, &iod_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve Attribute ID from parent KV store");
 
-    attr_id = iod_link.iod_id;
+    HDassert(iod_link.link_type == H5L_TYPE_HARD);
+    attr_id = iod_link.u.iod_id;
 
     /* remove attribute */
     kv.key = attr_name;

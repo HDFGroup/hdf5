@@ -53,8 +53,6 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t target_oh;
     iod_obj_id_t target_id; /* The ID of the target object where link is created*/
     char *src_last_comp = NULL, *dst_last_comp = NULL;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
-    H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -86,7 +84,7 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* add link in parent group to current object */
         if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
-                                    H5L_TYPE_HARD, target_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_HARD, &target_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
         /* get scratch pad */
@@ -120,71 +118,15 @@ H5VL_iod_server_link_create_cb(AXE_engine_t UNUSED axe_engine,
         }
     }
     else if(H5VL_LINK_CREATE_SOFT == create_type) {
-        iod_handle_t parent_oh; /* The handle for creation src object */
-        iod_obj_id_t parent_id; /* The ID of the creation src object */
-
-        /* Retrieve the parent of the object where the new link points
-           to. The traversal must not fail. */
-        if(H5VL_iod_server_traverse(coh, input->target_loc_id, input->target_loc_oh, 
-                                    input->target_name, FALSE, 
-                                    &dst_last_comp, &parent_id, &parent_oh) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't traverse path");
-
-        /* lookup target object in the current location. The lookup
-           might fail since this is a soft link */
-        if(iod_kv_get_value(parent_oh, IOD_TID_UNKNOWN, dst_last_comp, 
-                            &iod_link, &kv_size, NULL, NULL) < 0) {
-            /* the lookup failed so just insert the target_id as
-               undefined in the src object */
-            /* MSC - Figure out what to do when reaccessing this
-               object after it was created */
-            target_id = IOD_ID_UNDEFINED;
-        }
-        else {
-            target_id = iod_link.iod_id;
-        }
-
         /* add link in parent group to the source location */
         if(H5VL_iod_insert_new_link(src_oh, IOD_TID_UNKNOWN, src_last_comp, 
-                                    H5L_TYPE_SOFT, target_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_SOFT, input->link_value, 
+                                    NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
 
-        /* store the link value for new symbolic link */
-        fprintf(stderr, "Full Soft link path = %s\n", input->link_value);
-        {
-            iod_kv_t kv;
-            char *key = NULL;
-            scratch_pad_t sp;
-            iod_handle_t mdkv_oh;
-
-            /* get scratch pad */
-            if(iod_obj_get_scratch(src_oh, IOD_TID_UNKNOWN, &sp, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't get scratch pad for object");
-
-            /* open the metadata scratch pad */
-            if (iod_obj_open_write(coh, sp.mdkv_id, NULL, &mdkv_oh, NULL) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't open scratch pad");
-
-            key = strdup(H5VL_IOD_KEY_SOFT_LINK);
-            kv.key = key;
-            kv.value_len = strlen(input->link_value) + 1;
-            kv.value = input->link_value;
-
-            if (iod_kv_set(mdkv_oh, IOD_TID_UNKNOWN, NULL, &kv, NULL, NULL) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't set KV pair in parent");
-
-            free(key);
-
-            /* close the metadata scratch pad */
-            if(iod_obj_close(mdkv_oh, NULL, NULL))
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't close object");
-        }
-
-        /* close parent group if it is not the location we started the
-           traversal into */
-        if(input->target_loc_oh.cookie != parent_oh.cookie) {
-            iod_obj_close(parent_oh, NULL, NULL);
-        }
+#if H5VL_IOD_DEBUG
+        fprintf(stderr, "Soft link Value = %s\n", input->link_value);
+#endif
     }
     else
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Invalid Link type");
@@ -255,7 +197,6 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
     iod_obj_id_t dst_id; /* The ID of the dst object where link is created*/
     char *src_last_comp = NULL, *dst_last_comp = NULL;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
@@ -279,15 +220,24 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
                                 FALSE, &dst_last_comp, &dst_id, &dst_oh) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
-    /* lookup object ID in the current src location */
-    if(iod_kv_get_value(src_oh, IOD_TID_UNKNOWN, src_last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
+    /* get the link value */
+    if(H5VL_iod_get_metadata(src_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             src_last_comp, NULL, NULL, &iod_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* Insert object in the destination path */
-    if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, dst_last_comp, 
-                                iod_link.link_type, iod_link.iod_id, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
-
+    if(H5L_TYPE_HARD == iod_link.link_type) {
+        if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, dst_last_comp, 
+                                    iod_link.link_type, &iod_link.u.iod_id, 
+                                    NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+    }
+    else if(H5L_TYPE_SOFT == iod_link.link_type) {
+        if(H5VL_iod_insert_new_link(dst_oh, IOD_TID_UNKNOWN, dst_last_comp, 
+                                    iod_link.link_type, &iod_link.u.symbolic_name, 
+                                    NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+    }
 
     /* if the operation type is a Move, remove the KV pair from the source object */
     if(!copy_flag) {
@@ -300,8 +250,9 @@ H5VL_iod_server_link_move_cb(AXE_engine_t UNUSED axe_engine,
         if(iod_kv_unlink_keys(src_oh, IOD_TID_UNKNOWN, NULL, (iod_size_t)1, &kvs, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink KV pair");
     }
+
     /* adjust link count on target object */
-    else {
+    {
         iod_handle_t target_oh;
         iod_handle_t mdkv_oh;
         scratch_pad_t sp;
@@ -379,6 +330,11 @@ done:
     input = (link_move_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
+    if(iod_link.link_type == H5L_TYPE_SOFT) {
+        if(iod_link.u.symbolic_name)
+            free(iod_link.u.symbolic_name);
+    }
+
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_move_cb() */
 
@@ -412,11 +368,10 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
     const char *loc_name = input->path;
     char *last_comp = NULL;
     htri_t ret = -1;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
-    H5VL_iod_link_t iod_link;
+    iod_size_t kv_size = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Start link Exists\n");
@@ -432,7 +387,7 @@ H5VL_iod_server_link_exists_cb(AXE_engine_t UNUSED axe_engine,
 
     /* check the last component */
     if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, 
-                        &iod_link, &kv_size, NULL, NULL) < 0) {
+                        NULL, &kv_size, NULL, NULL) < 0) {
         ret = FALSE;
     } /* end if */
     else {
@@ -468,6 +423,206 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_link_get_info_cb
+ *
+ * Purpose:	Checks if a link get_info.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_link_get_info_cb(AXE_engine_t UNUSED axe_engine, 
+                                 size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                 size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                 void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    link_op_in_t *input = (link_op_in_t *)op_data->input;
+    H5L_ff_info_t linfo;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_handle_t cur_oh;
+    iod_obj_id_t cur_id;
+    const char *loc_name = input->path;
+    char *last_comp = NULL;
+    H5VL_iod_link_t iod_link;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    cur_oh.cookie = 0;
+
+    /* the traversal will retrieve the location where the link needs
+       to be checked */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Link Get_Info on link %s\n", last_comp);
+#endif
+    
+    /* lookup link information in the current location */
+    if(H5VL_iod_get_metadata(cur_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             last_comp, NULL, NULL, &iod_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+
+    /* setup link info */
+    linfo.type = iod_link.link_type;
+    linfo.cset = 0;
+    switch (linfo.type) {
+    case H5L_TYPE_HARD:
+        linfo.u.address = iod_link.u.iod_id;
+        break;
+    case H5L_TYPE_SOFT:
+        linfo.u.val_size = strlen(iod_link.u.symbolic_name) + 1;
+    default:
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unsuppored link type");
+    }
+
+    /* MSC - fake for now */
+    linfo.type = H5L_TYPE_SOFT;
+    linfo.u.val_size = 10;
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Done with link get_info, sending response to client\n");
+#endif
+
+    HG_Handler_start_output(op_data->hg_handle, &linfo);
+
+done:
+
+    if(ret_value < 0) {
+        fprintf(stderr, "FAILED link get_info, sending ERROR to client\n");
+        linfo.type = H5L_TYPE_ERROR;
+        HG_Handler_start_output(op_data->hg_handle, &linfo);
+    }
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(input->loc_oh.cookie != cur_oh.cookie && cur_oh.cookie != 0) {
+        iod_obj_close(loc_oh, NULL, NULL);
+    }
+
+    input = (link_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+    last_comp = (char *)H5MM_xfree(last_comp);
+
+    if(iod_link.link_type == H5L_TYPE_SOFT) {
+        if(iod_link.u.symbolic_name)
+            free(iod_link.u.symbolic_name);
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_link_get_info_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_link_get_val_cb
+ *
+ * Purpose:	Get comment for an object.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              May, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_link_get_val_cb(AXE_engine_t UNUSED axe_engine, 
+                                size_t UNUSED num_n_parents, AXE_task_t UNUSED n_parents[], 
+                                size_t UNUSED num_s_parents, AXE_task_t UNUSED s_parents[], 
+                                void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    link_get_val_in_t *input = (link_get_val_in_t *)op_data->input;
+    link_get_val_out_t output;
+    iod_handle_t coh = input->coh;
+    iod_handle_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    size_t length = input->length;
+    iod_handle_t cur_oh;
+    iod_obj_id_t cur_id;
+    const char *loc_name = input->path;
+    char *last_comp = NULL;
+    ssize_t size = 0;
+    H5VL_iod_link_t iod_link;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* the traversal will retrieve the location where the link needs
+       to be checked */
+    if(H5VL_iod_server_traverse(coh, loc_id, loc_oh, loc_name, FALSE, 
+                                &last_comp, &cur_id, &cur_oh) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
+
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Link Get_val on link %s\n", last_comp);
+#endif
+    
+    /* lookup link information in the current location */
+    if(H5VL_iod_get_metadata(cur_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             last_comp, NULL, NULL, &iod_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
+
+    /* MSC - fake for now */
+    iod_link.link_type = H5L_TYPE_SOFT;
+    iod_link.u.symbolic_name = strdup("FAKE_SOFT");
+    size = strlen(iod_link.u.symbolic_name)+1;
+
+    if(H5L_TYPE_SOFT != iod_link.link_type)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "link is not SOFT");
+
+    output.value.val_size = length;
+    output.value.val = NULL;
+
+    if(length) {
+        if(NULL == (output.value.val = (void *)malloc (length)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate value buffer");
+        memcpy(output.value.val, iod_link.u.symbolic_name, length);
+    }
+
+    output.ret = ret_value;
+    
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+done:
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Done with get link_val, sending (%s) response to client\n", output.value.val);
+#endif
+    if(ret_value < 0) {
+        output.ret = ret_value;
+        output.value.val = NULL;
+        output.value.val_size = 0;
+        HG_Handler_start_output(op_data->hg_handle, &output);
+    }
+
+    input = (link_get_val_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+    last_comp = (char *)H5MM_xfree(last_comp);
+
+    if(output.value.val)
+        free(output.value.val);
+
+    if(iod_link.link_type == H5L_TYPE_SOFT) {
+        if(iod_link.u.symbolic_name)
+            free(iod_link.u.symbolic_name);
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL_iod_server_link_get_val_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_link_remove_cb
  *
  * Purpose:	Removes a link from a container.
@@ -492,12 +647,11 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t loc_oh = input->loc_oh;
     iod_obj_id_t loc_id = input->loc_id;
     iod_handle_t cur_oh;
-    iod_obj_id_t cur_id, obj_id;
+    iod_obj_id_t cur_id;
     const char *loc_name = input->path;
     char *last_comp = NULL;
     iod_kv_params_t kvs;
     iod_kv_t kv;
-    iod_size_t kv_size = sizeof(H5VL_iod_link_t);
     H5VL_iod_link_t iod_link;
     herr_t ret_value = SUCCEED;
 
@@ -515,10 +669,9 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't traverse path");
 
     /* lookup object ID in the current location */
-    if(iod_kv_get_value(cur_oh, IOD_TID_UNKNOWN, last_comp, &iod_link, &kv_size, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Object does not exist in source path");
-
-    obj_id = iod_link.iod_id;
+    if(H5VL_iod_get_metadata(cur_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK, 
+                             last_comp, NULL, NULL, &iod_link) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve link value");
 
     /* unlink object from conainer */
     kv.key = last_comp;
@@ -530,11 +683,13 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
 #if 0
     /* check the metadata information for the object and remove
        it from the container if this is the last link to it */
-    if(iod_link.link_type == H5VL_LINK_CREATE_HARD) {
+    if(iod_link.link_type == H5L_TYPE_HARD) {
         iod_handle_t obj_oh;
         iod_handle_t mdkv_oh;
         scratch_pad_t sp;
         uint64_t link_count = 0;
+
+        obj_id = iod_link.u.iod_id;
 
         /* open the current group */
         if (iod_obj_open_write(coh, obj_id, NULL, &obj_oh, NULL) < 0)
@@ -573,6 +728,10 @@ H5VL_iod_server_link_remove_cb(AXE_engine_t UNUSED axe_engine,
         if(0 == link_count) {
             if(iod_obj_unlink(coh, obj_id, IOD_TID_UNKNOWN, NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+            if(iod_obj_unlink(coh, sp.mdkv_id, IOD_TID_UNKNOWN, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
+            if(iod_obj_unlink(coh, sp.attrkv_id, IOD_TID_UNKNOWN, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "Unable to unlink object");
         }
     }
 #endif
@@ -599,6 +758,11 @@ done:
     input = (link_op_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
 
+    if(iod_link.link_type == H5L_TYPE_SOFT) {
+        if(iod_link.u.symbolic_name)
+            free(iod_link.u.symbolic_name);
+    }
+        
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5VL_iod_server_link_remove_cb() */
 

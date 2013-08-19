@@ -188,7 +188,7 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
 
         /* add link in parent group to current object */
         if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
-                                    H5L_TYPE_HARD, dtype_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_HARD, &dtype_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     }
 #if H5_DO_NATIVE
@@ -267,7 +267,9 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t UNUSED axe_engine,
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    fprintf(stderr, "Start datatype Open %s\n", name);
+#if H5VL_IOD_DEBUG
+    fprintf(stderr, "Start datatype Open %s with Loc ID %llu\n", name, loc_id);
+#endif
 
     /* Traverse Path and open dtype */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &dtype_id, &dtype_oh) < 0)

@@ -20,6 +20,7 @@
 #define _H5VLiod_common_H
 
 #include "H5public.h"
+#include "H5FFpublic.h"
 #include "H5VLpublic.h"
 #include "H5VLiod.h"            /* Iod VOL plugin			*/
 
@@ -81,6 +82,8 @@ H5_DLL int hg_proc_axe_ids_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_name_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_value_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_binary_buf_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_linfo_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_oinfo_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(eff_init_in_t, ((uint32_t)(proc_num)))
 
@@ -141,13 +144,15 @@ MERCURY_GEN_PROC(group_close_in_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_
 MERCURY_GEN_PROC(map_create_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
                  ((iod_obj_id_t)(loc_id)) ((iod_obj_id_t)(map_id))
                  ((uint64_t)(parent_axe_id)) ((hg_string_t)(name)) 
-                 ((hid_t)(keytype_id)) ((hid_t)(valtype_id)) ((uint64_t)(axe_id)))
+                 ((hid_t)(keytype_id)) ((hid_t)(valtype_id)) 
+                 ((hid_t)(mapl_id)) ((hid_t)(mcpl_id)) 
+                 ((hid_t)(lcpl_id))((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(map_create_out_t, ((iod_handle_t)(iod_oh)))
 MERCURY_GEN_PROC(map_open_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh))
                  ((iod_obj_id_t)(loc_id)) ((uint64_t)(parent_axe_id)) 
-                 ((hg_string_t)(name)) ((uint64_t)(axe_id)))
+                 ((hg_string_t)(name)) ((hid_t)(mapl_id)) ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(map_open_out_t, ((iod_handle_t)(iod_oh)) ((iod_obj_id_t)(iod_id)) 
-                 ((hid_t)(keytype_id)) ((hid_t)(valtype_id)))
+                 ((hid_t)(keytype_id)) ((hid_t)(valtype_id)) ((hid_t)(mcpl_id)))
 MERCURY_GEN_PROC(map_set_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(iod_oh))
                  ((iod_obj_id_t)(iod_id)) ((uint64_t)(parent_axe_id)) 
                  ((hid_t)(key_maptype_id)) ((hid_t)(key_memtype_id)) ((binary_buf_t)(key))
@@ -225,6 +230,10 @@ MERCURY_GEN_PROC(link_move_in_t, ((hbool_t)(copy_flag)) ((iod_handle_t)(coh))
 MERCURY_GEN_PROC(link_op_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh)) 
                  ((iod_obj_id_t)(loc_id)) ((uint64_t)(parent_axe_id)) 
                  ((hg_string_t)(path)) ((uint64_t)(axe_id)))
+MERCURY_GEN_PROC(link_get_val_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh)) 
+                 ((iod_obj_id_t)(loc_id)) ((uint64_t)(parent_axe_id)) 
+                 ((hg_string_t)(path)) ((uint64_t)(length)) ((uint64_t)(axe_id)))
+MERCURY_GEN_PROC(link_get_val_out_t, ((int32_t)(ret)) ((value_t)(value)))
 
 MERCURY_GEN_PROC(object_op_in_t, ((iod_handle_t)(coh)) ((iod_handle_t)(loc_oh)) 
                  ((iod_obj_id_t)(loc_id)) ((uint64_t)(parent_axe_id)) 

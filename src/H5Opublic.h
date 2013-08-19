@@ -85,6 +85,7 @@ typedef enum H5O_type_t {
     H5O_TYPE_GROUP,	        /* Object is a group		*/
     H5O_TYPE_DATASET,		/* Object is a dataset		*/
     H5O_TYPE_NAMED_DATATYPE, 	/* Object is a named data type	*/
+    H5O_TYPE_MAP,	        /* Object is a map		*/
     H5O_TYPE_NTYPES             /* Number of different object types (must be last!) */
 } H5O_type_t;
 

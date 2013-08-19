@@ -59,6 +59,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
     iod_handle_t map_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
     char *last_comp; /* the name of the group obtained from traversal function */
+    hid_t mcpl_id;
     scratch_pad_t sp;
     iod_ret_t ret;
     hbool_t collective = FALSE; /* MSC - change when we allow for collective */
@@ -116,6 +117,16 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
         if (iod_obj_open_write(coh, mdkv_id, NULL, &mdkv_oh, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
+        if(H5P_DEFAULT == input->mcpl_id)
+            mcpl_id = H5P_GROUP_CREATE_DEFAULT;
+        else
+            mcpl_id = input->mcpl_id;
+
+        /* insert plist metadata */
+        if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, mcpl_id, 
+                                 NULL, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
+
         /* insert link count metadata */
         if(H5VL_iod_insert_link_count(mdkv_oh, IOD_TID_UNKNOWN, (uint64_t)1, 
                                       NULL, NULL, NULL) < 0)
@@ -135,7 +146,7 @@ H5VL_iod_server_map_create_cb(AXE_engine_t UNUSED axe_engine,
 
         /* add link in parent group to current object */
         if(H5VL_iod_insert_new_link(cur_oh, IOD_TID_UNKNOWN, last_comp, 
-                                    H5L_TYPE_HARD, map_id, NULL, NULL, NULL) < 0)
+                                    H5L_TYPE_HARD, &map_id, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't insert KV value");
     } /* end if */
 
@@ -203,8 +214,11 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Start map open %s\n", name);
+    fprintf(stderr, "Start map open %s with Loc ID %llu\n", name, loc_id);
 #endif
+
+    output.keytype_id = -1;
+    output.valtype_id = -1;
 
     /* Traverse Path and open map */
     if(H5VL_iod_server_open_path(coh, loc_id, loc_handle, name, &map_id, &map_oh) < 0)
@@ -220,6 +234,10 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
 
     /* MSC - retrieve metadata - need IOD*/
 #if 0
+    if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_PLIST, 
+                             H5VL_IOD_KEY_OBJ_CPL, NULL, NULL, &output.mcpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "failed to retrieve gcpl");
+
     if(H5VL_iod_get_metadata(mdkv_oh, IOD_TID_UNKNOWN, H5VL_IOD_LINK_COUNT, 
                              H5VL_IOD_KEY_OBJ_LINK_COUNT,
                              NULL, NULL, &output.link_count) < 0)
@@ -236,6 +254,7 @@ H5VL_iod_server_map_open_cb(AXE_engine_t UNUSED axe_engine,
     /* MSC - fake datatypes for now*/
     output.keytype_id = H5Tcopy(H5T_NATIVE_INT);
     output.valtype_id = H5Tcopy(H5T_NATIVE_INT);
+    output.mcpl_id = H5P_GROUP_CREATE_DEFAULT;
 
 #if H5VL_IOD_DEBUG
     fprintf(stderr, "Done with map open, sending response to client\n");
@@ -250,8 +269,10 @@ done:
         HG_Handler_start_output(op_data->hg_handle, &output);
     }
 
-    H5Tclose(output.keytype_id);
-    H5Tclose(output.valtype_id);
+    if(output.keytype_id)
+        H5Tclose(output.keytype_id);
+    if(output.valtype_id)
+        H5Tclose(output.valtype_id);
 
     input = (map_open_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);

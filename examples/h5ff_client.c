@@ -369,6 +369,14 @@ int main(int argc, char **argv) {
     assert(H5Gclose_ff(gid2, event_q) == 0);
     assert(H5Gclose_ff(gid3, event_q) == 0);
 
+    /* If the read request did no complete earlier when we tested it, Wait on it now.
+       We have to do this since we popped it earlier from the event queue */
+    if(H5AO_PENDING == status1) {
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+    }
+    else
+        assert(H5AO_SUCCEEDED == status1);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Test Links\n");
@@ -393,6 +401,45 @@ int main(int argc, char **argv) {
 
     ret = H5Lcreate_soft_ff("/G1/G2/G3/D4", gid1, "G5/newD2", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(ret == 0);
+
+    {
+        H5L_ff_info_t linfo;
+        char *link_buf;
+
+        ret = H5Lget_info_ff(gid1, "G5/newD2", &linfo, H5P_DEFAULT, 0, event_q);
+        assert(ret == 0);
+
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+
+        switch(linfo.type) {
+        case H5L_TYPE_SOFT:
+            fprintf(stderr, 
+                    "LINK GET INFO return a SOFT LINK with value size: %zu\n", 
+                    linfo.u.val_size);
+            break;
+        default:
+            fprintf(stderr, "Unexpected result from lget_info\n");
+            exit(1);
+        }
+
+        link_buf = malloc(linfo.u.val_size);
+
+        ret = H5Lget_val_ff(gid1, "G5/newD2", link_buf, linfo.u.val_size, H5P_DEFAULT, 0, event_q);
+        assert(ret == 0);
+
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+
+        fprintf(stderr, "Link value = %s\n", link_buf);
+
+        free(link_buf);
+    }
+
     ret = H5Lmove_ff(file_id, "/G1/G2/G3/D3", file_id, "/G4/G5/D3moved", H5P_DEFAULT, H5P_DEFAULT, 0, event_q);
     assert(ret == 0);
     ret = H5Ldelete_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, 0, event_q);
@@ -410,15 +457,6 @@ int main(int argc, char **argv) {
        at the server. This is asynchronous. */
     ret = H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q);
     assert(ret == 0);
-
-    /* If the read request did no complete earlier when we tested it, Wait on it now.
-       We have to do this since we popped it earlier from the event queue */
-    if(H5AO_PENDING == status1) {
-        assert(H5AOwait(req1, &status1) == 0);
-        assert (status1);
-    }
-    else
-        assert(H5AO_SUCCEEDED == status1);
 
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
@@ -535,6 +573,7 @@ int main(int argc, char **argv) {
     {
         ssize_t ret_size = 0;
         char *comment = NULL;
+        H5O_ff_info_t oinfo;
 
         ret = H5Oget_comment_ff(gid1, NULL, 0, &ret_size, 0, event_q);
         assert(ret == 0);
@@ -555,6 +594,24 @@ int main(int argc, char **argv) {
         assert (status1);
         fprintf(stderr, "size of comment is %d Comment is %s\n", ret_size, comment);
         free(comment);
+
+        ret = H5Oget_info_ff(gid1, &oinfo, 0, event_q);
+        assert(ret == 0);
+        if(H5EQpop(event_q, &req1) < 0)
+            exit(1);
+        assert(H5AOwait(req1, &status1) == 0);
+        assert (status1);
+
+        switch(oinfo.type) {
+        case H5O_TYPE_GROUP:
+            fprintf(stderr, 
+                    "OBJECT GET INFO return a GROUP TYPE with IOD ID: %llu, num attrs = %llu, reference count = %d\n", 
+                    oinfo.addr, oinfo.num_attrs, oinfo.rc);
+            break;
+        default:
+            fprintf(stderr, "Unexpected result from oget_info\n");
+            exit(1);
+        }
     }
 
     /* Open a named datatype in the file. 
@@ -630,6 +687,21 @@ int main(int argc, char **argv) {
     assert(H5Tclose(int_id) == 0);
     assert(H5Aclose(aid2) == 0);
     assert(H5Gclose(gid1) == 0);
+
+    {
+        hid_t map,dset,dtype,grp;
+
+        dset = H5Oopen_by_addr_ff(file_id, 123456789, H5O_TYPE_DATASET, 0, H5_EVENT_QUEUE_NULL);
+        dtype = H5Oopen_by_addr_ff(file_id, 123456789, H5O_TYPE_NAMED_DATATYPE, 0, H5_EVENT_QUEUE_NULL);
+        map = H5Oopen_by_addr_ff(file_id, 123456789, H5O_TYPE_MAP, 0, H5_EVENT_QUEUE_NULL);
+        grp = H5Oopen_by_addr_ff(file_id, 123456789, H5O_TYPE_GROUP, 0, H5_EVENT_QUEUE_NULL);
+
+        H5Dclose_ff(dset, event_q);
+        H5Tclose_ff(dtype, event_q);
+        H5Mclose_ff(map, event_q);
+        H5Gclose_ff(grp, event_q);
+    }
+
     assert(H5Fclose(file_id) == 0);
 
     /* wait on all requests in event queue */
