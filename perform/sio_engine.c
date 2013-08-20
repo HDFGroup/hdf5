@@ -180,7 +180,7 @@ do_sio(parameters param)
         break;
     default:
         /* unknown request */
-        fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
         GOTOERROR(FAIL);
     }
 
@@ -285,6 +285,10 @@ done:
         case HDF5:
             if (fd.h5fd != -1)
                 hrc = do_fclose(iot, &fd);
+			break;
+        default:
+            /* unknown request */
+            HDassert(0 && "Unknown IO type");
             break;
     }
 
@@ -330,6 +334,11 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
             suffix = "%05d.h5";
         else if (vfd == multi)
             suffix = NULL;
+        break;
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        HDassert(0 && "Unknown IO type");
         break;
     }
 
@@ -506,6 +515,11 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         }
 
         break;
+
+    default:
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
+        break;
     } /* end switch */
 
 
@@ -546,7 +560,12 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             HDfprintf(stderr, "HDF5 Property List Close failed\n");
             GOTOERROR(FAIL);
         }
+        break;
 
+        default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
         break;
     }
 
@@ -684,6 +703,12 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
                     h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dwrite");
 
+                break;
+				
+            default:
+                /* unknown request */
+                HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+                HDassert(0 && "Unknown IO type");
                 break;
             } /* switch (parms->io_type) */
         }
@@ -832,7 +857,12 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             fprintf(stderr, "HDF5 Property List Create failed\n");
             GOTOERROR(FAIL);
         }
+        break;
 
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
         break;
     } /* end switch */
 
@@ -849,9 +879,13 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             HDfprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
         }
-
         break;
-
+		
+        default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+        GOTOERROR(FAIL);
+        break;
     } /* end switch */
 
     /* Start "raw data" read timer */
@@ -974,6 +1008,12 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
                 }
 #endif
                 break;
+				
+            default:
+                /* unknown request */
+                HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
+                HDassert(0 && "Unknown IO type");
+                break;
             } /* switch (parms->io_type) */
         }
     }
@@ -1085,6 +1125,12 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             fprintf(stderr, "HDF5 File Create failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
+        break;
+		
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
+        GOTOERROR(FAIL);
         break;
     }
 
@@ -1208,6 +1254,12 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
 
         fd->h5fd = -1;
         break;
+		
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        GOTOERROR(FAIL);
+        break;
     }
 
 done:
@@ -1234,7 +1286,7 @@ do_cleanupfile(iotype iot, char *filename)
 
     if (clean_file_g){
 
-     switch (iot) {
+    switch (iot) {
     case POSIXIO:
           HDremove(filename);
         break;
@@ -1273,9 +1325,15 @@ do_cleanupfile(iotype iot, char *filename)
                 HDremove(filename);
             }
             H5Pclose(fapl);
-            break;
-      }
-}
+        break;
+			
+    default:
+        /* unknown request */
+        HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
+        HDassert(0 && "Unknown IO type");
+        break;
+    }
+    }
 }
 
 #ifdef H5_HAVE_GPFS
