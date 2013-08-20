@@ -79,9 +79,10 @@ int FFbench_read_config_file (char *fname,
   char *tmp_string = NULL;
   int cnt = 0, i;
   char *charLoc = NULL;
-  int rank;
+  int rank, size = 0;
 
   MPI_Comm_rank (comm, &rank);
+  MPI_Comm_size (comm, &size);
 
   input_args = (file_args *) malloc (sizeof(file_args));
   if (NULL == input_args){
@@ -125,7 +126,7 @@ int FFbench_read_config_file (char *fname,
 	}
 	break;
       case 2:
-	input_args->n_coords = atol(tmp_string);
+	input_args->n_coords = atol(tmp_string) ;
 	if (input_args->n_coords == 0){
 	  DEBUG_LINE ("Coordinates cannot be 0\n")
 	  ret_value = FFB_FAIL;
@@ -133,7 +134,7 @@ int FFbench_read_config_file (char *fname,
 	}
 	break;
       case 3:
-	input_args->coords[0] = atol(tmp_string);
+	input_args->coords[0] = atol(tmp_string) * size;
 	for ( i = 1; i < input_args->n_coords; i++){
 	  tmp_string[0] = 0;
 	  fgets (tmp_string, NAME_SIZE, fp);
@@ -412,14 +413,14 @@ int FFbench_create_dataspaces(hid_t **f_dataspaces,
 					NULL);
     }
 
-    count[0][0] = dimsf[1]/(size * input_args->num_ops); 
+    count[0][0] = dimsf[0]/(size * input_args->num_ops); 
     for (j = 1; j < input_args->n_coords; j++){
       count[0][j] = dimsf[j];
     }
     offset[0][0] = rank * count[0][0];
     offset[0][1] = 0;
     for ( i = 1; i < num_dataspaces; i++){
-      count[i][0] = dimsf[1]/(size * input_args->num_ops);
+      count[i][0] = dimsf[0]/(size * input_args->num_ops);
       for (j = 1; j < input_args->n_coords; j++){
 	count[i][j] = dimsf[j];
 	offset[i][j] = 0;

@@ -17,12 +17,12 @@
 #define _FFBENCH_COMMON_H
 
 #include <stdlib.h>
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
+#include <time.h>
+#include <math.h>
 #define FFB_SUCCESS 0
 #define FFB_FAIL -1
 #define DEBUG
@@ -31,7 +31,7 @@
 #define WRITE 390
 
 
-typedef struct timeval timer;
+typedef time_t timer;
 typedef unsigned long long length_t;
 
 

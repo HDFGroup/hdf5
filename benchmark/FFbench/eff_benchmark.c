@@ -40,6 +40,9 @@ int main (int argc, char **argv){
   hsize_t **count=NULL, **offset=NULL;
   int num_dataspaces, i;
   int *data = NULL, k ,j, count_size = 1;
+  double start, end;
+  double totallength = 0;
+  double totaltime = 0, max_time;
 
   MPI_Init_thread(&argc,&argv, MPI_THREAD_MULTIPLE, &provided);
   if(MPI_THREAD_MULTIPLE != provided) {
@@ -92,6 +95,8 @@ int main (int argc, char **argv){
   event_q = H5EQcreate(fapl_id);
   assert(event_q);
 
+  
+  start = MPI_Wtime();
 
   for (i = 0; i < num_dataspaces; i++){
 
@@ -104,6 +109,8 @@ int main (int argc, char **argv){
     data = (int *) malloc
       (sizeof(int)*count_size);
     
+    totallength += count_size * sizeof(int);
+
     for (k=0; k < count_size; k++) {
       data[k] = rank + 1001 + i;
     }
@@ -118,16 +125,33 @@ int main (int argc, char **argv){
 		      event_q);
     assert(ret == 0);
 
-
-
-    
-    
+   
     H5EQwait(event_q, &num_requests, &status);
     free(status);
     
     if (data)
       free (data);
   }
+  end = MPI_Wtime();
+  totaltime = difftime (end, start);
+  totallength *= size;
+
+  
+  MPI_Reduce(&totaltime, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+  
+  if (!rank){
+    
+    totallength /= 1024*1024;
+     
+    
+    
+    fprintf (stderr,
+	     "Approx. %lf MB data took %lf(s) with write bandwidth of %lf MB/s\n",
+	     totallength,
+	     max_time,
+	     totallength/max_time);
+  }
+  
 
   
   if (f_dataspaces)

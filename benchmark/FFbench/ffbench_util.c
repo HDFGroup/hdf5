@@ -34,8 +34,7 @@ int FFbench_timer_start(timer *rettimer){
   int ret_value = FFB_SUCCESS;
   timer starttime;
   
-  if (FFB_SUCCESS != gettimeofday(&starttime, NULL))
-    ret_value = FFB_FAIL;
+  time(&starttime);
 
   *rettimer = starttime;
   return ret_value;
@@ -60,9 +59,7 @@ int FFbench_timer_end(timer *rettimer){
   int ret_value = FFB_SUCCESS;
   timer endtime;
 
-  if (FFB_SUCCESS !=  gettimeofday(&endtime, NULL)){
-    ret_value =  FFB_FAIL;
-  }
+  endtime = time(NULL);
 
   *rettimer = endtime;
   return ret_value;
@@ -85,10 +82,9 @@ int FFbench_timer_end(timer *rettimer){
 double FFbench_timer_gettime(timer start, 
 			     timer end){
   
-  double elapsedTime;
+  double elapsedTime = 0;
 
-  elapsedTime = (end.tv_sec - start.tv_sec) * 1000.0;
-  elapsedTime += (end.tv_usec - start.tv_usec) / 1000.0;
+  elapsedTime = difftime(end, start);
 
   return elapsedTime;
   
@@ -113,9 +109,13 @@ double FFbench_getBandwidth(length_t totallength,
 			    double totaltime){
   
   /*Convert to MB*/
+
+  double bandwidth;
   totallength /= 1024;
-  totallength /= 1024; 
   
-  return (double) (totallength/totaltime);
+  bandwidth = totallength/totaltime;
+  printf ("b: %lf\n", bandwidth);
+
+  return bandwidth;
   
 }

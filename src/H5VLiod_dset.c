@@ -663,7 +663,7 @@ done:
     fflush(stderr);
 #endif     
 
-#if H5_DO_NATIVE
+#if 1
     usleep(2000);
 #endif
     
