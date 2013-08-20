@@ -147,9 +147,8 @@ H5VL_iod_server_dtype_commit_cb(AXE_engine_t UNUSED axe_engine,
         free(file_desc);
 
         if(H5P_DEFAULT == input->tcpl_id)
-            tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
-        else
-            tcpl_id = input->tcpl_id;
+            input->tcpl_id = H5Pcopy(H5P_DATATYPE_CREATE_DEFAULT);
+        tcpl_id = input->tcpl_id;
 
         /* insert plist metadata */
         if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, tcpl_id, 

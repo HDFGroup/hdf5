@@ -121,9 +121,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t UNUSED axe_engine,
 
 
         if(H5P_DEFAULT == input->fcpl_id)
-            fcpl_id = H5P_FILE_CREATE_DEFAULT;
-        else
-            fcpl_id = input->fcpl_id;
+            input->fcpl_id = H5Pcopy(H5P_FILE_CREATE_DEFAULT);
+        fcpl_id = input->fcpl_id;
 
         /* insert plist metadata */
         if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, fcpl_id, 

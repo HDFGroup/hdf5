@@ -178,9 +178,8 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t UNUSED axe_engine,
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create scratch pad");
 
         if(H5P_DEFAULT == input->dcpl_id)
-            dcpl_id = H5P_DATASET_CREATE_DEFAULT;
-        else
-            dcpl_id = input->dcpl_id;
+            input->dcpl_id = H5Pcopy(H5P_DATASET_CREATE_DEFAULT);
+        dcpl_id = input->dcpl_id;
 
         /* insert plist metadata */
         if(H5VL_iod_insert_plist(mdkv_oh, IOD_TID_UNKNOWN, dcpl_id, 
