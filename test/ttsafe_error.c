@@ -199,7 +199,7 @@ void *tts_error_thread(void UNUSED *arg)
 }
 
 static
-herr_t error_callback(hid_t estack_id, void *client_data)
+herr_t error_callback(hid_t UNUSED estack_id, void *client_data)
 {
     H5TS_mutex_lock_simple(&error_mutex);
     error_count++;

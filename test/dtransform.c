@@ -35,18 +35,18 @@ hid_t dset_id_float_chunk = -1;
 
 
 const float windchillFfloat[ROWS][COLS] =
-    {   {36.0, 31.0, 25.0, 19.0, 13.0, 7.0, 1.0, -5.0, -11.0, -16.0, -22.0, -28.0, -34.0, -40.0, -46.0, -52.0, -57.0, -63.0 },
-	{34.0, 27.0, 21.0, 15.0, 9.0, 3.0, -4.0, -10.0, -16.0, -22.0, -28.0, -35.0, -41.0, -47.0, -53.0, -59.0, -66.0, -72.0 } ,
-	{32.0, 25.0, 19.0, 13.0, 6.0, 0.0, -7.0, -13.0, -19.0, -26.0, -32.0, -39.0, -45.0, -51.0, -58.0, -64.0, -71.0, -77.0 },
-	{30.0, 24.0, 17.0, 11.0, 4.0, -2.0, -9.0, -15.0, -22.0, -29.0, -35.0, -42.0, -48.0, -55.0, -61.0, -68.0, -74.0, -81.0 },
-	{29.0, 23.0, 16.0, 9.0, 3.0, -4.0, -11.0, -17.0, -24.0, -31.0, -37.0, -44.0, -51.0, -58.0, -64.0, -71.0, -78.0, -84.0 },
-	{28.0, 22.0, 15.0, 8.0, 1.0, -5.0, -12.0, -19.0, -26.0, -33.0, -39.0, -46.0, -53.0, -60.0, -67.0, -73.0, -80.0, -87.0 },
-	{28.0, 21.0, 14.0, 7.0, 0.0, -7.0, -14.0, -21.0, -27.0, -34.0, -41.0, -48.0, -55.0, -62.0, -69.0, -76.0, -82.0, -89.0 },
-	{27.0, 20.0, 13.0, 6.0, -1.0, -8.0, -15.0, -22.0, -29.0, -36.0, -43.0, -50.0, -57.0, -64.0, -71.0, -78.0, -84.0, -91.0 },
-	{26.0, 19.0, 12.0, 5.0, -2.0, -9.0, -16.0, -23.0, -30.0, -37.0, -44.0, -51.0, -58.0, -65.0, -72.0, -79.0, -86.0, -93.0 },
-	{26.0, 19.0, 12.0, 4.0, -3.0, -10.0, -17.0, -24.0, -31.0, -38.0, -45.0, -52.0, -60.0, -67.0, -74.0, -81.0, -88.0, -95.0},
-	{25.0, 18.0, 11.0, 4.0, -3.0, -11.0, -18.0, -25.0, -32.0, -39.0, -46.0, -54.0, -61.0, -68.0, -75.0, -82.0, -89.0, -97.0},
-	{25.0, 17.0, 10.0, 3.0, -4.0, -11.0, -19.0, -26.0, -33.0, -40.0, -48.0, -55.0, -62.0, -69.0, -76.0, -84.0, -91.0, -98.0}
+    {   {36.0f, 31.0f, 25.0f, 19.0f, 13.0f,   7.0f,   1.0f,  -5.0f, -11.0f, -16.0f, -22.0f, -28.0f, -34.0f, -40.0f, -46.0f, -52.0f, -57.0f, -63.0f},
+	{34.0f, 27.0f, 21.0f, 15.0f,  9.0f,   3.0f,  -4.0f, -10.0f, -16.0f, -22.0f, -28.0f, -35.0f, -41.0f, -47.0f, -53.0f, -59.0f, -66.0f, -72.0f} ,
+	{32.0f, 25.0f, 19.0f, 13.0f,  6.0f,   0.0f,  -7.0f, -13.0f, -19.0f, -26.0f, -32.0f, -39.0f, -45.0f, -51.0f, -58.0f, -64.0f, -71.0f, -77.0f},
+	{30.0f, 24.0f, 17.0f, 11.0f,  4.0f,  -2.0f,  -9.0f, -15.0f, -22.0f, -29.0f, -35.0f, -42.0f, -48.0f, -55.0f, -61.0f, -68.0f, -74.0f, -81.0f},
+	{29.0f, 23.0f, 16.0f,  9.0f,  3.0f,  -4.0f, -11.0f, -17.0f, -24.0f, -31.0f, -37.0f, -44.0f, -51.0f, -58.0f, -64.0f, -71.0f, -78.0f, -84.0f},
+	{28.0f, 22.0f, 15.0f,  8.0f,  1.0f,  -5.0f, -12.0f, -19.0f, -26.0f, -33.0f, -39.0f, -46.0f, -53.0f, -60.0f, -67.0f, -73.0f, -80.0f, -87.0f},
+	{28.0f, 21.0f, 14.0f,  7.0f,  0.0f,  -7.0f, -14.0f, -21.0f, -27.0f, -34.0f, -41.0f, -48.0f, -55.0f, -62.0f, -69.0f, -76.0f, -82.0f, -89.0f},
+	{27.0f, 20.0f, 13.0f,  6.0f, -1.0f,  -8.0f, -15.0f, -22.0f, -29.0f, -36.0f, -43.0f, -50.0f, -57.0f, -64.0f, -71.0f, -78.0f, -84.0f, -91.0f},
+	{26.0f, 19.0f, 12.0f,  5.0f, -2.0f,  -9.0f, -16.0f, -23.0f, -30.0f, -37.0f, -44.0f, -51.0f, -58.0f, -65.0f, -72.0f, -79.0f, -86.0f, -93.0f},
+	{26.0f, 19.0f, 12.0f,  4.0f, -3.0f, -10.0f, -17.0f, -24.0f, -31.0f, -38.0f, -45.0f, -52.0f, -60.0f, -67.0f, -74.0f, -81.0f, -88.0f, -95.0f},
+	{25.0f, 18.0f, 11.0f,  4.0f, -3.0f, -11.0f, -18.0f, -25.0f, -32.0f, -39.0f, -46.0f, -54.0f, -61.0f, -68.0f, -75.0f, -82.0f, -89.0f, -97.0f},
+	{25.0f, 17.0f, 10.0f,  3.0f, -4.0f, -11.0f, -19.0f, -26.0f, -33.0f, -40.0f, -48.0f, -55.0f, -62.0f, -69.0f, -76.0f, -84.0f, -91.0f, -98.0f}
     };
 
 const int transformData[ROWS][COLS] =
@@ -489,8 +489,8 @@ test_poly(const hid_t dxpl_id_polynomial)
 
     for(row = 0; row < ROWS; row++)
         for(col = 0; col < COLS; col++) {
-            windchillC = (int) ((5.0 / 9.0) * (windchillFfloat[row][col] - 32));
-            polyflres[row][col] = (float) ((2.0 + windchillC) * ((windchillC - 8.0) / 2.0));
+            windchillC = (int) ((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
+            polyflres[row][col] = (float) ((2.0f + windchillC) * ((windchillC - 8.0f) / 2.0f));
         }
 
     TESTING("data transform, polynomial transform (int->float)")
@@ -498,11 +498,11 @@ test_poly(const hid_t dxpl_id_polynomial)
             dxpl_id_polynomial, polyflread) < 0)
         TEST_ERROR
         
-    COMPARE(float, polyflread, polyflres, 2.0)
+    COMPARE(float, polyflread, polyflres, 2.0f)
 
     for(row = 0; row < ROWS; row++)
         for(col = 0; col < COLS; col++) {
-            windchillC = (int) ((5.0 / 9.0) * (windchillFfloat[row][col] - 32));
+            windchillC = (int) ((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
             polyflres[row][col] = (float) ((2 + windchillC) * ((windchillC - 8) / 2));
         }
 
@@ -684,7 +684,7 @@ test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy)
 
     for(row = 0; row < ROWS; row++)
         for(col = 0; col < COLS; col++) {
-            windchillC = (int) ((5.0 / 9.0) * (windchillFfloat[row][col] - 32));
+            windchillC = (int) ((5.0f / 9.0f) * (windchillFfloat[row][col] - 32));
             polyflres[row][col] = (float) ((2 + windchillC) * ((windchillC - 8) / 2));
         }
 
@@ -721,7 +721,7 @@ test_trivial(const hid_t dxpl_id_simple)
         TEST_ERROR
     for(row = 0; row < ROWS; row++)
         for(col = 0; col < COLS; col++) {
-            if((windchillFfloatread[row][col] - 4.8) > FLOAT_TOL) 
+            if((windchillFfloatread[row][col] - 4.8f) > FLOAT_TOL) 
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n");
         }
 
@@ -780,7 +780,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
         
     for(row = 0; row < ROWS; row++)
         for(col = 0; col < COLS; col++) {
-            if((windchillFfloatread[row][col] - 4.8) > FLOAT_TOL) 
+            if((windchillFfloatread[row][col] - 4.8f) > FLOAT_TOL) 
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n")
         }
 
