@@ -182,6 +182,8 @@ $SRC_H5DUMP_TESTFILES/tall-4s.ddl
 $SRC_H5DUMP_TESTFILES/tall-5s.ddl
 $SRC_H5DUMP_TESTFILES/tall-6.ddl
 $SRC_H5DUMP_TESTFILES/tall-6.exp
+$SRC_H5DUMP_TESTFILES/tall-7.ddl
+$SRC_H5DUMP_TESTFILES/tall-7N.ddl
 $SRC_H5DUMP_TESTFILES/tallfilters.ddl
 $SRC_H5DUMP_TESTFILES/tarray1.ddl
 $SRC_H5DUMP_TESTFILES/tarray1_big.ddl
@@ -912,6 +914,7 @@ TOOLTEST4 tdset-2.ddl --enable-error-stack -H -d dset1 -d /dset2 --dataset=dset3
 TOOLTEST tattr-1.ddl --enable-error-stack tattr.h5
 # test for displaying the selected attributes of string type and scalar space
 TOOLTEST tattr-2.ddl --enable-error-stack -a "/\/attr1" --attribute /attr4 --attribute=/attr5 tattr.h5
+TOOLTEST tattr-2.ddl --enable-error-stack -N "/\/attr1" --any_object /attr4 --any_object=/attr5 tattr.h5
 # test for header and error messages
 TOOLTEST4 tattr-3.ddl --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5
 # test for displaying at least 9 attributes on root from a BE machine
@@ -924,6 +927,7 @@ TOOLTEST tslink-1.ddl --enable-error-stack tslink.h5
 TOOLTEST tudlink-1.ddl --enable-error-stack tudlink.h5
 # test for displaying the selected link
 TOOLTEST tslink-2.ddl --enable-error-stack -l slink2 tslink.h5
+TOOLTEST tslink-2.ddl --enable-error-stack -N slink2 tslink.h5
 TOOLTEST tudlink-2.ddl --enable-error-stack -l udlink2 tudlink.h5
 # test for displaying dangling soft links
 TOOLTEST4 tslink-D.ddl --enable-error-stack -d /slink1 tslink.h5
@@ -933,12 +937,15 @@ TOOLTEST thlink-1.ddl --enable-error-stack thlink.h5
 TOOLTEST thlink-2.ddl --enable-error-stack -d /g1/dset2 --dataset /dset1 --dataset=/g1/g1.1/dset3 thlink.h5
 TOOLTEST thlink-3.ddl --enable-error-stack -d /g1/g1.1/dset3 --dataset /g1/dset2 --dataset=/dset1 thlink.h5
 TOOLTEST thlink-4.ddl --enable-error-stack -g /g1 thlink.h5
+TOOLTEST thlink-4.ddl --enable-error-stack -N /g1 thlink.h5
 TOOLTEST thlink-5.ddl --enable-error-stack -d /dset1 -g /g2 -d /g1/dset2 thlink.h5
+TOOLTEST thlink-5.ddl --enable-error-stack -N /dset1 -N /g2 -N /g1/dset2 thlink.h5
 
 # tests for compound data types
 TOOLTEST tcomp-1.ddl --enable-error-stack tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
+TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_object /type2 --any_object=/group1/type3 tcompound.h5
 # test for unamed type 
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
@@ -952,6 +959,9 @@ TOOLTEST tnestedcmpddt.ddl --enable-error-stack tnestedcmpddt.h5
 TOOLTEST4 tall-1.ddl --enable-error-stack tall.h5
 TOOLTEST tall-2.ddl --enable-error-stack --header -g /g1/g1.1 -a attr2 tall.h5
 TOOLTEST tall-3.ddl --enable-error-stack -d /g2/dset2.1 -l /g1/g1.2/g1.2.1/slink tall.h5
+TOOLTEST tall-3.ddl --enable-error-stack -N /g2/dset2.1 -N /g1/g1.2/g1.2.1/slink tall.h5
+TOOLTEST tall-7.ddl --enable-error-stack -a attr1 tall.h5
+TOOLTEST tall-7N.ddl --enable-error-stack -N attr1 tall.h5
 
 # test for loop detection
 TOOLTEST tloop-1.ddl --enable-error-stack tloop.h5

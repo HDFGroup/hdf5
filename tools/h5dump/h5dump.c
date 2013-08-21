@@ -71,7 +71,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*N:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -188,6 +188,7 @@ static struct long_options l_opts[] = {
     { "packed-bits", require_arg, 'M' },
     { "no-compact-subset", no_arg, 'C' },
     { "ddl", optional_arg, 'O' },
+    { "any_object", require_arg, 'N' },
     { NULL, 0, '\0' }
 };
 
@@ -231,20 +232,6 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "     -h,   --help         Print a usage message and exit\n");
     PRINTVALSTREAM(rawoutstream, "     -V,   --version      Print version number and exit\n");
-    PRINTVALSTREAM(rawoutstream, "--------------- Formatting Options ---------------\n");
-    PRINTVALSTREAM(rawoutstream, "     -e,   --escape       Escape non printing characters\n");
-    PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
-    PRINTVALSTREAM(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
-    PRINTVALSTREAM(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
-    PRINTVALSTREAM(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
-    PRINTVALSTREAM(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
-    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
-    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
-    PRINTVALSTREAM(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
-    PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
-    PRINTVALSTREAM(rawoutstream, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
-    PRINTVALSTREAM(rawoutstream, "                          sets the number of columns to the maximum (65535).\n");
-    PRINTVALSTREAM(rawoutstream, "                          Default width is 80 columns.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- File Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -n,   --contents     Print a list of the file contents and exit\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 1 also prints attributes.\n");
@@ -264,6 +251,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -g P, --group=P      Print the specified group and all members\n");
     PRINTVALSTREAM(rawoutstream, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     PRINTVALSTREAM(rawoutstream, "     -t P, --datatype=P   Print the specified named datatype\n");
+    PRINTVALSTREAM(rawoutstream, "     -N P, --any_path=P   Print any attribute, dataset, group, datatype, or link that matches P\n");
+    PRINTVALSTREAM(rawoutstream, "                          P can be the absolute path or just a relative path.\n");
     PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Property Options ---------------\n");
@@ -276,6 +265,20 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "                          the data value and length is the number of bits of\n");
     PRINTVALSTREAM(rawoutstream, "                          the mask.\n");
     PRINTVALSTREAM(rawoutstream, "     -R,   --region       Print dataset pointed by region references\n");
+    PRINTVALSTREAM(rawoutstream, "--------------- Formatting Options ---------------\n");
+    PRINTVALSTREAM(rawoutstream, "     -e,   --escape       Escape non printing characters\n");
+    PRINTVALSTREAM(rawoutstream, "     -r,   --string       Print 1-byte integer datasets as ASCII\n");
+    PRINTVALSTREAM(rawoutstream, "     -y,   --noindex      Do not print array indices with the data\n");
+    PRINTVALSTREAM(rawoutstream, "     -m T, --format=T     Set the floating point output format\n");
+    PRINTVALSTREAM(rawoutstream, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
+    PRINTVALSTREAM(rawoutstream, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
+    PRINTVALSTREAM(rawoutstream, "     --no-compact-subset  Disable compact form of subsetting and allow the use\n");
+    PRINTVALSTREAM(rawoutstream, "                          of \"[\" in dataset names.\n");
+    PRINTVALSTREAM(rawoutstream, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
+    PRINTVALSTREAM(rawoutstream, "                          sets the number of columns to the maximum (65535).\n");
+    PRINTVALSTREAM(rawoutstream, "                          Default width is 80 columns.\n");
     PRINTVALSTREAM(rawoutstream, "--------------- XML Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -x,   --xml          Output in XML using Schema\n");
     PRINTVALSTREAM(rawoutstream, "     -u,   --use-dtd      Output in XML using DTD\n");
@@ -306,15 +309,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "      the file driver flag, the file will be opened with each driver in\n");
     PRINTVALSTREAM(rawoutstream, "      turn and in the order specified above until one driver succeeds\n");
     PRINTVALSTREAM(rawoutstream, "      in opening the file.\n");
-    PRINTVALSTREAM(rawoutstream, "      These are the letters that are appended to the file name(without .h5) when opening\n");
-    PRINTVALSTREAM(rawoutstream, "      names for the split(m,r) and multi(s,b,r,g,l,o) drivers. They are:\n");
-    PRINTVALSTREAM(rawoutstream, "         m: All meta data when using the split driver.\n");
-    PRINTVALSTREAM(rawoutstream, "         s: The userblock, superblock, and driver info block\n");
-    PRINTVALSTREAM(rawoutstream, "         b: B-tree nodes\n");
-    PRINTVALSTREAM(rawoutstream, "         r: Dataset raw data\n");
-    PRINTVALSTREAM(rawoutstream, "         g: Global heap\n");
-    PRINTVALSTREAM(rawoutstream, "         l: local heap (object names)\n");
-    PRINTVALSTREAM(rawoutstream, "         o: object headers\n");
+    PRINTVALSTREAM(rawoutstream, "      See examples below for family, split, and multi driver special file name usage.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  F - is a filename.\n");
     PRINTVALSTREAM(rawoutstream, "  P - is the full path from the root group to the object.\n");
@@ -359,6 +354,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  6) Dataset foo in split files splitfile-m.h5 splitfile-r.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f split splitfile\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  7) Dataset foo in multi files mf-s.h5, mf-b.h5, mf-r.h5, mf-g.h5, mf-l.h5 and mf-o.h5\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f multi mf\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "  8) Dataset foo in family files fam00000.h5 fam00001.h5 and fam00002.h5\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      h5dump -d /foo -f family fam%%05d.h5\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 }
 
@@ -956,6 +959,18 @@ parse_start:
             if (h5tools_nCols <= 0) {
                 h5tools_nCols = 65535;
             }
+            last_was_dset = FALSE;
+            break;
+        case 'N':
+            display_all = 0;
+
+            for (i = 0; i < argc; i++)
+                if (!hand[i].func) {
+                    hand[i].func = handle_paths;
+                    hand[i].obj = HDstrdup(opt_arg);
+                    break;
+                }
+
             last_was_dset = FALSE;
             break;
         case 'a':
