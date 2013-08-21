@@ -1457,19 +1457,20 @@ herr_t
 H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                          const char *name, /*OUT*/iod_obj_id_t *iod_id, 
                          /*OUT*/iod_handle_t *iod_oh, /*OUT*/uint64_t *axe_id, 
-                         /*OUT*/char **new_name, /*OUT*/H5VL_iod_object_t **last_obj)
+                         /*OUT*/char **new_name, /*OUT*/const H5VL_iod_object_t **last_obj)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
     size_t cur_size; /* current size of the path traversed so far */
     char *cur_name;  /* full path to object that is currently being looked for */
-    H5VL_iod_object_t *cur_obj = obj;   /* current object in the traversal loop */
-    H5VL_iod_object_t *next_obj = NULL; /* the next object to traverse */
+    const H5VL_iod_object_t *cur_obj = obj;   /* current object in the traversal loop */
+    const H5VL_iod_object_t *next_obj = NULL; /* the next object to traverse */
     const char *path;        /* specified path for the object to traverse to */
     H5WB_t *wb = NULL;       /* Wrapped buffer for temporary buffer */
     char comp_buf[1024];     /* Temporary buffer for path components */
     char *comp;              /* Pointer to buffer for path components */
     size_t nchars;	     /* component name length	*/
+    H5VL_iod_file_t *file = obj->file; /* pointer to file where the search happens */
     hbool_t last_comp = FALSE; /* Flag to indicate that a component is the last component in the name */
     herr_t ret_value = SUCCEED;
 
@@ -1525,10 +1526,12 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
         cur_size += nchars;
         cur_name[cur_size] = '\0';
 
-        if(NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_GROUP))) {
+        if(NULL == (next_obj = (const H5VL_iod_object_t *)H5I_search_name(file, cur_name, H5I_GROUP))) {
             if(last_comp) {
-                if(NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATASET)))
-                    //&& NULL == (cur_obj = (H5VL_iod_object_t *)H5I_search_name(cur_name, H5I_DATATYPE)))
+                if(NULL == (next_obj = (const H5VL_iod_object_t *)H5I_search_name
+                            (file, cur_name, H5I_DATASET))
+                   && NULL == (next_obj = (H5VL_iod_object_t *)H5I_search_name
+                               (file, cur_name, H5I_DATATYPE)))
                     break;
             }
             else {
@@ -1553,16 +1556,16 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
             cur_id = cur_obj->file->remote_file.root_id;
             break;
         case H5I_GROUP:
-            cur_oh = ((H5VL_iod_group_t *)cur_obj)->remote_group.iod_oh;
-            cur_id = ((H5VL_iod_group_t *)cur_obj)->remote_group.iod_id;
+            cur_oh = ((const H5VL_iod_group_t *)cur_obj)->remote_group.iod_oh;
+            cur_id = ((const H5VL_iod_group_t *)cur_obj)->remote_group.iod_id;
             break;
         case H5I_DATASET:
-            cur_oh = ((H5VL_iod_dset_t *)cur_obj)->remote_dset.iod_oh;
-            cur_id = ((H5VL_iod_dset_t *)cur_obj)->remote_dset.iod_id;
+            cur_oh = ((const H5VL_iod_dset_t *)cur_obj)->remote_dset.iod_oh;
+            cur_id = ((const H5VL_iod_dset_t *)cur_obj)->remote_dset.iod_id;
             break;
         case H5I_DATATYPE:
-            cur_oh = ((H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_oh;
-            cur_id = ((H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_id;
+            cur_oh = ((const H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_oh;
+            cur_id = ((const H5VL_iod_dtype_t *)cur_obj)->remote_dtype.iod_id;
             break;
         default:
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "bad location object");

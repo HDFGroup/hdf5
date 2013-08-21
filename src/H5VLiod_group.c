@@ -56,7 +56,7 @@ H5VL_iod_server_group_create_cb(AXE_engine_t UNUSED axe_engine,
     const char *name = input->name; /* path relative to loc_id and loc_oh  */
     iod_handle_t grp_oh, cur_oh, mdkv_oh;
     iod_obj_id_t cur_id, mdkv_id, attr_id;
-    char *last_comp; /* the name of the group obtained from traversal function */
+    char *last_comp = NULL; /* the name of the group obtained from traversal function */
     hid_t gcpl_id;
     scratch_pad_t sp;
     iod_ret_t ret;

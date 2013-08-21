@@ -2604,11 +2604,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
-H5I_search_name(char *name, H5I_type_t type)
+const void *
+H5I_search_name(void *_file, char *name, H5I_type_t type)
 {
     H5I_id_type_t   *type_ptr;      /*ptr to the type       */
-    void *ret_value = NULL;      /* Return value */
+    const void *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2625,11 +2625,15 @@ H5I_search_name(char *name, H5I_type_t type)
         for(i = 0; i < type_ptr->cls->hash_size; i++) {
             id_ptr = type_ptr->id_list[i];
             while(id_ptr) {
+                H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
+
                 switch(type) {
                 case H5I_GROUP:
                     {
-                        H5VL_iod_group_t *grp = (H5VL_iod_group_t *)id_ptr->obj_ptr;
-                        if (0 == strcmp(grp->common.obj_name, name)) {
+                        const H5VL_iod_group_t *grp = (const H5VL_iod_group_t *)id_ptr->obj_ptr;
+
+                        if (file == grp->common.file &&
+                            0 == strcmp(grp->common.obj_name, name)) {
                             ret_value = id_ptr->obj_ptr;
                             HGOTO_DONE(id_ptr->obj_ptr);
                         }
@@ -2637,8 +2641,21 @@ H5I_search_name(char *name, H5I_type_t type)
                     }
                 case H5I_DATASET:
                     {
-                        H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)id_ptr->obj_ptr;
-                        if (0 == strcmp(dset->common.obj_name, name)) {
+                        const H5VL_iod_dset_t *dset = (const H5VL_iod_dset_t *)id_ptr->obj_ptr;
+
+                        if (file == dset->common.file && 
+                            0 == strcmp(dset->common.obj_name, name)) {
+                            ret_value = id_ptr->obj_ptr;
+                            HGOTO_DONE(id_ptr->obj_ptr);
+                        }
+                        break;
+                    }
+                case H5I_MAP:
+                    {
+                        const H5VL_iod_map_t *map = (const H5VL_iod_map_t *)id_ptr->obj_ptr;
+
+                        if (file == map->common.file &&
+                            0 == strcmp(map->common.obj_name, name)) {
                             ret_value = id_ptr->obj_ptr;
                             HGOTO_DONE(id_ptr->obj_ptr);
                         }
@@ -2646,16 +2663,23 @@ H5I_search_name(char *name, H5I_type_t type)
                     }
                 case H5I_DATATYPE:
                     {
-                        H5T_t *dt = (H5T_t *)id_ptr->obj_ptr;
+                        const H5T_t *dt = (const H5T_t *)id_ptr->obj_ptr;
+
                         if(H5T_committed(dt)) {
-                            H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)H5T_get_named_type(dt);
-                            if (0 == strcmp(dtype->common.obj_name, name)) {
+                            const H5VL_iod_dtype_t *dtype ;
+
+                            dtype = (const H5VL_iod_dtype_t *)H5T_get_named_type(dt);
+
+                            if (file == dtype->common.file && 
+                                0 == strcmp(dtype->common.obj_name, name)) {
                                 ret_value = id_ptr->obj_ptr;
                                 HGOTO_DONE(id_ptr->obj_ptr);
                             }
                         }
                         break;
                     }
+                default:
+                    HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "invalid type")
                 }
                 id_ptr = id_ptr->next;
             } /* end while */

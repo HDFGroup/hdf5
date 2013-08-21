@@ -401,7 +401,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog $(EXTLINK_DIRS) *.h5
 @BUILD_EFF_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYIOD_LIBS)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@LDADD = $(LIBH5TEST) $(LIBHDF5)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@EXAMPLE_PROG_PARA = ph5example
-@BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server h5ff_client h5ff_client_map h5ff_client_old_api h5ff_client_do
+@BUILD_EFF_CONDITIONAL_TRUE@EXAMPLE_PROG_EFF = h5ff_server h5ff_client h5ff_client_map h5ff_client_do \
+@BUILD_EFF_CONDITIONAL_TRUE@                h5ff_client_old_api h5ff_client_multiple_cont
+
 
 # Example programs.
 # Don't tell automake about them, because if it knew they were programs,

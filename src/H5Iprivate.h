@@ -97,7 +97,7 @@ H5_DLL hid_t H5I_get_id(void *object, H5I_type_t type);
 
 /* this is just an IOD VOL plugin helper routine */
 #ifdef H5_HAVE_EFF
-H5_DLL void *H5I_search_name(char *name, H5I_type_t type);
+H5_DLL const void *H5I_search_name(void *file, char *name, H5I_type_t type);
 #endif /* H5_HAVE_EFF */
 
 #endif /* _H5Iprivate_H */
