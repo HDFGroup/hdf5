@@ -208,11 +208,11 @@
             NAME H5REPACK_DMP-h5dump-${testname}
             COMMAND "${CMAKE_COMMAND}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
-                -D "TEST_ARGS:STRING=-pH;out-${testname}.${resultfile}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                -D "TEST_ARGS:STRING=-pH;./testfiles/out-${testname}.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+                -D "TEST_OUTPUT=./testfiles/${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}.ddl"
+                -D "TEST_REFERENCE=testfiles/${resultfile}.ddl"
                 -P "${HDF5_RESOURCES_DIR}/runTest.cmake"
         )
         SET_TESTS_PROPERTIES (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")

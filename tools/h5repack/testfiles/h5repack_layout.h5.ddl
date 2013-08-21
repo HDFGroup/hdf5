@@ -1,4 +1,4 @@
-HDF5 "out-deflate_limit.h5repack_layout.h5" {
+HDF5 "./testfiles/out-deflate_limit.h5repack_layout.h5" {
 GROUP "/" {
    DATASET "dset1" {
       DATATYPE  H5T_STD_I32LE
