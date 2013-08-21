@@ -413,7 +413,7 @@ done:
 herr_t
 H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(hdr);
@@ -441,7 +441,7 @@ H5B2_hdr_fuse_incr(H5B2_hdr_t *hdr)
 size_t
 H5B2_hdr_fuse_decr(H5B2_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(hdr);
@@ -601,6 +601,6 @@ done:
     if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_hdr_delete() */
 

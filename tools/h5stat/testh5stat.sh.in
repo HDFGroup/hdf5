@@ -13,7 +13,12 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tests for the h5dump tool
+# Tests for the h5stat tool
+#
+# Modifcations:
+# 	Vailin Choi; July 2013
+# 	Add tests for -l, -m, -a options
+#
 
 srcdir=@srcdir@
 
@@ -72,12 +77,14 @@ LIST_HDF5_TEST_FILES="
 $SRC_H5STAT_TESTFILES/h5stat_filters.h5
 $SRC_H5STAT_TESTFILES/h5stat_tsohm.h5
 $SRC_H5STAT_TESTFILES/h5stat_newgrat.h5
+$SRC_H5STAT_TESTFILES/h5stat_threshold.h5
 "
 
 LIST_OTHER_TEST_FILES="
 $SRC_H5STAT_TESTFILES/h5stat_help1.ddl
 $SRC_H5STAT_TESTFILES/h5stat_help2.ddl
 $SRC_H5STAT_TESTFILES/h5stat_notexist.ddl
+$SRC_H5STAT_TESTFILES/h5stat_nofile.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters-file.ddl
 $SRC_H5STAT_TESTFILES/h5stat_filters-F.ddl
@@ -90,6 +97,21 @@ $SRC_H5STAT_TESTFILES/h5stat_tsohm.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat-UG.ddl
 $SRC_H5STAT_TESTFILES/h5stat_newgrat-UA.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err1_links.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links3.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links4.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links5.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err1_dims.ddl
+$SRC_H5STAT_TESTFILES/h5stat_dims1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_dims2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err1_numattrs.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err2_numattrs.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs3.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs4.ddl
 "
 
 #
@@ -210,6 +232,7 @@ TOOLTEST h5stat_help1.ddl -h
 TOOLTEST h5stat_help2.ddl --help
 # Test when h5stat a file that does not exist
 TOOLTEST h5stat_notexist.ddl notexist.h5
+TOOLTEST h5stat_nofile.ddl ''
 
 # Test file with groups, compressed datasets, user-applied fileters, etc.
 # h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
@@ -229,6 +252,47 @@ TOOLTEST h5stat_tsohm.ddl h5stat_tsohm.h5
 TOOLTEST h5stat_newgrat.ddl h5stat_newgrat.h5
 TOOLTEST h5stat_newgrat-UG.ddl -G h5stat_newgrat.h5
 TOOLTEST h5stat_newgrat-UA.ddl -A h5stat_newgrat.h5
+#
+# Tests for -l (--links) option on h5stat_threshold.h5: 
+# 	-l 0 (incorrect threshold value)
+# 	-g -l 8
+# 	--links=8
+# 	--links=20 -g
+TOOLTEST h5stat_err1_links.ddl -l 0 h5stat_threshold.h5
+TOOLTEST h5stat_links1.ddl -g -l 8 h5stat_threshold.h5
+TOOLTEST h5stat_links2.ddl --links=8 h5stat_threshold.h5
+TOOLTEST h5stat_links3.ddl --links=20 -g h5stat_threshold.h5
+#
+# Tests for -l (--links) option on h5stat_newgrat.h5: 
+# 	-g
+# 	-g -l 40000
+TOOLTEST h5stat_links4.ddl -g h5stat_newgrat.h5
+TOOLTEST h5stat_links5.ddl -g -l 40000 h5stat_newgrat.h5
+#
+# Tests for -m (--dims) option on h5stat_threshold.h5
+# 	-d --dims=-1 (incorrect threshold value)
+# 	-gd -m 5
+# 	-d --di=15
+TOOLTEST h5stat_err1_dims.ddl -d --dims=-1 h5stat_threshold.h5
+TOOLTEST h5stat_dims1.ddl -gd -m 5 h5stat_threshold.h5
+TOOLTEST h5stat_dims2.ddl -d --di=15 h5stat_threshold.h5
+#
+# Tests for -a option on h5stat_threshold.h5
+# 	-a -2 (incorrect threshold value)
+#	--numattrs (without threshold value)
+#	-AS -a 10
+#	-a 1
+#	-A --numattrs=25
+TOOLTEST h5stat_err1_numattrs.ddl -a -2 h5stat_threshold.h5
+TOOLTEST h5stat_err2_numattrs.ddl --numattrs h5stat_threshold.h5
+TOOLTEST h5stat_numattrs1.ddl -AS -a 10 h5stat_threshold.h5
+TOOLTEST h5stat_numattrs2.ddl -a 1 h5stat_threshold.h5
+TOOLTEST h5stat_numattrs3.ddl -A --numattrs=25 h5stat_threshold.h5
+#
+# Tests for -a option on h5stat_newgrat.h5
+#	-A -a 100
+TOOLTEST h5stat_numattrs4.ddl -A -a 100 h5stat_newgrat.h5
+#
 
 if test $nerrors -eq 0 ; then
     echo "All $TESTNAME tests passed."

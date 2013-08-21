@@ -52,7 +52,7 @@ H5TOOLS_DLL void    h5tools_dump_datatype(FILE *stream, const h5tool_format_t *i
 H5TOOLS_DLL void    h5tools_dump_dataspace(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx/*in,out*/, hid_t space);
 H5TOOLS_DLL void    h5tools_dump_attribute(FILE *stream, const h5tool_format_t *info,
-                            h5tools_context_t *ctx/*in,out*/, hid_t oid, const char *attr_name, 
+                            h5tools_context_t *ctx/*in,out*/, const char *attr_name, 
                             hid_t attr_id, int display_index, int display_char);
 H5TOOLS_DLL void    h5tools_dump_oid(FILE *stream, const h5tool_format_t *info,
                             h5tools_context_t *ctx/*in,out*/, hid_t oid);

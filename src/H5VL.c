@@ -235,7 +235,12 @@ H5VLregister(const H5VL_class_t *cls)
     /* Check arguments */
     if(!cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, FAIL, "null class pointer is disallowed")
-    /* MSC - check if required callback are defined */
+
+    if(cls->value < MAX_VOL_LIB_VALUE)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, 
+                    "registered class value must not be smaller than %d", MAX_VOL_LIB_VALUE)
+
+    /* MSC - check if required callback are defined?? */
 
     /* Create the new class ID */
     if((ret_value=H5VL_register(cls, sizeof(H5VL_class_t), TRUE)) < 0)
@@ -346,9 +351,10 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VLregister_object
+ * Function:	H5VLobject_register
  *
- * Purpose:	utility routine to register the native VOL plugin to an ID
+ * Purpose:     Public routine to create an HDF5 hid_t with library
+ *              specific types, bypassing the limitation of H5Iregister.
  *
  * Returns:     Non-negative on success or negative on failure
  *
@@ -376,7 +382,52 @@ H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5VLregister_object */
+} /* H5VLobject_register */
+
+
+/*---------------------------------------------------------------------------
+ * Function:	H5VLget_object
+ *
+ * Purpose:	Retrieve the object pointer associated with the ID. This 
+ *              also optionally returns the H5VL_t struct that this ID 
+ *              belongs to, if the user passes a valid pointer value.
+ *
+ * Returns:     Non-negative on success or negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              July, 2013
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin)
+{
+    H5VL_t *temp_vol;
+    hid_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object pointer")
+
+    /* get the plugin pointer */
+    if (NULL == (temp_vol = (H5VL_t *)H5I_get_aux(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain VOL information")
+
+    if(NATIVE == temp_vol->cls->value)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot call public function on library type")
+
+    /* if the user requested the plugin pointer, return it */
+    if(vol_plugin)
+        *vol_plugin = temp_vol;
+
+    if(NULL == (*obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "ID does not contain a valid object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLget_object */
 
 
 /*-------------------------------------------------------------------------

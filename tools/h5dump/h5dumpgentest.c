@@ -3421,14 +3421,19 @@ static void gent_array8(void)
                 H5P_DEFAULT);
         if(dset>=0)
             status = H5Dwrite (dset, filetype, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+            HDassert(status >= 0);
     }
     /*
      * Close and release resources.
      */
     status = H5Dclose (dset);
+    HDassert(status >= 0);
     status = H5Sclose (space);
+    HDassert(status >= 0);
     status = H5Tclose (filetype);
+    HDassert(status >= 0);
     status = H5Fclose (file);
+    HDassert(status >= 0);
 }
 
 static void gent_empty(void)
@@ -7397,14 +7402,17 @@ gent_charsets(void)
     sid = H5Screate_simple( 1, dim, NULL );
     fid = H5Fcreate( FILE68, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
     status = H5Tset_cset( ascii_dtid, H5T_CSET_ASCII );
+    HDassert(status >= 0);
     H5Tinsert( charset_dtid, "ascii", HOFFSET(CharSetInfo, ascii_p_ ), ascii_dtid );
 
     status = H5Tset_cset( utf8_dtid, H5T_CSET_UTF8 );
+    HDassert(status >= 0);
     H5Tinsert( charset_dtid, "utf8", HOFFSET( CharSetInfo, utf8_p_ ), utf8_dtid );
 
     did = H5Dcreate2( fid, "CharSets", charset_dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
 
     status = H5Dwrite( did, charset_dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, writeData );
+    HDassert(status >= 0);
 
     H5Tclose( charset_dtid );
     H5Tclose( ascii_dtid );
@@ -7415,7 +7423,7 @@ gent_charsets(void)
 }
 
 static void gent_compound_intsizes(void) {
-    hid_t fid, dataset, space, root;
+    hid_t fid, dataset, space;
     hsize_t dims[2];
     hsize_t    array_dim8[]={F70_XDIM,F70_YDIM8}; /* Array dimensions         */
     hsize_t    array_dim16[]={F70_XDIM,F70_YDIM16}; /* Array dimensions         */
@@ -7992,7 +8000,6 @@ static void gent_nested_compound_dt(void) {       /* test nested data type */
     dset3_t dset3[10];
 
     enumtype dset4[] = {RED, GREEN, BLUE, GREEN, WHITE, BLUE};
-    dset1_t dset5[10];
 
     int i, j, k;
     unsigned ndims;

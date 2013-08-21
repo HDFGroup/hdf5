@@ -1668,6 +1668,9 @@ H5SL_below(H5SL_t *slist, const void *key)
         case H5SL_TYPE_GENERIC:
             H5SL_FIND(GENERIC, slist, x, const void, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1767,6 +1770,9 @@ H5SL_above(H5SL_t *slist, const void *key)
         case H5SL_TYPE_GENERIC:
             H5SL_FIND(GENERIC, slist, x, const void, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* An exact match for 'key' must not have been found in list, if we get here */

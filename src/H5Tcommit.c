@@ -915,39 +915,6 @@ H5T_update_shared(H5T_t *dt)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tget_named_type
- *
- * Purpose:	returns the VOL object or the named datatype structure 
- *              if it exists. This is the public wrapper for H5T_get_named_type.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
- *              June 2013
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Tget_vol_named_type(hid_t type_id, void **dt_obj)
-{
-    H5T_t *type;                /* datatype for operation */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i**x", type_id, dt_obj);
-
-    /* Check arguments */
-    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
-
-    *dt_obj = H5T_get_named_type(type);
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Tget_named_type() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5T_get_named_type
  *
  * Purpose:	returns the VOL object or the named datatype structure 

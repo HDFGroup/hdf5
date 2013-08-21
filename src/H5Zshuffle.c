@@ -183,6 +183,9 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
                 duffs_index = (numofelements + 7) / 8;
                 switch (numofelements % 8) {
+                    default:
+                        HDassert(0 && "This Should never be executed!");
+                        break;
                     case 0:
                         do
                           {
@@ -238,6 +241,9 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
                 duffs_index = (numofelements + 7) / 8;
                 switch (numofelements % 8) {
+                    default:
+                        HDassert(0 && "This Should never be executed!");
+                        break;
                     case 0:
                         do
                           {

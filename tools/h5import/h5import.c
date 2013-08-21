@@ -1009,10 +1009,7 @@ static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
     char   *str2 = NULL;
     char   *str3 = NULL;
     char    str[1024] = "";
-    char    c;
-    int     results;
     int     j;
-    int     nlines = 0;
     int     line;
 
     /*-------------------------------------------------------------------------

@@ -3261,6 +3261,8 @@ H5T_copy(H5T_t *old_dt, H5T_copy_t method)
                 new_dt->shared->state = H5T_STATE_RDONLY;
             }
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid copy method type")
     } /* end switch */
 
     /* Update fields in the new struct, if we aren't sharing an already opened
@@ -3463,6 +3465,8 @@ H5T_lock (H5T_t *dt, hbool_t immutable)
         case H5T_STATE_OPEN:
             /*void*/
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid datatype state")
     }
 
 done:
@@ -4865,6 +4869,8 @@ H5T_oloc(H5T_t *dt)
             HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
             ret_value = &dt->oloc;
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid datatype state")
     } /* end switch */
 
 done:
@@ -4903,6 +4909,8 @@ H5T_nameof(H5T_t *dt)
         case H5T_STATE_OPEN:
             ret_value = &(dt->path);
             break;
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, NULL, "invalid datatype state")
     } /* end switch */
 
 done:

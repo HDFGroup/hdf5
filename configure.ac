@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.156], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.162], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADER([src/H5config.h])
 
@@ -432,14 +432,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([HID_T])
   AC_SUBST([SIZE_T])
   AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
-
-  ## --------------------------------------------------------------------
-  ## General Fortran flags
-  ## Only add FFLAGS to FCFLAGS if it's set.
-  if test "x$FFLAGS" != "x" ; then
-    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-    FCFLAGS="${FCFLAGS} ${FFLAGS}"
-  fi
 
   ## --------------------------------------------------------------------
   ## Fortran source extention
@@ -2309,7 +2301,14 @@ AC_TRY_COMPILE([
 ## ----------------------------------------------------------------------
 ## How do we figure out the width of a tty in characters?
 ##
-AC_CHECK_FUNCS([_getvideoconfig gettextinfo GetConsoleScreenBufferInfo])
+AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
+case "`uname`" in
+  CYGWIN*)
+    ;;
+  *)
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
+    ;;
+esac
 AC_CHECK_FUNCS([_scrsize ioctl])
 
 AC_MSG_CHECKING([for struct videoconfig])
@@ -2906,10 +2905,7 @@ case "X-$enable_parallel" in
           integer:: ierr
           call mpi_file_open( ierr )
           end],,
-          [AC_CHECK_LIB([mpi], [
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )],, [PARALLEL=no])])
+          [AC_CHECK_LIB([mpi], [mpi_file_open],, [PARALLEL=no])])
 
       ## Then try link a simple MPI-IO program.  If fail, try again with
       ## -lmpio.
@@ -2920,10 +2916,7 @@ case "X-$enable_parallel" in
             integer:: ierr
             call mpi_file_open( ierr )
             end],,
-            [AC_CHECK_LIB([mpio], [
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )],, [PARALLEL=no])])
+            [AC_CHECK_LIB([mpio], [mpi_file_open],, [PARALLEL=no])])
       fi
 
       ## Change to the C language

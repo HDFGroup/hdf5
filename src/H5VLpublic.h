@@ -302,10 +302,11 @@ typedef struct H5VL_async_class_t {
     herr_t (*wait)  (void **, H5_status_t *);
 } H5VL_async_class_t;
 
-/* enum value to identify the class of a VOL plugin (mostly for comparison purposes */
+/* enum value to identify the class of a VOL plugin (mostly for comparison purposes) */
 typedef enum H5VL_class_value_t {
-    NATIVE = 0,
-    IOD = 1
+    NATIVE = 0, /* This should be first */
+    IOD = 1,
+    MAX_VOL_LIB_VALUE = 128 /* This should be last */
 } H5VL_class_value_t;
 
 /* Class information for each VOL driver */
@@ -419,6 +420,7 @@ H5_DLL herr_t H5VLunregister(hid_t plugin_id);
 H5_DLL htri_t H5VLis_registered(hid_t id);
 H5_DLL ssize_t H5VLget_plugin_name(hid_t id, char *name/*out*/, size_t size);
 H5_DLL hid_t H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls);
+H5_DLL herr_t H5VLget_object(hid_t obj_id, void **obj, H5VL_t **vol_plugin);
 
 #ifdef __cplusplus
 }

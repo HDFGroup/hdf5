@@ -648,7 +648,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr, hid_t dxpl_id,
+H5HF_sect_single_dblock_info(H5HF_hdr_t *hdr,
     H5HF_free_section_t *sect, haddr_t *dblock_addr, size_t *dblock_size)
 {
     FUNC_ENTER_NOAPI_NOERR
@@ -766,7 +766,7 @@ H5HF_sect_single_full_dblock(H5HF_hdr_t *hdr, hid_t dxpl_id,
     HDassert(hdr);
 
     /* Retrieve direct block address from section */
-    if(H5HF_sect_single_dblock_info(hdr, dxpl_id, sect, &dblock_addr, &dblock_size) < 0)
+    if(H5HF_sect_single_dblock_info(hdr, sect, &dblock_addr, &dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
 
     /* Check for section occupying entire direct block */
@@ -1087,7 +1087,7 @@ H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void UNUSED *_udata)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
 
     /* Retrieve direct block address from section */
-    if(H5HF_sect_single_dblock_info(hdr, dxpl_id, (*sect), &dblock_addr, &dblock_size) < 0)
+    if(H5HF_sect_single_dblock_info(hdr, (*sect), &dblock_addr, &dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve direct block information")
 
     /* Protect the direct block for the section */
@@ -1197,7 +1197,7 @@ H5HF_sect_single_valid(const H5FS_section_class_t UNUSED *cls, const H5FS_sectio
 
             /* Retrieve direct block address from section */
             /* (Casting away const OK - QAK) */
-            status = H5HF_sect_single_dblock_info(iblock->hdr, H5AC_dxpl_id, (H5HF_free_section_t *)sect, &dblock_addr, &dblock_size);
+            status = H5HF_sect_single_dblock_info(iblock->hdr, (H5HF_free_section_t *)sect, &dblock_addr, &dblock_size);
             HDassert(status >= 0);
             HDassert(H5F_addr_eq(iblock->ents[sect->u.single.par_entry].addr, dblock_addr));
             HDassert(dblock_size > 0);
