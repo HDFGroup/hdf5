@@ -30,6 +30,7 @@
 #define READ 290
 #define WRITE 390
 
+#define NUM_BUFFERS 8
 
 typedef time_t timer;
 typedef unsigned long long length_t;

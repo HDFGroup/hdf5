@@ -324,7 +324,7 @@ int FFbench_create_dataspaces(hid_t **f_dataspaces,
   hsize_t coords  = 0, j = 0;
   hsize_t **count = NULL;
   hsize_t **offset = NULL;
-  hsize_t *dimsf = NULL;
+  hsize_t *dimsf = NULL, tmp = 0;
   int ret_value = FFB_SUCCESS;
   
   dimsf = (hsize_t *) malloc (input_args->n_coords *
@@ -457,8 +457,114 @@ int FFbench_create_dataspaces(hid_t **f_dataspaces,
       ret_value = FFB_FAIL;	
     }
     
+    if ( input_args->n_coords > 1){
+      coords = input_args->coords[1];
+    }
+    else
+      coords = input_args->coords[0];
     
+    if (((coords % (input_args->num_ops)) == 0)){
+      
+      num_dataspaces = input_args->num_ops;
+      
+      if (num_dataspaces < 1){
+	DEBUG_ERROR ("Error num_dataspaces cannot be less than 1");
+	ret_value = FFB_FAIL;
+      }
+    }
+    else{
+      DEBUG_ERROR("ERROR! the Y coords are not exactly divisible \n");
+      ret_value = FFB_FAIL;
+    }
     
+    memory_spaces = (hid_t *) malloc (num_dataspaces *
+				      sizeof(hid_t));
+    if (NULL == memory_spaces){
+      DEBUG_ERROR ("Error allocating memory spaces \n");
+      ret_value = FFB_FAIL;	
+    }
+    
+    file_spaces = (hid_t *) malloc (num_dataspaces *
+				    sizeof(hid_t));
+    if (NULL == file_spaces){
+      DEBUG_ERROR ("Error Allocating file spaces");
+      ret_value = FFB_FAIL;
+    }
+
+    count = (hsize_t **) malloc (num_dataspaces *
+				 sizeof(hsize_t *));
+    if (NULL == count){
+      DEBUG_ERROR ("Error  Allocation count array");
+      ret_value = FFB_FAIL;
+    }
+			
+    offset = (hsize_t **) malloc (num_dataspaces *
+				  sizeof(hsize_t *));
+    if (NULL == offset){
+      DEBUG_ERROR ("Error Allocating offset array");
+      ret_value = FFB_FAIL;
+    }
+    
+    for (i = 0; i < num_dataspaces; i++){
+
+      count[i] = (hsize_t *) malloc (input_args->n_coords *
+				     sizeof(hsize_t));
+      if (NULL == count[i]){
+	DEBUG_ERROR ("Error while allocating count[i] \n");
+	ret_value = FFB_FAIL;
+      }
+      
+      offset[i]= (hsize_t *) malloc (input_args->n_coords *
+				     sizeof(hsize_t));
+      if (NULL == offset[i]){
+	DEBUG_ERROR ("Error while allocating offset[i] \n");
+	ret_value = FFB_FAIL;
+      }
+
+      file_spaces[i] = H5Screate_simple(input_args->n_coords,
+					dimsf,
+					NULL);
+    }
+
+    count[0][0] = dimsf[0]/(input_args->num_ops);
+    for (j = 1; j < input_args->n_coords; j++){
+      count[0][j] = dimsf[j];
+    }
+
+    offset[0][0] = rank;
+    offset[0][1] = 0;
+    for (i = 1; i< num_dataspaces; i++){
+      count[i][0] = dimsf[0]/(input_args->num_ops) ;
+      for (j = 1; j< input_args->n_coords; j++){
+	count[i][j] = dimsf[j];
+	offset[i][j] = 0;
+      }
+      offset[i][0] = offset[i - 1][0] + count[i][0] - (count[i-1][0]/4);
+    }
+
+
+    for (i = 0; i< num_dataspaces; i++){
+#if 0
+      DEBUG_PRINT("%d: count[%d][0]: %lli, count[%d][1]: %lli off[%d][0]: %lli, off[%d][1]: %lli\n",
+		  rank, i, count[i][0], i, count[i][1], i, offset[i][0], i, offset[i][1]);
+#endif
+ 
+      memory_spaces[i] = H5Screate_simple(input_args->n_coords,
+					  count[i],
+					  NULL);
+      
+      H5Sselect_hyperslab (file_spaces[i],
+			   H5S_SELECT_SET,
+			   offset[i],
+			   NULL,
+			   count[i],
+			   NULL);
+
+
+    }
+
+
+
   }
   
   

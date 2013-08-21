@@ -38,8 +38,9 @@ int main (int argc, char **argv){
   int num_requests = 0;  
   H5_status_t *status = NULL;
   hsize_t **count=NULL, **offset=NULL;
-  int num_dataspaces, i;
+  int num_dataspaces, i, l;
   int *data = NULL, k ,j, count_size = 1;
+  int **data_overlap=NULL;
   double start, end;
   double totallength = 0;
   double totaltime = 0, max_time;
@@ -95,64 +96,98 @@ int main (int argc, char **argv){
   event_q = H5EQcreate(fapl_id);
   assert(event_q);
 
-  
-  start = MPI_Wtime();
 
-  for (i = 0; i < num_dataspaces; i++){
-
-    count_size = 1;
-
-    for ( j = 0; j < input_args->n_coords; j++){
-      count_size *= count[i][j];
-    }
-
-    data = (int *) malloc
-      (sizeof(int)*count_size);
+  if (!input_args->overlap){
+    start = MPI_Wtime();
     
-    totallength += count_size * sizeof(int);
-
-    for (k=0; k < count_size; k++) {
-      data[k] = rank + 1001 + i;
-    }
-    
-    ret = H5Dwrite_ff(dset_id, 
-		      H5T_NATIVE_INT,
-		      m_dataspaces[i], 
-		      f_dataspaces[i],
-		      H5P_DEFAULT,
-		      data,
-		      0,
-		      event_q);
-    assert(ret == 0);
-
-   
+    for (i = 0; i < num_dataspaces; i++){
+      
+      count_size = 1;
+      
+      for ( j = 0; j < input_args->n_coords; j++){
+	count_size *= count[i][j];
+      }
+      
+      data = (int *) malloc
+	(sizeof(int)*count_size);
+      
+      totallength += count_size * sizeof(int);
+      
+      for (k=0; k < count_size; k++) {
+	data[k] = rank + 1001 + i;
+      }
+      
+      ret = H5Dwrite_ff(dset_id, 
+			H5T_NATIVE_INT,
+			m_dataspaces[i], 
+			f_dataspaces[i],
+			H5P_DEFAULT,
+			data,
+			0,
+			event_q);
+      assert(ret == 0);
+      
+      
     H5EQwait(event_q, &num_requests, &status);
     free(status);
     
     if (data)
       free (data);
-  }
-  end = MPI_Wtime();
-  totaltime = difftime (end, start);
-  totallength *= size;
-
-  
-  MPI_Reduce(&totaltime, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-  
-  if (!rank){
-    
-    totallength /= 1024*1024;
+    }
+    end = MPI_Wtime();
+    totaltime = difftime (end, start);
+    totallength *= size;
      
+    MPI_Reduce(&totaltime, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+  }
+  else{
+    start = MPI_Wtime();
     
-    
+    for (i = 0; i < num_dataspaces; i+=NUM_BUFFERS){
+      count_size = 1;
+      for ( j = 0; j < input_args->n_coords; j++){
+	count_size *= count[i][j];
+      } 
+
+      data_overlap = (int **)malloc (NUM_BUFFERS * sizeof(int *));
+      for (l = 0; l < 8; l++){
+	data_overlap[l] = (int *) malloc (sizeof(int) * count_size);
+	totallength += count_size * sizeof(int);
+	for (k = 0; k < count_size; k++){
+	  data_overlap[l][k] = rank + 1001 + i + l;
+	}
+	ret = H5Dwrite_ff(dset_id, 
+			  H5T_NATIVE_INT,
+			  m_dataspaces[i+l], 
+			  f_dataspaces[i+l],
+			  H5P_DEFAULT,
+			  data_overlap[l],
+			  0,
+			  event_q);
+	assert(ret == 0);
+      }
+      H5EQwait (event_q, &num_requests, &status);
+      free(status);
+      if (data_overlap){
+	for (l = 0; l < NUM_BUFFERS; l ++){
+	  free(data_overlap[l]);
+	}
+	free(data_overlap);
+      }
+    }
+    end = MPI_Wtime();
+    totaltime = difftime(end, start);
+  }
+   
+  if (!rank){
+   
+    totallength /= 1024*1024;
     fprintf (stderr,
-	     "Approx. %lf MB data took %lf(s) with write bandwidth of %lf MB/s\n",
+	     "Approx. %lf MB data took %lf(s)\n",
 	     totallength,
-	     max_time,
-	     totallength/max_time);
+	     max_time);
   }
   
-
   
   if (f_dataspaces)
     free(f_dataspaces);
