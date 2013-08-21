@@ -906,7 +906,7 @@ H5_DLL htri_t H5D__mpio_opt_possible_mdset(const size_t count, H5D_io_info_md_t 
 
 #endif /* H5_HAVE_PARALLEL */
 
-#ifndef JK_SLCOSE_ISSUE
+#ifndef JK_SLCLOSE_ISSUE
 /* JK this is needed for CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term_md */
 H5_DLL herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
 #endif

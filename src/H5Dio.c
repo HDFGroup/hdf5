@@ -1692,6 +1692,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     H5D_t *dataset=NULL;  // old args
     const H5S_t *file_space = NULL; // old arg
     const H5S_t *mem_space = NULL;  // old arg
+    size_t i;
     #endif
     #ifndef JK_SHAPE_SAME_P
     /* save original wbuf */
@@ -1742,8 +1743,28 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate ori buf array")
     #endif
 
+    #ifdef JK_TODO_D866
+    #ifdef H5_HAVE_PARALLEL
+    /* JK this take care of H5AC_COLLECTIVE_META_WRITE can not be find by
+     * H5P_get() when # of dset is over 865. */
+    {
+     unsigned coll_meta_write = 1;
+     htri_t  check_prop;
+     check_prop = H5Pexist(dxpl_id, H5AC_COLLECTIVE_META_WRITE_NAME);
+     //printf("JKDBG %s|%d check Pexist: %d\n", __FUNCTION__, __LINE__, check_prop);
+     if(0 == check_prop)
+     {
+         //printf("JKDBG %s|%d H5AC_COLLECTIVE_META_WRITE_NAME NOT Exist!\n", __FUNCTION__, __LINE__);
+         if (0 > H5Pinsert2(dxpl_id, H5AC_COLLECTIVE_META_WRITE_NAME,H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write, NULL, NULL, NULL, NULL, NULL, NULL)) {
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+         }
+     }
+    }
+   #endif    
+   #endif // JK_TODO_D866
+
   /* iterate dsets */
-  for (unsigned int i=0; i < count; i++)
+  for (i=0; i < count; i++)
   {
     /* check args */
     // JK - dataset : info[i].dset_id , loop
@@ -1858,10 +1879,11 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 
     #ifdef JK_DBG_SHAPE_SAME_P
     {
-        int a;
-        printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before> buf : ", __FUNCTION__, __LINE__);
-        for (a=0; a < 10; a++) {
-            printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
+        size_t a;
+        printf("\nJKDBG %s|%d DBG_SHAPE_SAME_P Before> buf : ", __FUNCTION__, __LINE__);
+        for (a=0; a < 2; a++) {
+            //printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
+            printf("%f ", (float) ((float *)info[i].wbuf)[a]);
         }
         printf(" \n");
         printf("JKDBG %s|%d DBG_SHAPE_SAME_P Before> ShapeSame:%d  Mem Ndims: %u File Ndims: %u \n", __FUNCTION__, __LINE__, H5S_select_shape_same(mem_space, file_space), H5S_GET_EXTENT_NDIMS(mem_space), H5S_GET_EXTENT_NDIMS(file_space));
@@ -1920,7 +1942,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     } /* end if */
     #ifdef JK_DBG_SHAPE_SAME_P
     {
-        int a;
+        size_t a;
         printf("JKDBG %s|%d DBG_SHAPE_SAME_P After> buf : ", __FUNCTION__, __LINE__);
         for (a=0; a < 10; a++) {
             printf("%u ", (uint32_t) ((uint32_t *)info[i].wbuf)[a]);
@@ -2007,6 +2029,10 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
     if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     #else
+     #ifdef JK_DBG
+     printf("JKDBG %s|%d> i:%d\n", __FUNCTION__, __LINE__, i);
+     #endif
+
     // JK May reduce .type_info
     if(dset_info_array[i].layout_ops.io_init_md && (*dset_info_array[i].layout_ops.io_init_md)(&io_info_md, &(dset_info_array[i].type_info), nelmts, file_space, mem_space, &(dset_info_array[i])) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
@@ -2076,7 +2102,7 @@ H5D__write_mdset (hid_t file_id, size_t count, H5D_rw_multi_t *info, hid_t dxpl_
 done:
 
   /* iterate dsets */
-  for (unsigned int i=0; i < count; i++) 
+  for (i=0; i < count; i++) 
   {
     #ifdef JK_DBG
     if(dset_info_array[i].layout)
@@ -2105,7 +2131,7 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
 
-    for (unsigned int i=0; i<count; i++)
+    for (i=0; i< count; i++)
     {
     /* Shut down datatype info for operation */
     #ifdef JK_ORI

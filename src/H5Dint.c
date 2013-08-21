@@ -1394,7 +1394,7 @@ H5D_close(H5D_t *dataset)
         /* Free cached information for each kind of dataset */
         switch(dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
-                #ifndef JK_SLCOSE_ISSUE
+                #ifndef JK_SLCLOSE_ISSUE
                 /* Check for skip list for iterating over pieces during I/O to close */
                 if(dataset->shared->cache.sel_pieces) {
                     size_t cnt=0; 
@@ -1416,7 +1416,7 @@ H5D_close(H5D_t *dataset)
                     H5SL_close(dataset->shared->cache.chunk.sel_chunks);
                     dataset->shared->cache.chunk.sel_chunks = NULL;
                 } /* end if */
-                #ifndef JK_SLCOSE_ISSUE
+                #ifndef JK_SLCLOSE_ISSUE
                 /* Check for skip list for iterating over pieces during I/O to close */
                 if(dataset->shared->cache.sel_pieces) {
                     size_t cnt=0; 

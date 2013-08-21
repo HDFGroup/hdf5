@@ -194,7 +194,7 @@ static herr_t H5D__chunk_write_mdset(const hid_t file_id, const size_t count, H5
 #endif
 static herr_t H5D__chunk_flush(H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
-#ifdef JK_SLCOSE_ISSUE_REMOVE // also use in H5Dcontig.c
+#ifdef JK_SLCLOSE_ISSUE_REMOVE // also use in H5Dcontig.c
 //static herr_t H5D__piece_io_term_mdset(const H5D_dset_info_t *di, H5D_io_info_md_t *io_info_md);
 #endif
 static herr_t H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
@@ -1241,7 +1241,7 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
             fflush (stdout);
             #endif
 
-            #ifndef JK_SLCOSE_ISSUE
+            #ifndef JK_SLCLOSE_ISSUE
             /* keep the skip list in cache, so do not need to recreate until close */
             io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
             #endif
@@ -1253,7 +1253,7 @@ H5D__chunk_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *ty
             io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
 
         HDassert(io_info_md->sel_pieces);
-        #else
+        #else // JK_MULTI_DSET 
         if(NULL == dataset->shared->cache.sel_pieces) {
             #ifndef JK_SL_P_FADDR
             if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1748,13 +1748,19 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     hsize_t     sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
     hsize_t     sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
     unsigned    u;                          /* Local index variable */
+    #ifndef JK_SL_P_FADDR_NOTNEED_REMOVE
+    //haddr_t prev_tag = HADDR_UNDEF;
+    #endif
     #ifndef JK_SL_P_FADDR
-    haddr_t prev_tag = HADDR_UNDEF;
     H5D_chunk_ud_t udata;   /* User data for querying piece info */
     #endif
     herr_t	ret_value = SUCCEED;        /* Return value */
 
+    #ifndef JK_SL_P_FADDR_2
+    FUNC_ENTER_STATIC_TAG(io_info_md->dxpl_id, di->dset->oloc.addr, FAIL)
+    #else
     FUNC_ENTER_STATIC
+    #endif
 
     /* Sanity check */
     HDassert(di->f_ndims > 0);
@@ -1820,15 +1826,19 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
     #endif
-    #ifndef JK_SL_P_FADDR
+    #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
     /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
     if(H5AC_tag(io_info_md->dxpl_id, piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+    #endif
+    #ifndef JK_SL_P_FADDR
     /* get chunk file address */
     if(H5D__chunk_lookup(piece_info->dset_info->dset, io_info_md->dxpl_id,
             piece_info->coords, piece_info->index, &udata) < 0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
     piece_info->faddr = udata.addr;
+    #endif
+    #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
     /* Reset metadata tagging */
     if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
@@ -1840,7 +1850,11 @@ H5D__create_piece_map_single(H5D_dset_info_t *di, const H5D_io_info_md_t
     #endif
 
 done:
+    #ifndef JK_JK_SL_P_FADDR_2
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    #else
     FUNC_LEAVE_NOAPI(ret_value)
+    #endif
 } /* end H5D__create_piece_map_single() */
 #endif
 
@@ -2040,8 +2054,15 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
     int         curr_dim;                   /* Current dimension to increment */
     unsigned    u;                          /* Local index variable */
     herr_t	ret_value = SUCCEED;        /* Return value */
+    #ifndef JK_TEST
+    static unsigned int k = 0;
+    #endif
 
+    #ifndef JK_SL_P_FADDR_2
+    FUNC_ENTER_STATIC_TAG(io_info_md->dxpl_id, dinfo->dset->oloc.addr, FAIL)
+    #else
     FUNC_ENTER_STATIC
+    #endif
 
     /* Sanity check */
     HDassert(dinfo->f_ndims > 0);
@@ -2069,8 +2090,10 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
 
     /* Iterate through each chunk in the dataset */
     while(sel_points) {
+        #ifndef JK_SL_P_FADDR_NOTNEED_REMOVE
+        //haddr_t prev_tag = HADDR_UNDEF;
+        #endif
         #ifndef JK_SL_P_FADDR
-        haddr_t prev_tag = HADDR_UNDEF;
         H5D_chunk_ud_t udata;   /* User data for querying chunk info */
         #endif
         /* Check for intersection of temporary chunk and file selection */
@@ -2150,23 +2173,38 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
             /* make connection to related dset info from this piece_info */
             new_piece_info->dset_info = dinfo;
             #endif
-            #ifndef JK_SL_P_FADDR
+
+            #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
             /* set metadata tagging with dset oheader addr for H5D__chunk_lookup */
-            if(H5AC_tag(io_info_md->dxpl_id, new_piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+            //if(H5AC_tag(io_info_md->dxpl_id, new_piece_info->dset_info->dset->oloc.addr, &prev_tag) < 0)
+            //    HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
+            #endif
+            #ifndef JK_SL_P_FADDR // JK_TEST
+            #ifdef JK_DBG
+            printf("JKDBG %s|%d > coord [0]: %llu, [1]: %llu, cindex: %llu\n", __FUNCTION__, __LINE__, new_piece_info->coords[0], new_piece_info->coords[1], new_piece_info->index);
+            #endif
+
             /* get chunk file address */
             if(H5D__chunk_lookup(new_piece_info->dset_info->dset, io_info_md->dxpl_id,
                     new_piece_info->coords, new_piece_info->index, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+            //HDassert(H5F_addr_defined(udata.addr));
+
             new_piece_info->faddr = udata.addr;
+            //If CONTIG : new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr OR
+            //                                    io_info_md->store->contig.dset_addr;
+            #else // JKTEST
+            new_piece_info->faddr = 0xaa2 + (k*8);
+            k++;
+            #endif // JK_SL_P_FADDR
+            #ifdef JK_SL_P_FADDR_NOTNEED_REMOVE
             /* Reset metadata tagging */
-            if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
-                HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
-            //If CONTIG : new_piece_info->faddr = io_info_md->store->contig->dset_addr;
+            //if(H5AC_tag(io_info_md->dxpl_id, prev_tag, NULL) < 0)
+            //    HDONE_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to apply metadata tag")
             #endif
 
             #ifdef JK_DBG
-            printf("JKDBG %s|%d H5D__create_piece_file_map_hyper()> new_piece_info->faddr: %x\n", __FILE__, __LINE__,new_piece_info->faddr);
+            printf("JKDBG %s|%d> k:%d,  new_piece_info->faddr: 0x%x\n", __FUNCTION__, __LINE__,k, new_piece_info->faddr);
             #endif
             
 
@@ -2225,7 +2263,11 @@ H5D__create_piece_file_map_hyper(H5D_dset_info_t *dinfo, const H5D_io_info_md_t
     } /* end while */
 
 done:
+    #ifndef JK_JK_SL_P_FADDR_2
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    #else
     FUNC_LEAVE_NOAPI(ret_value)
+    #endif
 } /* end H5D__create_chunk_file_map_hyper() */
 #endif
 
@@ -3408,7 +3450,7 @@ done:
 } /* end H5D__chunk_io_term() */
 
 #ifndef JK_WORK
- #ifndef JK_SLCOSE_ISSUE // also use in H5Dcontig.c
+ #ifndef JK_SLCLOSE_ISSUE // also use in H5Dcontig.c
  herr_t
  #else
 static herr_t

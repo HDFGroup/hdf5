@@ -1675,13 +1675,31 @@ H5D__all_piece_collective_io(UNUSED const hid_t file_id, const size_t count,
     int                *chunk_mpi_mem_counts = NULL;    /* Count of MPI memory datatype for each chunk */
     int                 mpi_code;           /* MPI return code */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode = H5D_MPIO_LINK_CHUNK;
-    H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CHUNK_COLLECTIVE;
+    #ifndef JK_ALSO_CONTIG1
+    H5D_mpio_actual_io_mode_t actual_io_mode = 0;
+    //H5D_MPIO_CHUNK_COLLECTIVE;
+    #endif
+    
     herr_t              ret_value = SUCCEED;
     #ifndef JK_DBG
     int mpi_rank;
     #endif
 
     FUNC_ENTER_STATIC
+
+    #ifndef JK_ALSO_CONTIG1
+    /* set actual_io_mode */ 
+    for (i=0; i < count; i++) {
+        #ifndef JK_ACTUALIO_MDSET
+        if (io_info_md->dsets_info[i].layout->type == H5D_CHUNKED)
+            actual_io_mode |= H5D_MPIO_CHUNK_COLLECTIVE;
+        else if (io_info_md->dsets_info[i].layout->type == H5D_CONTIGUOUS)
+            actual_io_mode |= H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+        else
+            HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
+        #endif
+    }
+    #endif
 
     #ifndef JK_DBG
     mpi_rank = H5F_mpi_get_rank(io_info_md->dsets_info[0].dset->oloc.file);

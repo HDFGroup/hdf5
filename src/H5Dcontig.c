@@ -146,7 +146,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_writevv,
     H5D__contig_flush,
     NULL,
-    #ifndef JK_SLCOSE_ISSUE
+    #ifndef JK_SLCLOSE_ISSUE
     H5D__piece_io_term_mdset
     #endif
 }};
@@ -648,7 +648,7 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
         if(NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
         #endif
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
-        #ifndef JK_SLCOSE_ISSUE
+        #ifndef JK_SLCLOSE_ISSUE
         /* keep the skip list in cache, so do not need to recreate until close */
         io_info_md->sel_pieces = dataset->shared->cache.sel_pieces;
         #endif
@@ -891,12 +891,14 @@ H5D__contig_io_init_mdset(H5D_io_info_md_t *io_info_md, const H5D_type_info_t *t
        } /* end while */
        #endif
     }
-    // JK_TODO_POINT_NONE Test POINT|NONE Selection
+    #ifdef JK_TODO_NOT_NECESSARY_REMOVE
+    // Not Need for CONTIG as it just one chunk
     else {
-        #ifdef JK_DBG
+        #ifndef JK_DBG
         printf("JKDBG %s|%d> POINT or NONE SELECT nelmts:%llu\n", __FUNCTION__, __LINE__,nelmts);
         #endif
     }
+    #endif
 
     #ifndef JK_TODO_TEST_NOT_SAME_SHAPE
     /* 
