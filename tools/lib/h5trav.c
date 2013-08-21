@@ -724,22 +724,22 @@ trav_table_add(trav_table_t *table,
                     const char *path,
                     const H5O_info_t *oinfo)
 {
-    size_t new;
+    size_t new_obj;
 
     if(table->nobjs == table->size) {
         table->size = MAX(1, table->size * 2);
         table->objs = (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
     } /* end if */
 
-    new = table->nobjs++;
-    table->objs[new].objno = oinfo ? oinfo->addr : HADDR_UNDEF;
-    table->objs[new].flags[0] = table->objs[new].flags[1] = 0;
-    table->objs[new].is_same_trgobj = 0;
-    table->objs[new].name = (char *)HDstrdup(path);
-    table->objs[new].type = oinfo ? (h5trav_type_t)oinfo->type : H5TRAV_TYPE_LINK;
-    table->objs[new].nlinks = 0;
-    table->objs[new].sizelinks = 0;
-    table->objs[new].links = NULL;
+    new_obj = table->nobjs++;
+    table->objs[new_obj].objno = oinfo ? oinfo->addr : HADDR_UNDEF;
+    table->objs[new_obj].flags[0] = table->objs[new_obj].flags[1] = 0;
+    table->objs[new_obj].is_same_trgobj = 0;
+    table->objs[new_obj].name = (char *)HDstrdup(path);
+    table->objs[new_obj].type = oinfo ? (h5trav_type_t)oinfo->type : H5TRAV_TYPE_LINK;
+    table->objs[new_obj].nlinks = 0;
+    table->objs[new_obj].sizelinks = 0;
+    table->objs[new_obj].links = NULL;
 }
 
 /*-------------------------------------------------------------------------
@@ -807,23 +807,23 @@ void trav_table_addflags(unsigned *flags,
                          h5trav_type_t type,
                          trav_table_t *table)
 {
-    unsigned int new;
+    unsigned int new_obj;
 
     if(table->nobjs == table->size) {
         table->size = MAX(1, table->size * 2);
         table->objs = (trav_obj_t *)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
     } /* end if */
 
-    new = table->nobjs++;
-    table->objs[new].objno = 0;
-    table->objs[new].flags[0] = flags[0];
-    table->objs[new].flags[1] = flags[1];
-    table->objs[new].is_same_trgobj = 0;
-    table->objs[new].name = (char *)HDstrdup(name);
-    table->objs[new].type = type;
-    table->objs[new].nlinks = 0;
-    table->objs[new].sizelinks = 0;
-    table->objs[new].links = NULL;
+    new_obj = table->nobjs++;
+    table->objs[new_obj].objno = 0;
+    table->objs[new_obj].flags[0] = flags[0];
+    table->objs[new_obj].flags[1] = flags[1];
+    table->objs[new_obj].is_same_trgobj = 0;
+    table->objs[new_obj].name = (char *)HDstrdup(name);
+    table->objs[new_obj].type = type;
+    table->objs[new_obj].nlinks = 0;
+    table->objs[new_obj].sizelinks = 0;
+    table->objs[new_obj].links = NULL;
 }
 
 
@@ -890,7 +890,11 @@ void trav_table_free( trav_table_t *table )
 }
 
 static herr_t
-trav_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo, void *op_data)
+trav_attr(hid_t
+#ifndef H5TRAV_PRINT_SPACE
+UNUSED
+#endif /* H5TRAV_PRINT_SPACE */
+obj, const char *attr_name, const H5A_info_t UNUSED *ainfo, void *op_data)
 {
     char               *buf;
 

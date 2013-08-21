@@ -157,11 +157,11 @@ error(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    fprintf(stderr, "%s: error: ", prog);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
+    HDfprintf(stderr, "%s: error: ", prog);
+    HDvfprintf(stderr, fmt, ap);
+    HDfprintf(stderr, "\n");
     va_end(ap);
-    exit(EXIT_FAILURE);
+    HDexit(EXIT_FAILURE);
 }
 
 /*
@@ -174,9 +174,9 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!getenv("HDF5_NOCLEANUP"))
-        unlink(filename);
-    free(filename);
+    if (!HDgetenv("HDF5_NOCLEANUP"))
+        HDunlink(filename);
+    HDfree(filename);
 }
 
 static void
@@ -189,7 +189,7 @@ write_file(Bytef *source, uLongf sourceLen)
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
     destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
-    dest = (Bytef *)malloc(destLen);
+    dest = (Bytef *)HDmalloc(destLen);
 
     if (!dest)
         error("out of memory");
@@ -204,7 +204,7 @@ write_file(Bytef *source, uLongf sourceLen)
                             ((double)timer_start.tv_usec) / MICROSECOND);
 
     if (report_once_flag) {
-        printf("\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
+        HDfprintf(stdout, "\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
         report_once_flag = 0;
     }
 
@@ -213,10 +213,10 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* loop to make sure we write everything out that we want to write */
     for (;;) {
-        int rc = (int)write(output, d_ptr, (size_t)d_len);
+        int rc = (int)HDwrite(output, d_ptr, (size_t)d_len);
 
         if (rc == -1)
-            error(strerror(errno));
+            error(HDstrerror(errno));
 
         if (rc == (int)d_len)
             break;
@@ -225,7 +225,7 @@ write_file(Bytef *source, uLongf sourceLen)
         d_ptr += rc;
     }
 
-    free(dest);
+    HDfree(dest);
 }
 
 /*
@@ -299,7 +299,7 @@ static void
 get_unique_name(void)
 {
     const char *prefix = NULL;
-    const char *env = getenv("HDF5_PREFIX");
+    const char *env = HDgetenv("HDF5_PREFIX");
 
     if (env)
         prefix = env;
@@ -309,19 +309,19 @@ get_unique_name(void)
 
     if (prefix)
         /* 2 = 1 for '/' + 1 for null terminator */
-        filename = (char *) HDmalloc(strlen(prefix) + strlen(ZIP_PERF_FILE) + 2);
+        filename = (char *) HDmalloc(HDstrlen(prefix) + HDstrlen(ZIP_PERF_FILE) + 2);
     else
-        filename = (char *) HDmalloc(strlen(ZIP_PERF_FILE) + 1);
+        filename = (char *) HDmalloc(HDstrlen(ZIP_PERF_FILE) + 1);
 
     if (!filename)
         error("out of memory");
 
     filename[0] = 0;
     if (prefix){
-        strcpy(filename, prefix);
-        strcat(filename, "/");
+        HDstrcpy(filename, prefix);
+        HDstrcat(filename, "/");
     }
-    strcat(filename, ZIP_PERF_FILE);
+    HDstrcat(filename, ZIP_PERF_FILE);
 }
 
 /*
@@ -334,30 +334,30 @@ get_unique_name(void)
 static void
 usage(void)
 {
-    printf("usage: %s [OPTIONS]\n", prog);
-    printf("  OPTIONS\n");
-    printf("     -h, --help                 Print this usage message and exit\n");
-    printf("     -1...-9                    Level of compression, from 1 to 9\n");
-    printf("     -c P, --compressability=P  Percentage of compressability of the random\n");
-    printf("                                data you want [default: 0]");
-    printf("     -s S, --file-size=S        Maximum size of uncompressed file [default: 64M]\n");
-    printf("     -B S, --max-buffer_size=S  Maximum size of buffer [default: 1M]\n");
-    printf("     -b S, --min-buffer_size=S  Minumum size of buffer [default: 128K]\n");
-    printf("     -p D, --prefix=D           The directory prefix to place the file\n");
-    printf("     -r, --random-test          Use random data to write to the file\n");
-    printf("                                [default: no]\n");
-    printf("\n");
-    printf("  D  - a directory which exists\n");
-    printf("  P  - a number between 0 and 100\n");
-    printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
-    printf("\n");
-    printf("          K - Kilobyte (%d)\n", ONE_KB);
-    printf("          M - Megabyte (%d)\n", ONE_MB);
-    printf("          G - Gigabyte (%d)\n", ONE_GB);
-    printf("\n");
-    printf("      Example: 37M = 37 Megabytes = %d bytes\n", 37 * ONE_MB);
-    printf("\n");
-    fflush(stdout);
+    HDfprintf(stdout, "usage: %s [OPTIONS]\n", prog);
+    HDfprintf(stdout, "  OPTIONS\n");
+    HDfprintf(stdout, "     -h, --help                 Print this usage message and exit\n");
+    HDfprintf(stdout, "     -1...-9                    Level of compression, from 1 to 9\n");
+    HDfprintf(stdout, "     -c P, --compressability=P  Percentage of compressability of the random\n");
+    HDfprintf(stdout, "                                data you want [default: 0]");
+    HDfprintf(stdout, "     -s S, --file-size=S        Maximum size of uncompressed file [default: 64M]\n");
+    HDfprintf(stdout, "     -B S, --max-buffer_size=S  Maximum size of buffer [default: 1M]\n");
+    HDfprintf(stdout, "     -b S, --min-buffer_size=S  Minumum size of buffer [default: 128K]\n");
+    HDfprintf(stdout, "     -p D, --prefix=D           The directory prefix to place the file\n");
+    HDfprintf(stdout, "     -r, --random-test          Use random data to write to the file\n");
+    HDfprintf(stdout, "                                [default: no]\n");
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout, "  D  - a directory which exists\n");
+    HDfprintf(stdout, "  P  - a number between 0 and 100\n");
+    HDfprintf(stdout, "  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout, "          K - Kilobyte (%d)\n", ONE_KB);
+    HDfprintf(stdout, "          M - Megabyte (%d)\n", ONE_MB);
+    HDfprintf(stdout, "          G - Gigabyte (%d)\n", ONE_GB);
+    HDfprintf(stdout, "\n");
+    HDfprintf(stdout, "      Example: 37M = 37 Megabytes = %d bytes\n", 37 * ONE_MB);
+    HDfprintf(stdout, "\n");
+    HDfflush(stdout);
 }
 
 /*
@@ -380,7 +380,7 @@ parse_size_directive(const char *size)
     unsigned long s;
     char *endptr;
 
-    s = strtoul(size, &endptr, 10);
+    s = HDstrtoul(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -419,16 +419,16 @@ fill_with_random_data(Bytef *src, uLongf src_len)
         Bytef *buf = src;
         int fd = HDopen("/dev/urandom", O_RDONLY, 0);
 
-        printf("Using /dev/urandom for random data\n");
+        HDfprintf(stdout, "Using /dev/urandom for random data\n");
 
         if (fd < 0)
-            error(strerror(errno));
+            error(HDstrerror(errno));
 
         for (;;) {
-            ssize_t rc = read(fd, buf, src_len);
+            ssize_t rc = HDread(fd, buf, src_len);
 
             if (rc == -1)
-                error(strerror(errno));
+                error(HDstrerror(errno));
 
             if (rc == (ssize_t)len)
                 break;
@@ -437,7 +437,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
             len -= rc;
         }
     } else {
-        printf("Using random() for random data\n");
+        HDfprintf(stdout, "Using random() for random data\n");
 
         for (u = 0; u < src_len; ++u)
             src[u] = (Bytef)(0xff & HDrandom());
@@ -446,7 +446,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     if (compress_percent) {
         unsigned long s = src_len * compress_percent / 100;
 
-        memset(src, '\0', s);
+        HDmemset(src, '\0', s);
     }
 }
 
@@ -463,7 +463,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         register unsigned long i, iters;
 
         iters = file_size / src_len;
-        src = (Bytef *)calloc(1, sizeof(Bytef) * src_len);
+        src = (Bytef *)HDcalloc(1, sizeof(Bytef) * src_len);
 
         if (!src) {
             cleanup();
@@ -475,26 +475,26 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         if (random_test)
             fill_with_random_data(src, src_len);
 
-        printf("Buffer size == ");
+        HDfprintf(stdout, "Buffer size == ");
 
         if (src_len >= ONE_KB && (src_len % ONE_KB) == 0) {
             if (src_len >= ONE_MB && (src_len % ONE_MB) == 0) {
-                printf("%ldMB", src_len / ONE_MB);
+                HDfprintf(stdout, "%ldMB", src_len / ONE_MB);
             } else {
-                printf("%ldKB", src_len / ONE_KB);
+                HDfprintf(stdout, "%ldKB", src_len / ONE_KB);
             }
         } else {
-            printf("%ld", src_len);
+            HDfprintf(stdout, "%ld", src_len);
         }
 
-        printf("\n");
+        HDfprintf(stdout, "\n");
 
         /* do uncompressed data write */
         HDgettimeofday(&timer_start, NULL);
         output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
-            error(strerror(errno));
+            error(HDstrerror(errno));
 
         for (i = 0; i <= iters; ++i) {
             Bytef *s_ptr = src;
@@ -502,10 +502,10 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
 
             /* loop to make sure we write everything out that we want to write */
             for (;;) {
-                ssize_t rc = write(output, s_ptr, s_len);
+                ssize_t rc = HDwrite(output, s_ptr, s_len);
 
                 if (rc == -1)
-                    error(strerror(errno));
+                    error(HDstrerror(errno));
 
                 if (rc == (ssize_t)s_len)
                     break;
@@ -515,7 +515,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
             }
         }
 
-        close(output);
+        HDclose(output);
         HDgettimeofday(&timer_stop, NULL);
 
         total_time = ((double)timer_stop.tv_sec +
@@ -523,17 +523,17 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
                      ((double)timer_start.tv_sec +
                             ((double)timer_start.tv_usec) / MICROSECOND);
 
-        printf("\tUncompressed Write Time: %.2fs\n", total_time);
-        printf("\tUncompressed Write Throughput: %.2fMB/s\n",
+        HDfprintf(stdout, "\tUncompressed Write Time: %.2fs\n", total_time);
+        HDfprintf(stdout, "\tUncompressed Write Throughput: %.2fMB/s\n",
                MB_PER_SEC(file_size, total_time));
 
-        unlink(filename);
+        HDunlink(filename);
 
         /* do compressed data write */
         output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
-            error(strerror(errno));
+            error(HDstrerror(errno));
 
         report_once_flag = 1;
         HDgettimeofday(&timer_start, NULL);
@@ -541,7 +541,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         for (total_len = 0; total_len < file_size; total_len += src_len)
             write_file(src, src_len);
 
-        close(output);
+        HDclose(output);
         HDgettimeofday(&timer_stop, NULL);
 
         total_time = ((double)timer_stop.tv_sec +
@@ -549,13 +549,13 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
                      ((double)timer_start.tv_sec +
                             ((double)timer_start.tv_usec) / MICROSECOND);
 
-        printf("\tCompressed Write Time: %.2fs\n", total_time);
-        printf("\tCompressed Write Throughput: %.2fMB/s\n",
+        HDfprintf(stdout, "\tCompressed Write Time: %.2fs\n", total_time);
+        HDfprintf(stdout, "\tCompressed Write Throughput: %.2fMB/s\n",
                MB_PER_SEC(file_size, total_time));
-        printf("\tCompression Time: %gs\n", compression_time);
+        HDfprintf(stdout, "\tCompression Time: %gs\n", compression_time);
 
-        unlink(filename);
-        free(src);
+        HDunlink(filename);
+        HDfree(src);
     }
 }
 
@@ -593,7 +593,7 @@ main(int argc, char **argv)
             min_buf_size = parse_size_directive(opt_arg);
             break;
         case 'c':
-            compress_percent = (int)strtol(opt_arg, NULL, 10);
+            compress_percent = (int)HDstrtol(opt_arg, NULL, 10);
 
             if (compress_percent < 0)
                 compress_percent = 0;
@@ -626,12 +626,12 @@ main(int argc, char **argv)
         error("minmum buffer size (%d) exceeds maximum buffer size (%d)",
               min_buf_size, max_buf_size);
 
-    printf("Filesize: %ld\n", file_size);
+    HDfprintf(stdout, "Filesize: %ld\n", file_size);
 
     if (compress_level == Z_DEFAULT_COMPRESSION)
-        printf("Compression Level: 6\n");
+        HDfprintf(stdout, "Compression Level: 6\n");
     else
-        printf("Compression Level: %d\n", compress_level);
+        HDfprintf(stdout, "Compression Level: %d\n", compress_level);
 
     get_unique_name();
     do_write_test(file_size, min_buf_size, max_buf_size);
@@ -652,7 +652,7 @@ main(int argc, char **argv)
 int
 main(void)
 {
-    printf("No compression IO performance because zlib was not configured\n");
+    HDfprintf(stdout, "No compression IO performance because zlib was not configured\n");
     return EXIT_SUCCESS;
 }
 

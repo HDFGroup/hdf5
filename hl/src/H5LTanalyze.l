@@ -157,7 +157,11 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
                     return token('"');
                  }
 <TAG_STRING>[^\"]+       {
+#ifdef H5_HAVE_WIN32_API
+                    H5LTyylval.sval = _strdup(yytext);
+#else /* H5_HAVE_WIN32_API */
                     H5LTyylval.sval = strdup(yytext);
+#endif  /* H5_HAVE_WIN32_API */
                     BEGIN INITIAL;
                     return STRING;
                  }

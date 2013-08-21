@@ -414,7 +414,11 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     }
 
     /* Get the file descriptor (needed for truncate and some Windows information) */
+#ifdef H5_HAVE_WIN32_API
+    file->fd = _fileno(file->fp);
+#else /* H5_HAVE_WIN32_API */
     file->fd = fileno(file->fp);
+#endif /* H5_HAVE_WIN32_API */
     if(file->fd < 0) {
         free(file);
         fclose(f);

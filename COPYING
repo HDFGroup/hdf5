@@ -87,6 +87,12 @@ and/or accompanying materials:
    opinions of authors expressed herein do not necessarily state or reflect 
    those of the United States Government or the University of California, 
    and shall not be used for advertising or product endorsement purposes.
+
 -----------------------------------------------------------------------------
 
+HDF5 is available with the SZIP compression library but SZIP is not part 
+of HDF5 and has separate copyright and license terms. See “Szip Compression 
+in HDF Products” (www.hdfgroup.org/doc_resource/SZIP/) for further details.
+
+-----------------------------------------------------------------------------
 

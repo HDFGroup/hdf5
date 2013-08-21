@@ -230,7 +230,7 @@ void test_szip_filter(H5File& file1)
             issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
         }
 
-        delete tconv_buf;
+        delete[] tconv_buf;
     } // if szip presents
     else {
 	SKIPPED();

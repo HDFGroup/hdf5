@@ -925,7 +925,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
     H5S_t *dst_space;           /* Dataspace */
     H5S_sel_iter_t iter;        /* Selection iteration info*/
     hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
-    void *src_buf = NULL;       /* Source (contiguous) data buffer */
+    const void *src_buf = NULL; /* Source (contiguous) data buffer */
     size_t src_buf_nbytes = 0;  /* Size of src_buf */
     size_t type_size;           /* Datatype element size */
     hssize_t nelmts;            /* Number of remaining elements in selection */
@@ -1018,8 +1018,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dgather(hid_t src_space_id, void *src_buf, hid_t type_id, size_t dst_buf_size,
-    void *dst_buf, H5D_gather_func_t op, void *op_data)
+H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
+    size_t dst_buf_size, void *dst_buf, H5D_gather_func_t op, void *op_data)
 {
     H5T_t *type;                /* Datatype */
     H5S_t *src_space;           /* Dataspace */

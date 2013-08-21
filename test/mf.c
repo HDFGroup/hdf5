@@ -7375,7 +7375,7 @@ test_dichotomy(const char *env_h5_drvr, hid_t fapl)
     char		filename[FILENAME_LEN]; /* Filename to use */
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FD_mem_t 		type, stype;
-    haddr_t		addr1, addr2, addr3, saddr1, saddr2;
+    haddr_t		addr1, addr3, saddr1, saddr2;
     hbool_t             contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
     TESTING("Allocation from raw or metadata free-space manager");
@@ -7399,7 +7399,7 @@ test_dichotomy(const char *env_h5_drvr, hid_t fapl)
         addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
         /* Allocate the second block of type H5FD_MEM_SUPER */
-        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
         /* Allocate the first block of type H5FD_MEM_DRAW */
         stype = H5FD_MEM_DRAW;

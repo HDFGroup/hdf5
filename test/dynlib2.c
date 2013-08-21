@@ -71,6 +71,9 @@ H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
     if(cd_nelmts > 0)
         return(0);
 
+    /* Assignment to eliminate unused parameter warning. */
+    cd_values = cd_values;
+
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Divide the original value with MULTIPLIER */
         while(buf_left > 0) {
