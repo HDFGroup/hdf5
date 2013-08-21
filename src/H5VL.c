@@ -351,9 +351,10 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:	H5VLregister_object
+ * Function:	H5VLobject_register
  *
- * Purpose:	utility routine to register the native VOL plugin to an ID
+ * Purpose:     Public routine to create an HDF5 hid_t with library
+ *              specific types, bypassing the limitation of H5Iregister.
  *
  * Returns:     Non-negative on success or negative on failure
  *
@@ -381,7 +382,7 @@ H5VLobject_register(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5VLregister_object */
+} /* H5VLobject_register */
 
 
 /*---------------------------------------------------------------------------
