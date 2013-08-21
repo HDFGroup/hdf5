@@ -495,14 +495,7 @@ done:
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    H5O_linfo_t         linfo;		        /* Link info message            */
-    htri_t	        ginfo_exists;
-    htri_t	        linfo_exists;
-    htri_t              pline_exists;
     H5G_t		*group = NULL;
-    H5P_genplist_t      *gcpl_plist;
-    H5P_genplist_t      *new_plist;
-    hid_t		new_gcpl_id = FAIL;
     hid_t		ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
