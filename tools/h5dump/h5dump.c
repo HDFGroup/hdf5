@@ -290,7 +290,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Subsetting Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
-    PRINTVALSTREAM(rawoutstream, " attribute. Subsetting is done by selecting a hyperslab from the data.\n");
+    PRINTVALSTREAM(rawoutstream, " option. Subsetting is done by selecting a hyperslab from the data.\n");
     PRINTVALSTREAM(rawoutstream, " Thus, the options mirror those for performing a hyperslab selection.\n");
     PRINTVALSTREAM(rawoutstream, " One of the START, COUNT, STRIDE, or BLOCK parameters are mandatory if you do subsetting.\n");
     PRINTVALSTREAM(rawoutstream, " The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
