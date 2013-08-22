@@ -120,4 +120,39 @@ IF (BUILD_SHARED_LIBS)
   ENDFOREACH (test_lib ${TEST2_PLUGIN_LIBS})
 ENDIF (BUILD_SHARED_LIBS)
 
+SET (testhdf5_SRCS
+    ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
+    ${HDF5_TEST_SOURCE_DIR}/tarray.c
+    ${HDF5_TEST_SOURCE_DIR}/tattr.c
+    ${HDF5_TEST_SOURCE_DIR}/tchecksum.c
+    ${HDF5_TEST_SOURCE_DIR}/tconfig.c
+    ${HDF5_TEST_SOURCE_DIR}/tcoords.c
+    ${HDF5_TEST_SOURCE_DIR}/tfile.c
+    ${HDF5_TEST_SOURCE_DIR}/tgenprop.c
+    ${HDF5_TEST_SOURCE_DIR}/th5o.c
+    ${HDF5_TEST_SOURCE_DIR}/th5s.c
+    ${HDF5_TEST_SOURCE_DIR}/theap.c
+    ${HDF5_TEST_SOURCE_DIR}/tid.c
+    ${HDF5_TEST_SOURCE_DIR}/titerate.c
+    ${HDF5_TEST_SOURCE_DIR}/tmeta.c
+    ${HDF5_TEST_SOURCE_DIR}/tmisc.c
+    ${HDF5_TEST_SOURCE_DIR}/trefer.c
+    ${HDF5_TEST_SOURCE_DIR}/trefstr.c
+    ${HDF5_TEST_SOURCE_DIR}/tselect.c
+    ${HDF5_TEST_SOURCE_DIR}/tskiplist.c
+    ${HDF5_TEST_SOURCE_DIR}/tsohm.c
+    ${HDF5_TEST_SOURCE_DIR}/ttime.c
+    ${HDF5_TEST_SOURCE_DIR}/ttst.c
+    ${HDF5_TEST_SOURCE_DIR}/tunicode.c
+    ${HDF5_TEST_SOURCE_DIR}/tvltypes.c
+    ${HDF5_TEST_SOURCE_DIR}/tvlstr.c
+)
+
+#-- Adding test for testhdf5
+ADD_EXECUTABLE (testhdf5 ${testhdf5_SRCS})
+TARGET_NAMING (testhdf5 ${LIB_TYPE})
+TARGET_C_PROPERTIES (testhdf5 " " " ")
+TARGET_LINK_LIBRARIES (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+SET_TARGET_PROPERTIES (testhdf5 PROPERTIES FOLDER test)
+
 INCLUDE (CMakeTests.cmake)
