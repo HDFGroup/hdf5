@@ -76,7 +76,7 @@ set (CTEST_MAX_N 8)
 set (LOCAL_NO_SUBMIT TRUE)	# No CDash submit.
 set (MODEL "Experimental")
 set (CDASH_LOCAL TRUE)
-set (SITE_BUILDNAME_SUFFIX "SHARED")
+set (SITE_BUILDNAME_SUFFIX "cmakehdf5")
 
 # -- URL set for internal check, default is to not update
 set (LOCAL_SKIP_UPDATE TRUE)
@@ -225,7 +225,7 @@ EOF
 
 
 # Run ctest
-ctest -S $cfgfile -C Release -O ctest.log
+ctest -S $cfgfile -C Release -V -O ctest.log
 exit_code=$?
 if [ $exit_code = 0 ]; then
     echo Complete without error

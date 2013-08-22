@@ -8249,6 +8249,9 @@ loc += fast_dim_buf_off;
 
             duffs_index = (fast_dim_count + 7) / 8;
             switch (fast_dim_count % 8) {
+                default:
+                    HDassert(0 && "This Should never be executed!");
+                    break;
                 case 0:
                     do
                       {

@@ -188,7 +188,7 @@ static struct long_options l_opts[] = {
     { "packed-bits", require_arg, 'M' },
     { "no-compact-subset", no_arg, 'C' },
     { "ddl", optional_arg, 'O' },
-    { "any_object", require_arg, 'N' },
+    { "any_path", require_arg, 'N' },
     { NULL, 0, '\0' }
 };
 

@@ -2161,7 +2161,6 @@ out:
 */
 hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
 {
-    extern int H5LTyyparse(void);
     hid_t   type_id;
 
     if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)

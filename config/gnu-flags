@@ -156,6 +156,11 @@ case "$cc_vendor-$cc_version" in
       gcc-3.*)
         PROD_CFLAGS="-O3"
         ;;
+      gcc-4.8.*)
+	# temp patch: when GCC 4.8.x is used for Linux, dt_arith fails if -O*
+	# is used. Remove any -O* flags. (AKC HDFFV-8500)
+	PROD_CFLAGS="`echo $PROD_CFLAGS | sed -e 's/-O[0-3]*//'`"
+	;;
       gcc-4.*)
         PROD_CFLAGS="-O3"
         ;;

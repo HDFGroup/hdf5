@@ -115,7 +115,7 @@ usage: h5mkgrp [OPTIONS] FILE GROUP...\n\
  *-------------------------------------------------------------------------
  */
 static int
-parse_command_line(int argc, const char *argv[], param_t *params)
+parse_command_line(int argc, const char *argv[], param_t *parms)
 {
     int opt;            /* Option from command line */
     size_t curr_group;  /* Current group name to copy */
@@ -136,17 +136,17 @@ parse_command_line(int argc, const char *argv[], param_t *params)
 
             /* Create objects with the latest version of the format */
             case 'l':
-                params->latest = TRUE;
+                parms->latest = TRUE;
                 break;
 
             /* Create parent groups */
             case 'p':
-                params->parents = TRUE;
+                parms->parents = TRUE;
                 break;
 
             /* Verbose output */
             case 'v':
-                params->verbose = TRUE;
+                parms->verbose = TRUE;
                 break;
 
             /* Display version */
@@ -169,7 +169,7 @@ parse_command_line(int argc, const char *argv[], param_t *params)
     } /* end if */
 
     /* Retrieve file name */
-    params->fname = HDstrdup(argv[opt_ind]);
+    parms->fname = HDstrdup(argv[opt_ind]);
     opt_ind++;
 
     /* Check for group(s) to be created */
@@ -180,24 +180,24 @@ parse_command_line(int argc, const char *argv[], param_t *params)
     } /* end if */
 
     /* Allocate space for the group name pointers */
-    params->ngroups = (argc - opt_ind);
-    params->groups = HDmalloc(params->ngroups * sizeof(char *));
+    parms->ngroups = (argc - opt_ind);
+    parms->groups = HDmalloc(parms->ngroups * sizeof(char *));
 
     /* Retrieve the group names */
     curr_group = 0;
     while(opt_ind < argc) {
-        params->groups[curr_group] = HDstrdup(argv[opt_ind]);
+        parms->groups[curr_group] = HDstrdup(argv[opt_ind]);
         curr_group++;
         opt_ind++;
     } /* end while */
 
 #ifdef QAK
-HDfprintf(stderr, "params->parents = %t\n", params->parents);
-HDfprintf(stderr, "params->verbose = %t\n", params->verbose);
-HDfprintf(stderr, "params->fname = '%s'\n", params->fname);
-HDfprintf(stderr, "params->ngroups = %Zu\n", params->ngroups);
-for(curr_group = 0; curr_group < params->ngroups; curr_group++)
-    HDfprintf(stderr, "params->group[%Zu] = '%s'\n", curr_group, params->groups[curr_group]);
+HDfprintf(stderr, "parms->parents = %t\n", parms->parents);
+HDfprintf(stderr, "parms->verbose = %t\n", parms->verbose);
+HDfprintf(stderr, "parms->fname = '%s'\n", parms->fname);
+HDfprintf(stderr, "parms->ngroups = %Zu\n", parms->ngroups);
+for(curr_group = 0; curr_group < parms->ngroups; curr_group++)
+    HDfprintf(stderr, "parms->group[%Zu] = '%s'\n", curr_group, parms->groups[curr_group]);
 #endif /* QAK */
 
     return(0);

@@ -86,12 +86,12 @@ Then do the following steps:
 			# Read the Details section about parallel tests.
     $ make install
 
-We also suggest that you add "-qxlf90=autodealloc" to FFLAGS when building
+We also suggest that you add "-qxlf90=autodealloc" to FCFLAGS when building
 parallel with fortran enabled.  This can be done by invoking:
 
-    setenv FFLAGS -qxlf90=autodealloc		# 32 bit build
+    setenv FCFLAGS -qxlf90=autodealloc		# 32 bit build
 or
-    setenv FFLAGS "-q64 -qxlf90=autodealloc"	# 64 bit build
+    setenv FCFLAGS "-q64 -qxlf90=autodealloc"	# 64 bit build
 
 prior to running configure.  Recall that the "-q64" is necessary for 64
 bit builds.

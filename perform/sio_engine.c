@@ -1149,25 +1149,25 @@ done:
 hid_t
 set_vfd(parameters *param)
 {
-    hid_t fapl = -1;
+    hid_t my_fapl = -1;
     vfdtype  vfd;
 
     vfd = param->vfd;
 
-    if ((fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
+    if ((my_fapl=H5Pcreate(H5P_FILE_ACCESS))<0) return -1;
 
     if (vfd == sec2) {
         /* Unix read() and write() system calls */
-        if (H5Pset_fapl_sec2(fapl)<0) return -1;
+        if (H5Pset_fapl_sec2(my_fapl)<0) return -1;
     } else if (vfd == stdio) {
         /* Standard C fread() and fwrite() system calls */
-        if (H5Pset_fapl_stdio(fapl)<0) return -1;
+        if (H5Pset_fapl_stdio(my_fapl)<0) return -1;
     } else if (vfd == core) {
         /* In-core temporary file with 1MB increment */
-        if (H5Pset_fapl_core(fapl, (size_t)1024*1024, TRUE)<0) return -1;
+        if (H5Pset_fapl_core(my_fapl, (size_t)1024*1024, TRUE)<0) return -1;
     } else if (vfd == split) {
         /* Split meta data and raw data each using default driver */
-        if (H5Pset_fapl_split(fapl,
+        if (H5Pset_fapl_split(my_fapl,
                               "-m.h5", H5P_DEFAULT,
                               "-r.h5", H5P_DEFAULT)<0)
             return -1;
@@ -1193,7 +1193,7 @@ set_vfd(parameters *param)
             memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
         }
 
-        if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+        if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name,
                               memb_addr, FALSE)<0) {
             return -1;
         }
@@ -1203,20 +1203,20 @@ set_vfd(parameters *param)
         /* Family of files, each 1MB and using the default driver */
         /* if ((val=HDstrtok(NULL, " \t\n\r")))
             fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024); */
-        if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
+        if (H5Pset_fapl_family(my_fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
     } else if (vfd == direct) {
 #ifdef H5_HAVE_DIRECT
         /* Linux direct read() and write() system calls.  Set memory boundary, file block size,
          * and copy buffer size to the default values. */
-        if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
+        if (H5Pset_fapl_direct(my_fapl, 1024, 4096, 8*4096)<0) return -1;
 #endif
     } else {
         /* Unknown driver */
         return -1;
     }
 
-    return fapl;
+    return my_fapl;
 }
 
 /*

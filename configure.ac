@@ -433,14 +433,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
 
   ## --------------------------------------------------------------------
-  ## General Fortran flags
-  ## Only add FFLAGS to FCFLAGS if it's set.
-  if test "x$FFLAGS" != "x" ; then
-    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-    FCFLAGS="${FCFLAGS} ${FFLAGS}"
-  fi
-
-  ## --------------------------------------------------------------------
   ## Fortran source extention
   ##
   AC_FC_SRCEXT([f90])
@@ -2156,7 +2148,14 @@ AC_TRY_COMPILE([
 ## ----------------------------------------------------------------------
 ## How do we figure out the width of a tty in characters?
 ##
-AC_CHECK_FUNCS([_getvideoconfig gettextinfo GetConsoleScreenBufferInfo])
+AC_CHECK_FUNCS([_getvideoconfig gettextinfo])
+case "`uname`" in
+  CYGWIN*)
+    ;;
+  *)
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
+    ;;
+esac
 AC_CHECK_FUNCS([_scrsize ioctl])
 
 AC_MSG_CHECKING([for struct videoconfig])
@@ -2716,10 +2715,7 @@ case "X-$enable_parallel" in
           integer:: ierr
           call mpi_file_open( ierr )
           end],,
-          [AC_CHECK_LIB([mpi], [
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )],, [PARALLEL=no])])
+          [AC_CHECK_LIB([mpi], [mpi_file_open],, [PARALLEL=no])])
 
       ## Then try link a simple MPI-IO program.  If fail, try again with
       ## -lmpio.
@@ -2730,10 +2726,7 @@ case "X-$enable_parallel" in
             integer:: ierr
             call mpi_file_open( ierr )
             end],,
-            [AC_CHECK_LIB([mpio], [
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )],, [PARALLEL=no])])
+            [AC_CHECK_LIB([mpio], [mpi_file_open],, [PARALLEL=no])])
       fi
 
       ## Change to the C language

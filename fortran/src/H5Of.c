@@ -320,7 +320,6 @@ nh5oget_info_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *
   char *c_name = NULL;          /* Buffer to hold C string */
   int_f ret_value = 0;          /* Return value */
   H5O_info_t Oinfo;
-  struct tm *ts;
   
   /*
    * Convert FORTRAN name to C name
@@ -599,7 +598,6 @@ nh5oexists_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *la
 {
   char *c_name = NULL;          /* Buffer to hold C string */
   int_f ret_value = 0;          /* Return value */
-  htri_t status = 0;
 
   /*
    * Convert FORTRAN name to C name

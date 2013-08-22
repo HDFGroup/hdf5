@@ -212,10 +212,6 @@ nh5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx);
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5dsattach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx);
-
-HDF5_HL_F90CSTUBDLL
-int_f
 nh5dsdetach_scale_c( hid_t_f *did, hid_t_f *dsid, int_f *idx);
 
 HDF5_HL_F90CSTUBDLL
@@ -224,16 +220,15 @@ nh5dsis_attached_c( hid_t_f *did, hid_t_f *dsid, int_f *idx, int_f *c_is_attache
 
 HDF5_HL_F90CSTUBDLL
 int_f
-nh5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size);
-
-HDF5_HL_F90CSTUBDLL
-int_f
 nh5dsis_scale_c(hid_t_f *did, int_f *is_scale);
-
 
 HDF5_HL_F90CSTUBDLL
 int_f
 nh5dsset_label_c(hid_t_f *did, int_f *idx, _fcd label, int_f *labellen);
+
+HDF5_HL_F90CSTUBDLL
+int_f
+nh5dsget_label_c(hid_t_f *did, int_f *idx, _fcd label, size_t_f *size);
 
 HDF5_HL_F90CSTUBDLL
 int_f

@@ -5243,14 +5243,6 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
 
   ## --------------------------------------------------------------------
-  ## General Fortran flags
-  ## Only add FFLAGS to FCFLAGS if it's set.
-  if test "x$FFLAGS" != "x" ; then
-    AM_FCFLAGS="${AM_FCFLAGS} ${FFLAGS}"
-    FCFLAGS="${FCFLAGS} ${FFLAGS}"
-  fi
-
-  ## --------------------------------------------------------------------
   ## Fortran source extention
   ##
   ac_ext=${ac_fc_srcext-f}
@@ -26922,7 +26914,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 ## ----------------------------------------------------------------------
 ## How do we figure out the width of a tty in characters?
 ##
-for ac_func in _getvideoconfig gettextinfo GetConsoleScreenBufferInfo
+for ac_func in _getvideoconfig gettextinfo
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -26934,6 +26926,23 @@ _ACEOF
 fi
 done
 
+case "`uname`" in
+  CYGWIN*)
+    ;;
+  *)
+    for ac_func in GetConsoleScreenBufferInfo
+do :
+  ac_fn_c_check_func "$LINENO" "GetConsoleScreenBufferInfo" "ac_cv_func_GetConsoleScreenBufferInfo"
+if test "x$ac_cv_func_GetConsoleScreenBufferInfo" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETCONSOLESCREENBUFFERINFO 1
+_ACEOF
+
+fi
+done
+
+    ;;
+esac
 for ac_func in _scrsize ioctl
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
@@ -28361,44 +28370,30 @@ _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
 
 else
-  as_ac_Lib=`$as_echo "ac_cv_lib_mpi_
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr ) in -lmpi" >&5
-$as_echo_n "checking for
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr ) in -lmpi... " >&6; }
-if eval \${$as_ac_Lib+:} false; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpi_file_open in -lmpi" >&5
+$as_echo_n "checking for mpi_file_open in -lmpi... " >&6; }
+if ${ac_cv_lib_mpi_mpi_file_open+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lmpi  $LIBS"
 cat > conftest.$ac_ext <<_ACEOF
       program main
-      call
-            include 'mpif.h'
-            integer:: ierr
-            call mpi_file_open( ierr )
+      call mpi_file_open
       end
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
+  ac_cv_lib_mpi_mpi_file_open=yes
 else
-  eval "$as_ac_Lib=no"
+  ac_cv_lib_mpi_mpi_file_open=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpi_mpi_file_open" >&5
+$as_echo "$ac_cv_lib_mpi_mpi_file_open" >&6; }
+if test "x$ac_cv_lib_mpi_mpi_file_open" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBMPI 1
 _ACEOF
@@ -28427,44 +28422,30 @@ _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
 
 else
-  as_ac_Lib=`$as_echo "ac_cv_lib_mpio_
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr ) in -lmpio" >&5
-$as_echo_n "checking for
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr ) in -lmpio... " >&6; }
-if eval \${$as_ac_Lib+:} false; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpi_file_open in -lmpio" >&5
+$as_echo_n "checking for mpi_file_open in -lmpio... " >&6; }
+if ${ac_cv_lib_mpio_mpi_file_open+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
 LIBS="-lmpio  $LIBS"
 cat > conftest.$ac_ext <<_ACEOF
       program main
-      call
-              include 'mpif.h'
-              integer:: ierr
-              call mpi_file_open( ierr )
+      call mpi_file_open
       end
 _ACEOF
 if ac_fn_fc_try_link "$LINENO"; then :
-  eval "$as_ac_Lib=yes"
+  ac_cv_lib_mpio_mpi_file_open=yes
 else
-  eval "$as_ac_Lib=no"
+  ac_cv_lib_mpio_mpi_file_open=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-eval ac_res=\$$as_ac_Lib
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mpio_mpi_file_open" >&5
+$as_echo "$ac_cv_lib_mpio_mpi_file_open" >&6; }
+if test "x$ac_cv_lib_mpio_mpi_file_open" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_LIBMPIO 1
 _ACEOF

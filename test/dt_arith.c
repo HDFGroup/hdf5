@@ -3455,6 +3455,8 @@ done:
         HDexit(MIN((int)fails_all_tests, 254));
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
         HDexit(0);
+    HDassert(0 && "Should not reach this point!");
+    return 1;
 #else
     reset_hdf5();
 
@@ -3476,6 +3478,8 @@ error:
         HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
         HDexit(1);
+    HDassert(0 && "Should not reach this point!");
+    return 1;
 #else
     reset_hdf5();
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)

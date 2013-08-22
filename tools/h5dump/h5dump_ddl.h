@@ -12,12 +12,9 @@
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifndef H5DUMP_DDL_H__
 #define H5DUMP_DDL_H__
-
-/* callback function used by H5Literate() */
-static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
-static int      dump_extlink(hid_t group, const char *linkname, const char *objname);
 
 #ifdef __cplusplus
 extern "C" {
