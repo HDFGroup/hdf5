@@ -77,6 +77,7 @@ static struct long_options l_opts[] = {
     { "hel", no_arg, 'h' },
     { "contents", optional_arg, 'n' },
     { "properties", no_arg, 'p' },
+    { "superblock", no_arg, 'B' },
     { "boot-block", no_arg, 'B' },
     { "boot-bloc", no_arg, 'B' },
     { "boot-blo", no_arg, 'B' },
