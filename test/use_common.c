@@ -14,6 +14,10 @@
 
 #include "use.h"
 
+#define H5D_PACKAGE
+#define H5D_TESTING
+#include "H5Dpkg.h"
+
 void
 usage(const char *prog)
 {
@@ -134,9 +138,11 @@ done:
 /* Show parameters used for this use case */
 void show_parameters(void){
     printf("===Parameters used:===\n");
-    printf("chunk dims=(%llu, %llu, %llu)\n", UC_opts.chunkdims[0], UC_opts.chunkdims[1], UC_opts.chunkdims[2]);
-    printf("dataset max dims=(%llu, %llu, %llu)\n", UC_opts.max_dims[0], UC_opts.max_dims[1], UC_opts.max_dims[2]);
-    printf("number of planes to write=%d\n", UC_opts.nplanes);
+    printf("chunk dims=(%llu, %llu, %llu)\n", (unsigned long long)UC_opts.chunkdims[0], 
+        (unsigned long long)UC_opts.chunkdims[1], (unsigned long long)UC_opts.chunkdims[2]);
+    printf("dataset max dims=(%llu, %llu, %llu)\n", (unsigned long long)UC_opts.max_dims[0], 
+        (unsigned long long)UC_opts.max_dims[1], (unsigned long long)UC_opts.max_dims[2]);
+    printf("number of planes to write=%llu\n", (unsigned long long)UC_opts.nplanes);
     printf("using SWMR mode=%s\n", UC_opts.use_swmr ? "yes(1)" : "no(0)");
     printf("data filename=%s\n", UC_opts.filename);
     printf("launch part=");
@@ -173,9 +179,15 @@ int create_uc_file(void)
     hid_t dcpl;         /* Dataset creation property list */
     hid_t sid;          /* Dataspace ID */
     hid_t dsid;         /* Dataset ID */
+    hid_t fapl;         /* File access property list */
+    H5D_chunk_index_t idx_type; /* Chunk index type */
 
     /* Create the file */
-    if((fid = H5Fcreate(UC_opts.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        return -1;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        return -1;
+    if((fid = H5Fcreate(UC_opts.filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         return -1;
 
     /* Set up dimension sizes */
@@ -196,10 +208,23 @@ int create_uc_file(void)
     if((dsid = H5Dcreate2(fid, progname_g, UC_DATATYPE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
 	return -1;
 
-    /* Close everythign */
+    /* Check that the chunk index type is not version 1 B-tree.
+     * Version 1 B-trees are not supported under SWMR.
+     */
+    if(H5D__layout_idx_type_test(dsid, &idx_type) < 0)
+        return -1;
+    if(idx_type == H5D_CHUNK_IDX_BTREE) {
+        fprintf(stderr, "ERROR: Chunk index is version 1 B-tree: aborting.\n");
+        return -1;
+    }
+
+    /* Close everything */
     if(H5Dclose(dsid) < 0)
 	return -1;
-
+    if(H5Pclose(fapl) < 0)
+        return -1;
+    if(H5Pclose(dcpl) < 0)
+        return -1;
     if(H5Sclose(sid) < 0)
         return -1;
     if(H5Fclose(fid) < 0)
@@ -223,7 +248,7 @@ int write_uc_file(void)
     hid_t	dcpl;         /* Dataset creation property list */
     char	*name;
     UC_CTYPE	*buffer, *bufptr;	/* data buffer */
-    int		cz=UC_opts.chunksize;		/* Chunk size */
+    hsize_t	cz=UC_opts.chunksize;		/* Chunk size */
     hid_t	f_sid;	    /* dataset file space id */
     hid_t	m_sid;	    /* memory space id */
     int		rank;	    /* rank */
@@ -231,7 +256,7 @@ int write_uc_file(void)
     hsize_t	dims[3];    /* Dataspace dimensions */
     hsize_t	memdims[3]; /* Memory space dimensions */
     hsize_t	start[3] = {0,0,0}, count[3];    /* Hyperslab selection values */
-    int		i, j, k;
+    hsize_t     i, j, k;
 
     name = UC_opts.filename;
 
@@ -263,8 +288,9 @@ int write_uc_file(void)
 
     /* verify chunk_dims against set paramenters */
     if (chunk_dims[0]!=UC_opts.chunkdims[0] || chunk_dims[1] != cz || chunk_dims[2] != cz){
-	fprintf(stderr, "chunk size is not as expected. Got dims=(%ld,%ld,%ld)\n",
-	    (long)chunk_dims[0], (long)chunk_dims[1], (long)chunk_dims[2]);
+	fprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
+	    (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1], 
+            (unsigned long long)chunk_dims[2]);
 	return -1;
     }
 
@@ -272,7 +298,7 @@ int write_uc_file(void)
     memdims[0]=1;
     memdims[1] = UC_opts.dims[1];
     memdims[2] = UC_opts.dims[2];
-    if ((buffer=(UC_CTYPE*)HDmalloc(memdims[1]*memdims[2]*sizeof(UC_CTYPE)))==NULL) {
+    if ((buffer=(UC_CTYPE*)HDmalloc((size_t)memdims[1]*(size_t)memdims[2]*sizeof(UC_CTYPE)))==NULL) {
 	fprintf(stderr, "malloc: failed\n");
 	return -1;
     };
@@ -290,12 +316,14 @@ int write_uc_file(void)
 	fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
 	return -1;
     }
-    printf("dataset rank %d, dimensions %lu x %lu x %lu\n",
-	   rank, (unsigned long)(dims[0]), (unsigned long)(dims[1]), (unsigned long)(dims[2]));
+    printf("dataset rank %d, dimensions %llu x %llu x %llu\n",
+	   rank, (unsigned long long)(dims[0]), (unsigned long long)(dims[1]), 
+           (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[0] != 0 || dims[1] != memdims[1] || dims[2] != memdims[2]){
-	fprintf(stderr, "dataset is not empty. Got dims=(%ld,%ld,%ld)\n",
-	    (long)dims[0], (long)dims[1], (long)dims[2]);
+	fprintf(stderr, "dataset is not empty. Got dims=(%llu,%llu,%llu)\n",
+	    (unsigned long long)dims[0], (unsigned long long)dims[1], 
+            (unsigned long long)dims[2]);
 	return -1;
     }
     
@@ -392,15 +420,14 @@ int read_uc_file(void)
     hid_t	dsid;         /* dataset ID */
     char	*name;
     UC_CTYPE	*buffer, *bufptr;	/* read data buffer */
-    int		cz=UC_opts.chunksize;		/* Chunk size */
     hid_t	f_sid;	    /* dataset file space id */
     hid_t	m_sid;	    /* memory space id */
     int		rank;	    /* rank */
     hsize_t	dims[3];    /* Dataspace dimensions */
     hsize_t	memdims[3]; /* Memory space dimensions */
-    int		nplane=0, nplane_old=0;	/* nth plane, last nth plane */
+    hsize_t     nplane=0, nplane_old=0;	/* nth plane, last nth plane */
     hsize_t	start[3] = {0,0,0}, count[3];    /* Hyperslab selection values */
-    int		j, k;
+    hsize_t	j, k;
     int		nreadererr=0;
     int		nerrs;
     int		nonewplane;
@@ -423,7 +450,7 @@ int read_uc_file(void)
     memdims[0]=1;
     memdims[1] = UC_opts.dims[1];
     memdims[2] = UC_opts.dims[2];
-    if ((buffer=(UC_CTYPE*)HDmalloc(memdims[1]*memdims[2]*sizeof(UC_CTYPE)))==NULL) {
+    if ((buffer=(UC_CTYPE*)HDmalloc((size_t)memdims[1]*(size_t)memdims[2]*sizeof(UC_CTYPE)))==NULL) {
 	fprintf(stderr, "malloc: failed\n");
 	return -1;
     };
@@ -442,14 +469,17 @@ int read_uc_file(void)
 	fprintf(stderr, "H5Sget_simple_extent_dims got error\n");
 	return -1;
     }
-    printf("dataset rank %d, dimensions %lu x %lu x %lu\n",
-	   rank, (unsigned long)(dims[0]), (unsigned long)(dims[1]), (unsigned long)(dims[2]));
+    printf("dataset rank %d, dimensions %llu x %llu x %llu\n",
+	   rank, (unsigned long long)(dims[0]), (unsigned long long)(dims[1]),
+           (unsigned long long)(dims[2]));
     /* verify that file space dims are as expected and are consistent with memory space dims */
     if (dims[1] != memdims[1] || dims[2] != memdims[2]){
-	fprintf(stderr, "dataset dimension is not as expected. Got dims=(%ld,%ld,%ld)\n",
-	    (long)dims[0], (long)dims[1], (long)dims[2]);
-	fprintf(stderr, "But memdims=(%ld,%ld,%ld)\n",
-	    (long)memdims[0], (long)memdims[1], (long)memdims[2]);
+	fprintf(stderr, "dataset dimension is not as expected. Got dims=(%llu,%llu,%llu)\n",
+	    (unsigned long long)dims[0], (unsigned long long)dims[1],
+            (unsigned long long)dims[2]);
+	fprintf(stderr, "But memdims=(%llu,%llu,%llu)\n",
+	    (unsigned long long)memdims[0], (unsigned long long)memdims[1], 
+            (unsigned long long)memdims[2]);
 	return -1;
     }
     
@@ -464,7 +494,7 @@ int read_uc_file(void)
     count[0]=1;
     count[1]=dims[1];
     count[2]=dims[2];
-    /* quit when all nplanes, default cz, have been read */
+    /* quit when all nplanes  have been read */
     nonewplane=0;
     while (nplane_old < UC_opts.nplanes ){
 	/* print progress message according to if new planes are availalbe */
@@ -474,7 +504,8 @@ int read_uc_file(void)
 		printf("\n");
 		nonewplane=0;
 	    }
-	    printf("reading planes %d to %d\n", nplane_old, (int)dims[0]);
+	    printf("reading planes %llu to %llu\n", (unsigned long long)nplane_old, 
+                (unsigned long long)dims[0]);
 	}else{
 	    if (nonewplane){
 		printf(".");
@@ -516,18 +547,20 @@ int read_uc_file(void)
 	    nerrs=0;
 	    for (j=0; j<dims[1]; j++){
 		for (k=0; k<dims[2]; k++){
-		    if (*bufptr++ != nplane){
+		    if ((hsize_t)*bufptr++ != nplane){
 			if (++nerrs < ErrorReportMax){
 			    fprintf(stderr,
-				"found error %d plane(%d,%d), expected %d, got %d\n",
-				nplane, j, k, nplane, (int)*(bufptr-1));
+				"found error %llu plane(%llu,%llu), expected %llu, got %d\n",
+				(unsigned long long)nplane, (unsigned long long)j, 
+                                (unsigned long long)k, (unsigned long long)nplane, (int)*(bufptr-1));
 			}
 		    }
 		}
 	    }
 	    if (nerrs){
 		nreadererr++;
-		fprintf(stderr, "found %d unexpected values in plane %d\n", nerrs, nplane);
+		fprintf(stderr, "found %d unexpected values in plane %llu\n", nerrs, 
+                    (unsigned long long)nplane);
 	    }
 	}
 	/* Have read all current planes */
@@ -567,3 +600,4 @@ int read_uc_file(void)
     else
 	return 0;
 }
+

@@ -42,11 +42,11 @@ typedef enum part_t {
 } part_t;
 typedef struct options_t {
     int chunksize;		/* chunks are chunksize^2 planes	*/
-    int chunkplanes;		/* number of planes per chunk, default 1*/
+    int chunkplanes;		/* number of planes per chunk, default 1 */
     hsize_t chunkdims[UC_RANK]; /* chunk dims is (chunkplan, chunksize, chunksize) */
     hsize_t dims[UC_RANK];      /* dataset initial dims */
     hsize_t max_dims[UC_RANK];  /* dataset max dims */
-    int nplanes;		/* number of planes to write, default proportional to chunksize */
+    hsize_t nplanes;		/* number of planes to write, default proportional to chunksize */
     char *filename;		/* use case data filename		*/
     part_t launch;		/* launch writer, reader or both	*/
     int use_swmr;               /* use swmr open (1) or not 		*/
