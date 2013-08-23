@@ -91,6 +91,13 @@ static hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
 static hg_id_t H5VL_OBJECT_GET_INFO_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
 
+static na_addr_t PEER;
+static na_class_t *network_class = NULL;
+
+static uint64_t g_axe_id;
+static uint64_t axe_bound;
+static H5VL_iod_axe_list_t axe_list;
+
 /* Prototypes */
 static void *H5VL_iod_fapl_copy(const void *_old_fa);
 static herr_t H5VL_iod_fapl_free(void *_fa);
@@ -174,12 +181,6 @@ H5FL_DEFINE(H5VL_iod_group_t);
 H5FL_DEFINE(H5VL_iod_map_t);
 H5FL_DEFINE(H5VL_iod_dset_t);
 H5FL_DEFINE(H5VL_iod_dtype_t);
-
-static na_addr_t PEER;
-static na_class_t *network_class = NULL;
-
-static uint64_t axe_id;
-static uint64_t axe_bound;
 
 static H5VL_class_t H5VL_iod_g = {
     IOD,
@@ -303,6 +304,164 @@ H5VL_iod_init(void)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_init() */
 
+herr_t
+H5VL__iod_request_remove_from_axe_list(H5VL_iod_request_t *request)
+{
+    H5VL_iod_request_t *prev;
+    H5VL_iod_request_t *next;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(request);
+
+    prev = request->global_prev;
+    next = request->global_next;
+
+    if (prev) {
+        if (next) {
+            prev->global_next = next;
+            next->global_prev = prev;
+        }
+        else {
+            prev->global_next = NULL;
+            axe_list.tail = prev;
+        }
+    }
+    else {
+        if (next) {
+            next->global_prev = NULL;
+            axe_list.head = next;
+        }
+        else {
+            axe_list.head = NULL;
+            axe_list.tail = NULL;
+        }
+    }
+
+    request->global_prev = NULL;
+    request->global_next = NULL;
+    //request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
+
+herr_t
+H5VL__iod_request_add_to_axe_list(H5VL_iod_request_t *request)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(request);
+
+    if (axe_list.tail) {
+        axe_list.tail->global_next = request;
+        request->global_prev = axe_list.tail;
+        axe_list.tail = request;
+    }
+    else {
+        axe_list.head = request;
+        axe_list.tail = request;
+        request->global_prev = NULL;
+    }
+
+    request->global_next = NULL;
+    request->rc ++;
+
+    /* process axe_list */
+    while(axe_list.head && 1 == axe_list.head->rc && 
+          axe_list.head->axe_id == axe_list.last_released_task+1) {
+
+        axe_list.last_released_task = axe_list.head->axe_id;
+
+        /* remove head from axe list */
+        H5VL__iod_request_remove_from_axe_list(axe_list.head);        
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}
+
+herr_t
+H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 
+                             H5VL_iod_object_t *request_obj, htri_t track,
+                             void *input, void *output, void *data, void **req)
+{
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    hg_request_t *hg_req = NULL;
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    H5VL_iod_request_t *request = NULL;
+    hbool_t do_async = (req == NULL) ? FALSE : TRUE;  /* Whether we're performing async. I/O */
+    axe_t *axe_info = (axe_t *) input;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get a function shipper request */
+    if(do_async) {
+        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
+    } /* end if */
+    else
+        hg_req = &_hg_req;
+
+    /* Get async request for operation */
+    if(do_async) {
+        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
+    } /* end if */
+    else
+        request = &_request;
+
+    /* Set up request */
+    HDmemset(request, 0, sizeof(*request));
+    request->type = op_type;
+    request->data = data;
+    request->req = hg_req;
+    request->rc = 1;
+    request->obj = request_obj;
+    request->axe_id = axe_info->axe_id;
+    request->next = request->prev = NULL;
+    request->global_next = request->global_prev = NULL;
+
+    /* add request to container's linked list */
+    H5VL_iod_request_add(request_obj->file, request);
+
+    axe_info->start_range = axe_list.last_released_task;
+    /* add request to global axe's linked list */
+    H5VL__iod_request_add_to_axe_list(request);
+    axe_info->count = axe_list.last_released_task - axe_info->start_range;
+
+    /* forward the call to the ION */
+    if(HG_Forward(PEER, op_id, input, output, hg_req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship file create");
+
+    /* Store/wait on request */
+    if(do_async) {
+        /* Sanity check */
+        HDassert(request != &_request);
+
+        *req = request;
+
+        /* Track request */
+        if(track)
+            request_obj->request = request;
+    } /* end if */
+    else {
+        if(track)
+            request_obj->request = NULL;
+
+        /* Synchronously wait on the request */
+        if(H5VL_iod_request_wait(request_obj->file, request) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
+
+        H5VL__iod_request_remove_from_axe_list(request);
+
+        /* Sanity check */
+        HDassert(request == &_request);
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	EFF_init
@@ -334,8 +493,12 @@ EFF_init(MPI_Comm comm, MPI_Info UNUSED info)
        operation. Each process owns a portion of the ID space and uses
        that space incrementally. */
     axe_seed = (pow(2.0,64.0) - 1) / num_procs;
-    axe_id = axe_seed * my_rank + 1;
+    g_axe_id = axe_seed * my_rank + 1;
     axe_bound = axe_seed * (my_rank + 1);
+
+    axe_list.last_released_task = g_axe_id - 1;
+    axe_list.head = NULL;
+    axe_list.tail = NULL;
 
     /* This is a temporary solution for connecting to the server using
        mercury */
@@ -909,12 +1072,7 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     H5VL_iod_fapl_t *fa = NULL;
     H5P_genplist_t *plist;      /* Property list pointer */
     H5VL_iod_file_t *file = NULL;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     file_create_in_t input;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE;  /* Whether we're performing async. I/O */
     void  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -951,24 +1109,13 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     input.flags = flags;
     input.fcpl_id = fcpl_id;
     input.fapl_id = fapl_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
 
 #if H5VL_IOD_DEBUG
     printf("File Create %s IOD ROOT ID %llu, axe id %llu\n", 
-           name, input.root_id, input.axe_id);
+           name, input.root_id, input.axe_info.axe_id);
 #endif
-
-    /* forward the call to the ION */
-    if(HG_Forward(PEER, H5VL_FILE_CREATE_ID, &input, &file->remote_file, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship file create");
 
     /* create the file object that is passed to the API layer */
     file->file_name = HDstrdup(name);
@@ -989,46 +1136,10 @@ H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl
     file->common.obj_name[1] = '\0';
     file->common.file = file;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_FILE_CREATE;
-    request->data = file;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)file;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        file->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        file->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_FILE_CREATE_ID, HG_FILE_CREATE, 
+                                    (H5VL_iod_object_t *)file, 1,
+                                    &input, &file->remote_file, file, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship file create");
 
     ret_value = (void *)file;
 
@@ -1085,23 +1196,11 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     input.name = name;
     input.flags = flags;
     input.fapl_id = fapl_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
-    printf("File Open %s axe id %llu\n", name, input.axe_id);
+    printf("File Open %s axe id %llu\n", name, input.axe_info.axe_id);
 #endif
-
-    /* forward the call to the server */
-    if(HG_Forward(PEER, H5VL_FILE_OPEN_ID, &input, &file->remote_file, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship file create");
 
     /* create the file object that is passed to the API layer */
     MPI_Comm_rank(fa->comm, &file->my_rank);
@@ -1122,46 +1221,10 @@ H5VL_iod_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_i
     file->common.obj_name[1] = '\0';
     file->common.file = file;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_FILE_OPEN;
-    request->data = file;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)file;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        file->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        file->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_FILE_OPEN_ID, HG_FILE_OPEN, 
+                                    (H5VL_iod_object_t *)file, 1,
+                                    &input, &file->remote_file, file, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship file open");
 
     ret_value = (void *)file;
 
@@ -1189,13 +1252,8 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5VL_iod_file_t *file = obj->file;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
     int *status;
     file_flush_in_t input;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1203,59 +1261,15 @@ H5VL_iod_file_flush(void *_obj, H5VL_loc_params_t loc_params, H5F_scope_t scope,
     /* set the input structure for the HG encode routine */
     input.coh = file->remote_file.coh;
     input.scope = scope;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
     /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the ION */
-    if(HG_Forward(PEER, H5VL_FILE_FLUSH_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_FILE_FLUSH;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)file;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        file->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_FILE_FLUSH_ID, HG_FILE_FLUSH, 
+                                    (H5VL_iod_object_t *)file, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship file flush");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1280,10 +1294,6 @@ H5VL_iod_file_get(void *_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **re
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5VL_iod_file_t *file = obj->file;
-    hg_request_t *hg_req;
-    int *status;
-    H5VL_iod_request_t *request;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1484,19 +1494,14 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
 {
     H5VL_iod_file_t *file = (H5VL_iod_file_t *)_file;
     file_close_in_t input;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
     int *status;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* If this call is not asynchronous, complete and remove all
        requests that are associated with this object from the List */
-    if(!do_async) {
+    if(NULL == req) {
         if(H5VL_iod_request_wait_all(file) < 0)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
@@ -1504,63 +1509,19 @@ H5VL_iod_file_close(void *_file, hid_t dxpl_id, void **req)
     /* allocate an integer to receive the return value if the file close succeeded or not */
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
     input.coh = file->remote_file.coh;
     input.root_oh = file->remote_file.root_oh;
     input.root_id = file->remote_file.root_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
-    printf("File Close Root ID %llu axe id %llu\n", input.root_id, input.axe_id);
+    printf("File Close Root ID %llu axe id %llu\n", input.root_id, input.axe_info.axe_id);
 #endif
 
-    /* forward the call to the ION */
-    if(HG_Forward(PEER, H5VL_FILE_CLOSE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship file close");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_FILE_CLOSE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)file;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        file->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_FILE_CLOSE_ID, HG_FILE_CLOSE, 
+                                    (H5VL_iod_object_t *)file, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship file close");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1593,11 +1554,6 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
     char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1642,24 +1598,12 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.gcpl_id = gcpl_id;
     input.gapl_id = gapl_id;
     input.lcpl_id = lcpl_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Group Create %s, IOD ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.grp_id, input.axe_id, input.parent_axe_id);
+           new_name, input.grp_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_GROUP_CREATE_ID, &input, &grp->remote_group, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship group create");
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
@@ -1684,51 +1628,16 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     grp->common.file = obj->file;
     grp->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_GROUP_CREATE;
-    request->data = grp;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)grp;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        grp->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't wait on HG request")
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        grp->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_GROUP_CREATE_ID, HG_GROUP_CREATE, 
+                                    (H5VL_iod_object_t *)grp, 1,
+                                    &input, &grp->remote_group, grp, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group create");
 
     ret_value = (void *)grp;
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_create() */
 
@@ -1757,11 +1666,6 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
     char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     group_open_in_t input;
     void           *ret_value = NULL;
 
@@ -1787,24 +1691,12 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.gapl_id = gapl_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Group Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.loc_id, input.axe_id, input.parent_axe_id);
+           new_name, input.loc_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_GROUP_OPEN_ID, &input, &grp->remote_group, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship group open");
 
     /* setup the local group struct */
     /* store the entire path of the group locally */
@@ -1827,51 +1719,16 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     grp->common.file = obj->file;
     grp->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_GROUP_OPEN;
-    request->data = grp;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)grp;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        grp->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't wait on HG request")
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        grp->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_GROUP_OPEN_ID, HG_GROUP_OPEN, 
+                                    (H5VL_iod_object_t *)grp, 1,
+                                    &input, &grp->remote_group, grp, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open");
 
     ret_value = (void *)grp;
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_open() */
 
@@ -1942,32 +1799,19 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
     group_close_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* If this call is not asynchronous, complete and remove all
        requests that are associated with this object from the List */
-    if(!do_async) {
+    if(NULL == req) {
         if(H5VL_iod_request_wait_some(grp->common.file, grp) < 0)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
 
     /* allocate an integer to receive the return value if the group close succeeded or not */
     status = (int *)malloc(sizeof(int));
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
 
     /* set the parent axe id */
     if(grp->common.request)
@@ -1978,53 +1822,17 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
 
     input.iod_oh = grp->remote_group.iod_oh;
     input.iod_id = grp->remote_group.iod_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Group Close IOD ID %llu, axe id %llu\n", 
-           input.iod_id, input.axe_id);
+           input.iod_id, input.axe_info.axe_id);
 #endif
 
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_GROUP_CLOSE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship group close");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_GROUP_CLOSE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)grp;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(grp->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        grp->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(grp->common.file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_GROUP_CLOSE_ID, HG_GROUP_CLOSE, 
+                                    (H5VL_iod_object_t *)grp, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship group close");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2056,12 +1864,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     iod_handle_t iod_oh;
     uint64_t parent_axe_id;
     char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     hid_t type_id, space_id, lcpl_id;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2111,24 +1914,12 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     input.lcpl_id = lcpl_id;
     input.type_id = type_id;
     input.space_id = space_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Dataset Create %s IOD ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.dset_id, input.axe_id, input.parent_axe_id);
+           new_name, input.dset_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_CREATE_ID, &input, &dset->remote_dset, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship dataset create");
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
@@ -2158,51 +1949,15 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     dset->common.file = obj->file;
     dset->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DSET_CREATE;
-    request->data = dset;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dset;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        dset->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        dset->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DSET_CREATE_ID, HG_DSET_CREATE, (H5VL_iod_object_t *)dset, 1,
+                                    &input, &dset->remote_dset, dset, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset create");
 
     ret_value = (void *)dset;
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_create() */
 
@@ -2263,24 +2018,12 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.dapl_id = dapl_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Dataset Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.loc_id, input.axe_id, input.parent_axe_id);
+           new_name, input.loc_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_OPEN_ID, &input, &dset->remote_dset, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship dataset open");
 
     /* setup the local dataset struct */
     /* store the entire path of the dataset locally */
@@ -2295,11 +2038,6 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
         dset->common.obj_name[obj_name_len+name_len] = '\0';
     }
 
-#if H5VL_IOD_DEBUG
-    printf("Dataset Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
-           dset->common.obj_name, input.loc_id, input.axe_id, input.parent_axe_id);
-#endif
-
     if((dset->dapl_id = H5Pcopy(dapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dapl");
 
@@ -2308,51 +2046,15 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     dset->common.file = obj->file;
     dset->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DSET_OPEN;
-    request->data = dset;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dset;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        dset->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        dset->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DSET_OPEN_ID, HG_DSET_OPEN, (H5VL_iod_object_t *)dset, 1,
+                                    &input, &dset->remote_dset, dset, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset open");
 
     ret_value = (void *)dset;
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_dataset_open() */
 
@@ -2378,11 +2080,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     dset_io_in_t input;
     dset_get_vl_size_in_t input_vl;
     H5P_genplist_t *plist;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
     hg_bulk_t *bulk_handle = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     H5VL_iod_read_status_t *status = NULL;
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
@@ -2392,7 +2090,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_iod_io_info_t *info = NULL;
     hbool_t is_vl_data = FALSE;
     uint64_t parent_axe_id;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2460,14 +2157,6 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                          bulk_handle, &is_vl_data) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't generate read parameters");
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
     if(!is_vl_data) {
         /* Fill input structure for reading data */
         input.coh = dset->common.file->remote_file.coh;
@@ -2479,7 +2168,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input.space_id = file_space_id;
         input.dset_type_id = dset->remote_dset.type_id;
         input.mem_type_id = mem_type_id;
-        input.axe_id = axe_id ++;
+        input.axe_info.axe_id = g_axe_id ++;
         input.parent_axe_id = parent_axe_id;
     }
     else {
@@ -2490,7 +2179,7 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         input_vl.dxpl_id = dxpl_id;
         input_vl.space_id = file_space_id;
         input_vl.mem_type_id = mem_type_id;
-        input_vl.axe_id = axe_id ++;
+        input_vl.axe_info.axe_id = g_axe_id ++;
         input_vl.parent_axe_id = parent_axe_id;
     }
 
@@ -2501,21 +2190,11 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 #if H5VL_IOD_DEBUG
     if(!is_vl_data)
         printf("Dataset Read, axe id %llu, parent %llu\n", 
-               input.axe_id, input.parent_axe_id);
+               input.axe_info.axe_id, input.parent_axe_id);
     else
         printf("Dataset GET size, axe id %llu, parent %llu\n", 
-               input_vl.axe_id, input_vl.parent_axe_id);
+               input_vl.axe_info.axe_id, input_vl.parent_axe_id);
 #endif
-
-    /* forward the call to the IONs */
-    if(!is_vl_data) {
-        if(HG_Forward(PEER, H5VL_DSET_READ_ID, &input, status, hg_req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
-    }
-    else {
-        if(HG_Forward(PEER, H5VL_DSET_GET_VL_SIZE_ID, &input_vl, status, hg_req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset get VL size");
-    }
 
     /* setup info struct for I/O request. 
        This is to manage the I/O operation once the wait is called. */
@@ -2549,54 +2228,23 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
         if(NULL == (info->dxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy dxpl");
-        info->axe_id = axe_id++;
+        info->axe_id = g_axe_id ++;
         info->peer = PEER;
         info->read_id = H5VL_DSET_READ_ID;
     }
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-
+    /* forward the call to the IONs */
     if(!is_vl_data) {
-        request->type = HG_DSET_READ;
+        if(H5VL__iod_create_and_forward(H5VL_DSET_READ_ID, HG_DSET_READ, (H5VL_iod_object_t *)dset, 0,
+                                        &input, status, info, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset read");
     }
     else {
-        request->type = HG_DSET_GET_VL_SIZE;
+        if(H5VL__iod_create_and_forward(H5VL_DSET_GET_VL_SIZE_ID, HG_DSET_GET_VL_SIZE, 
+                                        (H5VL_iod_object_t *)dset, 0,
+                                        &input_vl, status, info, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset get VL size");
     }
-
-    request->data = info;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dset;
-    request->status = 0;
-    request->state = 0;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dset->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dset->common.file, request) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2623,11 +2271,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     dset_io_in_t input;
     H5P_genplist_t *plist;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
     hg_bulk_t *bulk_handle = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     const H5S_t *mem_space = NULL;
     const H5S_t *file_space = NULL;
     char fake_char;
@@ -2639,7 +2283,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     uint64_t parent_axe_id;
     uint32_t internal_cs; /* internal checksum calculated in this function */
     size_t *vl_string_len = NULL; /* array that will contain lengths of strings if the datatype is a VL string type */
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2722,26 +2365,14 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     input.space_id = file_space_id;
     input.dset_type_id = dset->remote_dset.type_id;
     input.mem_type_id = mem_type_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
 #if H5VL_IOD_DEBUG
     printf("Dataset Write, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
+           input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_WRITE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
 
     /* setup info struct for I/O request 
        This is to manage the I/O operation once the wait is called. */
@@ -2752,40 +2383,10 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     info->bulk_handle = bulk_handle;
     info->vl_string_len = vl_string_len;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DSET_WRITE;
-    request->data = info;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dset;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dset->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dset->common.file, request) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DSET_WRITE_ID, HG_DSET_WRITE, 
+                                    (H5VL_iod_object_t *)dset, 0,
+                                    &input, status, info, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset write");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2812,11 +2413,6 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     dset_set_extent_in_t input;
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     int *status = NULL;
     uint64_t parent_axe_id;
     size_t num_parents;
@@ -2852,14 +2448,14 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
     input.dims.size = size;
     input.parent_axe_ids.count = num_parents;
     input.parent_axe_ids.ids = axe_parents;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     {
         size_t i;
 
         printf("Dataset Set Extent, axe id %llu, %d parents: ", 
-               input.axe_id, num_parents);
+               input.axe_info.axe_id, num_parents);
         for(i=0 ; i<num_parents ; i++)
             printf("%llu ", axe_parents[i]);
         printf("\n");
@@ -2868,54 +2464,10 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
 
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_SET_EXTENT_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset write");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DSET_SET_EXTENT;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dset;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dset->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        dset->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dset->common.file, request) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DSET_SET_EXTENT_ID, HG_DSET_SET_EXTENT, 
+                                    (H5VL_iod_object_t *)dset, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset set_extent");
 
     /* modify the local dataspace of the dataset */
     {
@@ -2924,7 +2476,7 @@ H5VL_iod_dataset_set_extent(void *_dset, const hsize_t size[], hid_t dxpl_id, vo
         hsize_t curr_dims[H5O_LAYOUT_NDIMS];/* Current dimension sizes */
 
 	if(NULL == (space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
-                                                             H5I_DATASPACE)))
+                                                       H5I_DATASPACE)))
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
         /* Check if we are shrinking or expanding any of the dimensions */
@@ -3046,13 +2598,8 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     dset_close_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     size_t num_parents;
     uint64_t *axe_parents = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3068,7 +2615,7 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 
     /* If this call is not asynchronous, complete and remove all
        requests that are associated with this object from the List */
-    if(!do_async) {
+    if(NULL == req) {
         if(H5VL_iod_request_wait_some(dset->common.file, dset) < 0)
             HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
@@ -3083,75 +2630,30 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get AXE parents");
     }
 
-    status = (int *)malloc(sizeof(int));
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
     input.iod_oh = dset->remote_dset.iod_oh;
     input.iod_id = dset->remote_dset.iod_id;
     input.parent_axe_ids.count = num_parents;
     input.parent_axe_ids.ids = axe_parents;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     {
         size_t i;
 
         printf("Dataset Close %s, axe id %llu, %d parents: ", 
-               dset->common.obj_name, input.axe_id, num_parents);
+               dset->common.obj_name, input.axe_info.axe_id, num_parents);
         for(i=0 ; i<num_parents ; i++)
             printf("%llu ", axe_parents[i]);
         printf("\n");
     }
 #endif
 
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DSET_CLOSE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship dset close");
+    status = (int *)malloc(sizeof(int));
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DSET_CLOSE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dset;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dset->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        dset->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dset->common.file, request) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DSET_CLOSE_ID, HG_DSET_CLOSE, 
+                                    (H5VL_iod_object_t *)dset, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset close");
 
 done:
     axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
@@ -3184,12 +2686,7 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     uint64_t parent_axe_id;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3226,24 +2723,12 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     input.tapl_id = tapl_id;
     input.lcpl_id = lcpl_id;
     input.type_id = type_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Datatype Commit %s IOD ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.dtype_id, input.axe_id, input.parent_axe_id);
+           new_name, input.dtype_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DTYPE_COMMIT_ID, &input, &dtype->remote_dtype, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship dataset create");
 
     /* setup the local datatype struct */
     /* store the entire path of the datatype locally */
@@ -3271,46 +2756,10 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
     dtype->common.file = obj->file;
     dtype->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DTYPE_COMMIT;
-    request->data = dtype;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dtype;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        dtype->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        dtype->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DTYPE_COMMIT_ID, HG_DTYPE_COMMIT, 
+                                    (H5VL_iod_object_t *)dtype, 1,
+                                    &input, &dtype->remote_dtype, dtype, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype commit");
 
     ret_value = (void *)dtype;
 done:
@@ -3342,12 +2791,7 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     uint64_t parent_axe_id;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3374,24 +2818,12 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.tapl_id = tapl_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Datatype Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.loc_id, input.axe_id, input.parent_axe_id);
+           new_name, input.loc_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DTYPE_OPEN_ID, &input, &dtype->remote_dtype, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship datatype open");
 
     /* setup the local datatype struct */
     /* store the entire path of the datatype locally */
@@ -3414,46 +2846,10 @@ H5VL_iod_datatype_open(void *_obj, H5VL_loc_params_t loc_params, const char *nam
     dtype->common.file = obj->file;
     dtype->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DTYPE_OPEN;
-    request->data = dtype;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dtype;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        dtype->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        dtype->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DTYPE_OPEN_ID, HG_DTYPE_OPEN, 
+                                    (H5VL_iod_object_t *)dtype, 1,
+                                    &input, &dtype->remote_dtype, dtype, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open");
 
     ret_value = (void *)dtype;
 
@@ -3552,18 +2948,13 @@ H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
     H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
     dtype_close_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* If this call is not asynchronous, complete and remove all
        requests that are associated with this object from the List */
-    if(!do_async) {
+    if(NULL == req) {
         if(H5VL_iod_request_wait_some(dtype->common.file, dtype) < 0)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
@@ -3575,65 +2966,21 @@ H5VL_iod_datatype_close(void *obj, hid_t dxpl_id, void **req)
         input.parent_axe_id = 0;
     }
 
-    status = (int *)malloc(sizeof(int));
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
     input.iod_oh = dtype->remote_dtype.iod_oh;
     input.iod_id = dtype->remote_dtype.iod_id;
-    input.axe_id = axe_id ++;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_DTYPE_CLOSE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship dtype close");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_DTYPE_CLOSE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)dtype;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dtype->common.file, request);
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Datatype Close %s, axe id %llu, parent %d\n", 
-           dtype->common.obj_name, input.axe_id, input.parent_axe_id);
+           dtype->common.obj_name, input.axe_info.axe_id, input.parent_axe_id);
 #endif
 
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
+    status = (int *)malloc(sizeof(int));
 
-        *req = request;
-
-        /* Track request */
-        dtype->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dtype->common.file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_DTYPE_CLOSE_ID, HG_DTYPE_CLOSE, 
+                                    (H5VL_iod_object_t *)dtype, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship datatype open");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3665,13 +3012,8 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     iod_handle_t iod_oh;
     char *new_name = NULL;   /* resolved path to where we need to start traversal at the server */
     const char *path; /* path on where the traversal starts relative to the location object specified */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     hid_t type_id, space_id;
     uint64_t parent_axe_id;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3718,22 +3060,9 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.acpl_id = acpl_id;
     input.type_id = type_id;
     input.space_id = space_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_CREATE_ID, &input, &attr->remote_attr, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship attribute create");
+    input.axe_info.axe_id = g_axe_id ++;
 
     /* setup the local attribute struct */
-
     /* store the entire path of the attribute locally */
     if(loc_params.type == H5VL_OBJECT_BY_SELF) {
         path = NULL;
@@ -3758,7 +3087,7 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
 
 #if H5VL_IOD_DEBUG
     printf("Attribute Create %s IOD ID %llu, axe id %llu, parent %llu\n", 
-           attr_name, input.attr_id, input.axe_id, input.parent_axe_id);
+           attr_name, input.attr_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
 
     /* copy property lists, dtype, and dspace*/
@@ -3774,51 +3103,16 @@ H5VL_iod_attribute_create(void *_obj, H5VL_loc_params_t loc_params, const char *
     attr->common.file = obj->file;
     attr->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_ATTR_CREATE;
-    request->data = attr;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)attr;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        attr->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        attr->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_ATTR_CREATE_ID, HG_ATTR_CREATE, 
+                                    (H5VL_iod_object_t *)attr, 1,
+                                    &input, &attr->remote_attr, attr, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship attribute create");
 
     ret_value = (void *)attr;
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_create() */
 
@@ -3847,12 +3141,7 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     const char *path; /* path on where the traversal starts relative to the location object specified */
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     uint64_t parent_axe_id;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -3880,24 +3169,12 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     input.parent_axe_id = parent_axe_id;
     input.path = new_name;
     input.attr_name = attr_name;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Attribute Open %s LOC ID %llu, axe id %llu, parent %llu\n", 
-           attr_name, input.loc_id, input.axe_id, input.parent_axe_id);
+           attr_name, input.loc_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_OPEN_ID, &input, &attr->remote_attr, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship attribute open");
 
     /* setup the local attribute struct */
 
@@ -3928,51 +3205,16 @@ H5VL_iod_attribute_open(void *_obj, H5VL_loc_params_t loc_params, const char *at
     attr->common.file = obj->file;
     attr->common.file->nopen_objs ++;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_ATTR_OPEN;
-    request->data = attr;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)attr;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        attr->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        attr->common.request = NULL;
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_ATTR_OPEN_ID, HG_ATTR_OPEN, 
+                                    (H5VL_iod_object_t *)attr, 1,
+                                    &input, &attr->remote_attr, attr, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship attribute open");
 
     ret_value = (void *)attr;
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_open() */
 
@@ -3996,15 +3238,10 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)_attr;
     attr_io_in_t input;
     H5P_genplist_t *plist;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
     hg_bulk_t *bulk_handle = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     H5VL_iod_read_status_t *status = NULL;
     size_t size;
     H5VL_iod_io_info_t *info;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4041,22 +3278,10 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     input.iod_id = attr->remote_attr.iod_id;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
     /* allocate structure to receive status of read operation (contains return value and checksum */
     status = (H5VL_iod_read_status_t *)malloc(sizeof(H5VL_iod_read_status_t));
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_READ_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute read");
 
     /* setup info struct for I/O request. 
        This is to manage the I/O operation once the wait is called. */
@@ -4065,42 +3290,10 @@ H5VL_iod_attribute_read(void *_attr, hid_t type_id, void *buf, hid_t dxpl_id, vo
     info->status = status;
     info->bulk_handle = bulk_handle;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_ATTR_READ;
-    request->data = info;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)attr;
-    request->status = 0;
-    request->state = 0;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(attr->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(attr->common.file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_ATTR_READ_ID, HG_ATTR_READ, 
+                                    (H5VL_iod_object_t *)attr, 0,
+                                    &input, status, info, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute read");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4126,16 +3319,11 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     H5VL_iod_attr_t *attr = (H5VL_iod_attr_t *)_attr;
     attr_io_in_t input;
     H5P_genplist_t *plist;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
     hg_bulk_t *bulk_handle = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
     int *status = NULL;
     size_t size;
     H5VL_iod_io_info_t *info;
     uint32_t cs;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4177,25 +3365,13 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     input.iod_id = attr->remote_attr.iod_id;
     input.bulk_handle = *bulk_handle;
     input.type_id = type_id;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
     /* Get the dxpl plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_WRITE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute write");
 
     /* setup info struct for I/O request 
        This is to manage the I/O operation once the wait is called. */
@@ -4204,40 +3380,10 @@ H5VL_iod_attribute_write(void *_attr, hid_t type_id, const void *buf, hid_t dxpl
     info->status = status;
     info->bulk_handle = bulk_handle;
 
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_ATTR_WRITE;
-    request->data = info;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)attr;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(attr->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(attr->common.file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_ATTR_WRITE_ID, HG_ATTR_WRITE, 
+                                    (H5VL_iod_object_t *)attr, 0,
+                                    &input, status, info, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute write");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4266,11 +3412,6 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     iod_obj_id_t iod_id;
     iod_handle_t iod_oh;
     char *new_name = NULL;   /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     int *status = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -4288,61 +3429,18 @@ H5VL_iod_attribute_remove(void *_obj, H5VL_loc_params_t loc_params, const char *
     input.loc_oh = iod_oh;
     input.path = new_name;
     input.attr_name = attr_name;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_REMOVE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute remove");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_ATTR_REMOVE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)obj;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        obj->request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_ATTR_REMOVE_ID, HG_ATTR_REMOVE, 
+                                    (H5VL_iod_object_t *)obj, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute remove");
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_attribute_remove() */
 
@@ -4482,57 +3580,15 @@ H5VL_iod_attribute_get(void *_obj, H5VL_attr_get_t get_type, hid_t dxpl_id,
                 input.loc_oh = iod_oh;
                 input.path = new_name;
                 input.attr_name = attr_name;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
 
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
+                if(H5VL__iod_create_and_forward(H5VL_ATTR_EXISTS_ID, HG_ATTR_EXISTS, 
+                                                (H5VL_iod_object_t *)obj, 1,
+                                                &input, ret, ret, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute exists");
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_ATTR_EXISTS_ID, &input, ret, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute exists");
-
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_ATTR_EXISTS;
-                request->data = ret;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                    /* Track request */
-                    obj->request = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
+                if(new_name) 
+                    free(new_name);
                 break;
             }
         /* H5Aget_info */
@@ -4613,7 +3669,7 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
 
     /* If this call is not asynchronous, complete and remove all
        requests that are associated with this object from the List */
-    if(!do_async) {
+    if(NULL == req) {
         if(H5VL_iod_request_wait_some(attr->common.file, attr) < 0)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
@@ -4630,72 +3686,28 @@ H5VL_iod_attribute_close(void *_attr, hid_t dxpl_id, void **req)
 
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
     input.iod_oh = attr->remote_attr.iod_oh;
     input.iod_id = attr->remote_attr.iod_id;
     input.parent_axe_ids.count = num_parents;
     input.parent_axe_ids.ids = axe_parents;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     {
         size_t i;
 
         printf("Attribute Close, axe id %llu, %d parents: ", 
-               input.axe_id, num_parents);
+               input.axe_info.axe_id, num_parents);
         for(i=0 ; i<num_parents ; i++)
             printf("%llu ", axe_parents[i]);
         printf("\n");
     }
 #endif
 
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_ATTR_CLOSE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship attr close");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_ATTR_CLOSE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)attr;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(attr->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        attr->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(attr->common.file, request) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_ATTR_CLOSE_ID, HG_ATTR_CLOSE, 
+                                    (H5VL_iod_object_t *)attr, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute close");
 
 done:
     axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
@@ -4724,11 +3736,6 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
     H5VL_iod_object_t *cur_obj = NULL;
     link_create_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     H5P_genplist_t    *plist;                      /* Property list pointer */
     char *loc_name = NULL, *new_name = NULL;
     char *link_value = NULL; /* Value of soft link */
@@ -4785,12 +3792,14 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 input.lapl_id = lapl_id;
                 input.loc_name = loc_name;
                 input.target_name = new_name;
-                input.axe_id = axe_id ++;
-                input.link_value = strdup("\0");
+                input.axe_info.axe_id = g_axe_id ++;
+                link_value = strdup("\0");
+                input.link_value = link_value;
+
 
 #if H5VL_IOD_DEBUG
                 printf("Hard Link Create axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
-                       input.axe_id, loc_name, input.loc_id, input.parent_axe_id,
+                       input.axe_info.axe_id, loc_name, input.loc_id, input.parent_axe_id,
                        new_name, input.target_loc_id, input.target_parent_axe_id);
 #endif
 
@@ -4836,7 +3845,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
                 input.create_type = H5VL_LINK_CREATE_SOFT;
                 input.coh = obj->file->remote_file.coh;
 
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.lcpl_id = lcpl_id;
                 input.lapl_id = lapl_id;
                 input.loc_name = loc_name;
@@ -4845,7 +3854,7 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
 #if H5VL_IOD_DEBUG
                 printf("Soft Link Create axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
-                       input.axe_id, loc_name, input.loc_id, input.parent_axe_id,
+                       input.axe_info.axe_id, loc_name, input.loc_id, input.parent_axe_id,
                        new_name, input.target_loc_id, input.target_parent_axe_id);
 #endif
 
@@ -4871,60 +3880,17 @@ H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *_obj, H5VL_loc_p
 
     status = (herr_t *)malloc(sizeof(herr_t));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_LINK_CREATE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link create");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc
-                    (sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_LINK_CREATE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)cur_obj;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        cur_obj->request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_LINK_CREATE_ID, HG_LINK_CREATE, cur_obj, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link move");
 
 done:
-    if(loc_name) free(loc_name);
-    if(new_name) free(new_name);
-    if(input.link_value) HDfree(input.link_value);
+    if(loc_name) 
+        HDfree(loc_name);
+    if(new_name) 
+        HDfree(new_name);
+    if(link_value) 
+        HDfree(link_value);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_create() */
@@ -4958,13 +3924,8 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     H5VL_iod_object_t *cur_obj;
     link_move_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     char *src_name = NULL, *dst_name = NULL;
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -5003,7 +3964,7 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
     /* set the input structure for the HG encode routine */
     input.coh = src_obj->file->remote_file.coh;
     input.copy_flag = copy_flag;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
     input.lcpl_id = lcpl_id;
     input.lapl_id = lapl_id;
     input.src_loc_name = src_name;
@@ -5012,65 +3973,19 @@ H5VL_iod_link_move(void *_src_obj, H5VL_loc_params_t loc_params1,
 #if H5VL_IOD_DEBUG
     if(copy_flag)
         printf("Link Copy axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
-               input.axe_id, src_name, input.src_loc_id, input.src_parent_axe_id,
+               input.axe_info.axe_id, src_name, input.src_loc_id, input.src_parent_axe_id,
                dst_name, input.dst_loc_id, input.dst_parent_axe_id);
     else
         printf("Link Move axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
-               input.axe_id, src_name, input.src_loc_id, input.src_parent_axe_id,
+               input.axe_info.axe_id, src_name, input.src_loc_id, input.src_parent_axe_id,
                dst_name, input.dst_loc_id, input.dst_parent_axe_id);
 #endif
 
     status = (herr_t *)malloc(sizeof(herr_t));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_LINK_MOVE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link move");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc
-                    (sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_LINK_MOVE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)cur_obj;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dst_obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        cur_obj->request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dst_obj->file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_LINK_MOVE_ID, HG_LINK_MOVE, cur_obj, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link move");
 
 done:
     if(src_name) free(src_name);
@@ -5127,12 +4042,6 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                   hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     char *new_name = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -5153,61 +4062,21 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.path = new_name;
-
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
 
 #if H5VL_IOD_DEBUG
                 printf("Link Exists axe %llu: %s ID %llu axe %llu\n", 
-                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+                       input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_LINK_EXISTS_ID, &input, ret, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link exists");
+                if(H5VL__iod_create_and_forward(H5VL_LINK_EXISTS_ID, HG_LINK_EXISTS, obj, 0,
+                                                &input, ret, ret, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link exists");
 
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
+                if(new_name) 
+                    free(new_name);
 
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_LINK_EXISTS;
-                request->data = ret;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
                 break;
             }
         /* H5Lget_info/H5Lget_info_by_idx */
@@ -5224,61 +4093,20 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.path = new_name;
-
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
 
 #if H5VL_IOD_DEBUG
                 printf("Link get info axe %llu: %s ID %llu axe %llu\n", 
-                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+                       input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_LINK_GET_INFO_ID, &input, linfo, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link get info");
+                if(H5VL__iod_create_and_forward(H5VL_LINK_GET_INFO_ID, HG_LINK_GET_INFO, obj, 0,
+                                                &input, linfo, linfo, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link get_info");
 
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_LINK_GET_INFO;
-                request->data = linfo;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
+                if(new_name) 
+                    free(new_name);
                 break;
             }
         /* H5Lget_val/H5Lget_val_by_idx */
@@ -5297,7 +4125,7 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.path = new_name;
                 input.length = size;
 
@@ -5309,58 +4137,17 @@ H5VL_iod_link_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_get_t get_
                 result->value.val_size = input.length;
                 result->value.val = buf;
 
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
-
 #if H5VL_IOD_DEBUG
                 printf("Link get val axe %llu: %s ID %llu axe %llu\n", 
-                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+                       input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_LINK_GET_VAL_ID, &input, result, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link get val");
+                if(H5VL__iod_create_and_forward(H5VL_LINK_GET_VAL_ID, HG_LINK_GET_VAL, obj, 0,
+                                                &input, result, result, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link get_val");
 
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_LINK_GET_VAL;
-                request->data = result;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
+                if(new_name) 
+                    free(new_name);
                 break;
             }
         /* H5Lget_name_by_idx */
@@ -5398,11 +4185,6 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     H5VL_iod_object_t *cur_obj;
     link_op_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     char *new_name = NULL;
     herr_t ret_value = SUCCEED;
 
@@ -5417,66 +4199,22 @@ H5VL_iod_link_remove(void *_obj, H5VL_loc_params_t loc_params, hid_t dxpl_id, vo
     /* set the input structure for the HG encode routine */
     input.coh = obj->file->remote_file.coh;
     input.path = new_name;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
     printf("Link Remove axe %llu: %s ID %llu axe %llu\n", 
-           input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+           input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
     status = (int *)malloc(sizeof(int));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_LINK_REMOVE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship link remove");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_LINK_REMOVE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)cur_obj;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        cur_obj->request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_LINK_REMOVE_ID, HG_LINK_REMOVE, cur_obj, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship link remove");
 
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_link_remove() */
 
@@ -5499,33 +4237,12 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                      H5I_type_t *opened_type, hid_t dxpl_id, void **req)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to open the group */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     char *new_name = NULL;
     void *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if(H5VL_OBJECT_BY_ADDR == loc_params.type) {
-        /* get a function shipper request */
-        if(do_async) {
-            if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate a HG request");
-        } /* end if */
-        else
-            hg_req = &_hg_req;
-
-        /* Get async request for operation */
-        if(do_async) {
-            if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-        } /* end if */
-        else
-            request = &_request;
-
         switch(loc_params.loc_data.loc_by_addr.obj_type) {
         case H5O_TYPE_DATASET:
             {
@@ -5548,11 +4265,7 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.parent_axe_id = 0;
                 input.name = ".";
                 input.dapl_id = H5P_DATASET_ACCESS_DEFAULT;
-                input.axe_id = axe_id ++;
-
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_DSET_OPEN_ID, &input, &dset->remote_dset, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship dataset open");
+                input.axe_info.axe_id = g_axe_id ++;
 
                 dset->dapl_id = H5P_DATASET_ACCESS_DEFAULT;
 
@@ -5562,38 +4275,10 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 dset->common.file->nopen_objs ++;
                 dset->common.obj_name = NULL;
 
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_DSET_OPEN;
-                request->data = dset;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)dset;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-
-                    *req = request;
-
-                    /* Track request */
-                    dset->common.request = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-                    /* Sanity check */
-                    HDassert(request == &_request);
-
-                    /* Request has completed already */
-                    dset->common.request = NULL;
-                } /* end else */
+                if(H5VL__iod_create_and_forward(H5VL_DSET_OPEN_ID, HG_DSET_OPEN, 
+                                                (H5VL_iod_object_t *)dset, 1,
+                                                &input, &dset->remote_dset, dset, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship dataset create");
 
                 *opened_type = H5I_DATASET;
                 ret_value = (void *)dset;
@@ -5620,13 +4305,9 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.parent_axe_id = 0;
                 input.name = ".";
                 input.tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
 
                 dtype->tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_DTYPE_OPEN_ID, &input, &dtype->remote_dtype, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship datatype open");
 
                 /* set common object parameters */
                 dtype->common.obj_type = H5I_DATATYPE;
@@ -5634,27 +4315,10 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 dtype->common.file->nopen_objs ++;
                 dtype->common.obj_name = NULL;
 
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_DTYPE_OPEN;
-                request->data = dtype;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)dtype;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* MSC - DATATYPE OPEN has to SYNCHRONOUS for now */
-                /* Synchronously wait on the request */
-                if(H5VL_iod_request_wait(obj->file, request) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't wait on HG request");
-
-                /* Sanity check */
-                HDassert(request == &_request);
-
-                /* Request has completed already */
-                dtype->common.request = NULL;
+                if(H5VL__iod_create_and_forward(H5VL_DTYPE_OPEN_ID, HG_DTYPE_OPEN, 
+                                                (H5VL_iod_object_t *)dtype, 1,
+                                                &input, &dtype->remote_dtype, dtype, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship datatype open");
 
                 *opened_type = H5I_DATATYPE;
                 ret_value = (void *)dtype;
@@ -5680,13 +4344,9 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.parent_axe_id = 0;
                 input.name = ".";
                 input.gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
 
                 grp->gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_GROUP_OPEN_ID, &input, &grp->remote_group, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship group open");
 
                 /* set common object parameters */
                 grp->common.obj_type = H5I_GROUP;
@@ -5694,38 +4354,10 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 grp->common.file->nopen_objs ++;
                 grp->common.obj_name = NULL;
 
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_GROUP_OPEN;
-                request->data = grp;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)grp;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-
-                    *req = request;
-
-                    /* Track request */
-                    grp->common.request = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't wait on HG request")
-
-                            /* Sanity check */
-                            HDassert(request == &_request);
-
-                    /* Request has completed already */
-                    grp->common.request = NULL;
-                } /* end else */
+                if(H5VL__iod_create_and_forward(H5VL_GROUP_OPEN_ID, HG_GROUP_OPEN, 
+                                                (H5VL_iod_object_t *)grp, 1,
+                                                &input, &grp->remote_group, grp, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship group open");
 
                 *opened_type = H5I_GROUP;
                 ret_value = (void *)grp;
@@ -5753,13 +4385,9 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 input.parent_axe_id = 0;
                 input.name = ".";
                 input.mapl_id = H5P_GROUP_ACCESS_DEFAULT;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
 
                 map->mapl_id = H5P_GROUP_ACCESS_DEFAULT;
-
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_MAP_OPEN_ID, &input, &map->remote_map, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship map open");
 
                 /* set common object parameters */
                 map->common.obj_type = H5I_MAP;
@@ -5767,38 +4395,10 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
                 map->common.file->nopen_objs ++;
                 map->common.obj_name = NULL;
 
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_MAP_OPEN;
-                request->data = map;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)map;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-
-                    *req = request;
-
-                    /* Track request */
-                    map->common.request = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't wait on HG request")
-
-                            /* Sanity check */
-                            HDassert(request == &_request);
-
-                    /* Request has completed already */
-                    map->common.request = NULL;
-                } /* end else */
+                if(H5VL__iod_create_and_forward(H5VL_MAP_OPEN_ID, HG_MAP_OPEN, 
+                                                (H5VL_iod_object_t *)map, 1,
+                                                &input, &map->remote_map, map, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
 
                 *opened_type = H5I_MAP;
                 ret_value = (void *)map;
@@ -5813,9 +4413,6 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
         object_op_in_t input;
         H5VL_iod_remote_object_t remote_obj; /* generic remote object structure */
 
-        hg_req = &_hg_req;
-        request = &_request;
-
         /* Retrieve the parent AXE id by traversing the path where the
            object should be opened. */
         if(H5VL_iod_get_parent_info(obj, loc_params, ".", &input.loc_id, &input.loc_oh, 
@@ -5824,28 +4421,12 @@ H5VL_iod_object_open(void *_obj, H5VL_loc_params_t loc_params,
 
         /* set the input structure for the HG encode routine */
         input.coh = obj->file->remote_file.coh;
-        input.axe_id = axe_id ++;
+        input.axe_info.axe_id = g_axe_id ++;
         input.loc_name = new_name;
 
-        /* forward the call to the IONs */
-        if(HG_Forward(PEER, H5VL_OBJECT_OPEN_ID, &input, &remote_obj, hg_req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship link remove");
-
-        /* Set up request */
-        HDmemset(request, 0, sizeof(*request));
-        request->type = HG_OBJECT_OPEN;
-        request->data = &remote_obj;
-        request->req = hg_req;
-        request->obj = obj;
-        request->axe_id = input.axe_id;
-        request->next = request->prev = NULL;
-
-        /* add request to container's linked list */
-        H5VL_iod_request_add(obj->file, request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, NULL, "can't wait on HG request");
+        if(H5VL__iod_create_and_forward(H5VL_OBJECT_OPEN_ID, HG_OBJECT_OPEN, 
+                                        obj, 1, &input, &remote_obj, &remote_obj, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship object open");
 
         *opened_type = remote_obj.obj_type;
 
@@ -6064,11 +4645,6 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *
     H5VL_iod_object_t *cur_obj;
     object_copy_in_t input;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     char *new_src_name = NULL, *new_dst_name = NULL;
     herr_t      ret_value = SUCCEED;        /* Return value */
 
@@ -6090,7 +4666,7 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *
 
     /* set the input structure for the HG encode routine */
     input.coh = src_obj->file->remote_file.coh;
-    input.axe_id = axe_id ++;
+    input.axe_info.axe_id = g_axe_id ++;
     input.lcpl_id = lcpl_id;
     input.ocpypl_id = ocpypl_id;
     input.src_loc_name = new_src_name;
@@ -6098,61 +4674,16 @@ H5VL_iod_object_copy(void *_src_obj, H5VL_loc_params_t loc_params1, const char *
 
 #if H5VL_IOD_DEBUG
     printf("Object Copy axe %llu: %s ID %llu axe %llu to %s ID %llu axe %llu\n", 
-           input.axe_id, new_src_name, input.src_loc_id, input.src_parent_axe_id,
+           input.axe_info.axe_id, new_src_name, input.src_loc_id, input.src_parent_axe_id,
            new_dst_name, input.dst_loc_id, input.dst_parent_axe_id);
 #endif
 
     status = (herr_t *)malloc(sizeof(herr_t));
 
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_OBJECT_COPY_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object copy");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc
-                    (sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_OBJECT_COPY;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)cur_obj;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(dst_obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        cur_obj->request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(dst_obj->file, request) < 0)
-            HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
+    if(H5VL__iod_create_and_forward(H5VL_OBJECT_COPY_ID, HG_OBJECT_COPY, 
+                                    (H5VL_iod_object_t *)cur_obj, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object copy");
 
 done:
     if(new_src_name) free(new_src_name);
@@ -6209,11 +4740,6 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                      hid_t dxpl_id, void **req, va_list arguments)
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     int *status = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -6239,64 +4765,22 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.path = loc_name;
                 input.old_attr_name = old_name;
                 input.new_attr_name = new_name;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
                 printf("Attribute Rename %s to %s LOC ID %llu, axe id %llu, parent %llu\n", 
-                       old_name, new_name, input.loc_id, input.axe_id, input.parent_axe_id);
+                       old_name, new_name, input.loc_id, input.axe_info.axe_id, input.parent_axe_id);
 #endif
 
                 status = (herr_t *)malloc(sizeof(herr_t));
 
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
+                if(H5VL__iod_create_and_forward(H5VL_ATTR_RENAME_ID, HG_ATTR_RENAME, 
+                                                (H5VL_iod_object_t *)obj, 1,
+                                                &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship attribute rename");
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_ATTR_RENAME_ID, &input, status, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship attribute rename");
-
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_ATTR_RENAME;
-                request->data = status;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                    /* Track request */
-                    obj->request = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(loc_name) free(loc_name);
+                if(loc_name) 
+                    free(loc_name);
                 break;
             }
         /* H5Oset_comment */
@@ -6316,61 +4800,21 @@ H5VL_iod_object_misc(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_misc_
                 input.coh = obj->file->remote_file.coh;
                 input.path = loc_name;
                 input.comment = comment;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
 
                 status = (herr_t *)malloc(sizeof(herr_t));
 
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
-
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_OBJECT_SET_COMMENT_ID, &input, status, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship set comment");
-
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_OBJECT_SET_COMMENT;
-                request->data = status;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
+                if(H5VL__iod_create_and_forward(H5VL_OBJECT_SET_COMMENT_ID, HG_OBJECT_SET_COMMENT, 
+                                                (H5VL_iod_object_t *)obj, 0,
+                                                &input, status, status, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object set_comment");
 
                 /* store the comment locally if the object is open */
                 if(loc_params.type == H5VL_OBJECT_BY_SELF)
                     obj->comment = HDstrdup(comment);
 
-                if(loc_name) free(loc_name);
+                if(loc_name) 
+                    free(loc_name);
                 break;
             }
         /* H5Oincr_refcount / H5Odecr_refcount */
@@ -6419,11 +4863,6 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 {
     H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     int *status;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
     char *new_name = NULL;
     herr_t ret_value = SUCCEED;    /* Return value */
 
@@ -6444,61 +4883,21 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.loc_name = new_name;
-
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
 
 #if H5VL_IOD_DEBUG
                 printf("Object Exists axe %llu: %s ID %llu axe %llu\n", 
-                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+                       input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_OBJECT_EXISTS_ID, &input, ret, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object exists");
+                if(H5VL__iod_create_and_forward(H5VL_OBJECT_EXISTS_ID, HG_OBJECT_EXISTS, 
+                                                (H5VL_iod_object_t *)obj, 0,
+                                                &input, ret, ret, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object exists");
 
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_OBJECT_EXISTS;
-                request->data = ret;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
+                if(new_name) 
+                    free(new_name);
                 break;
             }
         /* H5Oget_comment / H5Oget_comment_by_name */
@@ -6536,7 +4935,7 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.path = new_name;
                 if(comment)
                     input.length = size;
@@ -6552,58 +4951,18 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
                 result->name.value_size = ret;
                 result->name.value = comment;
 
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
-
 #if H5VL_IOD_DEBUG
                 printf("Object Get Comment axe %llu: %s ID %llu axe %llu\n", 
-                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+                       input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_OBJECT_GET_COMMENT_ID, &input, result, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object exists");
+                if(H5VL__iod_create_and_forward(H5VL_OBJECT_GET_COMMENT_ID, HG_OBJECT_GET_COMMENT, 
+                                                (H5VL_iod_object_t *)obj, 0,
+                                                &input, result, result, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object get_comment");
 
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_OBJECT_GET_COMMENT;
-                request->data = result;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
+                if(new_name) 
+                    free(new_name);
                 break;
             }
         /* H5Oget_info / H5Oget_info_by_name / H5Oget_info_by_idx */
@@ -6620,61 +4979,21 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 
                 /* set the input structure for the HG encode routine */
                 input.coh = obj->file->remote_file.coh;
-                input.axe_id = axe_id ++;
+                input.axe_info.axe_id = g_axe_id ++;
                 input.loc_name = new_name;
-
-                /* get a function shipper request */
-                if(do_async) {
-                    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-                        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-                } /* end if */
-                else
-                    hg_req = &_hg_req;
 
 #if H5VL_IOD_DEBUG
                 printf("Object get_info axe %llu: %s ID %llu axe %llu\n", 
-                       input.axe_id, new_name, input.loc_id, input.parent_axe_id);
+                       input.axe_info.axe_id, new_name, input.loc_id, input.parent_axe_id);
 #endif
 
-                /* forward the call to the IONs */
-                if(HG_Forward(PEER, H5VL_OBJECT_GET_INFO_ID, &input, oinfo, hg_req) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship object exists");
+                if(H5VL__iod_create_and_forward(H5VL_OBJECT_GET_INFO_ID, HG_OBJECT_GET_INFO, 
+                                                (H5VL_iod_object_t *)obj, 0,
+                                                &input, oinfo, oinfo, req) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship object get_info");
 
-                /* Get async request for operation */
-                if(do_async) {
-                    if(NULL == (request = (H5VL_iod_request_t *)
-                                H5MM_malloc(sizeof(H5VL_iod_request_t))))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-                } /* end if */
-                else
-                    request = &_request;
-
-                /* Set up request */
-                HDmemset(request, 0, sizeof(*request));
-                request->type = HG_OBJECT_GET_INFO;
-                request->data = oinfo;
-                request->req = hg_req;
-                request->obj = (H5VL_iod_object_t *)obj;
-                request->axe_id = input.axe_id;
-                request->next = request->prev = NULL;
-                /* add request to container's linked list */
-                H5VL_iod_request_add(obj->file, request);
-
-                /* Store/wait on request */
-                if(do_async) {
-                    /* Sanity check */
-                    HDassert(request != &_request);
-                    *req = request;
-                } /* end if */
-                else {
-                    /* Synchronously wait on the request */
-                    if(H5VL_iod_request_wait(obj->file, request) < 0)
-                        HGOTO_ERROR(H5E_ATTR,  H5E_CANTGET, FAIL, "can't wait on HG request");
-                    /* Sanity check */
-                    HDassert(request == &_request);
-                } /* end else */
-
-                if(new_name) free(new_name);
+                if(new_name) 
+                    free(new_name);
                 break;
             }
         /* H5Rget_region */
@@ -6707,6 +5026,557 @@ H5VL_iod_object_get(void *_obj, H5VL_loc_params_t loc_params, H5VL_object_get_t 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_object_get() */
+
+void *
+H5VL_iod_map_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
+                    hid_t keytype, hid_t valtype, hid_t lcpl_id, hid_t mcpl_id, 
+                    hid_t mapl_id, uint64_t trans, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
+    H5VL_iod_map_t *map = NULL; /* the map object that is created and passed to the user */
+    map_create_in_t input;
+    iod_obj_id_t iod_id;
+    iod_handle_t iod_oh;
+    uint64_t parent_axe_id;
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Retrieve the parent AXE id by traversing the path where the
+       map should be created. */
+    if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
+                                &parent_axe_id, &new_name, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
+
+    /* allocate the map object that is returned to the user */
+    if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+    map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
+    map->remote_map.iod_id = IOD_ID_UNDEFINED;
+    map->remote_map.mcpl_id = -1;
+
+    /* Generate an IOD ID for the group to be created */
+    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
+                        obj->file->remote_file.kv_oid_index, 
+                        IOD_OBJ_KV, &input.map_id);
+    map->remote_map.iod_id = input.map_id;
+
+    /* increment the index of KV objects created on the container */
+    obj->file->remote_file.kv_oid_index ++;
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_id = iod_id;
+    input.loc_oh = iod_oh;
+    input.parent_axe_id = parent_axe_id;
+    input.name = new_name;
+    input.keytype_id = keytype;
+    input.valtype_id = valtype;
+    input.mcpl_id = mcpl_id;
+    input.mapl_id = mapl_id;
+    input.lcpl_id = lcpl_id;
+    input.axe_info.axe_id = g_axe_id ++;
+
+#if H5VL_IOD_DEBUG
+    printf("Map Create %s, IOD ID %llu, axe id %llu, parent %llu\n", 
+           new_name, input.map_id, input.axe_info.axe_id, input.parent_axe_id);
+#endif
+
+    /* setup the local map struct */
+    /* store the entire path of the map locally */
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(map->common.obj_name+obj_name_len, name, name_len);
+        map->common.obj_name[obj_name_len+name_len] = '\0';
+    }
+
+    /* copy property lists */
+    if((map->remote_map.mcpl_id = H5Pcopy(mcpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mcpl");
+    if((map->mapl_id = H5Pcopy(mapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
+    if((map->remote_map.keytype_id = H5Tcopy(keytype)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
+    if((map->remote_map.valtype_id = H5Tcopy(valtype)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
+
+    /* set common object parameters */
+    map->common.obj_type = H5I_MAP;
+    map->common.file = obj->file;
+    map->common.file->nopen_objs ++;
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_CREATE_ID, HG_MAP_CREATE, 
+                                    (H5VL_iod_object_t *)map, 1,
+                                    &input, &map->remote_map, map, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map create");
+
+    ret_value = (void *)map;
+
+done:
+    if(new_name) 
+        free(new_name);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_create() */
+
+void *
+H5VL_iod_map_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t mapl_id, 
+                  uint64_t trans, void **req)
+{
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
+    H5VL_iod_map_t *map = NULL; /* the map object that is created and passed to the user */
+    map_open_in_t input;
+    iod_obj_id_t iod_id;
+    iod_handle_t iod_oh;
+    uint64_t parent_axe_id;
+    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Retrieve the parent AXE id by traversing the path where the
+       map should be created. */
+    if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
+                                &parent_axe_id, &new_name, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
+
+    /* allocate the map object that is returned to the user */
+    if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
+
+    map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
+    map->remote_map.iod_id = IOD_ID_UNDEFINED;
+    map->remote_map.keytype_id = -1;
+    map->remote_map.valtype_id = -1;
+
+    /* set the input structure for the HG encode routine */
+    input.coh = obj->file->remote_file.coh;
+    input.loc_id = iod_id;
+    input.loc_oh = iod_oh;
+    input.parent_axe_id = parent_axe_id;
+    input.name = new_name;
+    input.mapl_id = mapl_id;
+    input.axe_info.axe_id = g_axe_id ++;
+
+#if H5VL_IOD_DEBUG
+    printf("Map Open %s LOC ID %llu, axe id %llu, parent %llu, name len %zu\n", 
+           new_name, input.loc_id, input.axe_info.axe_id, input.parent_axe_id, strlen(input.name));
+#endif
+
+    /* setup the local map struct */
+    /* store the entire path of the map locally */
+    {
+        size_t obj_name_len = HDstrlen(obj->obj_name);
+        size_t name_len = HDstrlen(name);
+
+        if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
+        HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
+        HDmemcpy(map->common.obj_name+obj_name_len, name, name_len);
+        map->common.obj_name[obj_name_len+name_len] = '\0';
+    }
+
+    /* copy property lists */
+    if((map->mapl_id = H5Pcopy(mapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
+
+    /* set common object parameters */
+    map->common.obj_type = H5I_MAP;
+    map->common.file = obj->file;
+    map->common.file->nopen_objs ++;
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_OPEN_ID, HG_MAP_OPEN, (H5VL_iod_object_t *)map, 1,
+                                    &input, &map->remote_map, map, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to create and ship map open");
+
+    ret_value = (void *)map;
+
+done:
+    if(new_name) free(new_name);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_open() */
+
+herr_t 
+H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key, 
+                 hid_t val_mem_type_id, const void *value, hid_t dxpl_id, 
+                 uint64_t trans, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    map_set_in_t input;
+    size_t key_size, val_size;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* If there is information needed about the dataset that is not present locally, wait */
+    if(-1 == map->remote_map.keytype_id ||
+       -1 == map->remote_map.valtype_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        map->common.request = NULL;
+    }
+
+    /* set the parent axe id */
+    if(map->common.request)
+        input.parent_axe_id = map->common.request->axe_id;
+    else {
+        input.parent_axe_id = 0;
+    }
+
+    /* get the Key and Value size */
+    {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+        key_size = H5T_GET_SIZE(dt);
+
+        dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(val_mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+        val_size = H5T_GET_SIZE(dt);
+    }
+
+    /* Fill input structure */
+    input.coh = map->common.file->remote_file.coh;
+    input.iod_oh = map->remote_map.iod_oh;
+    input.iod_id = map->remote_map.iod_id;
+    input.dxpl_id = dxpl_id;
+    input.key_maptype_id = map->remote_map.keytype_id;
+    input.key_memtype_id = key_mem_type_id;
+    input.key.buf_size = key_size;
+    input.key.buf = key;
+    input.val_maptype_id = map->remote_map.valtype_id;
+    input.val_memtype_id = val_mem_type_id;
+    input.val.buf_size = val_size;
+    input.val.buf = value;
+    input.axe_info.axe_id = g_axe_id ++;
+
+    status = (int *)malloc(sizeof(int));
+
+#if H5VL_IOD_DEBUG
+    printf("MAP set, axe id %llu, parent %llu\n", 
+           input.axe_info.axe_id, input.parent_axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_SET_ID, HG_MAP_SET, (H5VL_iod_object_t *)map, 0,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map set");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_set() */
+
+herr_t 
+H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key, 
+                 hid_t val_mem_type_id, void *value, hid_t dxpl_id, 
+                 uint64_t trans, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    map_get_in_t input;
+    map_get_out_t *output;
+    size_t key_size, val_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* If there is information needed about the map that is not present locally, wait */
+    if(-1 == map->remote_map.keytype_id ||
+       -1 == map->remote_map.valtype_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        map->common.request = NULL;
+    }
+
+    /* set the parent axe id */
+    if(map->common.request)
+        input.parent_axe_id = map->common.request->axe_id;
+    else {
+        input.parent_axe_id = 0;
+    }
+
+    /* get the Key and Value size */
+    {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+        key_size = H5T_GET_SIZE(dt);
+
+        dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(val_mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+        val_size = H5T_GET_SIZE(dt);
+    }
+
+    /* Fill input structure */
+    input.coh = map->common.file->remote_file.coh;
+    input.iod_oh = map->remote_map.iod_oh;
+    input.iod_id = map->remote_map.iod_id;
+    input.dxpl_id = dxpl_id;
+    input.key_maptype_id = map->remote_map.keytype_id;
+    input.val_maptype_id = map->remote_map.valtype_id;
+    input.key_memtype_id = key_mem_type_id;
+    input.key.buf_size = key_size;
+    input.key.buf = key;
+    input.val_memtype_id = val_mem_type_id;
+    input.axe_info.axe_id = g_axe_id ++;
+
+#if H5VL_IOD_DEBUG
+    printf("MAP Get, axe id %llu, parent %llu\n", 
+           input.axe_info.axe_id, input.parent_axe_id);
+#endif
+
+    if(NULL == (output = (map_get_out_t *)H5MM_calloc(sizeof(map_get_out_t))))
+	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a request");
+
+    output->val.val = value;
+    output->val.val_size = val_size;
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_GET_ID, HG_MAP_GET, (H5VL_iod_object_t *)map, 0,
+                                    &input, output, output, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map get");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_get() */
+
+herr_t 
+H5VL_iod_map_get_types(void *_map, hid_t *key_type_id, hid_t *val_type_id, 
+                       uint64_t trans, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* If there is information needed about the dataset that is not present locally, wait */
+    if(-1 == map->remote_map.keytype_id ||
+       -1 == map->remote_map.valtype_id) {
+        /* Synchronously wait on the request attached to the dataset */
+        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
+        map->common.request = NULL;
+    }
+
+    if((*key_type_id = H5Tcopy(map->remote_map.keytype_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of map key")
+
+    if((*val_type_id = H5Tcopy(map->remote_map.valtype_id)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of map val")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_get_types() */
+
+herr_t 
+H5VL_iod_map_get_count(void *_map, hsize_t *count, uint64_t trans, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    map_get_count_in_t input;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the parent axe id */
+    if(map->common.request)
+        input.parent_axe_id = map->common.request->axe_id;
+    else {
+        input.parent_axe_id = 0;
+    }
+
+    /* Fill input structure */
+    input.coh = map->common.file->remote_file.coh;
+    input.iod_oh = map->remote_map.iod_oh;
+    input.iod_id = map->remote_map.iod_id;
+    input.axe_info.axe_id = g_axe_id ++;
+
+#if H5VL_IOD_DEBUG
+    printf("MAP Get count, axe id %llu, parent %llu\n", 
+           input.axe_info.axe_id, input.parent_axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_GET_COUNT_ID, HG_MAP_GET_COUNT, 
+                                    (H5VL_iod_object_t *)map, 0,
+                                    &input, count, count, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map get_count");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_get_count() */
+
+herr_t 
+H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key, 
+                    htri_t *exists, uint64_t trans, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    map_op_in_t input;
+    size_t key_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the parent axe id */
+    if(map->common.request)
+        input.parent_axe_id = map->common.request->axe_id;
+    else {
+        input.parent_axe_id = 0;
+    }
+
+    /* get the Key and Value size */
+    {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+        key_size = H5T_GET_SIZE(dt);
+    }
+
+    /* Fill input structure */
+    input.coh = map->common.file->remote_file.coh;
+    input.iod_oh = map->remote_map.iod_oh;
+    input.iod_id = map->remote_map.iod_id;
+    input.key_maptype_id = map->remote_map.keytype_id;
+    input.key_memtype_id = key_mem_type_id;
+    input.key.buf_size = key_size;
+    input.key.buf = key;
+    input.axe_info.axe_id = g_axe_id ++;
+
+#if H5VL_IOD_DEBUG
+    printf("MAP EXISTS, axe id %llu, parent %llu\n", 
+           input.axe_info.axe_id, input.parent_axe_id);
+#endif
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_EXISTS_ID, HG_MAP_EXISTS, (H5VL_iod_object_t *)map, 0,
+                                    &input, exists, exists, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map exists");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_exists() */
+
+herr_t 
+H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
+                     H5M_iterate_func_t callback_func, void *context)
+{
+    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    H5VL_iod_request_t _request; /* Local request, for sync. operations */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_iterate() */
+
+herr_t 
+H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key, 
+                    uint64_t trans, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    map_op_in_t input;
+    size_t key_size;
+    int *status = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* set the parent axe id */
+    if(map->common.request)
+        input.parent_axe_id = map->common.request->axe_id;
+    else {
+        input.parent_axe_id = 0;
+    }
+
+    /* get the Key and Value size */
+    {
+        H5T_t *dt = NULL;
+
+        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
+        key_size = H5T_GET_SIZE(dt);
+    }
+
+    /* Fill input structure */
+    input.coh = map->common.file->remote_file.coh;
+    input.iod_oh = map->remote_map.iod_oh;
+    input.iod_id = map->remote_map.iod_id;
+    input.key_maptype_id = map->remote_map.keytype_id;
+    input.key_memtype_id = key_mem_type_id;
+    input.key.buf_size = key_size;
+    input.key.buf = key;
+    input.axe_info.axe_id = g_axe_id ++;
+
+#if H5VL_IOD_DEBUG
+    printf("MAP DELETE, axe id %llu, parent %llu\n", 
+           input.axe_info.axe_id, input.parent_axe_id);
+#endif
+
+    status = (int *)malloc(sizeof(int));
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_DELETE_ID, HG_MAP_DELETE, (H5VL_iod_object_t *)map, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map delete");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_delete() */
+
+herr_t H5VL_iod_map_close(void *_map, void **req)
+{
+    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
+    map_close_in_t input;
+    int *status;
+    size_t num_parents;
+    uint64_t *axe_parents = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* If this call is not asynchronous, complete and remove all
+       requests that are associated with this object from the List */
+    if(NULL == req) {
+        if(H5VL_iod_request_wait_some(map->common.file, map) < 0)
+            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on all object requests");
+    }
+
+    /* determine the parent axe IDs array for this operation*/
+    if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)map, &num_parents, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get num AXE parents");
+    if(num_parents) {
+        if(NULL == (axe_parents = (uint64_t *)H5MM_malloc(sizeof(uint64_t) * num_parents)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate num parents array");
+        if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)map, &num_parents, axe_parents) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get AXE parents");
+    }
+
+    input.iod_oh = map->remote_map.iod_oh;
+    input.iod_id = map->remote_map.iod_id;
+    input.parent_axe_ids.count = num_parents;
+    input.parent_axe_ids.ids = axe_parents;
+    input.axe_info.axe_id = g_axe_id ++;
+
+    status = (int *)malloc(sizeof(int));
+
+    if(H5VL__iod_create_and_forward(H5VL_MAP_CLOSE_ID, HG_MAP_CLOSE, (H5VL_iod_object_t *)map, 1,
+                                    &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship map close");
+
+done:
+    axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_map_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -6863,978 +5733,15 @@ H5VL_iod_wait(void **req, H5_status_t *status)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
     }
 
+    H5VL__iod_request_remove_from_axe_list(request);
+
     *status = request->status;
+    request->rc --;
     request->req = H5MM_xfree(request->req);
     request = (H5VL_iod_request_t *)H5MM_xfree(request);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_wait() */
-
-void *
-H5VL_iod_map_create(void *_obj, H5VL_loc_params_t loc_params, const char *name, 
-                    hid_t keytype, hid_t valtype, hid_t lcpl_id, hid_t mcpl_id, 
-                    hid_t mapl_id, uint64_t trans, void **req)
-{
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
-    H5VL_iod_map_t *map = NULL; /* the map object that is created and passed to the user */
-    map_create_in_t input;
-    iod_obj_id_t iod_id;
-    iod_handle_t iod_oh;
-    uint64_t parent_axe_id;
-    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    void *ret_value = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Retrieve the parent AXE id by traversing the path where the
-       map should be created. */
-    if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
-
-    /* allocate the map object that is returned to the user */
-    if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-    map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
-    map->remote_map.iod_id = IOD_ID_UNDEFINED;
-    map->remote_map.mcpl_id = -1;
-
-    /* Generate an IOD ID for the group to be created */
-    H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
-                        obj->file->remote_file.kv_oid_index, 
-                        IOD_OBJ_KV, &input.map_id);
-    map->remote_map.iod_id = input.map_id;
-
-    /* increment the index of KV objects created on the container */
-    obj->file->remote_file.kv_oid_index ++;
-
-    /* set the input structure for the HG encode routine */
-    input.coh = obj->file->remote_file.coh;
-    input.loc_id = iod_id;
-    input.loc_oh = iod_oh;
-    input.parent_axe_id = parent_axe_id;
-    input.name = new_name;
-    input.keytype_id = keytype;
-    input.valtype_id = valtype;
-    input.mcpl_id = mcpl_id;
-    input.mapl_id = mapl_id;
-    input.lcpl_id = lcpl_id;
-    input.axe_id = axe_id ++;
-
-#if H5VL_IOD_DEBUG
-    printf("Map Create %s, IOD ID %llu, axe id %llu, parent %llu\n", 
-           new_name, input.map_id, input.axe_id, input.parent_axe_id);
-#endif
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_CREATE_ID, &input, &map->remote_map, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship map create");
-
-    /* setup the local map struct */
-    /* store the entire path of the map locally */
-    {
-        size_t obj_name_len = HDstrlen(obj->obj_name);
-        size_t name_len = HDstrlen(name);
-
-        if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-        HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
-        HDmemcpy(map->common.obj_name+obj_name_len, name, name_len);
-        map->common.obj_name[obj_name_len+name_len] = '\0';
-    }
-
-    /* copy property lists */
-    if((map->remote_map.mcpl_id = H5Pcopy(mcpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mcpl");
-    if((map->mapl_id = H5Pcopy(mapl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
-    if((map->remote_map.keytype_id = H5Tcopy(keytype)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
-    if((map->remote_map.valtype_id = H5Tcopy(valtype)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy dtype");
-
-    /* set common object parameters */
-    map->common.obj_type = H5I_MAP;
-    map->common.file = obj->file;
-    map->common.file->nopen_objs ++;
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_CREATE;
-    request->data = map;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        map->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't wait on HG request")
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        map->common.request = NULL;
-    } /* end else */
-
-    ret_value = (void *)map;
-
-done:
-    if(new_name) free(new_name);
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_create() */
-
-void *
-H5VL_iod_map_open(void *_obj, H5VL_loc_params_t loc_params, const char *name, hid_t mapl_id, 
-                  uint64_t trans, void **req)
-{
-    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj; /* location object to create the group */
-    H5VL_iod_map_t *map = NULL; /* the map object that is created and passed to the user */
-    map_open_in_t input;
-    iod_obj_id_t iod_id;
-    iod_handle_t iod_oh;
-    uint64_t parent_axe_id;
-    char *new_name = NULL; /* resolved path to where we need to start traversal at the server */
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    void *ret_value = NULL;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Retrieve the parent AXE id by traversing the path where the
-       map should be created. */
-    if(H5VL_iod_get_parent_info(obj, loc_params, name, &iod_id, &iod_oh, 
-                                &parent_axe_id, &new_name, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "Failed to resolve current working group");
-
-    /* allocate the map object that is returned to the user */
-    if(NULL == (map = H5FL_CALLOC(H5VL_iod_map_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate object struct");
-
-    map->remote_map.iod_oh.cookie = IOD_OH_UNDEFINED;
-    map->remote_map.iod_id = IOD_ID_UNDEFINED;
-    map->remote_map.keytype_id = -1;
-    map->remote_map.valtype_id = -1;
-
-    /* set the input structure for the HG encode routine */
-    input.coh = obj->file->remote_file.coh;
-    input.loc_id = iod_id;
-    input.loc_oh = iod_oh;
-    input.parent_axe_id = parent_axe_id;
-    input.name = new_name;
-    input.mapl_id = mapl_id;
-    input.axe_id = axe_id ++;
-
-#if H5VL_IOD_DEBUG
-    printf("Map Open %s LOC ID %llu, axe id %llu, parent %llu, name len %zu\n", 
-           new_name, input.loc_id, input.axe_id, input.parent_axe_id, strlen(input.name));
-#endif
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_OPEN_ID, &input, &map->remote_map, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "failed to ship map create");
-
-    /* setup the local map struct */
-    /* store the entire path of the map locally */
-    {
-        size_t obj_name_len = HDstrlen(obj->obj_name);
-        size_t name_len = HDstrlen(name);
-
-        if (NULL == (map->common.obj_name = (char *)HDmalloc(obj_name_len + name_len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate");
-        HDmemcpy(map->common.obj_name, obj->obj_name, obj_name_len);
-        HDmemcpy(map->common.obj_name+obj_name_len, name, name_len);
-        map->common.obj_name[obj_name_len+name_len] = '\0';
-    }
-
-    /* copy property lists */
-    if((map->mapl_id = H5Pcopy(mapl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy mapl");
-
-    /* set common object parameters */
-    map->common.obj_type = H5I_MAP;
-    map->common.file = obj->file;
-    map->common.file->nopen_objs ++;
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_OPEN;
-    request->data = map;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(obj->file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        map->common.request = request;
-    } /* end if */
-    else {
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(obj->file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't wait on HG request")
-
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Request has completed already */
-        map->common.request = NULL;
-    } /* end else */
-
-    ret_value = (void *)map;
-
-done:
-    if(new_name) free(new_name);
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_open() */
-
-herr_t 
-H5VL_iod_map_set(void *_map, hid_t key_mem_type_id, const void *key, 
-                 hid_t val_mem_type_id, const void *value, hid_t dxpl_id, 
-                 uint64_t trans, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    map_set_in_t input;
-    size_t key_size, val_size;
-    int *status = NULL;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* If there is information needed about the dataset that is not present locally, wait */
-    if(-1 == map->remote_map.keytype_id ||
-       -1 == map->remote_map.valtype_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        map->common.request = NULL;
-    }
-
-    /* set the parent axe id */
-    if(map->common.request)
-        input.parent_axe_id = map->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
-    }
-
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-
-        dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(val_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        val_size = H5T_GET_SIZE(dt);
-    }
-
-    /* Fill input structure */
-    input.coh = map->common.file->remote_file.coh;
-    input.iod_oh = map->remote_map.iod_oh;
-    input.iod_id = map->remote_map.iod_id;
-    input.dxpl_id = dxpl_id;
-    input.key_maptype_id = map->remote_map.keytype_id;
-    input.key_memtype_id = key_mem_type_id;
-    input.key.buf_size = key_size;
-    input.key.buf = key;
-    input.val_maptype_id = map->remote_map.valtype_id;
-    input.val_memtype_id = val_mem_type_id;
-    input.val.buf_size = val_size;
-    input.val.buf = value;
-    input.axe_id = axe_id ++;
-
-    status = (int *)malloc(sizeof(int));
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    printf("kmap %d kmem %d. vmap %d kmap %d  dxpl %d\n", 
-           input.key_maptype_id,input.key_memtype_id,input.val_maptype_id,input.val_memtype_id, dxpl_id);
-
-#if H5VL_IOD_DEBUG
-    printf("MAP set, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
-#endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_SET_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship map set");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_SET;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(map->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(map->common.file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_set() */
-
-herr_t 
-H5VL_iod_map_get(void *_map, hid_t key_mem_type_id, const void *key, 
-                 hid_t val_mem_type_id, void *value, hid_t dxpl_id, 
-                 uint64_t trans, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    map_get_in_t input;
-    map_get_out_t *output;
-    size_t key_size, val_size;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* If there is information needed about the map that is not present locally, wait */
-    if(-1 == map->remote_map.keytype_id ||
-       -1 == map->remote_map.valtype_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        map->common.request = NULL;
-    }
-
-    /* set the parent axe id */
-    if(map->common.request)
-        input.parent_axe_id = map->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
-    }
-
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-
-        dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(val_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        val_size = H5T_GET_SIZE(dt);
-    }
-
-    /* Fill input structure */
-    input.coh = map->common.file->remote_file.coh;
-    input.iod_oh = map->remote_map.iod_oh;
-    input.iod_id = map->remote_map.iod_id;
-    input.dxpl_id = dxpl_id;
-    input.key_maptype_id = map->remote_map.keytype_id;
-    input.val_maptype_id = map->remote_map.valtype_id;
-    input.key_memtype_id = key_mem_type_id;
-    input.key.buf_size = key_size;
-    input.key.buf = key;
-    input.val_memtype_id = val_mem_type_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-#if H5VL_IOD_DEBUG
-    printf("MAP Get, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
-#endif
-
-    if(NULL == (output = (map_get_out_t *)H5MM_calloc(sizeof(map_get_out_t))))
-	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a request");
-
-    output->val.val = value;
-    output->val.val_size = val_size;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_GET_ID, &input, output, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_GET;
-    request->data = output;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->status = 0;
-    request->state = 0;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(map->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(map->common.file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_get() */
-
-herr_t 
-H5VL_iod_map_get_types(void *_map, hid_t *key_type_id, hid_t *val_type_id, 
-                       uint64_t trans, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* If there is information needed about the dataset that is not present locally, wait */
-    if(-1 == map->remote_map.keytype_id ||
-       -1 == map->remote_map.valtype_id) {
-        /* Synchronously wait on the request attached to the dataset */
-        if(H5VL_iod_request_wait(map->common.file, map->common.request) < 0)
-            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on HG request");
-        map->common.request = NULL;
-    }
-
-    if((*key_type_id = H5Tcopy(map->remote_map.keytype_id)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of map key")
-
-    if((*val_type_id = H5Tcopy(map->remote_map.valtype_id)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of map val")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_get_types() */
-
-herr_t 
-H5VL_iod_map_get_count(void *_map, hsize_t *count, uint64_t trans, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    map_get_count_in_t input;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* set the parent axe id */
-    if(map->common.request)
-        input.parent_axe_id = map->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
-    }
-
-    /* Fill input structure */
-    input.coh = map->common.file->remote_file.coh;
-    input.iod_oh = map->remote_map.iod_oh;
-    input.iod_id = map->remote_map.iod_id;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-#if H5VL_IOD_DEBUG
-    printf("MAP Get count, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
-#endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_GET_COUNT_ID, &input, count, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_GET_COUNT;
-    request->data = count;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->status = 0;
-    request->state = 0;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(map->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(map->common.file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_get_count() */
-
-herr_t 
-H5VL_iod_map_exists(void *_map, hid_t key_mem_type_id, const void *key, 
-                    htri_t *exists, uint64_t trans, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    map_op_in_t input;
-    size_t key_size;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* set the parent axe id */
-    if(map->common.request)
-        input.parent_axe_id = map->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
-    }
-
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-    }
-
-    /* Fill input structure */
-    input.coh = map->common.file->remote_file.coh;
-    input.iod_oh = map->remote_map.iod_oh;
-    input.iod_id = map->remote_map.iod_id;
-    input.key_maptype_id = map->remote_map.keytype_id;
-    input.key_memtype_id = key_mem_type_id;
-    input.key.buf_size = key_size;
-    input.key.buf = key;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-#if H5VL_IOD_DEBUG
-    printf("MAP EXISTS, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
-#endif
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_EXISTS_ID, &input, exists, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_EXISTS;
-    request->data = exists;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->status = 0;
-    request->state = 0;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(map->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(map->common.file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_exists() */
-
-herr_t 
-H5VL_iod_map_iterate(void *map, hid_t key_mem_type_id, hid_t value_mem_type_id, 
-                     H5M_iterate_func_t callback_func, void *context)
-{
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_iterate() */
-
-herr_t 
-H5VL_iod_map_delete(void *_map, hid_t key_mem_type_id, const void *key, 
-                    uint64_t trans, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    map_op_in_t input;
-    size_t key_size;
-    int *status = NULL;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* set the parent axe id */
-    if(map->common.request)
-        input.parent_axe_id = map->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
-    }
-
-    /* get the Key and Value size */
-    {
-        H5T_t *dt = NULL;
-
-        if(NULL == (dt = (H5T_t *)H5I_object_verify(key_mem_type_id, H5I_DATATYPE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype");
-        key_size = H5T_GET_SIZE(dt);
-    }
-
-    /* Fill input structure */
-    input.coh = map->common.file->remote_file.coh;
-    input.iod_oh = map->remote_map.iod_oh;
-    input.iod_id = map->remote_map.iod_id;
-    input.key_maptype_id = map->remote_map.keytype_id;
-    input.key_memtype_id = key_mem_type_id;
-    input.key.buf_size = key_size;
-    input.key.buf = key;
-    input.axe_id = axe_id ++;
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-#if H5VL_IOD_DEBUG
-    printf("MAP DELETE, axe id %llu, parent %llu\n", 
-           input.axe_id, input.parent_axe_id);
-#endif
-
-    status = (int *)malloc(sizeof(int));
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_DELETE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to ship dataset read");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_DELETE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->status = 0;
-    request->state = 0;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(map->common.file, request);
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        map->common.request = request;
-    } /* end if */
-    else {
-        /* Sanity check */
-        HDassert(request == &_request);
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(map->common.file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on HG request");
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_delete() */
-
-herr_t H5VL_iod_map_close(void *_map, void **req)
-{
-    H5VL_iod_map_t *map = (H5VL_iod_map_t *)_map;
-    map_close_in_t input;
-    int *status;
-    size_t num_parents;
-    uint64_t *axe_parents = NULL;
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
-    hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
-    H5VL_iod_request_t *request = NULL;
-    hbool_t do_async = (req == NULL) ? FALSE : TRUE; /* Whether we're performing async. I/O */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* If this call is not asynchronous, complete and remove all
-       requests that are associated with this object from the List */
-    if(!do_async) {
-        if(H5VL_iod_request_wait_some(map->common.file, map) < 0)
-            HGOTO_ERROR(H5E_SYM,  H5E_CANTGET, FAIL, "can't wait on all object requests");
-    }
-
-    /* determine the parent axe IDs array for this operation*/
-    if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)map, &num_parents, NULL) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get num AXE parents");
-    if(num_parents) {
-        if(NULL == (axe_parents = (uint64_t *)H5MM_malloc(sizeof(uint64_t) * num_parents)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate num parents array");
-        if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)map, &num_parents, axe_parents) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get AXE parents");
-    }
-
-    status = (int *)malloc(sizeof(int));
-
-    /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
-
-    input.iod_oh = map->remote_map.iod_oh;
-    input.iod_id = map->remote_map.iod_id;
-    input.parent_axe_ids.count = num_parents;
-    input.parent_axe_ids.ids = axe_parents;
-    input.axe_id = axe_id ++;
-
-    /* forward the call to the IONs */
-    if(HG_Forward(PEER, H5VL_MAP_CLOSE_ID, &input, status, hg_req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to ship map close");
-
-    /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
-
-    /* Set up request */
-    HDmemset(request, 0, sizeof(*request));
-    request->type = HG_MAP_CLOSE;
-    request->data = status;
-    request->req = hg_req;
-    request->obj = (H5VL_iod_object_t *)map;
-    request->axe_id = input.axe_id;
-    request->next = request->prev = NULL;
-    /* add request to container's linked list */
-    H5VL_iod_request_add(map->common.file, request);
-
-#if H5VL_IOD_DEBUG
-    printf("MAP Close IOD ID %llu, axe id %llu\n", 
-           input.iod_id, input.axe_id);
-#endif
-
-    /* Store/wait on request */
-    if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
-        *req = request;
-
-        /* Track request */
-        map->common.request = request;
-    } /* end if */
-    else {
-
-        /* Synchronously wait on the request */
-        if(H5VL_iod_request_wait(map->common.file, request) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't wait on HG request");
-
-        /* Sanity check */
-        HDassert(request == &_request);
-    } /* end else */
-
-done:
-    axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_map_close() */
 
 #endif /* H5_HAVE_EFF */

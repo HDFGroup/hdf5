@@ -275,6 +275,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
                 fprintf(stderr, "Wait timeout reached\n");
                 cur_req->status = H5AO_FAILED;
                 cur_req->state = H5VL_IOD_COMPLETED;
+                //H5VL_iod_request_remove_from_axe_list(cur_req);
                 H5VL_iod_request_delete(file, cur_req);
                 goto done;
             }
@@ -284,6 +285,7 @@ H5VL_iod_request_wait_all(H5VL_iod_file_t *file)
             }
         }
 
+        //H5VL_iod_request_remove_from_axe_list(cur_req);
         if(H5VL_iod_request_complete(file, cur_req) < 0)
             fprintf(stderr, "Operation Failed!\n");
 
@@ -330,6 +332,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                 fprintf(stderr, "failed to wait on request\n");
                 cur_req->status = H5AO_FAILED;
                 cur_req->state = H5VL_IOD_COMPLETED;
+                //H5VL_iod_request_remove_from_axe_list(cur_req);
                 H5VL_iod_request_delete(file, cur_req);
             }
             else {
@@ -337,6 +340,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                     fprintf(stderr, "Wait timeout reached\n");
                     cur_req->status = H5AO_FAILED;
                     cur_req->state = H5VL_IOD_COMPLETED;
+                    //H5VL_iod_request_remove_from_axe_list(cur_req);
                     H5VL_iod_request_delete(file, cur_req);
                 }
                 else {
@@ -344,6 +348,7 @@ H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object)
                     cur_req->state = H5VL_IOD_COMPLETED;
                     if(H5VL_iod_request_complete(file, cur_req) < 0)
                         fprintf(stderr, "Operation Failed!\n");
+                    //H5VL_iod_request_remove_from_axe_list(cur_req);
                 }
             }
         }
@@ -552,7 +557,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 input.space_id = info->file_space_id;
                 input.mem_type_id = info->mem_type_id;
                 input.dset_type_id = dset->remote_dset.type_id;
-                input.axe_id = info->axe_id;
+                input.axe_info.axe_id = info->axe_id;
                 input.parent_axe_id = 0;
 
                 /* forward call to IONs */
@@ -1424,6 +1429,7 @@ H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, /*IN/OUT*/ size_t *count,
             if(cur_req->status == H5AO_PENDING){
                 if(NULL != parents) {
                     parents[size] = cur_req->axe_id;
+                    cur_req->rc ++;
                 }
                 size ++;
             }
@@ -1457,7 +1463,7 @@ herr_t
 H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                          const char *name, /*OUT*/iod_obj_id_t *iod_id, 
                          /*OUT*/iod_handle_t *iod_oh, /*OUT*/uint64_t *axe_id, 
-                         /*OUT*/char **new_name, /*OUT*/const H5VL_iod_object_t **last_obj)
+                         /*OUT*/char **new_name, /*OUT*/H5VL_iod_object_t **last_obj)
 {
     iod_obj_id_t cur_id;
     iod_handle_t cur_oh;
@@ -1573,6 +1579,7 @@ H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params,
 
     if(cur_obj->request && cur_obj->request->status == H5AO_PENDING) {
         *axe_id = cur_obj->request->axe_id;
+        cur_obj->request->rc ++;
     }
     else {
         *axe_id = 0;

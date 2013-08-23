@@ -81,6 +81,13 @@ typedef enum H5RQ_type_t {
     HG_OBJECT_GET_INFO
 } H5RQ_type_t;
 
+/* global AXE list struct */
+typedef struct H5VL_iod_axe_list_t {
+    struct H5VL_iod_request_t *head;
+    struct H5VL_iod_request_t *tail;
+    uint64_t last_released_task;
+} H5VL_iod_axe_list_t;
+
 /* the client IOD VOL request struct */
 typedef struct H5VL_iod_request_t {
     H5RQ_type_t type;
@@ -92,6 +99,9 @@ typedef struct H5VL_iod_request_t {
     uint64_t axe_id;
     struct H5VL_iod_request_t *prev;
     struct H5VL_iod_request_t *next;
+    struct H5VL_iod_request_t *global_prev;
+    struct H5VL_iod_request_t *global_next;
+    unsigned rc;
 } H5VL_iod_request_t;
 
 /* struct that contains the information about the IOD container */
@@ -253,10 +263,17 @@ H5_DLL herr_t H5VL_iod_request_wait_all(H5VL_iod_file_t *file);
 H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *object);
 H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
 H5_DLL herr_t H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
+
+H5_DLL herr_t H5VL__iod_request_remove_from_axe_list(H5VL_iod_request_t *request);
+H5_DLL herr_t H5VL__iod_request_add_to_axe_list(H5VL_iod_request_t *request);
+H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 
+                                           H5VL_iod_object_t *request_obj, htri_t track,
+                                           void *input, void *output, void *data, void **req);
+
 H5_DLL herr_t H5VL_iod_get_parent_info(H5VL_iod_object_t *obj, H5VL_loc_params_t loc_params, 
                                        const char *name, iod_obj_id_t *iod_id, iod_handle_t *iod_oh, 
                                        uint64_t *axe_id, char **new_name, 
-                                       const H5VL_iod_object_t **last_obj);
+                                       H5VL_iod_object_t **last_obj);
 H5_DLL herr_t H5VL_iod_get_axe_parents(H5VL_iod_object_t *obj, size_t *count, uint64_t *parents);
 H5_DLL herr_t H5VL_iod_gen_obj_id(int myrank, int nranks, uint64_t cur_index, 
                                   iod_obj_type_t type, uint64_t *id);

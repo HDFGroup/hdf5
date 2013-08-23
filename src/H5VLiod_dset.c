@@ -870,7 +870,7 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t UNUSED axe_engine,
     FUNC_ENTER_NOAPI_NOINIT
 
 #if H5VL_IOD_DEBUG
-    fprintf(stderr, "Dataset Write with AXE ID %llu\n",input->axe_id);
+    fprintf(stderr, "Dataset Write with AXE ID\n");
 #endif
 
     /* open the dataset if we don't have the handle yet */

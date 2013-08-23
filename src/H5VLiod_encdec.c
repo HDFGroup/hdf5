@@ -55,6 +55,32 @@ int hg_proc_ret_t(hg_proc_t proc, void *data)
     return ret;
 }
 
+int hg_proc_axe_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    axe_t *struct_data = (axe_t *) data;
+
+    ret = hg_proc_uint64_t(proc, &struct_data->axe_id);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+    ret = hg_proc_uint64_t(proc, &struct_data->start_range);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+    ret = hg_proc_uint64_t(proc, &struct_data->count);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    return ret;
+}
 /* Define hg_proc_htri_t */
 int hg_proc_htri_t(hg_proc_t proc, void *data)
 {
