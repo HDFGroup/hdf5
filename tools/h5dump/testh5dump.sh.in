@@ -212,6 +212,8 @@ $SRC_H5DUMP_TESTFILES/tbinregR.ddl
 $SRC_H5DUMP_TESTFILES/tbigdims.ddl
 $SRC_H5DUMP_TESTFILES/tboot1.ddl
 $SRC_H5DUMP_TESTFILES/tboot2.ddl
+$SRC_H5DUMP_TESTFILES/tboot2A.ddl
+$SRC_H5DUMP_TESTFILES/tboot2B.ddl
 $SRC_H5DUMP_TESTFILES/tchar1.ddl
 $SRC_H5DUMP_TESTFILES/tchunked.ddl
 $SRC_H5DUMP_TESTFILES/tcmpdattrintsize.ddl
@@ -1040,6 +1042,8 @@ TOOLTEST charsets.ddl --enable-error-stack charsets.h5
 # tests for super block
 TOOLTEST tboot1.ddl --enable-error-stack -H -B -d dset tfcontents1.h5
 TOOLTEST tboot2.ddl --enable-error-stack -B tfcontents2.h5
+TOOLTEST tboot2A.ddl --enable-error-stack --boot-block tfcontents2.h5
+TOOLTEST tboot2B.ddl --enable-error-stack --superblock tfcontents2.h5
 TOOLTEST file_space.ddl --enable-error-stack -B file_space.h5
 
 # test -p with a non existing dataset
