@@ -376,9 +376,19 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t
 
     /* Get an atom for the object and attach VOL information and free function to the ID */
     switch(obj_type) {
+        case H5I_FILE:
+            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+            break;
+
+        case H5I_ATTR:
+            if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize attribute handle")
+            break;
+
         case H5I_GROUP:
             if((ret_value = H5I_register2(obj_type, obj, vol_plugin, app_ref)) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize dataset handle")
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
             break;
 
         case H5I_DATASET:
@@ -393,9 +403,7 @@ H5VL_object_register(void *obj, H5I_type_t obj_type, H5VL_t *vol_plugin, hbool_t
 
         case H5I_UNINIT:
         case H5I_BADID:
-        case H5I_FILE:
         case H5I_DATASPACE:
-        case H5I_ATTR:
         case H5I_REFERENCE:
         case H5I_VFL:
         case H5I_VOL:
