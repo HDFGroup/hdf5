@@ -632,6 +632,11 @@ test_hard_query(void)
         goto error;
     }
 
+
+#ifndef H5_VMS
+    /* Disable this test because the soft conversion functions (H5T__conv_i_f and H5T__conv_f_i) on
+       OpenVMS and are disabled - SLU 2013/8/26 */
+
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
     H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T__conv_int_float);
@@ -640,6 +645,7 @@ test_hard_query(void)
         printf("Can't query conversion function\n");
         goto error;
     }
+#endif
 
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
@@ -5433,9 +5439,14 @@ main(void)
     /* Test H5Tcompiler_conv() for querying hard conversion. */
     nerrors += test_hard_query();
 
+#ifndef H5_VMS
+    /* Disable this test because the soft conversion functions (H5T__conv_i_f and H5T__conv_f_i) on
+       OpenVMS and are disabled - SLU 2013/8/26 */
+
     /* Test user-define, query functions and software conversion
      * for user-defined floating-point types */
     nerrors += test_derived_flt();
+#endif
 
     /* Test user-define, query functions and software conversion
      * for user-defined integer types */
@@ -5478,11 +5489,16 @@ main(void)
     nerrors += test_conv_int_2();
     nerrors += run_integer_tests("soft");
 
+#ifndef H5_VMS
+    /* Disable these tests because the soft conversion functions (H5T__conv_i_f and H5T__conv_f_i) on
+       OpenVMS and are disabled - SLU 2013/8/26 */
+
     /* Test software float-integer conversion functions */
     nerrors += run_fp_int_conv("soft");
 
     /* Test software integer-float conversion functions */
     nerrors += run_int_fp_conv("soft");
+#endif
 
     reset_hdf5();
 
