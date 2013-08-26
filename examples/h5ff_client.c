@@ -453,14 +453,10 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Flush and Close File\n");
     fprintf(stderr, "*****************************************************************************************************************\n");
 
-    /* flush all the contents of file to disk. This is a barrier task
-       at the server. This is asynchronous. */
-    ret = H5Fflush_ff(file_id, H5F_SCOPE_GLOBAL, event_q);
-    assert(ret == 0);
-
     /* closing the container also acts as a wait all on all pending requests 
        on the container. */
-    assert(H5Fclose_ff(file_id, event_q) == 0);
+    //assert(H5Fclose_ff(file_id, event_q) == 0);
+    assert(H5Fclose(file_id) == 0);
 
     fprintf(stderr, "\n*****************************************************************************************************************\n");
     fprintf(stderr, "Wait on everything in EQ and check Results of operations in EQ\n");

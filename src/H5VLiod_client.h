@@ -81,13 +81,6 @@ typedef enum H5RQ_type_t {
     HG_OBJECT_GET_INFO
 } H5RQ_type_t;
 
-/* global AXE list struct */
-typedef struct H5VL_iod_axe_list_t {
-    struct H5VL_iod_request_t *head;
-    struct H5VL_iod_request_t *tail;
-    uint64_t last_released_task;
-} H5VL_iod_axe_list_t;
-
 /* the client IOD VOL request struct */
 typedef struct H5VL_iod_request_t {
     H5RQ_type_t type;
@@ -264,8 +257,6 @@ H5_DLL herr_t H5VL_iod_request_wait_some(H5VL_iod_file_t *file, const void *obje
 H5_DLL herr_t H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
 H5_DLL herr_t H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req);
 
-H5_DLL herr_t H5VL__iod_request_remove_from_axe_list(H5VL_iod_request_t *request);
-H5_DLL herr_t H5VL__iod_request_add_to_axe_list(H5VL_iod_request_t *request);
 H5_DLL herr_t H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 
                                            H5VL_iod_object_t *request_obj, htri_t track,
                                            void *input, void *output, void *data, void **req);

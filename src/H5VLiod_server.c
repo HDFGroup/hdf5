@@ -195,6 +195,24 @@ H5VLiod_start_handler(MPI_Comm comm, MPI_Info UNUSED info)
     return ret_value;
 }
 
+static herr_t
+H5VL__iod_server_finish_axe_tasks(AXE_engine_t axe_engine, AXE_task_t start_range, 
+                                  uint64_t count)
+{
+    AXE_task_t u;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    for(u=start_range ; u<count+start_range ; u++) {
+        if(AXE_SUCCEED != AXEfinish(axe_engine, u))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE task %llu", u);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__iod_server_finish_axe_tasks() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_eff_init
@@ -355,6 +373,11 @@ H5VL_iod_server_file_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range, 
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -402,6 +425,11 @@ H5VL_iod_server_file_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -448,6 +476,11 @@ H5VL_iod_server_file_flush(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -497,6 +530,11 @@ H5VL_iod_server_file_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -544,6 +582,11 @@ H5VL_iod_server_attr_create(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -601,6 +644,11 @@ H5VL_iod_server_attr_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -656,6 +704,11 @@ H5VL_iod_server_attr_read(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -713,6 +766,11 @@ H5VL_iod_server_attr_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -768,6 +826,11 @@ H5VL_iod_server_attr_exists(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -825,6 +888,11 @@ H5VL_iod_server_attr_rename(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -880,6 +948,11 @@ H5VL_iod_server_attr_remove(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -937,6 +1010,11 @@ H5VL_iod_server_attr_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -993,6 +1071,11 @@ H5VL_iod_server_group_create(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1047,6 +1130,11 @@ H5VL_iod_server_group_open(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1103,12 +1191,18 @@ H5VL_iod_server_group_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
-    if(input->parent_axe_id) {
+    if(input->parent_axe_ids.count) {
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
-                                          1, &input->parent_axe_id, 0, NULL, 
+                                          input->parent_axe_ids.count, input->parent_axe_ids.ids, 
+                                          0, NULL, 
                                           H5VL_iod_server_group_close_cb, op_data, NULL))
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "can't insert task into async engine");
     }
@@ -1158,6 +1252,11 @@ H5VL_iod_server_dset_create(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1215,6 +1314,11 @@ H5VL_iod_server_dset_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1270,6 +1374,11 @@ H5VL_iod_server_dset_read(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1327,6 +1436,11 @@ H5VL_iod_server_dset_get_vl_size(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1383,6 +1497,11 @@ H5VL_iod_server_dset_write(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1438,6 +1557,11 @@ H5VL_iod_server_dset_set_extent(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1496,22 +1620,15 @@ H5VL_iod_server_dset_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
     if(input->parent_axe_ids.count) {
-#if 0
-        int i;
-        AXE_status_t status;
-        for(i=0 ; i<input->parent_axe_ids.count ; i++) {
-            if(AXEget_status(engine, input->parent_axe_ids.ids[i], &status) < 0) {
-                fprintf(stderr, "GET STATUS FAILED\n");
-                exit(1);
-            }
-            fprintf(stderr, "%d: AXE ID %llu status %d\n", 
-                    i, input->parent_axe_ids.ids[i], status);
-        }
-#endif
         if (AXE_SUCCEED != AXEcreate_task(engine, input->axe_info.axe_id, 
                                           input->parent_axe_ids.count, input->parent_axe_ids.ids, 
                                           0, NULL, 
@@ -1564,6 +1681,11 @@ H5VL_iod_server_dtype_commit(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1621,6 +1743,11 @@ H5VL_iod_server_dtype_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1677,6 +1804,11 @@ H5VL_iod_server_dtype_close(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1732,6 +1864,11 @@ H5VL_iod_server_link_create(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1803,6 +1940,11 @@ H5VL_iod_server_link_move(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -1873,6 +2015,11 @@ H5VL_iod_server_link_iterate(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 #endif
@@ -1917,6 +2064,11 @@ H5VL_iod_server_link_exists(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -1974,6 +2126,11 @@ H5VL_iod_server_link_get_info(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2029,6 +2186,11 @@ H5VL_iod_server_link_get_val(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2086,6 +2248,11 @@ H5VL_iod_server_link_remove(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2142,6 +2309,11 @@ H5VL_iod_server_object_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2197,6 +2369,11 @@ H5VL_iod_server_object_copy(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2295,6 +2472,11 @@ H5VL_iod_server_object_exists(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2350,6 +2532,11 @@ H5VL_iod_server_object_set_comment(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2407,6 +2594,11 @@ H5VL_iod_server_object_get_comment(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2463,6 +2655,11 @@ H5VL_iod_server_object_get_info(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2517,6 +2714,11 @@ H5VL_iod_server_map_create(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2573,6 +2775,11 @@ H5VL_iod_server_map_open(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2627,6 +2834,11 @@ H5VL_iod_server_map_set(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2683,6 +2895,11 @@ H5VL_iod_server_map_get(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2737,6 +2954,11 @@ H5VL_iod_server_map_get_count(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
@@ -2793,6 +3015,11 @@ H5VL_iod_server_map_exists(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2848,6 +3075,11 @@ H5VL_iod_server_map_delete(hg_handle_t handle)
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
 
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
+
     op_data->hg_handle = handle;
     op_data->input = (void *)input;
 
@@ -2902,6 +3134,11 @@ H5VL_iod_server_map_close(hg_handle_t handle)
 
     if(NULL == engine)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "AXE engine not started");
+
+    if(input->axe_info.count && 
+       H5VL__iod_server_finish_axe_tasks(engine, input->axe_info.start_range,  
+                                         input->axe_info.count) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, HG_FAIL, "Unable to cleanup AXE tasks");
 
     op_data->hg_handle = handle;
     op_data->input = (void *)input;

@@ -91,6 +91,13 @@ static hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
 static hg_id_t H5VL_OBJECT_GET_INFO_ID;
 static hg_id_t H5VL_CANCEL_OP_ID;
 
+/* global AXE list struct */
+typedef struct H5VL_iod_axe_list_t {
+    H5VL_iod_request_t *head;
+    H5VL_iod_request_t *tail;
+    uint64_t last_released_task;
+} H5VL_iod_axe_list_t;
+
 static na_addr_t PEER;
 static na_class_t *network_class = NULL;
 
@@ -304,7 +311,22 @@ H5VL_iod_init(void)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_init() */
 
-herr_t
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__iod_request_remove_from_axe_list
+ *
+ * Purpose:	Utility routine to remove a node from the global list of 
+ *              AXE tasks.
+ *
+ * Return:	Success:	Positive
+ *		Failure:	Negative.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
 H5VL__iod_request_remove_from_axe_list(H5VL_iod_request_t *request)
 {
     H5VL_iod_request_t *prev;
@@ -340,12 +362,34 @@ H5VL__iod_request_remove_from_axe_list(H5VL_iod_request_t *request)
 
     request->global_prev = NULL;
     request->global_next = NULL;
-    //request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+    request->rc --;
+
+    if(0 == request->rc)
+        request = (H5VL_iod_request_t *)H5MM_xfree(request);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5VL__iod_request_remove_from_axe_list() */
 
-herr_t
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__iod_request_add_to_axe_list
+ *
+ * Purpose:	Utility routine to add a node to the global list of AXE
+ *              tasks. This routine also checks which tasks have completed
+ *              and can be freed by the VOL callback that is calling this 
+ *              routine, and updates the last_released_task global variable
+ *              accordingly.
+ *
+ * Return:	Success:	Positive
+ *		Failure:	Negative.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
 H5VL__iod_request_add_to_axe_list(H5VL_iod_request_t *request)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -367,26 +411,41 @@ H5VL__iod_request_add_to_axe_list(H5VL_iod_request_t *request)
     request->rc ++;
 
     /* process axe_list */
-    while(axe_list.head && 1 == axe_list.head->rc && 
+    while(axe_list.head && axe_list.head->state == H5VL_IOD_COMPLETED && 
           axe_list.head->axe_id == axe_list.last_released_task+1) {
 
         axe_list.last_released_task = axe_list.head->axe_id;
 
         /* remove head from axe list */
-        H5VL__iod_request_remove_from_axe_list(axe_list.head);        
+        H5VL__iod_request_remove_from_axe_list(axe_list.head);
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+}/* end H5VL__iod_request_add_to_axe_list() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL__iod_create_and_forward
+ *
+ * Purpose:	Utility routine to create a mercury request and a 
+ *              VOL IOD request and ship the op to the server.
+ *
+ * Return:	Success:	Positive
+ *		Failure:	Negative.
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              August, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type, 
                              H5VL_iod_object_t *request_obj, htri_t track,
                              void *input, void *output, void *data, void **req)
 {
-    hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    //hg_request_t _hg_req;       /* Local function shipper request, for sync. operations */
+    //H5VL_iod_request_t _request; /* Local request, for sync. operations */
     hg_request_t *hg_req = NULL;
-    H5VL_iod_request_t _request; /* Local request, for sync. operations */
     H5VL_iod_request_t *request = NULL;
     hbool_t do_async = (req == NULL) ? FALSE : TRUE;  /* Whether we're performing async. I/O */
     axe_t *axe_info = (axe_t *) input;
@@ -395,20 +454,12 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get a function shipper request */
-    if(do_async) {
-        if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
-    } /* end if */
-    else
-        hg_req = &_hg_req;
+    if(NULL == (hg_req = (hg_request_t *)H5MM_malloc(sizeof(hg_request_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate a HG request");
 
     /* Get async request for operation */
-    if(do_async) {
-        if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
-    } /* end if */
-    else
-        request = &_request;
+    if(NULL == (request = (H5VL_iod_request_t *)H5MM_malloc(sizeof(H5VL_iod_request_t))))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate IOD VOL request struct");
 
     /* Set up request */
     HDmemset(request, 0, sizeof(*request));
@@ -424,10 +475,17 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
     /* add request to container's linked list */
     H5VL_iod_request_add(request_obj->file, request);
 
-    axe_info->start_range = axe_list.last_released_task;
+    axe_info->start_range = axe_list.last_released_task + 1;
     /* add request to global axe's linked list */
     H5VL__iod_request_add_to_axe_list(request);
-    axe_info->count = axe_list.last_released_task - axe_info->start_range;
+    axe_info->count = axe_list.last_released_task - axe_info->start_range + 1;
+
+#if H5VL_IOD_DEBUG
+    if(axe_info->count) {
+        fprintf(stderr, "Operation %llu will finish tasks %llu through %llu\n",
+                request->axe_id, axe_info->start_range, axe_info->start_range+axe_info->count-1);
+    }
+#endif
 
     /* forward the call to the ION */
     if(HG_Forward(PEER, op_id, input, output, hg_req) < 0)
@@ -435,9 +493,6 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
 
     /* Store/wait on request */
     if(do_async) {
-        /* Sanity check */
-        HDassert(request != &_request);
-
         *req = request;
 
         /* Track request */
@@ -452,15 +507,15 @@ H5VL__iod_create_and_forward(hg_id_t op_id, H5RQ_type_t op_type,
         if(H5VL_iod_request_wait(request_obj->file, request) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't wait on HG request");
 
-        H5VL__iod_request_remove_from_axe_list(request);
+        request->rc --;
 
-        /* Sanity check */
-        HDassert(request == &_request);
+        request->req = H5MM_xfree(request->req);
+        HDassert(1 == request->rc);
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+}/* end H5VL__iod_create_and_forward() */
 
 
 /*-------------------------------------------------------------------------
@@ -1593,11 +1648,11 @@ H5VL_iod_group_create(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
-    input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.gcpl_id = gcpl_id;
     input.gapl_id = gapl_id;
     input.lcpl_id = lcpl_id;
+    input.parent_axe_id = parent_axe_id;
     input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
@@ -1688,9 +1743,9 @@ H5VL_iod_group_open(void *_obj, H5VL_loc_params_t loc_params, const char *name,
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
-    input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.gapl_id = gapl_id;
+    input.parent_axe_id = parent_axe_id;
     input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
@@ -1799,6 +1854,8 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
     group_close_in_t input;
     int *status;
+    size_t num_parents;
+    uint64_t *axe_parents = NULL;
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1810,18 +1867,20 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
             HGOTO_ERROR(H5E_FILE,  H5E_CANTGET, FAIL, "can't wait on all object requests");
     }
 
-    /* allocate an integer to receive the return value if the group close succeeded or not */
-    status = (int *)malloc(sizeof(int));
-
-    /* set the parent axe id */
-    if(grp->common.request)
-        input.parent_axe_id = grp->common.request->axe_id;
-    else {
-        input.parent_axe_id = 0;
+    /* determine the parent axe IDs array for this operation*/
+    if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)grp, &num_parents, NULL) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get num AXE parents");
+    if(num_parents) {
+        if(NULL == (axe_parents = (uint64_t *)H5MM_malloc(sizeof(uint64_t) * num_parents)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate num parents array");
+        if(H5VL_iod_get_axe_parents((H5VL_iod_object_t *)grp, &num_parents, axe_parents) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get AXE parents");
     }
 
     input.iod_oh = grp->remote_group.iod_oh;
     input.iod_id = grp->remote_group.iod_id;
+    input.parent_axe_ids.count = num_parents;
+    input.parent_axe_ids.ids = axe_parents;
     input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
@@ -1829,12 +1888,16 @@ H5VL_iod_group_close(void *_grp, hid_t dxpl_id, void **req)
            input.iod_id, input.axe_info.axe_id);
 #endif
 
+    /* allocate an integer to receive the return value if the group close succeeded or not */
+    status = (int *)malloc(sizeof(int));
+
     if(H5VL__iod_create_and_forward(H5VL_GROUP_CLOSE_ID, HG_GROUP_CLOSE, 
                                     (H5VL_iod_object_t *)grp, 1,
                                     &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship group close");
 
 done:
+    axe_parents = (uint64_t *)H5MM_xfree(axe_parents);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_group_close() */
 
@@ -1907,13 +1970,13 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t loc_params, const char *na
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
-    input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.dcpl_id = dcpl_id;
     input.dapl_id = dapl_id;
     input.lcpl_id = lcpl_id;
     input.type_id = type_id;
     input.space_id = space_id;
+    input.parent_axe_id = parent_axe_id;
     input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
@@ -2015,9 +2078,9 @@ H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t loc_params, const char *name
     input.coh = obj->file->remote_file.coh;
     input.loc_id = iod_id;
     input.loc_oh = iod_oh;
-    input.parent_axe_id = parent_axe_id;
     input.name = new_name;
     input.dapl_id = dapl_id;
+    input.parent_axe_id = parent_axe_id;
     input.axe_info.axe_id = g_axe_id ++;
 
 #if H5VL_IOD_DEBUG
@@ -2129,8 +2192,9 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* set the parent axe id */
-    if(dset->common.request)
+    if(dset->common.request) {
         parent_axe_id = dset->common.request->axe_id;
+    }
     else {
         parent_axe_id = 0;
     }
@@ -2349,8 +2413,9 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     }
 
     /* set the parent axe id */
-    if(dset->common.request)
+    if(dset->common.request) {
         input.parent_axe_id = dset->common.request->axe_id;
+    }
     else {
         input.parent_axe_id = 0;
     }
@@ -2763,7 +2828,8 @@ H5VL_iod_datatype_commit(void *_obj, H5VL_loc_params_t loc_params, const char *n
 
     ret_value = (void *)dtype;
 done:
-    if(new_name) free(new_name);
+    if(new_name) 
+        free(new_name);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_datatype_commit() */
 
@@ -5606,11 +5672,21 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
 
     /* request has completed already, can not cancel */
     if(request->state == H5VL_IOD_COMPLETED) {
-        if(H5VL_iod_request_wait(request->obj->file, request) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
+        /* Call the completion function to check return values and free resources */
+        if(H5VL_iod_request_complete(request->obj->file, request) < 0)
+            fprintf(stderr, "Operation Failed!\n");
+
+        /* decrement the ref count on the actual request */
+        request->rc --;
+
         *status = request->status;
+
+        /* free the mercury request */
         request->req = H5MM_xfree(request->req);
-        request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+        /* free the actual request if the ref count reached 0 */
+        if(0 == request->rc)
+            request = (H5VL_iod_request_t *)H5MM_xfree(request);
     }
 
     /* forward the cancel call to the IONs */
@@ -5619,6 +5695,7 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
 
     /* Wait on the cancel request to return */
     ret = HG_Wait(hg_req, HG_MAX_IDLE_TIME, &hg_status);
+
     /* If the actual wait Fails, then the status of the cancel
        operation is unknown */
     if(HG_FAIL == ret)
@@ -5633,9 +5710,17 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
                         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request");
                 }
 
+                /* decrement the ref count on the actual request */
+                request->rc --;
+
                 *status = request->status;
+
+                /* free the mercury request */
                 request->req = H5MM_xfree(request->req);
-                request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+                /* free the actual request if the ref count reached 0 */
+                if(0 == request->rc)
+                    request = (H5VL_iod_request_t *)H5MM_xfree(request);
             }
 
             /* if the status returned is cancelled, then cancel it
@@ -5646,9 +5731,17 @@ H5VL_iod_cancel(void **req, H5_status_t *status)
                 if(H5VL_iod_request_cancel(request->obj->file, request) < 0)
                     fprintf(stderr, "Operation Failed!\n");
 
+                /* decrement the ref count on the actual request */
+                request->rc --;
+
                 *status = request->status;
+
+                /* free the mercury request */
                 request->req = H5MM_xfree(request->req);
-                request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+                /* free the actual request if the ref count reached 0 */
+                if(0 == request->rc)
+                    request = (H5VL_iod_request_t *)H5MM_xfree(request);
             }
         }
         else
@@ -5687,18 +5780,42 @@ H5VL_iod_test(void **req, H5_status_t *status)
         fprintf(stderr, "failed to wait on request\n");
         request->status = H5AO_FAILED;
         request->state = H5VL_IOD_COMPLETED;
+
+        /* remove the request from the file linked list */
         H5VL_iod_request_delete(request->obj->file, request);
+
+        /* decrement the ref count on the actual request */
+        request->rc --;
+
+        /* free the mercury request */
+        request->req = H5MM_xfree(request->req);
+
+        /* free the actual request if the ref count reached 0 */
+        if(0 == request->rc)
+            request = (H5VL_iod_request_t *)H5MM_xfree(request);
     }
     else {
         if(hg_status) {
             request->status = H5AO_SUCCEEDED;
             request->state = H5VL_IOD_COMPLETED;
+
+            /* Call the completion function to check return values and free resources */
             if(H5VL_iod_request_complete(request->obj->file, request) < 0)
                 fprintf(stderr, "Operation Failed!\n");
+
+            /* decrement the ref count on the actual request */
+            request->rc --;
+
             *status = request->status;
+
+            /* free the mercury request */
             request->req = H5MM_xfree(request->req);
-            request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+            /* free the actual request if the ref count reached 0 */
+            if(0 == request->rc)
+                request = (H5VL_iod_request_t *)H5MM_xfree(request);
         }
+        /* request has not finished, set return status appropriately */
         else
             *status = request->status;
     }
@@ -5728,17 +5845,23 @@ H5VL_iod_wait(void **req, H5_status_t *status)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Wait on completion of the request if it was not completed */
     if(H5VL_IOD_PENDING == request->state) {
         if(H5VL_iod_request_wait(request->obj->file, request) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to wait for request")
     }
 
-    H5VL__iod_request_remove_from_axe_list(request);
+    /* decrement the ref count on the actual request */
+    request->rc --;
 
     *status = request->status;
-    request->rc --;
+
+    /* free the mercury request */
     request->req = H5MM_xfree(request->req);
-    request = (H5VL_iod_request_t *)H5MM_xfree(request);
+
+    /* free the actual request if the ref count reached 0 */
+    if(0 == request->rc)
+        request = (H5VL_iod_request_t *)H5MM_xfree(request);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
