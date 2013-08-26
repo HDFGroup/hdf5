@@ -91,7 +91,7 @@ int h5repack_init(pack_opt_t *options,
     int k, n;
 
     HDmemset(options, 0, sizeof(pack_opt_t));
-    options->min_comp = 1024;
+    options->min_comp = 0;
     options->verbose  = verbose;
     options->layout_g = H5D_LAYOUT_ERROR;
 
