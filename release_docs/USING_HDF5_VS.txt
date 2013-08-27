@@ -35,7 +35,7 @@ Using Visual Studio 2010 with HDF5 Libraries built with Visual Studio 2010
           library, and then optionally the HDF5 High Level, Fortran or C++
           libraries. For example, to compile a C++ application, enter:
 
-          szip.lib zlib.lib hdf5dll.lib hdf5_cppdll.lib
+          szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
 
                                                                          
 ==========================================================================
@@ -67,7 +67,7 @@ Using Visual Studio 2008 with HDF5 Libraries built with Visual Studio 2008
           library, and then optionally the HDF5 High Level, Fortran or C++
           libraries. For example, to compile a C++ application, enter:
 
-          szip.lib zlib.lib hdf5dll.lib hdf5_cppdll.lib
+          szip.lib zlib.lib hdf5.lib hdf5_cpp.lib
 
 ========================================================================
 3. Helpful Pointers
