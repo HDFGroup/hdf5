@@ -177,10 +177,12 @@ $ type sys$input
 $ run  links
 $ type sys$input
 
-$ type sys$input
--------			Running links_env    	-------
-$ run  links_env
-$ type sys$input
+$! Skip this test for now because it needs a script file to run the test
+$! Please see Issue VMS-2 in Jira about it.
+$! type sys$input
+$! -------			Running links_env    	-------
+$! run  links_env
+$! type sys$input
 
 $ type sys$input
 -------			Running mf    	-------
